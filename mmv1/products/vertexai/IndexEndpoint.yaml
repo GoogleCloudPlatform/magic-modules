@@ -12,101 +12,109 @@
 # limitations under the License.
 
 ---
-name: 'IndexEndpoint'
-description: |-
-  An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
+name: IndexEndpoint
+description: An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
 references:
   guides:
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints/'
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints/
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints'
-self_link: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{name}}'
-create_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{region}}/indexEndpoints
+self_link: projects/{{project}}/locations/{{region}}/indexEndpoints/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/indexEndpoints
 update_mask: true
+update_verb: PATCH
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  identifier_field: displayName
 async:
-  actions: ['create', 'delete']
-  type: 'OpAsync'
+  actions: [create, delete]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-sweeper:
-  identifier_field: 'displayName'
-examples:
-  - name: 'vertex_ai_index_endpoint'
-    primary_resource_id: 'index_endpoint'
-    vars:
-      address_name: 'address-name'
-      network_name: 'network-name'
+samples:
+  - name: vertex_ai_index_endpoint
+    primary_resource_id: index_endpoint
     exclude_test: true
-  - name: 'vertex_ai_index_endpoint_test'
-    primary_resource_id: 'index_endpoint'
-    vars:
-      network_name: 'network-name'
-      kms_key_name: 'kms-name'
-      index_endpoint_display_name: 'sample-endpoint'
-    test_vars_overrides:
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    exclude_docs: true
+    steps:
+      - name: vertex_ai_index_endpoint
+        resource_id_vars:
+          address_name: address-name
+          network_name: network-name
+  - name: vertex_ai_index_endpoint_test
     min_version: beta
-  - name: 'vertex_ai_index_endpoint_with_psc'
-    primary_resource_id: 'index_endpoint'
-    vars:
-      index_endpoint_display_name: 'sample-endpoint'
-  - name: 'vertex_ai_index_endpoint_with_false_psc'
-    primary_resource_id: 'index_endpoint'
-    # It's not distinguishable if the psc is false or not set, so we need to skip the test.
-    exclude_import_test: true
-    exclude_docs: true
-    vars:
-      index_endpoint_display_name: 'sample-endpoint'
-  - name: 'vertex_ai_index_endpoint_with_public_endpoint'
-    primary_resource_id: 'index_endpoint'
-    vars:
-      index_endpoint_display_name: 'sample-endpoint'
+    primary_resource_id: index_endpoint
+    exclude_basic_doc: true
+    steps:
+      - name: vertex_ai_index_endpoint_test
+        resource_id_vars:
+          index_endpoint_display_name: sample-endpoint
+          kms_key_name: kms-name
+          network_name: network-name
+        test_vars_overrides:
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+  - name: vertex_ai_index_endpoint_with_psc
+    primary_resource_id: index_endpoint
+    steps:
+      - name: vertex_ai_index_endpoint_with_psc
+        resource_id_vars:
+          index_endpoint_display_name: sample-endpoint
+  - name: vertex_ai_index_endpoint_with_false_psc
+    primary_resource_id: index_endpoint
+    exclude_basic_doc: true
+    steps:
+      - name: vertex_ai_index_endpoint_with_false_psc
+        resource_id_vars:
+          index_endpoint_display_name: sample-endpoint
+        exclude_import_test: true
+  - name: vertex_ai_index_endpoint_with_public_endpoint
+    primary_resource_id: index_endpoint
+    steps:
+      - name: vertex_ai_index_endpoint_with_public_endpoint
+        resource_id_vars:
+          index_endpoint_display_name: sample-endpoint
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     description: The region of the index endpoint. eg us-central1
     url_param_only: true
     immutable: true
 properties:
   # Intentionally deployedIndexes[] is not included because it's an output-only field and another terraform resource will manage a deployed index.
-  - name: 'name'
+  - name: name
     type: String
     description: The resource name of the Index.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'displayName'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
     type: String
     description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
     required: true
-  - name: 'description'
+  - name: description
     type: String
     description: The description of the Index.
-  - name: 'etag'
+  - name: etag
     type: String
     description: Used to perform consistent read-modify-write updates.
     ignore_read: true
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: The labels with user-defined metadata to organize your Indexes.
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
-  - name: 'network'
+  - name: network
     type: String
     description: |-
       The full name of the Google Compute Engine [network](https://cloud.google.com//compute/docs/networks-and-firewalls#networks) to which the index endpoint should be peered.
@@ -116,63 +124,56 @@ properties:
     immutable: true
     conflicts:
       - privateServiceConnectConfig
-  - name: 'privateServiceConnectConfig'
+  - name: privateServiceConnectConfig
     type: NestedObject
-    description: |-
-      Optional. Configuration for private service connect. `network` and `privateServiceConnectConfig` are mutually exclusive.
+    description: Optional. Configuration for private service connect. `network` and `privateServiceConnectConfig` are mutually exclusive.
     immutable: true
     default_from_api: true
     conflicts:
       - network
-    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_index_endpoint_private_service_connect_config.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_endpoint_private_service_connect_config.go.tmpl
     properties:
-      - name: 'enablePrivateServiceConnect'
+      - name: enablePrivateServiceConnect
         type: Boolean
         description: If set to true, the IndexEndpoint is created without private service access.
         required: true
         immutable: true
-      - name: 'projectAllowlist'
+      - name: projectAllowlist
         type: Array
         description: A list of Projects from which the forwarding rule will target the service attachment.
         immutable: true
         item_type:
           type: String
-      - name: 'pscAutomationConfigs'
+      - name: pscAutomationConfigs
         type: Array
         description: List of projects and networks where the PSC endpoints will be created. This field is used by Online Inference(Prediction) only.
         item_type:
           type: NestedObject
           properties:
-            - name: 'projectId'
+            - name: projectId
               type: String
               required: true
               description: Project id used to create forwarding rule.
-            - name: 'network'
+            - name: network
               type: String
               required: true
               description: 'The full name of the Google Compute Engine [network](https://cloud.google.com/compute/docs/networks-and-firewalls#networks). [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/get): projects/{project}/global/networks/{network}.'
-  - name: 'publicEndpointEnabled'
+  - name: publicEndpointEnabled
     type: Boolean
     description: If true, the deployed index will be accessible through public endpoint.
     immutable: true
     ignore_read: true
-  - name: 'publicEndpointDomainName'
+  - name: publicEndpointDomainName
     type: String
     description: If publicEndpointEnabled is true, this field will be populated with the domain name to use for this index endpoint.
     output: true
-  - name: 'encryptionSpec'
+  - name: encryptionSpec
     type: NestedObject
-    description:
-      Customer-managed encryption key spec for an IndexEndpoint. If set, this IndexEndpoint and all sub-resources of this IndexEndpoint will be secured by this key.
+    description: Customer-managed encryption key spec for an IndexEndpoint. If set, this IndexEndpoint and all sub-resources of this IndexEndpoint will be secured by this key.
     immutable: true
     properties:
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
-        description:
-          'Required. The Cloud KMS resource identifier of the customer managed
-          encryption key used to protect a resource. Has the form:
-          `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
-          The key needs to be in the same region as where the compute resource
-          is created.'
+        description: 'Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. Has the form: `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`. The key needs to be in the same region as where the compute resource is created.'
         required: true
         immutable: true

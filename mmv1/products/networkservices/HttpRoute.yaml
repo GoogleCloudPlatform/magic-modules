@@ -12,29 +12,28 @@
 # limitations under the License.
 
 ---
-name: 'HttpRoute'
+name: HttpRoute
 description: |
   HttpRoute is the resource defining how HTTP traffic should be routed by a Mesh or Gateway resource.
 references:
   guides:
-    'Setup HTTP Services': 'https://cloud.google.com/traffic-director/docs/set-up-envoy-http-mesh'
-  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.httpRoutes'
+    Setup HTTP Services: https://cloud.google.com/traffic-director/docs/set-up-envoy-http-mesh
+  api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.httpRoutes
 docs:
-base_url: 'projects/{{project}}/locations/global/httpRoutes'
-self_link: 'projects/{{project}}/locations/global/httpRoutes/{{name}}'
-create_url: 'projects/{{project}}/locations/global/httpRoutes?httpRouteId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/global/httpRoutes
+self_link: projects/{{project}}/locations/global/httpRoutes/{{name}}
+create_url: projects/{{project}}/locations/global/httpRoutes?httpRouteId={{name}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/global/httpRoutes/{{name}}'
+  - projects/{{project}}/locations/global/httpRoutes/{{name}}
 timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
     timeouts:
@@ -43,27 +42,36 @@ async:
       delete_minutes: 30
   result:
     resource_inside_response: false
+autogen_async: true
 custom_code:
-examples:
-  - name: 'network_services_http_route_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-http-route'
-  - name: 'network_services_http_route_matches_and_actions'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-http-route'
-  - name: 'network_services_http_route_actions'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-http-route'
-  - name: 'network_services_http_route_mesh_basic'
-    primary_resource_id: 'default'
-    vars:
-      mesh_name: 'my-mesh'
-      resource_name: 'my-http-route'
+samples:
+  - name: network_services_http_route_basic
+    primary_resource_id: default
+    steps:
+      - name: network_services_http_route_basic
+        resource_id_vars:
+          resource_name: my-http-route
+  - name: network_services_http_route_matches_and_actions
+    primary_resource_id: default
+    steps:
+      - name: network_services_http_route_matches_and_actions
+        resource_id_vars:
+          resource_name: my-http-route
+  - name: network_services_http_route_actions
+    primary_resource_id: default
+    steps:
+      - name: network_services_http_route_actions
+        resource_id_vars:
+          resource_name: my-http-route
+  - name: network_services_http_route_mesh_basic
+    primary_resource_id: default
+    steps:
+      - name: network_services_http_route_mesh_basic
+        resource_id_vars:
+          mesh_name: my-mesh
+          resource_name: my-http-route
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the HttpRoute resource.
@@ -71,36 +79,36 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: |
       Server-defined URL of this resource.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Time the HttpRoute was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the HttpRoute was updated in UTC.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Set of label tags associated with the HttpRoute resource.
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - name: 'hostnames'
+  - name: hostnames
     type: Array
     description: |
       Set of hosts that should match against the HTTP host header to select a HttpRoute to process the request.
     required: true
     item_type:
       type: String
-  - name: 'meshes'
+  - name: meshes
     type: Array
     description: |
       Meshes defines a list of meshes this HttpRoute is attached to, as one of the routing rules to route the requests served by the mesh.
@@ -109,7 +117,7 @@ properties:
     send_empty_value: true
     item_type:
       type: String
-  - name: 'gateways'
+  - name: gateways
     type: Array
     description: |
       Gateways defines a list of gateways this HttpRoute is attached to, as one of the routing rules to route the requests served by the gateway.
@@ -117,7 +125,7 @@ properties:
     send_empty_value: true
     item_type:
       type: String
-  - name: 'rules'
+  - name: rules
     type: Array
     description: |
       Rules that define how traffic is routed and handled.
@@ -126,7 +134,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'matches'
+        - name: matches
           type: Array
           description: |
             A list of matches define conditions used for matching the rule against incoming HTTP requests. Each match is independent, i.e. this rule will be matched if ANY one of the matches is satisfied.
@@ -136,392 +144,392 @@ properties:
           item_type:
             type: NestedObject
             properties:
-              - name: 'ignoreCase'
+              - name: ignoreCase
                 type: Boolean
                 description: |
                   Specifies if prefixMatch and fullPathMatch matches are case sensitive. The default value is false.
                 send_empty_value: true
-              - name: 'fullPathMatch'
+              - name: fullPathMatch
                 type: String
                 description: |
                   The HTTP request path value should exactly match this value.
                 exactly_one_of:
-                  - 'fullPathMatch'
-                  - 'prefixMatch'
-                  - 'regexMatch'
-              - name: 'prefixMatch'
+                  - fullPathMatch
+                  - prefixMatch
+                  - regexMatch
+              - name: prefixMatch
                 type: String
                 description: |
                   The HTTP request path value must begin with specified prefixMatch. prefixMatch must begin with a /.
                 exactly_one_of:
-                  - 'fullPathMatch'
-                  - 'prefixMatch'
-                  - 'regexMatch'
-              - name: 'regexMatch'
+                  - fullPathMatch
+                  - prefixMatch
+                  - regexMatch
+              - name: regexMatch
                 type: String
                 description: |
                   The HTTP request path value must satisfy the regular expression specified by regexMatch after removing any query parameters and anchor supplied with the original URL. For regular expression grammar, please see https://github.com/google/re2/wiki/Syntax
                 exactly_one_of:
-                  - 'fullPathMatch'
-                  - 'prefixMatch'
-                  - 'regexMatch'
-              - name: 'queryParameters'
+                  - fullPathMatch
+                  - prefixMatch
+                  - regexMatch
+              - name: queryParameters
                 type: Array
                 description: |
                   Specifies a list of query parameters to match against.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: 'queryParameter'
+                    - name: queryParameter
                       type: String
                       description: |
                         The name of the query parameter to match.
-                    - name: 'exactMatch'
+                    - name: exactMatch
                       type: String
                       description: |
                         The value of the query parameter must exactly match the contents of exactMatch.
                       exactly_one_of:
-                        - 'exactMatch'
-                        - 'regexMatch'
-                        - 'presentMatch'
-                    - name: 'regexMatch'
+                        - exactMatch
+                        - regexMatch
+                        - presentMatch
+                    - name: regexMatch
                       type: String
                       description: |
                         The value of the query parameter must match the regular expression specified by regexMatch.For regular expression grammar, please see https://github.com/google/re2/wiki/Syntax
                       exactly_one_of:
-                        - 'exactMatch'
-                        - 'regexMatch'
-                        - 'presentMatch'
-                    - name: 'presentMatch'
+                        - exactMatch
+                        - regexMatch
+                        - presentMatch
+                    - name: presentMatch
                       type: Boolean
                       description: |
                         Specifies that the QueryParameterMatcher matches if request contains query parameter, irrespective of whether the parameter has a value or not.
                       exactly_one_of:
-                        - 'exactMatch'
-                        - 'regexMatch'
-                        - 'presentMatch'
-              - name: 'headers'
+                        - exactMatch
+                        - regexMatch
+                        - presentMatch
+              - name: headers
                 type: Array
                 description: |
                   Specifies a list of HTTP request headers to match against.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: 'header'
+                    - name: header
                       type: String
                       description: |
                         The name of the HTTP header to match against.
-                    - name: 'invertMatch'
+                    - name: invertMatch
                       type: Boolean
                       description: |
                         If specified, the match result will be inverted before checking. Default value is set to false.
                       send_empty_value: true
-                    - name: 'exactMatch'
+                    - name: exactMatch
                       type: String
                       description: |
                         The value of the header should match exactly the content of exactMatch.
                       exactly_one_of:
-                        - 'exactMatch'
-                        - 'regexMatch'
-                        - 'prefixMatch'
-                        - 'presentMatch'
-                        - 'suffixMatch'
-                        - 'rangeMatch'
-                    - name: 'regexMatch'
+                        - exactMatch
+                        - regexMatch
+                        - prefixMatch
+                        - presentMatch
+                        - suffixMatch
+                        - rangeMatch
+                    - name: regexMatch
                       type: String
                       description: |
                         The value of the header must match the regular expression specified in regexMatch.
                       exactly_one_of:
-                        - 'exactMatch'
-                        - 'regexMatch'
-                        - 'prefixMatch'
-                        - 'presentMatch'
-                        - 'suffixMatch'
-                        - 'rangeMatch'
-                    - name: 'prefixMatch'
+                        - exactMatch
+                        - regexMatch
+                        - prefixMatch
+                        - presentMatch
+                        - suffixMatch
+                        - rangeMatch
+                    - name: prefixMatch
                       type: String
                       description: |
                         The value of the header must start with the contents of prefixMatch.
                       exactly_one_of:
-                        - 'exactMatch'
-                        - 'regexMatch'
-                        - 'prefixMatch'
-                        - 'presentMatch'
-                        - 'suffixMatch'
-                        - 'rangeMatch'
-                    - name: 'presentMatch'
+                        - exactMatch
+                        - regexMatch
+                        - prefixMatch
+                        - presentMatch
+                        - suffixMatch
+                        - rangeMatch
+                    - name: presentMatch
                       type: Boolean
                       description: |
                         A header with headerName must exist. The match takes place whether or not the header has a value.
                       exactly_one_of:
-                        - 'exactMatch'
-                        - 'regexMatch'
-                        - 'prefixMatch'
-                        - 'presentMatch'
-                        - 'suffixMatch'
-                        - 'rangeMatch'
-                    - name: 'suffixMatch'
+                        - exactMatch
+                        - regexMatch
+                        - prefixMatch
+                        - presentMatch
+                        - suffixMatch
+                        - rangeMatch
+                    - name: suffixMatch
                       type: String
                       description: |
                         The value of the header must end with the contents of suffixMatch.
                       exactly_one_of:
-                        - 'exactMatch'
-                        - 'regexMatch'
-                        - 'prefixMatch'
-                        - 'presentMatch'
-                        - 'suffixMatch'
-                        - 'rangeMatch'
-                    - name: 'rangeMatch'
+                        - exactMatch
+                        - regexMatch
+                        - prefixMatch
+                        - presentMatch
+                        - suffixMatch
+                        - rangeMatch
+                    - name: rangeMatch
                       type: NestedObject
                       description: |
                         If specified, the rule will match if the request header value is within the range.
                       exactly_one_of:
-                        - 'exactMatch'
-                        - 'regexMatch'
-                        - 'prefixMatch'
-                        - 'presentMatch'
-                        - 'suffixMatch'
-                        - 'rangeMatch'
+                        - exactMatch
+                        - regexMatch
+                        - prefixMatch
+                        - presentMatch
+                        - suffixMatch
+                        - rangeMatch
                       properties:
-                        - name: 'start'
+                        - name: start
                           type: Integer
                           description: |
                             Start of the range (inclusive).
                           required: true
-                        - name: 'end'
+                        - name: end
                           type: Integer
                           description: |
                             End of the range (exclusive).
                           required: true
-        - name: 'action'
+        - name: action
           type: NestedObject
           description: |
             The detailed rule defining how to route matched traffic.
           send_empty_value: true
           properties:
-            - name: 'destinations'
+            - name: destinations
               type: Array
               description: |
                 The destination to which traffic should be forwarded.
               item_type:
                 type: NestedObject
                 properties:
-                  - name: 'serviceName'
+                  - name: serviceName
                     type: String
                     description: |
                       The URL of a BackendService to route traffic to.
-                  - name: 'weight'
+                  - name: weight
                     type: Integer
                     description: |
                       Specifies the proportion of requests forwarded to the backend referenced by the serviceName field. This is computed as: weight/Sum(weights in this destination list). For non-zero values, there may be some epsilon from the exact proportion defined here depending on the precision an implementation supports.
                       If only one serviceName is specified and it has a weight greater than 0, 100% of the traffic is forwarded to that backend.
                       If weights are specified for any one service name, they need to be specified for all of them.
                       If weights are unspecified for all services, then, traffic is distributed in equal proportions to all of them.
-            - name: 'redirect'
+            - name: redirect
               type: NestedObject
               description: |
                 If set, the request is directed as configured by this field.
               properties:
-                - name: 'hostRedirect'
+                - name: hostRedirect
                   type: String
                   description: |
                     The host that will be used in the redirect response instead of the one that was supplied in the request.
-                - name: 'pathRedirect'
+                - name: pathRedirect
                   type: String
                   description: |
                     The path that will be used in the redirect response instead of the one that was supplied in the request. pathRedirect can not be supplied together with prefixRedirect. Supply one alone or neither. If neither is supplied, the path of the original request will be used for the redirect.
-                - name: 'prefixRewrite'
+                - name: prefixRewrite
                   type: String
                   description: |
                     Indicates that during redirection, the matched prefix (or path) should be swapped with this value.
-                - name: 'responseCode'
+                - name: responseCode
                   type: String
                   description: |
                     The HTTP Status code to use for the redirect.
-                - name: 'httpsRedirect'
+                - name: httpsRedirect
                   type: Boolean
                   description: |
                     If set to true, the URL scheme in the redirected request is set to https.
-                - name: 'stripQuery'
+                - name: stripQuery
                   type: Boolean
                   description: |
                     If set to true, any accompanying query portion of the original URL is removed prior to redirecting the request.
-                - name: 'portRedirect'
+                - name: portRedirect
                   type: Integer
                   description: |
                     The port that will be used in the redirected request instead of the one that was supplied in the request.
-            - name: 'faultInjectionPolicy'
+            - name: faultInjectionPolicy
               type: NestedObject
               description: |
                 The specification for fault injection introduced into traffic to test the resiliency of clients to backend service failure.
               properties:
-                - name: 'delay'
+                - name: delay
                   type: NestedObject
                   description: |
                     Specification of how client requests are delayed as part of fault injection before being sent to a destination.
                   properties:
-                    - name: 'fixedDelay'
+                    - name: fixedDelay
                       type: String
                       description: |
                         Specify a fixed delay before forwarding the request.
-                    - name: 'percentage'
+                    - name: percentage
                       type: Integer
                       description: |
                         The percentage of traffic on which delay will be injected.
                       send_empty_value: true
-                - name: 'abort'
+                - name: abort
                   type: NestedObject
                   description: |
                     Specification of how client requests are aborted as part of fault injection before being sent to a destination.
                   properties:
-                    - name: 'httpStatus'
+                    - name: httpStatus
                       type: Integer
                       description: |
                         The HTTP status code used to abort the request.
-                    - name: 'percentage'
+                    - name: percentage
                       type: Integer
                       description: |
                         The percentage of traffic which will be aborted.
                       send_empty_value: true
-            - name: 'requestHeaderModifier'
+            - name: requestHeaderModifier
               type: NestedObject
               description: |
                 The specification for modifying the headers of a matching request prior to delivery of the request to the destination.
               properties:
-                - name: 'set'
+                - name: set
                   type: KeyValuePairs
                   description: |
                     Completely overwrite/replace the headers with given map where key is the name of the header, value is the value of the header.
-                - name: 'add'
+                - name: add
                   type: KeyValuePairs
                   description: |
                     Add the headers with given map where key is the name of the header, value is the value of the header.
-                - name: 'remove'
+                - name: remove
                   type: Array
                   description: |
                     Remove headers (matching by header names) specified in the list.
                   item_type:
                     type: String
-            - name: 'responseHeaderModifier'
+            - name: responseHeaderModifier
               type: NestedObject
               description: |
                 The specification for modifying the headers of a response prior to sending the response back to the client.
               properties:
-                - name: 'set'
+                - name: set
                   type: KeyValuePairs
                   description: |
                     Completely overwrite/replace the headers with given map where key is the name of the header, value is the value of the header.
-                - name: 'add'
+                - name: add
                   type: KeyValuePairs
                   description: |
                     Add the headers with given map where key is the name of the header, value is the value of the header.
-                - name: 'remove'
+                - name: remove
                   type: Array
                   description: |
                     Remove headers (matching by header names) specified in the list.
                   item_type:
                     type: String
-            - name: 'urlRewrite'
+            - name: urlRewrite
               type: NestedObject
               description: |
                 The specification for rewrite URL before forwarding requests to the destination.
               properties:
-                - name: 'pathPrefixRewrite'
+                - name: pathPrefixRewrite
                   type: String
                   description: |
                     Prior to forwarding the request to the selected destination, the matching portion of the requests path is replaced by this value.
-                - name: 'hostRewrite'
+                - name: hostRewrite
                   type: String
                   description: |
                     Prior to forwarding the request to the selected destination, the requests host header is replaced by this value.
-            - name: 'timeout'
+            - name: timeout
               type: String
               description: |
                 Specifies the timeout for selected route.
-            - name: 'retryPolicy'
+            - name: retryPolicy
               type: NestedObject
               description: |
                 Specifies the retry policy associated with this route.
               properties:
-                - name: 'retryConditions'
+                - name: retryConditions
                   type: Array
                   description: |
                     Specifies one or more conditions when this retry policy applies.
                   item_type:
                     type: String
-                - name: 'numRetries'
+                - name: numRetries
                   type: Integer
                   description: |
                     Specifies the allowed number of retries.
-                - name: 'perTryTimeout'
+                - name: perTryTimeout
                   type: String
                   description: |
                     Specifies a non-zero timeout per retry attempt. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-            - name: 'requestMirrorPolicy'
+            - name: requestMirrorPolicy
               type: NestedObject
               description: |
                 Specifies the policy on how requests intended for the routes destination are shadowed to a separate mirrored destination.
               properties:
-                - name: 'destination'
+                - name: destination
                   type: NestedObject
                   description: |
                     The destination the requests will be mirrored to.
                   properties:
-                    - name: 'serviceName'
+                    - name: serviceName
                       type: String
                       description: |
                         The URL of a BackendService to route traffic to.
-                    - name: 'weight'
+                    - name: weight
                       type: Integer
                       description: |
                         Specifies the proportion of requests forwarded to the backend referenced by the serviceName field. This is computed as: weight/Sum(weights in this destination list). For non-zero values, there may be some epsilon from the exact proportion defined here depending on the precision an implementation supports.
                         If only one serviceName is specified and it has a weight greater than 0, 100% of the traffic is forwarded to that backend.
                         If weights are specified for any one service name, they need to be specified for all of them.
                         If weights are unspecified for all services, then, traffic is distributed in equal proportions to all of them.
-            - name: 'corsPolicy'
+            - name: corsPolicy
               type: NestedObject
               description: |
                 The specification for allowing client side cross-origin requests.
               properties:
-                - name: 'allowOrigins'
+                - name: allowOrigins
                   type: Array
                   description: |
                     Specifies the list of origins that will be allowed to do CORS requests.
                   item_type:
                     type: String
-                - name: 'allowOriginRegexes'
+                - name: allowOriginRegexes
                   type: Array
                   description: |
                     Specifies the regular expression patterns that match allowed origins.
                   item_type:
                     type: String
-                - name: 'allowMethods'
+                - name: allowMethods
                   type: Array
                   description: |
                     Specifies the content for Access-Control-Allow-Methods header.
                   item_type:
                     type: String
-                - name: 'allowHeaders'
+                - name: allowHeaders
                   type: Array
                   description: |
                     Specifies the content for Access-Control-Allow-Headers header.
                   item_type:
                     type: String
-                - name: 'exposeHeaders'
+                - name: exposeHeaders
                   type: Array
                   description: |
                     Specifies the content for Access-Control-Expose-Headers header.
                   item_type:
                     type: String
-                - name: 'maxAge'
+                - name: maxAge
                   type: String
                   description: |
                     Specifies how long result of a preflight request can be cached in seconds.
-                - name: 'allowCredentials'
+                - name: allowCredentials
                   type: Boolean
                   description: |
                     In response to a preflight request, setting this to true indicates that the actual request can include user credentials.
-                - name: 'disabled'
+                - name: disabled
                   type: Boolean
                   description: |
                     If true, the CORS policy is disabled. The default value is false, which indicates that the CORS policy is in effect.

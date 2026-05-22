@@ -12,102 +12,104 @@
 # limitations under the License.
 
 ---
-name: 'HaVpnGateway'
+name: HaVpnGateway
 api_resource_type_kind: VpnGateway
-kind: 'compute#vpnGateway'
 description: |
   Represents a VPN gateway running in GCP. This virtual device is managed
   by Google, but used only by you. This type of VPN Gateway allows for the creation
   of VPN solutions with higher availability than classic Target VPN Gateways.
 references:
   guides:
-    'Choosing a VPN': 'https://cloud.google.com/vpn/docs/how-to/choosing-a-vpn'
-    'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/vpnGateways'
+    Choosing a VPN: https://cloud.google.com/vpn/docs/how-to/choosing-a-vpn
+    Cloud VPN Overview: https://cloud.google.com/vpn/docs/concepts/overview
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/vpnGateways
 docs:
-base_url: 'projects/{{project}}/regions/{{region}}/vpnGateways'
-has_self_link: true
+base_url: projects/{{project}}/regions/{{region}}/vpnGateways
 immutable: true
+has_self_link: true
+collection_url_key: items
+kind: compute#vpnGateway
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
-include_in_tgc_next: true
-custom_code:
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'ha_vpn_gateway_basic'
-    primary_resource_id: 'ha_gateway1'
-    vars:
-      ha_vpn_gateway1_name: 'ha-vpn-1'
-      network1_name: 'network1'
-    test_vars_overrides:
-      # for backward compatible
-      network1_name: '"network1" + randomSuffix'
-  - name: 'ha_vpn_gateway_ipv6'
-    primary_resource_id: 'ha_gateway1'
-    vars:
-      ha_vpn_gateway1_name: 'ha-vpn-1'
-      network1_name: 'network1'
-    test_vars_overrides:
-      # for backward compatible
-      network1_name: '"network1" + randomSuffix'
-  - name: 'ha_vpn_gateway_gcp_to_gcp'
-    primary_resource_id: 'ha_gateway1'
-    vars:
-      ha_vpn_gateway1_name: 'ha-vpn-1'
-      network1_name: 'network1'
-      router1_name: 'ha-vpn-router1'
-      ha_vpn_gateway2_name: 'ha-vpn-2'
-      network2_name: 'network2'
-      router2_name: 'ha-vpn-router2'
-    test_vars_overrides:
-      # for backward compatible
-      network1_name: '"network1" + randomSuffix'
-      # for backward compatible
-      network2_name: '"network2" + randomSuffix'
-    exclude_test: true
-    exclude_docs: true
-    # Multiple fine-grained resources
+include_in_tgc_next: true
+custom_code:
+samples:
+  - name: ha_vpn_gateway_basic
+    primary_resource_id: ha_gateway1
+    steps:
+      - name: ha_vpn_gateway_basic
+        resource_id_vars:
+          ha_vpn_gateway1_name: ha-vpn-1
+          network1_name: network1
+        test_vars_overrides:
+          network1_name: '"network1" + randomSuffix'
+  - name: ha_vpn_gateway_ipv6
+    primary_resource_id: ha_gateway1
+    steps:
+      - name: ha_vpn_gateway_ipv6
+        resource_id_vars:
+          ha_vpn_gateway1_name: ha-vpn-1
+          network1_name: network1
+        test_vars_overrides:
+          network1_name: '"network1" + randomSuffix'
+  - name: ha_vpn_gateway_gcp_to_gcp
     skip_vcr: true
-  - name: 'compute_ha_vpn_gateway_encrypted_interconnect'
-    primary_resource_id: 'vpn-gateway'
-    vars:
-      ha_vpn_gateway_name: 'test-ha-vpngw'
-      interconnect_attachment1_name: 'test-interconnect-attachment1'
-      interconnect_attachment2_name: 'test-interconnect-attachment2'
-      address1_name: 'test-address1'
-      address2_name: 'test-address2'
-      router_name: 'test-router'
-      network_name: 'test-network'
-      # TODO: https://github.com/hashicorp/terraform-provider-google/issues/11504
+    primary_resource_id: ha_gateway1
     exclude_test: true
+    exclude_basic_doc: true
+    steps:
+      - name: ha_vpn_gateway_gcp_to_gcp
+        resource_id_vars:
+          ha_vpn_gateway1_name: ha-vpn-1
+          ha_vpn_gateway2_name: ha-vpn-2
+          network1_name: network1
+          network2_name: network2
+          router1_name: ha-vpn-router1
+          router2_name: ha-vpn-router2
+        test_vars_overrides:
+          network1_name: '"network1" + randomSuffix'
+          network2_name: '"network2" + randomSuffix'
+  - name: compute_ha_vpn_gateway_encrypted_interconnect
+    primary_resource_id: vpn-gateway
+    exclude_test: true
+    steps:
+      - name: compute_ha_vpn_gateway_encrypted_interconnect
+        resource_id_vars:
+          address1_name: test-address1
+          address2_name: test-address2
+          ha_vpn_gateway_name: test-ha-vpngw
+          interconnect_attachment1_name: test-interconnect-attachment1
+          interconnect_attachment2_name: test-interconnect-attachment2
+          network_name: test-network
+          router_name: test-router
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
     description: |
       The region this gateway should sit in.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: name
 properties:
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     immutable: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -120,39 +122,39 @@ properties:
     required: true
     immutable: true
     validation:
-      function: 'verify.ValidateGCEName'
-  - name: 'network'
+      function: verify.ValidateGCEName
+  - name: network
     type: ResourceRef
     description: |
       The network this VPN gateway is accepting traffic for.
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Network'
-    imports: 'selfLink'
-  - name: 'stackType'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Network
+    imports: selfLink
+  - name: stackType
     type: Enum
     description: |
       The stack type for this VPN gateway to identify the IP protocols that are enabled.
       If not specified, IPV4_ONLY will be used.
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-    default_value: "IPV4_ONLY"
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
+    default_value: IPV4_ONLY
     enum_values:
-      - 'IPV4_ONLY'
-      - 'IPV4_IPV6'
-      - 'IPV6_ONLY'
-  - name: 'gatewayIpVersion'
+      - IPV4_ONLY
+      - IPV4_IPV6
+      - IPV6_ONLY
+  - name: gatewayIpVersion
     type: Enum
     description: |
       The IP family of the gateway IPs for the HA-VPN gateway interfaces. If not specified, IPV4 will be used.
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-    default_value: "IPV4"
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
+    default_value: IPV4
     enum_values:
-      - 'IPV4'
-      - 'IPV6'
-  - name: 'vpnInterfaces'
+      - IPV4
+      - IPV6
+  - name: vpnInterfaces
     type: Array
     description: |
       A list of interfaces on this VPN gateway.
@@ -160,14 +162,14 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'id'
+        - name: id
           type: Integer
-          description: 'The numeric ID of this VPN gateway interface.'
-        - name: 'ipAddress'
+          description: The numeric ID of this VPN gateway interface.
+        - name: ipAddress
           type: String
-          description: 'The external IP address for this VPN gateway interface.'
+          description: The external IP address for this VPN gateway interface.
           output: true
-        - name: 'interconnectAttachment'
+        - name: interconnectAttachment
           type: ResourceRef
           description: |
             URL of the interconnect attachment resource. When the value
@@ -178,20 +180,20 @@ properties:
 
             Not currently available publicly.
           immutable: true
-          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-          resource: 'InterconnectAttachment'
-          imports: 'selfLink'
-  - name: 'labels'
+          custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+          resource: InterconnectAttachment
+          imports: selfLink
+  - name: labels
     type: KeyValueLabels
-    update_url: 'projects/{{project}}/regions/{{region}}/vpnGateways/{{name}}/setLabels'
-    update_verb: 'POST'
+    update_url: projects/{{project}}/regions/{{region}}/vpnGateways/{{name}}/setLabels
+    update_verb: POST
     description: |
       Labels for this resource. These can only be added or modified by the setLabels method.
       Each label key/value pair must comply with RFC1035. Label values may be empty.
-  - name: 'labelFingerprint'
+  - name: labelFingerprint
     type: Fingerprint
-    update_url: 'projects/{{project}}/regions/{{region}}/vpnGateways/{{name}}/setLabels'
-    update_verb: 'POST'
+    update_url: projects/{{project}}/regions/{{region}}/vpnGateways/{{name}}/setLabels
+    update_verb: POST
     description: |
       A fingerprint for the labels being applied to this VpnGateway, which is essentially a hash
       of the labels set used for optimistic locking. The fingerprint is initially generated by
@@ -199,14 +201,14 @@ properties:
       You must always provide an up-to-date fingerprint hash in order to update or change labels,
       otherwise the request will fail with error 412 conditionNotMet.
     output: true
-  - name: 'params'
+  - name: params
     type: NestedObject
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
-      - name: 'resourceManagerTags'
+      - name: resourceManagerTags
         type: KeyValuePairs
         description: |
           Resource manager tags to be bound to the HaVpnGateway. Tag keys and values have the

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'VPCServiceControls'
+name: VPCServiceControls
 api_resource_type_kind: VpcServiceControls
 description: |
   Manages the VPC Service Controls configuration for a service
@@ -41,57 +41,59 @@ description: |
     name overrides.
 references:
   guides:
-    'Private Google Access with VPC Service Controls': 'https://cloud.google.com/vpc-service-controls/docs/private-connectivity'
-    'Set up private connectivity to Google APIs and services': 'https://cloud.google.com/vpc-service-controls/docs/set-up-private-connectivity'
-    'Enable VPC Service Controls for service networking': 'https://cloud.google.com/sdk/gcloud/reference/services/vpc-peerings/enable-vpc-service-controls'
-  api: 'https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/services'
+    Private Google Access with VPC Service Controls: https://cloud.google.com/vpc-service-controls/docs/private-connectivity
+    Set up private connectivity to Google APIs and services: https://cloud.google.com/vpc-service-controls/docs/set-up-private-connectivity
+    Enable VPC Service Controls for service networking: https://cloud.google.com/sdk/gcloud/reference/services/vpc-peerings/enable-vpc-service-controls
+  api: https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/services
 docs:
   note: |
     Destroying a `google_service_networking_vpc_service_controls`
     resource will remove it from state, but will not change the
     underlying VPC Service Controls configuration for the service
     producer network.
-id_format: 'services/{{service}}/projects/{{project}}/networks/{{network}}'
-base_url: ''
-exclude_delete: true
+base_url: ""
+id_format: services/{{service}}/projects/{{project}}/networks/{{network}}
 import_format:
-  - 'services/{{service}}/projects/{{project}}/networks/{{network}}'
+  - services/{{service}}/projects/{{project}}/networks/{{network}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
   # we just need the boilerplate async code, we'll call the methods manually
-  actions: ['']
-  type: 'OpAsync'
+  actions: [""]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
   include_project: true
-custom_code:
-  constants: 'templates/terraform/constants/service_networking_vpc_service_controls.go.tmpl'
-  custom_create: 'templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/service_networking_vpc_service_controls.go.tmpl'
-  custom_update: 'templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl'
+exclude_delete: true
+autogen_async: true
 # excluding tgc because of helpers in custom_code.constants
 exclude_tgc: true
-examples:
-  - name: 'service_networking_vpc_service_controls_basic'
-    primary_resource_id: 'default'
-    vars:
-      network_name: 'example-network'
-      psa_range_name: 'psa-range'
+custom_code:
+  constants: templates/terraform/constants/service_networking_vpc_service_controls.go.tmpl
+  pre_read: templates/terraform/pre_read/service_networking_vpc_service_controls.go.tmpl
+  custom_create: templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl
+  custom_update: templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl
+samples:
+  - name: service_networking_vpc_service_controls_basic
+    primary_resource_id: default
+    steps:
+      - name: service_networking_vpc_service_controls_basic
+        resource_id_vars:
+          network_name: example-network
+          psa_range_name: psa-range
 parameters:
-  - name: 'network'
+  - name: network
     type: String
     description: |
       The network that the consumer is using to connect with services.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'service'
+  - name: service
     type: String
     description: |
       The service that is managing peering connectivity for a service
@@ -100,15 +102,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'project'
+  - name: project
     type: String
-    description: |-
-      The id of the Google Cloud project containing the consumer network.
+    description: The id of the Google Cloud project containing the consumer network.
     # required: true
     immutable: true
     ignore_read: true
 properties:
-  - name: 'enabled'
+  - name: enabled
     type: Boolean
     description: |-
       Desired VPC Service Controls state service producer VPC network, as

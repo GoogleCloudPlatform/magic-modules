@@ -39,15 +39,17 @@ async:
   operation:
     base_url: '{{op_id}}'
 custom_code:
+  pre_delete: templates/terraform/pre_delete/compute_resource_policy_attachment.go.tmpl
   encoder: templates/terraform/encoders/compute_resource_policy_attachment.go.tmpl
   decoder: templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl
-  pre_delete: templates/terraform/pre_delete/compute_resource_policy_attachment.go.tmpl
-examples:
+samples:
   - name: compute_resource_policy_attachment_basic
     primary_resource_id: attachment
-    vars:
-      instance_name: my-instance
-      policy_name: my-resource-policy
+    steps:
+      - name: compute_resource_policy_attachment_basic
+        resource_id_vars:
+          instance_name: my-instance
+          policy_name: my-resource-policy
 parameters:
   - name: instance
     type: ResourceRef

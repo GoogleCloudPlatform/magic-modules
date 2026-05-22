@@ -12,56 +12,60 @@
 # limitations under the License.
 
 ---
-name: 'Policy'
-kind: 'dns#policy'
+name: Policy
 description: |
   A policy is a collection of DNS rules applied to one or more Virtual
   Private Cloud resources.
 references:
   guides:
-    'Using DNS server policies': 'https://cloud.google.com/dns/zones/#using-dns-server-policies'
-  api: 'https://cloud.google.com/dns/docs/reference/v1beta2/policies'
+    Using DNS server policies: https://cloud.google.com/dns/zones/#using-dns-server-policies
+  api: https://cloud.google.com/dns/docs/reference/v1beta2/policies
 docs:
-id_format: 'projects/{{project}}/policies/{{name}}'
-base_url: 'projects/{{project}}/policies'
+base_url: projects/{{project}}/policies
 immutable: true
+kind: dns#policy
+id_format: projects/{{project}}/policies/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/detach_network.tmpl'
-examples:
-  - name: 'dns_policy_basic'
-    primary_resource_id: 'example-policy'
-    vars:
-      policy_name: 'example-policy'
-      network_1_name: 'network-1'
-      network_2_name: 'network-2'
-  - name: 'dns_policy_multiproject'
-    primary_resource_id: 'example-policy-multiproject'
-    vars:
-      policy_name: 'example-policy-multiproject'
-      network_1_name: 'network-1'
-      network_2_name: 'network-2'
-      project_1_name: 'project-1'
-      project_2_name: 'project-2'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+  pre_delete: templates/terraform/pre_delete/detach_network.tmpl
+samples:
+  - name: dns_policy_basic
+    primary_resource_id: example-policy
+    steps:
+      - name: dns_policy_basic
+        resource_id_vars:
+          network_1_name: network-1
+          network_2_name: network-2
+          policy_name: example-policy
+  - name: dns_policy_multiproject
+    primary_resource_id: example-policy-multiproject
+    exclude_basic_doc: true
+    steps:
+      - name: dns_policy_multiproject
+        resource_id_vars:
+          network_1_name: network-1
+          network_2_name: network-2
+          policy_name: example-policy-multiproject
+          project_1_name: project-1
+          project_2_name: project-2
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
 properties:
-  - name: 'alternativeNameServerConfig'
+  - name: alternativeNameServerConfig
     type: NestedObject
     description: |
       Sets an alternative name server for the associated networks.
       When specified, all DNS queries are forwarded to a name server that you choose.
       Names such as .internal are not available when an alternative name server is specified.
-    update_url: 'projects/{{project}}/policies/{{name}}'
-    update_verb: 'PATCH'
+    update_url: projects/{{project}}/policies/{{name}}
+    update_verb: PATCH
     properties:
-      - name: 'targetNameServers'
+      - name: targetNameServers
         type: Array
         description: |
           Sets an alternative name server for the associated networks. When specified,
@@ -82,42 +86,42 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'ipv4Address'
+            - name: ipv4Address
               type: String
-              description: 'IPv4 address to forward to.'
+              description: IPv4 address to forward to.
               required: true
-            - name: 'forwardingPath'
+            - name: forwardingPath
               type: Enum
               description: |
                 Forwarding path for this TargetNameServer. If unset or `default` Cloud DNS will make forwarding
                 decision based on address ranges, i.e. RFC1918 addresses go to the VPC, Non-RFC1918 addresses go
                 to the Internet. When set to `private`, Cloud DNS will always send queries through VPC for this target
               enum_values:
-                - 'default'
-                - 'private'
-  - name: 'description'
+                - default
+                - private
+  - name: description
     type: String
     description: |
       A textual description field. Defaults to 'Managed by Terraform'.
     required: false
-    update_url: 'projects/{{project}}/policies/{{name}}'
-    update_verb: 'PATCH'
-    default_value: "Managed by Terraform"
-  - name: 'dns64Config'
+    update_url: projects/{{project}}/policies/{{name}}
+    update_verb: PATCH
+    default_value: Managed by Terraform
+  - name: dns64Config
     type: NestedObject
     default_from_api: true
     description: Configurations related to DNS64 for this Policy.
     properties:
-      - name: 'scope'
+      - name: scope
         type: NestedObject
         description: The scope to which DNS64 config will be applied to.
         required: true
         properties:
-          - name: 'allQueries'
+          - name: allQueries
             type: Boolean
             description: Controls whether DNS64 is enabled globally at the network level.
             send_empty_value: true
-  - name: 'enableInboundForwarding'
+  - name: enableInboundForwarding
     type: Boolean
     description: |
       Allows networks bound to this policy to receive DNS queries sent
@@ -125,29 +129,27 @@ properties:
       virtual IP address will be allocated from each of the sub-networks
       that are bound to this policy.
     send_empty_value: true
-    update_url: 'projects/{{project}}/policies/{{name}}'
-    update_verb: 'PATCH'
-  - name: 'enableLogging'
+    update_url: projects/{{project}}/policies/{{name}}
+    update_verb: PATCH
+  - name: enableLogging
     type: Boolean
     description: |
       Controls whether logging is enabled for the networks bound to this policy.
       Defaults to no logging if not set.
     send_empty_value: true
-    update_url: 'projects/{{project}}/policies/{{name}}'
-    update_verb: 'PATCH'
-  - name: 'name'
+    update_url: projects/{{project}}/policies/{{name}}
+    update_verb: PATCH
+  - name: name
     type: String
     description: |
       User assigned name for this policy.
     required: true
-  - name: 'networks'
+  - name: networks
     type: Array
-    description:
-      'List of network names specifying networks to which this policy is
-      applied.'
+    description: List of network names specifying networks to which this policy is applied.
     is_set: true
-    update_url: 'projects/{{project}}/policies/{{name}}'
-    update_verb: 'PATCH'
+    update_url: projects/{{project}}/policies/{{name}}
+    update_verb: PATCH
     set_hash_func: |-
       func(v interface{}) int {
         raw := v.(map[string]interface{})
@@ -161,12 +163,12 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'networkUrl'
+        - name: networkUrl
           type: String
           description: |
             The id or fully qualified URL of the VPC network to forward queries to.
             This should be formatted like `projects/{project}/global/networks/{network}` or
             `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
           required: true
-          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-          custom_expand: 'templates/terraform/custom_expand/network_full_url.tmpl'
+          diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+          custom_expand: templates/terraform/custom_expand/network_full_url.tmpl

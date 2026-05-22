@@ -12,31 +12,33 @@
 # limitations under the License.
 
 ---
-name: 'CmekConfig'
+name: CmekConfig
 description: |
   CmekConfig represents configurations used to enable CMEK data encryption with
   Cloud KMS keys.
 references:
   guides:
-  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.cmekConfigs'
-base_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs'
-self_link: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
+  api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.cmekConfigs
+base_url: projects/{{project}}/locations/{{location}}/cmekConfigs
+self_link: projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}
 # Update API is also used as create API.
-create_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}?&setDefault={{set_default}}'
-create_verb: 'PATCH'
-update_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}?&setDefault={{set_default}}'
-update_verb: 'PATCH'
-delete_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
+create_url: projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}?&setDefault={{set_default}}
+delete_url: projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}
+update_url: projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}?&setDefault={{set_default}}
+create_verb: PATCH
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
+  - projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}
 timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
-autogen_async: false
+sweeper:
+  url_substitutions:
+    - location: us
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
     timeouts:
@@ -45,25 +47,24 @@ async:
       delete_minutes: 60
   result:
     resource_inside_response: true
+autogen_async: false
 custom_code:
-  update_encoder: 'templates/terraform/update_encoder/discoveryengine_cmekconfig_kmskey.go.tmpl'
-sweeper:
-  url_substitutions:
-    - location: "us"
-examples:
-  - name: 'discoveryengine_cmekconfig_default'
-    primary_resource_id: 'default'
-    vars:
-      cmek_config_id: 'cmek-config-id'
-      kms_key_name: 'kms-key-name'
-    test_vars_overrides:
-      kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-5").CryptoKey.Name'
-    ignore_read_extra:
-      - 'project'
-    # Skipping test because cmek configs are expensive to provision and teardown.
+  update_encoder: templates/terraform/update_encoder/discoveryengine_cmekconfig_kmskey.go.tmpl
+samples:
+  - name: discoveryengine_cmekconfig_default
+    primary_resource_id: default
     exclude_test: true
+    steps:
+      - name: discoveryengine_cmekconfig_default
+        resource_id_vars:
+          cmek_config_id: cmek-config-id
+          kms_key_name: kms-key-name
+        test_vars_overrides:
+          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-5").CryptoKey.Name
+        ignore_read_extra:
+          - project
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The geographic location where the CMEK config should reside. The value can
@@ -71,14 +72,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'cmekConfigId'
+  - name: cmekConfigId
     type: String
     description: |
       The unique id of the cmek config.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'setDefault'
+  - name: setDefault
     type: Boolean
     description: |
       Set the following CmekConfig as the default to be used for child resources
@@ -87,7 +88,7 @@ parameters:
     default_value: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The unique full resource name of the cmek config. Values are of the format
@@ -95,49 +96,49 @@ properties:
       This field must be a UTF-8 encoded string with a length limit of 1024
       characters.
     output: true
-  - name: 'kmsKey'
+  - name: kmsKey
     type: String
     description: |
       KMS key resource name which will be used to encrypt resources
       `projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{keyId}`.
     required: true
     immutable: true
-  - name: 'kmsKeyVersion'
+  - name: kmsKeyVersion
     type: String
     description: |
       KMS key version resource name which will be used to encrypt resources
       `<kms_key>/cryptoKeyVersions/{keyVersion}`.
     output: true
-  - name: 'state'
+  - name: state
     type: String
     description: |
       The state of the CmekConfig.
     output: true
-  - name: 'isDefault'
+  - name: isDefault
     type: Boolean
     description: |
       The default CmekConfig for the Customer.
     output: true
-  - name: 'lastRotationTimestampMicros'
+  - name: lastRotationTimestampMicros
     type: Integer
     description: |
       The timestamp of the last key rotation.
     output: true
-  - name: 'singleRegionKeys'
+  - name: singleRegionKeys
     type: Array
     description: |
       Single-regional CMEKs that are required for some VAIS features.
     item_type:
       type: NestedObject
       properties:
-        - name: 'kmsKey'
+        - name: kmsKey
           type: String
           description: |
             Single-regional kms key resource name which will be used to encrypt
             resources
             `projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{keyId}`.
           required: true
-  - name: 'notebooklmState'
+  - name: notebooklmState
     type: String
     description: |
       Whether the NotebookLM Corpus is ready to be used.

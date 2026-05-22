@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'NetworkPeeringRoutesConfig'
+name: NetworkPeeringRoutesConfig
 api_resource_type_kind: Network
 description: |
   Manage a network peering's route settings without managing the peering as
@@ -21,31 +21,15 @@ description: |
   resource is a no-op and the peering will not be modified.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/vpc/docs/vpc-peering'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks/updatePeering'
+    Official Documentation: https://cloud.google.com/vpc/docs/vpc-peering
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/networks/updatePeering
 docs:
-id_format: 'projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}'
-base_url: 'projects/{{project}}/global/networks/{{network}}'
-self_link: 'projects/{{project}}/global/networks/{{network}}'
-create_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
-create_verb: 'PATCH'
-update_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
-update_verb: 'PATCH'
-exclude_delete: true
-mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
-import_format:
-  - 'projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
+base_url: projects/{{project}}/global/networks/{{network}}
+self_link: projects/{{project}}/global/networks/{{network}}
+create_url: projects/{{project}}/global/networks/{{network}}/updatePeering
+update_url: projects/{{project}}/global/networks/{{network}}/updatePeering
+create_verb: PATCH
+update_verb: PATCH
 identity:
   - peering
 nested_query:
@@ -53,47 +37,65 @@ nested_query:
     - peerings
   is_list_of_ids: false
   modify_by_patch: false
+id_format: projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}
+import_format:
+  - projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+mutex: projects/{{project}}/global/networks/{{network}}/peerings
+async:
+  actions: [create, delete, update]
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+exclude_delete: true
 custom_code:
-  encoder: 'templates/terraform/encoders/network_peering_routes_config.go.tmpl'
-examples:
-  - name: 'network_peering_routes_config_basic'
-    primary_resource_id: 'peering_primary_routes'
-    vars:
-      peering_primary_name: 'primary-peering'
-      peering_secondary_name: 'secondary-peering'
-      network_primary_name: 'primary-network'
-      network_secondary_name: 'secondary-network'
+  encoder: templates/terraform/encoders/network_peering_routes_config.go.tmpl
+samples:
+  - name: network_peering_routes_config_basic
+    primary_resource_id: peering_primary_routes
+    steps:
+      - name: network_peering_routes_config_basic
+        resource_id_vars:
+          network_primary_name: primary-network
+          network_secondary_name: secondary-network
+          peering_primary_name: primary-peering
+          peering_secondary_name: secondary-peering
 parameters:
-  - name: 'network'
+  - name: network
     type: ResourceRef
     description: |
       The name of the primary network for the peering.
     url_param_only: true
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    resource: 'Network'
-    imports: 'name'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    resource: Network
+    imports: name
 properties:
-  - name: 'peering'
+  - name: peering
     type: String
     description: |
       Name of the peering.
     # renamed to make it clear that this is an existing peering
     api_name: name
     required: true
-  - name: 'exportCustomRoutes'
+  - name: exportCustomRoutes
     type: Boolean
     description: |
       Whether to export the custom routes to the peer network.
     required: true
     send_empty_value: true
-  - name: 'importCustomRoutes'
+  - name: importCustomRoutes
     type: Boolean
     description: |
       Whether to import the custom routes to the peer network.
     required: true
     send_empty_value: true
-  - name: 'exportSubnetRoutesWithPublicIp'
+  - name: exportSubnetRoutesWithPublicIp
     type: Boolean
     description: |
       Whether subnet routes with public IP range are exported.
@@ -101,7 +103,7 @@ properties:
       are not controlled by this field.
     send_empty_value: true
     default_from_api: true
-  - name: 'importSubnetRoutesWithPublicIp'
+  - name: importSubnetRoutesWithPublicIp
     type: Boolean
     description: |
       Whether subnet routes with public IP range are imported.

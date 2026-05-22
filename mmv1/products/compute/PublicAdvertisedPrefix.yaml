@@ -12,63 +12,63 @@
 # limitations under the License.
 
 ---
-name: 'PublicAdvertisedPrefix'
+name: PublicAdvertisedPrefix
 description: |
   Represents a PublicAdvertisedPrefix for use with bring your own IP addresses (BYOIP).
 references:
   guides:
-    'Using bring your own IP': 'https://cloud.google.com/vpc/docs/using-bring-your-own-ip'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/publicAdvertisedPrefixes'
+    Using bring your own IP: https://cloud.google.com/vpc/docs/using-bring-your-own-ip
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/publicAdvertisedPrefixes
 docs:
-base_url: 'projects/{{project}}/global/publicAdvertisedPrefixes'
-has_self_link: true
+base_url: projects/{{project}}/global/publicAdvertisedPrefixes
 immutable: true
+has_self_link: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'public_advertised_prefixes_basic'
-    primary_resource_id: 'prefixes'
-    vars:
-      prefixes_name: 'my-prefix'
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+samples:
+  - name: public_advertised_prefixes_basic
+    primary_resource_id: prefixes
     exclude_test: true
-  - name: 'public_advertised_prefixes_pdp_scope'
-    primary_resource_id: 'prefixes'
-    vars:
-      prefixes_name: 'my-pap'
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+    steps:
+      - name: public_advertised_prefixes_basic
+        resource_id_vars:
+          prefixes_name: my-prefix
+        test_env_vars:
+          desc: PAP_DESCRIPTION
+  - name: public_advertised_prefixes_pdp_scope
+    primary_resource_id: prefixes
     exclude_test: true
-  - name: 'public_advertised_prefixes_ipv6_access_type'
-    primary_resource_id: 'prefixes'
-    vars:
-      prefixes_name: 'my-pap'
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+    steps:
+      - name: public_advertised_prefixes_pdp_scope
+        resource_id_vars:
+          prefixes_name: my-pap
+        test_env_vars:
+          desc: PAP_DESCRIPTION
+  - name: public_advertised_prefixes_ipv6_access_type
+    primary_resource_id: prefixes
     exclude_test: true
+    steps:
+      - name: public_advertised_prefixes_ipv6_access_type
+        resource_id_vars:
+          prefixes_name: my-pap
+        test_env_vars:
+          desc: PAP_DESCRIPTION
 parameters:
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: An optional description of this resource.
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. The name must be 1-63 characters long, and
@@ -78,16 +78,14 @@ properties:
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
     required: true
-  - name: 'dnsVerificationIp'
+  - name: dnsVerificationIp
     type: String
     description: The IPv4 address to be used for reverse DNS verification.
-  - name: 'ipCidrRange'
+  - name: ipCidrRange
     type: String
-    description:
-      The address range, in CIDR format, represented by this public advertised
-      prefix.
+    description: The address range, in CIDR format, represented by this public advertised prefix.
     required: true
-  - name: 'pdpScope'
+  - name: pdpScope
     type: Enum
     description: |
       Specifies how child public delegated prefix will be scoped. pdpScope
@@ -97,9 +95,9 @@ properties:
       * GLOBAL: The public delegated prefix is global only. The provisioning
       will take ~4 weeks.
     enum_values:
-      - 'GLOBAL'
-      - 'REGIONAL'
-  - name: 'ipv6AccessType'
+      - GLOBAL
+      - REGIONAL
+  - name: ipv6AccessType
     type: Enum
     description: |
       The internet access type for IPv6 Public Advertised Prefixes. It can be
@@ -111,9 +109,9 @@ properties:
         access type as INTERNAL.
     default_from_api: true
     enum_values:
-      - 'EXTERNAL'
-      - 'INTERNAL'
-  - name: 'sharedSecret'
+      - EXTERNAL
+      - INTERNAL
+  - name: sharedSecret
     type: String
     description: |
       Output Only. The shared secret to be used for reverse DNS verification.

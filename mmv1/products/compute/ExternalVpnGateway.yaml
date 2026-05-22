@@ -12,67 +12,70 @@
 # limitations under the License.
 
 ---
-name: 'ExternalVpnGateway'
-kind: 'compute#externalVpnGateway'
+name: ExternalVpnGateway
 description: |
   Represents a VPN gateway managed outside of GCP.
 references:
   guides:
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/externalVpnGateways'
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/externalVpnGateways
 docs:
-base_url: 'projects/{{project}}/global/externalVpnGateways'
-has_self_link: true
+base_url: projects/{{project}}/global/externalVpnGateways
 immutable: true
+has_self_link: true
+collection_url_key: items
+kind: compute#externalVpnGateway
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
-examples:
-  - name: 'external_vpn_gateway'
-    primary_resource_id: 'external_gateway'
-    vars:
-      ha_vpn_gateway_name: 'ha-vpn'
-      network_name: 'network-1'
-      external_gateway_name: 'external-gateway'
-      global_address_name: 'global-address'
-      router_name: 'ha-vpn-router1'
-      # Multiple fine-grained resources
+samples:
+  - name: external_vpn_gateway
     skip_vcr: true
-  - name: 'only_external_vpn_gateway_full'
-    primary_resource_id: 'external_gateway'
-    vars:
-      external_gateway_name: 'external-gateway'
-    exclude_docs: true
+    primary_resource_id: external_gateway
+    steps:
+      - name: external_vpn_gateway
+        resource_id_vars:
+          external_gateway_name: external-gateway
+          global_address_name: global-address
+          ha_vpn_gateway_name: ha-vpn
+          network_name: network-1
+          router_name: ha-vpn-router1
+  - name: only_external_vpn_gateway_full
+    primary_resource_id: external_gateway
+    exclude_basic_doc: true
+    steps:
+      - name: only_external_vpn_gateway_full
+        resource_id_vars:
+          external_gateway_name: external-gateway
 parameters:
 properties:
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
-  - name: 'labels'
+    description: An optional description of this resource.
+  - name: labels
     type: KeyValueLabels
-    description: 'Labels for the external VPN gateway resource.'
-    update_url: 'projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels'
-    update_verb: 'POST'
-  - name: 'labelFingerprint'
+    description: Labels for the external VPN gateway resource.
+    update_url: projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels
+    update_verb: POST
+  - name: labelFingerprint
     type: Fingerprint
     description: |
       The fingerprint used for optimistic locking of this resource.  Used
       internally during updates.
     output: true
-    update_url: 'projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels'
-    update_verb: 'POST'
-    key_expander: ''
-  - name: 'name'
+    update_url: projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels
+    update_verb: POST
+    key_expander: ""
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -83,15 +86,15 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-  - name: 'redundancyType'
+  - name: redundancyType
     type: Enum
     description: |
       Indicates the redundancy type of this external VPN gateway
     enum_values:
-      - 'FOUR_IPS_REDUNDANCY'
-      - 'SINGLE_IP_INTERNALLY_REDUNDANT'
-      - 'TWO_IPS_REDUNDANCY'
-  - name: 'interface'
+      - FOUR_IPS_REDUNDANCY
+      - SINGLE_IP_INTERNALLY_REDUNDANT
+      - TWO_IPS_REDUNDANCY
+  - name: interface
     type: Array
     description: |
       A list of interfaces on this external VPN gateway.
@@ -99,7 +102,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'id'
+        - name: id
           type: Integer
           description: |
             The numeric ID for this interface. Allowed values are based on the redundancy type
@@ -108,14 +111,14 @@ properties:
             * `0, 1 - TWO_IPS_REDUNDANCY`
             * `0, 1, 2, 3 - FOUR_IPS_REDUNDANCY`
           send_empty_value: true
-        - name: 'ipAddress'
+        - name: ipAddress
           type: String
           description: |
             IP address of the interface in the external VPN gateway.
             Only IPv4 is supported. This IP address can be either from
             your on-premise gateway or another Cloud provider's VPN gateway,
             it cannot be an IP address from Google Compute Engine.
-        - name: 'ipv6Address'
+        - name: ipv6Address
           type: String
           description: |
             IPv6 address of the interface in the external VPN gateway. This IPv6
@@ -124,14 +127,14 @@ properties:
             Engine. Must specify an IPv6 address (not IPV4-mapped) using any format
             described in RFC 4291 (e.g. 2001:db8:0:0:2d9:51:0:0). The output format
             is RFC 5952 format (e.g. 2001:db8::2d9:51:0:0).
-  - name: 'params'
+  - name: params
     type: NestedObject
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
-      - name: 'resourceManagerTags'
+      - name: resourceManagerTags
         type: KeyValuePairs
         description: |
           Resource manager tags to be bound to the ExternalVpnGateway. Tag keys and values have the

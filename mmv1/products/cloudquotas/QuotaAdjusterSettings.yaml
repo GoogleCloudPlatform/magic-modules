@@ -12,47 +12,47 @@
 # limitations under the License.
 
 ---
-name: 'QuotaAdjusterSettings'
+name: QuotaAdjusterSettings
 description: |
   QuotaAdjusterSettings resource represents your quota adjuster settings for a particular project. When enabled, the quota adjuster monitors your usage for the specified resources and issues quota adjustment requests when resource usage approaches its quota value.
-min_version: beta
 references:
   guides:
-    'Cloud Quotas Overview': 'https://cloud.google.com/docs/quotas/overview'
-  api: 'https://cloud.google.com/docs/quotas/reference/rest/v1beta/projects.locations.quotaAdjusterSettings'
+    Cloud Quotas Overview: https://cloud.google.com/docs/quotas/overview
+  api: https://cloud.google.com/docs/quotas/reference/rest/v1beta/projects.locations.quotaAdjusterSettings
 docs:
-id_format: '{{parent}}/locations/global/quotaAdjusterSettings'
 base_url: '{{parent}}/locations/global/quotaAdjusterSettings'
+min_version: beta
 self_link: '{{parent}}/locations/global/quotaAdjusterSettings'
 create_url: '{{parent}}/locations/global/quotaAdjusterSettings'
+update_url: '{{parent}}/locations/global/quotaAdjusterSettings'
 # This is a singleton resource that is already created, so create
 # is really an update, and therefore should be PATCHed.
-create_verb: 'PATCH'
-update_url: '{{parent}}/locations/global/quotaAdjusterSettings'
-update_verb: 'PATCH'
-# This is a singleton resource that cannot be deleted, so skip delete.
-exclude_delete: true
+create_verb: PATCH
+update_verb: PATCH
+id_format: '{{parent}}/locations/global/quotaAdjusterSettings'
 import_format:
   - '{{%parent}}/locations/global/quotaAdjusterSettings'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# This is a singleton resource that cannot be deleted, so skip delete.
+exclude_delete: true
 custom_code:
-examples:
-  - name: 'cloudquotas_quota_adjuster_settings_basic'
-    primary_resource_id: 'adjuster_settings'
-    vars:
-      parent: "projects/104740170505"
-      enablement: "ENABLED"
-    test_vars_overrides:
-      # for backward compatible
-      parent: '"projects/104740170505" + randomSuffix'
-      # for backward compatible
-      enablement: '"ENABLED" + randomSuffix'
+samples:
+  - name: cloudquotas_quota_adjuster_settings_basic
+    primary_resource_id: adjuster_settings
     exclude_test: true
+    steps:
+      - name: cloudquotas_quota_adjuster_settings_basic
+        resource_id_vars:
+          enablement: ENABLED
+          parent: projects/104740170505
+        test_vars_overrides:
+          enablement: '"ENABLED" + randomSuffix'
+          parent: '"projects/104740170505" + randomSuffix'
 parameters:
-  - name: 'parent'
+  - name: parent
     type: String
     description: The parent of the quota preference. Allowed parent format is "projects/[project-id / number]".
     url_param_only: true
@@ -60,22 +60,22 @@ parameters:
     immutable: true
     default_from_api: true
 properties:
-  - name: 'enablement'
+  - name: enablement
     type: Enum
     description: |
       Required. The configured value of the enablement at the given resource.
     required: true
     enum_values:
-      - 'ENABLED'
-      - 'DISABLED'
-  - name: 'effectiveContainer'
+      - ENABLED
+      - DISABLED
+  - name: effectiveContainer
     type: String
     description: |
       The resource container that determines if the quota adjuster is set for this project.
       Expect this field to be empty currently.
     deprecation_message: '`effectiveContainer` is deprecated and will be removed in a future major release. Use `inherited_from` instead.'
     output: true
-  - name: 'effectiveEnablement'
+  - name: effectiveEnablement
     type: Enum
     description: |
       Based on the effective container`s setting above, determines Whether this resource container has the quota adjuster enabled.
@@ -83,15 +83,15 @@ properties:
     deprecation_message: '`effectiveEnablement` is deprecated and will be removed in a future major release. Use `inherited` instead.'
     output: true
     enum_values:
-      - 'DEFAULT'
-      - 'ENABLED'
-      - 'DISABLED'
-  - name: 'inherited'
+      - DEFAULT
+      - ENABLED
+      - DISABLED
+  - name: inherited
     type: Boolean
     description: |
       Indicates whether the setting is inherited or explicitly specified.
     output: true
-  - name: 'inheritedFrom'
+  - name: inheritedFrom
     type: String
     description: |
       The resource container from which the setting is inherited. This refers to the  nearest ancestor with enablement set (either ENABLED or DISABLED).

@@ -12,52 +12,51 @@
 # limitations under the License.
 
 ---
-name: 'Bucket'
+name: Bucket
 description: |
   An association between a Firebase project and a Google Cloud Storage bucket.
   This association enables integration of Cloud Storage buckets with Firebase such as Firebase SDKS, Authentication, and Security Rules.
-min_version: 'beta'
 references:
   guides:
-    'Official Documentation': 'https://firebase.google.com/docs/storage/'
-  api: 'https://firebase.google.com/docs/reference/rest/storage/rest/v1beta/projects.buckets'
+    Official Documentation: https://firebase.google.com/docs/storage/
+  api: https://firebase.google.com/docs/reference/rest/storage/rest/v1beta/projects.buckets
 docs:
-base_url: 'projects/{{project}}/buckets'
-self_link: 'projects/{{project}}/buckets/{{bucket_id}}'
-create_url: 'projects/{{project}}/buckets/{{bucket_id}}:addFirebase'
-delete_url: 'projects/{{project}}/buckets/{{bucket_id}}:removeFirebase'
-delete_verb: 'POST'
+base_url: projects/{{project}}/buckets
+min_version: beta
 # Does not support update operation. There is nothing to update.
 immutable: true
+self_link: projects/{{project}}/buckets/{{bucket_id}}
+create_url: projects/{{project}}/buckets/{{bucket_id}}:addFirebase
+delete_url: projects/{{project}}/buckets/{{bucket_id}}:removeFirebase
+delete_verb: POST
 import_format:
-  - 'projects/{{project}}/buckets/{{bucket_id}}'
+  - projects/{{project}}/buckets/{{bucket_id}}
   - '{{project}}/{{bucket_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'firebasestorage_bucket_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      bucket_id: 'test_bucket'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: firebasestorage_bucket_basic
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: firebasestorage_bucket_basic
+        resource_id_vars:
+          bucket_id: test_bucket
+        test_env_vars:
+          project_id: PROJECT_NAME
 parameters:
-  - name: 'bucket_id'
+  - name: bucket_id
     type: String
-    description:
-      Required. Immutable. The ID of the underlying Google Cloud Storage bucket
-    min_version: 'beta'
+    description: Required. Immutable. The ID of the underlying Google Cloud Storage bucket
+    min_version: beta
     url_param_only: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
-    description:
-      Resource name of the bucket in the format
-      projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID
-    min_version: 'beta'
+    description: Resource name of the bucket in the format projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID
+    min_version: beta
     output: true

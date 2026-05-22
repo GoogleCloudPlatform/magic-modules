@@ -16,53 +16,50 @@ name: MulticastDomainGroup
 description: Create a multicast domain group in the current project.
 references:
   guides:
-    'Create Multicast Domain Group': 'https://docs.cloud.google.com/vpc/docs/multicast/create-domains#create-domain-group'
-  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastDomainGroups'
+    Create Multicast Domain Group: https://docs.cloud.google.com/vpc/docs/multicast/create-domains#create-domain-group
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastDomainGroups
 base_url: projects/{{project}}/locations/{{location}}/multicastDomainGroups
+self_link: projects/{{project}}/locations/{{location}}/multicastDomainGroups/{{multicast_domain_group_id}}
+create_url: projects/{{project}}/locations/{{location}}/multicastDomainGroups?multicastDomainGroupId={{multicast_domain_group_id}}
 update_mask: true
-self_link:
-  projects/{{project}}/locations/{{location}}/multicastDomainGroups/{{multicast_domain_group_id}}
-create_url:
-  projects/{{project}}/locations/{{location}}/multicastDomainGroups?multicastDomainGroupId={{multicast_domain_group_id}}
 update_verb: PATCH
-id_format:
-  projects/{{project}}/locations/{{location}}/multicastDomainGroups/{{multicast_domain_group_id}}
+id_format: projects/{{project}}/locations/{{location}}/multicastDomainGroups/{{multicast_domain_group_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastDomainGroups/{{multicast_domain_group_id}}
 sweeper:
   url_substitutions:
-    - location: "global"
-examples:
-  - name: network_services_multicast_domain_group_basic
-    primary_resource_id: mdg_test
-    vars:
-      domain_group_name: test-mdg-resource
-      network_name: test-mdg-network
-      domain_a_name: test-mdg-domain-a
-      domain_b_name: test-mdg-domain-b
-autogen_async: true
+    - location: global
 async:
-  operation:
-    timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
-    base_url: '{{op_id}}'
   actions:
     - create
     - delete
     - update
   type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: TXVsdGljYXN0RG9tYWluR3JvdXA=
+autogen_async: true
+samples:
+  - name: network_services_multicast_domain_group_basic
+    primary_resource_id: mdg_test
+    steps:
+      - name: network_services_multicast_domain_group_basic
+        resource_id_vars:
+          domain_a_name: test-mdg-domain-a
+          domain_b_name: test-mdg-domain-b
+          domain_group_name: test-mdg-resource
+          network_name: test-mdg-network
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the
-      resource within its parent collection as described in
-      https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
@@ -79,7 +76,7 @@ parameters:
 properties:
   - name: createTime
     type: String
-    description: 'The timestamp when the multicast domain group was created.'
+    description: The timestamp when the multicast domain group was created.
     output: true
   - name: description
     type: String

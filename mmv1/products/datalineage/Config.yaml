@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'Config'
+name: Config
 api_variant_patterns:
-  - 'projects/{project}/locations/{location}/config'
-  - 'folders/{folder}/locations/{location}/config'
-  - 'organizations/{organization}/locations/{location}/config'
+  - projects/{project}/locations/{location}/config
+  - folders/{folder}/locations/{location}/config
+  - organizations/{organization}/locations/{location}/config
 description: |
   Configuration for Data Lineage.
 
@@ -24,46 +24,51 @@ description: |
   lineage systems.
 references:
   guides:
-    'Official Documentation': 'https://docs.cloud.google.com/dataplex/docs/about-data-lineage#control-lineage-ingestion'
-  api: 'https://docs.cloud.google.com/dataplex/docs/reference/data-lineage/rest/v1/folders.locations.config'
+    Official Documentation: https://docs.cloud.google.com/dataplex/docs/about-data-lineage#control-lineage-ingestion
+  api: https://docs.cloud.google.com/dataplex/docs/reference/data-lineage/rest/v1/folders.locations.config
 docs:
-id_format: '{{parent}}/locations/{{location}}/config'
 base_url: '{{parent}}/locations/{{location}}/config'
 self_link: '{{parent}}/locations/{{location}}/config'
 create_url: '{{parent}}/locations/{{location}}/config'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
-delete_verb: 'PATCH'
 update_mask: false
-exclude_delete: false
+create_verb: PATCH
+update_verb: PATCH
+delete_verb: PATCH
+id_format: '{{parent}}/locations/{{location}}/config'
 import_format:
   - '{{%parent}}/locations/{{location}}/config'
-
+exclude_delete: false
 autogen_async: false
 custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/datalineage_config.go.tmpl'
-
-examples:
-  - name: 'data_lineage_config_project'
-    primary_resource_id: 'default'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    external_providers: ["time"]
-  - name: 'data_lineage_config_folder'
-    primary_resource_id: 'default'
-    vars:
-      folder_name: 'config-f'
-    test_env_vars:
-      organization: 'ORG_ID'
-      service_account: 'SERVICE_ACCT'
-    external_providers: ["time"]
-  - name: 'data_lineage_config_organization'
-    primary_resource_id: 'default'
-    test_env_vars:
-      organization: 'ORG_ID'
-
+  test_check_destroy: templates/terraform/custom_check_destroy/datalineage_config.go.tmpl
+samples:
+  - name: data_lineage_config_project
+    external_providers:
+      - time
+    primary_resource_id: default
+    steps:
+      - name: data_lineage_config_project
+        test_env_vars:
+          org_id: ORG_ID
+  - name: data_lineage_config_folder
+    external_providers:
+      - time
+    primary_resource_id: default
+    steps:
+      - name: data_lineage_config_folder
+        resource_id_vars:
+          folder_name: config-f
+        test_env_vars:
+          organization: ORG_ID
+          service_account: SERVICE_ACCT
+  - name: data_lineage_config_organization
+    primary_resource_id: default
+    steps:
+      - name: data_lineage_config_organization
+        test_env_vars:
+          organization: ORG_ID
 parameters:
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       Parent scope for the config.
@@ -71,16 +76,15 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The region of the data lineage configuration for integration.
     url_param_only: true
     required: true
     immutable: true
-
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Identifier. The resource name of the config.
@@ -89,18 +93,18 @@ properties:
       projects/{project_id}/locations/{location}/config,
       or projects/{project_number}/locations/{location}/config.
     output: true
-  - name: 'etag'
+  - name: etag
     type: Fingerprint
     description: |
       Used for optimistic concurrency control when patching config.
     output: true
-  - name: 'ingestion'
+  - name: ingestion
     type: NestedObject
     description: |
       Defines how Lineage should be ingested for this resource.
     required: true
     properties:
-      - name: 'rule'
+      - name: rule
         type: Array
         description: |
           List of ingestion rules for Data Lineage ingestion.
@@ -110,27 +114,27 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'integrationSelector'
+            - name: integrationSelector
               type: NestedObject
               description: |
                 Selects which integration this rule applies to.
               required: true
               properties:
-                - name: 'integration'
+                - name: integration
                   type: Enum
                   description: |
                     Integration to which the rule applies.
                   required: true
                   enum_values:
-                    - 'DATAPROC'
-                    - 'LOOKER_CORE'
-            - name: 'lineageEnablement'
+                    - DATAPROC
+                    - LOOKER_CORE
+            - name: lineageEnablement
               type: NestedObject
               description: |
                 Configures lineage ingestion enablement for this scope.
               required: true
               properties:
-                - name: 'enabled'
+                - name: enabled
                   type: Boolean
                   description: |
                     Whether ingestion of lineage should be enabled.

@@ -34,33 +34,41 @@ async:
   operation:
     base_url: '{{op_id}}'
 include_in_tgc_next: true
-examples:
+samples:
   - name: region_target_tcp_proxy_basic
     primary_resource_id: default
-    vars:
-      health_check_name: health-check
-      region_backend_service_name: backend-service
-      region_target_tcp_proxy_name: test-proxy
+    steps:
+      - name: region_target_tcp_proxy_basic
+        resource_id_vars:
+          health_check_name: health-check
+          region_backend_service_name: backend-service
+          region_target_tcp_proxy_name: test-proxy
   - name: region_target_tcp_proxy_basic_beta
     min_version: beta
     primary_resource_id: default
-    vars:
-      health_check_name: health-check
-      region_backend_service_name: backend-service
-      region_target_tcp_proxy_name: test-proxy
+    steps:
+      - name: region_target_tcp_proxy_basic_beta
+        resource_id_vars:
+          health_check_name: health-check
+          region_backend_service_name: backend-service
+          region_target_tcp_proxy_name: test-proxy
   - name: region_target_tcp_proxy_backendless
     min_version: beta
     primary_resource_id: default
-    vars:
-      region_target_tcp_proxy_name: test-proxy
+    steps:
+      - name: region_target_tcp_proxy_backendless
+        resource_id_vars:
+          region_target_tcp_proxy_name: test-proxy
   - name: region_target_tcp_proxy_tls_route
     min_version: beta
     primary_resource_id: default
-    vars:
-      region_backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-      region_target_tcp_proxy_name: test-proxy
-      tls_route_name: 'tls-route-check'
+    steps:
+      - name: region_target_tcp_proxy_tls_route
+        resource_id_vars:
+          health_check_name: health-check
+          region_backend_service_name: backend-service
+          region_target_tcp_proxy_name: test-proxy
+          tls_route_name: tls-route-check
 parameters:
   - name: region
     type: ResourceRef
@@ -115,8 +123,8 @@ properties:
       A reference to the BackendService resource. This field is optional when
       the loadBalancingScheme (available in beta) is specified.
     at_least_one_of:
-      - 'backend_service'
-      - 'load_balancing_scheme'
+      - backend_service
+      - load_balancing_scheme
     resource: RegionBackendService
     imports: selfLink
     custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
@@ -134,8 +142,8 @@ properties:
       of load balancer cannot be used with another. For more information, refer
       to [Summary of types of Google Cloud load balancers](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview#summary-gclb).
     at_least_one_of:
-      - 'backend_service'
-      - 'load_balancing_scheme'
+      - backend_service
+      - load_balancing_scheme
     enum_values:
-      - 'EXTERNAL_MANAGED'
-      - 'INTERNAL_MANAGED'
+      - EXTERNAL_MANAGED
+      - INTERNAL_MANAGED

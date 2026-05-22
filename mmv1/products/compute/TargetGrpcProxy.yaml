@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'TargetGrpcProxy'
-kind: 'compute#targetGrpcProxy'
+name: TargetGrpcProxy
 description: |
   Represents a Target gRPC Proxy resource. A target gRPC proxy is a component
   of load balancers intended for load balancing gRPC traffic. Global forwarding
@@ -21,50 +20,49 @@ description: |
   a URL map which specifies how traffic routes to gRPC backend services.
 references:
   guides:
-    'Using Target gRPC Proxies': 'https://cloud.google.com/traffic-director/docs/proxyless-overview'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetGrpcProxies'
+    Using Target gRPC Proxies: https://cloud.google.com/traffic-director/docs/proxyless-overview
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/targetGrpcProxies
 docs:
-base_url: 'projects/{{project}}/global/targetGrpcProxies'
+base_url: projects/{{project}}/global/targetGrpcProxies
 has_self_link: true
-update_verb: 'PATCH'
+update_verb: PATCH
+collection_url_key: items
+kind: compute#targetGrpcProxy
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
-examples:
-  - name: 'target_grpc_proxy_basic'
-    primary_resource_id: 'default'
-    vars:
-      proxy_name: 'proxy'
-      urlmap_name: 'urlmap'
-      backend_name: 'backend'
-      healthcheck_name: 'healthcheck'
-    test_vars_overrides:
-      # for backward compatible
-      proxy_name: '"proxy" + randomSuffix'
-      # for backward compatible
-      urlmap_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      backend_name: '"backend" + randomSuffix'
-      # for backward compatible
-      healthcheck_name: '"healthcheck" + randomSuffix'
+samples:
+  - name: target_grpc_proxy_basic
+    primary_resource_id: default
+    steps:
+      - name: target_grpc_proxy_basic
+        resource_id_vars:
+          backend_name: backend
+          healthcheck_name: healthcheck
+          proxy_name: proxy
+          urlmap_name: urlmap
+        test_vars_overrides:
+          backend_name: '"backend" + randomSuffix'
+          healthcheck_name: '"healthcheck" + randomSuffix'
+          proxy_name: '"proxy" + randomSuffix'
+          urlmap_name: '"urlmap" + randomSuffix'
 parameters:
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource
@@ -76,24 +74,24 @@ properties:
       except the last character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
-  - name: 'selfLinkWithId'
+    description: An optional description of this resource.
+  - name: selfLinkWithId
     type: String
-    description: 'Server-defined URL with id for the resource.'
+    description: Server-defined URL with id for the resource.
     output: true
-  - name: 'urlMap'
+  - name: urlMap
     type: String
     description: |
       URL to the UrlMap resource that defines the mapping from URL to
       the BackendService. The protocol field in the BackendService
       must be set to GRPC.
     immutable: true
-    update_id: 'urlMap'
-    fingerprint_name: 'fingerprint'
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - name: 'validateForProxyless'
+    update_id: urlMap
+    fingerprint_name: fingerprint
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+  - name: validateForProxyless
     type: Boolean
     description: |
       If true, indicates that the BackendServices referenced by
@@ -107,7 +105,7 @@ properties:
       must not use "xds:///" scheme in the target URI of the service
       it is connecting to
     immutable: true
-  - name: 'fingerprint'
+  - name: fingerprint
     type: Fingerprint
     description: |
       Fingerprint of this resource. A hash of the contents stored in

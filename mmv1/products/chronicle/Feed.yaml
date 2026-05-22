@@ -14,68 +14,72 @@
 ---
 name: Feed
 description: The FeedsService is responsible for configuring and managing the ingestion of third-party security data and logs into Google Security Operations through various feed creation, updates, and lifecycle management, and schema validation.
-min_version: 'beta'
 references:
   guides:
-    'Feed management overview': 'https://docs.cloud.google.com/chronicle/docs/administration/feed-management-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.feeds'
+    Feed management overview: https://docs.cloud.google.com/chronicle/docs/administration/feed-management-overview
+  api: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.feeds
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds
-update_verb: PATCH
+delete_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
 update_mask: true
+update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
-delete_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
-
-examples:
-  - name: 'chronicle_feed_basic'
-    primary_resource_id: 'example_feed'
-    vars:
-      resource_name: test-feeds
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-      project_name: 'PROJECT_NAME'
-  - name: 'chronicle_feed_gcs'
-    primary_resource_id: 'example_feed'
-    vars:
-      resource_name: test-feeds
-      description: test-feeds-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-      project_name: 'PROJECT_NAME'
-      project_number: 'PROJECT_NUMBER'
-    ignore_read_extra:
-      - 'feed_service_account'
-  - name: 'chronicle_feed_https_push'
-    primary_resource_id: 'example_feed'
-    vars:
-      resource_name: test-feeds
-      description: test-feeds-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-      project_name: 'PROJECT_NAME'
-    exclude_import_test: true
-
+autogen_status: RmVlZA==
 custom_code:
-  update_encoder: 'templates/terraform/encoders/chronicle_feed_update.go.tmpl'
-  post_update: 'templates/terraform/post_update/chronicle_feed_state.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/chronicle_feed_service_account.go.tmpl'
-  post_create: 'templates/terraform/post_create/chronicle_feed_generate_secret.go.tmpl'
+  pre_create: templates/terraform/pre_create/chronicle_feed_service_account.go.tmpl
+  post_create: templates/terraform/post_create/chronicle_feed_generate_secret.go.tmpl
+  post_update: templates/terraform/post_update/chronicle_feed_state.go.tmpl
+  update_encoder: templates/terraform/encoders/chronicle_feed_update.go.tmpl
+samples:
+  - name: chronicle_feed_basic
+    primary_resource_id: example_feed
+    steps:
+      - name: chronicle_feed_basic
+        resource_id_vars:
+          resource_name: test-feeds
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+          project_name: PROJECT_NAME
+  - name: chronicle_feed_gcs
+    primary_resource_id: example_feed
+    steps:
+      - name: chronicle_feed_gcs
+        resource_id_vars:
+          description: test-feeds-description
+          resource_name: test-feeds
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+          project_name: PROJECT_NAME
+          project_number: PROJECT_NUMBER
+        ignore_read_extra:
+          - feed_service_account
+  - name: chronicle_feed_https_push
+    primary_resource_id: example_feed
+    steps:
+      - name: chronicle_feed_https_push
+        resource_id_vars:
+          description: test-feeds-description
+          resource_name: test-feeds
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+          project_name: PROJECT_NAME
+        exclude_import_test: true
 virtual_fields:
-  - name: 'secret'
+  - name: secret
     type: String
     description: |
       Output only. The secret generated for the feed. This is only available when the feed source type is HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE.
     output: true
     sensitive: true
-  - name: 'feed_service_account'
+  - name: feed_service_account
     type: String
     description: |
       Output only. The service account used by Chronicle to ingest data from Cloud Storage. This is only available when the feed source type is GOOGLE_CLOUD_STORAGE_EVENT_DRIVEN or GOOGLE_CLOUD_STORAGE.
     output: true
     ignore_read: true
-autogen_status: RmVlZA==
 parameters:
   - name: location
     type: String
@@ -94,16 +98,16 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
 properties:
   - name: state
     type: String
-    description: 'The state of the feed (e.g., ACTIVE, INACTIVE).'
+    description: The state of the feed (e.g., ACTIVE, INACTIVE).
     # Mark as output if the API only allows changing it via custom endpoints
     output: true
   - name: enabled
     type: Boolean
-    description: 'Whether the feed is enabled.'
+    description: Whether the feed is enabled.
     # Use a virtual/client-side field to trigger enable/disable calls
   - name: details
     type: NestedObject
@@ -276,8 +280,7 @@ properties:
               FOLDERS_RECURSIVE
       - name: amazonS3V2Settings
         type: NestedObject
-        description: |-
-          AmazonS3V2Settings is the settings proto for Omniflow S3 feeds.
+        description: AmazonS3V2Settings is the settings proto for Omniflow S3 feeds.
         exactly_one_of: *all_feed_settings
         properties:
           - name: authentication
@@ -410,8 +413,7 @@ properties:
               SOURCE_DELETION_ON_SUCCESS_FILES_ONLY
       - name: amazonSqsV2Settings
         type: NestedObject
-        description: |-
-          AmazonSQSV2Settings is the settings proto for Omniflow SQS feeds.
+        description: AmazonSQSV2Settings is the settings proto for Omniflow SQS feeds.
         exactly_one_of: *all_feed_settings
         properties:
           - name: authentication
@@ -673,8 +675,7 @@ properties:
               FOLDERS_RECURSIVE
       - name: azureBlobStoreV2Settings
         type: NestedObject
-        description: |-
-          AzureBlobStoreV2Settings is the settings proto for Azure Blob Storage feeds.
+        description: AzureBlobStoreV2Settings is the settings proto for Azure Blob Storage feeds.
         exactly_one_of: *all_feed_settings
         properties:
           - name: authentication
@@ -960,25 +961,25 @@ properties:
         type: Enum
         immutable: true
         enum_values:
-          - 'GOOGLE_CLOUD_STORAGE'
-          - 'HTTP'
-          - 'SFTP'
-          - 'AMAZON_S3'
-          - 'AZURE_BLOBSTORE'
-          - 'API'
-          - 'AMAZON_SQS'
-          - 'PUBSUB'
-          - 'AMAZON_KINESIS_FIREHOSE'
-          - 'WEBHOOK'
-          - 'HTTPS_PUSH_GOOGLE_CLOUD_PUBSUB'
-          - 'HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE'
-          - 'HTTPS_PUSH_WEBHOOK'
-          - 'AZURE_EVENT_HUB'
-          - 'GOOGLE_CLOUD_STORAGE_V2'
-          - 'AMAZON_S3_V2'
-          - 'AMAZON_SQS_V2'
-          - 'AZURE_BLOBSTORE_V2'
-          - 'GOOGLE_CLOUD_STORAGE_EVENT_DRIVEN'
+          - GOOGLE_CLOUD_STORAGE
+          - HTTP
+          - SFTP
+          - AMAZON_S3
+          - AZURE_BLOBSTORE
+          - API
+          - AMAZON_SQS
+          - PUBSUB
+          - AMAZON_KINESIS_FIREHOSE
+          - WEBHOOK
+          - HTTPS_PUSH_GOOGLE_CLOUD_PUBSUB
+          - HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE
+          - HTTPS_PUSH_WEBHOOK
+          - AZURE_EVENT_HUB
+          - GOOGLE_CLOUD_STORAGE_V2
+          - AMAZON_S3_V2
+          - AMAZON_SQS_V2
+          - AZURE_BLOBSTORE_V2
+          - GOOGLE_CLOUD_STORAGE_EVENT_DRIVEN
         description: |-
           Source Type of the feed.
           Possible values:
@@ -1039,7 +1040,6 @@ properties:
                   -----BEGIN RSA PRIVATE KEY-----
                   Proc-Type: 4,ENCRYPTED
                   DEK-Info: DES-EDE3-CBC,F23074E02CF47304
-
 
                   -----END RSA PRIVATE KEY-----
               - name: sslCertificate

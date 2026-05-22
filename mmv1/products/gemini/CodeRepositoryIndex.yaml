@@ -13,60 +13,60 @@
 
 ---
 name: CodeRepositoryIndex
-include_in_tgc_next: true
 description: The resource for managing Code Repository Index for Gemini Code Assist.
 references:
   guides:
-    'Gemini Code Assist overview': 'https://cloud.google.com/gemini/docs/codeassist/overview'
-  api: 'https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.codeRepositoryIndexes'
+    Gemini Code Assist overview: https://cloud.google.com/gemini/docs/codeassist/overview
+  api: https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.codeRepositoryIndexes
 base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes
 self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes?codeRepositoryIndexId={{code_repository_index_id}}
 delete_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}?force={{force_destroy}}
-collection_url_key: 'codeRepositoryIndexes'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
+collection_url_key: codeRepositoryIndexes
 id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
-mutex: 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}'
-examples:
-  - name: "gemini_code_repository_index_basic"
-    primary_resource_id: "example"
-    test_vars_overrides:
-      cri_id: '"cri-example"'
-    exclude_test: true
 timeouts:
   insert_minutes: 90
   update_minutes: 90
   delete_minutes: 90
-autogen_async: true
+mutex: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
+sweeper:
+  url_substitutions:
+    - force_destroy: true
 async:
-  operation:
-    timeouts:
-      insert_minutes: 90
-      update_minutes: 90
-      delete_minutes: 90
-    base_url: "{{op_id}}"
   actions:
     - create
     - delete
     - update
   type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+    timeouts:
+      insert_minutes: 90
+      update_minutes: 90
+      delete_minutes: 90
   result:
     resource_inside_response: true
   include_project: false
 error_retry_predicates:
-  - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
-  - 'transport_tpg.IsRepositoryGroupQueueError'
-sweeper:
-  url_substitutions:
-    - force_destroy: true
+  - transport_tpg.IsCodeRepositoryIndexUnreadyError
+  - transport_tpg.IsRepositoryGroupQueueError
+autogen_async: true
+include_in_tgc_next: true
+samples:
+  - name: gemini_code_repository_index_basic
+    primary_resource_id: example
+    exclude_test: true
+    steps:
+      - name: gemini_code_repository_index_basic
+        test_vars_overrides:
+          cri_id: '"cri-example"'
 virtual_fields:
-  - name: 'force_destroy'
-    description:
-      If set to true, will allow deletion of the CodeRepositoryIndex even if there are existing
-      RepositoryGroups for the resource. These RepositoryGroups will also be deleted.
+  - name: force_destroy
+    description: If set to true, will allow deletion of the CodeRepositoryIndex even if there are existing RepositoryGroups for the resource. These RepositoryGroups will also be deleted.
     type: Boolean
     default_value: false
 parameters:

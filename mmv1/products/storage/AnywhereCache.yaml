@@ -12,92 +12,95 @@
 # limitations under the License.
 
 ---
-name: 'AnywhereCache'
-kind: 'storage#anywhereCache'
+name: AnywhereCache
 description: |
   The Google Cloud Storage (GCS) Anywhere Cache feature allows users to
   create SSD backed zonal read cache for their buckets. These zonal
   caches are co-located with the customers compute engines to provide
   cost efficiency.
-base_url: 'b/{{bucket}}/anywhereCaches'
-self_link: 'b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}'
-create_url: 'b/{{bucket}}/anywhereCaches/'
-delete_url: 'b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}/disable'
-update_verb: 'PATCH'
-delete_verb: 'POST'
-import_format: ['b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}']
-id_format: '{{bucket}}/{{anywhere_cache_id}}'
-examples:
-  - name: 'storage_anywhere_cache_basic'
-    primary_resource_id: 'cache'
-    vars:
-      bucket_name: 'bucket-name'
-    external_providers: ["time"]
-    ignore_read_extra:
-      - 'update_time'
+base_url: b/{{bucket}}/anywhereCaches
+self_link: b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}
+create_url: b/{{bucket}}/anywhereCaches/
+delete_url: b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}/disable
+update_verb: PATCH
+delete_verb: POST
 identity:
   - bucket
   - anywhereCacheId
-custom_code:
-  custom_create: templates/terraform/custom_create/storage_anywhere_cache.go.tmpl
-  custom_update: templates/terraform/custom_update/storage_anywhere_cache.go.tmpl
-autogen_async: false
+kind: storage#anywhereCache
+id_format: '{{bucket}}/{{anywhere_cache_id}}'
+import_format: ['b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}']
 timeouts:
   insert_minutes: 240
   update_minutes: 240
   delete_minutes: 20
 async:
-  type: 'OpAsync'
   actions:
     - create
     - update
+  type: OpAsync
   result:
     resource_inside_response: true
+autogen_async: false
+custom_code:
+  custom_create: templates/terraform/custom_create/storage_anywhere_cache.go.tmpl
+  custom_update: templates/terraform/custom_update/storage_anywhere_cache.go.tmpl
+samples:
+  - name: storage_anywhere_cache_basic
+    external_providers:
+      - time
+    primary_resource_id: cache
+    steps:
+      - name: storage_anywhere_cache_basic
+        resource_id_vars:
+          bucket_name: bucket-name
+        ignore_read_extra:
+          - update_time
 parameters:
-  - name: 'bucket'
+  - name: bucket
     type: ResourceRef
     required: true
     immutable: true
     url_param_only: true
-    resource: 'Bucket'
-    imports: 'name'
+    resource: Bucket
+    imports: name
 properties:
-  - name: 'zone'
+  - name: zone
     type: String
     required: true
     immutable: true
     description: The zone in which the cache instance needs to be created. For example, `us-central1-a.`
-  - name: 'admissionPolicy'
+  - name: admissionPolicy
     type: Enum
     enum_values:
-      - 'admit-on-first-miss'
-      - 'admit-on-second-miss'
-    default_value: 'admit-on-first-miss'
+      - admit-on-first-miss
+      - admit-on-second-miss
+    default_value: admit-on-first-miss
     description: The cache admission policy dictates whether a block should be inserted upon a cache miss.
-  - name: 'ttl'
+  - name: ttl
     type: String
-    default_value: '86400s'
+    default_value: 86400s
     description: The TTL of all cache entries in whole seconds. e.g., "7200s". It defaults to `86400s`
-  - name: 'anywhereCacheId'
+  - name: anywhereCacheId
     type: String
     output: true
     description: The ID of the Anywhere cache instance.
-  - name: 'createTime'
+  - name: createTime
     type: Time
     output: true
     description: The creation time of the cache instance in RFC 3339 format.
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     output: true
     description: The modification time of the cache instance metadata in RFC 3339 format.
-  - name: 'pendingUpdate'
+  - name: pendingUpdate
     type: Boolean
     output: true
     description: True if the cache instance has an active Update long-running operation.
-  - name: 'state'
+  - name: state
     type: String
     output: true
     description: The current state of the cache instance.
-  - name: 'ingestOnWrite'
+  - name: ingestOnWrite
     type: Boolean
     description: Whether or not the cache ingests data as the data is written to the bucket.

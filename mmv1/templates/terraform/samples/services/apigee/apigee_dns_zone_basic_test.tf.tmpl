@@ -1,0 +1,115 @@
+ resource "google_project" "project" {
+   provider = google-beta
+
+   project_id      = "tf-test%{random_suffix}"
+   name            = "tf-test%{random_suffix}"
+   org_id          = "{{index $.TestEnvVars "org_id"}}"
+   billing_account = "{{index $.TestEnvVars "billing_account"}}"
+   deletion_policy = "DELETE"
+ }
+
+ resource "time_sleep" "wait_120_seconds" {
+   create_duration = "120s"
+   depends_on = [google_project.project]
+ }
+
+resource "google_project_service" "apigee" {
+  provider = google-beta
+
+  project = google_project.project.project_id
+  service = "apigee.googleapis.com"
+}
+
+resource "google_project_service" "compute" {
+  provider = google-beta
+
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+  depends_on = [
+    google_project_service.container,
+    time_sleep.wait_120_seconds,
+  ]
+}
+
+resource "google_project_service" "container" {
+  provider = google-beta
+
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "dns" {
+  provider = google-beta
+
+  project = google_project.project.project_id
+  service = "dns.googleapis.com"
+}
+
+resource "time_sleep" "wait_120_seconds_2" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
+resource "google_compute_network" "apigee_network" {
+  provider = google-beta
+
+  name       = "apigee-network"
+  project    = google_project.project.project_id
+  depends_on = [time_sleep.wait_120_seconds_2]
+}
+
+resource "google_project_service_identity" "apigee_sa" {
+  provider = google-beta
+
+  project = google_project.project.project_id
+  service = google_project_service.apigee.service
+  depends_on = [google_project_service.apigee]
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [google_project_service_identity.apigee_sa]
+}
+
+resource "google_project_iam_member" "project" {
+  provider = google-beta
+
+  project = google_project.project.project_id
+  role    = "roles/dns.peer"
+  member  = google_project_service_identity.apigee_sa.member
+  depends_on = [
+      google_project_service_identity.apigee_sa,
+      time_sleep.wait_60_seconds,
+  ]
+}
+
+resource "google_apigee_organization" "apigee_org" {
+  provider = google-beta
+
+  analytics_region   = "us-central1"
+  project_id         = google_project.project.project_id
+  disable_vpc_peering = true
+  depends_on         = [
+    google_project_service.compute,
+    google_project_service.container,
+    google_project_service.dns,
+    google_project_service.apigee,
+    google_project_iam_member.project,
+  ]
+}
+
+resource "google_apigee_dns_zone" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  dns_zone_id     = "tf-test%{random_suffix}"
+  org_id   = google_apigee_organization.apigee_org.id
+  domain = "foo.com"
+  description = "test"
+  peering_config {
+    target_project_id = google_project.project.project_id
+    target_network_id = "apigee-network"
+  }
+  depends_on  = [
+    google_apigee_organization.apigee_org
+  ]
+}

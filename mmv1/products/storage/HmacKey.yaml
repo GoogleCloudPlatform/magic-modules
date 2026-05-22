@@ -12,89 +12,91 @@
 # limitations under the License.
 
 ---
-name: 'HmacKey'
+name: HmacKey
 api_resource_type_kind: HmacKeyMetadata
-kind: 'storage#hmacKey'
 description: |
   The hmacKeys resource represents an HMAC key within Cloud Storage. The resource
   consists of a secret and HMAC key metadata. HMAC keys can be used as credentials
   for service accounts.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/storage/docs/authentication/managing-hmackeys'
-  api: 'https://cloud.google.com/storage/docs/json_api/v1/projects/hmacKeys'
+    Official Documentation: https://cloud.google.com/storage/docs/authentication/managing-hmackeys
+  api: https://cloud.google.com/storage/docs/json_api/v1/projects/hmacKeys
 docs:
   warning: |
     All arguments including the `secret` value will be stored in the raw
     state as plain-text. [Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
     On import, the `secret` value will not be retrieved.
-id_format: 'projects/{{project}}/hmacKeys/{{access_id}}'
-base_url: 'projects/{{project}}/hmacKeys'
-self_link: 'projects/{{project}}/hmacKeys/{{access_id}}'
-create_url: 'projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}'
+base_url: projects/{{project}}/hmacKeys
 # technically updatable, but implemented as custom update for new fingerprint support
 immutable: true
+self_link: projects/{{project}}/hmacKeys/{{access_id}}
+create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}
+kind: storage#hmacKey
+id_format: projects/{{project}}/hmacKeys/{{access_id}}
 import_format:
-  - 'projects/{{project}}/hmacKeys/{{access_id}}'
+  - projects/{{project}}/hmacKeys/{{access_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+exclude_sweeper: true
 async:
-  type: 'PollAsync'
-  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  actions: [create]
+  type: PollAsync
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   suppress_error: false
   target_occurrences: 1
-  actions: ['create']
 custom_code:
-  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
-  post_create: 'templates/terraform/post_create/storage_hmac_key.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/storage_hmac_key.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/storage_hmac_key.go.tmpl'
-exclude_sweeper: true
-examples:
-  - name: 'storage_hmac_key'
-    primary_resource_id: 'key'
-    vars:
-      account_id: 'my-svc-acc'
+  post_create: templates/terraform/post_create/storage_hmac_key.go.tmpl
+  pre_delete: templates/terraform/pre_delete/storage_hmac_key.go.tmpl
+  decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/storage_hmac_key.go.tmpl
+samples:
+  - name: storage_hmac_key
+    primary_resource_id: key
+    steps:
+      - name: storage_hmac_key
+        resource_id_vars:
+          account_id: my-svc-acc
 parameters:
 properties:
-  - name: 'serviceAccountEmail'
+  - name: serviceAccountEmail
     type: String
     description: |
       The email address of the key's associated service account.
     required: true
-  - name: 'state'
+  - name: state
     type: Enum
     description: |
       The state of the key. Can be set to one of ACTIVE, INACTIVE.
-    update_url: 'projects/{{project}}/hmacKeys/{{access_id}}'
-    update_id: 'state'
-    fingerprint_name: 'etag'
-    default_value: "ACTIVE"
+    update_url: projects/{{project}}/hmacKeys/{{access_id}}
+    update_id: state
+    fingerprint_name: etag
+    default_value: ACTIVE
     enum_values:
       # - :DELETED (not directly settable)
-      - 'ACTIVE'
-      - 'INACTIVE'
-  - name: 'secret'
+      - ACTIVE
+      - INACTIVE
+  - name: secret
     type: String
     description: |
       HMAC secret key material.
     ignore_read: true
     sensitive: true
     output: true
-  - name: 'accessId'
+  - name: accessId
     type: String
     description: |
       The access ID of the HMAC Key.
     output: true
-  - name: 'timeCreated'
+  - name: timeCreated
     type: Time
     description: |
       'The creation time of the HMAC key in RFC 3339 format. '
     output: true
-  - name: 'updated'
+  - name: updated
     type: Time
     description: |
       'The last modification time of the HMAC key metadata in RFC 3339 format.'

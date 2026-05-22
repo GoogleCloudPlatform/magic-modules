@@ -15,157 +15,150 @@
 name: Toolset
 description: Description
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/toolsets
+self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/toolsets/{{toolset_id}}
+create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/toolsets?toolsetId={{toolset_id}}
 update_mask: true
-self_link:
-  projects/{{project}}/locations/{{location}}/apps/{{app}}/toolsets/{{toolset_id}}
-create_url:
-  projects/{{project}}/locations/{{location}}/apps/{{app}}/toolsets?toolsetId={{toolset_id}}
 update_verb: PATCH
-id_format:
-  projects/{{project}}/locations/{{location}}/apps/{{app}}/toolsets/{{toolset_id}}
+id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/toolsets/{{toolset_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/toolsets/{{toolset_id}}
-examples:
-  - name: "ces_toolset_openapi_service_account_auth_config"
-    primary_resource_id: "ces_toolset_openapi_service_account_auth_config"  # yamllint disable rule:line-length
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-    test_vars_overrides:
-      # for backward compatible
-      toolset_id: '"toolset1" + randomSuffix'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-  - name: "ces_toolset_openapi_oauth_config"
-    primary_resource_id: "ces_toolset_openapi_oauth_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-    test_vars_overrides:
-      # for backward compatible
-      toolset_id: '"toolset1" + randomSuffix'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-  - name: "ces_toolset_openapi_service_agent_id_token_auth_config"
-    primary_resource_id: "ces_toolset_openapi_service_agent_id_token_auth_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-    test_vars_overrides:
-      # for backward compatible
-      toolset_id: '"toolset1" + randomSuffix'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-  - name: "ces_toolset_openapi_api_key_config"
-    primary_resource_id: "ces_toolset_openapi_api_key_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-    test_vars_overrides:
-      # for backward compatible
-      toolset_id: '"toolset1" + randomSuffix'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-  - name: "ces_toolset_bearer_token_config"
-    primary_resource_id: "ces_toolset_bearer_token_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-    test_vars_overrides:
-      # for backward compatible
-      toolset_id: '"toolset1" + randomSuffix'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-  - name: "ces_toolset_mcp_service_account_auth_config"
-    primary_resource_id: "ces_toolset_mcp_service_account_auth_config"
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-    test_vars_overrides:
-      # for backward compatible
-      toolset_id: '"toolset1" + randomSuffix'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-  - name: "ces_toolset_mcp_oauth_config"
-    primary_resource_id: "ces_toolset_mcp_oauth_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-    test_vars_overrides:
-      # for backward compatible
-      toolset_id: '"toolset1" + randomSuffix'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-  - name: "ces_toolset_mcp_service_agent_id_token_auth_config"
-    primary_resource_id: "ces_toolset_mcp_service_agent_id_token_auth_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-    test_vars_overrides:
-      # for backward compatible
-      toolset_id: '"toolset1" + randomSuffix'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-  - name: "ces_toolset_mcp_api_key_config"
-    primary_resource_id: "ces_toolset_mcp_api_key_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-    test_vars_overrides:
-      # for backward compatible
-      toolset_id: '"toolset1" + randomSuffix'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-  - name: "ces_toolset_mcp_bearer_token_config"
-    primary_resource_id: "ces_toolset_mcp_bearer_token_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-    test_vars_overrides:
-      # for backward compatible
-      toolset_id: '"toolset1" + randomSuffix'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-autogen_async: true
 autogen_status: VG9vbHNldA==
+autogen_async: true
+samples:
+  - name: ces_toolset_openapi_service_account_auth_config
+    primary_resource_id: ces_toolset_openapi_service_account_auth_config
+    steps:
+      - name: ces_toolset_openapi_service_account_auth_config
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          location: us
+          toolset_id: toolset1
+        test_env_vars:
+          service_account: SERVICE_ACCT
+        test_vars_overrides:
+          location: '"us" + randomSuffix'
+          toolset_id: '"toolset1" + randomSuffix'
+  - name: ces_toolset_openapi_oauth_config
+    primary_resource_id: ces_toolset_openapi_oauth_config
+    steps:
+      - name: ces_toolset_openapi_oauth_config
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          location: us
+          toolset_id: toolset1
+        test_vars_overrides:
+          location: '"us" + randomSuffix'
+          toolset_id: '"toolset1" + randomSuffix'
+  - name: ces_toolset_openapi_service_agent_id_token_auth_config
+    primary_resource_id: ces_toolset_openapi_service_agent_id_token_auth_config
+    steps:
+      - name: ces_toolset_openapi_service_agent_id_token_auth_config
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          location: us
+          toolset_id: toolset1
+        test_vars_overrides:
+          location: '"us" + randomSuffix'
+          toolset_id: '"toolset1" + randomSuffix'
+  - name: ces_toolset_openapi_api_key_config
+    primary_resource_id: ces_toolset_openapi_api_key_config
+    steps:
+      - name: ces_toolset_openapi_api_key_config
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          location: us
+          toolset_id: toolset1
+        test_vars_overrides:
+          location: '"us" + randomSuffix'
+          toolset_id: '"toolset1" + randomSuffix'
+  - name: ces_toolset_bearer_token_config
+    primary_resource_id: ces_toolset_bearer_token_config
+    steps:
+      - name: ces_toolset_bearer_token_config
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          location: us
+          toolset_id: toolset1
+        test_vars_overrides:
+          location: '"us" + randomSuffix'
+          toolset_id: '"toolset1" + randomSuffix'
+  - name: ces_toolset_mcp_service_account_auth_config
+    primary_resource_id: ces_toolset_mcp_service_account_auth_config
+    steps:
+      - name: ces_toolset_mcp_service_account_auth_config
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          location: us
+          toolset_id: toolset1
+        test_env_vars:
+          service_account: SERVICE_ACCT
+        test_vars_overrides:
+          location: '"us" + randomSuffix'
+          toolset_id: '"toolset1" + randomSuffix'
+  - name: ces_toolset_mcp_oauth_config
+    primary_resource_id: ces_toolset_mcp_oauth_config
+    steps:
+      - name: ces_toolset_mcp_oauth_config
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          location: us
+          toolset_id: toolset1
+        test_vars_overrides:
+          location: '"us" + randomSuffix'
+          toolset_id: '"toolset1" + randomSuffix'
+  - name: ces_toolset_mcp_service_agent_id_token_auth_config
+    primary_resource_id: ces_toolset_mcp_service_agent_id_token_auth_config
+    steps:
+      - name: ces_toolset_mcp_service_agent_id_token_auth_config
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          location: us
+          toolset_id: toolset1
+        test_vars_overrides:
+          location: '"us" + randomSuffix'
+          toolset_id: '"toolset1" + randomSuffix'
+  - name: ces_toolset_mcp_api_key_config
+    primary_resource_id: ces_toolset_mcp_api_key_config
+    steps:
+      - name: ces_toolset_mcp_api_key_config
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          location: us
+          toolset_id: toolset1
+        test_vars_overrides:
+          location: '"us" + randomSuffix'
+          toolset_id: '"toolset1" + randomSuffix'
+  - name: ces_toolset_mcp_bearer_token_config
+    primary_resource_id: ces_toolset_mcp_bearer_token_config
+    steps:
+      - name: ces_toolset_mcp_bearer_token_config
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          location: us
+          toolset_id: toolset1
+        test_vars_overrides:
+          location: '"us" + randomSuffix'
+          toolset_id: '"toolset1" + randomSuffix'
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the
-      resource within its parent collection as described in
-      https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
   - name: app
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the
-      resource within its parent collection as described in
-      https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
@@ -188,8 +181,7 @@ properties:
     description: The description of the toolset.
   - name: displayName
     type: String
-    description: The display name of the toolset. Must be unique within the same
-      app.
+    description: The display name of the toolset. Must be unique within the same app.
   - name: etag
     type: String
     output: true
@@ -200,7 +192,6 @@ properties:
   - name: executionType
     type: String
     description: |2-
-
       Possible values:
       SYNCHRONOUS
       ASYNCHRONOUS
@@ -281,13 +272,11 @@ properties:
                   type: String
               - name: tokenEndpoint
                 type: String
-                description: The token endpoint in the OAuth provider to exchange for an
-                  access token.
+                description: The token endpoint in the OAuth provider to exchange for an access token.
                 required: true
           - name: serviceAccountAuthConfig
             type: NestedObject
-            description: Configurations for authentication using a custom service
-              account.
+            description: Configurations for authentication using a custom service account.
             properties:
               - name: serviceAccount
                 type: String
@@ -471,13 +460,11 @@ properties:
                   type: String
               - name: tokenEndpoint
                 type: String
-                description: The token endpoint in the OAuth provider to exchange for an
-                  access token.
+                description: The token endpoint in the OAuth provider to exchange for an access token.
                 required: true
           - name: serviceAccountAuthConfig
             type: NestedObject
-            description: Configurations for authentication using a custom service
-              account.
+            description: Configurations for authentication using a custom service account.
             properties:
               - name: serviceAccount
                 type: String
@@ -567,11 +554,11 @@ properties:
       - name: customHeaders
         type: KeyValuePairs
         description: |-
-            The custom headers to send in the request to the MCP server. The values
-            must be in the format `$context.variables.<name_of_variable>` and can be
-            set in the session variables. See
-            https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/tool/open-api#openapi-injection
-            for more details.
+          The custom headers to send in the request to the MCP server. The values
+          must be in the format `$context.variables.<name_of_variable>` and can be
+          set in the session variables. See
+          https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/tool/open-api#openapi-injection
+          for more details.
   - name: updateTime
     type: String
     description: Timestamp when the toolset was last updated.

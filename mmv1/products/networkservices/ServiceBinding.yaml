@@ -12,31 +12,26 @@
 # limitations under the License.
 
 ---
-name: 'ServiceBinding'
+name: ServiceBinding
 description: |
   ServiceBinding is the resource that defines a Service Directory Service to be used in a
   BackendService resource.
 references:
   guides:
-  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.serviceBindings'
+  api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.serviceBindings
 docs:
-base_url: 'projects/{{project}}/locations/global/serviceBindings'
-create_url: 'projects/{{project}}/locations/global/serviceBindings?serviceBindingId={{name}}'
+base_url: projects/{{project}}/locations/global/serviceBindings
 immutable: true
+create_url: projects/{{project}}/locations/global/serviceBindings?serviceBindingId={{name}}
 import_format:
-  - 'projects/{{project}}/locations/global/serviceBindings/{{name}}'
-deprecation_message: >-
-  Cloud Service Mesh's integration with Service Directory is going to be deprecated.
-  [Learn more](https://docs.cloud.google.com/service-mesh/docs/service-routing/service-directory-integration-setup).
-  Creating new service binding resources will be disabled.
+  - projects/{{project}}/locations/global/serviceBindings/{{name}}
 timeouts:
   insert_minutes: 10
   update_minutes: 10
   delete_minutes: 10
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
     timeouts:
@@ -45,43 +40,47 @@ async:
       delete_minutes: 10
   result:
     resource_inside_response: false
-custom_code:
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'network_services_service_binding_basic'
+deprecation_message: Cloud Service Mesh's integration with Service Directory is going to be deprecated. [Learn more](https://docs.cloud.google.com/service-mesh/docs/service-routing/service-directory-integration-setup). Creating new service binding resources will be disabled.
+autogen_async: true
+custom_code:
+samples:
+  - name: network_services_service_binding_basic
+    primary_resource_id: default
     exclude_test: true
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-service-binding'
-      namespace_id: 'my-namespace'
-      service_id: 'my-service'
+    steps:
+      - name: network_services_service_binding_basic
+        resource_id_vars:
+          namespace_id: my-namespace
+          resource_name: my-service-binding
+          service_id: my-service
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the ServiceBinding resource.
     url_param_only: true
     required: true
 properties:
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Time the ServiceBinding was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the ServiceBinding was updated in UTC.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Set of label tags associated with the ServiceBinding resource.
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - name: 'service'
+  - name: service
     type: String
     description: |
       The full Service Directory Service name of the format

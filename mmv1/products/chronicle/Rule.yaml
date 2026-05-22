@@ -16,47 +16,51 @@ name: Rule
 description: The Rule resource represents a user-created rule.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.rules'
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.rules
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules
+update_mask: true
+update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
-update_verb: PATCH
-update_mask: true
-autogen_status: UnVsZQ==
-deletion_policy_default: "DEFAULT"
 deletion_policy_custom_docs: true
-examples:
-  - name: 'chronicle_rule_basic'
-    primary_resource_id: example
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    ignore_read_extra:
-      - 'deletion_policy'
-    exclude_import_test: true
-  - name: 'chronicle_rule_with_force_deletion'
-    primary_resource_id: example
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    ignore_read_extra:
-      - 'deletion_policy'
-    exclude_import_test: true
-  - name: 'chronicle_rule_with_data_access_scope'
-    primary_resource_id: example
-    vars:
-      data_access_scope_id: scope-name
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    exclude_import_test: true
-
+deletion_policy_default: DEFAULT
+autogen_status: UnVsZQ==
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/chronicle_rule.go.tmpl'
-
+  pre_delete: templates/terraform/pre_delete/chronicle_rule.go.tmpl
+samples:
+  - name: chronicle_rule_basic
+    primary_resource_id: example
+    steps:
+      - name: chronicle_rule_basic
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+        ignore_read_extra:
+          - deletion_policy
+        exclude_import_test: true
+  - name: chronicle_rule_with_force_deletion
+    primary_resource_id: example
+    steps:
+      - name: chronicle_rule_with_force_deletion
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+        ignore_read_extra:
+          - deletion_policy
+        exclude_import_test: true
+  - name: chronicle_rule_with_data_access_scope
+    primary_resource_id: example
+    steps:
+      - name: chronicle_rule_with_data_access_scope
+        resource_id_vars:
+          data_access_scope_id: scope-name
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+        exclude_import_test: true
 virtual_fields:
-  - name: 'deletion_policy'
+  - name: deletion_policy
     description: |
       Policy to determine if the rule should be deleted forcefully.
       If deletion_policy = "FORCE", any retrohunts and any detections associated with the rule
@@ -75,7 +79,6 @@ virtual_fields:
     type: String
     # excluded from generation due to Universal Deletion Policy
     exclude: true
-
 parameters:
   - name: location
     type: String
@@ -102,9 +105,8 @@ properties:
     output: true
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-    description: |-
-      Rule Id is the ID of the Rule.
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
+    description: Rule Id is the ID of the Rule.
   - name: text
     type: String
     description: |-
@@ -118,7 +120,7 @@ properties:
     output: true
   - name: scope
     type: String
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
     description: |-
       Resource name of the DataAccessScope bound to this rule.
       Populated in BASIC view and FULL view.
@@ -172,7 +174,6 @@ properties:
     type: String
     output: true
     description: |2-
-
       Possible values:
       RULE_TYPE_UNSPECIFIED
       SINGLE_EVENT

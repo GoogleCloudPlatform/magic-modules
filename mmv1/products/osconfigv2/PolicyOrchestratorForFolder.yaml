@@ -15,55 +15,56 @@
 name: PolicyOrchestratorForFolder
 api_resource_type_kind: PolicyOrchestrator
 api_variant_patterns:
-  - 'folders/{folder}/locations/{location}/policyOrchestrators/{policyOrchestrator}'
+  - folders/{folder}/locations/{location}/policyOrchestrators/{policyOrchestrator}
 description: |
   PolicyOrchestrator helps managing project+zone level policy resources (e.g.
   OS Policy Assignments), by providing tools to create, update and delete them
   across projects and locations, at scale.
 base_url: folders/{{folder_id}}/locations/global/policyOrchestrators
-update_mask: true
 self_link: folders/{{folder_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
 create_url: folders/{{folder_id}}/locations/global/policyOrchestrators?policyOrchestratorId={{policy_orchestrator_id}}
+update_mask: true
 update_verb: PATCH
 id_format: folders/{{folder_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
 import_format:
   - folders/{{folder_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
-examples:
-  - name: osconfigv2_policy_orchestrator_for_folder_basic
-    primary_resource_id: policy_orchestrator_for_folder
-    vars:
-      policy_orchestrator_id: po-folder
-      orchestrated_resource_id: test-orchestrated-resource-folder
-      os_policy_id: test-os-policy-folder
-      folder: po-folder
-    test_env_vars:
-      org_id: ORG_ID
-      zone: 'ZONE'
-    external_providers:
-      - "time"
-    min_version: beta
-autogen_async: true
 async:
-  operation:
-    timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
-    base_url: "{{op_id}}"
   actions:
     - create
     - delete
     - update
   type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
   result:
     resource_inside_response: true
   include_project: true
 autogen_status: UG9saWN5T3JjaGVzdHJhdG9yRm9yRm9sZGVy
+autogen_async: true
+samples:
+  - name: osconfigv2_policy_orchestrator_for_folder_basic
+    external_providers:
+      - time
+    min_version: beta
+    primary_resource_id: policy_orchestrator_for_folder
+    steps:
+      - name: osconfigv2_policy_orchestrator_for_folder_basic
+        resource_id_vars:
+          folder: po-folder
+          orchestrated_resource_id: test-orchestrated-resource-folder
+          os_policy_id: test-os-policy-folder
+          policy_orchestrator_id: po-folder
+        test_env_vars:
+          org_id: ORG_ID
+          zone: ZONE
 parameters:
   - name: folderId
     type: String
-    description: |-
-      The parent resource name in the form of `folders/{folder_id}/locations/global`.
+    description: The parent resource name in the form of `folders/{folder_id}/locations/global`.
     immutable: true
     url_param_only: true
     required: true
@@ -177,11 +178,10 @@ properties:
                     Length of the description is limited to 1024 characters.
                 - name: mode
                   type: Enum
-                  description: |-
-                    Policy mode
+                  description: Policy mode
                   enum_values:
-                    - 'VALIDATION'
-                    - 'ENFORCEMENT'
+                    - VALIDATION
+                    - ENFORCEMENT
                   required: true
                 - name: resourceGroups
                   type: Array
@@ -325,11 +325,10 @@ properties:
                                         type: String
                                 - name: desiredState
                                   type: Enum
-                                  description: |-
-                                    The desired state the agent should maintain for this package.
+                                  description: The desired state the agent should maintain for this package.
                                   enum_values:
-                                    - 'INSTALLED'
-                                    - 'REMOVED'
+                                    - INSTALLED
+                                    - REMOVED
                                   required: true
                                 - name: apt
                                   type: NestedObject
@@ -500,11 +499,10 @@ properties:
                                         keyring at `/etc/apt/trusted.gpg.d/osconfig_agent_managed.gpg`.
                                     - name: archiveType
                                       type: Enum
-                                      description: |-
-                                        Type of archive files in this repository.
+                                      description: Type of archive files in this repository.
                                       enum_values:
-                                        - 'DEB'
-                                        - 'DEB_SRC'
+                                        - DEB
+                                        - DEB_SRC
                                       required: true
                                     - name: uri
                                       type: String
@@ -625,12 +623,11 @@ properties:
                                         type: String
                                     - name: interpreter
                                       type: Enum
-                                      description: |-
-                                        The script interpreter to use.
+                                      description: The script interpreter to use.
                                       enum_values:
-                                        - 'NONE'
-                                        - 'SHELL'
-                                        - 'POWERSHELL'
+                                        - NONE
+                                        - SHELL
+                                        - POWERSHELL
                                       required: true
                                     - name: outputFilePath
                                       type: String
@@ -700,12 +697,11 @@ properties:
                                         type: String
                                     - name: interpreter
                                       type: Enum
-                                      description: |-
-                                        The script interpreter to use.
+                                      description: The script interpreter to use.
                                       enum_values:
-                                        - 'NONE'
-                                        - 'SHELL'
-                                        - 'POWERSHELL'
+                                        - NONE
+                                        - SHELL
+                                        - POWERSHELL
                                       required: true
                                     - name: outputFilePath
                                       type: String
@@ -822,12 +818,11 @@ properties:
                                   required: true
                                 - name: state
                                   type: Enum
-                                  description: |-
-                                    Desired state of the file.
+                                  description: Desired state of the file.
                                   enum_values:
-                                    - 'PRESENT'
-                                    - 'ABSENT'
-                                    - 'CONTENTS_MATCH'
+                                    - PRESENT
+                                    - ABSENT
+                                    - CONTENTS_MATCH
                                   required: true
                                 - name: permissions
                                   type: String
@@ -1077,8 +1072,7 @@ properties:
                   properties:
                     - name: type_url
                       type: String
-                      description: |-
-                        A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
+                      description: A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
                       output: true
                     - name: value
                       type: String
@@ -1168,8 +1162,7 @@ properties:
                   properties:
                     - name: type_url
                       type: String
-                      description: |-
-                        A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
+                      description: A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
                       output: true
                     - name: value
                       type: String

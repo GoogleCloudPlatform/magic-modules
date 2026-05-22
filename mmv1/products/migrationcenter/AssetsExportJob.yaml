@@ -21,20 +21,22 @@ create_url: projects/{{project}}/locations/{{location}}/assetsExportJobs?assetsE
 import_format:
   - projects/{{project}}/locations/{{location}}/assetsExportJobs/{{assets_export_job_id}}
 async:
-  operation:
-    base_url: '{{op_id}}'
   actions:
     - create
     - delete
+  operation:
+    base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 autogen_status: QXNzZXRzRXhwb3J0Sm9i
 autogen_async: true
-examples:
-  - name: 'migration_center_assets_export_job_basic'
-    primary_resource_id: 'default'
-    vars:
-      assets_export_job_id: 'assets-export-job-test'
+samples:
+  - name: migration_center_assets_export_job_basic
+    primary_resource_id: default
+    steps:
+      - name: migration_center_assets_export_job_basic
+        resource_id_vars:
+          assets_export_job_id: assets-export-job-test
 parameters:
   - name: location
     type: String

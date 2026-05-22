@@ -34,26 +34,32 @@ async:
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
-  encoder: templates/terraform/encoders/cloudbuild_bitbucketserver_config.go.tmpl
   post_create: templates/terraform/post_create/cloudbuild_bitbucketserver_config.go.tmpl
   pre_update: templates/terraform/pre_update/cloudbuild_bitbucketserver_config.go.tmpl
   post_update: templates/terraform/post_update/cloudbuild_bitbucketserver_config.go.tmpl
-examples:
+  encoder: templates/terraform/encoders/cloudbuild_bitbucketserver_config.go.tmpl
+samples:
   - name: cloudbuild_bitbucket_server_config
     primary_resource_id: bbs-config
-    vars:
-      config_id: bbs-config
+    steps:
+      - name: cloudbuild_bitbucket_server_config
+        resource_id_vars:
+          config_id: bbs-config
   - name: cloudbuild_bitbucket_server_config_repositories
     primary_resource_id: bbs-config-with-repos
     exclude_test: true
-    vars:
-      config_id: bbs-config
+    steps:
+      - name: cloudbuild_bitbucket_server_config_repositories
+        resource_id_vars:
+          config_id: bbs-config
   - name: cloudbuild_bitbucket_server_config_peered_network
     primary_resource_id: bbs-config-with-peered-network
-    vars:
-      config_id: bbs-config
-      global_address_name: private-ip-alloc
-      network_name: vpc-network
+    steps:
+      - name: cloudbuild_bitbucket_server_config_peered_network
+        resource_id_vars:
+          config_id: bbs-config
+          global_address_name: private-ip-alloc
+          network_name: vpc-network
 parameters:
   - name: config_id
     type: String

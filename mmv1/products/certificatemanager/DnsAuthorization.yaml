@@ -12,57 +12,59 @@
 # limitations under the License.
 
 ---
-name: 'DnsAuthorization'
+name: DnsAuthorization
 description: |
   DnsAuthorization represents a HTTP-reachable backend for a DnsAuthorization.
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations'
-self_link: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations?dnsAuthorizationId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/dnsAuthorizations
+self_link: projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/dnsAuthorizations?dnsAuthorizationId={{name}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}'
+  - projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: global
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
 schema_version: 1
 state_upgraders: true
-sweeper:
-  url_substitutions:
-    - region: "us-central1"
-    - region: "global"
+autogen_async: true
 include_in_tgc_next: true
-examples:
-  - name: 'certificate_manager_dns_authorization_basic'
-    primary_resource_id: 'default'
-    vars:
-      dns_auth_name: 'dns-auth'
-      zone_name: 'my-zone'
-      subdomain: 'subdomain'
-    test_vars_overrides:
-      # for backward compatible
-      subdomain: '"subdomain" + randomSuffix'
-  - name: 'certificate_manager_dns_authorization_regional'
-    primary_resource_id: 'default'
-    vars:
-      dns_auth_name: 'dns-auth'
-      zone_name: 'my-zone'
-      subdomain: 'subdomain'
-    test_vars_overrides:
-      # for backward compatible
-      subdomain: '"subdomain" + randomSuffix'
+samples:
+  - name: certificate_manager_dns_authorization_basic
+    primary_resource_id: default
+    steps:
+      - name: certificate_manager_dns_authorization_basic
+        resource_id_vars:
+          dns_auth_name: dns-auth
+          subdomain: subdomain
+          zone_name: my-zone
+        test_vars_overrides:
+          subdomain: '"subdomain" + randomSuffix'
+  - name: certificate_manager_dns_authorization_regional
+    primary_resource_id: default
+    steps:
+      - name: certificate_manager_dns_authorization_regional
+        resource_id_vars:
+          dns_auth_name: dns-auth
+          subdomain: subdomain
+          zone_name: my-zone
+        test_vars_overrides:
+          subdomain: '"subdomain" + randomSuffix'
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource; provided by the client when the resource is created.
@@ -71,23 +73,22 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The Certificate Manager location. If not specified, "global" is used.
     url_param_only: true
     immutable: true
-    default_value: "global"
+    default_value: global
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A human-readable description of the resource.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description:
-      'Set of label tags associated with the DNS Authorization resource.'
-  - name: 'domain'
+    description: Set of label tags associated with the DNS Authorization resource.
+  - name: domain
     type: String
     description: |
       A domain which is being authorized. A DnsAuthorization resource covers a
@@ -95,7 +96,7 @@ properties:
       be used to issue certificates for "example.com" and "*.example.com".
     required: true
     immutable: true
-  - name: 'type'
+  - name: type
     type: Enum
     description: |
       type of DNS authorization. If unset during the resource creation, FIXED_RECORD will
@@ -109,9 +110,9 @@ properties:
     immutable: true
     default_from_api: true
     enum_values:
-      - 'FIXED_RECORD'
-      - 'PER_PROJECT_RECORD'
-  - name: 'dnsResourceRecord'
+      - FIXED_RECORD
+      - PER_PROJECT_RECORD
+  - name: dnsResourceRecord
     type: NestedObject
     description: |
       The structure describing the DNS Resource Record that needs to be added
@@ -119,18 +120,18 @@ properties:
       certificate.
     output: true
     properties:
-      - name: 'name'
+      - name: name
         type: String
         description: |
           Fully qualified name of the DNS Resource Record.
           E.g. `_acme-challenge.example.com`.
         output: true
-      - name: 'type'
+      - name: type
         type: String
         description: |
           Type of the DNS Resource Record.
         output: true
-      - name: 'data'
+      - name: data
         type: String
         description: |
           Data of the DNS Resource Record.

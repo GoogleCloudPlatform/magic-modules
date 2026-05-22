@@ -12,37 +12,21 @@
 # limitations under the License.
 
 ---
-name: 'IngressPolicy'
+name: IngressPolicy
 api_resource_type_kind: ServicePerimeter
 description: |
   This resource has been deprecated, please refer to ServicePerimeterIngressPolicy.
 references:
   guides:
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#ingresspolicy'
+  api: https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#ingresspolicy
 docs:
-id_format: '{{ingress_policy_name}}/{{resource}}'
-base_url: ''
+base_url: ""
+immutable: true
 self_link: '{{ingress_policy_name}}'
 create_url: '{{ingress_policy_name}}'
-create_verb: 'PATCH'
 update_mask: true
-delete_verb: 'PATCH'
-immutable: true
-mutex: '{{access_policy_id}}'
-import_format:
-  - '{{ingress_policy_name}}/{{resource}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
+create_verb: PATCH
+delete_verb: PATCH
 identity:
   - resource
 nested_query:
@@ -51,30 +35,46 @@ nested_query:
     - resources
   is_list_of_ids: true
   modify_by_patch: true
-custom_code:
-  encoder: 'templates/terraform/encoders/access_context_manager_ingress_policy.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
-exclude_tgc: true
+id_format: '{{ingress_policy_name}}/{{resource}}'
+import_format:
+  - '{{ingress_policy_name}}/{{resource}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+mutex: '{{access_policy_id}}'
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter/IngressPolicy
 exclude_sweeper: true
+async:
+  actions: [create, delete, update]
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+autogen_async: true
+exclude_tgc: true
+custom_code:
+  custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl
+  encoder: templates/terraform/encoders/access_context_manager_ingress_policy.go.tmpl
 parameters:
-  - name: 'ingressPolicyName'
+  - name: ingressPolicyName
     type: ResourceRef
     description: |
       The name of the Service Perimeter to add this resource to.
     url_param_only: true
     required: true
     immutable: true
-    resource: 'ServicePerimeter'
-    imports: 'name'
+    resource: ServicePerimeter
+    imports: name
 properties:
-  - name: 'resource'
+  - name: resource
     type: String
     description: |
       A GCP resource that is inside of the service perimeter.
     required: true
     immutable: true
-  - name: 'accessPolicyId'
+  - name: accessPolicyId
     type: String
     description: |
       The name of the Access Policy this resource belongs to.

@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'Firewall'
-kind: 'compute#firewall'
+name: Firewall
 description: |
   Each network has its own firewall controlling access to and from the
   instances.
@@ -29,55 +28,60 @@ description: |
   you need.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/vpc/docs/firewalls'
-  api: 'https://cloud.google.com/compute/docs/reference/v1/firewalls'
+    Official Documentation: https://cloud.google.com/vpc/docs/firewalls
+  api: https://cloud.google.com/compute/docs/reference/v1/firewalls
 docs:
   optional_properties: |
     * `enable_logging` - (Optional, Deprecated) This field denotes whether to enable logging for a particular firewall rule.
     If logging is enabled, logs will be exported to Stackdriver. Deprecated in favor of `log_config`
-base_url: 'projects/{{project}}/global/firewalls'
+base_url: projects/{{project}}/global/firewalls
 has_self_link: true
-update_verb: 'PATCH'
+update_verb: PATCH
+collection_url_key: items
+kind: compute#firewall
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_diff:
+  - resourceComputeFirewallEnableLoggingCustomizeDiff
+  - resourceComputeFirewallSourceFieldsCustomizeDiff
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
+schema_version: 1
+migrate_state: resourceComputeFirewallMigrateState
 include_in_tgc_next: true
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/firewall.tmpl'
-  constants: 'templates/terraform/constants/firewall.tmpl'
-custom_diff:
-  - 'resourceComputeFirewallEnableLoggingCustomizeDiff'
-  - 'resourceComputeFirewallSourceFieldsCustomizeDiff'
-schema_version: 1
-migrate_state: 'resourceComputeFirewallMigrateState'
-examples:
-  - name: 'firewall_basic'
-    primary_resource_id: 'default'
-    vars:
-      firewall_name: 'test-firewall'
-      network_name: 'test-network'
-  - name: 'firewall_with_target_tags'
-    primary_resource_id: 'rules'
-    vars:
-      firewall_name: 'my-firewall-rule'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+  constants: templates/terraform/constants/firewall.tmpl
+  extra_schema_entry: templates/terraform/extra_schema_entry/firewall.tmpl
+samples:
+  - name: firewall_basic
+    primary_resource_id: default
+    steps:
+      - name: firewall_basic
+        resource_id_vars:
+          firewall_name: test-firewall
+          network_name: test-network
+  - name: firewall_with_target_tags
+    primary_resource_id: rules
+    steps:
+      - name: firewall_with_target_tags
+        resource_id_vars:
+          firewall_name: my-firewall-rule
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
 properties:
   # TODO: [nice to have] Make the format here simpler to use, in
   # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
   # function to the # final JSON format expected by the API for this
   # proposal to work.
-  - name: 'allow'
+  - name: allow
     type: Array
     description: |
       The list of ALLOW rules specified by this firewall. Each rule
@@ -86,15 +90,15 @@ properties:
     api_name: allowed
     is_set: true
     exactly_one_of:
-      - 'allow'
-      - 'deny'
-    set_hash_func: 'resourceComputeFirewallRuleHash'
+      - allow
+      - deny
+    set_hash_func: resourceComputeFirewallRuleHash
     item_type:
       type: NestedObject
       properties:
         # IPProtocol has to be string, instead of Enum because user can
         # specify the protocol by number as well.
-        - name: 'protocol'
+        - name: protocol
           type: String
           description: |
             The IP protocol to which this rule applies. The protocol type is
@@ -103,8 +107,8 @@ properties:
             icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
           api_name: IPProtocol
           required: true
-          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-        - name: 'ports'
+          diff_suppress_func: tpgresource.CaseDiffSuppress
+        - name: ports
           type: Array
           description: |
             An optional list of ports to which this rule applies. This field
@@ -116,11 +120,11 @@ properties:
             ["12345-12349"].
           item_type:
             type: String
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'deny'
+  - name: deny
     type: Array
     description: |
       The list of DENY rules specified by this firewall. Each rule specifies
@@ -128,15 +132,15 @@ properties:
     api_name: denied
     is_set: true
     exactly_one_of:
-      - 'allow'
-      - 'deny'
-    set_hash_func: 'resourceComputeFirewallRuleHash'
+      - allow
+      - deny
+    set_hash_func: resourceComputeFirewallRuleHash
     item_type:
       type: NestedObject
       properties:
         # IPProtocol has to be string, instead of Enum because user can
         # specify the protocol by number as well.
-        - name: 'protocol'
+        - name: protocol
           type: String
           description: |
             The IP protocol to which this rule applies. The protocol type is
@@ -145,8 +149,8 @@ properties:
             icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
           api_name: IPProtocol
           required: true
-          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-        - name: 'ports'
+          diff_suppress_func: tpgresource.CaseDiffSuppress
+        - name: ports
           type: Array
           description: |
             An optional list of ports to which this rule applies. This field
@@ -158,13 +162,13 @@ properties:
             ["12345-12349"].
           item_type:
             type: String
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
     send_empty_value: true
-  - name: 'destinationRanges'
+  - name: destinationRanges
     type: Array
     description: |
       If destination ranges are specified, the firewall will apply only to
@@ -174,7 +178,7 @@ properties:
     default_from_api: true
     item_type:
       type: String
-  - name: 'direction'
+  - name: direction
     type: Enum
     description: |
       Direction of traffic to which this firewall applies; default is
@@ -183,9 +187,9 @@ properties:
     immutable: true
     default_from_api: true
     enum_values:
-      - 'INGRESS'
-      - 'EGRESS'
-  - name: 'disabled'
+      - INGRESS
+      - EGRESS
+  - name: disabled
     type: Boolean
     description: |
       Denotes whether the firewall rule is disabled, i.e not applied to the
@@ -193,25 +197,25 @@ properties:
       not enforced and the network behaves as if it did not exist. If this
       is unspecified, the firewall rule will be enabled.
     send_empty_value: true
-  - name: 'logConfig'
+  - name: logConfig
     type: NestedObject
     description: |
       This field denotes the logging options for a particular firewall rule.
       If defined, logging is enabled, and logs will be exported to Cloud Logging.
     send_empty_value: true
-    diff_suppress_func: 'diffSuppressEnableLogging'
-    custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/firewall_log_config.go.tmpl'
+    diff_suppress_func: diffSuppressEnableLogging
+    custom_flatten: templates/terraform/custom_flatten/firewall_log_config.go.tmpl
+    custom_expand: templates/terraform/custom_expand/firewall_log_config.go.tmpl
     properties:
-      - name: 'metadata'
+      - name: metadata
         type: Enum
         description: |
           This field denotes whether to include or exclude metadata for firewall logs.
         required: true
         enum_values:
-          - 'EXCLUDE_ALL_METADATA'
-          - 'INCLUDE_ALL_METADATA'
-  - name: 'name'
+          - EXCLUDE_ALL_METADATA
+          - INCLUDE_ALL_METADATA
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -224,16 +228,16 @@ properties:
     required: true
     immutable: true
     validation:
-      function: 'verify.ValidateGCEName'
-  - name: 'network'
+      function: verify.ValidateGCEName
+  - name: network
     type: ResourceRef
     description: |
       The name or self_link of the network to attach this firewall to.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Network'
-    imports: 'selfLink'
-  - name: 'priority'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Network
+    imports: selfLink
+  - name: priority
     type: Integer
     description: |
       Priority for this rule. This is an integer between 0 and 65535, both
@@ -244,9 +248,9 @@ properties:
       precedence over ALLOW rules having equal priority.
     send_empty_value: true
     validation:
-      function: 'validation.IntBetween(0, 65535)'
+      function: validation.IntBetween(0, 65535)
     default_value: 1000
-  - name: 'sourceRanges'
+  - name: sourceRanges
     type: Array
     description: |
       If source ranges are specified, the firewall will apply only to
@@ -259,11 +263,11 @@ properties:
       apply. IPv4 or IPv6 ranges are supported. For INGRESS traffic, one of
       `source_ranges`, `source_tags` or `source_service_accounts` is required.
     is_set: true
-    diff_suppress_func: 'diffSuppressSourceRanges'
+    diff_suppress_func: diffSuppressSourceRanges
     set_hash_func: tpgresource.IpAddrSetHashFunc
     item_type:
       type: String
-  - name: 'sourceServiceAccounts'
+  - name: sourceServiceAccounts
     type: Array
     description: |
       If source service accounts are specified, the firewall will apply only
@@ -285,7 +289,7 @@ properties:
     item_type:
       type: String
     max_size: 10
-  - name: 'sourceTags'
+  - name: sourceTags
     type: Array
     description: |
       If source tags are specified, the firewall will apply only to traffic
@@ -304,7 +308,7 @@ properties:
       - target_service_accounts
     item_type:
       type: String
-  - name: 'targetServiceAccounts'
+  - name: targetServiceAccounts
     type: Array
     description: |
       A list of service accounts indicating sets of instances located in the
@@ -320,7 +324,7 @@ properties:
     item_type:
       type: String
     max_size: 10
-  - name: 'targetTags'
+  - name: targetTags
     type: Array
     description: |
       A list of instance tags indicating sets of instances located in the
@@ -333,14 +337,14 @@ properties:
       - target_service_accounts
     item_type:
       type: String
-  - name: 'params'
+  - name: params
     type: NestedObject
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
-      - name: 'resourceManagerTags'
+      - name: resourceManagerTags
         type: KeyValuePairs
         description: |
           Resource manager tags to be bound to the firewall. Tag keys and values have the

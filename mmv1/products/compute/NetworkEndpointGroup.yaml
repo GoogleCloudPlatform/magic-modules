@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'NetworkEndpointGroup'
-kind: 'compute#networkEndpointGroup'
+name: NetworkEndpointGroup
 description: |
   Network endpoint groups (NEGs) are zonal resources that represent
   collections of IP address and port combinations for GCP resources within a
@@ -31,55 +30,60 @@ description: |
   to avoid this type of error.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
+    Official Documentation: https://cloud.google.com/load-balancing/docs/negs/
+  api: https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups
 docs:
-base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups'
-has_self_link: true
+base_url: projects/{{project}}/zones/{{zone}}/networkEndpointGroups
 immutable: true
+has_self_link: true
+collection_url_key: items
+kind: compute#networkEndpointGroup
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  url_substitutions:
+    - zone: us-central1-a
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
-custom_code:
-  constants: 'templates/terraform/constants/compute_network_endpoint_group.go.tmpl'
-sweeper:
-  url_substitutions:
-    - zone: "us-central1-a"
 include_in_tgc_next: true
-examples:
-  - name: 'network_endpoint_group'
-    primary_resource_id: 'neg'
-    vars:
-      neg_name: 'my-lb-neg'
-      network_name: 'neg-network'
-      subnetwork_name: 'neg-subnetwork'
-  - name: 'network_endpoint_group_non_gcp'
-    primary_resource_id: 'neg'
-    vars:
-      neg_name: 'my-lb-neg'
-      network_name: 'neg-network'
+custom_code:
+  constants: templates/terraform/constants/compute_network_endpoint_group.go.tmpl
+samples:
+  - name: network_endpoint_group
+    primary_resource_id: neg
+    steps:
+      - name: network_endpoint_group
+        resource_id_vars:
+          neg_name: my-lb-neg
+          network_name: neg-network
+          subnetwork_name: neg-subnetwork
+  - name: network_endpoint_group_non_gcp
+    primary_resource_id: neg
+    steps:
+      - name: network_endpoint_group_non_gcp
+        resource_id_vars:
+          neg_name: my-lb-neg
+          network_name: neg-network
 parameters:
-  - name: 'zone'
+  - name: zone
     type: ResourceRef
     description: |
       Zone where the network endpoint group is located.
     required: false
     ignore_read: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Zone'
-    imports: 'name'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Zone
+    imports: name
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource; provided by the client when the resource is
@@ -91,13 +95,13 @@ properties:
       character, which cannot be a dash.
     required: true
     validation:
-      function: 'verify.ValidateGCEName'
-  - name: 'description'
+      function: verify.ValidateGCEName
+  - name: description
     type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - name: 'networkEndpointType'
+  - name: networkEndpointType
     type: Enum
     description: |
       Type of network endpoints in this network endpoint group.
@@ -109,45 +113,45 @@ properties:
       CONNECTION balancing modes.
 
       Possible values include: GCE_VM_IP, GCE_VM_IP_PORT, NON_GCP_PRIVATE_IP_PORT, INTERNET_IP_PORT, INTERNET_FQDN_PORT, SERVERLESS, and PRIVATE_SERVICE_CONNECT.
-    default_value: "GCE_VM_IP_PORT"
+    default_value: GCE_VM_IP_PORT
     enum_values:
-      - 'GCE_VM_IP'
-      - 'GCE_VM_IP_PORT'
-      - 'NON_GCP_PRIVATE_IP_PORT'
-      - 'INTERNET_IP_PORT'
-      - 'INTERNET_FQDN_PORT'
-      - 'SERVERLESS'
-      - 'PRIVATE_SERVICE_CONNECT'
-      - 'GCE_VM_IP_DEDICATED_BACKEND'
-  - name: 'size'
+      - GCE_VM_IP
+      - GCE_VM_IP_PORT
+      - NON_GCP_PRIVATE_IP_PORT
+      - INTERNET_IP_PORT
+      - INTERNET_FQDN_PORT
+      - SERVERLESS
+      - PRIVATE_SERVICE_CONNECT
+      - GCE_VM_IP_DEDICATED_BACKEND
+  - name: size
     type: Integer
     description: Number of network endpoints in the network endpoint group.
     output: true
-  - name: 'network'
+  - name: network
     type: ResourceRef
     description: |
       The network to which all network endpoints in the NEG belong.
       Uses "default" project network if unspecified.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Network'
-    imports: 'selfLink'
-  - name: 'subnetwork'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Network
+    imports: selfLink
+  - name: subnetwork
     type: ResourceRef
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
-    diff_suppress_func: 'compareOptionalSubnet'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Subnetwork'
-    imports: 'selfLink'
-  - name: 'defaultPort'
+    diff_suppress_func: compareOptionalSubnet
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Subnetwork
+    imports: selfLink
+  - name: defaultPort
     type: Integer
     description: |
       The default port used if the port number is not specified in the
       network endpoint.
-  - name: 'generated_id'
+  - name: generated_id
     type: Integer
-    api_name: 'id'
+    api_name: id
     output: true
     description: |
       The uniquely generated identifier for the resource. This identifier is defined by the server.

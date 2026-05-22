@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'AccessPolicy'
+name: AccessPolicy
 description: |
   AccessPolicy is a container for AccessLevels (which define the necessary
   attributes to use GCP services) and ServicePerimeters (which define
@@ -21,8 +21,8 @@ description: |
   restrictions it specifies apply to all projects within an organization.
 references:
   guides:
-    'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies'
+    Access Policy Quickstart: https://cloud.google.com/access-context-manager/docs/quickstart
+  api: https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies
 docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
@@ -30,62 +30,66 @@ docs:
     in the provider configuration. Otherwise the ACM API will return a 403 error.
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-id_format: '{{name}}'
-base_url: 'accessPolicies'
-self_link: 'accessPolicies/{{name}}'
-cai_asset_name_format: 'accessPolicies/{{name}}'
-update_verb: 'PATCH'
+base_url: accessPolicies
+self_link: accessPolicies/{{name}}
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  allowed_iam_role: roles/accesscontextmanager.policyAdmin
+  parent_resource_attribute: name
+  import_format:
+    - accessPolicies/{{name}}
+    - '{{name}}'
+  fetch_iam_policy_verb: POST
+  method_name_separator: ':'
+id_format: '{{name}}'
 import_format:
   - '{{name}}'
-mutex: 'accessPolicies/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+mutex: accessPolicies/{{name}}
+# Skipping the sweeper due to the non-standard base_url
+exclude_sweeper: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-iam_policy:
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  allowed_iam_role: 'roles/accesscontextmanager.policyAdmin'
-  parent_resource_attribute: 'name'
-  import_format:
-    - 'accessPolicies/{{name}}'
-    - '{{name}}'
-# Skipping the sweeper due to the non-standard base_url
-exclude_sweeper: true
-examples:
-  - name: 'access_context_manager_access_policy_basic'
-    primary_resource_id: 'access-policy'
+autogen_async: true
+cai_asset_name_format: accessPolicies/{{name}}
+samples:
+  - name: access_context_manager_access_policy_basic
+    primary_resource_id: access-policy
     exclude_test: true
-  - name: 'access_context_manager_access_policy_scoped'
-    primary_resource_id: 'access-policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
+    steps:
+      - name: access_context_manager_access_policy_basic
+  - name: access_context_manager_access_policy_scoped
+    primary_resource_id: access-policy
     exclude_test: true
-    exclude_import_test: true
+    steps:
+      - name: access_context_manager_access_policy_scoped
+        test_env_vars:
+          org_id: ORG_ID
+          project: PROJECT_NAME
+        exclude_import_test: true
 parameters:
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The parent of this AccessPolicy in the Cloud Resource Hierarchy.
       Format: 'organizations/{{organization_id}}'
     required: true
     immutable: true
-  - name: 'title'
+  - name: title
     type: String
     description: |
       Human readable title. Does not affect behavior.
     required: true
-  - name: 'scopes'
+  - name: scopes
     type: Array
     description: |
       Folder or project on which this policy is applicable.
@@ -95,18 +99,18 @@ parameters:
       type: String
     max_size: 1
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Resource name of the AccessPolicy. Format: '{{policy_id}}'
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'createTime'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: createTime
     type: Time
     description: |
       Time the AccessPolicy was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the AccessPolicy was updated in UTC.

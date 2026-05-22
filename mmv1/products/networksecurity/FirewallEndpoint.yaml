@@ -12,17 +12,16 @@
 # limitations under the License.
 
 ---
-name: 'FirewallEndpoint'
-include_in_tgc_next: true
+name: FirewallEndpoint
 description: |
   A Firewall endpoint is a Cloud Firewall resource that enables
   layer 7 advanced protection capabilities, such as intrusion prevention,
   in your network.
 references:
   guides:
-    'Firewall endpoint overview': 'https://cloud.google.com/firewall/docs/about-firewall-endpoints'
-    'Create and associate firewall endpoints': 'https://cloud.google.com/firewall/docs/configure-firewall-endpoints'
-  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/organizations.locations.firewallEndpoints'
+    Firewall endpoint overview: https://cloud.google.com/firewall/docs/about-firewall-endpoints
+    Create and associate firewall endpoints: https://cloud.google.com/firewall/docs/configure-firewall-endpoints
+  api: https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/organizations.locations.firewallEndpoints
 docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
@@ -33,58 +32,61 @@ docs:
 base_url: '{{parent}}/locations/{{location}}/firewallEndpoints'
 self_link: '{{parent}}/locations/{{location}}/firewallEndpoints/{{name}}'
 create_url: '{{parent}}/locations/{{location}}/firewallEndpoints?firewallEndpointId={{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
 import_format:
   - '{{%parent}}/locations/{{location}}/firewallEndpoints/{{name}}'
 timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
   include_project: true
+autogen_async: true
+include_in_tgc_next: true
 custom_code:
-examples:
-  - name: 'network_security_firewall_endpoint_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-firewall-endpoint'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
-    # update tests will take care of create and update. Firewall endpoint creation is too long.
+samples:
+  - name: network_security_firewall_endpoint_basic
+    primary_resource_id: default
     exclude_test: true
-  - name: 'network_security_firewall_endpoint_project'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-firewall-endpoint'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    # update tests will take care of create and update. Firewall endpoint creation is too long.
+    steps:
+      - name: network_security_firewall_endpoint_basic
+        resource_id_vars:
+          resource_name: my-firewall-endpoint
+        test_env_vars:
+          org_id: ORG_ID
+          project: PROJECT_NAME
+  - name: network_security_firewall_endpoint_project
+    primary_resource_id: default
     exclude_test: true
+    steps:
+      - name: network_security_firewall_endpoint_project
+        resource_id_vars:
+          resource_name: my-firewall-endpoint
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the firewall endpoint resource.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location (zone) of the firewall endpoint.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The name of the parent this firewall endpoint belongs to.
@@ -93,29 +95,29 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       A map of key/value label pairs to assign to the resource.
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: |
       Server-defined URL of this resource.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: Time the firewall endpoint was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: Time the firewall endpoint was updated in UTC.
     output: true
-  - name: 'reconciling'
+  - name: reconciling
     type: Boolean
     description: |
       Whether reconciling is in progress, recommended per https://google.aip.dev/128.
     output: true
-  - name: 'associatedNetworks'
+  - name: associatedNetworks
     type: Array
     description: |
       List of networks that are associated with this endpoint in the local zone.
@@ -125,11 +127,11 @@ properties:
     output: true
     item_type:
       type: String
-  - name: 'state'
+  - name: state
     type: String
     description: The current state of the endpoint.
     output: true
-  - name: 'billingProjectId'
+  - name: billingProjectId
     type: String
     description: |
       Project to charge for the deployed firewall endpoint.
@@ -137,12 +139,12 @@ properties:
       For project-scoped endpoints, it is optional but must match the
       endpoint's project if specified.
     default_from_api: true
-  - name: 'endpointSettings'
+  - name: endpointSettings
     type: NestedObject
     description: |
       Settings for the endpoint.
     properties:
-      - name: 'jumboFramesEnabled'
+      - name: jumboFramesEnabled
         type: Boolean
         send_empty_value: true
         immutable: true

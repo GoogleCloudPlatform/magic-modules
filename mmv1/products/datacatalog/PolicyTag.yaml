@@ -12,49 +12,51 @@
 # limitations under the License.
 
 ---
-name: 'PolicyTag'
+name: PolicyTag
 description: |
   Denotes one policy tag in a taxonomy.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/data-catalog/docs'
-  api: 'https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies.policyTags'
+    Official Documentation: https://cloud.google.com/data-catalog/docs
+  api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies.policyTags
 docs:
 base_url: '{{taxonomy}}/policyTags'
 self_link: '{{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  base_url: '{{%policy_tag}}'
+  parent_resource_attribute: policy_tag
+  import_format:
+    - '{{%policy_tag}}'
+  exclude_import_test: true
+  fetch_iam_policy_verb: POST
+  method_name_separator: ':'
 import_format:
   - '{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-iam_policy:
-  exclude_import_test: true
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'policy_tag'
-  base_url: '{{%policy_tag}}'
-  import_format:
-    - '{{%policy_tag}}'
-custom_code:
-  custom_import: 'templates/terraform/custom_import/extract_taxonomy.go.tmpl'
 # exluding resource_identity due to custom_import
 exclude_identity_generation: true
-examples:
-  - name: 'data_catalog_taxonomies_policy_tag_basic'
-    primary_resource_id: 'basic_policy_tag'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_policy_tag%s", context["random_suffix"])'
-    vars:
-      taxonomy_display_name: 'taxonomy_display_name'
-  - name: 'data_catalog_taxonomies_policy_tag_child_policies'
-    primary_resource_id: 'child_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_child_tag%s", context["random_suffix"])'
-    vars:
-      taxonomy_display_name: 'taxonomy_display_name'
+custom_code:
+  custom_import: templates/terraform/custom_import/extract_taxonomy.go.tmpl
+samples:
+  - name: data_catalog_taxonomies_policy_tag_basic
+    primary_resource_id: basic_policy_tag
+    steps:
+      - name: data_catalog_taxonomies_policy_tag_basic
+        resource_id_vars:
+          taxonomy_display_name: taxonomy_display_name
+  - name: data_catalog_taxonomies_policy_tag_child_policies
+    primary_resource_id: child_policy
+    steps:
+      - name: data_catalog_taxonomies_policy_tag_child_policies
+        resource_id_vars:
+          taxonomy_display_name: taxonomy_display_name
 parameters:
-  - name: 'taxonomy'
+  - name: taxonomy
     type: String
     description: |
       Taxonomy the policy tag is associated with
@@ -62,33 +64,33 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Resource name of this policy tag, whose format is:
       "projects/{project}/locations/{region}/taxonomies/{taxonomy}/policyTags/{policytag}"
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       User defined name of this policy tag. It must: be unique within the parent
       taxonomy; contain only unicode letters, numbers, underscores, dashes and spaces;
       not start or end with spaces; and be at most 200 bytes long when encoded in UTF-8.
     required: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description of this policy tag. It must: contain only unicode characters, tabs,
       newlines, carriage returns and page breaks; and be at most 2000 bytes long when
       encoded in UTF-8. If not set, defaults to an empty description.
       If not set, defaults to an empty description.
-  - name: 'parentPolicyTag'
+  - name: parentPolicyTag
     type: String
     description: |
       Resource name of this policy tag's parent policy tag.
       If empty, it means this policy tag is a top level policy tag.
       If not set, defaults to an empty string.
-  - name: 'childPolicyTags'
+  - name: childPolicyTags
     type: Array
     description: |
       Resource names of child policy tags of this policy tag.

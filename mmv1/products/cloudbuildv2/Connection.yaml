@@ -24,11 +24,11 @@ self_link: projects/{{project}}/locations/{{location}}/connections/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{name}}
 update_verb: PATCH
 iam_policy:
-  exclude_import_test: true
-  method_name_separator: ':'
   allowed_iam_role: roles/cloudbuild.connectionViewer
   parent_resource_attribute: name
   custom_import_state_id_funcs: ""
+  exclude_import_test: true
+  method_name_separator: ':'
 import_format:
   - projects/{{project}}/locations/{{location}}/connections/{{name}}
   - '{{name}}'
@@ -43,17 +43,23 @@ legacy_long_form_project: true
 autogen_async: true
 exclude_tgc: true
 include_in_tgc_next: true
-examples:
+samples:
   - name: cloudbuildv2_connection
     primary_resource_id: my-connection
-    vars:
-      connection_name: tf-test-connection
+    steps:
+      - name: cloudbuildv2_connection
+        resource_id_vars:
+          connection_name: tf-test-connection
   - name: cloudbuildv2_connection_ghe
     primary_resource_id: ""
     exclude_test: true
+    steps:
+      - name: cloudbuildv2_connection_ghe
   - name: cloudbuildv2_connection_github
     primary_resource_id: ""
     exclude_test: true
+    steps:
+      - name: cloudbuildv2_connection_github
 parameters:
   - name: name
     type: String

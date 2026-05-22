@@ -28,35 +28,39 @@ sweeper:
   url_substitutions:
     - zone: us-central1-c
 async:
-  operation:
-    base_url: '{{op_id}}'
   actions:
     - create
     - delete
+  operation:
+    base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 autogen_async: true
-examples:
+samples:
   - name: tpu_v2_queued_resource_basic
-    primary_resource_id: qr
-    min_version: beta
-    vars:
-      qr_name: test-qr
-      tpu_name: test-tpu
-    test_env_vars:
-      project: PROJECT_NAME
     skip_vcr: true
+    min_version: beta
+    primary_resource_id: qr
+    steps:
+      - name: tpu_v2_queued_resource_basic
+        resource_id_vars:
+          qr_name: test-qr
+          tpu_name: test-tpu
+        test_env_vars:
+          project: PROJECT_NAME
   - name: tpu_v2_queued_resource_full
-    primary_resource_id: qr
-    min_version: beta
-    vars:
-      network_name: tpu-net
-      qr_name: test-qr
-      subnet_name: tpu-subnet
-      tpu_name: test-tpu
-    test_env_vars:
-      project: PROJECT_NAME
     skip_vcr: true
+    min_version: beta
+    primary_resource_id: qr
+    steps:
+      - name: tpu_v2_queued_resource_full
+        resource_id_vars:
+          network_name: tpu-net
+          qr_name: test-qr
+          subnet_name: tpu-subnet
+          tpu_name: test-tpu
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: zone
     type: String

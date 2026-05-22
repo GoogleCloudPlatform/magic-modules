@@ -12,58 +12,59 @@
 # limitations under the License.
 
 ---
-name: 'InterceptDeployment'
+name: InterceptDeployment
 description: |-
   A deployment represents a zonal intercept backend ready to accept
   GENEVE-encapsulated traffic, e.g. a zonal instance group fronted by an
   internal passthrough load balancer. Deployments are always part of a
   global deployment group which represents a global intercept service.
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/interceptDeployments/{{intercept_deployment_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/interceptDeployments'
-self_link: 'projects/{{project}}/locations/{{location}}/interceptDeployments/{{intercept_deployment_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/interceptDeployments?interceptDeploymentId={{intercept_deployment_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/interceptDeployments
+self_link: projects/{{project}}/locations/{{location}}/interceptDeployments/{{intercept_deployment_id}}
+create_url: projects/{{project}}/locations/{{location}}/interceptDeployments?interceptDeploymentId={{intercept_deployment_id}}
 update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/interceptDeployments/{{intercept_deployment_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/interceptDeployments/{{intercept_deployment_id}}'
+  - projects/{{project}}/locations/{{location}}/interceptDeployments/{{intercept_deployment_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+sweeper:
+  url_substitutions:
+    - region: us-central1-a
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+autogen_async: true
 custom_code:
-sweeper:
-  url_substitutions:
-    - region: "us-central1-a"
-examples:
-  - name: 'network_security_intercept_deployment_basic'
-    config_path: 'templates/terraform/examples/network_security_intercept_deployment_basic.tf.tmpl'
-    primary_resource_id: 'default'
-    vars:
-      network_name: 'example-network'
-      subnetwork_name: 'example-subnet'
-      health_check_name: 'example-hc'
-      backend_service_name: 'example-bs'
-      forwarding_rule_name: 'example-fwr'
-      deployment_group_id: 'example-dg'
-      deployment_id: 'example-deployment'
+samples:
+  - name: network_security_intercept_deployment_basic
+    primary_resource_id: default
+    steps:
+      - name: network_security_intercept_deployment_basic
+        config_path: templates/terraform/samples/services/networksecurity/network_security_intercept_deployment_basic.tf.tmpl
+        resource_id_vars:
+          backend_service_name: example-bs
+          deployment_group_id: example-dg
+          deployment_id: example-deployment
+          forwarding_rule_name: example-fwr
+          health_check_name: example-hc
+          network_name: example-network
+          subnetwork_name: example-subnet
 parameters:
-  - name: 'location'
+  - name: location
     type: String
-    description: |-
-      The cloud location of the deployment, e.g. `us-central1-a` or `asia-south1-b`.
+    description: The cloud location of the deployment, e.g. `us-central1-a` or `asia-south1-b`.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'interceptDeploymentId'
+  - name: interceptDeploymentId
     type: String
     description: |-
       The ID to use for the new deployment, which will become the final
@@ -72,30 +73,29 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |-
       The resource name of this deployment, for example:
       `projects/123456789/locations/us-central1-a/interceptDeployments/my-dep`.
       See https://google.aip.dev/122 for more details.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |-
       The timestamp when the resource was created.
       See https://google.aip.dev/148#timestamps.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |-
       The timestamp when the resource was most recently updated.
       See https://google.aip.dev/148#timestamps.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: |-
-      Labels are key/value pairs that help to organize and filter resources.
-  - name: 'forwardingRule'
+    description: Labels are key/value pairs that help to organize and filter resources.
+  - name: forwardingRule
     type: String
     description: |-
       The regional forwarding rule that fronts the interceptors, for example:
@@ -103,7 +103,7 @@ properties:
       See https://google.aip.dev/124.
     required: true
     immutable: true
-  - name: 'interceptDeploymentGroup'
+  - name: interceptDeploymentGroup
     type: String
     description: |-
       The deployment group that this deployment is a part of, for example:
@@ -111,7 +111,7 @@ properties:
       See https://google.aip.dev/124.
     required: true
     immutable: true
-  - name: 'state'
+  - name: state
     type: String
     description: |-
       The current state of the deployment.
@@ -124,7 +124,7 @@ properties:
       OUT_OF_SYNC
       DELETE_FAILED
     output: true
-  - name: 'reconciling'
+  - name: reconciling
     type: Boolean
     description: |-
       The current state of the resource does not match the user's intended state,
@@ -132,7 +132,7 @@ properties:
       operation (e.g. linking a new association to the parent group).
       See https://google.aip.dev/128.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |-
       User-provided description of the deployment.

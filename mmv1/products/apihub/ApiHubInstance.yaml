@@ -24,37 +24,41 @@ create_url: projects/{{project}}/locations/{{location}}/apiHubInstances?apiHubIn
 id_format: '{{name}}'
 import_format:
   - projects/{{project}}/locations/{{location}}/apiHubInstances/{{api_hub_instance_id}}
-custom_code:
-  custom_import: 'templates/terraform/custom_import/apihub_api_hub_instance_set_id.go.tmpl'
-examples:
-  - name: apihub_api_hub_instance_basic
-    primary_resource_id: apihub-instance-without-search
-    vars:
-      instance_id: test-instance-basic
-    exclude_test: true
-  - name: apihub_api_hub_instance_full
-    primary_resource_id: apihub-instance-search
-    vars:
-      instance_id: test-instance-full
-    exclude_test: true
-autogen_async: true
-exclude_delete: true
 async:
-  operation:
-    timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
-    base_url: '{{op_id}}'
   actions:
     - create
     - delete
     - update
   type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
   result:
     resource_inside_response: true
   include_project: false
+exclude_delete: true
 autogen_status: QXBpSHViSW5zdGFuY2U=
+autogen_async: true
+custom_code:
+  custom_import: templates/terraform/custom_import/apihub_api_hub_instance_set_id.go.tmpl
+samples:
+  - name: apihub_api_hub_instance_basic
+    primary_resource_id: apihub-instance-without-search
+    exclude_test: true
+    steps:
+      - name: apihub_api_hub_instance_basic
+        resource_id_vars:
+          instance_id: test-instance-basic
+  - name: apihub_api_hub_instance_full
+    primary_resource_id: apihub-instance-search
+    exclude_test: true
+    steps:
+      - name: apihub_api_hub_instance_full
+        resource_id_vars:
+          instance_id: test-instance-full
 parameters:
   - name: location
     type: String

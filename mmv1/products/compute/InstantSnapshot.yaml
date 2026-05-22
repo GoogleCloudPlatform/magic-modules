@@ -12,10 +12,9 @@
 # limitations under the License.
 
 ---
-name: 'InstantSnapshot'
+name: InstantSnapshot
 api_variant_patterns:
-  - 'projects/{project}/zones/{zone}/instantSnapshots/{instantSnapshot}'
-kind: 'compute#instantSnapshot'
+  - projects/{project}/zones/{zone}/instantSnapshots/{instantSnapshot}
 description: |
   Represents an instant snapshot resource.
 
@@ -26,63 +25,66 @@ description: |
   but the data on the disk has been lost or corrupted
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/compute/docs/disks/instant-snapshots'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instantSnapshots'
+    Official Documentation: https://cloud.google.com/compute/docs/disks/instant-snapshots
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/instantSnapshots
 docs:
-base_url: 'projects/{{project}}/zones/{{zone}}/instantSnapshots'
-has_self_link: true
+base_url: projects/{{project}}/zones/{{zone}}/instantSnapshots
 immutable: true
+has_self_link: true
+collection_url_key: items
+iam_policy:
+  allowed_iam_role: roles/compute.storageAdmin
+  parent_resource_attribute: name
+  iam_conditions_request_type: QUERY_PARAM
+  import_format:
+    - projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}
+kind: compute#instantSnapshot
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  result:
-    resource_inside_response: false
-collection_url_key: 'items'
-iam_policy:
-  parent_resource_attribute: 'name'
-  iam_conditions_request_type: 'QUERY_PARAM'
-  allowed_iam_role: 'roles/compute.storageAdmin'
-  import_format:
-    - 'projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}'
 sweeper:
   url_substitutions:
-    - zone: "us-central1-a"
+    - zone: us-central1-a
+async:
+  actions: [create, delete, update]
+  type: OpAsync
+  result:
+    resource_inside_response: false
 include_in_tgc_next: true
-examples:
-  - name: 'instant_snapshot_basic'
-    primary_resource_id: 'default'
-    vars:
-      instance_name: 'instant-snapshot'
-      disk_name: 'example-disk'
+samples:
+  - name: instant_snapshot_basic
+    primary_resource_id: default
+    steps:
+      - name: instant_snapshot_basic
+        resource_id_vars:
+          disk_name: example-disk
+          instance_name: instant-snapshot
 parameters:
-  - name: 'sourceDisk'
+  - name: sourceDisk
     type: ResourceRef
-    description: 'A reference to the disk used to create this instant snapshot.'
+    description: A reference to the disk used to create this instant snapshot.
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Disk'
-    imports: 'name'
-  - name: 'zone'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Disk
+    imports: name
+  - name: zone
     type: ResourceRef
-    description: 'A reference to the zone where the disk is located.'
+    description: A reference to the zone where the disk is located.
     default_from_api: true
     required: false
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Zone'
-    imports: 'name'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Zone
+    imports: name
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource; provided by the client when the resource is
@@ -94,39 +96,39 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     required: false
-  - name: 'sourceDiskId'
+  - name: sourceDiskId
     type: String
-    description: 'The ID value of the disk used to create this InstantSnapshot.'
+    description: The ID value of the disk used to create this InstantSnapshot.
     output: true
-  - name: 'diskSizeGb'
+  - name: diskSizeGb
     type: Integer
-    description: 'Size of the snapshot, specified in GB.'
+    description: Size of the snapshot, specified in GB.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Labels to apply to this InstantSnapshot.
-    update_url: 'projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}/setLabels'
-    update_verb: 'POST'
-  - name: 'labelFingerprint'
+    update_url: projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}/setLabels
+    update_verb: POST
+  - name: labelFingerprint
     type: Fingerprint
     description: |
       The fingerprint used for optimistic locking of this resource. Used
       internally during updates.
     output: true
-    update_url: 'projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}/setLabels'
-    update_verb: 'POST'
-  - name: 'params'
+    update_url: projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}/setLabels
+    update_verb: POST
+  - name: params
     type: NestedObject
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
-      - name: 'resourceManagerTags'
+      - name: resourceManagerTags
         type: KeyValuePairs
         description: |
           Resource manager tags to be bound to the instant snapshot. Tag keys and values have the

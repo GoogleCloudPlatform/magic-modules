@@ -12,47 +12,45 @@
 # limitations under the License.
 
 ---
-name: 'Generator'
+name: Generator
 description: |
   LLM generator.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/agent-assist/docs'
-  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2beta1/projects.locations.generators'
-base_url: 'projects/{{project}}/locations/{{location}}/generators'
-create_url: 'projects/{{project}}/locations/{{location}}/generators?generatorId={{generator_id}}'
+    Official Documentation: https://cloud.google.com/agent-assist/docs
+  api: https://cloud.google.com/dialogflow/es/docs/reference/rest/v2beta1/projects.locations.generators
+base_url: projects/{{project}}/locations/{{location}}/generators
 self_link: '{{name}}'
-update_verb: 'PATCH'
+create_url: projects/{{project}}/locations/{{location}}/generators?generatorId={{generator_id}}
 update_mask: true
-
+update_verb: PATCH
 custom_code:
-  pre_create: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
-  pre_read: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
-  pre_delete: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
-  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
-
-examples:
-  - name: 'dialogflow_generator_basic'
-    primary_resource_id: 'summarization_basic_generator'
-    vars:
-      profile_name: 'dialogflow-profile'
-
+  pre_create: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  post_create: templates/terraform/post_create/set_computed_name.tmpl
+  pre_delete: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  pre_read: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  pre_update: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  custom_import: templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl
+samples:
+  - name: dialogflow_generator_basic
+    primary_resource_id: summarization_basic_generator
+    steps:
+      - name: dialogflow_generator_basic
+        resource_id_vars:
+          profile_name: dialogflow-profile
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     url_param_only: true
     description: |
       desc
-  - name: 'generatorId'
+  - name: generatorId
     type: String
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
     description: |
       Optional. The ID to use for the generator, which will become the final component of the generator's resource name.
-
 properties:
   - name: name
     type: String
@@ -89,15 +87,15 @@ properties:
               description: |
                 Optional. Type of the summarization section.
               enum_values:
-                - 'SITUATION'
-                - 'ACTION'
-                - 'RESOLUTION'
-                - 'REASON_FOR_CANCELLATION'
-                - 'CUSTOMER_SATISFACTION'
-                - 'ENTITIES'
-                - 'CUSTOMER_DEFINED'
-                - 'SITUATION_CONCISE'
-                - 'ACTION_CONCISE'
+                - SITUATION
+                - ACTION
+                - RESOLUTION
+                - REASON_FOR_CANCELLATION
+                - CUSTOMER_SATISFACTION
+                - ENTITIES
+                - CUSTOMER_DEFINED
+                - SITUATION_CONCISE
+                - ACTION_CONCISE
       - name: fewShotExamples
         type: Array
         description: |
@@ -112,8 +110,7 @@ properties:
               properties:
                 - name: messageEntries
                   type: Array
-                  description:
-                    Optional. List of message transcripts in the conversation.
+                  description: Optional. List of message transcripts in the conversation.
                   item_type:
                     type: NestedObject
                     properties:
@@ -122,9 +119,9 @@ properties:
                         description: |
                           Optional. Participant role of the message.
                         enum_values:
-                          - 'HUMAN_AGENT'
-                          - 'AUTOMATED_AGENT'
-                          - 'END_USER'
+                          - HUMAN_AGENT
+                          - AUTOMATED_AGENT
+                          - END_USER
                       - name: text
                         type: String
                         description: |
@@ -195,15 +192,15 @@ properties:
                         description: |
                           Optional. Type of the summarization section.
                         enum_values:
-                          - 'SITUATION'
-                          - 'ACTION'
-                          - 'RESOLUTION'
-                          - 'REASON_FOR_CANCELLATION'
-                          - 'CUSTOMER_SATISFACTION'
-                          - 'ENTITIES'
-                          - 'CUSTOMER_DEFINED'
-                          - 'SITUATION_CONCISE'
-                          - 'ACTION_CONCISE'
+                          - SITUATION
+                          - ACTION
+                          - RESOLUTION
+                          - REASON_FOR_CANCELLATION
+                          - CUSTOMER_SATISFACTION
+                          - ENTITIES
+                          - CUSTOMER_DEFINED
+                          - SITUATION_CONCISE
+                          - ACTION_CONCISE
       - name: version
         type: String
         default_from_api: true
@@ -239,10 +236,10 @@ properties:
     description: |
       Optional. The trigger event of the generator. It defines when the generator is triggered in a conversation.
     enum_values:
-      - 'END_OF_UTTERANCE'
-      - 'MANUAL_CALL'
-      - 'CUSTOMER_MESSAGE'
-      - 'AGENT_MESSAGE'
+      - END_OF_UTTERANCE
+      - MANUAL_CALL
+      - CUSTOMER_MESSAGE
+      - AGENT_MESSAGE
   - name: publishedModel
     type: String
     description: |

@@ -21,22 +21,24 @@ create_url: projects/{{project}}/locations/{{location}}/reportConfigs?reportConf
 import_format:
   - projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config_id}}
 async:
-  operation:
-    base_url: '{{op_id}}'
   actions:
     - create
     - delete
+  operation:
+    base_url: '{{op_id}}'
   result:
     resource_inside_response: true
 autogen_status: UmVwb3J0Q29uZmln
 autogen_async: true
-examples:
-  - name: 'migration_center_report_config_basic'
-    primary_resource_id: 'default'
-    vars:
-      report_config_id: 'report-config-test'
-      pref_set_id: 'pref-set-test'
-      group_id: 'group-test'
+samples:
+  - name: migration_center_report_config_basic
+    primary_resource_id: default
+    steps:
+      - name: migration_center_report_config_basic
+        resource_id_vars:
+          group_id: group-test
+          pref_set_id: pref-set-test
+          report_config_id: report-config-test
 parameters:
   - name: location
     type: String

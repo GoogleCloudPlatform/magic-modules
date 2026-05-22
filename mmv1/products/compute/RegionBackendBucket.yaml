@@ -12,9 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'RegionBackendBucket'
-min_version: 'beta'
-kind: 'compute#backendBucket'
+name: RegionBackendBucket
 description: |
   Regional backend buckets allow you to use Google Cloud Storage buckets with
   regional HTTP(S) load balancing.
@@ -36,82 +34,90 @@ description: |
   - Single-region buckets only (multi-region and dual-region buckets are not supported)
 references:
   guides:
-    'Using a Cloud Storage bucket as a load balancer backend': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket'
-  api: 'https://cloud.google.com/compute/docs/reference/beta/regionBackendBuckets'
+    Using a Cloud Storage bucket as a load balancer backend: https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket
+  api: https://cloud.google.com/compute/docs/reference/beta/regionBackendBuckets
 docs:
-base_url: 'projects/{{project}}/regions/{{region}}/backendBuckets'
+base_url: projects/{{project}}/regions/{{region}}/backendBuckets
+min_version: beta
 has_self_link: true
+collection_url_key: items
+iam_policy:
+  allowed_iam_role: roles/compute.admin
+  parent_resource_attribute: name
+  iam_conditions_request_type: QUERY_PARAM
+  min_version: beta
+  import_format:
+    - projects/{{project}}/regions/{{region}}/backendBuckets/{{name}}
+    - '{{name}}'
+kind: compute#backendBucket
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-east1
+    - region: europe-west1
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
-iam_policy:
-  allowed_iam_role: 'roles/compute.admin'
-  parent_resource_attribute: 'name'
-  iam_conditions_request_type: 'QUERY_PARAM'
-  import_format:
-    - 'projects/{{project}}/regions/{{region}}/backendBuckets/{{name}}'
-    - '{{name}}'
-  min_version: 'beta'
-sweeper:
-  url_substitutions:
-    - region: "us-central1"
-    - region: "us-east1"
-    - region: "europe-west1"
-examples:
-  - name: 'region_backend_bucket_basic'
-    primary_resource_id: 'image_backend'
-    vars:
-      backend_bucket_name: 'region-image-backend-bucket'
-      bucket_name: 'region-image-store-bucket'
-      region: 'us-central1'
-  - name: 'region_backend_bucket_internal_lb'
-    primary_resource_id: 'internal_backend'
-    vars:
-      backend_bucket_name: 'regional-internal-backend'
-      bucket_name: 'regional-internal-bucket'
-      region: 'us-central1'
-  - name: 'region_backend_bucket_external_lb'
-    primary_resource_id: 'external_backend'
-    vars:
-      backend_bucket_name: 'regional-external-backend'
-      bucket_name: 'regional-external-bucket'
-      region: 'us-east1'
+samples:
+  - name: region_backend_bucket_basic
+    primary_resource_id: image_backend
+    steps:
+      - name: region_backend_bucket_basic
+        resource_id_vars:
+          backend_bucket_name: region-image-backend-bucket
+          bucket_name: region-image-store-bucket
+          region: us-central1
+  - name: region_backend_bucket_internal_lb
+    primary_resource_id: internal_backend
+    steps:
+      - name: region_backend_bucket_internal_lb
+        resource_id_vars:
+          backend_bucket_name: regional-internal-backend
+          bucket_name: regional-internal-bucket
+          region: us-central1
+  - name: region_backend_bucket_external_lb
+    primary_resource_id: external_backend
+    steps:
+      - name: region_backend_bucket_external_lb
+        resource_id_vars:
+          backend_bucket_name: regional-external-backend
+          bucket_name: regional-external-bucket
+          region: us-east1
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
     description: |
       The region where the backend bucket resides.
     required: true
     immutable: true
-    resource: 'region'
-    imports: 'name'
+    resource: region
+    imports: name
     url_param_only: true
 properties:
-  - name: 'bucketName'
+  - name: bucketName
     type: String
     description: |
       Cloud Storage bucket name. The bucket must be in the same region as this
       backend bucket.
     required: true
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional textual description of the resource; provided by the
       client when the resource is created.
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -124,8 +130,8 @@ properties:
     required: true
     immutable: true
     validation:
-      regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
-  - name: 'loadBalancingScheme'
+      regex: ^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$
+  - name: loadBalancingScheme
     type: Enum
     description: |
       Specifies the load balancer type this backend bucket will be used with.
@@ -136,7 +142,7 @@ properties:
 
       This field is required for regional backend buckets.
     enum_values:
-      - 'INTERNAL_MANAGED'
-      - 'EXTERNAL_MANAGED'
+      - INTERNAL_MANAGED
+      - EXTERNAL_MANAGED
     required: false
     default_from_api: true

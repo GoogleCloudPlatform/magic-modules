@@ -16,39 +16,40 @@ name: Watchlist
 description: A watchlist is a list of entities that allows for bulk operations over the included entities.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.watchlists'
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.watchlists
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists/{{watchlist_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists?watchlistId={{watchlist_id}}
+update_mask: true
+update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists/{{watchlist_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists/{{watchlist_id}}
-update_verb: PATCH
-update_mask: true
 autogen_status: V2F0Y2hsaXN0
 custom_code:
-  encoder: 'templates/terraform/encoders/chronicle_watchlist.go.tmpl'
-examples:
-  - name: 'chronicle_watchlist_basic'
-    primary_resource_id: 'example'
-    vars:
-      name: watchlist_name
-      watchlist_id: watchlist-id
-      description: watchlist-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_watchlist_without_id'
-    primary_resource_id: 'example'
-    vars:
-      name: watchlist-name
-      description: watchlist-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    # The watchlist_id is an optional field. If watchlist_id is not provided, the system will generate one.
-    # See AIP-133 for details: https://google.aip.dev/133#user-specified-ids
-    exclude_import_test: true
-
+  encoder: templates/terraform/encoders/chronicle_watchlist.go.tmpl
+samples:
+  - name: chronicle_watchlist_basic
+    primary_resource_id: example
+    steps:
+      - name: chronicle_watchlist_basic
+        resource_id_vars:
+          description: watchlist-description
+          name: watchlist_name
+          watchlist_id: watchlist-id
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+  - name: chronicle_watchlist_without_id
+    primary_resource_id: example
+    steps:
+      - name: chronicle_watchlist_without_id
+        resource_id_vars:
+          description: watchlist-description
+          name: watchlist-name
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+        exclude_import_test: true
 parameters:
   - name: location
     type: String
@@ -72,7 +73,7 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
 properties:
   - name: name
     type: String
@@ -116,8 +117,7 @@ properties:
         default_from_api: true
         allow_empty_object: true
         send_empty_value: true
-        properties:
-          []   # Meant to be an empty object with no properties.
+        properties: [] # Meant to be an empty object with no properties.
   - name: entityCount
     type: NestedObject
     description: Count of different types of entities in the watchlist.

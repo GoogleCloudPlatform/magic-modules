@@ -12,39 +12,40 @@
 # limitations under the License.
 
 ---
-name: 'Service'
-legacy_name: 'google_endpoints_service'
+name: Service
 description: |
   A service that is managed by Google Service Management
-exclude_resource: true
 docs:
-id_format: 'services/{{service_name}}'
-base_url: 'services'
-self_link: 'services/{{service_name}}'
+base_url: services
+self_link: services/{{service_name}}
+iam_policy:
+  parent_resource_attribute: service_name
+  fetch_iam_policy_verb: POST
+  method_name_separator: ':'
+exclude_resource: true
+legacy_name: google_endpoints_service
+id_format: services/{{service_name}}
 import_format:
-  - 'services/{{service_name}}'
+  - services/{{service_name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-iam_policy:
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'service_name'
 custom_code:
-examples:
-  - name: 'endpoints_iam'
-    primary_resource_id: 'endpoints_service'
-    vars:
-      name: 'endpoint'
-    test_vars_overrides:
-      # for backward compatible
-      name: '"endpoint" + randomSuffix'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: endpoints_iam
+    primary_resource_id: endpoints_service
+    steps:
+      - name: endpoints_iam
+        resource_id_vars:
+          name: endpoint
+        test_env_vars:
+          project_name: PROJECT_NAME
+        test_vars_overrides:
+          name: '"endpoint" + randomSuffix'
 parameters:
 properties:
-  - name: 'serviceName'
+  - name: serviceName
     type: String
     description: The name of the service.
     required: true

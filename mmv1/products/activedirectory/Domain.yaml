@@ -12,22 +12,22 @@
 # limitations under the License.
 
 ---
-name: 'Domain'
-kind: 'activedirectory#domain'
+name: Domain
 description: Creates a Microsoft AD domain
 references:
   guides:
-    'Managed Microsoft Active Directory Quickstart': 'https://cloud.google.com/managed-microsoft-ad/docs/quickstarts'
-  api: 'https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains'
+    Managed Microsoft Active Directory Quickstart: https://cloud.google.com/managed-microsoft-ad/docs/quickstarts
+  api: https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains
 docs:
-id_format: '{{name}}'
-base_url: 'projects/{{project}}/locations/global/domains'
+base_url: projects/{{project}}/locations/global/domains
 self_link: '{{name}}'
-create_url: 'projects/{{project}}/locations/global/domains?domainName={{domain_name}}'
-update_verb: 'PATCH'
-update_mask: true
+create_url: projects/{{project}}/locations/global/domains?domainName={{domain_name}}
 # equivalent to {{name}}, but makes sweepers work
-delete_url: 'projects/{{project}}/locations/global/domains/{{domain_name}}'
+delete_url: projects/{{project}}/locations/global/domains/{{domain_name}}
+update_mask: true
+update_verb: PATCH
+kind: activedirectory#domain
+id_format: '{{name}}'
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
@@ -35,10 +35,9 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
     # It takes about 35-40 mins to get the resource created
@@ -48,32 +47,28 @@ async:
       delete_minutes: 60
   result:
     resource_inside_response: true
-custom_code:
-  pre_delete: 'templates/terraform/pre_delete/active_directory_domain.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 error_abort_predicates:
-
-  - 'transport_tpg.Is429QuotaError'
-examples:
-  - name: 'active_directory_domain_basic'
-    primary_resource_id: 'ad-domain'
-    vars:
-      name: 'myorg'
-      # the part of the domain before the first "." must be <15 chars, and
-      # the random suffix is 10 chars. In order to make sure these get swept,
-      # 'tfgen' is the only option here.
-      domain_name: 'tfgen'
-    test_vars_overrides:
-      # for backward compatible
-      name: '"myorg" + randomSuffix'
-      # for backward compatible
-      domain_name: '"tfgen" + randomSuffix'
-    ignore_read_extra:
-      - 'deletion_protection'
-    # skip the test until Active Directory setup issue got resolved
+  - transport_tpg.Is429QuotaError
+autogen_async: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/active_directory_domain.go.tmpl
+  custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
+samples:
+  - name: active_directory_domain_basic
+    primary_resource_id: ad-domain
     exclude_test: true
+    steps:
+      - name: active_directory_domain_basic
+        resource_id_vars:
+          domain_name: tfgen
+          name: myorg
+        test_vars_overrides:
+          domain_name: '"tfgen" + randomSuffix'
+          name: '"myorg" + randomSuffix'
+        ignore_read_extra:
+          - deletion_protection
 virtual_fields:
-  - name: 'deletion_protection'
+  - name: deletion_protection
     description: |
       Whether Terraform will be prevented from destroying the domain. Defaults to true.
       When a`terraform destroy` or `terraform apply` would delete the domain,
@@ -84,7 +79,7 @@ virtual_fields:
     type: Boolean
     default_value: true
 parameters:
-  - name: 'domainName'
+  - name: domainName
     type: String
     description: |
       The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions
@@ -93,18 +88,16 @@ parameters:
     required: true
     immutable: true
     validation:
-      function: 'verify.ValidateADDomainName()'
+      function: verify.ValidateADDomainName()
 properties:
-  - name: 'name'
+  - name: name
     type: String
-    description:
-      'The unique name of the domain using the format:
-      `projects/{project}/locations/global/domains/{domainName}`.'
+    description: 'The unique name of the domain using the format: `projects/{project}/locations/global/domains/{domainName}`.'
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: 'Resource labels that can contain user-provided metadata'
-  - name: 'authorizedNetworks'
+    description: Resource labels that can contain user-provided metadata
+  - name: authorizedNetworks
     type: Array
     description: |
       The full names of the Google Compute Engine networks the domain instance is connected to. The domain is only available on networks listed in authorizedNetworks.
@@ -112,14 +105,14 @@ properties:
     is_set: true
     item_type:
       type: String
-  - name: 'reservedIpRange'
+  - name: reservedIpRange
     type: String
     description: |
       The CIDR range of internal addresses that are reserved for this domain. Reserved networks must be /24 or larger.
       Ranges must be unique and non-overlapping with existing subnets in authorizedNetworks
     required: true
     immutable: true
-  - name: 'locations'
+  - name: locations
     type: Array
     description: |
       Locations where domain needs to be provisioned. [regions][compute/docs/regions-zones/]
@@ -127,14 +120,14 @@ properties:
     required: true
     item_type:
       type: String
-  - name: 'admin'
+  - name: admin
     type: String
     description: |
       The name of delegated administrator account used to perform Active Directory operations.
       If not specified, setupadmin will be used.
     immutable: true
-    default_value: "setupadmin"
-  - name: 'fqdn'
+    default_value: setupadmin
+  - name: fqdn
     type: String
     description: |
       The fully-qualified domain name of the exposed domain used by clients to connect to the service.

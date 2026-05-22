@@ -12,94 +12,94 @@
 # limitations under the License.
 
 ---
-name: 'VpnGateway'
-kind: 'compute#targetVpnGateway'
+name: VpnGateway
 description: |
   Represents a VPN gateway running in GCP. This virtual device is managed
   by Google, but used only by you.
 references:
   guides:
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways'
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways
 docs:
   warning: |
     Classic VPN is deprecating certain functionality on October 31, 2021. For more information,
     see the [Classic VPN partial deprecation page](https://cloud.google.com/network-connectivity/docs/vpn/deprecations/classic-vpn-deprecation).
-base_url: 'projects/{{project}}/regions/{{region}}/targetVpnGateways'
-has_self_link: true
+base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
 immutable: true
+has_self_link: true
+collection_url_key: items
+kind: compute#targetVpnGateway
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
 custom_code:
-examples:
-  - name: 'target_vpn_gateway_basic'
-    primary_resource_id: 'target_gateway'
-    vars:
-      target_vpn_gateway_name: 'vpn-1'
-      network_name: 'network-1'
-      address_name: 'vpn-static-ip'
-      esp_forwarding_rule_name: 'fr-esp'
-      udp500_forwarding_rule_name: 'fr-udp500'
-      udp4500_forwarding_rule_name: 'fr-udp4500'
-      vpn_tunnel_name: 'tunnel1'
-      route_name: 'route1'
-    test_vars_overrides:
-      # for backward compatible
-      vpn_tunnel_name: '"tunnel1" + randomSuffix'
-      # for backward compatible
-      route_name: '"route1" + randomSuffix'
-  - name: 'target_vpn_gateway_tags'
-    primary_resource_id: 'target_gateway_tags'
-    vars:
-      target_vpn_gateway_name: 'vpn-1'
-      network_name: 'network-1'
-      address_name: 'vpn-static-ip'
-      esp_forwarding_rule_name: 'fr-esp'
-      udp500_forwarding_rule_name: 'fr-udp500'
-      udp4500_forwarding_rule_name: 'fr-udp4500'
-      vpn_tunnel_name: 'tunnel1'
-      route_name: 'route1'
-      tag_key: 'tagkey'
-      tag_value: 'tagvalue'
-      org_id: '123456789'
-    test_vars_overrides:
-      'tag_key': '"tf-test-key-" + acctest.RandString(t, 10)'
-      'tag_value': '"tf-test-value-" + acctest.RandString(t, 10)'
-      'org_id': 'envvar.GetTestOrgFromEnv(t)'
-      # for backward compatible
-      vpn_tunnel_name: '"tunnel1" + randomSuffix'
-      # for backward compatible
-      route_name: '"route1" + randomSuffix'
+samples:
+  - name: target_vpn_gateway_basic
+    primary_resource_id: target_gateway
+    steps:
+      - name: target_vpn_gateway_basic
+        resource_id_vars:
+          address_name: vpn-static-ip
+          esp_forwarding_rule_name: fr-esp
+          network_name: network-1
+          route_name: route1
+          target_vpn_gateway_name: vpn-1
+          udp500_forwarding_rule_name: fr-udp500
+          udp4500_forwarding_rule_name: fr-udp4500
+          vpn_tunnel_name: tunnel1
+        test_vars_overrides:
+          route_name: '"route1" + randomSuffix'
+          vpn_tunnel_name: '"tunnel1" + randomSuffix'
+  - name: target_vpn_gateway_tags
+    primary_resource_id: target_gateway_tags
+    steps:
+      - name: target_vpn_gateway_tags
+        resource_id_vars:
+          address_name: vpn-static-ip
+          esp_forwarding_rule_name: fr-esp
+          network_name: network-1
+          org_id: "123456789"
+          route_name: route1
+          tag_key: tagkey
+          tag_value: tagvalue
+          target_vpn_gateway_name: vpn-1
+          udp500_forwarding_rule_name: fr-udp500
+          udp4500_forwarding_rule_name: fr-udp4500
+          vpn_tunnel_name: tunnel1
+        test_vars_overrides:
+          org_id: envvar.GetTestOrgFromEnv(t)
+          route_name: '"route1" + randomSuffix'
+          tag_key: '"tf-test-key-" + acctest.RandString(t, 10)'
+          tag_value: '"tf-test-value-" + acctest.RandString(t, 10)'
+          vpn_tunnel_name: '"tunnel1" + randomSuffix'
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
     description: |
       The region this gateway should sit in.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: name
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     immutable: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -111,31 +111,31 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'gateway_id'
+  - name: gateway_id
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     api_name: id
     output: true
-  - name: 'params'
+  - name: params
     type: NestedObject
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
-      - name: 'resourceManagerTags'
+      - name: resourceManagerTags
         type: KeyValuePairs
         description: |
           Resource manager tags to be bound to the Vpn Gateway. Tag keys and values have the
           same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
           and values are in the format tagValues/456.
         ignore_read: true
-  - name: 'network'
+  - name: network
     type: ResourceRef
     description: |
       The network this VPN gateway is accepting traffic for.
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Network'
-    imports: 'selfLink'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Network
+    imports: selfLink

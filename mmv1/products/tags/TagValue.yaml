@@ -12,71 +12,71 @@
 # limitations under the License.
 
 ---
-name: 'TagValue'
-description:
-  A TagValue is a child of a particular TagKey. TagValues are used to group
-  cloud resources for the purpose of controlling them using policies.
+name: TagValue
+description: A TagValue is a child of a particular TagKey. TagValues are used to group cloud resources for the purpose of controlling them using policies.
 references:
   guides:
-    'Official Documentation': 'https://docs.cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
-  api: 'https://docs.cloud.google.com/resource-manager/reference/rest/v3/tagValues'
+    Official Documentation: https://docs.cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing
+  api: https://docs.cloud.google.com/resource-manager/reference/rest/v3/tagValues
 docs:
-id_format: 'tagValues/{{name}}'
-base_url: 'tagValues'
-self_link: 'tagValues/{{name}}'
-update_verb: 'PATCH'
+base_url: tagValues
+self_link: tagValues/{{name}}
 update_mask: true
-mutex: 'tagValues/{{parent}}'
+update_verb: PATCH
+iam_policy:
+  parent_resource_attribute: tag_value
+  iam_conditions_request_type: REQUEST_BODY
+  fetch_iam_policy_verb: POST
+  method_name_separator: ':'
+id_format: tagValues/{{name}}
 import_format:
-  - 'tagValues/{{name}}'
+  - tagValues/{{name}}
   - '{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+mutex: tagValues/{{parent}}
+exclude_sweeper: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-iam_policy:
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'tag_value'
-  iam_conditions_request_type: 'REQUEST_BODY'
-custom_code:
+autogen_async: true
 exclude_tgc: true
-exclude_sweeper: true
-examples:
-  - name: 'tag_value_basic'
-    primary_resource_id: 'value'
-    vars:
-      key_short_name: 'keyname'
-      value_short_name: 'valuename'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    test_vars_overrides:
-      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
-      'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
+custom_code:
+samples:
+  - name: tag_value_basic
+    primary_resource_id: value
     exclude_test: true
+    steps:
+      - name: tag_value_basic
+        resource_id_vars:
+          key_short_name: keyname
+          value_short_name: valuename
+        test_env_vars:
+          org_id: ORG_ID
+        test_vars_overrides:
+          key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
+          value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The generated numeric id for the TagValue.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'parent'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: parent
     type: String
     description: |
       Input only. The resource name of the new TagValue's parent. Must be of the form tagKeys/{tag_key_id}.
     required: true
     immutable: true
-  - name: 'shortName'
+  - name: shortName
     type: String
     description: |
       Input only. User-assigned short name for TagValue. The short name should be unique for TagValues within the same parent TagKey.
@@ -85,26 +85,26 @@ properties:
     required: true
     immutable: true
     validation:
-      function: 'validation.StringLenBetween(1, 256)'
-  - name: 'namespacedName'
+      function: validation.StringLenBetween(1, 256)
+  - name: namespacedName
     type: String
     description: |
       Output only. Namespaced name of the TagValue. Will be in the format {parentNamespace}/{tagKeyShortName}/{shortName}.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       User-assigned description of the TagValue. Must not exceed 256 characters.
     validation:
-      function: 'validation.StringLenBetween(0, 256)'
-  - name: 'createTime'
+      function: validation.StringLenBetween(0, 256)
+  - name: createTime
     type: String
     description: |
       Output only. Creation time.
 
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       Output only. Update time.

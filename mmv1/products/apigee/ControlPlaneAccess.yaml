@@ -12,47 +12,49 @@
 # limitations under the License.
 
 ---
-name: 'ControlPlaneAccess'
+name: ControlPlaneAccess
 description: |
   Authorize the Runtime components to access directly with Apigee Control Plane.
 references:
   guides:
-    'Enable ControlPlane access': 'https://cloud.google.com/apigee/docs/hybrid/v1.14/install-enable-control-plane-access'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations/updateControlPlaneAccess'
+    Enable ControlPlane access: https://cloud.google.com/apigee/docs/hybrid/v1.14/install-enable-control-plane-access
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations/updateControlPlaneAccess
 docs:
-id_format: 'organizations/{{name}}/controlPlaneAccess'
-base_url: ''
-self_link: 'organizations/{{name}}/controlPlaneAccess'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
-async:
-  actions: ['create', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-autogen_async: true
+base_url: ""
+self_link: organizations/{{name}}/controlPlaneAccess
 update_mask: true
-exclude_delete: true
+create_verb: PATCH
+update_verb: PATCH
+id_format: organizations/{{name}}/controlPlaneAccess
 import_format:
-  - 'organizations/{{name}}/controlPlaneAccess'
+  - organizations/{{name}}/controlPlaneAccess
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+async:
+  actions: [create, update]
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+exclude_delete: true
+autogen_async: true
 custom_code:
-examples:
-  - name: 'apigee_control_plane_access_basic_test'
-    primary_resource_id: 'apigee_control_plane_access'
-    vars:
-      account_id: 'my-account'
-      project_id: 'my-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+samples:
+  - name: apigee_control_plane_access_basic_test
+    primary_resource_id: apigee_control_plane_access
+    steps:
+      - name: apigee_control_plane_access_basic_test
+        resource_id_vars:
+          account_id: my-account
+          project_id: my-project
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the Apigee organization.
@@ -60,7 +62,7 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'synchronizerIdentities'
+  - name: synchronizerIdentities
     type: Array
     description: |
       Array of service accounts to grant access to control plane resources (for the Synchronizer component), each specified using the following format: `serviceAccount:service-account-name`.
@@ -73,7 +75,7 @@ properties:
     send_empty_value: true
     item_type:
       type: String
-  - name: 'analyticsPublisherIdentities'
+  - name: analyticsPublisherIdentities
     type: Array
     description: |
       Array of service accounts authorized to publish analytics data to the control plane, each specified using the following format: `serviceAccount:service-account-name`.

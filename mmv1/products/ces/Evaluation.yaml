@@ -14,55 +14,65 @@
 ---
 name: Evaluation
 description: Customer Engagement Suite Evaluation
+references:
+  api: https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rest/v1beta/projects.locations.apps.evaluations
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations
 min_version: beta
-references:
-  api: 'https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rest/v1beta/projects.locations.apps.evaluations'
 self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{evaluation_id}}
 create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations?evaluationId={{evaluation_id}}
-update_verb: PATCH
 update_mask: true
+update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{evaluation_id}}
-examples:
+samples:
   - name: ces_evaluation_basic
     min_version: beta
     primary_resource_id: ces_evaluation_basic
-    vars:
-      evaluation_id: eval-basic
-      app_id: app-id
-      app_display_name: my-app
+    steps:
+      - name: ces_evaluation_basic
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          evaluation_id: eval-basic
   - name: ces_evaluation_full
     min_version: beta
     primary_resource_id: ces_evaluation_full
-    vars:
-      evaluation_id: evaluation-id-full
-      app_id: app-id-full
-      app_display_name: my-app-full
-      tool_id: tool-id-full
+    steps:
+      - name: ces_evaluation_full
+        resource_id_vars:
+          app_display_name: my-app-full
+          app_id: app-id-full
+          evaluation_id: evaluation-id-full
+          tool_id: tool-id-full
   - name: ces_evaluation_toolset
     min_version: beta
     primary_resource_id: ces_evaluation_toolset
-    vars:
-      evaluation_id: eval-toolset
-      app_id: app-id-toolset
-      app_display_name: my-app-toolset
+    steps:
+      - name: ces_evaluation_toolset
+        resource_id_vars:
+          app_display_name: my-app-toolset
+          app_id: app-id-toolset
+          evaluation_id: eval-toolset
   - name: ces_evaluation_scenario_full
     min_version: beta
     primary_resource_id: ces_evaluation_scenario_full
-    vars:
-      evaluation_id: eval-scenario-full
-      app_id: app-id-scenario
-      app_display_name: my-app-scenario
-      tool_id: tool-id-scenario
+    steps:
+      - name: ces_evaluation_scenario_full
+        resource_id_vars:
+          app_display_name: my-app-scenario
+          app_id: app-id-scenario
+          evaluation_id: eval-scenario-full
+          tool_id: tool-id-scenario
   - name: ces_evaluation_scenario_toolset
     min_version: beta
     primary_resource_id: ces_evaluation_scenario_toolset
-    vars:
-      evaluation_id: eval-scen-ts
-      app_id: app-id-scenario-ts
-      app_display_name: my-app-scenario-ts
-      toolset_id: ts-scen
+    steps:
+      - name: ces_evaluation_scenario_toolset
+        resource_id_vars:
+          app_display_name: my-app-scenario-ts
+          app_id: app-id-scenario-ts
+          evaluation_id: eval-scen-ts
+          toolset_id: ts-scen
 parameters:
   - name: location
     type: String
@@ -188,7 +198,7 @@ properties:
                 properties:
                   - name: userInput
                     type: NestedObject
-                    description: "Represents user input for the conversation. Note: 'user_input' and 'expectation' are mutually exclusive."
+                    description: 'Represents user input for the conversation. Note: ''user_input'' and ''expectation'' are mutually exclusive.'
                     properties:
                       - name: text
                         type: String
@@ -286,7 +296,7 @@ properties:
                         output: true
                   - name: expectation
                     type: NestedObject
-                    description: "Executes an expectation on the current turn to verify the agent's behavior. Note: 'user_input' and 'expectation' are mutually exclusive."
+                    description: 'Executes an expectation on the current turn to verify the agent''s behavior. Note: ''user_input'' and ''expectation'' are mutually exclusive.'
                     properties:
                       - name: note
                         type: String
@@ -307,10 +317,10 @@ properties:
                             description: The input parameters and values for the tool in JSON object format.
                           - name: tool
                             type: String
-                            description: "The resource name of the tool. Note: 'tool' and 'toolset_tool' are mutually exclusive."
+                            description: 'The resource name of the tool. Note: ''tool'' and ''toolset_tool'' are mutually exclusive.'
                           - name: toolsetTool
                             type: NestedObject
-                            description: "A tool that is created from a toolset. Note: 'tool' and 'toolset_tool' are mutually exclusive."
+                            description: 'A tool that is created from a toolset. Note: ''tool'' and ''toolset_tool'' are mutually exclusive.'
                             properties:
                               - name: toolset
                                 type: String
@@ -505,7 +515,7 @@ properties:
                                 description: The tool ID to filter the tools to retrieve the schema for.
       - name: evaluationExpectations
         type: Array
-        description: "The evaluation expectations to evaluate the replayed conversation against. Format: projects/{project}/locations/{location}/apps/{app}/evaluationExpectations/{evaluationExpectation}"
+        description: 'The evaluation expectations to evaluate the replayed conversation against. Format: projects/{project}/locations/{location}/apps/{app}/evaluationExpectations/{evaluationExpectation}'
         item_type:
           type: String
   - name: scenario

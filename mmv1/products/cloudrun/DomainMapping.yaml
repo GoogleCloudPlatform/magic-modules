@@ -28,12 +28,12 @@ import_format:
 custom_diff:
   - hasMetadata
 async:
-  type: PollAsync
   actions:
     - create
     - update
-  check_response_func_existence: PollCheckKnativeStatusFunc(res)
+  type: PollAsync
   check_response_func_absence: transport_tpg.PollCheckForAbsence
+  check_response_func_existence: PollCheckKnativeStatusFunc(res)
   target_occurrences: 1
 error_retry_predicates:
   - transport_tpg.IsCloudRunCreationConflict
@@ -41,17 +41,19 @@ schema_version: 1
 state_upgraders: true
 cai_asset_name_format: projects/{{project}}/locations/{{location}}/domainmappings/{{name}}
 custom_code:
+  constants: templates/terraform/constants/cloud_run_domain_mapping.go.tmpl
   encoder: templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl
   decoder: templates/terraform/decoders/cloud_run.go.tmpl
-  constants: templates/terraform/constants/cloud_run_domain_mapping.go.tmpl
   test_check_destroy: templates/terraform/custom_check_destroy/cloudrun_domain_mapping.go.tmpl
-examples:
+samples:
   - name: cloud_run_domain_mapping_basic
     primary_resource_id: default
-    vars:
-      cloud_run_service_name: cloudrun-srv
-    test_env_vars:
-      namespace: PROJECT_NAME
+    steps:
+      - name: cloud_run_domain_mapping_basic
+        resource_id_vars:
+          cloud_run_service_name: cloudrun-srv
+        test_env_vars:
+          namespace: PROJECT_NAME
 parameters:
   - name: location
     type: String

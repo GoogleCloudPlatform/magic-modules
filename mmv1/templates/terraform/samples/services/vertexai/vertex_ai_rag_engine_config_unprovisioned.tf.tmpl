@@ -1,0 +1,7 @@
+resource "google_vertex_ai_rag_engine_config" "{{$.PrimaryResourceId}}" {
+  region = "us-central1"
+  rag_managed_db_config {
+    unprovisioned {
+    }
+  }
+}

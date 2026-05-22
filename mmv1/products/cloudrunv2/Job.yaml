@@ -12,132 +12,152 @@
 # limitations under the License.
 
 ---
-name: 'Job'
+name: Job
 description: |
   A Cloud Run Job resource that references a container image which is run to completion.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/run/docs/'
-  api: 'https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.jobs'
+    Official Documentation: https://cloud.google.com/run/docs/
+  api: https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.jobs
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
-base_url: 'projects/{{project}}/locations/{{location}}/jobs'
-self_link: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/jobs?jobId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/jobs
+self_link: projects/{{project}}/locations/{{location}}/jobs/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/jobs?jobId={{name}}
+update_verb: PATCH
+iam_policy:
+  base_url: projects/{{project}}/locations/{{location}}/jobs/{{name}}
+  parent_resource_attribute: name
+  import_format:
+    - projects/{{project}}/locations/{{location}}/jobs/{{name}}
+    - '{{name}}'
+  method_name_separator: ':'
+id_format: projects/{{project}}/locations/{{location}}/jobs/{{name}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
+  - projects/{{project}}/locations/{{location}}/jobs/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  actions: [create, delete, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-iam_policy:
-  method_name_separator: ':'
-  parent_resource_attribute: 'name'
-  base_url: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
-    - '{{name}}'
-custom_code:
-  pre_delete: 'templates/terraform/pre_delete/cloudrunv2_job_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
-examples:
-  - name: 'cloudrunv2_job_basic'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_limits'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_sql'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-      secret_id: 'secret'
-      cloud_run_sql_name: 'cloudrun-sql'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      # for backward compatible
-      secret_id: '"secret" + randomSuffix'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_vpcaccess'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-      vpc_access_connector_name: 'run-vpc'
-      vpc_compute_subnetwork_name: 'run-subnetwork'
-      compute_network_name: 'run-network'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_directvpc'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_secret'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-      secret_id: 'secret'
-    test_vars_overrides:
-      # for backward compatible
-      secret_id: '"secret" + randomSuffix'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_emptydir'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_emptydir_disk'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_run_job'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_multicontainer'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_gpu'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
+autogen_async: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/cloudrunv2_job_deletion_policy.go.tmpl
+samples:
+  - name: cloudrunv2_job_basic
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_basic
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
+  - name: cloudrunv2_job_limits
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_limits
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
+  - name: cloudrunv2_job_sql
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_sql
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+          cloud_run_sql_name: cloudrun-sql
+          deletion_protection: "true"
+          secret_id: secret
+        test_vars_overrides:
+          deletion_protection: "false"
+          secret_id: '"secret" + randomSuffix'
+        oics_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - deletion_protection
+  - name: cloudrunv2_job_vpcaccess
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_vpcaccess
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+          compute_network_name: run-network
+          vpc_access_connector_name: run-vpc
+          vpc_compute_subnetwork_name: run-subnetwork
+        ignore_read_extra:
+          - deletion_protection
+  - name: cloudrunv2_job_directvpc
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_directvpc
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
+  - name: cloudrunv2_job_secret
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_secret
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+          secret_id: secret
+        test_vars_overrides:
+          secret_id: '"secret" + randomSuffix'
+        ignore_read_extra:
+          - deletion_protection
+  - name: cloudrunv2_job_emptydir
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_emptydir
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
+  - name: cloudrunv2_job_emptydir_disk
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_emptydir_disk
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - deletion_protection
+  - name: cloudrunv2_job_run_job
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_run_job
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
+  - name: cloudrunv2_job_multicontainer
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_multicontainer
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
+  - name: cloudrunv2_job_gpu
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_gpu
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
 virtual_fields:
-  - name: 'deletion_protection'
+  - name: deletion_protection
     description: |
       Whether Terraform will be prevented from destroying the job. Defaults to true.
       When a`terraform destroy` or `terraform apply` would delete the job,
@@ -148,34 +168,34 @@ virtual_fields:
     type: Boolean
     default_value: true
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: The location of the cloud run job
     url_param_only: true
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the Job.
     url_param_only: true
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
-  - name: 'uid'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.tmpl
+  - name: uid
     type: String
     description: |
       Server assigned unique identifier for the Execution. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.
     output: true
-  - name: 'generation'
+  - name: generation
     type: String
     description: |
       A number that monotonically increases every time the user modifies the desired state.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |-
       Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
@@ -183,7 +203,7 @@ properties:
 
       Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
       All system labels in v1 now have a corresponding field in v2 Job.
-  - name: 'annotations'
+  - name: annotations
     type: KeyValueAnnotations
     description: |-
       Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
@@ -192,45 +212,39 @@ properties:
       All system annotations in v1 now have a corresponding field in v2 Job.
 
       This field follows Kubernetes annotations' namespacing, limits, and rules.
-  - name: 'createTime'
+  - name: createTime
     type: Time
-    description: |-
-      The creation time.
+    description: The creation time.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
-    description: |-
-      The last-modified time.
+    description: The last-modified time.
     output: true
-  - name: 'deleteTime'
+  - name: deleteTime
     type: Time
-    description: |-
-      The deletion time.
+    description: The deletion time.
     output: true
-  - name: 'expireTime'
+  - name: expireTime
     type: Time
-    description: |-
-      For a deleted resource, the time after which it will be permanently deleted.
+    description: For a deleted resource, the time after which it will be permanently deleted.
     output: true
-  - name: 'creator'
+  - name: creator
     type: String
-    description: |-
-      Email address of the authenticated creator.
+    description: Email address of the authenticated creator.
     output: true
-  - name: 'lastModifier'
+  - name: lastModifier
     type: String
-    description: |-
-      Email address of the last authenticated modifier.
+    description: Email address of the last authenticated modifier.
     output: true
-  - name: 'client'
+  - name: client
     type: String
     description: |
       Arbitrary identifier for the API client.
-  - name: 'clientVersion'
+  - name: clientVersion
     type: String
     description: |
       Arbitrary version identifier for the API client.
-  - name: 'launchStage'
+  - name: launchStage
     type: Enum
     description: |
       The launch stage as defined by [Google Cloud Platform Launch Stages](https://cloud.google.com/products#product-launch-stages). Cloud Run supports ALPHA, BETA, and GA.
@@ -239,57 +253,57 @@ properties:
       For example, if ALPHA is provided as input, but only BETA and GA-level features are used, this field will be BETA on output.
     default_from_api: true
     enum_values:
-      - 'UNIMPLEMENTED'
-      - 'PRELAUNCH'
-      - 'EARLY_ACCESS'
-      - 'ALPHA'
-      - 'BETA'
-      - 'GA'
-      - 'DEPRECATED'
-  - name: 'binaryAuthorization'
+      - UNIMPLEMENTED
+      - PRELAUNCH
+      - EARLY_ACCESS
+      - ALPHA
+      - BETA
+      - GA
+      - DEPRECATED
+  - name: binaryAuthorization
     type: NestedObject
     description: |
       Settings for the Binary Authorization feature.
     properties:
-      - name: 'breakglassJustification'
+      - name: breakglassJustification
         type: String
         description: |
           If present, indicates to use Breakglass using this justification. If useDefault is False, then it must be empty. For more information on breakglass, see https://cloud.google.com/binary-authorization/docs/using-breakglass
-      - name: 'useDefault'
+      - name: useDefault
         type: Boolean
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
         conflicts:
           - policy
-      - name: 'policy'
+      - name: policy
         type: String
         description: |
           The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
         conflicts:
           - use_default
-  - name: 'startExecutionToken'
+  - name: startExecutionToken
     type: String
     description: |-
       A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully started.
       The sum of job name and token length must be fewer than 63 characters.
-    min_version: 'beta'
+    min_version: beta
     conflicts:
       - run_execution_token
-  - name: 'runExecutionToken'
+  - name: runExecutionToken
     type: String
     description: |-
       A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully completed.
       The sum of job name and token length must be fewer than 63 characters.
-    min_version: 'beta'
+    min_version: beta
     conflicts:
       - start_execution_token
-  - name: 'template'
+  - name: template
     type: NestedObject
     description: |
       The template used to create executions for this Job.
     required: true
     properties:
-      - name: 'labels'
+      - name: labels
         type: KeyValuePairs
         description: |-
           Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter,
@@ -298,7 +312,7 @@ properties:
 
           Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
           All system labels in v1 now have a corresponding field in v2 ExecutionTemplate.
-      - name: 'annotations'
+      - name: annotations
         type: KeyValuePairs
         description: |-
           Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
@@ -307,110 +321,94 @@ properties:
           All system annotations in v1 now have a corresponding field in v2 ExecutionTemplate.
 
           This field follows Kubernetes annotations' namespacing, limits, and rules.
-      - name: 'parallelism'
+      - name: parallelism
         type: Integer
-        description: |-
-          Specifies the maximum desired number of tasks the execution should run at given time. Must be <= taskCount. When the job is run, if this field is 0 or unset, the maximum possible value will be used for that execution. The actual number of tasks running in steady state will be less than this number when there are fewer tasks waiting to be completed remaining, i.e. when the work left to do is less than max parallelism.
+        description: Specifies the maximum desired number of tasks the execution should run at given time. Must be <= taskCount. When the job is run, if this field is 0 or unset, the maximum possible value will be used for that execution. The actual number of tasks running in steady state will be less than this number when there are fewer tasks waiting to be completed remaining, i.e. when the work left to do is less than max parallelism.
         default_from_api: true
-      - name: 'taskCount'
+      - name: taskCount
         type: Integer
-        description: |-
-          Specifies the desired number of tasks the execution should run. Setting to 1 means that parallelism is limited to 1 and the success of that task signals the success of the execution. More info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/
+        description: 'Specifies the desired number of tasks the execution should run. Setting to 1 means that parallelism is limited to 1 and the success of that task signals the success of the execution. More info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/'
         default_from_api: true
-      - name: 'template'
+      - name: template
         type: NestedObject
         description: |
           Describes the task(s) that will be created when executing an execution
         required: true
         properties:
-          - name: 'containers'
+          - name: containers
             type: Array
-            description: |-
-              Holds the single container that defines the unit of execution for this task.
+            description: Holds the single container that defines the unit of execution for this task.
             default_from_api: true
             item_type:
               type: NestedObject
               properties:
-                - name: 'name'
+                - name: name
                   type: String
-                  description: |-
-                    Name of the container specified as a DNS_LABEL.
-                - name: 'image'
+                  description: Name of the container specified as a DNS_LABEL.
+                - name: image
                   type: String
-                  description: |-
-                    URL of the Container image in Google Container Registry or Google Artifact Registry. More info: https://kubernetes.io/docs/concepts/containers/images
+                  description: 'URL of the Container image in Google Container Registry or Google Artifact Registry. More info: https://kubernetes.io/docs/concepts/containers/images'
                   required: true
-                - name: 'command'
+                - name: command
                   type: Array
-                  description: |-
-                    Entrypoint array. Not executed within a shell. The docker image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                  description: 'Entrypoint array. Not executed within a shell. The docker image''s ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container''s environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
                   item_type:
                     type: String
-                - name: 'args'
+                - name: args
                   type: Array
-                  description: |-
-                    Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
+                  description: Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
                   item_type:
                     type: String
-                - name: 'env'
+                - name: env
                   type: Array
-                  description: |-
-                    List of environment variables to set in the container.
+                  description: List of environment variables to set in the container.
                   is_set: true
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'name'
+                      - name: name
                         type: String
-                        description: |-
-                          Name of the environment variable. Must be a C_IDENTIFIER, and mnay not exceed 32768 characters.
+                        description: Name of the environment variable. Must be a C_IDENTIFIER, and mnay not exceed 32768 characters.
                         required: true
-                      - name: 'value'
+                      - name: value
                         type: String
                         # env is a set.
                         # The env.value has value "" in Terraform state, but it has value nil in Terraform plan,
                         # which causes the diffs for unchanged env. default_value: "" is to suppress the diffs.
                         default_value: ""
-                        description: |-
-                          Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
+                        description: Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                         # exactly_one_of:
                         #   - template.0.template.0.containers.0.env.0.value
                         #   - template.0.template.0.containers.0.env.0.valueSource
-                      - name: 'valueSource'
+                      - name: valueSource
                         type: NestedObject
-                        description: |-
-                          Source for the environment variable's value.
+                        description: Source for the environment variable's value.
                         # exactly_one_of:
                         #   - template.0.template.0.containers.0.env.0.value
                         #   - template.0.template.0.containers.0.env.0.valueSource
                         properties:
-                          - name: 'secretKeyRef'
+                          - name: secretKeyRef
                             type: NestedObject
-                            description: |-
-                              Selects a secret and a specific version from Cloud Secret Manager.
+                            description: Selects a secret and a specific version from Cloud Secret Manager.
                             properties:
-                              - name: 'secret'
+                              - name: secret
                                 type: String
-                                description: |-
-                                  The name of the secret in Cloud Secret Manager. Format: {secretName} if the secret is in the same project. projects/{project}/secrets/{secretName} if the secret is in a different project.
+                                description: 'The name of the secret in Cloud Secret Manager. Format: {secretName} if the secret is in the same project. projects/{project}/secrets/{secretName} if the secret is in a different project.'
                                 required: true
-                              - name: 'version'
+                              - name: version
                                 type: String
-                                description: |-
-                                  The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version.
+                                description: The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version.
                                 required: true
-                - name: 'resources'
+                - name: resources
                   type: NestedObject
-                  description: |-
-                    Compute Resource requirements by this container. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources
+                  description: 'Compute Resource requirements by this container. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
                   default_from_api: true
                   properties:
-                    - name: 'limits'
+                    - name: limits
                       type: KeyValuePairs
-                      description: |-
-                        Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', '6', and '8'. Setting 4 CPU requires at least 2Gi of memory, setting 6 or more CPU requires at least 4Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                      description: 'Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are ''1'', ''2'', ''4'', ''6'', and ''8''. Setting 4 CPU requires at least 2Gi of memory, setting 6 or more CPU requires at least 4Gi of memory. The values of the map is string form of the ''quantity'' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go'
                       default_from_api: true
-                - name: 'ports'
+                - name: ports
                   type: Array
                   description: |-
                     List of ports to expose from the container. Only a single port can be specified. The specified ports must be listening on all interfaces (0.0.0.0) within the container to be accessible.
@@ -419,46 +417,38 @@ properties:
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'name'
+                      - name: name
                         type: String
-                        description: |-
-                          If specified, used to specify which protocol to use. Allowed values are "http1" and "h2c".
-                      - name: 'containerPort'
+                        description: If specified, used to specify which protocol to use. Allowed values are "http1" and "h2c".
+                      - name: containerPort
                         type: Integer
-                        description: |-
-                          Port number the container listens on. This must be a valid TCP port number, 0 < containerPort < 65536.
-                - name: 'volumeMounts'
+                        description: Port number the container listens on. This must be a valid TCP port number, 0 < containerPort < 65536.
+                - name: volumeMounts
                   type: Array
-                  description: |-
-                    Volume to mount into the container's filesystem.
+                  description: Volume to mount into the container's filesystem.
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'name'
+                      - name: name
                         type: String
-                        description: |-
-                          This must match the Name of a Volume.
+                        description: This must match the Name of a Volume.
                         required: true
-                      - name: 'mountPath'
+                      - name: mountPath
                         type: String
-                        description: |-
-                          Path within the container at which the volume should be mounted. Must not contain ':'. For Cloud SQL volumes, it can be left empty, or must otherwise be /cloudsql. All instances defined in the Volume will be available as /cloudsql/[instance]. For more information on Cloud SQL volumes, visit https://cloud.google.com/sql/docs/mysql/connect-run
+                        description: Path within the container at which the volume should be mounted. Must not contain ':'. For Cloud SQL volumes, it can be left empty, or must otherwise be /cloudsql. All instances defined in the Volume will be available as /cloudsql/[instance]. For more information on Cloud SQL volumes, visit https://cloud.google.com/sql/docs/mysql/connect-run
                         required: true
-                      - name: 'subPath'
+                      - name: subPath
                         type: String
-                        description: |-
-                          Path within the volume from which the container's volume should be mounted.
-                - name: 'workingDir'
+                        description: Path within the volume from which the container's volume should be mounted.
+                - name: workingDir
                   type: String
-                  description: |-
-                    Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
-                - name: 'dependsOn'
+                  description: Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
+                - name: dependsOn
                   type: Array
-                  description: |-
-                    Names of the containers that must start before this container.
+                  description: Names of the containers that must start before this container.
                   item_type:
                     type: String
-                - name: 'startupProbe'
+                - name: startupProbe
                   type: NestedObject
                   description: |-
                     Startup probe of application within the container.
@@ -466,116 +456,106 @@ properties:
                     succeeds. Container will not be added to service endpoints if the probe fails.
                   default_from_api: true
                   properties:
-                    - name: 'initialDelaySeconds'
+                    - name: initialDelaySeconds
                       type: Integer
                       description: |-
                         Number of seconds after the container has started before the probe is
                         initiated.
                         Defaults to 0 seconds. Minimum value is 0. Maximum value is 240.
                       default_value: 0
-                    - name: 'timeoutSeconds'
+                    - name: timeoutSeconds
                       type: Integer
                       description: |-
                         Number of seconds after which the probe times out.
                         Defaults to 1 second. Minimum value is 1. Maximum value is 3600.
                         Must be smaller than periodSeconds.
                       default_value: 1
-                    - name: 'periodSeconds'
+                    - name: periodSeconds
                       type: Integer
                       description: |-
                         How often (in seconds) to perform the probe.
                         Default to 10 seconds. Minimum value is 1. Maximum value is 240.
                       default_value: 10
-                    - name: 'failureThreshold'
+                    - name: failureThreshold
                       type: Integer
                       description: |-
                         Minimum consecutive failures for the probe to be considered failed after
                         having succeeded. Defaults to 3. Minimum value is 1.
                       default_value: 3
-                    - name: 'tcpSocket'
+                    - name: tcpSocket
                       type: NestedObject
-                      description: |-
-                        TcpSocket specifies an action involving a TCP port.
+                      description: TcpSocket specifies an action involving a TCP port.
                       send_empty_value: true
                       allow_empty_object: true
                       properties:
-                        - name: 'port'
+                        - name: port
                           type: Integer
                           description: |-
                             Port number to access on the container. Number must be in the range 1 to 65535.
                             If not specified, defaults to the same value as container.ports[0].containerPort.
                           default_from_api: true
-                    - name: 'httpGet'
+                    - name: httpGet
                       type: NestedObject
-                      description: |-
-                        HttpGet specifies the http request to perform.
+                      description: HttpGet specifies the http request to perform.
                       send_empty_value: true
                       allow_empty_object: true
                       properties:
-                        - name: 'path'
+                        - name: path
                           type: String
-                          description: |-
-                            Path to access on the HTTP server. If set, it should not be empty string.
-                          default_value: "/"
-                        - name: 'port'
+                          description: Path to access on the HTTP server. If set, it should not be empty string.
+                          default_value: /
+                        - name: port
                           type: Integer
                           description: |-
                             Port number to access on the container. Number must be in the range 1 to 65535.
                             If not specified, defaults to the same value as container.ports[0].containerPort.
                           default_from_api: true
-                        - name: 'httpHeaders'
+                        - name: httpHeaders
                           type: Array
-                          description: |-
-                            Custom headers to set in the request. HTTP allows repeated headers.
+                          description: Custom headers to set in the request. HTTP allows repeated headers.
                           item_type:
                             type: NestedObject
                             properties:
-                              - name: 'name'
+                              - name: name
                                 type: String
-                                description: |-
-                                  The header field name.
+                                description: The header field name.
                                 required: true
-                              - name: 'value'
+                              - name: value
                                 type: String
-                                description: |-
-                                  The header field value.
+                                description: The header field value.
                                 send_empty_value: true
                                 default_value: ""
-                    - name: 'grpc'
+                    - name: grpc
                       type: NestedObject
-                      description: |-
-                        GRPC specifies an action involving a GRPC port.
+                      description: GRPC specifies an action involving a GRPC port.
                       send_empty_value: true
                       allow_empty_object: true
                       properties:
-                        - name: 'port'
+                        - name: port
                           type: Integer
                           description: |-
                             Port number to access on the container. Number must be in the range 1 to 65535.
                             If not specified, defaults to the same value as container.ports[0].containerPort.
                           default_from_api: true
-                        - name: 'service'
+                        - name: service
                           type: String
                           description: |-
                             The name of the service to place in the gRPC HealthCheckRequest
                             (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                             If this is not specified, the default behavior is defined by gRPC.
-          - name: 'volumes'
+          - name: volumes
             type: Array
-            description: |-
-              A list of Volumes to make available to containers.
+            description: A list of Volumes to make available to containers.
             item_type:
               type: NestedObject
               properties:
-                - name: 'name'
+                - name: name
                   type: String
-                  description: |-
-                    Volume's name.
+                  description: Volume's name.
                   required: true
-                - name: 'secret'
+                - name: secret
                   type: NestedObject
-                  description: |-
-                    Secret represents a secret that should populate this volume. More info: https://kubernetes.io/docs/concepts/storage/volumes#secret
+                  description: 'Secret represents a secret that should populate this volume. More info: https://kubernetes.io/docs/concepts/storage/volumes#secret'
                   # exactly_one_of:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
@@ -583,40 +563,33 @@ properties:
                   #   - template.0.volumes.0.gcs
                   #   - template.0.volumes.0.nfs
                   properties:
-                    - name: 'secret'
+                    - name: secret
                       type: String
-                      description: |-
-                        The name of the secret in Cloud Secret Manager. Format: {secret} if the secret is in the same project. projects/{project}/secrets/{secret} if the secret is in a different project.
+                      description: 'The name of the secret in Cloud Secret Manager. Format: {secret} if the secret is in the same project. projects/{project}/secrets/{secret} if the secret is in a different project.'
                       required: true
-                    - name: 'defaultMode'
+                    - name: defaultMode
                       type: Integer
-                      description: |-
-                        Integer representation of mode bits to use on created files by default. Must be a value between 0000 and 0777 (octal), defaulting to 0444. Directories within the path are not affected by this setting.
-                    - name: 'items'
+                      description: Integer representation of mode bits to use on created files by default. Must be a value between 0000 and 0777 (octal), defaulting to 0444. Directories within the path are not affected by this setting.
+                    - name: items
                       type: Array
-                      description: |-
-                        If unspecified, the volume will expose a file whose name is the secret, relative to VolumeMount.mount_path. If specified, the key will be used as the version to fetch from Cloud Secret Manager and the path will be the name of the file exposed in the volume. When items are defined, they must specify a path and a version.
+                      description: If unspecified, the volume will expose a file whose name is the secret, relative to VolumeMount.mount_path. If specified, the key will be used as the version to fetch from Cloud Secret Manager and the path will be the name of the file exposed in the volume. When items are defined, they must specify a path and a version.
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: 'path'
+                          - name: path
                             type: String
-                            description: |-
-                              The relative path of the secret in the container.
+                            description: The relative path of the secret in the container.
                             required: true
-                          - name: 'version'
+                          - name: version
                             type: String
-                            description: |-
-                              The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
+                            description: The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
                             required: true
-                          - name: 'mode'
+                          - name: mode
                             type: Integer
-                            description: |-
-                              Integer octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
-                - name: 'cloudSqlInstance'
+                            description: Integer octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
+                - name: cloudSqlInstance
                   type: NestedObject
-                  description: |-
-                    For Cloud SQL volumes, contains the specific instances that should be mounted. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run.
+                  description: For Cloud SQL volumes, contains the specific instances that should be mounted. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run.
                   # exactly_one_of:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
@@ -624,16 +597,14 @@ properties:
                   #   - template.0.volumes.0.gcs
                   #   - template.0.volumes.0.nfs
                   properties:
-                    - name: 'instances'
+                    - name: instances
                       type: Array
-                      description: |-
-                        The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}
+                      description: 'The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}'
                       item_type:
                         type: String
-                - name: 'emptyDir'
+                - name: emptyDir
                   type: NestedObject
-                  description: |-
-                    Ephemeral storage used as a shared volume.
+                  description: Ephemeral storage used as a shared volume.
                   # exactly_one_of:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
@@ -641,22 +612,19 @@ properties:
                   #   - template.0.volumes.0.gcs
                   #   - template.0.volumes.0.nfs
                   properties:
-                    - name: 'medium'
+                    - name: medium
                       type: Enum
-                      description: |-
-                        The different types of medium supported for EmptyDir.
-                      default_value: "MEMORY"
+                      description: The different types of medium supported for EmptyDir.
+                      default_value: MEMORY
                       enum_values:
-                        - 'MEMORY'
-                        - 'DISK'
-                    - name: 'sizeLimit'
+                        - MEMORY
+                        - DISK
+                    - name: sizeLimit
                       type: String
-                      description: |-
-                          Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
-                - name: 'gcs'
+                      description: 'Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field''s values are of the ''Quantity'' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.'
+                - name: gcs
                   type: NestedObject
-                  description: |-
-                    Cloud Storage bucket mounted as a volume using GCSFuse.
+                  description: Cloud Storage bucket mounted as a volume using GCSFuse.
                   # exactly_one_of:
                   #   - template.0.volumes.0.secret
                   #   - template.0.volumes.0.cloudSqlInstance
@@ -664,26 +632,23 @@ properties:
                   #   - template.0.volumes.0.gcs
                   #   - template.0.volumes.0.nfs
                   properties:
-                    - name: 'bucket'
+                    - name: bucket
                       type: String
-                      description: |-
-                        Name of the cloud storage bucket to back the volume. The resource service account must have permission to access the bucket.
+                      description: Name of the cloud storage bucket to back the volume. The resource service account must have permission to access the bucket.
                       required: true
-                    - name: 'readOnly'
+                    - name: readOnly
                       type: Boolean
-                      description: |-
-                        If true, mount this volume as read-only in all mounts. If false, mount this volume as read-write.
-                    - name: 'mountOptions'
+                      description: If true, mount this volume as read-only in all mounts. If false, mount this volume as read-write.
+                    - name: mountOptions
                       type: Array
                       description: |
                         A list of flags to pass to the gcsfuse command for configuring this volume.
                         Flags should be passed without leading dashes.
                       item_type:
                         type: String
-                - name: 'nfs'
+                - name: nfs
                   type: NestedObject
-                  description: |-
-                    NFS share mounted as a volume.
+                  description: NFS share mounted as a volume.
                   # exactly_one_of:
                   #   - template.0.volumes.0.secret
                   #   - template.0.volumes.0.cloudSqlInstance
@@ -691,20 +656,17 @@ properties:
                   #   - template.0.volumes.0.gcs
                   #   - template.0.volumes.0.nfs
                   properties:
-                    - name: 'server'
+                    - name: server
                       type: String
-                      description: |-
-                        Hostname or IP address of the NFS server.
+                      description: Hostname or IP address of the NFS server.
                       required: true
-                    - name: 'path'
+                    - name: path
                       type: String
-                      description: |-
-                        Path that is exported by the NFS server.
-                    - name: 'readOnly'
+                      description: Path that is exported by the NFS server.
+                    - name: readOnly
                       type: Boolean
-                      description: |-
-                        If true, mount this volume as read-only in all mounts.
-          - name: 'timeout'
+                      description: If true, mount this volume as read-only in all mounts.
+          - name: timeout
             type: String
             description: |-
               Max allowed time duration the Task may be active before the system will actively try to mark it failed and kill associated containers. This applies per attempt of a task, meaning each retry can run for the full timeout.
@@ -712,224 +674,199 @@ properties:
               A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
             default_from_api: true
             validation:
-              regex: '^[0-9]+(?:\.[0-9]{1,9})?s$'
-          - name: 'serviceAccount'
+              regex: ^[0-9]+(?:\.[0-9]{1,9})?s$
+          - name: serviceAccount
             type: String
-            description: |-
-              Email address of the IAM service account associated with the Task of a Job. The service account represents the identity of the running task, and determines what permissions the task has. If not provided, the task will use the project's default service account.
+            description: Email address of the IAM service account associated with the Task of a Job. The service account represents the identity of the running task, and determines what permissions the task has. If not provided, the task will use the project's default service account.
             default_from_api: true
-          - name: 'executionEnvironment'
+          - name: executionEnvironment
             type: Enum
-            description: |-
-              The execution environment being used to host this Task.
+            description: The execution environment being used to host this Task.
             default_from_api: true
             enum_values:
-              - 'EXECUTION_ENVIRONMENT_GEN1'
-              - 'EXECUTION_ENVIRONMENT_GEN2'
-          - name: 'encryptionKey'
+              - EXECUTION_ENVIRONMENT_GEN1
+              - EXECUTION_ENVIRONMENT_GEN2
+          - name: encryptionKey
             type: String
-            description: |-
-              A reference to a customer managed encryption key (CMEK) to use to encrypt this container image. For more information, go to https://cloud.google.com/run/docs/securing/using-cmek
-          - name: 'vpcAccess'
+            description: A reference to a customer managed encryption key (CMEK) to use to encrypt this container image. For more information, go to https://cloud.google.com/run/docs/securing/using-cmek
+          - name: vpcAccess
             type: NestedObject
-            description: |-
-              VPC Access configuration to use for this Task. For more information, visit https://cloud.google.com/run/docs/configuring/connecting-vpc.
+            description: VPC Access configuration to use for this Task. For more information, visit https://cloud.google.com/run/docs/configuring/connecting-vpc.
             properties:
-              - name: 'connector'
+              - name: connector
                 type: String
-                description: |-
-                  VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.
+                description: 'VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.'
                 conflicts:
                   - template.0.vpc_access.0.network_interfaces
-              - name: 'egress'
+              - name: egress
                 type: Enum
-                description: |-
-                  Traffic VPC egress settings.
+                description: Traffic VPC egress settings.
                 default_from_api: true
                 enum_values:
-                  - 'ALL_TRAFFIC'
-                  - 'PRIVATE_RANGES_ONLY'
-              - name: 'networkInterfaces'
+                  - ALL_TRAFFIC
+                  - PRIVATE_RANGES_ONLY
+              - name: networkInterfaces
                 type: Array
-                description: |-
-                  Direct VPC egress settings. Currently only single network interface is supported.
+                description: Direct VPC egress settings. Currently only single network interface is supported.
                 conflicts:
                   - template.0.vpc_access.0.connector
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: 'network'
+                    - name: network
                       type: String
                       description: |-
                         The VPC network that the Cloud Run resource will be able to send traffic to. At least one of network or subnetwork must be specified. If both
                         network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If network is not specified, it will be
                         looked up from the subnetwork.
                       default_from_api: true
-                    - name: 'subnetwork'
+                    - name: subnetwork
                       type: String
                       description: |-
                         The VPC subnetwork that the Cloud Run resource will get IPs from. At least one of network or subnetwork must be specified. If both
                         network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If subnetwork is not specified, the
                         subnetwork with the same name with the network will be used.
                       default_from_api: true
-                    - name: 'tags'
+                    - name: tags
                       type: Array
-                      description: |-
-                        Network tags applied to this Cloud Run job.
+                      description: Network tags applied to this Cloud Run job.
                       item_type:
                         type: String
-          - name: 'maxRetries'
+          - name: maxRetries
             type: Integer
-            description: |-
-              Number of retries allowed per Task, before marking this Task failed. Defaults to 3. Minimum value is 0.
+            description: Number of retries allowed per Task, before marking this Task failed. Defaults to 3. Minimum value is 0.
             send_empty_value: true
             default_value: 3
-          - name: 'nodeSelector'
+          - name: nodeSelector
             type: NestedObject
             description: Node Selector describes the hardware requirements of the resources.
             properties:
-              - name: 'accelerator'
+              - name: accelerator
                 type: String
-                description:
-                  The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/jobs/gpu for configuring GPU.
+                description: The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/jobs/gpu for configuring GPU.
                 required: true
-          - name: 'gpuZonalRedundancyDisabled'
+          - name: gpuZonalRedundancyDisabled
             type: Boolean
             description: True if GPU zonal redundancy is disabled on this execution.
-  - name: 'observedGeneration'
+  - name: observedGeneration
     type: String
     description: |
       The generation of this Job. See comments in reconciling for additional information on reconciliation process in Cloud Run.
     output: true
-  - name: 'terminalCondition'
+  - name: terminalCondition
     type: NestedObject
     description: |
       The Condition of this Job, containing its readiness status, and detailed error information in case it did not reach the desired state
     output: true
     properties:
-      - name: 'type'
+      - name: type
         type: String
-        description: |-
-          type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
+        description: 'type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.'
         output: true
-      - name: 'state'
+      - name: state
         type: String
-        description: |-
-          State of the condition.
+        description: State of the condition.
         output: true
-      - name: 'message'
+      - name: message
         type: String
-        description: |-
-          Human readable message indicating details about the current status.
+        description: Human readable message indicating details about the current status.
         output: true
-      - name: 'lastTransitionTime'
+      - name: lastTransitionTime
         type: Time
         description: |-
           Last time the condition transitioned from one status to another.
 
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
         output: true
-      - name: 'severity'
+      - name: severity
         type: String
-        description: |-
-          How to interpret failures of this condition, one of Error, Warning, Info
+        description: How to interpret failures of this condition, one of Error, Warning, Info
         output: true
-      - name: 'reason'
+      - name: reason
         type: String
-        description: |-
-          A common (service-level) reason for this condition.
+        description: A common (service-level) reason for this condition.
         output: true
-      - name: 'revisionReason'
+      - name: revisionReason
         type: String
-        description: |-
-          A reason for the revision condition.
+        description: A reason for the revision condition.
         output: true
-      - name: 'executionReason'
+      - name: executionReason
         type: String
-        description: |-
-          A reason for the execution condition.
+        description: A reason for the execution condition.
         output: true
-  - name: 'conditions'
+  - name: conditions
     type: Array
-    description: |-
-      The Conditions of all other associated sub-resources. They contain additional diagnostics information in case the Job does not reach its desired state. See comments in reconciling for additional information on `reconciliation` process in Cloud Run.
+    description: The Conditions of all other associated sub-resources. They contain additional diagnostics information in case the Job does not reach its desired state. See comments in reconciling for additional information on `reconciliation` process in Cloud Run.
     output: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'type'
+        - name: type
           type: String
-          description: |-
-            type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
+          description: 'type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.'
           output: true
-        - name: 'state'
+        - name: state
           type: String
-          description: |-
-            State of the condition.
+          description: State of the condition.
           output: true
-        - name: 'message'
+        - name: message
           type: String
-          description: |-
-            Human readable message indicating details about the current status.
+          description: Human readable message indicating details about the current status.
           output: true
-        - name: 'lastTransitionTime'
+        - name: lastTransitionTime
           type: Time
           description: |-
             Last time the condition transitioned from one status to another.
 
             A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
           output: true
-        - name: 'severity'
+        - name: severity
           type: String
-          description: |-
-            How to interpret failures of this condition, one of Error, Warning, Info
+          description: How to interpret failures of this condition, one of Error, Warning, Info
           output: true
-        - name: 'reason'
+        - name: reason
           type: String
-          description: |-
-            A common (service-level) reason for this condition.
+          description: A common (service-level) reason for this condition.
           output: true
-        - name: 'revisionReason'
+        - name: revisionReason
           type: String
-          description: |-
-            A reason for the revision condition.
+          description: A reason for the revision condition.
           output: true
-        - name: 'executionReason'
+        - name: executionReason
           type: String
-          description: |-
-            A reason for the execution condition.
+          description: A reason for the execution condition.
           output: true
-  - name: 'executionCount'
+  - name: executionCount
     type: Integer
     description: |
       Number of executions created for this job.
     output: true
-  - name: 'latestCreatedExecution'
+  - name: latestCreatedExecution
     type: NestedObject
     description: |
       Name of the last created execution.
     output: true
     properties:
-      - name: 'name'
+      - name: name
         type: String
         description: |
           Name of the execution.
         output: true
-      - name: 'createTime'
+      - name: createTime
         type: Time
         description: |
           Creation timestamp of the execution.
 
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
         output: true
-      - name: 'completionTime'
+      - name: completionTime
         type: Time
         description: |
           Completion timestamp of the execution.
 
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
         output: true
-  - name: 'reconciling'
+  - name: reconciling
     type: Boolean
     description: |
       Returns true if the Job is currently being acted upon by the system to bring it into the desired state.
@@ -940,7 +877,7 @@ properties:
 
       If reconciliation failed, observedGeneration and latest_succeeded_execution will have the state of the last succeeded execution or empty for newly created Job. Additional information on the failure can be found in terminalCondition and conditions
     output: true
-  - name: 'etag'
+  - name: etag
     type: String
     description: |
       A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.

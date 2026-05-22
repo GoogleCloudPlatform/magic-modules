@@ -12,64 +12,65 @@
 # limitations under the License.
 
 ---
-name: 'InstancePartition'
+name: InstancePartition
 description: |
   A Cloud Spanner instance partition is a unit of Cloud Spanner database capacity
   that can be used to partition data and processing capacity within an instance.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/spanner/docs/geo-partitioning'
-  api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.instancePartitions'
-
-id_format: 'projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}'
-base_url: 'projects/{{project}}/instances/{{instance}}/instancePartitions'
-self_link: 'projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}'
-create_url: 'projects/{{project}}/instances/{{instance}}/instancePartitions?instancePartitionId={{name}}'
-delete_url: 'projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}'
-update_verb: 'PATCH'
-
+    Official Documentation: https://cloud.google.com/spanner/docs/geo-partitioning
+  api: https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.instancePartitions
+base_url: projects/{{project}}/instances/{{instance}}/instancePartitions
+self_link: projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}
+create_url: projects/{{project}}/instances/{{instance}}/instancePartitions?instancePartitionId={{name}}
+delete_url: projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}
+update_verb: PATCH
+id_format: projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}
+import_format:
+  - projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}
+  - '{{project}}/{{instance}}/{{name}}'
+  - '{{instance}}/{{name}}'
 timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-autogen_async: true
 async:
-  actions: ['create', 'update']
-  type: 'OpAsync'
+  actions: [create, update]
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-import_format:
-  - 'projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}'
-  - '{{project}}/{{instance}}/{{name}}'
-  - '{{instance}}/{{name}}'
-examples:
-  - name: 'spanner_instance_partition_basic'
-    primary_resource_id: 'partition'
-    vars:
-      instance_name: 'test-instance'
-      partition_name: 'test-partition'
-  - name: 'spanner_instance_partition_autoscaling'
-    primary_resource_id: 'partition'
-    vars:
-      instance_name: 'test-instance'
-      partition_name: 'test-partition'
+autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: 'templates/terraform/encoders/spanner_instance_partition.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/spanner_instance_partition.go.tmpl'
+  pre_update: templates/terraform/pre_update/spanner_instance_partition.go.tmpl
+  encoder: templates/terraform/encoders/spanner_instance_partition.go.tmpl
+samples:
+  - name: spanner_instance_partition_basic
+    primary_resource_id: partition
+    steps:
+      - name: spanner_instance_partition_basic
+        resource_id_vars:
+          instance_name: test-instance
+          partition_name: test-partition
+  - name: spanner_instance_partition_autoscaling
+    primary_resource_id: partition
+    steps:
+      - name: spanner_instance_partition_autoscaling
+        resource_id_vars:
+          instance_name: test-instance
+          partition_name: test-partition
 parameters:
-  - name: 'instance'
+  - name: instance
     type: ResourceRef
-    description: 'The instance to create the instance partition in.'
+    description: The instance to create the instance partition in.
     required: true
     immutable: true
-    resource: 'Instance'
-    imports: 'name'
+    resource: Instance
+    imports: name
     url_param_only: true
-
 properties:
-  - name: 'name'
+  - name: name
     description: |
       A unique identifier for the instance partition, which cannot be changed after
       the instance partition is created. The name must be between 2 and 64 characters
@@ -78,19 +79,17 @@ properties:
     required: true
     immutable: true
     validation:
-      regex: '^[a-z][a-z0-9-]{0,61}[a-z0-9]$'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-
-  - name: 'displayName'
+      regex: ^[a-z][a-z0-9-]{0,61}[a-z0-9]$
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
     description: |
       The descriptive name for this instance partition as it appears in UIs.
       Must be unique per project and between 4 and 30 characters in length.
     type: String
     required: true
     validation:
-      function: 'validation.StringLenBetween(4,30)'
-
-  - name: 'nodeCount'
+      function: validation.StringLenBetween(4,30)
+  - name: nodeCount
     description: |
       The number of nodes allocated to this instance partition. One node equals
       1000 processing units. Exactly one of either node_count, processing_units,
@@ -98,16 +97,15 @@ properties:
     type: Integer
     default_from_api: true
     validation:
-      function: 'validation.IntAtLeast(1)'
+      function: validation.IntAtLeast(1)
     at_least_one_of:
-      - 'node_count'
-      - 'processing_units'
-      - 'autoscaling_config'
+      - node_count
+      - processing_units
+      - autoscaling_config
     conflicts:
-      - 'processing_units'
-      - 'autoscaling_config'
-
-  - name: 'processingUnits'
+      - processing_units
+      - autoscaling_config
+  - name: processingUnits
     description: |
       The number of processing units allocated to this instance partition.
       Exactly one of either node_count, processing_units, or autoscaling_config
@@ -115,16 +113,15 @@ properties:
     type: Integer
     default_from_api: true
     validation:
-      function: 'validation.IntAtLeast(1000)'
+      function: validation.IntAtLeast(1000)
     at_least_one_of:
-      - 'node_count'
-      - 'processing_units'
-      - 'autoscaling_config'
+      - node_count
+      - processing_units
+      - autoscaling_config
     conflicts:
-      - 'node_count'
-      - 'autoscaling_config'
-
-  - name: 'autoscalingConfig'
+      - node_count
+      - autoscaling_config
+  - name: autoscalingConfig
     type: NestedObject
     description: |
       The autoscaling configuration. Autoscaling is enabled if this field is set.
@@ -133,14 +130,14 @@ properties:
       OUTPUT_ONLY fields and reflect the current compute capacity allocated to the
       instance partition.
     at_least_one_of:
-      - 'node_count'
-      - 'processing_units'
-      - 'autoscaling_config'
+      - node_count
+      - processing_units
+      - autoscaling_config
     conflicts:
-      - 'node_count'
-      - 'processing_units'
+      - node_count
+      - processing_units
     properties:
-      - name: 'autoscalingLimits'
+      - name: autoscalingLimits
         type: NestedObject
         description: |
           Defines scale in controls to reduce the risk of response latency
@@ -150,62 +147,62 @@ properties:
           units to specify the limits, but should use the same unit to set both the
           min_limit and max_limit.
         properties:
-          - name: 'minProcessingUnits'
+          - name: minProcessingUnits
             type: Integer
             description: |
               Specifies minimum number of processing units allocated to the instance partition.
               If set, this number should be multiples of 1000.
             exactly_one_of:
-              - 'min_processing_units'
-              - 'min_nodes'
-          - name: 'maxProcessingUnits'
+              - min_processing_units
+              - min_nodes
+          - name: maxProcessingUnits
             type: Integer
             description: |
               Specifies maximum number of processing units allocated to the instance partition.
               If set, this number should be multiples of 1000 and be greater than or equal to
               min_processing_units.
             exactly_one_of:
-              - 'max_processing_units'
-              - 'max_nodes'
-          - name: 'minNodes'
+              - max_processing_units
+              - max_nodes
+          - name: minNodes
             type: Integer
             description: |
               Specifies number of nodes allocated to the instance partition. If set, this number
               should be greater than or equal to 1.
             exactly_one_of:
-              - 'min_processing_units'
-              - 'min_nodes'
+              - min_processing_units
+              - min_nodes
             required_with:
-              - 'max_nodes'
-          - name: 'maxNodes'
+              - max_nodes
+          - name: maxNodes
             type: Integer
             description: |
               Specifies maximum number of nodes allocated to the instance partition. If set, this number
               should be greater than or equal to min_nodes.
             exactly_one_of:
-              - 'max_processing_units'
-              - 'max_nodes'
+              - max_processing_units
+              - max_nodes
             required_with:
-              - 'min_nodes'
-      - name: 'autoscalingTargets'
+              - min_nodes
+      - name: autoscalingTargets
         type: NestedObject
         description: |
           Defines scale in controls to reduce the risk of response latency
           and outages due to abrupt scale-in events
         properties:
-          - name: 'highPriorityCpuUtilizationPercent'
+          - name: highPriorityCpuUtilizationPercent
             type: Integer
             description: |
               Specifies the target high priority cpu utilization percentage that the autoscaler
               should be trying to achieve for the instance partition.
               This number is on a scale from 0 (no utilization) to 100 (full utilization).
-          - name: 'storageUtilizationPercent'
+          - name: storageUtilizationPercent
             type: Integer
             description: |
               Specifies the target storage utilization percentage that the autoscaler
               should be trying to achieve for the instance partition.
               This number is on a scale from 0 (no utilization) to 100 (full utilization).
-          - name: 'totalCpuUtilizationPercent'
+          - name: totalCpuUtilizationPercent
             type: Integer
             description: |
               Specifies the target total cpu utilization percentage that the autoscaler
@@ -213,18 +210,17 @@ properties:
               This number is on a scale from 0 (no utilization) to 100 (full utilization). The valid range is [10, 90] inclusive.
               If not specified or set to 0, the autoscaler will skip scaling based on total cpu utilization.
               The value should be higher than high_priority_cpu_utilization_percent if present.
-  - name: 'config'
+  - name: config
     description: |
       The name of the instance partition's configuration (similar to a region) which
       defines the geographic placement and replication of data in this instance partition.
     type: ResourceRef
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/spanner_instance_config.go.tmpl'
-    resource: 'InstanceConfig'
-    imports: 'name'
-
-  - name: 'state'
+    custom_expand: templates/terraform/custom_expand/spanner_instance_config.go.tmpl
+    resource: InstanceConfig
+    imports: name
+  - name: state
     description: |
       The current instance partition state. Possible values are:
       CREATING: The instance partition is being created. Resources are being
@@ -233,5 +229,5 @@ properties:
     type: Enum
     output: true
     enum_values:
-      - 'CREATING'
-      - 'READY'
+      - CREATING
+      - READY

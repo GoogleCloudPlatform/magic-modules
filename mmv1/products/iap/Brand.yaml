@@ -12,18 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'Brand'
-deprecation_message: >-
-  This resource is deprecated on Jan 22, 2025.
-  After Jan 19, 2026 the `google_iap_brand` Terraform resource will no longer function as intended
-  due to the deprecation of the IAP OAuth Admin APIs. New projects will not be able to use these APIs.
-  March 19, 2026 The IAP OAuth Admin APIs will be permanently shut down.
-  Access to this feature will no longer be available.
+name: Brand
 description: |
   OAuth brand data. Only "Organization Internal" brands can be created
   programmatically via API. To convert it into an external brands
   please use the GCP Console.
-
 
   ~> **Note:** Brands can only be created once for a Google Cloud
   project and the underlying Google API doesn't not support DELETE or PATCH methods.
@@ -31,46 +24,49 @@ description: |
   but *will not delete it from Google Cloud.*
 references:
   guides:
-    'Setting up IAP Brand': 'https://cloud.google.com/iap/docs/tutorial-gce#set_up_iap'
-  api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands'
+    Setting up IAP Brand: https://cloud.google.com/iap/docs/tutorial-gce#set_up_iap
+  api: https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands
 docs:
-id_format: '{{name}}'
-base_url: 'projects/{{project}}/brands'
-self_link: '{{name}}'
-exclude_delete: true
+base_url: projects/{{project}}/brands
 immutable: true
+self_link: '{{name}}'
+identity:
+  - name
+id_format: '{{name}}'
 import_format:
-  - 'projects/{{project_number}}/brands/{{brand_id}}'
-  - 'projects/{{project_id}}/brands/{{brand_id}}'
+  - projects/{{project_number}}/brands/{{brand_id}}
+  - projects/{{project_id}}/brands/{{brand_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+exclude_identity_generation: true
 async:
-  type: 'PollAsync'
-  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  actions: [create]
+  type: PollAsync
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   suppress_error: false
   target_occurrences: 5
-  actions: ['create']
-identity:
-  - name
-exclude_identity_generation: true
+exclude_delete: true
+deprecation_message: This resource is deprecated on Jan 22, 2025. After Jan 19, 2026 the `google_iap_brand` Terraform resource will no longer function as intended due to the deprecation of the IAP OAuth Admin APIs. New projects will not be able to use these APIs. March 19, 2026 The IAP OAuth Admin APIs will be permanently shut down. Access to this feature will no longer be available.
 custom_code:
-  custom_import: 'templates/terraform/custom_import/iap_brand.go.tmpl'
+  custom_import: templates/terraform/custom_import/iap_brand.go.tmpl
   custom_identity:
-    - 'project'
-examples:
-  - name: 'iap_brand'
-    primary_resource_id: 'project_brand'
-    vars:
-      project_id: 'my-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      org_domain: 'ORG_DOMAIN'
+    - project
+samples:
+  - name: iap_brand
+    primary_resource_id: project_brand
     exclude_test: true
+    steps:
+      - name: iap_brand
+        resource_id_vars:
+          project_id: my-project
+        test_env_vars:
+          org_domain: ORG_DOMAIN
+          org_id: ORG_ID
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Output only. Identifier of the brand, in the format `projects/{project_number}/brands/{brand_id}`
@@ -79,7 +75,7 @@ parameters:
       brand can be created per project.
     output: true
 properties:
-  - name: 'supportEmail'
+  - name: supportEmail
     type: String
     description: |
       Support email displayed on the OAuth consent screen. Can be either a
@@ -88,12 +84,12 @@ properties:
       specified, the caller can be either a user or a service account which
       is an owner of the specified group in Cloud Identity.
     required: true
-  - name: 'applicationTitle'
+  - name: applicationTitle
     type: String
     description: |
       Application name displayed on OAuth consent screen.
     required: true
-  - name: 'orgInternalOnly'
+  - name: orgInternalOnly
     type: Boolean
     description: |
       Whether the brand is only intended for usage inside the GSuite organization only.
