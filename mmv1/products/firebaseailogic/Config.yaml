@@ -124,10 +124,12 @@ properties:
   - name: trafficFilter
     type: NestedObject
     description: Configuration for traffic filtering.
-    custom_flatten: 'templates/terraform/custom_flatten/firebaseailogic_config_traffic_filter.go.tmpl'
+    default_from_api: true
     properties:
       - name: templateOnly
         type: Boolean
+        default_value: false
+        send_empty_value: true
         description: |-
           Only allows users to use AI Logic via prompt templates for this project.
           If true, only calls using server templates are permitted.
