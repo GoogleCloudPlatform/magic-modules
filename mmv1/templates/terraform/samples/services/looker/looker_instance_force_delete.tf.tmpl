@@ -1,0 +1,10 @@
+resource "google_looker_instance" "{{$.PrimaryResourceId}}" {
+  name              = "{{index $.ResourceIdVars "instance_name"}}"
+  platform_edition  = "LOOKER_CORE_STANDARD_ANNUAL"
+  region            = "us-central1"
+  oauth_config {
+    client_id = "{{index $.ResourceIdVars "client_id"}}"
+    client_secret = "{{index $.ResourceIdVars "client_secret"}}"
+  }
+  deletion_policy = "FORCE"
+}

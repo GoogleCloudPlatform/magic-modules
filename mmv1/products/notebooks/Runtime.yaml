@@ -12,13 +12,9 @@
 # limitations under the License.
 
 ---
-name: 'Runtime'
-# This resource should not be removed until the 2025 major release or later.
-# Check instance availability first before fully removing.
-deprecation_message: '`google_notebooks_runtime` is deprecated and will be removed in a future major release. Use `google_workbench_instance` instead.'
+name: Runtime
 description: |
   A Cloud AI Platform Notebook runtime.
-
 
   ~> **Note:** Due to limitations of the Notebooks Runtime API, many fields
   in this resource do not properly detect drift. These fields will also not
@@ -28,133 +24,146 @@ description: |
 # immutable: true
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/ai-platform-notebooks'
-  api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
+    Official Documentation: https://cloud.google.com/ai-platform-notebooks
+  api: https://cloud.google.com/ai-platform/notebooks/docs/reference/rest
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/runtimes'
-self_link: 'projects/{{project}}/locations/{{location}}/runtimes/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/runtimes?runtimeId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/runtimes
+self_link: projects/{{project}}/locations/{{location}}/runtimes/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/runtimes?runtimeId={{name}}
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: runtime_name
+  # Sets the base url for base_url:GetIamPolicy and base_url:SetIamPolicy in function `qualifyRuntimeUrl`
+  base_url: projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}
+  import_format:
+    - projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}
+    - '{{runtime_name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
-iam_policy:
-  method_name_separator: ':'
-  parent_resource_attribute: 'runtime_name'
-  # Sets the base url for base_url:GetIamPolicy and base_url:SetIamPolicy in function `qualifyRuntimeUrl`
-  base_url: 'projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}'
-    - '{{runtime_name}}'
+# This resource should not be removed until the 2025 major release or later.
+# Check instance availability first before fully removing.
+deprecation_message: '`google_notebooks_runtime` is deprecated and will be removed in a future major release. Use `google_workbench_instance` instead.'
+autogen_async: true
 custom_code:
-  constants: 'templates/terraform/constants/notebooks_runtime.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/notebooks_runtime.go.tmpl'
-examples:
-  - name: 'notebook_runtime_basic'
-    primary_resource_id: 'runtime'
-    region_override: 'us-central1'
-    vars:
-      runtime_name: 'notebooks-runtime'
-  - name: 'notebook_runtime_basic_gpu'
-    primary_resource_id: 'runtime_gpu'
-    region_override: 'us-central1'
-    vars:
-      runtime_name: 'notebooks-runtime-gpu'
-  - name: 'notebook_runtime_basic_container'
-    primary_resource_id: 'runtime_container'
-    region_override: 'us-central1'
-    vars:
-      runtime_name: 'notebooks-runtime-container'
-  - name: 'notebook_runtime_kernels'
-    primary_resource_id: 'runtime_container'
-    region_override: 'us-central1'
-    vars:
-      runtime_name: 'notebooks-runtime-kernel'
-  - name: 'notebook_runtime_script'
-    primary_resource_id: 'runtime_container'
-    region_override: 'us-central1'
-    vars:
-      runtime_name: 'notebooks-runtime-script'
+  constants: templates/terraform/constants/notebooks_runtime.go.tmpl
+  pre_update: templates/terraform/pre_update/notebooks_runtime.go.tmpl
+samples:
+  - name: notebook_runtime_basic
+    primary_resource_id: runtime
+    steps:
+      - name: notebook_runtime_basic
+        resource_id_vars:
+          runtime_name: notebooks-runtime
+    region_override: us-central1
+  - name: notebook_runtime_basic_gpu
+    primary_resource_id: runtime_gpu
+    steps:
+      - name: notebook_runtime_basic_gpu
+        resource_id_vars:
+          runtime_name: notebooks-runtime-gpu
+    region_override: us-central1
+  - name: notebook_runtime_basic_container
+    primary_resource_id: runtime_container
+    steps:
+      - name: notebook_runtime_basic_container
+        resource_id_vars:
+          runtime_name: notebooks-runtime-container
+    region_override: us-central1
+  - name: notebook_runtime_kernels
+    primary_resource_id: runtime_container
+    steps:
+      - name: notebook_runtime_kernels
+        resource_id_vars:
+          runtime_name: notebooks-runtime-kernel
+    region_override: us-central1
+  - name: notebook_runtime_script
+    primary_resource_id: runtime_container
+    steps:
+      - name: notebook_runtime_script
+        resource_id_vars:
+          runtime_name: notebooks-runtime-script
+    region_override: us-central1
 parameters:
-  - name: 'location'
+  - name: location
     type: ResourceRef
-    description: 'A reference to the zone where the machine resides.'
+    description: A reference to the zone where the machine resides.
     url_param_only: true
     required: true
     immutable: true
-    resource: 'Location'
-    imports: 'selfLink'
+    resource: Location
+    imports: selfLink
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name specified for the Notebook runtime.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'virtualMachine'
+  - name: virtualMachine
     type: NestedObject
     description: |
       Use a Compute Engine VM image to start the managed notebook instance.
     exactly_one_of:
-      - 'virtual_machine'
+      - virtual_machine
     properties:
-      - name: 'instanceName'
+      - name: instanceName
         type: String
         description: |
           The user-friendly name of the Managed Compute Engine instance.
         output: true
-      - name: 'instanceId'
+      - name: instanceId
         type: String
         description: |
           The unique identifier of the Managed Compute Engine instance.
         output: true
-      - name: 'virtualMachineConfig'
+      - name: virtualMachineConfig
         type: NestedObject
         description: |
           Virtual Machine configuration settings.
         properties:
-          - name: 'zone'
+          - name: zone
             type: String
             description: |
               The zone where the virtual machine is located.
             output: true
-          - name: 'machineType'
+          - name: machineType
             type: String
             description: |
               The Compute Engine machine type used for runtimes.
             required: true
-          - name: 'dataDisk'
+          - name: dataDisk
             type: NestedObject
             description: |
               Data disk option configuration settings.
             required: true
             properties:
-              - name: 'autoDelete'
+              - name: autoDelete
                 type: Boolean
                 description: |
                   Optional. Specifies whether the disk will be auto-deleted
                   when the instance is deleted (but not when the disk is
                   detached from the instance).
                 output: true
-              - name: 'boot'
+              - name: boot
                 type: Boolean
                 description: |
                   Optional. Indicates that this is a boot disk. The virtual
                   machine will use the first partition of the disk for its
                   root filesystem.
                 output: true
-              - name: 'deviceName'
+              - name: deviceName
                 type: String
                 description: |
                   Optional. Specifies a unique device name of your choice
@@ -167,7 +176,7 @@ properties:
                   x is a number assigned by Google Compute Engine. This field
                   is only applicable for persistent disks.
                 output: true
-              - name: 'guestOsFeatures'
+              - name: guestOsFeatures
                 type: Array
                 description: |
                   Indicates a list of features to enable on the guest operating
@@ -178,14 +187,14 @@ properties:
                 output: true
                 item_type:
                   type: String
-              - name: 'index'
+              - name: index
                 type: Integer
                 description: |
                   Output only. A zero-based index to this disk, where 0 is
                   reserved for the boot disk. If you have many disks attached
                   to an instance, each disk would have a unique index number.
                 output: true
-              - name: 'initializeParams'
+              - name: initializeParams
                 type: NestedObject
                 description: |
                   Input only. Specifies the parameters for a new disk that will
@@ -196,39 +205,39 @@ properties:
                   both.
                 immutable: true
                 properties:
-                  - name: 'description'
+                  - name: description
                     type: String
                     description: |
                       Provide this property when creating the disk.
-                  - name: 'diskName'
+                  - name: diskName
                     type: String
                     description: |
                       Specifies the disk name. If not specified, the default is
                       to use the name of the instance. If the disk with the
                       instance name exists already in the given zone/region, a
                       new name will be automatically generated.
-                  - name: 'diskSizeGb'
+                  - name: diskSizeGb
                     type: Integer
                     description: |
                       Specifies the size of the disk in base-2 GB. If not
                       specified, the disk will be the same size as the image
                       (usually 10GB). If specified, the size must be equal to
                       or larger than 10GB. Default 100 GB.
-                  - name: 'diskType'
+                  - name: diskType
                     type: String
                     description: |
                       The type of the boot disk attached to this runtime,
                       defaults to standard persistent disk. For valid values,
                       see `https://cloud.google.com/vertex-ai/docs/workbench/
                       reference/rest/v1/projects.locations.runtimes#disktype`
-                  - name: 'labels'
+                  - name: labels
                     type: KeyValuePairs
                     description: |
                       Labels to apply to this disk. These can be later modified
                       by the disks.setLabels method. This field is only
                       applicable for persistent disks.
                     default_from_api: true
-              - name: 'interface'
+              - name: interface
                 type: String
                 description: |
                   "Specifies the disk interface to use for attaching this disk,
@@ -237,36 +246,36 @@ properties:
                   to attach a persistent disk in any other format than SCSI. Local SSDs
                   can use either NVME or SCSI. For performance characteristics of SCSI
                   over NVMe, see Local SSD performance. Valid values: * NVME * SCSI".
-              - name: 'kind'
+              - name: kind
                 type: String
                 description: |
                   Type of the resource. Always compute#attachedDisk for attached
                   disks.
                 output: true
-              - name: 'licenses'
+              - name: licenses
                 type: Array
                 description: |
                   Output only. Any valid publicly visible licenses.
                 output: true
                 item_type:
                   type: String
-              - name: 'mode'
+              - name: mode
                 type: String
                 description: |
                   The mode in which to attach this disk, either READ_WRITE
                   or READ_ONLY. If not specified, the default is to attach
                   the disk in READ_WRITE mode.
-              - name: 'source'
+              - name: source
                 type: String
                 description: |
                   Specifies a valid partial or full URL to an existing
                   Persistent Disk resource.
-              - name: 'type'
+              - name: type
                 type: String
                 description: |
                   Specifies the type of the disk, either SCRATCH or PERSISTENT.
                   If not specified, the default is PERSISTENT.
-          - name: 'containerImages'
+          - name: containerImages
             type: Array
             description: |
               Use a list of container images to start the notebook instance.
@@ -275,23 +284,23 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'repository'
+                - name: repository
                   type: String
                   description: |
                     The path to the container image repository.
                     For example: gcr.io/{project_id}/{imageName}
                   required: true
-                - name: 'tag'
+                - name: tag
                   type: String
                   description: |
                     The tag of the container image. If not specified, this defaults to the latest tag.
-          - name: 'encryptionConfig'
+          - name: encryptionConfig
             type: NestedObject
             description: |
               Encryption settings for virtual machine data disk.
             immutable: true
             properties:
-              - name: 'kmsKey'
+              - name: kmsKey
                 type: String
                 description: |
                   The Cloud KMS resource identifier of the customer-managed
@@ -299,13 +308,13 @@ properties:
                   It has the following format:
                   `projects/{PROJECT_ID}/locations/{REGION}/keyRings/
                   {KEY_RING_NAME}/cryptoKeys/{KEY_NAME}`
-          - name: 'shieldedInstanceConfig'
+          - name: shieldedInstanceConfig
             type: NestedObject
             description: |
               Shielded VM Instance configuration settings.
             immutable: true
             properties:
-              - name: 'enableSecureBoot'
+              - name: enableSecureBoot
                 type: Boolean
                 description: |
                   Defines whether the instance has Secure Boot enabled.Secure
@@ -313,12 +322,12 @@ properties:
                   by verifying the digital signature of all boot components, and
                   halting the boot process if signature verification fails.
                   Disabled by default.
-              - name: 'enableVtpm'
+              - name: enableVtpm
                 type: Boolean
                 description: |
                   Defines whether the instance has the vTPM enabled. Enabled by
                   default.
-              - name: 'enableIntegrityMonitoring'
+              - name: enableIntegrityMonitoring
                 type: Boolean
                 description: |
                   Defines whether the instance has integrity monitoring enabled.
@@ -327,22 +336,22 @@ properties:
                   integrity policy baseline. This baseline is initially derived
                   from the implicitly trusted boot image when the instance is
                   created. Enabled by default.
-          - name: 'acceleratorConfig'
+          - name: acceleratorConfig
             type: NestedObject
             description: |
               The Compute Engine accelerator configuration for this runtime.
             properties:
-              - name: 'type'
+              - name: type
                 type: String
                 description: |
                   Accelerator model. For valid values, see
                   `https://cloud.google.com/vertex-ai/docs/workbench/reference/
                   rest/v1/projects.locations.runtimes#AcceleratorType`
-              - name: 'coreCount'
+              - name: coreCount
                 type: Integer
                 description: |
                   Count of cores of this accelerator.
-          - name: 'network'
+          - name: network
             type: String
             description: |
               The Compute Engine network to be used for machine communications.
@@ -360,7 +369,7 @@ properties:
                 * Shared VPC (network & subnet are required). Requires
                 configuring Private Service Access.
             immutable: true
-          - name: 'subnet'
+          - name: subnet
             type: String
             description: |
               The Compute Engine subnetwork to be used for machine
@@ -370,7 +379,7 @@ properties:
                 regions/us-east1/subnetworks/sub0`
                 * `projects/[project_id]/regions/us-east1/subnetworks/sub0`
             immutable: true
-          - name: 'internalIpOnly'
+          - name: internalIpOnly
             type: Boolean
             description: |
               If true, runtime will only have internal IP addresses. By default,
@@ -381,7 +390,7 @@ properties:
               accessible without external IP addresses.
             immutable: true
             send_empty_value: true
-          - name: 'tags'
+          - name: tags
             type: Array
             description: |
               The Compute Engine tags to add to runtime (see [Tagging instances]
@@ -390,14 +399,14 @@ properties:
             default_from_api: true
             item_type:
               type: String
-          - name: 'guestAttributes'
+          - name: guestAttributes
             type: KeyValuePairs
             description: |
               The Compute Engine guest attributes. (see [Project and instance
               guest attributes](https://cloud.google.com/compute/docs/
               storing-retrieving-metadata#guest_attributes)).
             output: true
-          - name: 'metadata'
+          - name: metadata
             type: KeyValuePairs
             description: |
               The Compute Engine metadata entries to add to virtual machine.
@@ -405,7 +414,7 @@ properties:
               /compute/docs/storing-retrieving-metadata#project_and_instance
               _metadata)).
             default_from_api: true
-          - name: 'labels'
+          - name: labels
             type: KeyValuePairs
             description: |
               The labels to associate with this runtime. Label **keys** must
@@ -415,157 +424,157 @@ properties:
               conform to [RFC 1035](https://www.ietf.org/rfc/rfc1035.txt). No
               more than 32 labels can be associated with a cluster.
             default_from_api: true
-            diff_suppress_func: 'NotebooksRuntimeLabelDiffSuppress'
-          - name: 'nicType'
+            diff_suppress_func: NotebooksRuntimeLabelDiffSuppress
+          - name: nicType
             type: Enum
             description: |
               The type of vNIC to be used on this interface. This may be gVNIC
               or VirtioNet.
             immutable: true
             enum_values:
-              - 'UNSPECIFIED_NIC_TYPE'
-              - 'VIRTIO_NET'
-              - 'GVNIC'
-          - name: 'reservedIpRange'
+              - UNSPECIFIED_NIC_TYPE
+              - VIRTIO_NET
+              - GVNIC
+          - name: reservedIpRange
             type: String
             description: |
               Reserved IP Range name is used for VPC Peering. The
               subnetwork allocation will use the range *name* if it's assigned.
             immutable: true
-  - name: 'state'
+  - name: state
     type: Enum
     description: |
       The state of this runtime.
     output: true
     enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'STARTING'
-      - 'PROVISIONING'
-      - 'ACTIVE'
-      - 'STOPPING'
-      - 'STOPPED'
-      - 'DELETING'
-      - 'UPGRADING'
-      - 'INITIALIZING'
-  - name: 'healthState'
+      - STATE_UNSPECIFIED
+      - STARTING
+      - PROVISIONING
+      - ACTIVE
+      - STOPPING
+      - STOPPED
+      - DELETING
+      - UPGRADING
+      - INITIALIZING
+  - name: healthState
     type: String
     description: |
       The health state of this runtime. For a list of possible output
       values, see `https://cloud.google.com/vertex-ai/docs/workbench/
       reference/rest/v1/projects.locations.runtimes#healthstate`.
     output: true
-  - name: 'accessConfig'
+  - name: accessConfig
     type: NestedObject
     description: |
       The config settings for accessing runtime.
     properties:
-      - name: 'accessType'
+      - name: accessType
         type: String
         description: |
           The type of access mode this instance. For valid values, see
           `https://cloud.google.com/vertex-ai/docs/workbench/reference/
           rest/v1/projects.locations.runtimes#RuntimeAccessType`.
-      - name: 'runtimeOwner'
+      - name: runtimeOwner
         type: String
         description: |
           The owner of this runtime after creation. Format: `alias@example.com`.
           Currently supports one owner only.
-      - name: 'proxyUri'
+      - name: proxyUri
         type: String
         description: |
           The proxy endpoint that is used to access the runtime.
         output: true
-  - name: 'softwareConfig'
+  - name: softwareConfig
     type: NestedObject
     description: |
       The config settings for software inside the runtime.
     default_from_api: true
     update_mask_fields:
-      - 'softwareConfig.idleShutdown'
-      - 'softwareConfig.idleShutdownTimeout'
-      - 'softwareConfig.customGpuDriverPath'
-      - 'softwareConfig.postStartupScript'
+      - softwareConfig.idleShutdown
+      - softwareConfig.idleShutdownTimeout
+      - softwareConfig.customGpuDriverPath
+      - softwareConfig.postStartupScript
     properties:
-      - name: 'notebookUpgradeSchedule'
+      - name: notebookUpgradeSchedule
         type: String
         description: |
           Cron expression in UTC timezone for schedule instance auto upgrade.
           Please follow the [cron format](https://en.wikipedia.org/wiki/Cron).
-      - name: 'enableHealthMonitoring'
+      - name: enableHealthMonitoring
         type: Boolean
         description: |
           Verifies core internal services are running. Default: True.
         default_value: true
-      - name: 'idleShutdown'
+      - name: idleShutdown
         type: Boolean
         description: |
           Runtime will automatically shutdown after idle_shutdown_time.
           Default: True
         default_value: true
-      - name: 'idleShutdownTimeout'
+      - name: idleShutdownTimeout
         type: Integer
         description: |
           Time in minutes to wait before shuting down runtime.
           Default: 180 minutes
-      - name: 'installGpuDriver'
+      - name: installGpuDriver
         type: Boolean
         description: |
           Install Nvidia Driver automatically.
-      - name: 'upgradeable'
+      - name: upgradeable
         type: Boolean
         description: |
           Bool indicating whether an newer image is available in an image family.
         output: true
-      - name: 'customGpuDriverPath'
+      - name: customGpuDriverPath
         type: String
         description: |
           Specify a custom Cloud Storage path where the GPU driver is stored.
           If not specified, we'll automatically choose from official GPU drivers.
-      - name: 'postStartupScript'
+      - name: postStartupScript
         type: String
         description: |
           Path to a Bash script that automatically runs after a notebook instance
           fully boots up. The path must be a URL or
           Cloud Storage path (gs://path-to-file/file-name).
-      - name: 'postStartupScriptBehavior'
+      - name: postStartupScriptBehavior
         type: Enum
         description: |
           Behavior for the post startup script.
         enum_values:
-          - 'POST_STARTUP_SCRIPT_BEHAVIOR_UNSPECIFIED'
-          - 'RUN_EVERY_START'
-          - 'DOWNLOAD_AND_RUN_EVERY_START'
-      - name: 'kernels'
+          - POST_STARTUP_SCRIPT_BEHAVIOR_UNSPECIFIED
+          - RUN_EVERY_START
+          - DOWNLOAD_AND_RUN_EVERY_START
+      - name: kernels
         type: Array
         description: |
           Use a list of container images to use as Kernels in the notebook instance.
         item_type:
           type: NestedObject
           properties:
-            - name: 'repository'
+            - name: repository
               type: String
               description: |
                 The path to the container image repository.
                 For example: gcr.io/{project_id}/{imageName}
               required: true
-            - name: 'tag'
+            - name: tag
               type: String
               description: |
                 The tag of the container image. If not specified, this defaults to the latest tag.
-  - name: 'metrics'
+  - name: metrics
     type: NestedObject
     description: |
       Contains Runtime daemon metrics such as Service status and JupyterLab
       status
     output: true
     properties:
-      - name: 'systemMetrics'
+      - name: systemMetrics
         type: KeyValuePairs
         description: |
           Contains runtime daemon metrics, such as OS and kernels and
           sessions stats.
         output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       The labels to associate with this runtime. Label **keys** must

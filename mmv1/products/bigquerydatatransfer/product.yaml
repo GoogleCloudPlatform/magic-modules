@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'BigqueryDataTransfer'
-display_name: 'BigQuery Data Transfer'
-versions:
-  - name: 'ga'
-    base_url: 'https://bigquerydatatransfer.googleapis.com/v1/'
+name: BigqueryDataTransfer
+display_name: BigQuery Data Transfer
 scopes:
-  - 'https://www.googleapis.com/auth/bigquery'
+  - https://www.googleapis.com/auth/bigquery
+versions:
+  - name: ga
+    base_url: https://bigquerydatatransfer.googleapis.com/v1/

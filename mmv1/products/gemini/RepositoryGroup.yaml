@@ -13,67 +13,69 @@
 
 ---
 name: RepositoryGroup
-include_in_tgc_next: true
 description: The resource for managing Repository Group for Gemini Code Assist.
 references:
-  api: 'https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.codeRepositoryIndexes.repositoryGroups'
+  api: https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.codeRepositoryIndexes.repositoryGroups
 base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups
 self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}
 create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups?repositoryGroupId={{repository_group_id}}
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: GET
+  set_iam_policy_verb: POST
+  allowed_iam_role: roles/cloudaicompanion.repositoryGroupsUser
+  parent_resource_attribute: repository_group_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}
+    - '{{repository_group_id}}'
 id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}
-mutex: 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}'
-examples:
-  - name: "gemini_repository_group_basic"
-    primary_resource_id: "example"
-    vars:
-      repository_group_id: "example-repository-group"
-      git_repository_link_id: 'example-git-repository-link-id'
-      cri_id: "cri-example"
-      repository_resource: "projects/example-project/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo"
-      connection_id: "example-connection-id"
-    exclude_test: true
 timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-autogen_async: true
+mutex: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}
+sweeper:
+  parent:
+    resource_type: google_gemini_code_repository_index
+    parent_field: name
+    parent_field_extract_name: true
+    child_field: code_repository_index
 async:
+  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   actions:
     - create
     - delete
     - update
-  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
-iam_policy:
-  parent_resource_attribute: 'repository_group_id'
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'GET'
-  set_iam_policy_verb: 'POST'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}'
-    - '{{repository_group_id}}'
-  allowed_iam_role: 'roles/cloudaicompanion.repositoryGroupsUser'
 error_retry_predicates:
-  - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
-  - 'transport_tpg.IsRepositoryGroupQueueError'
-sweeper:
-  parent:
-    resource_type: 'google_gemini_code_repository_index'
-    child_field: 'code_repository_index'
-    parent_field: 'name'
-    parent_field_extract_name: true
+  - transport_tpg.IsCodeRepositoryIndexUnreadyError
+  - transport_tpg.IsRepositoryGroupQueueError
+autogen_async: true
+include_in_tgc_next: true
+samples:
+  - name: gemini_repository_group_basic
+    exclude_test: true
+    primary_resource_id: example
+    steps:
+      - name: gemini_repository_group_basic
+        resource_id_vars:
+          connection_id: example-connection-id
+          cri_id: cri-example
+          git_repository_link_id: example-git-repository-link-id
+          repository_group_id: example-repository-group
+          repository_resource: projects/example-project/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo
 parameters:
   - name: location
     type: String

@@ -26,30 +26,35 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}
 import_format:
   - projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}
-examples:
+samples:
   - name: dataform_repository_release_config
-    primary_resource_id: release
     min_version: beta
-    vars:
-      data: secret-data
-      dataform_repository_name: dataform_repository
-      git_repository_name: my/repository
-      release_name: my_release
-      secret_name: my_secret
-    test_vars_overrides:
-      # for backward compatible
-      git_repository_name: '"my/repository" + randomSuffix'
+    primary_resource_id: release
+    steps:
+      - name: dataform_repository_release_config
+        resource_id_vars:
+          data: secret-data
+          dataform_repository_name: dataform_repository
+          git_repository_name: my/repository
+          release_name: my_release
+          secret_name: my_secret
+        test_vars_overrides:
+          git_repository_name: '"my/repository" + randomSuffix'
+        min_version: beta
   - name: dataform_repository_release_config_disabled
-    primary_resource_id: release
     min_version: beta
-    vars:
-      data: secret-data
-      dataform_repository_name: dataform_repository
-      git_repository_name: my/repository
-      release_name: my_release
-      secret_name: my_secret
-    test_vars_overrides:
-      git_repository_name: '"my/repository" + randomSuffix'
+    primary_resource_id: release
+    steps:
+      - name: dataform_repository_release_config_disabled
+        resource_id_vars:
+          data: secret-data
+          dataform_repository_name: dataform_repository
+          git_repository_name: my/repository
+          release_name: my_release
+          secret_name: my_secret
+        test_vars_overrides:
+          git_repository_name: '"my/repository" + randomSuffix'
+        min_version: beta
 parameters:
   - name: region
     type: String

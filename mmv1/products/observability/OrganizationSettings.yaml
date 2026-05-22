@@ -12,27 +12,19 @@
 # limitations under the License.
 
 ---
-name: 'OrganizationSettings'
+name: OrganizationSettings
 description: Manages Cloud Observability settings for an organization.
-min_version: 'beta'
-base_url: 'organizations/{{organization}}/locations/{{location}}/settings'
-self_link: 'organizations/{{organization}}/locations/{{location}}/settings'
-
-create_url: 'organizations/{{organization}}/locations/{{location}}/settings'
-create_verb: 'PATCH'
-update_url: 'organizations/{{organization}}/locations/{{location}}/settings'
-update_verb: 'PATCH'
+base_url: organizations/{{organization}}/locations/{{location}}/settings
+min_version: beta
+self_link: organizations/{{organization}}/locations/{{location}}/settings
+create_url: organizations/{{organization}}/locations/{{location}}/settings
+update_url: organizations/{{organization}}/locations/{{location}}/settings
 update_mask: true
-exclude_delete: true
-autogen_async: true
-
-custom_code:
-  pre_create: templates/terraform/pre_create/observability_organization_settings.go.tmpl
+create_verb: PATCH
+update_verb: PATCH
 import_format:
-  - 'organizations/{{organization}}/locations/{{location}}/settings'
-
+  - organizations/{{organization}}/locations/{{location}}/settings
 async:
-  include_project: true
   operation:
     timeouts:
       insert_minutes: 10
@@ -40,59 +32,63 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-
-examples:
-  - name: "observability_organization_settings_basic"
-    config_path: "templates/terraform/examples/observability_organization_settings_basic.tf.tmpl"
-    primary_resource_id: "primary"
-    external_providers: ["time"]
-    vars:
-      location: "us"
-      kms_key_name: "example-key"
-    test_vars_overrides:
-      kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
-      # for backward compatible
-      location: '"us" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: "observability_organization_settings_basic_global"
-    config_path: "templates/terraform/examples/observability_organization_settings_basic_global.tf.tmpl"
-    primary_resource_id: "primary_global"
-    external_providers: ["time"]
-    vars:
-      location: "global"
-    test_vars_overrides:
-      # for backward compatible
-      location: '"global" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
-
+  include_project: true
+exclude_delete: true
+autogen_async: true
+custom_code:
+  pre_create: templates/terraform/pre_create/observability_organization_settings.go.tmpl
+samples:
+  - name: observability_organization_settings_basic
+    external_providers:
+      - time
+    primary_resource_id: primary
+    steps:
+      - name: observability_organization_settings_basic
+        resource_id_vars:
+          kms_key_name: example-key
+          location: us
+        test_env_vars:
+          org_id: ORG_ID
+        test_vars_overrides:
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name
+          location: '"us" + randomSuffix'
+  - name: observability_organization_settings_basic_global
+    external_providers:
+      - time
+    primary_resource_id: primary_global
+    steps:
+      - name: observability_organization_settings_basic_global
+        resource_id_vars:
+          location: global
+        test_env_vars:
+          org_id: ORG_ID
+        test_vars_overrides:
+          location: '"global" + randomSuffix'
 parameters:
-  - name: 'location'
+  - name: location
     type: String
-    description: 'The location of the settings.'
+    description: The location of the settings.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'organization'
+  - name: organization
     type: String
-    description: 'The organization ID.'
+    description: The organization ID.
     url_param_only: true
     required: true
     immutable: true
-
 properties:
-  - name: 'defaultStorageLocation'
+  - name: defaultStorageLocation
     type: String
-    description: 'The default storage location for new resources, e.g. buckets. Only valid for global location.'
-  - name: 'kmsKeyName'
+    description: The default storage location for new resources, e.g. buckets. Only valid for global location.
+  - name: kmsKeyName
     type: String
-    description: 'The default Cloud KMS key to use for new resources. Only valid for regional locations.'
-  - name: 'name'
+    description: The default Cloud KMS key to use for new resources. Only valid for regional locations.
+  - name: name
     type: String
-    description: 'The resource name of the settings.'
+    description: The resource name of the settings.
     output: true
-  - name: 'serviceAccountId'
+  - name: serviceAccountId
     type: String
-    description: 'The service account used by Cloud Observability for this organization.'
+    description: The service account used by Cloud Observability for this organization.
     output: true

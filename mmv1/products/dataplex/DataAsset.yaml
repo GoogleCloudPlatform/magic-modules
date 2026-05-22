@@ -12,92 +12,88 @@
 # limitations under the License.
 
 ---
-name: 'DataAsset'
-deprecation_message: >-
-  `google_dataplex_data_asset` is deprecated and will be removed in a future major release. Please use `google_dataplex_data_product_data_asset` resource instead.
+name: DataAsset
 description: |
   A data asset resource that can be packaged and shared via a data product.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dataplex/docs'
-  api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts.dataAssets'
+    Official Documentation: https://cloud.google.com/dataplex/docs
+  api: https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts.dataAssets
+base_url: projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets
 min_version: beta
-
-base_url: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets'
-self_link: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets/{{data_asset_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets?dataAssetId={{data_asset_id}}'
-
-id_format: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets/{{data_asset_id}}'
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets/{{data_asset_id}}'
-
-update_verb: 'PATCH'
+self_link: projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets/{{data_asset_id}}
+create_url: projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets?dataAssetId={{data_asset_id}}
 update_mask: true
-autogen_async: true
-
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets/{{data_asset_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets/{{data_asset_id}}
 async:
-  actions: ['create', 'update', 'delete']
   operation:
     base_url: '{{op_id}}'
-
+  actions: [create, update, delete]
+deprecation_message: '`google_dataplex_data_asset` is deprecated and will be removed in a future major release. Please use `google_dataplex_data_product_data_asset` resource instead.'
+autogen_async: true
+samples:
+  - name: dataplex_data_asset_basic
+    primary_resource_id: example
+    steps:
+      - name: dataplex_data_asset_basic
+        resource_id_vars:
+          data_asset_id: data-asset
+          data_product_id: data-product
+        test_env_vars:
+          project_name: PROJECT_NAME
+  - name: dataplex_data_asset_full
+    primary_resource_id: example
+    steps:
+      - name: dataplex_data_asset_full
+        resource_id_vars:
+          data_asset_id: data-asset
+          data_product_id: data-product
+        test_env_vars:
+          project_name: PROJECT_NAME
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     immutable: true
     url_param_only: true
-    description: 'The location for the data asset.'
-  - name: 'data_product_id'
+    description: The location for the data asset.
+  - name: data_product_id
     type: String
     required: true
     immutable: true
     url_param_only: true
-    description: 'The ID of the parent data product.'
-  - name: 'data_asset_id'
+    description: The ID of the parent data product.
+  - name: data_asset_id
     type: String
     required: true
     immutable: true
     url_param_only: true
-    description: 'The ID of the data asset.'
-
+    description: The ID of the data asset.
 properties:
-  - name: 'uid'
+  - name: uid
     type: String
     output: true
-    description: 'System generated unique ID.'
-  - name: 'resource'
+    description: System generated unique ID.
+  - name: resource
     type: String
     required: true
     immutable: true
-    description: 'Full resource name of the cloud resource.'
-  - name: 'labels'
+    description: Full resource name of the cloud resource.
+  - name: labels
     type: KeyValueLabels
-    description: 'User-defined labels.'
-  - name: 'accessGroupConfigs'
+    description: User-defined labels.
+  - name: accessGroupConfigs
     type: Map
-    key_name: 'access_group'
-    description: 'Access groups configurations.'
+    key_name: access_group
+    description: Access groups configurations.
     value_type:
       type: NestedObject
       properties:
-        - name: 'iamRoles'
+        - name: iamRoles
           type: Array
           item_type:
             type: String
-          description: 'IAM roles granted on the resource.'
-
-examples:
-  - name: 'dataplex_data_asset_basic'
-    primary_resource_id: 'example'
-    vars:
-      data_product_id: 'data-product'
-      data_asset_id: 'data-asset'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_data_asset_full'
-    primary_resource_id: 'example'
-    vars:
-      data_product_id: 'data-product'
-      data_asset_id: 'data-asset'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+          description: IAM roles granted on the resource.

@@ -12,29 +12,29 @@
 # limitations under the License.
 
 ---
-name: 'StoragePoolType'
-kind: 'compute#storagePoolType'
+name: StoragePoolType
 description: |
   Represents a StoragePoolType data source.
   The type of Hyperdisk Storage Pool that you create determines the type of disks that you can create in the storage pool.
 references:
   guides:
-    'Types of Hyperdisk Storage Pools': 'https://cloud.google.com/compute/docs/disks/storage-pools#sp-types'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/storagePoolTypes'
-base_url: 'projects/{{project}}/zones/{{zone}}/storagePoolTypes'
-self_link: 'projects/{{project}}/zones/{{zone}}/storagePoolTypes/{{storagePoolType}}'
-immutable: true
+    Types of Hyperdisk Storage Pools: https://cloud.google.com/compute/docs/disks/storage-pools#sp-types
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/storagePoolTypes
+base_url: projects/{{project}}/zones/{{zone}}/storagePoolTypes
 exclude: true
+immutable: true
+self_link: projects/{{project}}/zones/{{zone}}/storagePoolTypes/{{storagePoolType}}
+kind: compute#storagePoolType
 readonly: true
 parameters:
-  - name: 'zone'
+  - name: zone
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The name of the zone.
-  - name: 'storagePoolType'
+  - name: storagePoolType
     type: String
     required: true
     immutable: true
@@ -42,38 +42,38 @@ parameters:
     description: |
       Name of the storage pool type.
 properties:
-  - name: 'kind'
+  - name: kind
     type: String
     output: true
     description: |
       Type of the resource. Always compute#storagePoolType for storage pool types.
-  - name: 'id'
+  - name: id
     type: Integer
     output: true
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
-  - name: 'creation_timestamp'
+  - name: creation_timestamp
     type: String
     output: true
     description: |
       Creation timestamp in RFC3339 text format.
-  - name: 'name'
+  - name: name
     type: String
     output: true
     description: |
       Name of the resource.
-  - name: 'description'
+  - name: description
     type: String
     output: true
     description: |
       An optional description of this resource.
-  - name: 'deprecated'
+  - name: deprecated
     type: NestedObject
     output: true
     description: |
       The deprecation status associated with this storage pool type.
     properties:
-      - name: 'state'
+      - name: state
         type: String
         output: true
         description: |
@@ -82,71 +82,71 @@ properties:
           Operations which create a new resource using a DEPRECATED resource will return successfully,
           but with a warning indicating the deprecated resource and recommending its replacement.
           Operations which use OBSOLETE or DELETED resources will be rejected and result in an error.
-      - name: 'replacement'
+      - name: replacement
         type: String
         output: true
         description: |
           The URL of the suggested replacement for a deprecated resource.
           The suggested replacement resource must be the same kind of resource as the deprecated resource.
-      - name: 'deprecated'
+      - name: deprecated
         type: String
         output: true
         description: |
           An optional RFC3339 timestamp on or after which the state of this resource is intended to change to DEPRECATED.
           This is only informational and the status will not change unless the client explicitly changes it.
-      - name: 'obsolete'
+      - name: obsolete
         type: String
         output: true
         description: |
           An optional RFC3339 timestamp on or after which the state of this resource is intended to change to OBSOLETE.
           This is only informational and the status will not change unless the client explicitly changes it.
-      - name: 'deleted'
+      - name: deleted
         type: String
         output: true
         description: |
           An optional RFC3339 timestamp on or after which the state of this resource is intended to change to DELETED.
           This is only informational and the status will not change unless the client explicitly changes it.
-  - name: 'self_link'
+  - name: self_link
     type: String
     output: true
     description: |
       Server-defined URL for the resource.
-  - name: 'self_link_with_id'
+  - name: self_link_with_id
     type: String
     output: true
     description: |
       Server-defined URL for this resource with the resource id.
-  - name: 'min_pool_provisioned_capacity_gb'
+  - name: min_pool_provisioned_capacity_gb
     type: Integer
     output: true
     description: |
       Minimum storage pool size in GB.
-  - name: 'max_pool_provisioned_capacity_gb'
+  - name: max_pool_provisioned_capacity_gb
     type: Integer
     output: true
     description: |
       Maximum storage pool size in GB.
-  - name: 'min_pool_provisioned_iops'
+  - name: min_pool_provisioned_iops
     type: Integer
     output: true
     description: |
       Minimum provisioned IOPS.
-  - name: 'max_pool_provisioned_iops'
+  - name: max_pool_provisioned_iops
     type: Integer
     output: true
     description: |
       Maximum provisioned IOPS.
-  - name: 'min_pool_provisioned_throughput'
+  - name: min_pool_provisioned_throughput
     type: Integer
     output: true
     description: |
       Minimum provisioned throughput.
-  - name: 'max_pool_provisioned_throughput'
+  - name: max_pool_provisioned_throughput
     type: Integer
     output: true
     description: |
       Maximum provisioned throughput.
-  - name: 'supported_disk_types'
+  - name: supported_disk_types
     type: Array
     output: true
     description: |
