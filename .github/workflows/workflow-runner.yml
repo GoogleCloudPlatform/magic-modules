@@ -32,7 +32,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # @copilot assignment requires a user token; GITHUB_TOKEN (app installation
+      # token) cannot call replaceActorsForAssignable. Store a fine-grained PAT
+      # with Issues: read/write as the COPILOT_ASSIGN_TOKEN secret.
+      GH_TOKEN: ${{ secrets.COPILOT_ASSIGN_TOKEN }}
       # On schedule runs there is no input; pick the default product here.
       PRODUCT: ${{ inputs.product || 'compute' }}
     steps:
