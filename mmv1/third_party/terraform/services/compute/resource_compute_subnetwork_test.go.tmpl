@@ -883,7 +883,7 @@ func testAccCheckComputeSubnetworkHasSecondaryIpv6Range(subnetwork *map[string]i
 }
 {{- end }}
 
-func testAccCheckComputeSubnetworkHasNotSecondaryIpRange(subnetwork *map[string]interface{}, rangeName, ipCidrRange string) resource.TestCheckFunc { 60988a8e7 (Migrate resource_compute_subnetwork_test.go.tmpl to new API):mmv1/third_party/terraform/services/compute/resource_compute_subnetwork_test.go
+func testAccCheckComputeSubnetworkHasNotSecondaryIpRange(subnetwork *map[string]interface{}, rangeName, ipCidrRange string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if ranges, ok := (*subnetwork)["secondaryIpRanges"].([]interface{}); ok {
 			for _, raw := range ranges {
