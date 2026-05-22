@@ -1,0 +1,61 @@
+name: Workflow Runner (via Copilot coding agent)
+
+# Creates an issue on this fork and assigns it to @copilot. The Copilot coding
+# agent picks it up, runs the workflow defined in
+# .github/agents/workflow-runner.md, and opens a PR on this fork.
+#
+# You then mirror the resulting PR to upstream manually when satisfied.
+#
+# Auth: uses the workflow's built-in GITHUB_TOKEN. No third-party secrets needed.
+# Copilot's identity is managed by GitHub server-side.
+
+on:
+  workflow_dispatch:
+    inputs:
+      product:
+        description: "Magic Modules product name (e.g. compute, storage, resourcemanager)"
+        required: true
+        type: string
+
+  schedule:
+    # Mon-Fri at 13:00 UTC (06:00 PT). Cron only triggers on the default branch.
+    - cron: "0 13 * * 1-5"
+
+permissions:
+  issues: write
+  contents: read
+
+# Safety: refuse to run on the upstream repo. This workflow is intended for forks only.
+jobs:
+  open-issue:
+    if: github.repository_owner != 'GoogleCloudPlatform'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # On schedule runs there is no input; pick the default product here.
+      PRODUCT: ${{ inputs.product || 'compute' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create issue and assign to Copilot
+        run: |
+          set -euo pipefail
+          title="workflow-runner: ${PRODUCT}"
+          body_file="$(mktemp)"
+          {
+            echo "Run the Default Workflow for product **${PRODUCT}**."
+            echo
+            echo "Follow the instructions in [\`.github/agents/workflow-runner.md\`](.github/agents/workflow-runner.md)."
+            echo
+            echo "Open the resulting PR against this fork (\`${GITHUB_REPOSITORY}\`). Do not target upstream."
+            echo
+            echo "_Auto-created by \`.github/workflows/workflow-runner.yml\`._"
+          } > "$body_file"
+
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$title" \
+            --body-file "$body_file" \
+            --assignee "@copilot"
+
