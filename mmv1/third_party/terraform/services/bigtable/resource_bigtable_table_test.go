@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -662,6 +663,84 @@ func TestAccBigtableTable_automated_backups_explicitly_disabled_on_create(t *tes
 	})
 }
 
+func TestAccBigtableTable_automated_backups_locations(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Creating a table with automated backup and locations.
+			// Locations can only be set for tables in Enterprise Plus instances.
+			// Currently PRODUCTION instance type is used.
+			{
+				Config: testAccBigtableTable_automated_backups_locations(instanceName, tableName, "72h0m0s", "24h0m0s", []string{"us-central1-b"}, family),
+				Check: resource.ComposeTestCheckFunc(
+					verifyBigtableAutomatedBackupsEnablementState(t, true),
+					resource.TestCheckResourceAttrSet("google_bigtable_table.table", "automated_backup_policy.0.locations.0"),
+				),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Update locations
+			{
+				Config: testAccBigtableTable_automated_backups_locations(instanceName, tableName, "72h0m0s", "24h0m0s", []string{"us-central1-b", "us-central1-c"}, family),
+				Check: resource.ComposeTestCheckFunc(
+					verifyBigtableAutomatedBackupsEnablementState(t, true),
+					resource.TestCheckResourceAttr("google_bigtable_table.table", "automated_backup_policy.0.locations.#", "2"),
+				),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Clear locations explicitly
+			{
+				Config: testAccBigtableTable_automated_backups_locations(instanceName, tableName, "72h0m0s", "24h0m0s", []string{}, family),
+				Check: resource.ComposeTestCheckFunc(
+					verifyBigtableAutomatedBackupsEnablementState(t, true),
+					resource.TestCheckResourceAttr("google_bigtable_table.table", "automated_backup_policy.0.locations.#", "0"),
+				),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccBigtableTable_automated_backups_locations_validation(t *testing.T) {
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccBigtableTable_automated_backups_locations_invalid(instanceName, tableName, family),
+				ExpectError: regexp.MustCompile("doesn't match regexp"),
+			},
+		},
+	})
+}
+
 func TestAccBigtableTable_familyMany(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
@@ -1079,6 +1158,87 @@ resource "google_bigtable_table" "table" {
 }
 `, instanceName, instanceName, tableName, retentionPeriod, frequency, family)
 	return config
+}
+
+func testAccBigtableTable_automated_backups_locations(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency string, zones []string, family string) string {
+	var retentionPeriod string
+	if automatedBackupsRetentionPeriod != "" {
+		retentionPeriod = fmt.Sprintf(`retention_period = "%s"`, automatedBackupsRetentionPeriod)
+	}
+	var frequency string
+	if automatedBackupsFrequency != "" {
+		frequency = fmt.Sprintf(`frequency = "%s"`, automatedBackupsFrequency)
+	}
+
+	locs := ""
+	if zones != nil {
+		var locStrings []string
+		for _, z := range zones {
+			locStrings = append(locStrings, fmt.Sprintf(`"projects/${data.google_project.project.project_id}/locations/%s"`, z))
+		}
+		locs = fmt.Sprintf(`locations = [%s]`, strings.Join(locStrings, ", "))
+	}
+
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+  cluster {
+    cluster_id = "%s-1"
+    zone       = "us-central1-b"
+  }
+  cluster {
+    cluster_id = "%s-2"
+    zone       = "us-central1-c"
+  }
+  instance_type = "PRODUCTION"
+  edition = "ENTERPRISE_PLUS"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+  automated_backup_policy {
+    %s
+    %s
+    %s
+  }
+  column_family {
+    family = "%s"
+  }
+  deletion_protection = "UNPROTECTED"
+}
+`, instanceName, instanceName, instanceName, tableName, retentionPeriod, frequency, locs, family)
+}
+
+func testAccBigtableTable_automated_backups_locations_invalid(instanceName, tableName, family string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+  automated_backup_policy {
+    retention_period = "72h0m0s"
+    frequency        = "24h0m0s"
+    locations        = ["invalid-format"]
+  }
+  column_family {
+    family = "%s"
+  }
+  deletion_protection = "UNPROTECTED"
+}
+`, instanceName, instanceName, tableName, family)
 }
 
 func testAccBigtableTable_no_automated_backup_policy(instanceName, tableName, family string) string {
