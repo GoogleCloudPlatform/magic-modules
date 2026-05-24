@@ -35,7 +35,7 @@ samples:
     primary_resource_id: sample
     min_version: beta
     steps:
-      - name: "chronicle_customlist_basic"    
+      - name: "chronicle_customlist_basic"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
       - name: "chronicle_customlist_full"
