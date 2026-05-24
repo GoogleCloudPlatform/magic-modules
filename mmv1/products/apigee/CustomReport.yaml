@@ -188,9 +188,18 @@ properties:
         - name: 'value'
           type: Array
           description: |
-            The property values.
+            The property values. Each value is an Attribute object with a name and value.
           item_type:
-            type: String
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                description: |
+                  The attribute name.
+              - name: 'value'
+                type: String
+                description: |
+                  The attribute value.
   - name: 'organization'
     type: String
     description: |
