@@ -16,12 +16,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func ResourceComputeRegionInstanceTemplate() *schema.Resource {
@@ -1584,7 +1578,7 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeRegionInstanceTemplate %q", d.Id()))
 	}
 
-	// Extract id (uint64) and selfLink before JSON roundtrip.
+	// Extract id (uint64) and selfLink directly from the response map.
 	var numericId string
 	switch v := res["id"].(type) {
 	case string:
@@ -1595,27 +1589,24 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		numericId = fmt.Sprintf("%v", v)
 	}
 	selfLink, _ := res["selfLink"].(string)
-	delete(res, "id")
+	if v, ok := res["name"].(string); ok {
+		name = v
+	}
+	description, _ := res["description"].(string)
+	creationTimestamp, _ := res["creationTimestamp"].(string)
 
-	resBytes, err := json.Marshal(res)
-	if err != nil {
-		return fmt.Errorf("Error marshaling instance template response: %s", err)
+	properties, _ := res["properties"].(map[string]interface{})
+	if properties == nil {
+		properties = map[string]interface{}{}
 	}
-	var instanceTemplate compute.InstanceTemplate
-	if err := json.Unmarshal(resBytes, &instanceTemplate); err != nil {
-		return fmt.Errorf("Error parsing instance template response: %s", err)
-	}
-	instanceTemplate.SelfLink = selfLink
 
 	// Set the metadata fingerprint if there is one.
-	if instanceTemplate.Properties.Metadata != nil {
-		if err = d.Set("metadata_fingerprint", instanceTemplate.Properties.Metadata.Fingerprint); err != nil {
+	if metadata, ok := properties["metadata"].(map[string]interface{}); ok && metadata != nil {
+		if err = d.Set("metadata_fingerprint", metadata["fingerprint"]); err != nil {
 			return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
 		}
 
-		md := instanceTemplate.Properties.Metadata
-
-		_md := flattenMetadataBeta(md)
+		_md := flattenMetadataBetaFromMap(metadata)
 
 		if script, scriptExists := d.GetOk("metadata_startup_script"); scriptExists {
 			if err = d.Set("metadata_startup_script", script); err != nil {
@@ -1635,8 +1626,9 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
-	if instanceTemplate.Properties.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instanceTemplate.Properties.PartnerMetadata))
+	if partnerMetadataRaw, ok := properties["partnerMetadata"].(map[string]interface{}); ok && partnerMetadataRaw != nil {
+		partnerMetadataConverted := convertPartnerMetadataFromMap(partnerMetadataRaw)
+		partnerMetadata, err := flattenPartnerMetadata(partnerMetadataConverted)
 		if err != nil {
 			return fmt.Errorf("Error parsing partner metadata: %s", err)
 		}
@@ -1647,8 +1639,8 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	{{- end }}
 
 	// Set the tags fingerprint if there is one.
-	if instanceTemplate.Properties.Tags != nil {
-		if err = d.Set("tags_fingerprint", instanceTemplate.Properties.Tags.Fingerprint); err != nil {
+	if tags, ok := properties["tags"].(map[string]interface{}); ok && tags != nil {
+		if err = d.Set("tags_fingerprint", tags["fingerprint"]); err != nil {
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
 	} else {
@@ -1656,28 +1648,36 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.Labels != nil {
-		if err := tpgresource.SetLabels(instanceTemplate.Properties.Labels, d, "labels"); err != nil {
+	if labels, ok := properties["labels"].(map[string]interface{}); ok && labels != nil {
+		labelStrMap := make(map[string]string, len(labels))
+		for k, v := range labels {
+			labelStrMap[k] = v.(string)
+		}
+		if err := tpgresource.SetLabels(labelStrMap, d, "labels"); err != nil {
 			return fmt.Errorf("Error setting labels: %s", err)
 		}
+		if err := tpgresource.SetLabels(labelStrMap, d, "terraform_labels"); err != nil {
+			return fmt.Errorf("Error setting terraform_labels: %s", err)
+		}
+		if err := d.Set("effective_labels", labelStrMap); err != nil {
+			return fmt.Errorf("Error setting effective_labels: %s", err)
+		}
+	} else {
+		if err := tpgresource.SetLabels(map[string]string{}, d, "terraform_labels"); err != nil {
+			return fmt.Errorf("Error setting terraform_labels: %s", err)
+		}
 	}
-	if err := tpgresource.SetLabels(instanceTemplate.Properties.Labels, d, "terraform_labels"); err != nil {
-		return fmt.Errorf("Error setting terraform_labels: %s", err)
-	}
-	if err := d.Set("effective_labels", instanceTemplate.Properties.Labels); err != nil {
-		return fmt.Errorf("Error setting effective_labels: %s", err)
-	}
-	if err = d.Set("self_link", instanceTemplate.SelfLink); err != nil {
+	if err = d.Set("self_link", selfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
-	if err := d.Set("creation_timestamp", instanceTemplate.CreationTimestamp); err != nil {
+	if err := d.Set("creation_timestamp", creationTimestamp); err != nil {
 		return fmt.Errorf("Error setting creation_timestamp: %s", err)
 	}
-	if err = d.Set("name", instanceTemplate.Name); err != nil {
+	if err = d.Set("name", name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if instanceTemplate.Properties.Disks != nil {
-		disks, err := flattenDisks(instanceTemplate.Properties.Disks, d, project)
+	if disksRaw, ok := properties["disks"].([]interface{}); ok && disksRaw != nil {
+		disks, err := flattenDisks(disksRaw, d, project)
 		if err != nil {
 			return fmt.Errorf("error flattening disks: %s", err)
 		}
@@ -1685,34 +1685,38 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error setting disk: %s", err)
 		}
 	}
-	if err = d.Set("description", instanceTemplate.Description); err != nil {
+	if err = d.Set("description", description); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
-	if err = d.Set("machine_type", instanceTemplate.Properties.MachineType); err != nil {
+	if err = d.Set("machine_type", properties["machineType"]); err != nil {
 		return fmt.Errorf("Error setting machine_type: %s", err)
 	}
-	if err = d.Set("min_cpu_platform", instanceTemplate.Properties.MinCpuPlatform); err != nil {
+	if err = d.Set("min_cpu_platform", properties["minCpuPlatform"]); err != nil {
 		return fmt.Errorf("Error setting min_cpu_platform: %s", err)
 	}
 
-	if err = d.Set("can_ip_forward", instanceTemplate.Properties.CanIpForward); err != nil {
+	if err = d.Set("can_ip_forward", properties["canIpForward"]); err != nil {
 		return fmt.Errorf("Error setting can_ip_forward: %s", err)
 	}
 
-	if err = d.Set("instance_description", instanceTemplate.Properties.Description); err != nil {
+	if err = d.Set("instance_description", properties["description"]); err != nil {
 		return fmt.Errorf("Error setting instance_description: %s", err)
 	}
-	if err = d.Set("key_revocation_action_type", instanceTemplate.Properties.KeyRevocationActionType); err != nil {
+	if err = d.Set("key_revocation_action_type", properties["keyRevocationActionType"]); err != nil {
 		return fmt.Errorf("Error setting key_revocation_action_type: %s", err)
 	}
 	if err = d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(instanceTemplate.Properties.NetworkPerformanceConfig)); err != nil {
+	var npcMap map[string]interface{}
+	if v, ok := properties["networkPerformanceConfig"].(map[string]interface{}); ok {
+		npcMap = v
+	}
+	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(npcMap)); err != nil {
 		return err
 	}
-	if instanceTemplate.Properties.NetworkInterfaces != nil {
-		networkInterfaces, region, _, _, err := flattenNetworkInterfaces(d, config, instanceTemplate.Properties.NetworkInterfaces)
+	if networkInterfacesRaw, ok := properties["networkInterfaces"].([]interface{}); ok && networkInterfacesRaw != nil {
+		networkInterfaces, region, _, _, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
 		if err != nil {
 			return err
 		}
@@ -1726,8 +1730,8 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			}
 		}
 	}
-	if instanceTemplate.Properties.Scheduling != nil {
-		scheduling := flattenScheduling(instanceTemplate.Properties.Scheduling)
+	if schedulingRaw, ok := properties["scheduling"].(map[string]interface{}); ok && schedulingRaw != nil {
+		scheduling := flattenScheduling(schedulingRaw)
 {{ if ne $.TargetVersionName `ga` }}
 		// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
 		// To avoid diff, we need to set the value from the state not from API response.
@@ -1744,57 +1748,65 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error setting scheduling: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.Tags != nil {
-		if err = d.Set("tags", instanceTemplate.Properties.Tags.Items); err != nil {
-			return fmt.Errorf("Error setting tags: %s", err)
+	if tags, ok := properties["tags"].(map[string]interface{}); ok && tags != nil {
+		if items, ok := tags["items"].([]interface{}); ok {
+			strItems := make([]string, 0, len(items))
+			for _, v := range items {
+				if s, ok := v.(string); ok {
+					strItems = append(strItems, s)
+				}
+			}
+			if err = d.Set("tags", strItems); err != nil {
+				return fmt.Errorf("Error setting tags: %s", err)
+			}
 		}
 	} else {
 		if err = d.Set("tags", nil); err != nil {
 			return fmt.Errorf("Error setting empty tags: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.ServiceAccounts != nil {
-		if err = d.Set("service_account", flattenServiceAccounts(instanceTemplate.Properties.ServiceAccounts)); err != nil {
+	if serviceAccountsRaw, ok := properties["serviceAccounts"].([]interface{}); ok && serviceAccountsRaw != nil {
+		if err = d.Set("service_account", flattenServiceAccounts(serviceAccountsRaw)); err != nil {
 			return fmt.Errorf("Error setting service_account: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.GuestAccelerators != nil {
-		if err = d.Set("guest_accelerator", flattenGuestAccelerators(instanceTemplate.Properties.GuestAccelerators)); err != nil {
+	if guestAcceleratorsRaw, ok := properties["guestAccelerators"].([]interface{}); ok && guestAcceleratorsRaw != nil {
+		if err = d.Set("guest_accelerator", flattenGuestAccelerators(guestAcceleratorsRaw)); err != nil {
 			return fmt.Errorf("Error setting guest_accelerator: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.ShieldedInstanceConfig != nil {
-		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instanceTemplate.Properties.ShieldedInstanceConfig)); err != nil {
+	if shieldedRaw, ok := properties["shieldedInstanceConfig"].(map[string]interface{}); ok && shieldedRaw != nil {
+		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(shieldedRaw)); err != nil {
 			return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 		}
 	}
 
-	if instanceTemplate.Properties.ConfidentialInstanceConfig != nil {
-		if err = d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instanceTemplate.Properties.ConfidentialInstanceConfig)); err != nil {
+	if cicRaw, ok := properties["confidentialInstanceConfig"].(map[string]interface{}); ok && cicRaw != nil {
+		if err = d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(cicRaw)); err != nil {
 			return fmt.Errorf("Error setting confidential_instance_config: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.AdvancedMachineFeatures != nil {
-		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(instanceTemplate.Properties.AdvancedMachineFeatures)); err != nil {
+	if amfRaw, ok := properties["advancedMachineFeatures"].(map[string]interface{}); ok && amfRaw != nil {
+		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(amfRaw)); err != nil {
 			return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 		}
 	}
 {{- if ne $.TargetVersionName "ga" }}
-	if instanceTemplate.Properties.DisplayDevice != nil {
-		if err = d.Set("enable_display", flattenEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
+	if ddRaw, ok := properties["displayDevice"].(map[string]interface{}); ok && ddRaw != nil {
+		if err = d.Set("enable_display", flattenEnableDisplay(ddRaw)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}
 {{- end }}
 
-	if instanceTemplate.Properties.ResourcePolicies != nil {
-		if err = d.Set("resource_policies", instanceTemplate.Properties.ResourcePolicies); err != nil {
+	if resourcePoliciesRaw, ok := properties["resourcePolicies"].([]interface{}); ok && resourcePoliciesRaw != nil {
+		if err = d.Set("resource_policies", resourcePoliciesRaw); err != nil {
 			return fmt.Errorf("Error setting resource_policies: %s", err)
 		}
 	}
 
-	if reservationAffinity := instanceTemplate.Properties.ReservationAffinity; reservationAffinity != nil {
-		if err = d.Set("reservation_affinity", flattenReservationAffinity(reservationAffinity)); err != nil {
+	if raRaw, ok := properties["reservationAffinity"].(map[string]interface{}); ok && raRaw != nil {
+		if err = d.Set("reservation_affinity", flattenReservationAffinity(raRaw)); err != nil {
 			return fmt.Errorf("Error setting reservation_affinity: %s", err)
 		}
 	}

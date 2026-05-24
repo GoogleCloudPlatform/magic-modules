@@ -2166,12 +2166,23 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("machine_type", tpgresource.GetResourceNameFromSelfLink(instance.MachineType)); err != nil {
 		return fmt.Errorf("Error setting machine_type: %s", err)
 	}
-	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(instance.NetworkPerformanceConfig)); err != nil {
+	// Convert the full instance to a map once and reuse for all flatten calls.
+	niJSON, err := tpgresource.ConvertToMap(instance)
+	if err != nil {
+		return fmt.Errorf("Error converting instance to map: %s", err)
+	}
+	var npcMap map[string]interface{}
+	if v, ok := niJSON["networkPerformanceConfig"].(map[string]interface{}); ok {
+		npcMap = v
+	}
+	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(npcMap)); err != nil {
 		return err
 	}
-	// Set the networks
-	// Use the first external IP found for the default connection info.
-	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, instance.NetworkInterfaces)
+	var networkInterfacesRaw []interface{}
+	if v, ok := niJSON["networkInterfaces"].([]interface{}); ok {
+		networkInterfacesRaw = v
+	}
+	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
 	if err != nil {
 		return err
 	}
@@ -2331,7 +2342,12 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 
 	zone := tpgresource.GetResourceNameFromSelfLink(instance.Zone)
 
-	if err := d.Set("service_account", flattenServiceAccounts(instance.ServiceAccounts)); err != nil {
+	// Use the already-converted map for service accounts, scheduling, etc.
+	var serviceAccountsRaw []interface{}
+	if v, ok := niJSON["serviceAccounts"].([]interface{}); ok {
+		serviceAccountsRaw = v
+	}
+	if err := d.Set("service_account", flattenServiceAccounts(serviceAccountsRaw)); err != nil {
 		return fmt.Errorf("Error setting service_account: %s", err)
 	}
 	if err := d.Set("attached_disk", ads); err != nil {
@@ -2341,14 +2357,18 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error setting scratch_disk: %s", err)
 	}
 
+	var schedulingMap map[string]interface{}
+	if v, ok := niJSON["scheduling"].(map[string]interface{}); ok {
+		schedulingMap = v
+	}
 {{ if eq $.TargetVersionName `ga` -}}
-	if err := d.Set("scheduling", flattenScheduling(instance.Scheduling)); err != nil {
+	if err := d.Set("scheduling", flattenScheduling(schedulingMap)); err != nil {
 		return fmt.Errorf("Error setting scheduling: %s", err)
 	}
 {{ else -}}
 	// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
 	// To avoid diff, we need to set the value from the state not from API response.
-	scheduling := flattenScheduling(instance.Scheduling)
+	scheduling := flattenScheduling(schedulingMap)
 	if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
 		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
 		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
@@ -2362,13 +2382,25 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	}
 {{- end }}
 
-	if err := d.Set("guest_accelerator", flattenGuestAccelerators(instance.GuestAccelerators)); err != nil {
+	var guestAcceleratorsRaw []interface{}
+	if v, ok := niJSON["guestAccelerators"].([]interface{}); ok {
+		guestAcceleratorsRaw = v
+	}
+	if err := d.Set("guest_accelerator", flattenGuestAccelerators(guestAcceleratorsRaw)); err != nil {
 		return fmt.Errorf("Error setting guest_accelerator: %s", err)
 	}
-	if err := d.Set("shielded_instance_config", flattenShieldedVmConfig(instance.ShieldedInstanceConfig)); err != nil {
+	var shieldedMap map[string]interface{}
+	if v, ok := niJSON["shieldedInstanceConfig"].(map[string]interface{}); ok {
+		shieldedMap = v
+	}
+	if err := d.Set("shielded_instance_config", flattenShieldedVmConfig(shieldedMap)); err != nil {
 		return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 	}
-	if err := d.Set("enable_display", flattenEnableDisplay(instance.DisplayDevice)); err != nil {
+	var displayMap map[string]interface{}
+	if v, ok := niJSON["displayDevice"].(map[string]interface{}); ok {
+		displayMap = v
+	}
+	if err := d.Set("enable_display", flattenEnableDisplay(displayMap)); err != nil {
 		return fmt.Errorf("Error setting enable_display: %s", err)
 	}
 	if err := d.Set("cpu_platform", instance.CpuPlatform); err != nil {
@@ -2407,10 +2439,18 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("current_status", instance.Status); err != nil {
 		return fmt.Errorf("Error setting current_status: %s", err)
 	}
-	if err := d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig)); err != nil {
+	var cicMap map[string]interface{}
+	if v, ok := niJSON["confidentialInstanceConfig"].(map[string]interface{}); ok {
+		cicMap = v
+	}
+	if err := d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(cicMap)); err != nil {
 		return fmt.Errorf("Error setting confidential_instance_config: %s", err)
 	}
-	if err := d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)); err != nil {
+	var amfMap map[string]interface{}
+	if v, ok := niJSON["advancedMachineFeatures"].(map[string]interface{}); ok {
+		amfMap = v
+	}
+	if err := d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(amfMap)); err != nil {
 		return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 	}
 	if d.Get("desired_status") != "" {
@@ -2418,7 +2458,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("Error setting desired_status: %s", err)
 		}
 	}
-	if err := d.Set("reservation_affinity", flattenReservationAffinity(instance.ReservationAffinity)); err != nil {
+	var raMap map[string]interface{}
+	if v, ok := niJSON["reservationAffinity"].(map[string]interface{}); ok {
+		raMap = v
+	}
+	if err := d.Set("reservation_affinity", flattenReservationAffinity(raMap)); err != nil {
 		return fmt.Errorf("Error setting reservation_affinity: %s", err)
 	}
 	if err := d.Set("key_revocation_action_type", instance.KeyRevocationActionType); err != nil {

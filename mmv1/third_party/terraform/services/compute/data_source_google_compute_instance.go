@@ -56,9 +56,19 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error setting hostname: %s", err)
 	}
 
+	// Convert instance to map for flatten functions that now accept maps.
+	instanceMap, err := tpgresource.ConvertToMap(instance)
+	if err != nil {
+		return fmt.Errorf("Error converting instance to map: %s", err)
+	}
+
 	// Set the networks
 	// Use the first external IP found for the default connection info.
-	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, instance.NetworkInterfaces)
+	var networkInterfacesRaw []interface{}
+	if v, ok := instanceMap["networkInterfaces"].([]interface{}); ok {
+		networkInterfacesRaw = v
+	}
+	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
 	if err != nil {
 		return err
 	}
@@ -143,17 +153,29 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	err = d.Set("service_account", flattenServiceAccounts(instance.ServiceAccounts))
+	var serviceAccountsRaw []interface{}
+	if v, ok := instanceMap["serviceAccounts"].([]interface{}); ok {
+		serviceAccountsRaw = v
+	}
+	err = d.Set("service_account", flattenServiceAccounts(serviceAccountsRaw))
 	if err != nil {
 		return err
 	}
 
-	err = d.Set("scheduling", flattenScheduling(instance.Scheduling))
+	var schedulingMap map[string]interface{}
+	if v, ok := instanceMap["scheduling"].(map[string]interface{}); ok {
+		schedulingMap = v
+	}
+	err = d.Set("scheduling", flattenScheduling(schedulingMap))
 	if err != nil {
 		return err
 	}
 
-	err = d.Set("guest_accelerator", flattenGuestAccelerators(instance.GuestAccelerators))
+	var guestAcceleratorsRaw []interface{}
+	if v, ok := instanceMap["guestAccelerators"].([]interface{}); ok {
+		guestAcceleratorsRaw = v
+	}
+	err = d.Set("guest_accelerator", flattenGuestAccelerators(guestAcceleratorsRaw))
 	if err != nil {
 		return err
 	}
@@ -163,12 +185,20 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instance.ShieldedInstanceConfig))
+	var shieldedMap map[string]interface{}
+	if v, ok := instanceMap["shieldedInstanceConfig"].(map[string]interface{}); ok {
+		shieldedMap = v
+	}
+	err = d.Set("shielded_instance_config", flattenShieldedVmConfig(shieldedMap))
 	if err != nil {
 		return err
 	}
 
-	err = d.Set("enable_display", flattenEnableDisplay(instance.DisplayDevice))
+	var displayMap map[string]interface{}
+	if v, ok := instanceMap["displayDevice"].(map[string]interface{}); ok {
+		displayMap = v
+	}
+	err = d.Set("enable_display", flattenEnableDisplay(displayMap))
 	if err != nil {
 		return err
 	}

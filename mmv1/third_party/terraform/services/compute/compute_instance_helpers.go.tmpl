@@ -19,6 +19,16 @@ import (
 {{- end }}
 )
 
+// toFloat64 safely converts a JSON-unmarshaled interface{} value to float64.
+// JSON numbers are always float64 after json.Unmarshal, so this handles nil safely.
+func toFloat64(v interface{}) float64 {
+	if v == nil {
+		return 0
+	}
+	f, _ := v.(float64)
+	return f
+}
+
 func instanceSchedulingNodeAffinitiesElemSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -77,6 +87,34 @@ func flattenAliasIpRange(d *schema.ResourceData, ranges []*compute.AliasIpRange,
 	return sorted
 }
 
+func flattenAliasIpRangeFromMap(d *schema.ResourceData, ranges []interface{}, i int) []map[string]interface{} {
+	prefix := fmt.Sprintf("network_interface.%d", i)
+
+	configData := []map[string]interface{}{}
+	for _, item := range d.Get(prefix + ".alias_ip_range").([]interface{}) {
+		configData = append(configData, item.(map[string]interface{}))
+	}
+
+	apiData := make([]map[string]interface{}, 0, len(ranges))
+	for _, rangeRaw := range ranges {
+		r, ok := rangeRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		apiData = append(apiData, map[string]interface{}{
+			"ip_cidr_range":         r["ipCidrRange"],
+			"subnetwork_range_name": r["subnetworkRangeName"],
+		})
+	}
+
+	//permadiff fix
+	sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "ip_cidr_range")
+	if err != nil {
+		return apiData
+	}
+	return sorted
+}
+
 {{ if ne $.TargetVersionName `ga` -}}
 func flattenIpv6AliasRange(d *schema.ResourceData, ranges []*compute.AliasIpRange, i int) []map[string]interface{} {
 	prefix := fmt.Sprintf("network_interface.%d", i)
@@ -91,6 +129,34 @@ func flattenIpv6AliasRange(d *schema.ResourceData, ranges []*compute.AliasIpRang
 		apiData = append(apiData, map[string]interface{}{
 			"ip_cidr_range":         ipRange.IpCidrRange,
 			"subnetwork_range_name": ipRange.SubnetworkRangeName,
+		})
+	}
+
+	//permadiff fix
+	sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "ip_cidr_range")
+	if err != nil {
+		return apiData
+	}
+	return sorted
+}
+
+func flattenIpv6AliasRangeFromMap(d *schema.ResourceData, ranges []interface{}, i int) []map[string]interface{} {
+	prefix := fmt.Sprintf("network_interface.%d", i)
+
+	configData := []map[string]interface{}{}
+	for _, item := range d.Get(prefix + ".alias_ipv6_range").([]interface{}) {
+		configData = append(configData, item.(map[string]interface{}))
+	}
+
+	apiData := make([]map[string]interface{}, 0, len(ranges))
+	for _, rangeRaw := range ranges {
+		r, ok := rangeRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		apiData = append(apiData, map[string]interface{}{
+			"ip_cidr_range":         r["ipCidrRange"],
+			"subnetwork_range_name": r["subnetworkRangeName"],
 		})
 	}
 
@@ -379,113 +445,136 @@ func expandGracefulShutdownMaxDuration(v interface{}) (*compute.Duration, error)
 }
 {{ end }}
 
-func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
+func flattenScheduling(resp map[string]interface{}) []map[string]interface{} {
+	if resp == nil {
+		return nil
+	}
 	schedulingMap := map[string]interface{}{
-		"on_host_maintenance":         resp.OnHostMaintenance,
-		"preemptible":                 resp.Preemptible,
-		"min_node_cpus":               resp.MinNodeCpus,
-		"provisioning_model":          resp.ProvisioningModel,
-		"instance_termination_action": resp.InstanceTerminationAction,
-		"availability_domain":         resp.AvailabilityDomain,
-		"termination_time":            resp.TerminationTime,
+		"on_host_maintenance":         resp["onHostMaintenance"],
+		"preemptible":                 resp["preemptible"],
+		"min_node_cpus":               int64(toFloat64(resp["minNodeCpus"])),
+		"provisioning_model":          resp["provisioningModel"],
+		"instance_termination_action": resp["instanceTerminationAction"],
+		"availability_domain":         int64(toFloat64(resp["availabilityDomain"])),
+		"termination_time":            resp["terminationTime"],
 	}
 
-	if resp.AutomaticRestart != nil {
-		schedulingMap["automatic_restart"] = *resp.AutomaticRestart
+	if v, ok := resp["automaticRestart"].(bool); ok {
+		schedulingMap["automatic_restart"] = v
 	}
 
-	if resp.MaxRunDuration != nil {
-		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(resp.MaxRunDuration)
+	if v, ok := resp["maxRunDuration"].(map[string]interface{}); ok && v != nil {
+		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(v)
 	}
 
-	if resp.OnInstanceStopAction != nil {
-		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(resp.OnInstanceStopAction)
+	if v, ok := resp["onInstanceStopAction"].(map[string]interface{}); ok && v != nil {
+		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(v)
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
-	schedulingMap["skip_guest_os_shutdown"] = resp.SkipGuestOsShutdown
+	schedulingMap["skip_guest_os_shutdown"] = resp["skipGuestOsShutdown"]
 
-	if resp.HostErrorTimeoutSeconds != 0 {
-		schedulingMap["host_error_timeout_seconds"] = resp.HostErrorTimeoutSeconds
+	if v, ok := resp["hostErrorTimeoutSeconds"]; ok && v != nil {
+		schedulingMap["host_error_timeout_seconds"] = int64(toFloat64(v))
 	}
 
-	if resp.MaintenanceInterval != "" {
-		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
+	if v, ok := resp["maintenanceInterval"].(string); ok && v != "" {
+		schedulingMap["maintenance_interval"] = v
 	}
 
-	if resp.GracefulShutdown != nil {
-		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(resp.GracefulShutdown)
+	if v, ok := resp["gracefulShutdown"].(map[string]interface{}); ok && v != nil {
+		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(v)
 	}
 
-	if resp.PreemptionNoticeDuration != nil {
-		schedulingMap["preemption_notice_duration"] = flattenComputePreemptionNoticeDuration(resp.PreemptionNoticeDuration)
+	if v, ok := resp["preemptionNoticeDuration"].(map[string]interface{}); ok && v != nil {
+		schedulingMap["preemption_notice_duration"] = flattenComputePreemptionNoticeDuration(v)
 	}
 {{- end }}
 
-	if resp.LocalSsdRecoveryTimeout != nil {
-		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(resp.LocalSsdRecoveryTimeout)
+	if v, ok := resp["localSsdRecoveryTimeout"].(map[string]interface{}); ok && v != nil {
+		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(v)
 	}
 
 	nodeAffinities := schema.NewSet(schema.HashResource(instanceSchedulingNodeAffinitiesElemSchema()), nil)
-	for _, na := range resp.NodeAffinities {
-		nodeAffinities.Add(map[string]interface{}{
-			"key":      na.Key,
-			"operator": na.Operator,
-			"values":   schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(na.Values)),
-		})
+	if nas, ok := resp["nodeAffinities"].([]interface{}); ok {
+		for _, naRaw := range nas {
+			na, ok := naRaw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			var values []interface{}
+			if v, ok := na["values"].([]interface{}); ok {
+				values = v
+			}
+			strValues := make([]string, 0, len(values))
+			for _, v := range values {
+				if s, ok := v.(string); ok {
+					strValues = append(strValues, s)
+				}
+			}
+			nodeAffinities.Add(map[string]interface{}{
+				"key":      na["key"],
+				"operator": na["operator"],
+				"values":   schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(strValues)),
+			})
+		}
 	}
 	schedulingMap["node_affinities"] = nodeAffinities
 
 	return []map[string]interface{}{schedulingMap}
 }
 
-func flattenComputeMaxRunDuration(v *compute.Duration) []interface{} {
+func flattenComputeMaxRunDuration(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
 	transformed := make(map[string]interface{})
-	transformed["nanos"] = v.Nanos
-	transformed["seconds"] = v.Seconds
+	transformed["nanos"] = int64(toFloat64(v["nanos"]))
+	transformed["seconds"] = int64(toFloat64(v["seconds"]))
 	return []interface{}{transformed}
 }
 
-func flattenOnInstanceStopAction(v *compute.SchedulingOnInstanceStopAction) []interface{} {
+func flattenOnInstanceStopAction(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
 	transformed := make(map[string]interface{})
-	transformed["discard_local_ssd"] = v.DiscardLocalSsd
+	transformed["discard_local_ssd"] = v["discardLocalSsd"]
 	return []interface{}{transformed}
 }
 
-func flattenComputeLocalSsdRecoveryTimeout(v *compute.Duration) []interface{} {
+func flattenComputeLocalSsdRecoveryTimeout(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
 	transformed := make(map[string]interface{})
-	transformed["nanos"] = v.Nanos
-	transformed["seconds"] = v.Seconds
+	transformed["nanos"] = int64(toFloat64(v["nanos"]))
+	transformed["seconds"] = int64(toFloat64(v["seconds"]))
 	return []interface{}{transformed}
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func flattenGracefulShutdown(v *compute.SchedulingGracefulShutdown) []interface{} {
+func flattenGracefulShutdown(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
 	transformed := make(map[string]interface{})
-	transformed["enabled"] = v.Enabled
-	transformed["max_duration"] = flattenGracefulShutdownMaxDuration(v.MaxDuration)
+	transformed["enabled"] = v["enabled"]
+	if md, ok := v["maxDuration"].(map[string]interface{}); ok && md != nil {
+		transformed["max_duration"] = flattenGracefulShutdownMaxDuration(md)
+	} else {
+		transformed["max_duration"] = nil
+	}
 	return []interface{}{transformed}
 }
 
-func flattenGracefulShutdownMaxDuration(v *compute.Duration) []interface{} {
+func flattenGracefulShutdownMaxDuration(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
 	transformed := make(map[string]interface{})
-	transformed["nanos"] = v.Nanos
-	transformed["seconds"] = v.Seconds
+	transformed["nanos"] = int64(toFloat64(v["nanos"]))
+	transformed["seconds"] = int64(toFloat64(v["seconds"]))
 	return []interface{}{transformed}
 }
 
@@ -509,125 +598,185 @@ func expandComputePreemptionNoticeDuration(v interface{}) (*compute.Duration, er
 	return &duration, nil
 }
 
-func flattenComputePreemptionNoticeDuration(v *compute.Duration) []interface{} {
+func flattenComputePreemptionNoticeDuration(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
 	transformed := make(map[string]interface{})
-	transformed["nanos"] = v.Nanos
-	transformed["seconds"] = v.Seconds
+	transformed["nanos"] = int64(toFloat64(v["nanos"]))
+	transformed["seconds"] = int64(toFloat64(v["seconds"]))
 	return []interface{}{transformed}
 }
 {{- end }}
 
-func flattenAccessConfigs(accessConfigs []*compute.AccessConfig) ([]map[string]interface{}, string) {
-	flattened := make([]map[string]interface{}, len(accessConfigs))
+func flattenAccessConfigs(accessConfigs []interface{}) ([]map[string]interface{}, string) {
+	flattened := make([]map[string]interface{}, 0, len(accessConfigs))
 	natIP := ""
-	for i, ac := range accessConfigs {
-		flattened[i] = map[string]interface{}{
-			"nat_ip":       ac.NatIP,
-			"network_tier": ac.NetworkTier,
+	for _, acRaw := range accessConfigs {
+		ac, ok := acRaw.(map[string]interface{})
+		if !ok {
+			continue
 		}
-		if ac.SetPublicPtr {
-			flattened[i]["public_ptr_domain_name"] = ac.PublicPtrDomainName
+		natIPVal, _ := ac["natIP"].(string)
+		entry := map[string]interface{}{
+			"nat_ip":       natIPVal,
+			"network_tier": ac["networkTier"],
+		}
+		if setPublicPtr, ok := ac["setPublicPtr"].(bool); ok && setPublicPtr {
+			entry["public_ptr_domain_name"] = ac["publicPtrDomainName"]
 		}
 		if natIP == "" {
-			natIP = ac.NatIP
+			natIP = natIPVal
 		}
 		{{- if ne $.TargetVersionName "ga" }}
-		if ac.SecurityPolicy != "" {
-			flattened[i]["security_policy"] = ac.SecurityPolicy
+		if sp, ok := ac["securityPolicy"].(string); ok && sp != "" {
+			entry["security_policy"] = sp
 		}
 		{{- end }}
+		flattened = append(flattened, entry)
 	}
 	return flattened, natIP
 }
 
-func flattenIpv6AccessConfigs(ipv6AccessConfigs []*compute.AccessConfig) []map[string]interface{} {
-	flattened := make([]map[string]interface{}, len(ipv6AccessConfigs))
-	for i, ac := range ipv6AccessConfigs {
-		flattened[i] = map[string]interface{}{
-			"network_tier": ac.NetworkTier,
+func flattenIpv6AccessConfigs(ipv6AccessConfigs []interface{}) []map[string]interface{} {
+	flattened := make([]map[string]interface{}, 0, len(ipv6AccessConfigs))
+	for _, acRaw := range ipv6AccessConfigs {
+		ac, ok := acRaw.(map[string]interface{})
+		if !ok {
+			continue
 		}
-		flattened[i]["public_ptr_domain_name"] = ac.PublicPtrDomainName
-		flattened[i]["external_ipv6"] = ac.ExternalIpv6
-		flattened[i]["external_ipv6_prefix_length"] = strconv.FormatInt(ac.ExternalIpv6PrefixLength, 10)
-		flattened[i]["name"] = ac.Name
+		prefixLen := int64(toFloat64(ac["externalIpv6PrefixLength"]))
+		entry := map[string]interface{}{
+			"network_tier":                ac["networkTier"],
+			"public_ptr_domain_name":      ac["publicPtrDomainName"],
+			"external_ipv6":               ac["externalIpv6"],
+			"external_ipv6_prefix_length": strconv.FormatInt(prefixLen, 10),
+			"name":                        ac["name"],
+		}
 		{{- if ne $.TargetVersionName "ga" }}
-		if ac.SecurityPolicy != "" {
-			flattened[i]["security_policy"] = ac.SecurityPolicy
+		if sp, ok := ac["securityPolicy"].(string); ok && sp != "" {
+			entry["security_policy"] = sp
 		}
 		{{- end }}
+		flattened = append(flattened, entry)
 	}
 	return flattened
 }
 
-func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Config, networkInterfaces []*compute.NetworkInterface) ([]map[string]interface{}, string, string, string, error) {
-	flattened := make([]map[string]interface{}, len(networkInterfaces))
+func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Config, networkInterfaces []interface{}) ([]map[string]interface{}, string, string, string, error) {
+	flattened := make([]map[string]interface{}, 0, len(networkInterfaces))
 	var region, internalIP, externalIP string
 
-	for i, iface := range networkInterfaces {
+	for i, ifaceRaw := range networkInterfaces {
+		iface, ok := ifaceRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		var accessConfigsRaw []interface{}
+		if v, ok := iface["accessConfigs"].([]interface{}); ok {
+			accessConfigsRaw = v
+		}
 		var ac []map[string]interface{}
-		ac, externalIP = flattenAccessConfigs(iface.AccessConfigs)
+		ac, externalIP = flattenAccessConfigs(accessConfigsRaw)
 
-		subnet, err := tpgresource.ParseSubnetworkFieldValue(iface.Subnetwork, d, config)
+		subnetwork, _ := iface["subnetwork"].(string)
+		subnet, err := tpgresource.ParseSubnetworkFieldValue(subnetwork, d, config)
 		if err != nil {
 			return nil, "", "", "", err
 		}
 		region = subnet.Region
 
-		flattened[i] = map[string]interface{}{
-			"network_ip":          iface.NetworkIP,
-			"network":             tpgresource.ConvertSelfLinkToV1(iface.Network),
-			"parent_nic_name":     iface.ParentNicName,
-			"vlan":                iface.Vlan,
-			"subnetwork":          tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
+		var aliasIpv6Ranges []interface{}
+		{{ if ne $.TargetVersionName `ga` -}}
+		if v, ok := iface["aliasIpv6Ranges"].([]interface{}); ok {
+			aliasIpv6Ranges = v
+		}
+		{{- end }}
+		_ = aliasIpv6Ranges
+
+		networkIP, _ := iface["networkIP"].(string)
+		network, _ := iface["network"].(string)
+		parentNicName, _ := iface["parentNicName"].(string)
+		vlan := int64(toFloat64(iface["vlan"]))
+		nicType, _ := iface["nicType"].(string)
+		stackType, _ := iface["stackType"].(string)
+		ipv6Address, _ := iface["ipv6Address"].(string)
+		queueCount := int64(toFloat64(iface["queueCount"]))
+		internalIpv6PrefixLength := int64(toFloat64(iface["internalIpv6PrefixLength"]))
+		igmpQuery, _ := iface["igmpQuery"].(string)
+
+		var ipv6AccessConfigsRaw []interface{}
+		if v, ok := iface["ipv6AccessConfigs"].([]interface{}); ok {
+			ipv6AccessConfigsRaw = v
+		}
+
+		var aliasIpRangesRaw []interface{}
+		if v, ok := iface["aliasIpRanges"].([]interface{}); ok {
+			aliasIpRangesRaw = v
+		}
+
+		entry := map[string]interface{}{
+			"network_ip":          networkIP,
+			"network":             tpgresource.ConvertSelfLinkToV1(network),
+			"parent_nic_name":     parentNicName,
+			"vlan":                vlan,
+			"subnetwork":          tpgresource.ConvertSelfLinkToV1(subnetwork),
 			"subnetwork_project":  subnet.Project,
 			"access_config":       ac,
-			"alias_ip_range":      flattenAliasIpRange(d, iface.AliasIpRanges, i),
+			"alias_ip_range":      flattenAliasIpRangeFromMap(d, aliasIpRangesRaw, i),
 			{{ if ne $.TargetVersionName `ga` -}}
-			"alias_ipv6_range":     flattenIpv6AliasRange(d, iface.AliasIpv6Ranges, i),
+			"alias_ipv6_range":     flattenIpv6AliasRangeFromMap(d, aliasIpv6Ranges, i),
 			{{- end }}
-			"nic_type":            iface.NicType,
-			"stack_type":          iface.StackType,
-			"ipv6_access_config": flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
-			"ipv6_address":        iface.Ipv6Address,
-			"queue_count":         iface.QueueCount,
-			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
-			"igmp_query":          iface.IgmpQuery,
+			"nic_type":            nicType,
+			"stack_type":          stackType,
+			"ipv6_access_config":  flattenIpv6AccessConfigs(ipv6AccessConfigsRaw),
+			"ipv6_address":        ipv6Address,
+			"queue_count":         queueCount,
+			"internal_ipv6_prefix_length": internalIpv6PrefixLength,
+			"igmp_query":          igmpQuery,
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
 		// same flattening code for both resource types, so we avoid trying to
 		// set the name field when it's not set at the GCE end.
-		if iface.Name != "" {
-			flattened[i]["name"] = iface.Name
+		if name, ok := iface["name"].(string); ok && name != "" {
+			entry["name"] = name
 		}
 		{{- if ne $.TargetVersionName "ga" }}
-		if iface.MacAddress != "" {
-			flattened[i]["mac_address"] = iface.MacAddress
+		if macAddress, ok := iface["macAddress"].(string); ok && macAddress != "" {
+			entry["mac_address"] = macAddress
 		}
 		{{- end }}
 		if internalIP == "" {
-			internalIP = iface.NetworkIP
+			internalIP = networkIP
 		}
 
-		if iface.NetworkAttachment != "" {
-			networkAttachment, err := tpgresource.GetRelativePath(iface.NetworkAttachment)
+		if networkAttachment, ok := iface["networkAttachment"].(string); ok && networkAttachment != "" {
+			relPath, err := tpgresource.GetRelativePath(networkAttachment)
 			if err != nil {
 				return nil, "", "", "", err
 			}
-			flattened[i]["network_attachment"] = networkAttachment
+			entry["network_attachment"] = relPath
 		}
 
 		{{ if ne $.TargetVersionName `ga` -}}
 		// the security_policy for a network_interface is found in one of its accessConfigs.
-		if len(iface.AccessConfigs) > 0 && iface.AccessConfigs[0].SecurityPolicy != "" {
-			flattened[i]["security_policy"] = iface.AccessConfigs[0].SecurityPolicy
-		} else if len(iface.Ipv6AccessConfigs) > 0 && iface.Ipv6AccessConfigs[0].SecurityPolicy != "" {
-			flattened[i]["security_policy"] = iface.Ipv6AccessConfigs[0].SecurityPolicy
+		if len(accessConfigsRaw) > 0 {
+			if ac0, ok := accessConfigsRaw[0].(map[string]interface{}); ok {
+				if sp, ok := ac0["securityPolicy"].(string); ok && sp != "" {
+					entry["security_policy"] = sp
+				}
+			}
+		}
+		if entry["security_policy"] == nil && len(ipv6AccessConfigsRaw) > 0 {
+			if iac0, ok := ipv6AccessConfigsRaw[0].(map[string]interface{}); ok {
+				if sp, ok := iac0["securityPolicy"].(string); ok && sp != "" {
+					entry["security_policy"] = sp
+				}
+			}
 		}
 		{{- end }}
+		flattened = append(flattened, entry)
 	}
 	return flattened, region, internalIP, externalIP, nil
 }
@@ -740,13 +889,26 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 	return ifaces, nil
 }
 
-func flattenServiceAccounts(serviceAccounts []*compute.ServiceAccount) []map[string]interface{} {
-	result := make([]map[string]interface{}, len(serviceAccounts))
-	for i, serviceAccount := range serviceAccounts {
-		result[i] = map[string]interface{}{
-			"email":  serviceAccount.Email,
-			"scopes": schema.NewSet(tpgresource.StringScopeHashcode, tpgresource.ConvertStringArrToInterface(serviceAccount.Scopes)),
+func flattenServiceAccounts(serviceAccounts []interface{}) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0, len(serviceAccounts))
+	for _, saRaw := range serviceAccounts {
+		sa, ok := saRaw.(map[string]interface{})
+		if !ok {
+			continue
 		}
+		email, _ := sa["email"].(string)
+		var scopes []string
+		if v, ok := sa["scopes"].([]interface{}); ok {
+			for _, s := range v {
+				if str, ok := s.(string); ok {
+					scopes = append(scopes, str)
+				}
+			}
+		}
+		result = append(result, map[string]interface{}{
+			"email":  email,
+			"scopes": schema.NewSet(tpgresource.StringScopeHashcode, tpgresource.ConvertStringArrToInterface(scopes)),
+		})
 	}
 	return result
 }
@@ -768,13 +930,17 @@ func expandServiceAccounts(configs []interface{}) []*compute.ServiceAccount {
 	return accounts
 }
 
-func flattenGuestAccelerators(accelerators []*compute.AcceleratorConfig) []map[string]interface{} {
-	acceleratorsSchema := make([]map[string]interface{}, len(accelerators))
-	for i, accelerator := range accelerators {
-		acceleratorsSchema[i] = map[string]interface{}{
-			"count": accelerator.AcceleratorCount,
-			"type":  accelerator.AcceleratorType,
+func flattenGuestAccelerators(accelerators []interface{}) []map[string]interface{} {
+	acceleratorsSchema := make([]map[string]interface{}, 0, len(accelerators))
+	for _, accRaw := range accelerators {
+		acc, ok := accRaw.(map[string]interface{})
+		if !ok {
+			continue
 		}
+		acceleratorsSchema = append(acceleratorsSchema, map[string]interface{}{
+			"count": int64(toFloat64(acc["acceleratorCount"])),
+			"type":  acc["acceleratorType"],
+		})
 	}
 	return acceleratorsSchema
 }
@@ -822,14 +988,14 @@ func expandConfidentialInstanceConfig(d tpgresource.TerraformResourceData) *comp
 	}
 }
 
-func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *compute.ConfidentialInstanceConfig) []map[string]interface{} {
+func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig map[string]interface{}) []map[string]interface{} {
 	if ConfidentialInstanceConfig == nil {
 		return nil
 	}
 
 	return []map[string]interface{}{{"{{"}}
-		"enable_confidential_compute": ConfidentialInstanceConfig.EnableConfidentialCompute,
-		"confidential_instance_type": ConfidentialInstanceConfig.ConfidentialInstanceType,
+		"enable_confidential_compute": ConfidentialInstanceConfig["enableConfidentialCompute"],
+		"confidential_instance_type": ConfidentialInstanceConfig["confidentialInstanceType"],
 	{{"}}"}}
 }
 
@@ -849,29 +1015,32 @@ func expandAdvancedMachineFeatures(d tpgresource.TerraformResourceData) *compute
 	}
 }
 
-func flattenAdvancedMachineFeatures(AdvancedMachineFeatures *compute.AdvancedMachineFeatures) []map[string]interface{} {
+func flattenAdvancedMachineFeatures(AdvancedMachineFeatures map[string]interface{}) []map[string]interface{} {
 	if AdvancedMachineFeatures == nil {
 		return nil
 	}
 	return []map[string]interface{}{{"{{"}}
-		"enable_nested_virtualization": AdvancedMachineFeatures.EnableNestedVirtualization,
-		"threads_per_core":             AdvancedMachineFeatures.ThreadsPerCore,
-		"turbo_mode":                   AdvancedMachineFeatures.TurboMode,
-		"visible_core_count":           AdvancedMachineFeatures.VisibleCoreCount,
-		"performance_monitoring_unit":  AdvancedMachineFeatures.PerformanceMonitoringUnit,
-		"enable_uefi_networking":       AdvancedMachineFeatures.EnableUefiNetworking,
+		"enable_nested_virtualization": AdvancedMachineFeatures["enableNestedVirtualization"],
+		"threads_per_core":             int64(toFloat64(AdvancedMachineFeatures["threadsPerCore"])),
+		"turbo_mode":                   AdvancedMachineFeatures["turboMode"],
+		"visible_core_count":           int64(toFloat64(AdvancedMachineFeatures["visibleCoreCount"])),
+		"performance_monitoring_unit":  AdvancedMachineFeatures["performanceMonitoringUnit"],
+		"enable_uefi_networking":       AdvancedMachineFeatures["enableUefiNetworking"],
 	{{"}}"}}
 }
 
-func flattenShieldedVmConfig(shieldedVmConfig *compute.ShieldedInstanceConfig) []map[string]bool {
+func flattenShieldedVmConfig(shieldedVmConfig map[string]interface{}) []map[string]bool {
 	if shieldedVmConfig == nil {
 		return nil
 	}
+	enableSecureBoot, _ := shieldedVmConfig["enableSecureBoot"].(bool)
+	enableVtpm, _ := shieldedVmConfig["enableVtpm"].(bool)
+	enableIntegrityMonitoring, _ := shieldedVmConfig["enableIntegrityMonitoring"].(bool)
 
 	return []map[string]bool{{"{{"}}
-		"enable_secure_boot":          shieldedVmConfig.EnableSecureBoot,
-		"enable_vtpm":                 shieldedVmConfig.EnableVtpm,
-		"enable_integrity_monitoring": shieldedVmConfig.EnableIntegrityMonitoring,
+		"enable_secure_boot":          enableSecureBoot,
+		"enable_vtpm":                 enableVtpm,
+		"enable_integrity_monitoring": enableIntegrityMonitoring,
 	{{"}}"}}
 }
 
@@ -885,12 +1054,12 @@ func expandDisplayDevice(d tpgresource.TerraformResourceData) *compute.DisplayDe
 	}
 }
 
-func flattenEnableDisplay(displayDevice *compute.DisplayDevice) interface{} {
+func flattenEnableDisplay(displayDevice map[string]interface{}) interface{} {
 	if displayDevice == nil {
 		return nil
 	}
 
-	return displayDevice.EnableDisplay
+	return displayDevice["enableDisplay"]
 }
 
 // Node affinity updates require a reboot
@@ -1118,19 +1287,29 @@ func expandReservationAffinity(d tpgresource.TerraformResourceData) (*compute.Re
 	return &affinity, nil
 }
 
-func flattenReservationAffinity(affinity *compute.ReservationAffinity) []map[string]interface{} {
+func flattenReservationAffinity(affinity map[string]interface{}) []map[string]interface{} {
 	if affinity == nil {
 		return nil
 	}
 
+	consumeReservationType, _ := affinity["consumeReservationType"].(string)
 	flattened := map[string]interface{}{
-		"type": affinity.ConsumeReservationType,
+		"type": consumeReservationType,
 	}
 
-	if affinity.ConsumeReservationType == "SPECIFIC_RESERVATION" {
+	if consumeReservationType == "SPECIFIC_RESERVATION" {
+		key, _ := affinity["key"].(string)
+		var values []string
+		if v, ok := affinity["values"].([]interface{}); ok {
+			for _, val := range v {
+				if s, ok := val.(string); ok {
+					values = append(values, s)
+				}
+			}
+		}
 		flattened["specific_reservation"] = []map[string]interface{}{{"{{"}}
-			"key":    affinity.Key,
-			"values": affinity.Values,
+			"key":    key,
+			"values": values,
 		{{"}}"}}
 	}
 
@@ -1174,6 +1353,23 @@ func flattenComputeInstanceGuestOsFeatures(v interface{}) []interface{} {
 	return result
 }
 
+func flattenComputeInstanceGuestOsFeaturesFromMap(features []interface{}) []interface{} {
+	if features == nil {
+		return nil
+	}
+	var result []interface{}
+	for _, featureRaw := range features {
+		feature, ok := featureRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if t, ok := feature["type"].(string); ok && t != "" {
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
 func expandComputeInstanceGuestOsFeatures(v interface{}) []*compute.GuestOsFeature {
 	if v == nil {
 		return nil
@@ -1185,13 +1381,13 @@ func expandComputeInstanceGuestOsFeatures(v interface{}) []*compute.GuestOsFeatu
 	return result
 }
 
-func flattenNetworkPerformanceConfig(c *compute.NetworkPerformanceConfig) []map[string]interface{} {
+func flattenNetworkPerformanceConfig(c map[string]interface{}) []map[string]interface{} {
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"total_egress_bandwidth_tier": c.TotalEgressBandwidthTier,
+			"total_egress_bandwidth_tier": c["totalEgressBandwidthTier"],
 		},
 	}
 }

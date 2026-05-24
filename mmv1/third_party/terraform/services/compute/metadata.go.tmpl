@@ -80,6 +80,36 @@ func flattenMetadataBeta(metadata *compute.Metadata) map[string]string {
 	return metadataMap
 }
 
+// flattenMetadataBetaFromMap flattens metadata from a map[string]interface{} returned
+// by the REST API (json.Unmarshal). The metadata format has "items" as a list of
+// {"key": ..., "value": ...} objects.
+func flattenMetadataBetaFromMap(metadata map[string]interface{}) map[string]string {
+	metadataMap := make(map[string]string)
+	if metadata == nil {
+		return metadataMap
+	}
+	items, ok := metadata["items"].([]interface{})
+	if !ok {
+		return metadataMap
+	}
+	for _, itemRaw := range items {
+		item, ok := itemRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		key, _ := item["key"].(string)
+		value, _ := item["value"].(string)
+		metadataMap[key] = value
+	}
+	return metadataMap
+}
+
+// convertPartnerMetadataFromMap converts partner metadata from the map form
+// returned by the REST API (after JSON unmarshal).
+func convertPartnerMetadataFromMap(pm map[string]interface{}) map[string]interface{} {
+	return pm
+}
+
 // This function differs from flattenMetadataBeta only in that it takes
 // compute.metadata rather than compute.metadata as an argument. It should
 // be removed in favour of flattenMetadataBeta if/when all resources using it get

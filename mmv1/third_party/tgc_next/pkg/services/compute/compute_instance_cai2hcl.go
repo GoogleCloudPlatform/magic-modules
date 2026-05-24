@@ -59,7 +59,8 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 		hclData["can_ip_forward"] = instance.CanIpForward
 	}
 	hclData["machine_type"] = tpgresource.GetResourceNameFromSelfLink(instance.MachineType)
-	hclData["network_performance_config"] = flattenNetworkPerformanceConfig(instance.NetworkPerformanceConfig)
+	npcMap := structToMap(instance.NetworkPerformanceConfig)
+	hclData["network_performance_config"] = flattenNetworkPerformanceConfig(npcMap)
 
 	// Set the networks
 	networkInterfaces, _, _, err := flattenNetworkInterfacesTgc(instance.NetworkInterfaces, project)
@@ -83,8 +84,10 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 
 	hclData["scheduling"] = flattenSchedulingTgc(instance.Scheduling)
 	hclData["guest_accelerator"] = flattenGuestAcceleratorsTgc(instance.GuestAccelerators)
-	hclData["shielded_instance_config"] = flattenShieldedVmConfig(instance.ShieldedInstanceConfig)
-	hclData["enable_display"] = flattenEnableDisplay(instance.DisplayDevice)
+	sicMap := structToMap(instance.ShieldedInstanceConfig)
+	hclData["shielded_instance_config"] = flattenShieldedVmConfig(sicMap)
+	ddMap := structToMap(instance.DisplayDevice)
+	hclData["enable_display"] = flattenEnableDisplay(ddMap)
 	hclData["min_cpu_platform"] = instance.MinCpuPlatform
 
 	// Only convert the field when its value is not default false
@@ -95,8 +98,10 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 	hclData["name"] = instance.Name
 	hclData["description"] = instance.Description
 	hclData["hostname"] = instance.Hostname
-	hclData["confidential_instance_config"] = flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig)
-	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)
+	cicMap := structToMap(instance.ConfidentialInstanceConfig)
+	hclData["confidential_instance_config"] = flattenConfidentialInstanceConfig(cicMap)
+	amfMap := structToMap(instance.AdvancedMachineFeatures)
+	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(amfMap)
 	hclData["reservation_affinity"] = flattenReservationAffinityTgc(instance.ReservationAffinity)
 	hclData["key_revocation_action_type"] = strings.TrimSuffix(instance.KeyRevocationActionType, "_ON_KEY_REVOCATION")
 	hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKey(instance.InstanceEncryptionKey)
