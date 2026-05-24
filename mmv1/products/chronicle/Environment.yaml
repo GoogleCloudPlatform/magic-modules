@@ -14,8 +14,8 @@
 ---
 name: Environment
 description: >
-  An environment is logical container for different networks or customers that are managed by the SOC or MSSP. 
-  This is useful for SOCs who provide services to several different networks, customers or business units within the organization. 
+  An environment is logical container for different networks or customers that are managed by the SOC or MSSP.
+  This is useful for SOCs who provide services to several different networks, customers or business units within the organization.
   The Platform comes with a predefined environment named Default Environment.
 min_version: 'beta'
 references:
@@ -41,7 +41,7 @@ samples:
     primary_resource_id: sample
     min_version: beta
     steps:
-      - name: "chronicle_environment_basic"    
+      - name: "chronicle_environment_basic"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
         ignore_read_extra:
@@ -57,8 +57,8 @@ virtual_fields:
     type: Boolean
     default_value: true
     description: 'Whether Terraform will be prevented from destroying the environment.
-      Deleting an environment will remove all its data and all playbooks, environments, 
-      integrations instances, reports and agents related to the environment. 
+      Deleting an environment will remove all its data and all playbooks, environments,
+      integrations instances, reports and agents related to the environment.
       Once you delete an environment, it cannot be reversed.
       Deleting environments via terraform destroy or terraform apply will only
       succeed if this field is false in the Terraform state.'
@@ -118,7 +118,7 @@ properties:
       Phone number of the contact for the environment.
   - name: aliasesJson
     type: String
-    description: Environment nicknames.  
+    description: Environment nicknames.
   - name: dataAccessScopesJson
     type: String
     description: data access scopes.
@@ -134,44 +134,3 @@ properties:
     required: true
     immutable: true
     description: Environment data retention in months.
-  # - name: dynamicParameters
-  #   type: Array
-  #   required: true
-  #   description: |-
-  #     Additional custom properties for enriching the environment.
-  #     For example:
-  #     {
-  #     "value": "value1",
-  #     "dynamic_parameter_id": 123,
-  #     "environment_id": 456
-  #     }
-  #   item_type:
-  #     type: NestedObject
-  #     properties:
-  #       - name: dynamicParameterId
-  #         type: String
-  #         required: true
-  #         description: The ID of the dynamic parameter.
-  #       - name: environmentId
-  #         type: String
-  #         required: true
-  #         description: The ID of the environment.
-  #       - name: value
-  #         type: String
-  #         required: true
-  #         description: The value of the dynamic parameter.
-  # - name: instanceUri
-  #   type: String
-  #   description: URL of the environment.
-  # - name: system
-  #   type: Boolean
-  #   description: Output only. Whether the environment is a system environment.
-  #   output: true
-  # - name: weight
-  #   type: Integer
-  #   description: |-
-  #     The weight of the environment, enabling customers to control distribution
-  #     of resources between the separate environments in a single instance of
-  #     Chronicle SOAR.
-  #     Environments with higher weights get prioritized for processing in
-  #     Chronicle SOAR via a lottery algorithm. Defaults to 1.
