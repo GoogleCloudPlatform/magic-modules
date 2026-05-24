@@ -14,7 +14,7 @@
 ---
 name: SoarNetwork
 description: >
-  Manage networks in the platform using the Classless Inter-Domain Routing (CIDR) format. 
+  Manage networks in the platform using the Classless Inter-Domain Routing (CIDR) format.
   The system identifies network subnets to help Google Security Operations recognize internal assets and consider network sensitivity during playbook execution.
 min_version: 'beta'
 references:
@@ -37,7 +37,7 @@ samples:
     primary_resource_id: sample
     min_version: beta
     steps:
-      - name: "chronicle_soarnetwork_basic"    
+      - name: "chronicle_soarnetwork_basic"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
       - name: "chronicle_soarnetwork_full"
