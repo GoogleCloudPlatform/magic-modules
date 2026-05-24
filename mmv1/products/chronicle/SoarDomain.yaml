@@ -35,7 +35,7 @@ samples:
     primary_resource_id: example
     min_version: beta
     steps:
-      - name: "chronicle_soardomain_basic"    
+      - name: "chronicle_soardomain_basic"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
       - name: "chronicle_soardomain_full"
@@ -55,7 +55,7 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-  - name: soar_domain_id
+  - name: soarDomainId
     type: String
     output: true
     immutable: true
