@@ -29,9 +29,15 @@ resource "google_project_service" "servicenetworking" {
   depends_on = [google_project_service.compute]
 }
 
+resource "google_project_service" "bigquery" {
+  project = google_project.project.project_id
+  service = "bigquery.googleapis.com"
+  depends_on = [google_project_service.servicenetworking]
+}
+
 resource "time_sleep" "wait_300_seconds" {
   create_duration = "300s"
-  depends_on = [google_project_service.servicenetworking]
+  depends_on = [google_project_service.bigquery]
 }
 
 resource "google_compute_network" "apigee_network" {
@@ -70,6 +76,7 @@ resource "google_bigquery_dataset" "analytics_dataset" {
   dataset_id = "tf_test_apigee_analytics%{random_suffix}"
   location   = "US"
   project    = google_project.project.project_id
+  depends_on = [google_project_service.bigquery]
 }
 
 resource "google_apigee_datastore" "{{$.PrimaryResourceId}}" {
