@@ -304,6 +304,10 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     kms_key_name = "%{kms_key_name}"
   }
 
+  traffic_config {
+    traffic_split_always_latest = true
+  }
+
   spec {
     agent_framework = "langchain"
     class_methods   = jsonencode(local.class_methods_new)
@@ -314,6 +318,8 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
       max_instances         = 4
       container_concurrency = 6
 
+      agent_server_mode     = "EXPERIMENTAL"
+      
       resource_limits = {
         cpu    = "4"
         memory = "4Gi"
