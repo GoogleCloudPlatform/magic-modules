@@ -765,3 +765,4 @@ properties:
         send_empty_value: true
         description: |-
           Traffic distribution configuration, where all traffic is sent to the latest Runtime Revision.
+        properties: []
