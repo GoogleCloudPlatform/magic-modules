@@ -760,6 +760,8 @@ properties:
                     Specifies percent of the traffic to this Runtime Revision.
                   required: true
       - name: 'trafficSplitAlwaysLatest'
-        type: Boolean
+        type: NestedObject
+        allow_empty_object: true
+        send_empty_value: true
         description: |-
           Traffic distribution configuration, where all traffic is sent to the latest Runtime Revision.
