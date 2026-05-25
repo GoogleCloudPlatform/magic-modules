@@ -24,9 +24,9 @@ The following arguments are supported:
 
 * `location` - (Optional) The location of the intelligence findings summary. Currently default value is global and users cannot use for input for now.
 
-* `filter` - (Optional) The filter expression to apply.
+* `filter` - (Optional) The filter expression. Supports filtering by FindingType.
 
-* `resource_scope` - (Optional) The scope of the resources to include in the summary. Possible values are PARENT and PROJECT. Default value is PARENT.
+* `resource_scope` - (Optional) Determines the granularity of the findings when the parent is an organization or folder. Only supported when parent is an organization or folder. Possible values are PARENT and PROJECT. Default value is PARENT.
 
 ## Attributes Reference
 
@@ -34,30 +34,30 @@ The following attributes are exported:
 
 * `id` - an identifier for the resource with format `folders/{{folder}}/locations/{{location}}/intelligenceFindingsSummary`
 
-* `finding_summaries` - A list of summaries for individual finding types. Structure is documented below.
+* `finding_summaries` - The list of FindingSummary summaries. Structure is documented below.
 
 <a name="nested_finding_summaries"></a>The `finding_summaries` block contains:
 
-* `type` - The finding type.
+* `type` - The type of finding.
 
 * `category` - The category of the finding.
 
-* `target_resource` - The target resource of the finding summary.
+* `target_resource` - The fully qualified Cloud resource name for which this summary was generated.
 
-* `create_time` - The creation time of the finding summary.
+* `create_time` - The creation time of the earliest finding that this summary is based on.
 
-* `update_time` - The last update time of the finding summary.
+* `update_time` - The time of the most recent update among all the findings that this summary is based on.
 
-* `severity` - The severity of the finding.
+* `severity` - Severity of the finding.
 
-* `summary_details` - Detailed summaries for the finding type. Structure is documented below.
+* `summary_details` - The SummaryDetails resources. Structure is documented below.
 
 <a name="nested_summary_details"></a>The `summary_details` block contains:
 
-* `count` - The total count of findings for this summary slice.
+* `count` - The count of impacted resources.
 
-* `percentage` - The percentage magnitude associated with this summary slice.
+* `percentage` - The percentage of impacted resources.
 
-* `resource_type` - The resource type associated with the summary slice.
+* `resource_type` - The type of Cloud resource this summary detail applies to.
 
-* `description` - A description explaining the summary slice.
+* `description` - A short description about the FindingSummary.

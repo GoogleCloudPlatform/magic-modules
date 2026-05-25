@@ -18,7 +18,7 @@ func DataSourceGoogleStorageControlOrganizationIntelligenceFindingsSummary() *sc
 			"filter": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: `The filter expression to apply.`,
+				Description: `The filter expression. Supports filtering by FindingType.`,
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -36,7 +36,7 @@ func DataSourceGoogleStorageControlOrganizationIntelligenceFindingsSummary() *sc
 				Optional:     true,
 				Default:      "PARENT",
 				ValidateFunc: validation.StringInSlice([]string{"PARENT", "PROJECT"}, false),
-				Description:  `The scope of the resources to include in the summary. Possible values are PARENT and PROJECT. Default value is PARENT.`,
+				Description:  `Determines the granularity of the findings when the parent is an organization or folder. Possible values are PARENT and PROJECT. Default value is PARENT.`,
 			},
 			"finding_summaries": {
 				Type:        schema.TypeList,
@@ -47,7 +47,7 @@ func DataSourceGoogleStorageControlOrganizationIntelligenceFindingsSummary() *sc
 						"type": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: `The finding type.`,
+							Description: `The type of finding.`,
 						},
 						"category": {
 							Type:        schema.TypeString,
@@ -57,48 +57,48 @@ func DataSourceGoogleStorageControlOrganizationIntelligenceFindingsSummary() *sc
 						"target_resource": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: `The target resource of the finding summary.`,
+							Description: `The fully qualified Cloud resource name for which this summary was generated.`,
 						},
 						"create_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: `The creation time of the finding summary.`,
+							Description: `The creation time of the earliest finding that this summary is based on.`,
 						},
 						"update_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: `The last update time of the finding summary.`,
+							Description: `The time of the most recent update among all the findings that this summary is based on.`,
 						},
 						"severity": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: `The severity of the finding.`,
+							Description: `Severity of the finding.`,
 						},
 						"summary_details": {
 							Type:        schema.TypeList,
 							Computed:    true,
-							Description: `Detailed summaries for the finding type.`,
+							Description: `The SummaryDetails resources.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"count": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: `The total count of findings for this summary slice.`,
+										Description: `The count of impacted resources.`,
 									},
 									"percentage": {
 										Type:        schema.TypeFloat,
 										Computed:    true,
-										Description: `The percentage magnitude associated with this summary slice.`,
+										Description: `The percentage of impacted resources.`,
 									},
 									"resource_type": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: `The resource type associated with the summary slice.`,
+										Description: `The type of Cloud resource this summary detail applies to.`,
 									},
 									"description": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: `A description explaining the summary slice.`,
+										Description: `A short description about the FindingSummary.`,
 									},
 								},
 							},
