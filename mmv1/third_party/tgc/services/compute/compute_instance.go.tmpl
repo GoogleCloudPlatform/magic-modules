@@ -144,6 +144,16 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
 	}
 
+	var shieldedInstanceConfig *compute.ShieldedInstanceConfig
+	if sicMap := expandShieldedVmConfigs(d); sicMap != nil {
+		shieldedInstanceConfig = &compute.ShieldedInstanceConfig{
+			EnableSecureBoot:          sicMap["enableSecureBoot"].(bool),
+			EnableVtpm:                sicMap["enableVtpm"].(bool),
+			EnableIntegrityMonitoring: sicMap["enableIntegrityMonitoring"].(bool),
+			ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
+		}
+	}
+
 	// Create the instance information
 	return &compute.Instance{
 		CanIpForward:            d.Get("can_ip_forward").(bool),
@@ -163,7 +173,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		DeletionProtection:      d.Get("deletion_protection").(bool),
 		Hostname:                d.Get("hostname").(string),
 		ForceSendFields:         []string{"CanIpForward", "DeletionProtection"},
-		ShieldedInstanceConfig:  expandShieldedVmConfigs(d),
+		ShieldedInstanceConfig:  shieldedInstanceConfig,
 		DisplayDevice:           expandDisplayDevice(d),
 		AdvancedMachineFeatures: expandAdvancedMachineFeatures(d),
 	}, nil
