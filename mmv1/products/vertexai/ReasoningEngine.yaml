@@ -730,6 +730,7 @@ properties:
   - name: 'trafficConfig'
     type: NestedObject
     min_version: beta
+    default_from_api: true
     description: |-
       Optional. Traffic distribution configuration for the Reasoning Engine.
     properties:
@@ -763,6 +764,7 @@ properties:
         type: NestedObject
         allow_empty_object: true
         send_empty_value: true
+        default_from_api: true
         description: |-
           Traffic distribution configuration, where all traffic is sent to the latest Runtime Revision.
         properties: []
