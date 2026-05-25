@@ -1,26 +1,10 @@
-// Copyright 2026 Google Inc.
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package ces_test
 
 import (
-	"log"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -37,18 +21,11 @@ func TestAccCESSecuritySettings_cesSecuritySettingsExample_update(t *testing.T) 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckCESSecuritySettingsDestroyNoOp,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
-			// Step 1: Spin up the project and enable the main CES wrapper API
 			{
-				Config: testAccCESSecuritySettings_cesSecuritySettingsExample_projectAndService(context),
-			},
-			// Step 2: Wait 30s in Go for regional endpoints to initialize, then apply the settings
-			{
-				PreConfig: func() {
-					log.Printf("[DEBUG] Waiting 30 seconds for CES regional endpoint propagation on new project...")
-					time.Sleep(30 * time.Second)
-				},
 				Config: testAccCESSecuritySettings_cesSecuritySettingsExample_full(context),
 			},
 			{
@@ -57,7 +34,6 @@ func TestAccCESSecuritySettings_cesSecuritySettingsExample_update(t *testing.T) 
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "project"},
 			},
-			// Step 3: Update the settings (testing standard allowed origins update)
 			{
 				Config: testAccCESSecuritySettings_cesSecuritySettingsExample_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -74,29 +50,6 @@ func TestAccCESSecuritySettings_cesSecuritySettingsExample_update(t *testing.T) 
 			},
 		},
 	})
-}
-
-func testAccCheckCESSecuritySettingsDestroyNoOp(s *terraform.State) error {
-	return nil
-}
-
-func testAccCESSecuritySettings_cesSecuritySettingsExample_projectAndService(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_project" "project" {
-  provider        = google-beta
-  project_id      = "tf-test-project-%{random_suffix}"
-  name            = "tf-test-project-%{random_suffix}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account}"
-  deletion_policy = "DELETE"
-}
-
-resource "google_project_service" "ces" {
-  provider = google-beta
-  project  = google_project.project.project_id
-  service  = "ces.googleapis.com"
-}
-`, context)
 }
 
 func testAccCESSecuritySettings_cesSecuritySettingsExample_full(context map[string]interface{}) string {
@@ -116,6 +69,12 @@ resource "google_project_service" "ces" {
   service  = "ces.googleapis.com"
 }
 
+resource "time_sleep" "wait_enable_service" {
+  provider        = time
+  create_duration = "30s"
+  depends_on      = [google_project_service.ces]
+}
+
 resource "google_ces_security_settings" "security_settings" {
   provider = google-beta
   project  = google_project.project.project_id
@@ -126,7 +85,7 @@ resource "google_ces_security_settings" "security_settings" {
     allowed_origins   = ["https://example.com", "https://google.com"]
   }
 
-  depends_on = [google_project_service.ces]
+  depends_on = [time_sleep.wait_enable_service]
 }
 `, context)
 }
@@ -148,6 +107,12 @@ resource "google_project_service" "ces" {
   service  = "ces.googleapis.com"
 }
 
+resource "time_sleep" "wait_enable_service" {
+  provider        = time
+  create_duration = "30s"
+  depends_on      = [google_project_service.ces]
+}
+
 resource "google_ces_security_settings" "security_settings" {
   provider = google-beta
   project  = google_project.project.project_id
@@ -158,7 +123,7 @@ resource "google_ces_security_settings" "security_settings" {
     allowed_origins   = ["https://google.com"]
   }
 
-  depends_on = [google_project_service.ces]
+  depends_on = [time_sleep.wait_enable_service]
 }
 `, context)
 }
