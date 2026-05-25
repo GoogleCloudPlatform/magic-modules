@@ -1881,9 +1881,16 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
 	}
 
-	reservationAffinity, err := expandReservationAffinity(d)
+	raMap, err := expandReservationAffinity(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating reservation affinity: %s", err)
+	}
+	var reservationAffinity *compute.ReservationAffinity
+	if raMap != nil {
+		reservationAffinity = &compute.ReservationAffinity{}
+		if err := tpgresource.Convert(raMap, reservationAffinity); err != nil {
+			return nil, fmt.Errorf("Error converting reservationAffinity: %s", err)
+		}
 	}
 
 	// Create the instance information
@@ -2418,7 +2425,15 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("Error setting desired_status: %s", err)
 		}
 	}
-	if err := d.Set("reservation_affinity", flattenReservationAffinity(instance.ReservationAffinity)); err != nil {
+	var raMap map[string]interface{}
+	if instance.ReservationAffinity != nil {
+		var err error
+		raMap, err = tpgresource.ConvertToMap(instance.ReservationAffinity)
+		if err != nil {
+			return fmt.Errorf("Error converting reservation_affinity: %s", err)
+		}
+	}
+	if err := d.Set("reservation_affinity", flattenReservationAffinity(raMap)); err != nil {
 		return fmt.Errorf("Error setting reservation_affinity: %s", err)
 	}
 	if err := d.Set("key_revocation_action_type", instance.KeyRevocationActionType); err != nil {
