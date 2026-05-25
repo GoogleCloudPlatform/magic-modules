@@ -172,7 +172,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		DeletionProtection:      d.Get("deletion_protection").(bool),
 		Hostname:                d.Get("hostname").(string),
 		ForceSendFields:         []string{"CanIpForward", "DeletionProtection"},
-		AdvancedMachineFeatures: expandAdvancedMachineFeatures(d),
+		AdvancedMachineFeatures: expandAdvancedMachineFeaturesTyped(d),
 	}
 	if sicMap := expandShieldedVmConfigs(d); sicMap != nil {
 		instance.ShieldedInstanceConfig = &compute.ShieldedInstanceConfig{
