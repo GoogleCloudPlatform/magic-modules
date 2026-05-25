@@ -40,6 +40,11 @@ examples:
 autogen_status: RnJhbWV3b3Jr
 custom_code:
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl"
+  pre_create: "templates/terraform/pre_create/cloudsecuritycompliance_pre_create.go.tmpl"
+  pre_read: "templates/terraform/pre_read/cloudsecuritycompliance_pre_read.go.tmpl"
+  pre_update: "templates/terraform/pre_update/cloudsecuritycompliance_pre_update.go.tmpl"
+  pre_delete: "templates/terraform/pre_delete/cloudsecuritycompliance_pre_delete.go.tmpl"
+  post_import: "templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl"
 parameters:
   - name: parent
     type: String
@@ -49,6 +54,7 @@ parameters:
       * `projects/{{project}}`
       * `organizations/{{organization}}`
     immutable: true
+    default_from_api: true
     url_param_only: true
     exactly_one_of:
       - parent

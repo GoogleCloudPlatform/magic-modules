@@ -84,23 +84,41 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: RnJhbWV3b3JrRGVwbG95bWVudA==
+custom_code:
+  pre_create: "templates/terraform/pre_create/cloudsecuritycompliance_pre_create.go.tmpl"
+  pre_read: "templates/terraform/pre_read/cloudsecuritycompliance_pre_read.go.tmpl"
+  pre_update: "templates/terraform/pre_update/cloudsecuritycompliance_pre_update.go.tmpl"
+  pre_delete: "templates/terraform/pre_delete/cloudsecuritycompliance_pre_delete.go.tmpl"
+  post_import: "templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl"
 parameters:
   - name: parent
     type: String
     description: |
-      The parent resource in which to create the FrameworkDeployment.
+      The parent resource in which to create the resource.
       Must be in one of the following formats:
       * `projects/{{project}}`
       * `organizations/{{organization}}`
     immutable: true
+    default_from_api: true
     url_param_only: true
-    required: true
+    exactly_one_of:
+      - parent
+      - organization
+  - name: organization
+    type: String
+    description: |
+      Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    deprecation_message: "Use `parent` instead."
+    exactly_one_of:
+      - parent
+      - organization
   - name: location
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
   - name: frameworkDeploymentId
     type: String
     description: |-

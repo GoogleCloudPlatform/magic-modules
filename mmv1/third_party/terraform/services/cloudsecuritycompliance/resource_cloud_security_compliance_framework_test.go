@@ -100,7 +100,7 @@ func TestAccCloudSecurityComplianceFramework_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_framework.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent"},
+				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization"},
 			},
 			{
 				Config: testAccCloudSecurityComplianceFramework_update(context),
@@ -114,7 +114,7 @@ func TestAccCloudSecurityComplianceFramework_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_framework.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent"},
+				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization"},
 			},
 		},
 	})

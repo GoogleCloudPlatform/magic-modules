@@ -393,7 +393,7 @@ func TestAccCloudSecurityComplianceCloudControl_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_cloud_control.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cloud_control_id", "location", "parent"},
+				ImportStateVerifyIgnore: []string{"cloud_control_id", "location", "parent", "organization"},
 			},
 			{
 				Config: testAccCloudSecurityComplianceCloudControl_update(context),
@@ -407,7 +407,7 @@ func TestAccCloudSecurityComplianceCloudControl_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_cloud_control.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cloud_control_id", "location", "parent"},
+				ImportStateVerifyIgnore: []string{"cloud_control_id", "location", "parent", "organization"},
 			},
 		},
 	})
