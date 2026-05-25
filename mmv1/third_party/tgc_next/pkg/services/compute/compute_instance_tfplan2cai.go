@@ -599,8 +599,12 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 	}
 
 	if v, ok := original["on_instance_stop_action"]; ok {
-		transformedOnInstanceStopAction, err := expandComputeOnInstanceStopAction(v)
+		transformedOnInstanceStopActionRaw, err := expandComputeOnInstanceStopAction(v)
 		if err != nil {
+			return nil, err
+		}
+		var transformedOnInstanceStopAction *compute.SchedulingOnInstanceStopAction
+		if err := tpgresource.Convert(transformedOnInstanceStopActionRaw, &transformedOnInstanceStopAction); err != nil {
 			return nil, err
 		}
 		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction

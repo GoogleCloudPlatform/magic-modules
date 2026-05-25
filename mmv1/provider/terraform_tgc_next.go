@@ -267,6 +267,7 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/tpgresource/regional_utils.go":       "third_party/terraform/tpgresource/regional_utils.go",
 		"pkg/tpgresource/field_helpers.go":        "third_party/terraform/tpgresource/field_helpers.go",
 		"pkg/tpgresource/service_scope.go":        "third_party/terraform/tpgresource/service_scope.go",
+		"pkg/tpgresource/convert.go":              "third_party/terraform/tpgresource/convert.go",
 		"pkg/verify/validation.go":                "third_party/terraform/verify/validation.go",
 		"pkg/verify/path_or_contents.go":          "third_party/terraform/verify/path_or_contents.go",
 		"pkg/version/version.go":                  "third_party/terraform/version/version.go",
