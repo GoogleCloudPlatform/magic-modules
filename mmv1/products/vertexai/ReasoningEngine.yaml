@@ -405,6 +405,67 @@ properties:
               Optional. Concurrency for each container and agent server.
               Recommended value: 2 * cpu + 1. Defaults to 9.
             default_from_api: true
+          - name: 'agentServerMode'
+            type: Enum
+            min_version: beta
+            description: |-
+              Optional. The agent server mode specifies what features are used when deploy the agent to agent engine.
+              Possible values:
+              * `STABLE`: Stable agent server mode.
+              * `EXPERIMENTAL`: Experimental agent server mode.
+            enum_values:
+              - 'STABLE'
+              - 'EXPERIMENTAL'
+          - name: 'agentGatewayConfig'
+            type: NestedObject
+            min_version: beta
+            description: |-
+              Optional. Agent Gateway configuration for a Reasoning Engine deployment.
+            properties:
+              - name: 'clientToAgentConfig'
+                type: NestedObject
+                description: |-
+                  Optional. Configuration for traffic targeting the Reasoning Engine.
+                properties:
+                  - name: 'agentGateway'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. The resource name of the Agent Gateway to use for inbound traffic.
+              - name: 'agentToAnywhereConfig'
+                type: NestedObject
+                description: |-
+                  Optional. Configuration for traffic originating from the Reasoning Engine.
+                properties:
+                  - name: 'agentGateway'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. The resource name of the Agent Gateway for outbound traffic.
+          - name: 'keepAliveProbe'
+            type: NestedObject
+            min_version: beta
+            description: |-
+              Optional. Specifies the configuration for keep-alive probe.
+            properties:
+              - name: 'httpGet'
+                type: NestedObject
+                description: |-
+                  Specifies the HTTP GET configuration for the probe.
+                properties:
+                  - name: 'path'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. Specifies the path of the HTTP GET request (e.g., `"/is_busy"`).
+                  - name: 'port'
+                    type: Integer
+                    description: |-
+                      Optional. Specifies the port number on the container to which the request is sent.
+              - name: 'maxSeconds'
+                type: Integer
+                description: |-
+                  Optional. Specifies the maximum duration (in seconds) to keep the instance alive via this probe. Can be a maximum of 3600 seconds (1 hour).
       - name: 'packageSpec'
         type: NestedObject
         description: |-
@@ -561,6 +622,21 @@ properties:
         description: |-
           The identity to use for the Reasoning Engine.
         output: true
+      - name: 'agentCard'
+        type: String
+        min_version: beta
+        description: |-
+          Optional. The A2A Agent Card for the agent (if available).
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+        validation:
+          function: 'validation.StringIsJSON'
+      - name: 'exampleStore'
+        type: String
+        min_version: beta
+        description: |-
+          Optional. The resource name of the linked ExampleStore. At query time, examples can be used to guide the performance of the agent.
   - name: 'contextSpec'
     min_version: 'beta'
     type: NestedObject
@@ -629,3 +705,63 @@ properties:
             type: Boolean
             description: |-
               If true, no memory revisions will be created for any requests to the Memory Bank.
+          - name: 'exampleStoreConfig'
+            type: NestedObject
+            min_version: beta
+            description: |-
+              Optional. Specification for an Example Store, which manages few-shot examples for the Agent Engine.
+            properties:
+              - name: 'similaritySearchConfig'
+                type: NestedObject
+                description: |-
+                  Optional. Configuration for how to perform similarity search on examples.
+                properties:
+                  - name: 'embeddingModel'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. The Gemini model used to generate embeddings to lookup similar examples. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+  - name: 'url'
+    type: String
+    description: |-
+      The URL of the reasoning engine.
+    output: true
+    min_version: beta
+  - name: 'trafficConfig'
+    type: NestedObject
+    min_version: beta
+    description: |-
+      Optional. Traffic distribution configuration for the Reasoning Engine.
+    properties:
+      - name: 'trafficSplitManual'
+        type: NestedObject
+        description: |-
+          Manual traffic distribution configuration, where the user specifies the
+          Runtime Revision IDs and the percentage of traffic to send to each.
+        exactly_one_of:
+          - 'trafficSplitManual'
+          - 'trafficSplitAlwaysLatest'
+        properties:
+          - name: 'targets'
+            type: Array
+            description: |-
+              A list of traffic targets for the Runtimes Revisions. The sum of percentages must equal to 100.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'runtimeRevisionName'
+                  type: String
+                  description: |-
+                    The Runtime Revision name to which to send this portion of traffic.
+                  required: true
+                - name: 'percent'
+                  type: Integer
+                  description: |-
+                    Specifies percent of the traffic to this Runtime Revision.
+                  required: true
+      - name: 'trafficSplitAlwaysLatest'
+        type: Boolean
+        description: |-
+          Traffic distribution configuration, where all traffic is sent to the latest Runtime Revision.
+        allow_empty_object: true
+        send_empty_value: true
