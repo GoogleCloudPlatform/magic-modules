@@ -2594,18 +2594,6 @@ func guestAcceleratorsToInterface(accelerators []*compute.AcceleratorConfig) []i
 	return result
 }
 
-func expandAdvancedMachineFeaturesTyped(d tpgresource.TerraformResourceData) *compute.AdvancedMachineFeatures {
-	amfMap := expandAdvancedMachineFeatures(d)
-	if amfMap == nil {
-		return nil
-	}
-	typed := &compute.AdvancedMachineFeatures{}
-	if err := tpgresource.Convert(amfMap, typed); err != nil {
-		return nil
-	}
-	return typed
-}
-
 func resourceComputeInstanceTemplateImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{"projects/(?P<project>[^/]+)/global/instanceTemplates/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
