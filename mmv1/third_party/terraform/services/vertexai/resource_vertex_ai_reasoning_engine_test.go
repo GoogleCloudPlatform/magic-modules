@@ -305,7 +305,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   }
 
   traffic_config {
-    traffic_split_always_latest = true
+    traffic_split_always_latest = {}
   }
 
   spec {
@@ -319,7 +319,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
       container_concurrency = 6
 
       agent_server_mode     = "EXPERIMENTAL"
-      
+
       resource_limits = {
         cpu    = "4"
         memory = "4Gi"
