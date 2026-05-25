@@ -1774,7 +1774,11 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	}
 {{- if ne $.TargetVersionName "ga" }}
 	if instanceTemplate.Properties.DisplayDevice != nil {
-		if err = d.Set("enable_display", flattenEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
+		ddMap, convErr := tpgresource.ConvertToMap(instanceTemplate.Properties.DisplayDevice)
+		if convErr != nil {
+			return fmt.Errorf("Error converting displayDevice: %s", convErr)
+		}
+		if err = d.Set("enable_display", flattenEnableDisplay(ddMap)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}

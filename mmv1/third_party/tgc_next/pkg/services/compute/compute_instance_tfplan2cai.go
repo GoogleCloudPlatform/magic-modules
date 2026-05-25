@@ -189,7 +189,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		DeletionProtection:       d.Get("deletion_protection").(bool),
 		Hostname:                 d.Get("hostname").(string),
 		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
-		DisplayDevice:            expandDisplayDeviceTgcNext(d),
 		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:      reservationAffinity,
 		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
@@ -210,6 +209,13 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
+	if dd := expandDisplayDevice(d); dd != nil {
+		enabled, _ := dd["enableDisplay"].(bool)
+		instance.DisplayDevice = &compute.DisplayDevice{
+			EnableDisplay:   enabled,
+			ForceSendFields: []string{"EnableDisplay"},
+		}
+	}
 	return instance, nil
 }
 
@@ -629,12 +635,3 @@ func expandComputeLocalSsdRecoveryTimeoutTgc(v interface{}) (*compute.Duration, 
 	return duration, nil
 }
 
-func expandDisplayDeviceTgcNext(d tpgresource.TerraformResourceData) *compute.DisplayDevice {
-	if _, ok := d.GetOkExists("enable_display"); !ok {
-		return nil
-	}
-	return &compute.DisplayDevice{
-		EnableDisplay:   d.Get("enable_display").(bool),
-		ForceSendFields: []string{"EnableDisplay"},
-	}
-}
