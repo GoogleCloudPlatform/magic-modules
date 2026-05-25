@@ -23,7 +23,8 @@ create_url: '{{parent}}/locations/{{location}}/frameworks?frameworkId={{framewor
 update_verb: PATCH
 id_format: '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
 import_format:
-  - '{{%parent}}/locations/{{location}}/frameworks/{{framework_id}}'
+  - "organizations/{{%organization}}/locations/{{location}}/frameworks/{{framework_id}}"
+  - "{{%parent}}/locations/{{location}}/frameworks/{{framework_id}}"
 examples:
   - name: "cloudsecuritycompliance_framework_org_basic"
     primary_resource_id: "example"
