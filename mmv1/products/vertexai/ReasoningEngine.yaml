@@ -705,7 +705,6 @@ properties:
             type: Boolean
             description: |-
               If true, no memory revisions will be created for any requests to the Memory Bank.
-<<<<<<< HEAD
           - name: 'customizationConfigs'
             type: Array
             description: |-
@@ -801,7 +800,6 @@ properties:
                         validation:
                           function: 'validation.StringIsJSON'
           - name: 'exampleStoreConfig'
-=======
       - name: 'exampleStoreConfig'
         type: NestedObject
         min_version: beta
@@ -809,7 +807,6 @@ properties:
           Optional. Specification for an Example Store, which manages few-shot examples for the Agent Engine.
         properties:
           - name: 'similaritySearchConfig'
->>>>>>> 92970aedd (test: add update test coverage for new fields and fix yaml formatting)
             type: NestedObject
             description: |-
               Optional. Configuration for how to perform similarity search on examples.
@@ -858,13 +855,6 @@ properties:
                     Specifies percent of the traffic to this Runtime Revision.
                   required: true
       - name: 'trafficSplitAlwaysLatest'
-        type: NestedObject
-        allow_empty_object: true
-        send_empty_value: true
+        type: Boolean
         description: |-
           Traffic distribution configuration, where all traffic is sent to the latest Runtime Revision.
-<<<<<<< HEAD
-        allow_empty_object: true
-        send_empty_value: true
-=======
->>>>>>> 92970aedd (test: add update test coverage for new fields and fix yaml formatting)
