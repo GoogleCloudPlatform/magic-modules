@@ -825,6 +825,7 @@ properties:
   - name: 'trafficConfig'
     type: NestedObject
     min_version: beta
+    default_from_api: true
     description: |-
       Optional. Traffic distribution configuration for the Reasoning Engine.
     properties:
@@ -855,6 +856,9 @@ properties:
                     Specifies percent of the traffic to this Runtime Revision.
                   required: true
       - name: 'trafficSplitAlwaysLatest'
-        type: Boolean
+        type: NestedObject
+        allow_empty_object: true
+        send_empty_value: true
+        default_from_api: true
         description: |-
           Traffic distribution configuration, where all traffic is sent to the latest Runtime Revision.
