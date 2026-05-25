@@ -705,22 +705,22 @@ properties:
             type: Boolean
             description: |-
               If true, no memory revisions will be created for any requests to the Memory Bank.
-          - name: 'exampleStoreConfig'
+      - name: 'exampleStoreConfig'
+        type: NestedObject
+        min_version: beta
+        description: |-
+          Optional. Specification for an Example Store, which manages few-shot examples for the Agent Engine.
+        properties:
+          - name: 'similaritySearchConfig'
             type: NestedObject
-            min_version: beta
             description: |-
-              Optional. Specification for an Example Store, which manages few-shot examples for the Agent Engine.
+              Optional. Configuration for how to perform similarity search on examples.
             properties:
-              - name: 'similaritySearchConfig'
-                type: NestedObject
+              - name: 'embeddingModel'
+                type: String
+                required: true
                 description: |-
-                  Optional. Configuration for how to perform similarity search on examples.
-                properties:
-                  - name: 'embeddingModel'
-                    type: String
-                    required: true
-                    description: |-
-                      Required. The Gemini model used to generate embeddings to lookup similar examples. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+                  Required. The Gemini model used to generate embeddings to lookup similar examples. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
   - name: 'url'
     type: String
     description: |-
@@ -763,5 +763,3 @@ properties:
         type: Boolean
         description: |-
           Traffic distribution configuration, where all traffic is sent to the latest Runtime Revision.
-        allow_empty_object: true
-        send_empty_value: true
