@@ -233,10 +233,6 @@ properties:
                   RagCorpus and set this to 3 if more than that.
 
                   Default value is 2.
-          - name: knn
-            type: NestedObject
-            description: Config for KNN search.
-            properties: []
       - name: vertexVectorSearch
         type: NestedObject
         description: The config for the Vertex Vector Search.
