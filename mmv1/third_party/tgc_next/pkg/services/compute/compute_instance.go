@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
@@ -1512,13 +1513,26 @@ func flattenSchedulingTgc(resp *compute.Scheduling) []map[string]interface{} {
 	return []map[string]interface{}{schedulingMap}
 }
 
+// accessConfigsToInterface converts a typed AccessConfig slice to []interface{}
+// (JSON-shaped maps) as required by the shared flatten helpers.
+func accessConfigsToInterface(configs []*compute.AccessConfig) []interface{} {
+	result := make([]interface{}, 0, len(configs))
+	for _, ac := range configs {
+		b, _ := json.Marshal(ac)
+		var m map[string]interface{}
+		_ = json.Unmarshal(b, &m)
+		result = append(result, m)
+	}
+	return result
+}
+
 func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, project string) ([]map[string]interface{}, string, string, error) {
 	flattened := make([]map[string]interface{}, len(networkInterfaces))
 	var internalIP, externalIP string
 
 	for i, iface := range networkInterfaces {
 		var ac []map[string]interface{}
-		ac, externalIP = flattenAccessConfigs(iface.AccessConfigs)
+		ac, externalIP = flattenAccessConfigs(accessConfigsToInterface(iface.AccessConfigs))
 
 		flattened[i] = map[string]interface{}{
 			"network_ip":                  iface.NetworkIP,
@@ -1526,7 +1540,7 @@ func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, 
 			"alias_ip_range":              flattenAliasIpRangeTgc(iface.AliasIpRanges),
 			"nic_type":                    iface.NicType,
 			"stack_type":                  iface.StackType,
-			"ipv6_access_config":          flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
+			"ipv6_access_config":          flattenIpv6AccessConfigs(accessConfigsToInterface(iface.Ipv6AccessConfigs)),
 			"ipv6_address":                iface.Ipv6Address,
 			"network":                     tpgresource.ConvertSelfLinkToV1(iface.Network),
 			"subnetwork":                  tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
