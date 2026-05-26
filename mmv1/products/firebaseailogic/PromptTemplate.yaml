@@ -24,13 +24,16 @@ references:
   api: 'https://firebase.google.com/docs/reference/ai-logic/rest/v1beta/projects.locations.templates'
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-create_url: projects/{{project}}/locations/{{location}}/templates?promptTemplateId={{template_id}}&regionalPropagationDisabled={{regional_propagation_disabled}}
-update_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}?regionalPropagationDisabled={{regional_propagation_disabled}}
+create_url: projects/{{project}}/locations/{{location}}/templates?promptTemplateId={{template_id}}
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}?regionalPropagationDisabled={{regional_propagation_disabled}}
+delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 autogen_async: false
+custom_code:
+  pre_create: 'templates/terraform/pre_create/firebase_ai_logic_prompt_template.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/firebase_ai_logic_prompt_template.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/firebase_ai_logic_prompt_template.go.tmpl'
 autogen_status: UHJvbXB0VGVtcGxhdGU=
 parameters:
   - name: location
@@ -41,7 +44,6 @@ parameters:
     url_param_only: true
   - name: regional_propagation_disabled
     type: Boolean
-    default_value: false
     description: |-
       For the `global` location only. If true, the write operation (create,
       update, or delete) will apply to the global region only. Otherwise, the

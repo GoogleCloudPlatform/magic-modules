@@ -38,11 +38,13 @@ examples:
     primary_resource_id: global_only_lock
     vars:
       template_id: 'global-only-lock-template'
-create_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=true&regionalPropagationDisabled={{regional_propagation_disabled}}
+create_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=true
 create_verb: POST
-delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=false&regionalPropagationDisabled={{regional_propagation_disabled}}
+delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=false
 delete_verb: POST
 custom_code:
+  pre_create: 'templates/terraform/pre_create/firebase_ai_logic_prompt_template_lock.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/firebase_ai_logic_prompt_template_lock.go.tmpl'
   # We read the PromptTemplate to verify it is locked
   post_read: 'templates/terraform/post_read/firebase_ai_logic_prompt_template_lock.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/firebase_ai_logic_prompt_template_lock.go.tmpl'
@@ -62,7 +64,6 @@ parameters:
     immutable: true
   - name: regional_propagation_disabled
     type: Boolean
-    default_value: false
     description: |-
       For the `global` location only. If true, the modifyLock operation will
       apply to the global region only. Otherwise, the operation will also
