@@ -484,6 +484,13 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `The name of a Google Compute Engine machine type.`,
 				},
 
+				"gpudirect_strategy": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					ForceNew:    true,
+					Description: `GPUDirect RDMA strategy for the node pool.`,
+				},
+
 				"metadata": {
 					Type:        schema.TypeMap,
 					Optional:    true,
@@ -1445,6 +1452,10 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 
 	if v, ok := nodeConfig["machine_type"]; ok {
 		nc.MachineType = v.(string)
+	}
+
+	if v, ok := nodeConfig["gpudirect_strategy"]; ok {
+		nc.GpuDirectConfig = expandGpuDirectConfig(v)
 	}
 
 	if v, ok := nodeConfig["guest_accelerator"]; ok {
@@ -2521,6 +2532,7 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 
 	transformed := map[string]interface{}{
 		"machine_type":                       c["machineType"],
+		"gpudirect_strategy":                 flattenGpuDirectConfig(c["gpuDirectConfig"]),
 		"containerd_config":                  flattenContainerdConfig(c["containerdConfig"]),
 		"disk_size_gb":                       c["diskSizeGb"],
 		"disk_type":                          c["diskType"],
@@ -3594,4 +3606,32 @@ func flattenFastSocket(v interface{}) []map[string]interface{} {
 	}
 
 	return []map[string]interface{}{transformed}
+}
+
+// GPUDirectConfig is currently directly stored as a GpuDirectStrategy string.
+func expandGpuDirectConfig(v interface{}) *container.GPUDirectConfig {
+	if v == nil || v.(string) == "" {
+		return nil
+	}
+
+	return &container.GPUDirectConfig{
+		GpuDirectStrategy: v.(string),
+	}
+}
+
+// GPUDirectConfig currently only has one field, flatten directly to string.
+func flattenGpuDirectConfig(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return ""
+	}
+
+	strategy, ok := c["gpuDirectStrategy"].(string)
+	if !ok {
+		return ""
+	}
+	return strategy
 }
