@@ -49,8 +49,12 @@ samples:
           description: "full description"
           leaf_count: 500
           tree_depth: 2
+          kms_key_name: "kms-name"
         test_env_vars:
           project: "PROJECT_NAME"
+          project_number: "PROJECT_NUMBER"
+        test_vars_overrides:
+          'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-west1").CryptoKey.Name'
         resource_id_vars:
           display_name: "rag-corpus-full"
   - name: "vertex_ai_rag_corpus_pinecone"
