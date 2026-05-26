@@ -161,8 +161,18 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	var reservationAffinity *compute.ReservationAffinity
 	if raMap != nil {
 		reservationAffinity = &compute.ReservationAffinity{}
-		if err := tpgresource.Convert(raMap, reservationAffinity); err != nil {
-			return nil, fmt.Errorf("Error converting reservation_affinity: %s", err)
+		if v, ok := raMap["consumeReservationType"].(string); ok {
+			reservationAffinity.ConsumeReservationType = v
+		}
+		if v, ok := raMap["key"].(string); ok {
+			reservationAffinity.Key = v
+		}
+		if vals, ok := raMap["values"].([]interface{}); ok {
+			for _, v := range vals {
+				if s, ok := v.(string); ok {
+					reservationAffinity.Values = append(reservationAffinity.Values, s)
+				}
+			}
 		}
 	}
 
