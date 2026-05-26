@@ -69,7 +69,7 @@ func TestAccCloudSecurityComplianceFramework_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_framework.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization"},
+				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization", "supported_enforcement_modes", "cloud_control_details"},
 			},
 			{
 				Config: testAccCloudSecurityComplianceFramework_update(context),
@@ -83,7 +83,11 @@ func TestAccCloudSecurityComplianceFramework_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_framework.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization"},
+				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization", "supported_enforcement_modes", "cloud_control_details"},
+			},
+			{
+				Config:   testAccCloudSecurityComplianceFramework_reorder(context),
+				PlanOnly: true,
 			},
 		},
 	})
@@ -127,7 +131,6 @@ resource "google_cloud_security_compliance_framework" "example" {
 }
 `, context)
 }
-
 func TestAccCloudSecurityComplianceFramework_backwardCompatibility(t *testing.T) {
 	t.Parallel()
 
@@ -147,7 +150,7 @@ func TestAccCloudSecurityComplianceFramework_backwardCompatibility(t *testing.T)
 				ResourceName:            "google_cloud_security_compliance_framework.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization"},
+				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization", "supported_enforcement_modes", "cloud_control_details"},
 			},
 		},
 	})
@@ -171,6 +174,45 @@ resource "google_cloud_security_compliance_framework" "example" {
       name = "location"
       parameter_value {
         string_value = "us-central1"
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudSecurityComplianceFramework_reorder(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_security_compliance_framework" "example" {
+  parent       = "organizations/%{org_id}"
+  location     = "global"
+  framework_id = "tf-test-example-framework%{random_suffix}"
+  
+  display_name = "Updated Terraform Framework Name"
+  description  = "An updated description for the framework with additional details"
+  
+  cloud_control_details {
+    name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
+    major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        string_value = "us-east1"
+      }
+    }
+  }
+
+  cloud_control_details {
+    name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-cmek-key-in-use-for-bigquery-table"
+    major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        string_list_value {
+          values = ["us-central1"]
+        }
       }
     }
   }

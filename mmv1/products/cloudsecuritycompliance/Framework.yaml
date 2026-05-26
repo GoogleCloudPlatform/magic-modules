@@ -32,18 +32,24 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
+    ignore_read_extra:
+      - "cloud_control_details"
   - name: "cloudsecuritycompliance_framework_project_basic"
     primary_resource_id: "example"
     vars:
       framework_name: "example-framework"
     test_env_vars:
       project_number: "PROJECT_NUMBER"
+    ignore_read_extra:
+      - "cloud_control_details"
   - name: "cloudsecuritycompliance_framework_org_basic_backward"
     primary_resource_id: "example"
     vars:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
+    ignore_read_extra:
+      - "cloud_control_details"
 identity_schema_version: 2
 identity_upgraders: true
 autogen_status: RnJhbWV3b3Jr
@@ -57,6 +63,7 @@ custom_code:
   pre_delete: "templates/terraform/pre_delete/cloudsecuritycompliance_pre_delete.go.tmpl"
   post_import: "templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl"
   custom_import: "templates/terraform/custom_import/cloudsecuritycompliance_framework.go.tmpl"
+  constants: "templates/terraform/constants/cloudsecuritycompliance_framework.go.tmpl"
 parameters:
   - name: parent
     type: String
@@ -106,6 +113,8 @@ properties:
     output: true
   - name: cloudControlDetails
     type: Array
+    is_set: true
+    set_hash_func: 'cloudsecuritycomplianceFrameworkCloudControlDetailsHash'
     description: |-
       The details of the cloud controls directly added without any grouping in
       the framework.
@@ -116,6 +125,7 @@ properties:
           type: String
           description: Major revision of cloudcontrol
           required: true
+          diff_suppress_func: 'tpgresource.SuppressMajorRevisionId'
         - name: name
           type: String
           description: |-
