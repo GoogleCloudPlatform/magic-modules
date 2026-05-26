@@ -20,13 +20,15 @@ To fix integration tests, follow the guidelines and playbook below:
 
 ### 1. General Rules for Fixing Tests
 When troubleshooting and resolving test failures, adhere to these constraints:
-- **DON'T** modify the templates in `mmv1/templates/terraform`. It is **only** allowed to modify the templates in `mmv1/templates/tgc_next`.
+- **DON'T** modify the templates in `mmv1/templates/terraform` or shared helper files/templates in `mmv1/third_party/terraform`. It is **only** allowed to modify the templates in `mmv1/templates/tgc_next` or TGC Next custom files under `mmv1/third_party/tgc_next/`.
+- **DON'T** modify legacy TGC code in `mmv1/third_party/cai2hcl` or `mmv1/third_party/tgc`. All changes must be made to TGC Next code in `mmv1/third_party/tgc_next/`.
 - **DON'T** add `ignore_read_extra` to the example in `Resource.yaml`.
 - **DON'T** add new fields to `mmv1/api/resource/custom_code.go` unless explicitly guided by the user.
 - **DON'T** remove any existing `custom_code`, including any constants.
 - **DO** add a comment for each fix in the YAML file or other files to explain the root cause and the solution.
 - **DON'T** use `d.Set` in custom decoders for `cai2hcl`. Conversion in `cai2hcl` is a direct mapping from CAI asset data maps to HCL maps without involving Terraform state. Mutate the data map directly.
 - **DON'T** use `is_missing_in_cai: true` if the missing fields are present in other raw JSON files of other tests.
+- **DON'T** modify `mmv1/api/resource.go` to hardcode or manually append ignored fields for tests. If there is a field path mapping mismatch (e.g., due to singular/plural name differences), rename the property name in the resource YAML configuration (e.g., `Instance.yaml`) and use `api_name` to map it to the API field name.
 - **DO** trace the value of a failing field through `Test_export.tf`, `Test_roundtrip.json`, and `Test_roundtrip.tf` to identify the exact stage where data is lost or mutated, rather than guessing based on the final error message.
 
 ---

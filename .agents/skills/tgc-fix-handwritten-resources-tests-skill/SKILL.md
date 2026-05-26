@@ -16,9 +16,17 @@ When you need to fix integration tests for handwritten resources in TGC, use thi
 
 ## How to Use It
 
+### General Rules for Fixing Tests
+When troubleshooting and resolving test failures, adhere to these constraints:
+- **DON'T** modify `mmv1/api/resource.go` to hardcode or manually append ignored fields for tests. If there is a field path mapping mismatch (e.g., due to singular/plural name differences), rename the property name in the resource YAML configuration (e.g., `Instance.yaml`) and use `api_name` to map it to the API field name.
+- **DON'T** modify shared provider templates/files in `mmv1/third_party/terraform`. All changes must be localized to TGC Next code under `mmv1/third_party/tgc_next/`.
+- **DON'T** modify legacy TGC code in `mmv1/third_party/cai2hcl` or `mmv1/third_party/tgc`. All changes must be made to TGC Next code in `mmv1/third_party/tgc_next/`.
+- **DO** add a comment for each fix in the YAML file or other files to explain the root cause and the solution.
+
 ### Steps
 1. Find the error message
 2. Fix the tests in magic-modules by following the guidelines and playbook below:
+
 
 #### File Naming Conventions for Handwritten Tests
 
@@ -176,9 +184,44 @@ To fix CAI mapping collisions between similar resources:
 
 #### Example: Fixing Missing Fields Not Present in CAI Asset via YAML
 
-Even for handwritten resources, if the resource has a corresponding YAML file in Magic Modules (e.g., for listing tests or shared properties), you can use `is_missing_in_cai: true` to ignore fields that are not present in the CAI asset data but are required by the Terraform schema.
+##### Debugging Order of Operations (Handling Missing Fields)
+When a field is reported as missing or failing in a handwritten resource's integration test, you must follow this strict logical order of operations rather than immediately marking it as ignored:
 
-**Solution:**
+1. **Verify Resource Type**: Confirm the resource is indeed a handwritten/custom resource (e.g., GKE Cluster or GKE NodePool) and not generated from a standard MM YAML.
+2. **Verify Go-Level Conversion Support**: Check the `tgc_next` handwritten Go files (e.g., `node_config.go`) to see if the schema, flattener, and expander for the missing field are already implemented.
+   - **If missing**: 
+      - **Check if the field is only mapped/set in the standard downstream Terraform Provider when the field exists in the Terraform state or configuration (e.g., via checks like `d.GetOk("field")`).**
+         - **If so**: **do NOT convert it in TGC**. Only implement Go-level flatteners in TGC for fields that are unconditionally mapped/set from the live API response.
+         - **Otherwise**: Implement the conversion code in Go first. Do NOT skip this step; doing so would mask a missing feature with a false-positive ignore rule.
+3. **Verify Post-Code Test Behavior**: Rebuild and re-run the integration test.
+4. **Apply Ignored Metadata**: If the field is *still* reported as missing during validation, check if it's because of a permanent API-level omission in the CAI asset payload. Only after proving a CAI-level omission, add `is_missing_in_cai: true` to the MM YAML (e.g., `NodePool.yaml`) to gracefully bypass validation.
+
+##### Solution for API-Level CAI Omissions:
 1. Add the field to the resource's YAML file under the appropriate property block.
 2. Set `is_missing_in_cai: true`.
-This avoids having to write custom Go code in flatteners to handle missing fields.
+This ensures that the validation framework gracefully ignores the CAI-level API omission during testing, while still allowing your Go-level conversion code (schema, flattener, and expander) to execute normally when properties are converted.
+
+> [!TIP]
+> **GKE CAI Parity Warning:** When dealing with nested configuration blocks shared between parent resources (like GKE Cluster) and standalone child resources (like GKE NodePool), do not assume their API CAI exporters share the same level of parity. For example, while GKE Clusters return `crashLoopBackOff` in CAI, the standalone GKE NodePool CAI asset (`container.googleapis.com/NodePool`) has a permanent omission and *never* returns `crashLoopBackOff`. Always verify target CAI asset types specifically.
+
+#### Example: Resolving Missing Fields by Implementing Go-Level Flatteners
+
+**Failing Test:** `TestAccComputeInstance_schedulingTerminationTime`
+
+The test fails during the CAI-to-HCL validation check because of a missing field:
+
+```text
+TestAccComputeInstance_schedulingTerminationTime_step1: Failed after 5 attempts. First real error: retryable: missing fields: [scheduling.termination_time]
+```
+
+**Analysis:**
+1. Inspect the raw CAI asset (`TestAccComputeInstance_schedulingTerminationTime_step1.json`). If the property (`terminationTime`) is present in the CAI payload, it is NOT missing from CAI. Thus, `is_missing_in_cai: true` must NOT be used.
+2. For handwritten resources (e.g., `google_compute_instance`), look at the custom conversion files (e.g., `compute_instance_cai2hcl.go`). If the property flattener is missing the mapping code, the property won't be written to the exported HCL.
+
+**Solution:**
+1. **cai2hcl (Flattener):** Locate the flattener function mapping the nested block (e.g., `flattenSchedulingTgcNext`). Add Go code to extract the value from the CAI response map and write it to the HCL schema map:
+   ```go
+   if tt, ok := resp["terminationTime"].(string); ok && tt != "" {
+       schedulingMap["termination_time"] = tt
+   }
+   ```

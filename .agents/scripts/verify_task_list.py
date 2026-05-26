@@ -24,7 +24,8 @@ def main():
         "skill: tgc-build-skill": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*tgc-build-skill",
         "skill: tgc-run-unit-tests-skill": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*tgc-run-unit-tests-skill",
         "skill: tgc-run-integration-tests-skill": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*tgc-run-integration-tests-skill",
-        "skill: resource specialized skill": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*(tgc-add-new-generated-resource-skill|tgc-fix-handwritten-resources-tests-skill)"
+        "skill: resource specialized skill": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*(tgc-add-new-generated-resource-skill|tgc-fix-handwritten-resources-tests-skill)",
+        "Go unit tests executed": r"-\s*\[([xX])\]\s*Run\s+Go\s+unit\s+tests"
     }
 
     errors = []

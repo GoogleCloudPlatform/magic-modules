@@ -160,7 +160,11 @@ By isolating the exact file where the data disappears, you avoid dead-ends and i
 - **Symptom**: Error message like `missing fields in resource ... after cai2hcl conversion: [field_name]`.
   - **Example**: `TestAccComputeBackendBucket_backendBucketSecurityPolicyExample_step1: missing fields in resource google_compute_backend_bucket.image_backend after cai2hcl conversion: [edge_security_policy]`
 - **Cause**: The field is part of the Terraform provider's schema but is not included in the asset data provided by Cloud Asset Inventory.
-- **Debug**: Check if the field exists in the CAI asset data by inspecting the test's JSON file. If the field is absent, verify its presence across other mock assets of the same resource by searching the cached metadata files in the `test_mata/tests_metadata_*.json` directory.
+- **Debug**: 
+  - Check if the field exists in the CAI asset data by inspecting the test's JSON file. If the field is absent, verify its presence across other mock assets of the same resource by searching the cached metadata files in the `test_mata/tests_metadata_*.json` directory.
+  - > [!NOTE]
+  - > **False-Positives with the Diagnostics Tool:**
+  - > The automated diagnostics tool (`diagnose_test_failure.py`) may report a `[cai2hcl FLATTENER BUG DETECTED]` indicating the field is present in the live Google Cloud Asset API but missing in HCL. However, always check the actual local pre-recorded test asset JSON file (e.g., `step1.json`) first. If the field is completely absent in the recorded JSON file, the tool's report is a false-positive caused by live API discrepancy. You should proceed with `is_missing_in_cai: true` rather than trying to fix non-existent flattener code.
 - **Solution**: Mark the field with `is_missing_in_cai: true` in the resource YAML file. This informs TGC that the field is not expected to be in the CAI input. Only add `is_missing_in_cai: true` if the field is missing in **ALL** of the resource's CAI asset JSON files (meaning it is never supported or returned by the API/CAI for any subtype). If the field exists in some CAI files but is missing in others, do not use this flag.
 - **Example**: `is_missing_in_cai: true` for the field `edgeSecurityPolicy` in `BackendBucket.yaml`.
 

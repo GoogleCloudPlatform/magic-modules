@@ -17,19 +17,22 @@ ACTIVE_TASK_MD=$(find /Users/zhenhuali/.gemini/jetski/brain -name task.md -type 
 
 if [ ! -z "$ACTIVE_TASK_MD" ]; then
   echo "Verifying task list at $ACTIVE_TASK_MD..."
-  /Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/scripts/verify_task_list.py "$ACTIVE_TASK_MD"
+  "$MAGIC_MODULES_PATH/.agents/scripts/verify_task_list.py" "$ACTIVE_TASK_MD"
 else
   echo "Warning: Active task.md could not be detected automatically. Skipping task list verification."
 fi
 
-# Automatically verify field ordering for all modified YAML product configurations
+# Automatically verify field ordering and test configuration for all modified YAML product configurations
 echo "Checking for modified YAML product configurations..."
 CHANGED_YAMLS=$(git diff --name-only 2>/dev/null | grep -E "^mmv1/products/.*\.ya?ml$" || true)
 if [ ! -z "$CHANGED_YAMLS" ]; then
   for yaml in $CHANGED_YAMLS; do
     if [ -f "$yaml" ]; then
       echo "Verifying field ordering compliance for $yaml..."
-      /Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/scripts/verify_yaml_field_order.py mmv1/api/resource.go "$yaml"
+      "$MAGIC_MODULES_PATH/.agents/scripts/verify_yaml_field_order.py" mmv1/api/resource.go "$yaml"
+      
+      echo "Verifying test configurations for $yaml..."
+      "$MAGIC_MODULES_PATH/.agents/scripts/verify_test_configs.py" "$yaml"
     fi
   done
 fi
@@ -37,7 +40,6 @@ fi
 
 echo "[Phase 1] Generating TGC Code from Magic Modules..."
 cd "$MAGIC_MODULES_PATH"
-make clean-tgc OUTPUT_PATH="$TGC_PATH"
 make tgc OUTPUT_PATH="$TGC_PATH"
 
 echo "[Phase 2] Compiling the TGC Binary downstream..."
@@ -46,3 +48,6 @@ make mod-clean
 make build
 
 echo "TGC build compiled successfully!"
+
+echo "[Phase 3] Executing selective unit tests..."
+TGC_DIR="$TGC_PATH" /Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/skills/tgc-build-skill/scripts/run_changed_folders_tests.sh
