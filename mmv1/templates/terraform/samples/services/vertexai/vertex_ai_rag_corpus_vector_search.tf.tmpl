@@ -1,0 +1,11 @@
+resource "google_vertex_ai_rag_corpus" "{{$.PrimaryResourceId}}" {
+  region       = "us-west1"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  description  = "{{index $.Vars "description"}}"
+  vector_db_config {
+    vertex_vector_search {
+      index          = "projects/{{index $.TestEnvVars "project"}}/locations/us-west1/indexes/1234567890"
+      index_endpoint = "projects/{{index $.TestEnvVars "project"}}/locations/us-west1/indexEndpoints/1234567890"
+    }
+  }
+}

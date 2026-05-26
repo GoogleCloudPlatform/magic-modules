@@ -53,6 +53,37 @@ samples:
           project: "PROJECT_NAME"
         resource_id_vars:
           display_name: "rag-corpus-full"
+  - name: "vertex_ai_rag_corpus_pinecone"
+    primary_resource_id: "default"
+    exclude_test: true
+    steps:
+      - name: "vertex_ai_rag_corpus_pinecone"
+        vars:
+          description: "pinecone backend"
+        resource_id_vars:
+          display_name: "rag-corpus-pinecone"
+  - name: "vertex_ai_rag_corpus_vector_search"
+    primary_resource_id: "default"
+    exclude_test: true
+    steps:
+      - name: "vertex_ai_rag_corpus_vector_search"
+        vars:
+          description: "vertex vector search backend"
+        test_env_vars:
+          project: "PROJECT_NAME"
+        resource_id_vars:
+          display_name: "rag-corpus-vector-search"
+  - name: "vertex_ai_rag_corpus_search_config"
+    primary_resource_id: "default"
+    exclude_test: true
+    steps:
+      - name: "vertex_ai_rag_corpus_search_config"
+        vars:
+          description: "vertex ai search config backend"
+        test_env_vars:
+          project: "PROJECT_NAME"
+        resource_id_vars:
+          display_name: "rag-corpus-search-config"
 parameters:
   - name: region
     type: String
@@ -134,29 +165,6 @@ properties:
     description: Config for the Vector DB to use for RAG.
     default_from_api: true
     properties:
-      - name: apiAuth
-        type: NestedObject
-        description: |-
-          The generic reusable api auth config.
-          Deprecated. Please use AuthConfig (google/cloud/aiplatform/master/auth.proto)
-          instead.
-        properties:
-          - name: apiKeyConfig
-            type: NestedObject
-            description: The API secret.
-            properties:
-              - name: apiKeySecretVersion
-                type: String
-                required: true
-                description: |-
-                  The SecretManager secret version resource name storing API key.
-                  e.g. projects/{project}/secrets/{secret}/versions/{version}
-              - name: apiKeyString
-                type: String
-                description: |-
-                  The API key string.
-
-                  Either this or `api_key_secret_version` must be set.
       - name: pinecone
         type: NestedObject
         description: The config for the Pinecone.
