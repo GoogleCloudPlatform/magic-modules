@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Parallelstore'
-display_name: 'Parallelstore'
-versions:
-  - name: 'ga'
-    base_url: 'https://parallelstore.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://parallelstore.googleapis.com/v1beta/'
+name: Parallelstore
+display_name: Parallelstore
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://parallelstore.googleapis.com/v1/
+  - name: beta
+    base_url: https://parallelstore.googleapis.com/v1beta/

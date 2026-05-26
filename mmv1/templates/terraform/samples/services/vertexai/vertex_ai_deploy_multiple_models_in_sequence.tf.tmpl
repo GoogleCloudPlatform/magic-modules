@@ -1,0 +1,55 @@
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "{{$.PrimaryResourceId}}-gemma-1_1-2b-it" {
+  publisher_model_name = "publishers/google/models/gemma@gemma-1.1-2b-it"
+  location             = "us-central1"
+  model_config {
+    accept_eula = true
+  }
+  deploy_config {
+    dedicated_resources {
+      machine_spec {
+        machine_type      = "g2-standard-12"
+        accelerator_type  = "NVIDIA_L4"
+        accelerator_count = 1
+      }
+      min_replica_count = 1
+    }
+  }
+}
+
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "{{$.PrimaryResourceId}}-qwen3-0_6b" {
+  hugging_face_model_id = "Qwen/Qwen3-0.6B"
+  location             = "us-central1"
+  model_config {
+    accept_eula = true
+  }
+  deploy_config {
+    dedicated_resources {
+      machine_spec {
+        machine_type      = "g2-standard-12"
+        accelerator_type  = "NVIDIA_L4"
+        accelerator_count = 1
+      }
+      min_replica_count = 1
+    }
+  }
+  depends_on = [ google_vertex_ai_endpoint_with_model_garden_deployment.{{$.PrimaryResourceId}}-gemma-1_1-2b-it ]
+}
+
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "{{$.PrimaryResourceId}}-llama-3_2-1b" {
+  publisher_model_name = "publishers/meta/models/llama3-2@llama-3.2-1b"
+  location             = "us-central1"
+  model_config {
+    accept_eula = true
+  }
+  deploy_config {
+    dedicated_resources {
+      machine_spec {
+        machine_type      = "g2-standard-12"
+        accelerator_type  = "NVIDIA_L4"
+        accelerator_count = 1
+      }
+      min_replica_count = 1
+    }
+  }
+  depends_on = [ google_vertex_ai_endpoint_with_model_garden_deployment.{{$.PrimaryResourceId}}-qwen3-0_6b ]
+}

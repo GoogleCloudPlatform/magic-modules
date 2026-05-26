@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'DNS'
-display_name: 'Cloud DNS'
-versions:
-  - name: 'ga'
-    base_url: 'https://dns.googleapis.com/dns/v1/'
-  - name: 'beta'
-    base_url: 'https://dns.googleapis.com/dns/v1beta2/'
+name: DNS
+display_name: Cloud DNS
 scopes:
-  - 'https://www.googleapis.com/auth/ndev.clouddns.readwrite'
+  - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+versions:
+  - name: ga
+    base_url: https://dns.googleapis.com/dns/v1/
+  - name: beta
+    base_url: https://dns.googleapis.com/dns/v1beta2/

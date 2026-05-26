@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'BigqueryConnection'
-legacy_name: 'bigquery'
-display_name: 'BigQuery Connection'
-versions:
-  - name: 'ga'
-    base_url: 'https://bigqueryconnection.googleapis.com/v1/'
+name: BigqueryConnection
+legacy_name: bigquery
+display_name: BigQuery Connection
 scopes:
-  - 'https://www.googleapis.com/auth/bigquery'
+  - https://www.googleapis.com/auth/bigquery
+versions:
+  - name: ga
+    base_url: https://bigqueryconnection.googleapis.com/v1/

@@ -12,21 +12,21 @@
 # limitations under the License.
 
 ---
-name: 'Config'
+name: Config
 api_resource_type_kind: TransferConfig
 description: |
   Represents a data transfer configuration. A transfer configuration
   contains all metadata needed to perform a data transfer.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/'
-  api: 'https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/create'
+    Official Documentation: https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/
+  api: https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/create
 docs:
-id_format: '{{name}}'
-base_url: 'projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}'
+base_url: projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}
 self_link: '{{name}}'
 update_url: '{{name}}?serviceAccountName={{service_account_name}}'
-update_verb: 'PATCH'
+update_verb: PATCH
+id_format: '{{name}}'
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
@@ -34,41 +34,46 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  constants: 'templates/terraform/constants/bigquery_data_transfer.go.tmpl'
-  encoder: 'templates/terraform/encoders/bigquery_data_transfer.go.tmpl'
-  decoder: 'templates/terraform/decoders/bigquery_data_transfer.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/bigquerydatatransfer_config.tmpl'
-  custom_import: 'templates/terraform/custom_import/bigquery_data_transfer_self_link_as_name_set_location.go.tmpl'
 custom_diff:
-  - 'sensitiveParamCustomizeDiff'
-  - 'paramsCustomizeDiff'
+  - sensitiveParamCustomizeDiff
+  - paramsCustomizeDiff
 error_retry_predicates:
-
-  - 'transport_tpg.IamMemberMissing'
-examples:
-  - name: 'bigquerydatatransfer_config_scheduled_query'
-    primary_resource_id: 'query_config'
-    vars:
-      display_name: 'my-query'
-      dataset_id: 'my_dataset'
+  - transport_tpg.IamMemberMissing
+custom_code:
+  encoder: templates/terraform/encoders/bigquery_data_transfer.go.tmpl
+  decoder: templates/terraform/decoders/bigquery_data_transfer.go.tmpl
+  constants: templates/terraform/constants/bigquery_data_transfer.go.tmpl
+  pre_update: templates/terraform/pre_update/bigquerydatatransfer_config.tmpl
+  custom_import: templates/terraform/custom_import/bigquery_data_transfer_self_link_as_name_set_location.go.tmpl
+samples:
+  - name: bigquerydatatransfer_config_scheduled_query
+    primary_resource_id: query_config
     exclude_test: true
-  - name: 'bigquerydatatransfer_config_cmek'
-    primary_resource_id: 'query_config_cmek'
-    vars:
-      dataset_id: 'example_dataset'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
-      display_name: 'display-name'
+    steps:
+      - name: bigquerydatatransfer_config_scheduled_query
+        resource_id_vars:
+          display_name: my-query
+          dataset_id: my_dataset
+  - name: bigquerydatatransfer_config_cmek
+    primary_resource_id: query_config_cmek
     exclude_test: true
-  - name: 'bigquerydatatransfer_config_salesforce'
-    primary_resource_id: 'salesforce_config'
-    vars:
-      display_name: 'my-salesforce-config'
-      dataset_id: 'my_dataset'
+    steps:
+      - name: bigquerydatatransfer_config_cmek
+        resource_id_vars:
+          dataset_id: example_dataset
+          key_name: example-key
+          keyring_name: example-keyring
+          display_name: display-name
+  - name: bigquerydatatransfer_config_salesforce
+    primary_resource_id: salesforce_config
     exclude_test: true
+    steps:
+      - name: bigquerydatatransfer_config_salesforce
+        resource_id_vars:
+          display_name: my-salesforce-config
+          dataset_id: my_dataset
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The geographic location where the transfer config should reside.
@@ -76,8 +81,8 @@ parameters:
     url_param_only: true
     immutable: true
     ignore_read: true
-    default_value: "US"
-  - name: 'serviceAccountName'
+    default_value: US
+  - name: serviceAccountName
     type: String
     description: |
       Service account email. If this field is set, transfer config will
@@ -86,12 +91,12 @@ parameters:
     url_param_only: true
     default_value: ""
 properties:
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       The user specified display name for the transfer config.
     required: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the transfer config. Transfer config names have the
@@ -100,17 +105,17 @@ properties:
       where configId is usually a uuid, but this is not required.
       The name is ignored when creating a transfer config.
     output: true
-  - name: 'destinationDatasetId'
+  - name: destinationDatasetId
     type: String
     description: |
       The BigQuery target dataset id.
-  - name: 'dataSourceId'
+  - name: dataSourceId
     type: String
     description: |
       The data source id. Cannot be changed once the transfer config is created.
     required: true
     immutable: true
-  - name: 'schedule'
+  - name: schedule
     type: String
     description: |
       Data transfer schedule. If the data source does not support a custom
@@ -122,12 +127,12 @@ properties:
       https://cloud.google.com/appengine/docs/flexible/python/scheduling-jobs-with-cron-yaml#the_schedule_format
       NOTE: The minimum interval time between recurring transfers depends
       on the data source; refer to the documentation for your data source.
-  - name: 'scheduleOptions'
+  - name: scheduleOptions
     type: NestedObject
     description: |
       Options customizing the data transfer schedule.
     properties:
-      - name: 'disableAutoScheduling'
+      - name: disableAutoScheduling
         type: Boolean
         description: |
           If true, automatic scheduling of data transfer runs for this
@@ -136,10 +141,10 @@ properties:
           scheduling is disabled, the TransferConfig.schedule field will
           be ignored.
         at_least_one_of:
-          - 'schedule_options.0.disable_auto_scheduling'
-          - 'schedule_options.0.start_time'
-          - 'schedule_options.0.end_time'
-      - name: 'startTime'
+          - schedule_options.0.disable_auto_scheduling
+          - schedule_options.0.start_time
+          - schedule_options.0.end_time
+      - name: startTime
         type: Time
         description: |
           Specifies time to start scheduling transfer runs. The first run will be
@@ -148,10 +153,10 @@ properties:
           moment. The time when a data transfer can be triggered manually is not
           limited by this option.
         at_least_one_of:
-          - 'schedule_options.0.disable_auto_scheduling'
-          - 'schedule_options.0.start_time'
-          - 'schedule_options.0.end_time'
-      - name: 'endTime'
+          - schedule_options.0.disable_auto_scheduling
+          - schedule_options.0.start_time
+          - schedule_options.0.end_time
+      - name: endTime
         type: Time
         description: |
           Defines time to stop scheduling transfer runs. A transfer run cannot be
@@ -159,26 +164,26 @@ properties:
           moment. The time when a data transfer can be triggered manually is not
           limited by this option.
         at_least_one_of:
-          - 'schedule_options.0.disable_auto_scheduling'
-          - 'schedule_options.0.start_time'
-          - 'schedule_options.0.end_time'
-  - name: 'emailPreferences'
+          - schedule_options.0.disable_auto_scheduling
+          - schedule_options.0.start_time
+          - schedule_options.0.end_time
+  - name: emailPreferences
     type: NestedObject
     description: |
       Email notifications will be sent according to these preferences to the
       email address of the user who owns this transfer config.
     properties:
-      - name: 'enableFailureEmail'
+      - name: enableFailureEmail
         type: Boolean
         description: |
           If true, email notifications will be sent on transfer run failures.
         required: true
-  - name: 'notificationPubsubTopic'
+  - name: notificationPubsubTopic
     type: String
     description: |
       Pub/Sub topic where notifications will be sent after transfer runs
       associated with this transfer config finish.
-  - name: 'dataRefreshWindowDays'
+  - name: dataRefreshWindowDays
     type: Integer
     description: |
       The number of days to look back to automatically refresh the data.
@@ -186,21 +191,21 @@ properties:
       reingests data for [today-10, today-1], rather than ingesting data for
       just [today-1]. Only valid if the data source supports the feature.
       Set the value to 0 to use the default value.
-  - name: 'encryptionConfiguration'
+  - name: encryptionConfiguration
     type: NestedObject
     description: |
       Represents the encryption configuration for a transfer.
     properties:
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           The name of the KMS key used for encrypting BigQuery data.
         required: true
-  - name: 'disabled'
+  - name: disabled
     type: Boolean
     description: |
       When set to true, no runs are scheduled for a given transfer.
-  - name: 'params'
+  - name: params
     type: KeyValuePairs
     description: |
       Parameters specific to each data source. For more information see the bq tab in the 'Setting up a data transfer'
@@ -209,8 +214,8 @@ properties:
 
       **NOTE** : If you are attempting to update a parameter that cannot be updated (due to api limitations) [please force recreation of the resource](https://www.terraform.io/cli/state/taint#forcing-re-creation-of-resources).
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/json_to_string_map.go.tmpl'
-  - name: 'sensitiveParams'
+    custom_flatten: templates/terraform/custom_flatten/json_to_string_map.go.tmpl
+  - name: sensitiveParams
     type: NestedObject
     description: |
       Different parameters are configured primarily using the the `params` field on this
@@ -222,30 +227,30 @@ properties:
       to a different credential configuration in the config will require an apply to update state.
     url_param_only: true
     properties:
-      - name: 'secretAccessKeyWoVersion'
+      - name: secretAccessKeyWoVersion
         type: Integer
         url_param_only: true
         required_with:
-          - 'sensitive_params.0.secretAccessKeyWo'
+          - sensitive_params.0.secretAccessKeyWo
         description: |
           The version of the sensitive params - used to trigger updates of the write-only params. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
-      - name: 'secretAccessKey'
+      - name: secretAccessKey
         type: String
         description: |
           The Secret Access Key of the AWS account transferring data from.
         sensitive: true
         at_least_one_of:
-          - 'sensitive_params.0.secretAccessKey'
-          - 'sensitive_params.0.secretAccessKeyWo'
+          - sensitive_params.0.secretAccessKey
+          - sensitive_params.0.secretAccessKeyWo
         conflicts:
-          - 'sensitive_params.0.secretAccessKeyWo'
-      - name: 'secretAccessKeyWo'  # Wo is convention for write-only properties
+          - sensitive_params.0.secretAccessKeyWo
+      - name: secretAccessKeyWo # Wo is convention for write-only properties
         type: String
         description: |
           The Secret Access Key of the AWS account transferring data from.
         write_only_legacy: true
         at_least_one_of:
-          - 'sensitive_params.0.secretAccessKeyWo'
-          - 'sensitive_params.0.secretAccessKey'
+          - sensitive_params.0.secretAccessKeyWo
+          - sensitive_params.0.secretAccessKey
         conflicts:
-          - 'sensitive_params.0.secretAccessKey'
+          - sensitive_params.0.secretAccessKey
