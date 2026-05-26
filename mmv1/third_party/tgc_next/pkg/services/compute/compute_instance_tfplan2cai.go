@@ -154,20 +154,20 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
 	}
 
-	raMap, err := expandReservationAffinity(d)
+	reservationAffinityMap, err := expandReservationAffinity(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating reservation affinity: %s", err)
 	}
 	var reservationAffinity *compute.ReservationAffinity
-	if raMap != nil {
+	if reservationAffinityMap != nil {
 		reservationAffinity = &compute.ReservationAffinity{}
-		if v, ok := raMap["consumeReservationType"].(string); ok {
+		if v, ok := reservationAffinityMap["consumeReservationType"].(string); ok {
 			reservationAffinity.ConsumeReservationType = v
 		}
-		if v, ok := raMap["key"].(string); ok {
+		if v, ok := reservationAffinityMap["key"].(string); ok {
 			reservationAffinity.Key = v
 		}
-		if vals, ok := raMap["values"].([]interface{}); ok {
+		if vals, ok := reservationAffinityMap["values"].([]interface{}); ok {
 			for _, v := range vals {
 				if s, ok := v.(string); ok {
 					reservationAffinity.Values = append(reservationAffinity.Values, s)
