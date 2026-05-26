@@ -13,6 +13,7 @@ import (
 {{- if ne $.TargetVersionName "ga" }}
 	_ "github.com/hashicorp/terraform-provider-google/google/services/firebasestorage"
 {{- end }}
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/firebaserules"
 	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 )
