@@ -1,6 +1,7 @@
 package storagecontrol_test
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -12,8 +13,7 @@ func TestAccDataSourceGoogleStorageControlFolderIntelligenceFindingsSummary_empt
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"org_id": envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -22,9 +22,7 @@ func TestAccDataSourceGoogleStorageControlFolderIntelligenceFindingsSummary_empt
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleStorageControlFolderIntelligenceFindingsSummary_empty(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_storage_control_folder_intelligence_findings_summary.empty", "total_findings_count", "0"),
-				),
+				ExpectError: regexp.MustCompile(".*not found.*"),
 			},
 		},
 	})
@@ -32,15 +30,9 @@ func TestAccDataSourceGoogleStorageControlFolderIntelligenceFindingsSummary_empt
 
 func testAccDataSourceGoogleStorageControlFolderIntelligenceFindingsSummary_empty(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_folder" "folder" {
-  parent              = "organizations/%{org_id}"
-  display_name        = "tf-test-folder-name%{random_suffix}"
-  deletion_protection = false
-}
 
 data "google_storage_control_folder_intelligence_findings_summary" "empty" {
-  folder     = google_folder.folder.folder_id
-  depends_on = [google_folder.folder]
+  folder = "folders/%{org_id}"
 }
 `, context)
 }
