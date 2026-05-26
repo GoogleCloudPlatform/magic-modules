@@ -1,7 +1,6 @@
 package storagecontrol_test
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -22,7 +21,9 @@ func TestAccDataSourceGoogleStorageControlOrganizationIntelligenceFindingsSummar
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleStorageControlOrganizationIntelligenceFindingsSummary_empty(context),
-				ExpectError: regexp.MustCompile(".*not found.*"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_storage_control_organization_intelligence_findings_summary.empty", "finding_summaries.#", "0"),
+				),
 			},
 		},
 	})
