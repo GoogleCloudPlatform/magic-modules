@@ -1886,11 +1886,11 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		return nil, fmt.Errorf("Error creating reservation affinity: %s", err)
 	}
 
-	iekMap := expandComputeInstanceEncryptionKey(d)
+	instanceEncryptionKeyMap := expandComputeInstanceEncryptionKey(d)
 	var instanceEncryptionKey *compute.CustomerEncryptionKey
-	if iekMap != nil {
+	if instanceEncryptionKeyMap != nil {
 		instanceEncryptionKey = &compute.CustomerEncryptionKey{}
-		if err := tpgresource.Convert(iekMap, instanceEncryptionKey); err != nil {
+		if err := tpgresource.Convert(instanceEncryptionKeyMap, instanceEncryptionKey); err != nil {
 			return nil, fmt.Errorf("Error converting instance_encryption_key: %s", err)
 		}
 	}
@@ -2433,15 +2433,15 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("key_revocation_action_type", instance.KeyRevocationActionType); err != nil {
 		return fmt.Errorf("Error setting key_revocation_action_type: %s", err)
 	}
-	var iekMap map[string]interface{}
+	var instanceEncryptionKeyMap map[string]interface{}
 	if instance.InstanceEncryptionKey != nil {
 		var err error
-		iekMap, err = tpgresource.ConvertToMap(instance.InstanceEncryptionKey)
+		instanceEncryptionKeyMap, err = tpgresource.ConvertToMap(instance.InstanceEncryptionKey)
 		if err != nil {
 			return fmt.Errorf("Error converting instance_encryption_key: %s", err)
 		}
 	}
-	if err := d.Set("instance_encryption_key", flattenComputeInstanceEncryptionKey(iekMap)); err != nil {
+	if err := d.Set("instance_encryption_key", flattenComputeInstanceEncryptionKey(instanceEncryptionKeyMap)); err != nil {
 		return fmt.Errorf("Error setting instance_encryption_key: %s", err)
 	}
 
