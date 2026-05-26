@@ -152,6 +152,21 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating reservation affinity: %s", err)
 	}
 
+	instanceEncryptionKeyMap := expandComputeInstanceEncryptionKey(d)
+	var instanceEncryptionKey *compute.CustomerEncryptionKey
+	if instanceEncryptionKeyMap != nil {
+		instanceEncryptionKey = &compute.CustomerEncryptionKey{}
+		if v, ok := instanceEncryptionKeyMap["kmsKeyName"].(string); ok {
+			instanceEncryptionKey.KmsKeyName = v
+		}
+		if v, ok := instanceEncryptionKeyMap["sha256"].(string); ok {
+			instanceEncryptionKey.Sha256 = v
+		}
+		if v, ok := instanceEncryptionKeyMap["kmsKeyServiceAccount"].(string); ok {
+			instanceEncryptionKey.KmsKeyServiceAccount = v
+		}
+	}
+
 	// Create the instance information
 	return &compute.Instance{
 		CanIpForward:               d.Get("can_ip_forward").(bool),
@@ -179,7 +194,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
-		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
+		InstanceEncryptionKey:      instanceEncryptionKey,
 	}, nil
 }
 
