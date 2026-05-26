@@ -6959,3 +6959,79 @@ func TestAccContainerNodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) 
 		},
 	})
 }
+
+func TestAccContainerNodePool_withCustomNodeInit(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	nodePool := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+	bucketName := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withCustomNodeInit(cluster, nodePool, bucketName, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np_with_custom_node_init", "node_config.0.linux_node_config.0.custom_node_init.0.init_script.0.gcs_uri", fmt.Sprintf("gs://%s/script.sh", bucketName)),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np_with_custom_node_init",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_withCustomNodeInit(cluster, np, bucket, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "script" {
+  name   = "script.sh"
+  bucket = google_storage_bucket.bucket.name
+  content = "#!/bin/bash\necho 'Hello World' > /tmp/hello.txt"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+
+resource "google_container_node_pool" "np_with_custom_node_init" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    image_type = "COS_CONTAINERD"
+    linux_node_config {
+      custom_node_init {
+        init_script {
+          gcs_uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.script.name}"
+        }
+      }
+    }
+  }
+}
+`, bucket, cluster, networkName, subnetworkName, np)
+}
