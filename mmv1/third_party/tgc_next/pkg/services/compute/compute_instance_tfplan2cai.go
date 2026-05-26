@@ -154,9 +154,16 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
 	}
 
-	reservationAffinity, err := expandReservationAffinity(d)
+	raMap, err := expandReservationAffinity(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating reservation affinity: %s", err)
+	}
+	var reservationAffinity *compute.ReservationAffinity
+	if raMap != nil {
+		reservationAffinity = &compute.ReservationAffinity{}
+		if err := tpgresource.Convert(raMap, reservationAffinity); err != nil {
+			return nil, fmt.Errorf("Error converting reservation_affinity: %s", err)
+		}
 	}
 
 	instanceEncryptionKeyMap := expandComputeInstanceEncryptionKey(d)
