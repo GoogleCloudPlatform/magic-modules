@@ -21,7 +21,7 @@ resource "google_migration_center_discovery_client" "default" {
   service_account     = {{index $.Vars "service_account"}}
   display_name        = "{{index $.Vars "display_name"}}"
   description         = "{{index $.Vars "description"}}"
-  ttl                 = "{{index $.Vars "ttl"}}"
+  expire_time         = "{{index $.Vars "expire_time"}}"
   labels = {
     my_key     = "{{index $.Vars "label_value"}}"
     second_key = "second_value"

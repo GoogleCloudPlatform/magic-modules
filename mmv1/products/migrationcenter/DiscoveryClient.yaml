@@ -46,9 +46,9 @@ samples:
           service_account: 'google_service_account.default.email'
           display_name: 'Terraform integration test display'
           description: 'Terraform integration test description'
-          expire_time: '2030-01-01T00:00:00Z'
+          ttl: '86400s'
           label_value: 'value'
-      - name: 'migration_center_discovery_client_basic'
+      - name: 'migration_center_discovery_client_update'
         resource_id_vars:
           discovery_client_id: 'discovery-client-test'
           source_id: 'source-test'
@@ -122,6 +122,7 @@ properties:
             google.rpc.Status.details field, or localized by the client.
   - name: expireTime
     type: String
+    default_from_api: true
     description: |-
       Client expiration time in UTC. If specified, the backend will not accept
       new frames after this time.
@@ -164,6 +165,7 @@ properties:
     output: true
   - name: ttl
     type: String
+    ignore_read: true
     description: |-
       Input only. Client time-to-live. If specified, the backend will not accept new
       frames after this time.
