@@ -757,6 +757,7 @@ resource "google_spanner_database" "database" {
 }
 
 func TestAccSpannerDatabase_cmekReencryption(t *testing.T) {
+	t.Skip("Waiting for Spanner API to roll out CMEK re-encryption to production (b/448507616)")
 	t.Parallel()
 
 	// Grant the Spanner service account KMS permissions for the test project
@@ -877,6 +878,7 @@ resource "google_spanner_database" "database" {
 }
 
 func TestAccSpannerDatabase_mrcmekReencryption(t *testing.T) {
+	t.Skip("Waiting for Spanner API to roll out CMEK re-encryption to production (b/448507616)")
 	t.Parallel()
 
 	// Grant the Spanner service account KMS permissions
