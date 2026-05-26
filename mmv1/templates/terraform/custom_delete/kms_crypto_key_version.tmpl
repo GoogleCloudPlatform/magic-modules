@@ -8,14 +8,14 @@
 	}
 	policy := d.Get("deletion_policy").(string)
 
-	// Handle the legacy "DESTROY" behavior first
-	if policy == "DESTROY" {
+	// Handle the legacy behavior first (default)
+	if policy == "SCHEDULE_DESTROY" || policy == "" {
 		if err := destroyCryptoKeyVersion(cryptoKeyVersionId, d, userAgent, config); err != nil {
 			return err
 		}
 		d.SetId("")
 		return nil
-	} else if policy == "" || policy == "DELETE" {
+	} else if policy == "DELETE" {
 		// Proceed with the "DELETE" workflow
 		if err := deleteCryptoKeyVersion(cryptoKeyVersionId, d, userAgent, config); err != nil {
 			return err

@@ -498,6 +498,7 @@ resource "google_kms_key_ring" "key_ring" {
 resource "google_kms_crypto_key" "crypto_key" {
   name     = "%s"
   key_ring = google_kms_key_ring.key_ring.id
+  deletion_policy = "DELETE"
   labels = {
     key = "value"
   }
@@ -531,7 +532,6 @@ resource "google_kms_key_ring" "key_ring" {
 resource "google_kms_crypto_key" "crypto_key" {
   name     = "%s"
   key_ring = google_kms_key_ring.key_ring.id
-  deletion_policy = "DESTROY"
   labels = {
     key = "value"
   }
@@ -564,7 +564,6 @@ resource "google_kms_crypto_key" "crypto_key" {
   name            = "%s"
   key_ring        = google_kms_key_ring.key_ring.id
   rotation_period = "%s"
-  deletion_policy = "DESTROY"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, rotationPeriod)
 }
@@ -593,7 +592,6 @@ resource "google_kms_key_ring" "key_ring" {
 resource "google_kms_crypto_key" "crypto_key" {
   name     = "%s"
   key_ring = google_kms_key_ring.key_ring.id
-  deletion_policy = "DESTROY"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
@@ -623,7 +621,6 @@ resource "google_kms_crypto_key" "crypto_key" {
   name     = "%s"
   key_ring = google_kms_key_ring.key_ring.id
   purpose  = "ASYMMETRIC_SIGN"
-  deletion_policy = "DESTROY"
 
   version_template {
     algorithm = "%s"
@@ -707,7 +704,6 @@ resource "google_kms_key_ring" "key_ring" {
 resource "google_kms_crypto_key" "crypto_key" {
   name     = "%s"
   key_ring = google_kms_key_ring.key_ring.id
-  deletion_policy = "DESTROY"
   labels = {
     key = "value"
   }
@@ -754,7 +750,6 @@ resource "google_kms_crypto_key" "crypto_key" {
   provider = google-beta
   name     = "%s"
   key_ring = google_kms_key_ring.key_ring.id
-  deletion_policy = "DESTROY"
   labels = {
     key = "value"
   }
@@ -882,6 +877,7 @@ resource "google_kms_key_ring" "key_ring" {
 resource "google_kms_crypto_key" "crypto_key" {
   name     = "%s"
   key_ring = google_kms_key_ring.key_ring.id
+  deletion_policy = "DELETE"
   skip_initial_version_creation = true
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)

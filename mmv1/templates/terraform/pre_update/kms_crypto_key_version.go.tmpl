@@ -25,24 +25,12 @@ if d.HasChange("state") {
 				return fmt.Errorf("Cannot combine state change to DESTROY_SCHEDULED with updates to other fields: %v", newUpdateMask)
 			}
 			
-			// Safe URL construction (Fix brittle split)
-			destroyUrl := strings.Split(url, "?")[0] + ":destroy"
-			
-			// Resolve billing project safely
-			billingProject, err := tpgresource.GetBillingProject(d, config)
+			ckvId, err := parseKmsCryptoKeyVersionId(d.Id(), config)
 			if err != nil {
 				return err
 			}
-			
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "POST",
-				Project:   billingProject,
-				RawURL:    destroyUrl,
-				UserAgent: userAgent,
-			})
-			if err != nil {
-				return fmt.Errorf("Error scheduling destroy: %s", err)
+			if err := destroyCryptoKeyVersion(ckvId, d, userAgent, config); err != nil {
+				return err
 			}
 			
 			// Return Read to update state after destroy (Fix state refresh)

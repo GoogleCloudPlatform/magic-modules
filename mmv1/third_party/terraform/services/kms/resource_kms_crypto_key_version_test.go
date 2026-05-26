@@ -2,8 +2,8 @@ package kms_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -12,9 +12,7 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
-	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 )
 
 func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
@@ -279,8 +277,6 @@ resource "google_kms_crypto_key" "crypto_key" {
 
 resource "google_kms_crypto_key_version" "crypto_key_version" {
 	crypto_key = google_kms_crypto_key.crypto_key.id
-	// Explicitly set to "DESTROY" to avoid failing teardown in acceptance tests.
-	deletion_policy = "DESTROY"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
@@ -320,8 +316,6 @@ resource "google_kms_crypto_key" "crypto_key" {
 
 resource "google_kms_crypto_key_version" "crypto_key_version" {
 	crypto_key = google_kms_crypto_key.crypto_key.id
-	// Explicitly set to "DESTROY" to avoid failing teardown in acceptance tests.
-	deletion_policy = "DESTROY"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
@@ -389,8 +383,6 @@ resource "google_kms_crypto_key" "crypto_key" {
 
 resource "google_kms_crypto_key_version" "crypto_key_version" {
 	crypto_key = google_kms_crypto_key.crypto_key.id
-	// Explicitly set to "DESTROY" to avoid failing teardown in acceptance tests.
-	deletion_policy = "DESTROY"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
@@ -429,8 +421,6 @@ resource "google_kms_crypto_key_version" "crypto_key_version" {
 		prevent_destroy = true
 	}
 	state       = "ENABLED"
-	// Explicitly set to "DESTROY" to avoid failing teardown in acceptance tests.
-	deletion_policy = "DESTROY"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
@@ -470,8 +460,6 @@ resource "google_kms_crypto_key_version" "crypto_key_version" {
 		prevent_destroy = %s
 	}
 	state = "%s"
-	// Explicitly set to "DESTROY" to avoid failing teardown in acceptance tests.
-	deletion_policy = "DESTROY"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, preventDestroy, state)
 }
@@ -526,8 +514,6 @@ resource "google_kms_crypto_key_version" "crypto_key_version" {
 	external_protection_level_options {
 		external_key_uri = %s
 	}
-	// Explicitly set to "DESTROY" to avoid failing teardown in acceptance tests.
-	deletion_policy = "DESTROY"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, keyUri)
 }
@@ -619,8 +605,6 @@ resource "google_kms_crypto_key_version" "crypto_key_version" {
 	external_protection_level_options {
 		ekm_connection_key_path = %s
 	}
-	// Explicitly set to "DESTROY" to avoid failing teardown in acceptance tests.
-	deletion_policy = "DESTROY"
 }
 `, projectId, ekmConnectionName, keyRingName, cryptoKeyName, keyPath)
 }
@@ -680,8 +664,8 @@ resource "google_kms_crypto_key" "crypto_key" {
 resource "google_kms_crypto_key_version" "crypto_key_version" {
 	crypto_key = google_kms_crypto_key.crypto_key.id
 	state      = "DESTROY_SCHEDULED"
-	// Explicitly set to "DESTROY" to avoid failing teardown in acceptance tests.
-	deletion_policy = "DESTROY"
+	// Explicitly set to "SCHEDULE_DESTROY" to avoid failing teardown in acceptance tests.
+	deletion_policy = "SCHEDULE_DESTROY"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
@@ -706,32 +690,15 @@ func TestAccKmsCryptoKeyVersion_delete(t *testing.T) {
 				Config: testGoogleKmsCryptoKeyVersion_deleteSchedule(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_kms_crypto_key_version.crypto_key_version", "state", "DESTROY_SCHEDULED"),
-					func(s *terraform.State) error {
-						config := acctest.GoogleProviderConfig(t)
-						versionsClient := kms.NewClient(config, config.UserAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
-
-						rs, ok := s.RootModule().Resources["google_kms_crypto_key_version.crypto_key_version"]
-						if !ok {
-							return fmt.Errorf("Not found: google_kms_crypto_key_version.crypto_key_version")
-						}
-						id := rs.Primary.ID
-
-						err := resource.Retry(20*time.Second, func() *resource.RetryError {
-							res, err := versionsClient.Get(id).Do()
-							if err != nil {
-								return resource.NonRetryableError(err)
-							}
-							if res.State == "DESTROYED" {
-								return nil
-							}
-							return resource.RetryableError(fmt.Errorf("waiting for CryptoKeyVersion to be DESTROYED, current state: %s", res.State))
-						})
-						return err
-					},
 				),
 			},
 			{
-				Config: testGoogleKmsCryptoKeyVersion_deleteRemoved(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
+				Config:      testGoogleKmsCryptoKeyVersion_deleteRemoved(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
+				ExpectError: regexp.MustCompile("is scheduled for destruction"),
+			},
+			{
+				// Escape hatch to reset policy to SCHEDULE_DESTROY so automated test teardown succeeds
+				Config: testGoogleKmsCryptoKeyVersion_deleteScheduleCleanup(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 			},
 		},
 	})
@@ -761,7 +728,7 @@ resource "google_kms_key_ring" "key_ring" {
 resource "google_kms_crypto_key" "crypto_key" {
 	name     = "%s"
 	key_ring = google_kms_key_ring.key_ring.id
-	destroy_scheduled_duration = "0s"
+	destroy_scheduled_duration = "86400s"
 }
 
 resource "google_kms_crypto_key_version" "crypto_key_version" {
@@ -795,7 +762,7 @@ resource "google_kms_key_ring" "key_ring" {
 resource "google_kms_crypto_key" "crypto_key" {
 	name     = "%s"
 	key_ring = google_kms_key_ring.key_ring.id
-	destroy_scheduled_duration = "0s"
+	destroy_scheduled_duration = "86400s"
 }
 
 resource "google_kms_crypto_key_version" "crypto_key_version" {
@@ -830,7 +797,43 @@ resource "google_kms_key_ring" "key_ring" {
 resource "google_kms_crypto_key" "crypto_key" {
 	name     = "%s"
 	key_ring = google_kms_key_ring.key_ring.id
-	destroy_scheduled_duration = "0s"
+	destroy_scheduled_duration = "86400s"
+}
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
+}
+
+func testGoogleKmsCryptoKeyVersion_deleteScheduleCleanup(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+	name            = "%s"
+	project_id      = "%s"
+	org_id          = "%s"
+	billing_account = "%s"
+	deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "acceptance" {
+	project = google_project.acceptance.project_id
+	service = "cloudkms.googleapis.com"
+}
+
+resource "google_kms_key_ring" "key_ring" {
+	project  = google_project_service.acceptance.project
+	name     = "%s"
+	location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+	name                       = "%s"
+	key_ring                   = google_kms_key_ring.key_ring.id
+	destroy_scheduled_duration = "86400s"
+}
+
+resource "google_kms_crypto_key_version" "crypto_key_version" {
+	crypto_key      = google_kms_crypto_key.crypto_key.id
+	state           = "DESTROY_SCHEDULED"
+	// Revert to legacy escape hatch so automated test teardown succeeds!
+	deletion_policy = "SCHEDULE_DESTROY"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }

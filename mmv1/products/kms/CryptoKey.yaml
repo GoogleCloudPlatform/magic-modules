@@ -173,9 +173,9 @@ properties:
     type: String
     description: |
       The deletion policy for the CryptoKey.
-      `DELETE` is the default and requires all versions to be permanently deleted first.
-      `DESTROY` will destroy all versions and abandon the key in state (legacy behavior).
-    default_value: "DELETE"
+      - 'SCHEDULE_DESTROY' (Default): Destroy all versions and abandon the key in state (legacy behavior).
+      - 'DELETE': Requires all versions to be permanently deleted first, then deletes the CryptoKey.
+    default_value: "SCHEDULE_DESTROY"
     url_param_only: true
     ignore_read: true
   - name: 'keyAccessJustificationsPolicy'
