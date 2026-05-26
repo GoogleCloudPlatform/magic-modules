@@ -19,19 +19,8 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
 	"{{ $.ImportPath }}/tpgresource"
-{{- if $.FirstTestConfig.Sample.BootstrapIam }}
-	"{{ $.ImportPath }}/services/resourcemanager"
-{{- end }}
-{{- range $_, $v := $.FirstTestConfig.Step.TestContextVars }}
-	{{- if hasPrefix $v "tpgcompute." }}
-	tpgcompute "{{ $.ImportPath }}/services/compute"
-	{{- end }}
-	{{- if hasPrefix $v "kms." }}
-	"{{ $.ImportPath }}/services/kms"
-	{{- end }}
-	{{- if hasPrefix $v "servicenetworking." }}
-	"{{ $.ImportPath }}/services/servicenetworking"
-	{{- end }}
+{{- range $service, $alias := ($.FirstTestConfig.Step.TestServiceDependencies $.Runtime.ResourcePrefixServiceMap) }}
+	{{ $alias }} "{{ $.ImportPath  }}/services/{{ $service }}"
 {{- end }}
 )
 

@@ -29,6 +29,8 @@ import (
 	"github.com/golang/glog"
 )
 
+var hclResourceRegexp = regexp.MustCompile(`resource "(?P<resource>google_[^"]+)"`)
+
 type Step struct {
 	Name string `yaml:"name,omitempty"`
 
@@ -120,6 +122,44 @@ type Step struct {
 func (s *Step) TestStepSlug(productName, resourceName string) string {
 	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(s.Name, "lower"))
 	return ret
+}
+
+// TestServiceDependencies returns a map of service names to import aliases that are required
+// by this step.
+func (s *Step) TestServiceDependencies(resourcePrefixServiceMap map[string]string) map[string]string {
+	deps := map[string]string{}
+	for _, val := range s.TestContextVars {
+		if strings.HasPrefix(val, "compute.") {
+			deps["compute"] = ""
+		}
+		if strings.HasPrefix(val, "kms.") {
+			deps["kms"] = ""
+		}
+		if strings.HasPrefix(val, "servicenetworking.") {
+			deps["servicenetworking"] = ""
+		}
+	}
+	matches := hclResourceRegexp.FindAllStringSubmatch(s.TestHCLText, -1)
+	resources := map[string]struct{}{}
+	for _, m := range matches {
+		resources[m[1]] = struct{}{}
+	}
+
+	for r, _ := range resources {
+		longestPrefix := ""
+		for prefix, _ := range resourcePrefixServiceMap {
+			if strings.HasPrefix(r, prefix) && len(prefix) > len(longestPrefix) {
+				longestPrefix = prefix
+			}
+		}
+		if longestPrefix != "" {
+			service := resourcePrefixServiceMap[longestPrefix]
+			if _, ok := deps[service]; !ok {
+				deps[service] = "_"
+			}
+		}
+	}
+	return deps
 }
 
 func (s *Step) Validate(rName, sName string) (es []error) {

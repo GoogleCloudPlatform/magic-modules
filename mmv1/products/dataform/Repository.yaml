@@ -102,7 +102,7 @@ virtual_fields:
       management without updating or deleting the resource in the API.
 
       Possible values: `DELETE`, `FORCE`, 'PREVENT', 'ABANDON'. Defaults to `DELETE`.
-    #excluded from generation due to Universal Deletion Policy
+    # excluded from generation due to Universal Deletion Policy
     exclude: true
 parameters:
   - name: 'region'

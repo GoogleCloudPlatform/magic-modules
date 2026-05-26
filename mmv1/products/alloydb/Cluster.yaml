@@ -78,7 +78,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "alloydb-1")'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "alloydb-1")'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'alloydb_cluster_after_upgrade'
@@ -88,7 +88,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "alloydb-1")'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "alloydb-1")'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'alloydb_cluster_full'
@@ -107,7 +107,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
     ignore_read_extra:
       - 'deletion_protection'
       - 'reconciling'
@@ -149,7 +149,7 @@ virtual_fields:
 
       Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE
     type: String
-    #excluded from generation due to Universal Deletion Policy
+    # excluded from generation due to Universal Deletion Policy
     exclude: true
   - name: 'deletion_protection'
     description: |

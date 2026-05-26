@@ -68,7 +68,7 @@ examples:
       address_name: 'vertex-ai-range'
     test_vars_overrides:
       'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-      'address_name': 'tpgcompute.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", tpgcompute.AddressWithPrefixLength(8))'
+      'address_name': 'compute.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", compute.AddressWithPrefixLength(8))'
   - name: 'vertex_ai_index_endpoint_deployed_index_basic_two'
     primary_resource_id: 'basic_deployed_index'
     vars:
@@ -82,7 +82,7 @@ examples:
       address_name: 'vertex-ai-range'
     test_vars_overrides:
       'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-      'address_name': 'tpgcompute.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", tpgcompute.AddressWithPrefixLength(8))'
+      'address_name': 'compute.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", compute.AddressWithPrefixLength(8))'
   - name: 'vertex_ai_index_endpoint_deployed_index_dedicated_resources'
     primary_resource_id: 'dedicated_resources'
     vars:

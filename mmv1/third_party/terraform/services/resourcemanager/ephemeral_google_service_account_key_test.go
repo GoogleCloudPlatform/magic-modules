@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccEphemeralServiceAccountKey_create(t *testing.T) {
@@ -18,10 +19,13 @@ func TestAccEphemeralServiceAccountKey_create(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	expectedServiceAccountEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountID, project)
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEphemeralServiceAccountKey_create_setup(accountID, displayName),
@@ -45,6 +49,11 @@ resource "google_service_account" "service_account" {
 	display_name = "%s"
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [google_service_account.service_account]
+}
+
 `, accountID, displayName)
 }
 
@@ -53,6 +62,11 @@ func testAccEphemeralServiceAccountKey_create(accountID, displayName string) str
 resource "google_service_account" "service_account" {
 	account_id   = "%s"
 	display_name = "%s"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [google_service_account.service_account]
 }
 
 ephemeral "google_service_account_key" "key" {
@@ -70,7 +84,7 @@ func TestAccEphemeralServiceAccountKey_upload(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	expectedServiceAccountEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountID, project)
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
@@ -99,8 +113,8 @@ resource "google_service_account" "service_account" {
 	account_id   = "%s"
 	display_name = "%s"
 }
-resource "time_sleep" "wait_30_seconds" {
-  create_duration = "30s"
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
   depends_on = [google_service_account.service_account]
 }
 `, accountID, displayName)
@@ -112,8 +126,8 @@ resource "google_service_account" "service_account" {
 	account_id   = "%s"
 	display_name = "%s"
 }
-resource "time_sleep" "wait_30_seconds" {
-  create_duration = "30s"
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
   depends_on = [google_service_account.service_account]
 }
 
@@ -129,7 +143,7 @@ func TestAccEphemeralServiceAccountKey_fetch(t *testing.T) {
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
 	targetServiceAccountEmail := iambeta.BootstrapServiceAccount(t, "key-basic", serviceAccount)
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),

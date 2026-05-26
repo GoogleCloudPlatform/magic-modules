@@ -53,7 +53,7 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      'network_attachment_name': 'tpgcompute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", tpgcompute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", tpgcompute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+      'network_attachment_name': 'compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
   - name: eventarc_pipeline_with_workflow_destination
     primary_resource_id: primary
     vars:
@@ -70,7 +70,7 @@ examples:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
-      'network_attachment_name': 'tpgcompute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", tpgcompute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", tpgcompute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+      'network_attachment_name': 'compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
   - name: eventarc_pipeline_with_oauth_and_protobuf_format
     primary_resource_id: primary
     vars:
@@ -80,7 +80,7 @@ examples:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
-      'network_attachment_name': 'tpgcompute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", tpgcompute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", tpgcompute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+      'network_attachment_name': 'compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
   - name: eventarc_pipeline_with_cmek_and_avro_format
     primary_resource_id: primary
     bootstrap_iam:
@@ -93,7 +93,7 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      'network_attachment_name': 'tpgcompute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", tpgcompute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", tpgcompute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+      'network_attachment_name': 'compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
       'key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name'
 parameters:
   - name: location
