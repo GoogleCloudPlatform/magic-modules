@@ -32,12 +32,24 @@ async:
     resource_inside_response: true
 autogen_status: SW1wb3J0Sm9i
 autogen_async: true
-examples:
+samples:
   - name: 'migration_center_import_job_basic'
     primary_resource_id: 'default'
-    vars:
-      import_job_id: 'import-job-test'
-      source_id: 'source-test'
+    steps:
+      - name: 'migration_center_import_job_basic'
+        resource_id_vars:
+          import_job_id: 'import-job-test'
+          source_id: 'source-test'
+        vars:
+          display_name: 'Terraform integration test display'
+          label_value: 'value'
+      - name: 'migration_center_import_job_basic'
+        resource_id_vars:
+          import_job_id: 'import-job-test'
+          source_id: 'source-test'
+        vars:
+          display_name: 'Terraform integration test display updated'
+          label_value: 'value_updated'
 parameters:
   - name: location
     type: String
@@ -69,28 +81,34 @@ properties:
     description: User-friendly display name. Maximum length is 256 characters.
   - name: executionReport
     type: NestedObject
+    output: true
     description: A resource that reports result of the import job execution.
     properties:
       - name: executionErrors
+        output: true
         type: NestedObject
         description: A resource that aggregates errors across import job files.
         properties:
           - name: fileValidations
+            output: true
             type: Array
             description: List of errors found in files.
             item_type:
               type: NestedObject
               properties:
                 - name: fileErrors
+                  output: true
                   type: Array
                   description: List of file level errors.
                   item_type:
                     type: NestedObject
                     properties:
                       - name: errorDetails
+                        output: true
                         type: String
                         description: The error information.
                       - name: severity
+                        output: true
                         type: String
                         description: |-
                           The severity of the error.
@@ -99,28 +117,34 @@ properties:
                           WARNING
                           INFO
                 - name: fileName
+                  output: true
                   type: String
                   description: The name of the file.
                 - name: partialReport
+                  output: true
                   type: Boolean
                   description: |-
                     Flag indicating that processing was aborted due to maximum number of
                     errors.
                 - name: rowErrors
+                  output: true
                   type: Array
                   description: Partial list of rows that encountered validation error.
                   item_type:
                     type: NestedObject
                     properties:
                       - name: archiveError
+                        output: true
                         type: NestedObject
                         description: Error details for an archive file.
                         properties:
                           - name: csvError
+                            output: true
                             type: NestedObject
                             description: Error details for a CSV file.
                             properties:
                               - name: rowNumber
+                                output: true
                                 type: Integer
                                 description: The row number where the error was detected.
                           - name: filePath
@@ -132,22 +156,27 @@ properties:
                         description: The asset title.
                         output: true
                       - name: csvError
+                        output: true
                         type: NestedObject
                         description: Error details for a CSV file.
                         properties:
                           - name: rowNumber
+                            output: true
                             type: Integer
                             description: The row number where the error was detected.
                       - name: errors
+                        output: true
                         type: Array
                         description: The list of errors detected in the row.
                         item_type:
                           type: NestedObject
                           properties:
                             - name: errorDetails
+                              output: true
                               type: String
                               description: The error information.
                             - name: severity
+                              output: true
                               type: String
                               description: |-
                                 The severity of the error.
@@ -156,34 +185,43 @@ properties:
                                 WARNING
                                 INFO
                       - name: rowNumber
+                        output: true
                         type: Integer
                         description: The row number where the error was detected.
                       - name: vmName
+                        output: true
                         type: String
                         description: The name of the VM in the row.
                       - name: vmUuid
+                        output: true
                         type: String
                         description: The VM UUID.
                       - name: xlsxError
+                        output: true
                         type: NestedObject
                         description: Error details for an XLSX file.
                         properties:
                           - name: rowNumber
+                            output: true
                             type: Integer
                             description: The row number where the error was detected.
                           - name: sheet
+                            output: true
                             type: String
                             description: The name of the sheet where the error was detected.
           - name: jobErrors
+            output: true
             type: Array
             description: List of job level errors.
             item_type:
               type: NestedObject
               properties:
                 - name: errorDetails
+                  output: true
                   type: String
                   description: The error information.
                 - name: severity
+                  output: true
                   type: String
                   description: |-
                     The severity of the error.
@@ -192,6 +230,7 @@ properties:
                     WARNING
                     INFO
       - name: framesReported
+        output: true
         type: Integer
         description: Total number of asset frames reported for the import job.
       - name: totalRowsCount
@@ -224,24 +263,29 @@ properties:
     output: true
   - name: validationReport
     type: NestedObject
+    output: true
     description: A resource that aggregates errors across import job files.
     properties:
       - name: fileValidations
+        output: true
         type: Array
         description: List of errors found in files.
         item_type:
           type: NestedObject
           properties:
             - name: fileErrors
+              output: true
               type: Array
               description: List of file level errors.
               item_type:
                 type: NestedObject
                 properties:
                   - name: errorDetails
+                    output: true
                     type: String
                     description: The error information.
                   - name: severity
+                    output: true
                     type: String
                     description: |-
                       The severity of the error.
@@ -250,28 +294,34 @@ properties:
                       WARNING
                       INFO
             - name: fileName
+              output: true
               type: String
               description: The name of the file.
             - name: partialReport
+              output: true
               type: Boolean
               description: |-
                 Flag indicating that processing was aborted due to maximum number of
                 errors.
             - name: rowErrors
+              output: true
               type: Array
               description: Partial list of rows that encountered validation error.
               item_type:
                 type: NestedObject
                 properties:
                   - name: archiveError
+                    output: true
                     type: NestedObject
                     description: Error details for an archive file.
                     properties:
                       - name: csvError
+                        output: true
                         type: NestedObject
                         description: Error details for a CSV file.
                         properties:
                           - name: rowNumber
+                            output: true
                             type: Integer
                             description: The row number where the error was detected.
                       - name: filePath
@@ -283,22 +333,27 @@ properties:
                     description: The asset title.
                     output: true
                   - name: csvError
+                    output: true
                     type: NestedObject
                     description: Error details for a CSV file.
                     properties:
                       - name: rowNumber
+                        output: true
                         type: Integer
                         description: The row number where the error was detected.
                   - name: errors
+                    output: true
                     type: Array
                     description: The list of errors detected in the row.
                     item_type:
                       type: NestedObject
                       properties:
                         - name: errorDetails
+                          output: true
                           type: String
                           description: The error information.
                         - name: severity
+                          output: true
                           type: String
                           description: |-
                             The severity of the error.
@@ -307,34 +362,43 @@ properties:
                             WARNING
                             INFO
                   - name: rowNumber
+                    output: true
                     type: Integer
                     description: The row number where the error was detected.
                   - name: vmName
+                    output: true
                     type: String
                     description: The name of the VM in the row.
                   - name: vmUuid
+                    output: true
                     type: String
                     description: The VM UUID.
                   - name: xlsxError
+                    output: true
                     type: NestedObject
                     description: Error details for an XLSX file.
                     properties:
                       - name: rowNumber
+                        output: true
                         type: Integer
                         description: The row number where the error was detected.
                       - name: sheet
+                        output: true
                         type: String
                         description: The name of the sheet where the error was detected.
       - name: jobErrors
+        output: true
         type: Array
         description: List of job level errors.
         item_type:
           type: NestedObject
           properties:
             - name: errorDetails
+              output: true
               type: String
               description: The error information.
             - name: severity
+              output: true
               type: String
               description: |-
                 The severity of the error.
