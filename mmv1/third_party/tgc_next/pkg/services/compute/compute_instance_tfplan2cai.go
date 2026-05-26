@@ -174,16 +174,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
-	var shieldedInstanceConfig *compute.ShieldedInstanceConfig
-	if sicMap := expandShieldedVmConfigs(d); sicMap != nil {
-		shieldedInstanceConfig = &compute.ShieldedInstanceConfig{
-			EnableSecureBoot:          sicMap["enableSecureBoot"].(bool),
-			EnableVtpm:                sicMap["enableVtpm"].(bool),
-			EnableIntegrityMonitoring: sicMap["enableIntegrityMonitoring"].(bool),
-			ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
-		}
-	}
-
 	// Create the instance information
 	instance := &compute.Instance{
 		CanIpForward:             d.Get("can_ip_forward").(bool),
@@ -205,7 +195,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		DeletionProtection:       d.Get("deletion_protection").(bool),
 		Hostname:                 d.Get("hostname").(string),
 		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
-		ShieldedInstanceConfig:   shieldedInstanceConfig,
 		DisplayDevice:            expandDisplayDevice(d),
 		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:      reservationAffinity,
@@ -218,6 +207,15 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 			ConfidentialInstanceType:  cic["confidentialInstanceType"].(string),
 		}
 	}
+	if sicMap := expandShieldedVmConfigs(d); sicMap != nil {
+		instance.ShieldedInstanceConfig = &compute.ShieldedInstanceConfig{
+			EnableSecureBoot:          sicMap["enableSecureBoot"].(bool),
+			EnableVtpm:                sicMap["enableVtpm"].(bool),
+			EnableIntegrityMonitoring: sicMap["enableIntegrityMonitoring"].(bool),
+			ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
+		}
+	}
+
 	return instance, nil
 }
 
