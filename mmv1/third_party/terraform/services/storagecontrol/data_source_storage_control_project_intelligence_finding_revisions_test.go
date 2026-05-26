@@ -1,7 +1,6 @@
 package storagecontrol_test
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -16,8 +15,10 @@ func TestAccDataSourceGoogleStorageControlProjectIntelligenceFindingRevisions_no
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccDataSourceGoogleStorageControlProjectIntelligenceFindingRevisions_notFound(),
-				ExpectError: regexp.MustCompile(".*not found.*"),
+				Config: testAccDataSourceGoogleStorageControlProjectIntelligenceFindingRevisions_notFound(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_storage_control_project_intelligence_finding_revisions.not_found", "revisions.#", "0"),
+				),
 			},
 		},
 	})
