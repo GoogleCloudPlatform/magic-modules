@@ -892,10 +892,13 @@ func TestAccSpannerDatabase_mrcmekReencryption(t *testing.T) {
 	kmsKey2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-mr-cmek-reenc-key2")
 	kmsKey3 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-mr-cmek-reenc-key3")
 
+	kmsKey4 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-mr-cmek-reenc-key4")
+
 	context := map[string]interface{}{
 		"key_name_1":    kmsKey1.CryptoKey.Name,
 		"key_name_2":    kmsKey2.CryptoKey.Name,
 		"key_name_3":    kmsKey3.CryptoKey.Name,
+		"key_name_4":    kmsKey4.CryptoKey.Name,
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -904,18 +907,18 @@ func TestAccSpannerDatabase_mrcmekReencryption(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// Step 1: Provision with MR-CMEK (Keys 1 & 2)
+			// Step 1: Provision with MR-CMEK (Keys 1, 2, & 3)
 			{
 				Config: testAccSpannerDatabase_mrcmekReencryption_1(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_spanner_database.database", "encryption_config.0.kms_key_names.#", "2"),
+					resource.TestCheckResourceAttr("google_spanner_database.database", "encryption_config.0.kms_key_names.#", "3"),
 				),
 			},
 			// Step 2: Update MR-CMEK keys (Drop Key 1, Keep Key 2, Add Key 3)
 			{
 				Config: testAccSpannerDatabase_mrcmekReencryption_2(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_spanner_database.database", "encryption_config.0.kms_key_names.#", "2"),
+					resource.TestCheckResourceAttr("google_spanner_database.database", "encryption_config.0.kms_key_names.#", "3"),
 				),
 			},
 		},
@@ -940,6 +943,7 @@ resource "google_spanner_database" "database" {
     kms_key_names = [
       "%{key_name_1}",
       "%{key_name_2}",
+	  "%{key_name_3}",
     ]
   }
 }
@@ -962,8 +966,9 @@ resource "google_spanner_database" "database" {
 
   encryption_config {
     kms_key_names = [
+      "%{key_name_1}",
       "%{key_name_2}",
-      "%{key_name_3}",
+	  "%{key_name_4}",
     ]
   }
 }
