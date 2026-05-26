@@ -162,12 +162,14 @@ properties:
       - 'psc_interface_config'
     properties:
       - name: 'vpc'
+        is_missing_in_cai: true
         type: String
         description: |
           Fully qualified name of the VPC that Datastream will peer to.
           Format: projects/{project}/global/{networks}/{name}
         required: true
       - name: 'subnet'
+        is_missing_in_cai: true
         type: String
         description: |
           A free subnet for peering. (CIDR of /29)
