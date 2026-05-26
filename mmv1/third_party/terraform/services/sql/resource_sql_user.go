@@ -42,7 +42,6 @@ func diffSuppressIamUserName(_, old, new string, d *schema.ResourceData) bool {
 		}
 	}
 
-
 	return false
 }
 
@@ -410,9 +409,12 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		if !(strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") || currentUser.Type == "CLOUD_IAM_GROUP") {
 			username = strings.Split(name, "@")[0]
 		} else if strings.Contains(databaseInstance.DatabaseVersion, "MYSQL") && currentUser.Type == "CLOUD_IAM_GROUP" {
-			groupUsername := strings.Split(name, "@")[0]
-			groupHostname := strings.ToLower(strings.Split(name, "@")[1])
-			username = groupUsername + "@" + groupHostname
+			splitName := strings.Split(name, "@")
+			if len(splitName) >= 2 {
+				groupUsername := splitName[0]
+				groupHostname := splitName[1]
+				username = groupUsername + "@" + strings.ToLower(groupHostname)
+			}
 		} else {
 			username = name
 		}

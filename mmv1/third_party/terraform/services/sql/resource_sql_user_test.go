@@ -191,7 +191,7 @@ func TestAccSqlUser_postgres_iamGroupUser(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccSqlUserDestroyProducer(t),
+		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlUser_postgres_iamGroupUser("iam-group-auth-test-group@google.com", instance),
@@ -332,10 +332,11 @@ func testAccCheckGoogleSqlUserExists(t *testing.T, n string) resource.TestCheckF
 		for _, user := range users.Items {
 			username := name
 			if user.Type == "CLOUD_IAM_GROUP" && strings.Contains(databaseInstance.DatabaseVersion, "MYSQL") {
-				if len(strings.Split(name, "@")) >= 2 {
-					groupUsername := strings.Split(name, "@")[0]
-					groupHostname := strings.ToLower(strings.Split(name, "@")[1])
-					username = groupUsername + "@" + groupHostname
+				splitName := strings.Split(name, "@")
+				if len(splitName) >= 2 {
+					groupUsername := splitName[0]
+					groupHostname := splitName[1]
+					username = groupUsername + "@" + strings.ToLower(groupHostname)
 				}
 			}
 			if user.Name == username && user.Host == host {
