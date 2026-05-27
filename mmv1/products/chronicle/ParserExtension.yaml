@@ -31,6 +31,20 @@ examples:
     primary_resource_id: example
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
+    ignore_read_extra:
+      - 'state'
+      - 'state_last_changed_time'
+      - 'validation_report'
+      - 'extension_validation_report'
+  - name: 'chronicle_parserextension_full'
+    primary_resource_id: example
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    ignore_read_extra:
+      - 'state'
+      - 'state_last_changed_time'
+      - 'validation_report'
+      - 'extension_validation_report'
 parameters:
   - name: location
     type: String

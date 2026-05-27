@@ -1,0 +1,21 @@
+resource "google_chronicle_parser" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  logtype  = "LINUX_DHCP" # Unique log type to prevent CI parallel test collisions
+  validated_on_empty_logs = false
+  validation_skipped      = true
+  
+  low_code {
+    log = "ZHVtbXkgbG9nIGJ5dGVz" # Base64 encoded "dummy log bytes"
+    field_extractors {
+      log_format = "JSON"
+      extractors {
+        field_path       = "$.ip"
+        destination_path = "udm.principal.ip"
+        precondition_op   = "EQUALS"
+        precondition_path = "$.event"
+        precondition_value = "login"
+      }
+    }
+  }
+}
