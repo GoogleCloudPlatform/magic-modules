@@ -73,7 +73,7 @@ properties:
     api_name: 'locationUri'
     type: String
     required: true
-    description: | 
+    description: |
       Cloud Storage location path where the catalog data will be stored. Format: gs://bucket/path/to/catalog
   - name: 'description'
     type: String
