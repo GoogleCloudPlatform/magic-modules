@@ -13,7 +13,7 @@ resource "google_compute_organization_snapshot_recycle_bin_policy" "{{$.PrimaryR
   rules {
     name = "some-project/12345/6789"
     standard_snapshots {
-      retention_duration_days = 6
+      retention_duration_days = 5
     }
   }
 }
