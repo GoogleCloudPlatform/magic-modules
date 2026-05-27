@@ -9,4 +9,9 @@ resource "google_saas_runtime_saas" "{{$.PrimaryResourceId}}" {
   locations {
     name = "europe-west1"
   }
+
+  application_template {
+    application_template = "projects/{{index $.TestEnvVars "project"}}/locations/global/applicationTemplates/my-template"
+    revision             = "r1"
+  }
 }

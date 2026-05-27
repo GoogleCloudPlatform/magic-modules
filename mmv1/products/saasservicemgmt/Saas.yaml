@@ -27,13 +27,24 @@ examples:
   - name: saas_runtime_saas_basic
     primary_resource_id: "example"
     min_version: 'beta'
+    ignore_read_extra:
+      - blueprint_repo
+      - conditions
+      - state
+      - update_time
+      - etag
+      - application_template.0.sync_operation
     vars:
       saas_name: test-saas
+    test_env_vars:
+      project: 'PROJECT_NAME'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
         role: "roles/saasservicemgmt.serviceAgent"
 autogen_async: false
 autogen_status: U2Fhcw==
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/saas_runtime_saas_delete.go.tmpl'
 parameters:
   - name: location
     type: String
@@ -56,10 +67,108 @@ properties:
       They are not queryable and should be preserved when modifying objects.
 
       More info: https://kubernetes.io/docs/user-guide/annotations
+  - name: applicationTemplate
+    type: NestedObject
+    description: |-
+      CompositeRef represents a reference to a composite resource.
+    properties:
+      - name: applicationTemplate
+        type: String
+        required: true
+        description: Reference to the ApplicationTemplate resource.
+      - name: revision
+        type: String
+        description: |-
+          Revision of the ApplicationTemplate to use.
+          Changes to revision will trigger manual resynchronization.
+          If empty, ApplicationTemplate will be ignored.
+      - name: syncOperation
+        type: String
+        description: |-
+          Reference to on-going AppTemplate import and replication operation (i.e.
+          the operation_id for the long-running operation).
+          This field is opaque for external usage.
+        output: true
+  - name: blueprintRepo
+    type: String
+    description: |-
+      Name of repository in Artifact Registry for system-generated Blueprints,
+      eg. Blueprints of imported ApplicationTemplates.
+    output: true
+  - name: conditions
+    type: Array
+    description: |-
+      A set of conditions which indicate the various conditions this resource can
+      have.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: lastTransitionTime
+          type: String
+          description: Last time the condition transited from one status to another.
+          output: true
+        - name: message
+          type: String
+          description: Human readable message indicating details about the last transition.
+          output: true
+        - name: reason
+          type: String
+          description: Brief reason for the condition's last transition.
+          output: true
+        - name: status
+          type: String
+          description: |-
+            Status of the condition.
+            Possible values:
+            STATUS_UNKNOWN
+            STATUS_TRUE
+            STATUS_FALSE
+          output: true
+        - name: type
+          type: String
+          description: |-
+            Type of the condition.
+            Possible values:
+            TYPE_READY
+            TYPE_SYNCHRONIZED
+          output: true
   - name: createTime
     type: String
     description: The timestamp when the resource was created.
     output: true
+  - name: error
+    type: NestedObject
+    output: true
+    description: |-
+      The `Status` type defines a logical error model that is suitable for
+      different programming environments, including REST APIs and RPC APIs. It is
+      used by [gRPC](https://github.com/grpc). Each `Status` message contains
+      three pieces of data: error code, error message, and error details.
+
+      You can find out more about this error model and how to work with it in the
+      [API Design Guide](https://cloud.google.com/apis/design/errors).
+    properties:
+      - name: code
+        type: Integer
+        description: The status code, which should be an enum value of google.rpc.Code.
+        output: true
+      - name: details
+        type: Array
+        description: |-
+          A list of messages that carry the error details.  There is a common set of
+          message types for APIs to use.
+        item_type:
+          type: NestedObject
+          properties: []
+        output: true
+      - name: message
+        type: String
+        description: |-
+          A developer-facing error message, which should be in English. Any
+          user-facing error message should be localized and sent in the
+          google.rpc.Status.details field, or localized by the client.
+        output: true
   - name: etag
     type: String
     description: |-
@@ -90,6 +199,16 @@ properties:
       scheme:
 
       "projects/{project}/locations/{location}/saas/{saas}"
+    output: true
+  - name: state
+    type: String
+    description: |-
+      State of the Saas.
+      It is always in STATE_ACTIVE state if the application_template is empty.
+      Possible values:
+      STATE_ACTIVE
+      STATE_RUNNING
+      STATE_FAILED
     output: true
   - name: uid
     type: String

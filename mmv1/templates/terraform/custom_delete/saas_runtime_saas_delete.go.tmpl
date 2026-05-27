@@ -1,0 +1,91 @@
+	billingProject := ""
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for Saas: %s", err)
+	}
+	billingProject = project
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/saas/{{"{{"}}saas_id{{"}}"}}"))
+	if err != nil {
+		return err
+	}
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	headers := make(http.Header)
+
+	// 1. Wait for the resource to transition out of STATE_RUNNING before deleting
+	log.Printf("[DEBUG] Waiting for Saas %q to transition out of STATE_RUNNING", d.Id())
+	err = retry.RetryContext(context.Background(), d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
+		res, readErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Headers:   headers,
+		})
+		if readErr != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(readErr, 404) {
+				return nil // already gone
+			}
+			return retry.NonRetryableError(readErr)
+		}
+
+		state, ok := res["state"].(string)
+		if !ok {
+			return retry.RetryableError(fmt.Errorf("Saas %q state is not yet populated", d.Id()))
+		}
+		if state == "STATE_RUNNING" {
+			return retry.RetryableError(fmt.Errorf("Saas %q is still in STATE_RUNNING state", d.Id()))
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("Error waiting for Saas %q to be ready for deletion: %s", d.Id(), err)
+	}
+
+	// 2. Trigger the DELETE request
+	log.Printf("[DEBUG] Deleting Saas %q", d.Id())
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+		Headers:   headers,
+	})
+	if err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, "Saas")
+	}
+
+	log.Printf("[DEBUG] Finished trigger for deleting Saas %q: %#v", d.Id(), res)
+
+	// 3. Wait for the Saas resource to be fully deleted from GCP (eventual consistency)
+	err = retry.RetryContext(context.Background(), d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
+		_, readErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Headers:   headers,
+		})
+		if readErr != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(readErr, 404) {
+				return nil
+			}
+			return retry.NonRetryableError(readErr)
+		}
+		return retry.RetryableError(fmt.Errorf("Saas %q still exists", d.Id()))
+	})
+	if err != nil {
+		return fmt.Errorf("Error waiting for Saas %q to be fully deleted: %s", d.Id(), err)
+	}
+
+	return nil
