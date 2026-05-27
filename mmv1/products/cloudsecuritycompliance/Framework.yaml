@@ -23,7 +23,6 @@ create_url: '{{parent}}/locations/{{location}}/frameworks?frameworkId={{framewor
 update_verb: PATCH
 id_format: '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
 import_format:
-  - "organizations/{{%organization}}/locations/{{location}}/frameworks/{{framework_id}}"
   - "{{%parent}}/locations/{{location}}/frameworks/{{framework_id}}"
 examples:
   - name: "cloudsecuritycompliance_framework_org_basic"
@@ -38,6 +37,12 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       project_number: "PROJECT_NUMBER"
+  - name: "cloudsecuritycompliance_framework_org_basic_backward"
+    primary_resource_id: "example"
+    vars:
+      framework_name: "example-framework"
+    test_env_vars:
+      org_id: "ORG_ID"
 autogen_status: RnJhbWV3b3Jr
 custom_code:
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl"

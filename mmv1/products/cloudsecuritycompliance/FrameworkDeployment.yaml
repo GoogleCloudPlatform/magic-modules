@@ -22,7 +22,6 @@ self_link: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_d
 create_url: '{{parent}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}'
 id_format: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
 import_format:
-  - "organizations/{{%organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}"
   - "{{%parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}"
 supports_indirect_user_project_override: true
 examples:
@@ -70,6 +69,13 @@ examples:
       deployment_name: "example-deployment"
       framework_name: "example-framework"
       app_name: "example-app"
+  - name: "cloudsecuritycompliance_framework_deployment_org_basic_backward"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment"
+      framework_name: "example-framework"
+    test_env_vars:
+      org_id: "ORG_ID"
 autogen_async: true
 async:
   operation:

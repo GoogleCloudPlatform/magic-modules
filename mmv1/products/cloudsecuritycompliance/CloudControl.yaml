@@ -26,7 +26,6 @@ create_url: '{{parent}}/locations/{{location}}/cloudControls?cloudControlId={{cl
 update_verb: PATCH
 id_format: '{{parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}'
 import_format:
-  - "organizations/{{%organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}"
   - "{{%parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}"
 examples:
   - name: "cloudsecuritycompliance_cloudcontrol_org_basic"
@@ -39,6 +38,12 @@ examples:
     primary_resource_id: "example"
     vars:
       cloudcontrol_name: "example-cloudcontrol"
+  - name: "cloudsecuritycompliance_cloudcontrol_org_basic_backward"
+    primary_resource_id: "example"
+    vars:
+      cloudcontrol_name: "example-cloudcontrol"
+    test_env_vars:
+      org_id: "ORG_ID"
 autogen_status: Q2xvdWRDb250cm9s
 custom_code:
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_cloudcontrol.go.tmpl"
@@ -56,6 +61,7 @@ parameters:
       * `projects/{{project}}`
       * `organizations/{{organization}}`
     immutable: true
+    output: true
     default_from_api: true
     url_param_only: true
     exactly_one_of:
