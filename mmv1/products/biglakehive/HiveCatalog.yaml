@@ -17,14 +17,8 @@ description: |
   Hive Catalogs in Biglake Metastore
 references:
   guides:
-   # Link to quickstart in the API's Guides section. 
-    'QUICKSTART_TITLE': 'QUICKSTART_URL'
-  # Link to the REST API reference for the resource. For example,
-  # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
-  api: 'API_REFERENCE_URL'
-# Marks the resource as beta-only. Ensure a beta version block is present in
-# provider.yaml.
-# min_version: beta
+    'QUICKSTART_TITLE': 'https://docs.cloud.google.com/lakehouse/docs/about-spark-hive-metastore'
+min_version: beta
 base_url: 'hive/v1beta/projects/{{project}}/catalogs'
 self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{name}}'
 immutable: false
@@ -50,7 +44,7 @@ examples:
     test_env_vars:
       GOOGLE_BILLING_PROJECT: 'PROJECT'
       USER_PROJECT_OVERRIDE: 'true'
-  - name: 'biglake_hive_catalog_full'
+  - name: 'biglake_hive_catalog_full_args'
     primary_resource_id: 'my_hive_catalog'
     vars:
       name: 'my_hive_catalog'

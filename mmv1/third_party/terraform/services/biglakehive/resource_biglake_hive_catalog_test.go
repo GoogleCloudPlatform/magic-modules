@@ -83,6 +83,7 @@ resource "google_storage_bucket" "bucket_for_my_hive_catalog" {
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
+  provider = google-beta
 }
 
 resource "google_biglake_hive_catalog" "my_hive_catalog" {
@@ -93,6 +94,7 @@ resource "google_biglake_hive_catalog" "my_hive_catalog" {
     depends_on = [
       google_storage_bucket.bucket_for_my_hive_catalog
     ]
+	provider = google-beta
 }
 `, context)
 }
