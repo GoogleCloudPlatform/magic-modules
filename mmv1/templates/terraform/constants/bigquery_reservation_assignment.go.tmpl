@@ -1,0 +1,10 @@
+func bigqueryReservationAssignmentReservationDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	oldParts := strings.Split(old, "/")
+	newParts := strings.Split(new, "/")
+
+	if len(oldParts) == 1 || len(newParts) == 1 {
+		return tpgresource.GetResourceNameFromSelfLink(old) == tpgresource.GetResourceNameFromSelfLink(new)
+	}
+
+	return tpgresource.CompareSelfLinkOrResourceName(k, old, new, d)
+}

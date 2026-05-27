@@ -180,6 +180,14 @@ func ReplaceVarsForTest(config *transport_tpg.Config, rs *terraform.ResourceStat
 		}
 
 		if v, ok := rs.Primary.Attributes[m]; ok {
+			if strings.Count(v, "/") >= 3 &&
+				!strings.Contains(m, "parent") &&
+				m != "project" &&
+				m != "location" &&
+				m != "region" &&
+				m != "zone" {
+				return GetResourceNameFromSelfLink(v)
+			}
 			return v
 		}
 

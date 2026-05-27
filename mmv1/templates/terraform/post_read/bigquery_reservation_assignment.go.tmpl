@@ -1,0 +1,20 @@
+if reservationVal, ok := d.GetOk("reservation"); ok {
+	reservation := reservationVal.(string)
+	if !strings.Contains(reservation, "/") && reservation != "" {
+		if project, err := tpgresource.GetProject(d, config); err == nil {
+			project = strings.TrimPrefix(project, "projects/")
+			location := d.Get("location").(string)
+			if location == "" {
+				idParts := strings.Split(d.Id(), "/")
+				if len(idParts) >= 4 && idParts[2] == "locations" {
+					location = idParts[3]
+				}
+			}
+			if location != "" {
+				if err := d.Set("reservation", fmt.Sprintf("projects/%s/locations/%s/reservations/%s", project, location, reservation)); err != nil {
+					return fmt.Errorf("Error setting normalized reservation: %s", err)
+				}
+			}
+		}
+	}
+}
