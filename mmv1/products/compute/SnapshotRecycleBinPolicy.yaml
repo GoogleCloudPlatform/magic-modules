@@ -71,14 +71,36 @@ properties:
     value_type:
       type: NestedObject
       properties:
-      - name: 'standardSnapshots'
-        type: NestedObject
-        description: The rule config for standard snapshots.
-        send_empty_value: true
-        properties:
-        - name: 'retentionDurationDays'
-          type: Integer
+        - name: 'standardSnapshots'
+          type: NestedObject
+          description: The rule config for standard snapshots.
           send_empty_value: true
-          description: |
-            The retention duration for snapshots in the recycle bin after which the
-            snapshots are automatically deleted from recycle bin.
+          properties:
+            - name: 'retentionDurationDays'
+              type: Integer
+              send_empty_value: true
+              description: |
+                The retention duration for snapshots in the recycle bin after which the
+                snapshots are automatically deleted from recycle bin.
+  - name: 'systemRules'
+    type: Map
+    output: true
+    description: |
+      The system rules for snapshot recycle bin policy. Defines the default rule that applies if no customer-defined
+      rule matches.
+    key_name: 'name'
+    value_type:
+      type: NestedObject
+      properties:
+        - name: 'standardSnapshots'
+          type: NestedObject
+          description: The rule config for standard snapshots.
+          send_empty_value: true
+          properties:
+            - name: 'retentionDurationDays'
+              type: Integer
+              send_empty_value: true
+              description: |
+                The retention duration for snapshots in the recycle bin after which the
+                snapshots are automatically deleted from recycle bin.
+                

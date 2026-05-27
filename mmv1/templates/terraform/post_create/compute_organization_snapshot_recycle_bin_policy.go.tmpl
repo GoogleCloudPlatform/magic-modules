@@ -17,7 +17,7 @@ if err != nil {
 waitFunc := func() (map[string]interface{}, error) {
 	url := opSelfLink
 	if !strings.HasPrefix(url, "https://") && !strings.HasPrefix(url, "http://") {
-		url = config.ComputeBasePath + url
+		url = transport_tpg.BaseUrl(registry.GetProduct("compute"), config) + url
 	}
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
