@@ -103,4 +103,3 @@ properties:
               description: |
                 The retention duration for snapshots in the recycle bin after which the
                 snapshots are automatically deleted from recycle bin.
-                
