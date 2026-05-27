@@ -110,29 +110,33 @@ func DataSourceGoogleStorageControlProjectIntelligenceFindings() *schema.Resourc
 							},
 						},
 						"coldline_and_archival_storage_operations_spike": {
-							Type:     schema.TypeList,
-							Computed: true,
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: `A finding about a spike in Class A or Class B operations on Coldline or Archive Cloud Storage objects.`,
 							Elem: &schema.Resource{
 								Schema: storageControlColdlineSpikeSchema(),
 							},
 						},
 						"throttled_requests_spike": {
-							Type:     schema.TypeList,
-							Computed: true,
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: `A finding about a spike in throttled requests (429 errors) within a project.`,
 							Elem: &schema.Resource{
 								Schema: storageControlThrottledRequestsSpikeSchema(),
 							},
 						},
 						"cross_region_egress_spike": {
-							Type:     schema.TypeList,
-							Computed: true,
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: `A finding about a spike in cross-region egress from Cloud Storage.`,
 							Elem: &schema.Resource{
 								Schema: storageControlCrossRegionEgressSpikeSchema(),
 							},
 						},
 						"storage_growth_above_trend": {
-							Type:     schema.TypeList,
-							Computed: true,
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: `A finding about storage growth above the expected trend.`,
 							Elem: &schema.Resource{
 								Schema: storageControlStorageGrowthSpikeSchema(),
 							},
@@ -147,12 +151,14 @@ func DataSourceGoogleStorageControlProjectIntelligenceFindings() *schema.Resourc
 func storageControlColdlineSpikeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"total_operations_count": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: `The total count of operations across the project.`,
 		},
 		"percentage_increase": {
-			Type:     schema.TypeFloat,
-			Computed: true,
+			Type:        schema.TypeFloat,
+			Computed:    true,
+			Description: `The percentage increase in operations across the project compared to the historical baseline.`,
 		},
 		"top_buckets": storageControlTopBucketsSchema(),
 	}
@@ -161,12 +167,14 @@ func storageControlColdlineSpikeSchema() map[string]*schema.Schema {
 func storageControlThrottledRequestsSpikeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"throttled_requests": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: `The count of throttled requests for the object prefix.`,
 		},
 		"percentage_increase": {
-			Type:     schema.TypeFloat,
-			Computed: true,
+			Type:        schema.TypeFloat,
+			Computed:    true,
+			Description: `The percentage increase in throttled requests for the object prefix.`,
 		},
 		"top_buckets": storageControlTopBucketsSchema(),
 	}
@@ -175,12 +183,14 @@ func storageControlThrottledRequestsSpikeSchema() map[string]*schema.Schema {
 func storageControlCrossRegionEgressSpikeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"total_egress_bytes": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: `The total cross-region egress volume in bytes across the project.`,
 		},
 		"percentage_increase": {
-			Type:     schema.TypeFloat,
-			Computed: true,
+			Type:        schema.TypeFloat,
+			Computed:    true,
+			Description: `The percentage increase in cross-region egress across the project.`,
 		},
 		"top_buckets": storageControlTopBucketsSchema(),
 	}
@@ -189,12 +199,14 @@ func storageControlCrossRegionEgressSpikeSchema() map[string]*schema.Schema {
 func storageControlStorageGrowthSpikeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"total_storage_growth_bytes": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: `The total storage growth in bytes.`,
 		},
 		"percentage_increase": {
-			Type:     schema.TypeFloat,
-			Computed: true,
+			Type:        schema.TypeFloat,
+			Computed:    true,
+			Description: `The percentage increase in storage growth.`,
 		},
 		"top_buckets": storageControlTopBucketsSchema(),
 	}
@@ -202,63 +214,62 @@ func storageControlStorageGrowthSpikeSchema() map[string]*schema.Schema {
 
 func storageControlTopBucketsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Computed: true,
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: `A list of the top buckets driving the increase in operations.`,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"bucket": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `The name of the bucket.`,
 				},
 				"percentage_increase": {
-					Type:     schema.TypeFloat,
-					Computed: true,
+					Type:        schema.TypeFloat,
+					Computed:    true,
+					Description: `The percentage increase in storage growth for the bucket.`,
 				},
 				"total_operations_count": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `The total count of operations across the project.`,
 				},
 				"total_egress_bytes": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `The total cross-region egress volume in bytes across the project.`,
 				},
 				"total_storage_growth_bytes": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `The total storage growth in bytes.`,
 				},
 				"throttled_requests": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `The count of throttled requests across the project.`,
 				},
 				"contribution": {
-					Type:     schema.TypeList,
-					Computed: true,
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: `The details about the contribution of the bucket.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"top_prefixes": {
-								Type:     schema.TypeList,
-								Computed: true,
+								Type:        schema.TypeList,
+								Computed:    true,
+								Description: `A list of top object prefixes driving the increase in throttled requests.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"prefix": {
-											Type:     schema.TypeString,
-											Computed: true,
+											Type:        schema.TypeString,
+											Computed:    true,
+											Description: `The object prefix. For example, a/b/c or a/b/d.`,
 										},
 										"percentage_increase": {
-											Type:     schema.TypeFloat,
-											Computed: true,
-										},
-										"total_operations_count": {
-											Type:     schema.TypeString,
-											Computed: true,
-										},
-										"total_egress_bytes": {
-											Type:     schema.TypeString,
-											Computed: true,
-										},
-										"throttled_requests": {
-											Type:     schema.TypeString,
-											Computed: true,
+											Type:        schema.TypeFloat,
+											Computed:    true,
+											Description: `The percentage increase in throttled requests for the object prefix.`,
 										},
 									},
 								},
@@ -272,12 +283,14 @@ func storageControlTopBucketsSchema() *schema.Schema {
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"code": {
-								Type:     schema.TypeInt,
-								Computed: true,
+								Type:        schema.TypeInt,
+								Computed:    true,
+								Description: `The status code, which should be an enum value of google.rpc.Code.`,
 							},
 							"message": {
-								Type:     schema.TypeString,
-								Computed: true,
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: `A developer-facing error message, which should be in English. `,
 							},
 						},
 					},
