@@ -85,14 +85,8 @@ resource "google_apigee_custom_report" "{{$.PrimaryResourceId}}" {
   time_unit    = "hour"
   sort_by_cols = ["message_count"]
   sort_order   = "DESC"
-  from_time    = "1609459200000"
-  to_time      = "1640995200000"
-  topk         = "10"
-  limit        = "100"
-  offset       = "0"
   chart_type   = "line"
   tags         = ["production", "analytics"]
-  comments     = ["Daily traffic report"]
 
   properties {
     property = "ui.chart.showTotal"

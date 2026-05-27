@@ -142,31 +142,6 @@ properties:
     type: String
     description: |
       The sort order for the report results. For example, `ASC` or `DESC`.
-  - name: 'fromTime'
-    type: String
-    description: |
-      The start time for the report data. Typically a timestamp string.
-    ignore_read: true
-  - name: 'toTime'
-    type: String
-    description: |
-      The end time for the report data. Typically a timestamp string.
-    ignore_read: true
-  - name: 'topk'
-    type: String
-    description: |
-      The number of top results to return. Used for top-k queries.
-    ignore_read: true
-  - name: 'limit'
-    type: String
-    description: |
-      The maximum number of rows to return in the report.
-    ignore_read: true
-  - name: 'offset'
-    type: String
-    description: |
-      The offset for paginating through report results.
-    ignore_read: true
   - name: 'chartType'
     type: String
     description: |
@@ -175,13 +150,6 @@ properties:
     type: Array
     description: |
       Tags associated with the custom report.
-    item_type:
-      type: String
-  - name: 'comments'
-    type: Array
-    description: |
-      Comments associated with the custom report.
-    ignore_read: true
     item_type:
       type: String
   - name: 'properties'
