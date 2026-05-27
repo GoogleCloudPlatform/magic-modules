@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
@@ -107,9 +108,9 @@ func TestAccComputeFutureReservation_resourceManagerTags(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-future-reservations-tagkey", "organizations/"+org, make(map[string]interface{}))
+	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "crm-future-reservations-tagkey", "organizations/"+org, make(map[string]interface{}))
 	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-future-reservations-tagvalue", sharedTagkey, org)
+	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "crm-future-reservations-tagvalue", sharedTagkey, org)
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
