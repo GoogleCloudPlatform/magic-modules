@@ -116,6 +116,21 @@ parameters:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Snapshot'
     imports: 'selfLink'
+  - name: 'image'
+    type: String
+    description: |
+      The image from which to initialize this disk. This can be
+      one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
+      `projects/{project}/global/images/family/{family}`, `global/images/{image}`,
+      `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
+      `{project}/{image}`, `{family}`, or `{image}`. If referred by family, the
+      images names must include the family name. If they don't, use the
+      [google_compute_image data source](/docs/providers/google/d/compute_image.html).
+      For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
+      These images can be referred by family name here.
+    api_name: sourceImage
+    immutable: true
+    diff_suppress_func: 'DiskImageDiffSuppress'
 properties:
   - name: 'diskEncryptionKey'
     type: NestedObject
@@ -160,6 +175,54 @@ properties:
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+  - name: 'sourceImageEncryptionKey'
+    type: NestedObject
+    description: |
+      The customer-supplied encryption key of the source image. Required if
+      the source image is protected by a customer-supplied encryption key.
+    immutable: true
+    ignore_read: true
+    properties:
+      - name: 'rawKey'
+        type: String
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
+        is_missing_in_cai: true
+      - name: 'rsaEncryptedKey'
+        type: String
+        description: |
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
+          this resource. You can provide either the rawKey or the rsaEncryptedKey.
+        sensitive: true
+        is_missing_in_cai: true
+      - name: 'sha256'
+        type: String
+        description: |
+          The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
+          encryption key that protects this resource.
+        output: true
+        # TODO Change to ResourceRef once KMS is in Magic Modules
+      - name: 'kmsKeyName'
+        type: String
+        description: |
+          The name of the encryption key that is stored in Google Cloud KMS.
+      - name: 'kmsKeyServiceAccount'
+        type: String
+        description: |
+          The service account used for the encryption request for the given KMS key.
+          If absent, the Compute Engine Service Agent service account is used.
+  - name: 'sourceImageId'
+    type: String
+    description: |
+      The ID value of the image used to create this disk. This value
+      identifies the exact image that was used to create this persistent
+      disk. For example, if you created the persistent disk from an image
+      that was later deleted and recreated under the same name, the source
+      image ID would identify the exact version of the image that was used.
+    output: true
   - name: 'sourceSnapshotEncryptionKey'
     type: NestedObject
     description: |
@@ -173,6 +236,7 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
         # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeyName'
         type: String

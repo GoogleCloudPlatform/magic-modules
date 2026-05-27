@@ -110,6 +110,7 @@ properties:
           description: |
             Encrypts or decrypts a disk using a customer-supplied
             encryption key.
+          immutable: true
           properties:
             - name: 'rawKey'
               type: String
@@ -117,12 +118,14 @@ properties:
                 Specifies a 256-bit customer-supplied encryption key,
                 encoded in RFC 4648 base64 to either encrypt or decrypt
                 this resource.
+              sensitive: true
             - name: 'rsaEncryptedKey'
               type: String
               description: |
                 Specifies an RFC 4648 base64 encoded, RSA-wrapped
                 2048-bit customer-supplied encryption key to either
                 encrypt or decrypt this resource.
+              sensitive: true
             - name: 'sha256'
               type: String
               description: |
@@ -210,6 +213,7 @@ properties:
                 encryption keys, so you cannot create disks for
                 instances in a managed instance group if the source
                 images are encrypted with your own keys.
+              immutable: true
               properties:
                 - name: 'rawKey'
                   type: String
@@ -217,6 +221,7 @@ properties:
                     Specifies a 256-bit customer-supplied encryption
                     key, encoded in RFC 4648 base64 to either encrypt
                     or decrypt this resource.
+                  sensitive: true
                 - name: 'sha256'
                   type: String
                   description: |
@@ -233,6 +238,17 @@ properties:
                 * /projects/{project}/zones/{zone}/storagePools/{storagePool}
               required: false
               immutable: true
+            - name: 'replicaZones'
+              type: Array
+              description: |
+                A list of short names or self_links of zones in which to create a regional disk.
+              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+              item_type:
+                name: 'zone'
+                type: ResourceRef
+                description: 'A reference to a zone where the disk should be replicated to.'
+                resource: 'Zone'
+                imports: 'selfLink'
         - name: 'interface'
           type: Enum
           description: |
@@ -484,6 +500,34 @@ properties:
                   CIDR range for this alias IP range. If left
                   unspecified, the primary range of the subnetwork will
                   be used.
+        - name: 'aliasIpv6Ranges'
+          type: Array
+          description: |
+            An array of alias IPv6 ranges for this network interface. Can
+            only be specified for network interfaces on subnet-mode
+            networks.
+          min_version: beta
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'ipCidrRange'
+                type: String
+                description: |
+                  The IP CIDR range represented by this alias IPv6 range.
+                  This IP CIDR range must belong to the specified
+                  subnetwork and cannot contain IP addresses reserved by
+                  system or used by other network interfaces. This range
+                  may be a single IP address (e.g. 2001:db8:1234:5678::),
+                  a netmask (e.g. /96) or a CIDR format string
+                  (e.g. 2001:db8:1234:5678::/96).
+              - name: 'subnetworkRangeName'
+                type: String
+                description: |
+                  Optional subnetwork secondary range name specifying
+                  the secondary range from which to allocate the IP
+                  CIDR range for this alias IPv6 range. If left
+                  unspecified, the primary range of the subnetwork will
+                  be used.
         - name: 'internalIpv6PrefixLength'
           type: String
           description: |
@@ -720,3 +764,10 @@ properties:
           comply with RFC1035.
         item_type:
           type: String
+  - name: 'eraseWindowsVssSignature'
+    type: Boolean
+    description: |
+      Specifies whether the disks restored from source snapshots or source machine image should erase Windows specific VSS signature.
+    min_version: 'beta'
+    ignore_read: true
+    default_value: false

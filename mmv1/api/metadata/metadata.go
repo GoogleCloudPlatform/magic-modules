@@ -35,6 +35,12 @@ func FromResource(r api.Resource) Metadata {
 			ApiField: "selfLink",
 		})
 	}
+	if !r.DeletionPolicyExclude && !r.ExcludeDelete {
+		m.Fields = append(m.Fields, Field{
+			Field:        "deletion_policy",
+			ProviderOnly: true,
+		})
+	}
 	return m
 }
 

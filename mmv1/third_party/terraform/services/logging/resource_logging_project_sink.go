@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -17,12 +18,15 @@ const nonUniqueWriterAccount = "serviceAccount:cloud-logs@system.gserviceaccount
 
 func ResourceLoggingProjectSink() *schema.Resource {
 	schm := &schema.Resource{
-		Create:        resourceLoggingProjectSinkAcquireOrCreate,
-		Read:          resourceLoggingProjectSinkRead,
-		Delete:        resourceLoggingProjectSinkDelete,
-		Update:        resourceLoggingProjectSinkUpdate,
-		Schema:        resourceLoggingSinkSchema(),
-		CustomizeDiff: resourceLoggingProjectSinkCustomizeDiff,
+		Create: resourceLoggingProjectSinkAcquireOrCreate,
+		Read:   resourceLoggingProjectSinkRead,
+		Delete: resourceLoggingProjectSinkDelete,
+		Update: resourceLoggingProjectSinkUpdate,
+		Schema: resourceLoggingSinkSchema(),
+		CustomizeDiff: customdiff.All(
+			resourceLoggingProjectSinkCustomizeDiff,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 		Importer: &schema.ResourceImporter{
 			State: resourceLoggingSinkImportState("project"),
 		},
@@ -67,9 +71,9 @@ func resourceLoggingProjectSinkAcquireOrCreate(d *schema.ResourceData, meta inte
 
 	log.Printf("[DEBUG] Fetching logging sink config: %#v", id)
 
-	res, _ := config.NewLoggingClient(userAgent).Projects.Sinks.Get(id.canonicalId()).Do()
+	res, _ := NewClient(config, userAgent).Projects.Sinks.Get(id.canonicalId()).Do()
 	if res == nil {
-		projectSinkCreateRequest := config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink)
+		projectSinkCreateRequest := NewClient(config, userAgent).Projects.Sinks.Create(id.parent(), sink)
 
 		// if custom-sa is specified, use it to write log and it requires uniqueWriterIdentity to be set as well
 		// otherwise set the uniqueWriter identity
@@ -149,7 +153,7 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	sink, err := config.NewLoggingClient(userAgent).Projects.Sinks.Get(d.Id()).Do()
+	sink, err := NewClient(config, userAgent).Projects.Sinks.Get(d.Id()).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project Logging Sink %s", d.Get("name").(string)))
 	}
@@ -171,10 +175,20 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 			return fmt.Errorf("Error setting unique_writer_identity: %s", err)
 		}
 	}
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceLoggingProjectSink) {
+		return ResourceLoggingProjectSink().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -185,7 +199,7 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
 	customWriterIdentity := d.Get("custom_writer_identity").(string)
 
-	projectSinkUpdateRequest := config.NewLoggingClient(userAgent).Projects.Sinks.Patch(d.Id(), sink).UpdateMask(updateMask)
+	projectSinkUpdateRequest := NewClient(config, userAgent).Projects.Sinks.Patch(d.Id(), sink).UpdateMask(updateMask)
 
 	// if custom-sa is specified, use it to write log and it reqiures uniqueWriterIdentity to be set as well
 	// otherwise set the uniqueWriter identity
@@ -205,6 +219,13 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	name := d.Get("name")
 	for _, restrictedName := range []string{"_Required", "_Default"} {
 		if name == restrictedName {
@@ -219,7 +240,7 @@ func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Delete(d.Id()).Do()
+	_, err = NewClient(config, userAgent).Projects.Sinks.Delete(d.Id()).Do()
 	if err != nil {
 		return err
 	}

@@ -395,6 +395,13 @@ The following arguments are supported:
 
 * `key_revocation_action_type` - (optional) Action to be taken when a customer's encryption key is revoked. Supports `STOP` and `NONE`, with `NONE` being the default.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+
 <a name="nested_disk"></a>The `disk` block supports:
 
 * `auto_delete` - (Optional) Whether or not the disk should be auto-deleted.
@@ -562,7 +569,11 @@ The following arguments are supported:
     array of alias IP ranges for this network interface. Can only be specified for network
     interfaces on subnet-mode networks. Structure [documented below](#nested_alias_ip_range).
 
-* `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, MRDMA, IRDMA.
+* `alias_ipv6_range` - (Optional) [Beta] An
+    array of alias IPv6 ranges for this network interface. Can only be specified for network
+    interfaces on subnet-mode networks. Structure [documented below](#nested_alias_ip_range).
+
+* `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, MRDMA, IRDMA, IDPF.
 
 * `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
 
@@ -750,9 +761,9 @@ The `specific_reservation` block supports:
 
 <a name="nested_confidential_instance_config"></a>The `confidential_instance_config` block supports:
 
-* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled with AMD SEV. If enabled, [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled with AMD SEV. If enabled, [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"` or `"AMD Genoa"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
 
-* `confidential_instance_type` (Optional) Defines the confidential computing technology the instance uses. SEV is an AMD feature. TDX is an Intel feature. One of the following values is required: `SEV`, `SEV_SNP`, `TDX`. [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`confidential_instance_type`](#confidential_instance_type) is set to `SEV` and [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM.
+* `confidential_instance_type` (Optional) Defines the confidential computing technology the instance uses. SEV is an AMD feature. TDX is an Intel feature. One of the following values is required: `SEV`, `SEV_SNP`, `TDX`. [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`confidential_instance_type`](#confidential_instance_type) is set to `SEV` and [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"` or `"AMD Genoa"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM.
 
 <a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 

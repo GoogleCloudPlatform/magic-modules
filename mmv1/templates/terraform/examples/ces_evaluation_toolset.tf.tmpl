@@ -1,0 +1,88 @@
+resource "google_ces_app" "app" {
+  provider = google-beta
+  app_id = "{{index $.Vars "app_id"}}"
+  location = "us"
+  display_name = "{{index $.Vars "app_display_name"}}"
+
+  language_settings {
+    default_language_code    = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_evaluation" "ces_evaluation_toolset" {
+  provider = google-beta
+  evaluation_id = "{{index $.Vars "evaluation_id"}}"
+  display_name = "my-evaluation-toolset"
+  location     = "us"
+  app          = google_ces_app.app.app_id
+
+  golden {
+    turns {
+      steps {
+        expectation {
+          note = "Expect agent response with toolset tool call"
+          agent_response {
+            role = "agent"
+            chunks {
+              tool_call {
+                id = "tool-call-id"
+                toolset_tool {
+                  toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset"
+                  tool_id = "dummy-tool"
+                }
+              }
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect agent response with toolset tool response"
+          agent_response {
+            role = "agent"
+            chunks {
+              tool_response {
+                id = "tool-call-id"
+                response = { result = "success" }
+                toolset_tool {
+                  toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset"
+                  tool_id = "dummy-tool"
+                }
+              }
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect mock tool response with toolset tool"
+          mock_tool_response {
+            id = "tool-call-id-2"
+            response = { result = "mocked" }
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset"
+              tool_id = "dummy-tool"
+            }
+          }
+        }
+      }
+      steps {
+        user_input {
+          tool_responses {
+            tool_responses {
+              id = "tool-call-id-3"
+              response = { result = "user-provided" }
+              toolset_tool {
+                toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset"
+                tool_id = "dummy-tool"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

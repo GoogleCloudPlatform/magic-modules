@@ -3,9 +3,11 @@ package compute
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
@@ -30,7 +32,14 @@ func testSweepComputeNetworkEdgeSecurityService(region string) error {
 		return err
 	}
 
-	found, err := config.NewComputeClient(config.UserAgent).NetworkEdgeSecurityServices.AggregatedList(config.Project).Do()
+	listUrl := fmt.Sprintf("%sprojects/%s/aggregated/networkEdgeSecurityServices", transport_tpg.BaseUrl(Product, config), config.Project)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    listUrl,
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] Error in response from request: %s", err)
 		return nil
@@ -38,19 +47,43 @@ func testSweepComputeNetworkEdgeSecurityService(region string) error {
 
 	// Keep count of items that aren't sweepable for logging.
 	nonPrefixCount := 0
-	for zone, itemList := range found.Items {
-		for _, tp := range itemList.NetworkEdgeSecurityServices {
-			if !sweeper.IsSweepableTestResource(tp.Name) {
+	// Aggregated list response: items is a map keyed by "regions/{region}"
+	items, ok := res["items"].(map[string]interface{})
+	if !ok {
+		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
+		return nil
+	}
+	for regionPath, regionDataRaw := range items {
+		regionData, ok := regionDataRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		resourcesRaw, ok := regionData["networkEdgeSecurityServices"]
+		if !ok {
+			continue
+		}
+		for _, tpRaw := range resourcesRaw.([]interface{}) {
+			tp := tpRaw.(map[string]interface{})
+			name := tp["name"].(string)
+			if !sweeper.IsSweepableTestResource(name) {
 				nonPrefixCount++
 				continue
 			}
 
+			region := tpgresource.GetResourceNameFromSelfLink(regionPath)
+			deleteUrl := fmt.Sprintf("%sprojects/%s/regions/%s/networkEdgeSecurityServices/%s", transport_tpg.BaseUrl(Product, config), config.Project, region, name)
 			// Don't wait on operations as we may have a lot to delete
-			_, err := config.NewComputeClient(config.UserAgent).NetworkEdgeSecurityServices.Delete(config.Project, tpgresource.GetResourceNameFromSelfLink(zone), tp.Name).Do()
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "DELETE",
+				Project:   config.Project,
+				RawURL:    deleteUrl,
+				UserAgent: config.UserAgent,
+			})
 			if err != nil {
-				log.Printf("[INFO][SWEEPER_LOG] Error deleting %s resource %s : %s", resourceName, tp.Name, err)
+				log.Printf("[INFO][SWEEPER_LOG] Error deleting %s resource %s : %s", resourceName, name, err)
 			} else {
-				log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, tp.Name)
+				log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, name)
 			}
 		}
 	}

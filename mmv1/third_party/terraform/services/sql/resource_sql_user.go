@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -61,6 +60,7 @@ func ResourceSqlUser() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		SchemaVersion: 1,
@@ -200,14 +200,9 @@ func ResourceSqlUser() *schema.Resource {
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 
-			"deletion_policy": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Description: `The deletion policy for the user. Setting ABANDON allows the resource
-				to be abandoned rather than deleted. This is useful for Postgres, where users cannot be deleted from the API if they
-				have been granted SQL roles. Possible values are: "ABANDON".`,
-				ValidateFunc: validation.StringInSlice([]string{"ABANDON", ""}, false),
-			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 			"database_roles": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -310,7 +305,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			var fetchedInstance *sqladmin.DatabaseInstance
 			err = transport_tpg.Retry(transport_tpg.RetryOptions{
 				RetryFunc: func() (rerr error) {
-					fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+					fetchedInstance, rerr = NewClient(config, userAgent).Instances.Get(project, instance).Do()
 					return rerr
 				},
 				Timeout:              d.Timeout(schema.TimeoutRead),
@@ -327,7 +322,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 
 	var op *sqladmin.Operation
 	insertFunc := func() error {
-		op, err = config.NewSqlAdminClient(userAgent).Users.Insert(project, instance,
+		op, err = NewClient(config, userAgent).Users.Insert(project, instance,
 			user).Do()
 		return err
 	}
@@ -370,7 +365,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	instance := d.Get("instance").(string)
 	name := d.Get("name").(string)
 	host := d.Get("host").(string)
-	databaseInstance, err := config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+	databaseInstance, err := NewClient(config, userAgent).Instances.Get(project, instance).Do()
 	if err != nil {
 		return err
 	}
@@ -382,7 +377,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	err = nil
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance).Do()
+			users, err = NewClient(config, userAgent).Users.List(project, instance).Do()
 			return err
 		},
 		Timeout: 5 * time.Minute,
@@ -448,6 +443,11 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -491,6 +491,11 @@ func flattenPasswordStatus(status *sqladmin.PasswordStatus) interface{} {
 }
 
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceSqlUser) {
+		return ResourceSqlUser().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -545,7 +550,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
-			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).DatabaseRoles(databaseRoles...).RevokeExistingRoles(revokeExistingRoles).Do()
+			op, err = NewClient(config, userAgent).Users.Update(project, instance, user).Host(host).Name(name).DatabaseRoles(databaseRoles...).RevokeExistingRoles(revokeExistingRoles).Do()
 			return err
 		}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -574,9 +579,9 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
-		// Allows for user to be abandoned without deletion to avoid deletion failing
-		// for Postgres users in some circumstances due to existing SQL roles
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
 		return nil
 	}
 
@@ -600,7 +605,7 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	var op *sqladmin.Operation
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
+			op, err = NewClient(config, userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
 			if err != nil {
 				return err
 			}

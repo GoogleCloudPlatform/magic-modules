@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -140,7 +141,7 @@ func TestAccPubsubTopicIamPolicy(t *testing.T) {
 func testAccCheckPubsubTopicIam(t *testing.T, topic, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		p, err := config.NewPubsubClient(config.UserAgent).Projects.Topics.GetIamPolicy(pubsub.GetComputedTopicName(envvar.GetTestProjectFromEnv(), topic)).Do()
+		p, err := pubsub.NewClient(config, config.UserAgent).Projects.Topics.GetIamPolicy(pubsub.GetComputedTopicName(envvar.GetTestProjectFromEnv(), topic)).Do()
 		if err != nil {
 			return err
 		}

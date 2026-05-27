@@ -224,7 +224,7 @@ examples:
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_protection_enabled': 'false'
   - name: 'redis_cluster_flexible_ca'
@@ -394,7 +394,10 @@ properties:
     enum_values:
       - 'REDIS_SHARED_CORE_NANO'
       - 'REDIS_HIGHMEM_MEDIUM'
+      - 'REDIS_HIGHCPU_MEDIUM'
+      - 'REDIS_STANDARD_LARGE'
       - 'REDIS_HIGHMEM_XLARGE'
+      - 'REDIS_HIGHMEM_2XLARGE'
       - 'REDIS_STANDARD_SMALL'
   - name: 'zoneDistributionConfig'
     type: NestedObject

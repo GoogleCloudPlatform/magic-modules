@@ -1,0 +1,15 @@
+resource "google_data_lineage_config" "{{$.PrimaryResourceId}}" {
+  parent = "organizations/{{index $.TestEnvVars "organization"}}"
+  location = "global"
+
+  ingestion {
+    rule {
+      integration_selector {
+        integration = "LOOKER_CORE"
+      }
+      lineage_enablement {
+        enabled = true
+      }
+    }
+  }
+}
