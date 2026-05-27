@@ -37,7 +37,6 @@ include_in_tgc_next: true
 examples:
   - name: 'binary_authorization_attestor_basic'
     primary_resource_id: 'attestor'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-attestor%s", context["random_suffix"])'
     vars:
       attestor_name: 'test-attestor'
       note_name: 'test-attestor-note'

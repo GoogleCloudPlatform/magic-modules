@@ -47,6 +47,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
 examples:
@@ -65,7 +66,7 @@ examples:
   - name: 'ssl_certificate_random_provider'
     primary_resource_id: 'default'
     external_providers: ["random", "time"]
-      # Uses id.UniqueId
+    # Uses id.UniqueId
     skip_vcr: true
   - name: 'ssl_certificate_target_https_proxies'
     primary_resource_id: 'default'

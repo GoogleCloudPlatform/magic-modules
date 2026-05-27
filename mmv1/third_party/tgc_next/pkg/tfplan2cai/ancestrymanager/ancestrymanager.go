@@ -13,6 +13,9 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 
+	rmClient "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager/client"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanagerv3"
+	storage_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/storage"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 
@@ -60,9 +63,9 @@ func New(cfg *transport_tpg.Config, offline bool, entries map[string]string, err
 		errorLogger:   errorLogger,
 	}
 	if !offline {
-		am.resourceManagerV1 = cfg.NewResourceManagerClient(cfg.UserAgent)
-		am.resourceManagerV3 = cfg.NewResourceManagerV3Client(cfg.UserAgent)
-		am.storageClient = cfg.NewStorageClient(cfg.UserAgent)
+		am.resourceManagerV1 = rmClient.NewClient(cfg, cfg.UserAgent)
+		am.resourceManagerV3 = resourcemanagerv3.NewClient(cfg, cfg.UserAgent)
+		am.storageClient = storage_tpg.NewClient(cfg, cfg.UserAgent)
 	}
 	err := am.initAncestryCache(entries)
 	if err != nil {
@@ -397,11 +400,15 @@ func (m *manager) SetAncestors(d tpgresource.TerraformResourceData, config *tran
 	return nil
 }
 
-// type NoOpAncestryManager struct{}
+type NoOpAncestryManager struct{}
 
-// func (*NoOpAncestryManager) Ancestors(config *transport_tpg.Config, tfData tpgresource.TerraformResourceData, cai *resources.Asset) ([]string, string, error) {
-// 	return nil, "", nil
-// }
+func (*NoOpAncestryManager) Ancestors(config *transport_tpg.Config, tfData tpgresource.TerraformResourceData, cai *caiasset.Asset) ([]string, string, error) {
+	return nil, "", nil
+}
+
+func (*NoOpAncestryManager) SetAncestors(d tpgresource.TerraformResourceData, config *transport_tpg.Config, cai *caiasset.Asset) error {
+	return nil
+}
 
 func ensurePrefix(s, pre string) string {
 	if strings.HasPrefix(s, pre) {

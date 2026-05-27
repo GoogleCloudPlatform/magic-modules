@@ -289,7 +289,7 @@ resource "google_sql_database_instance" "instance" {
 ```
 
 ### Cloud SQL Instance created using point_in_time_restore
-~> **NOTE:** Replace `backupdr_datasource` with the full datasource path, `time_stamp` should be in the format of `YYYY-MM-DDTHH:MM:SSZ`.
+~> **NOTE:** Replace `backupdr_datasource` with the full datasource path, `time_stamp` should be in the format of `YYYY-MM-DDTHH:MM:SSZ`. The `target_instance` is required field and must match the name of the resource.
 
 ```hcl
 resource "google_sql_database_instance" "instance" {
@@ -304,8 +304,31 @@ resource "google_sql_database_instance" "instance" {
   }
   point_in_time_restore_context {
    datasource      = "backupdr_datasource"
-   target_instance = "target_instance_name"
+   target_instance = "main-instance"
    point_in_time   = "time_stamp"
+ }
+}
+```
+
+### Cloud SQL Instance created using point_in_time_restore using multiregion datasource
+~> **NOTE:** Replace `backupdr_datasource` with the full datasource path, `time_stamp` should be in the format of `YYYY-MM-DDTHH:MM:SSZ` and `region` with the target instance region. The `target_instance` is required field and must match the name of the resource.
+
+```hcl
+resource "google_sql_database_instance" "instance" {
+  name             = "main-instance"
+  database_version = "MYSQL_8_0"
+  settings {
+    tier    = "db-f1-micro"
+    backup_configuration {
+      enabled = true
+      binary_log_enabled = true
+    }
+  }
+  point_in_time_restore_context {
+   datasource      = "backupdr_datasource"
+   target_instance = "main-instance"
+   point_in_time   = "time_stamp"
+   region          = "region"
  }
 }
 ```
@@ -325,10 +348,10 @@ The following arguments are supported:
 * `database_version` - (Required) The MySQL, PostgreSQL or
 SQL Server version to use. Supported values include `MYSQL_5_6`,
 `MYSQL_5_7`, `MYSQL_8_0`, `MYSQL_8_4`, `POSTGRES_9_6`,`POSTGRES_10`, `POSTGRES_11`,
-`POSTGRES_12`, `POSTGRES_13`, `POSTGRES_14`, `POSTGRES_15`, `POSTGRES_16`, `POSTGRES_17`,
-`SQLSERVER_2017_STANDARD`, `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`.
-`SQLSERVER_2019_STANDARD`, `SQLSERVER_2019_ENTERPRISE`, `SQLSERVER_2019_EXPRESS`,
-`SQLSERVER_2019_WEB`.
+`POSTGRES_12`, `POSTGRES_13`, `POSTGRES_14`, `POSTGRES_15`, `POSTGRES_16`, `POSTGRES_17`, `POSTGRES_18`,
+`SQLSERVER_2022_STANDARD`, `SQLSERVER_2022_ENTERPRISE`, `SQLSERVER_2022_EXPRESS`,
+`SQLSERVER_2022_WEB`, `SQLSERVER_2025_STANDARD`, `SQLSERVER_2025_ENTERPRISE`,
+`SQLSERVER_2025_EXPRESS`, `SQLSERVER_2025_WEB`.
 [Database Version Policies](https://cloud.google.com/sql/docs/db-versions)
 includes an up-to-date reference of supported versions.
 
@@ -397,6 +420,13 @@ includes an up-to-date reference of supported versions.
     **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
     block during resource creation/update will trigger the restore action after the resource is created/updated.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+    
 The `settings` block supports:
 
 * `tier` - (Required) The machine type to use. See [tiers](https://cloud.google.com/sql/docs/admin-api/v1beta4/tiers)
@@ -444,11 +474,11 @@ The `settings` block supports:
 
 * `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB for `PD_SSD`, `PD_HDD` and 20GB for `HYPERDISK_BALANCED`. Note that this value will override the resizing from `disk_autoresize` if that feature is enabled. To avoid this, set `lifecycle.ignore_changes` on this field.
 
-* `disk_type` - (Optional) The type of data disk: `PD_SSD`, `PD_HDD`, or `HYPERDISK_BALANCED`. Defaults to `PD_SSD`. `HYPERDISK_BALANCED` is preview.
+* `disk_type` - (Optional) The type of data disk: `PD_SSD`, `PD_HDD`, or `HYPERDISK_BALANCED`. Defaults to `PD_SSD`.
 
-* `data_disk_provisioned_iops` - (Optional, Beta) Provisioned number of I/O operations per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
+* `data_disk_provisioned_iops` - (Optional) Provisioned number of I/O operations per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
 
-* `data_disk_provisioned_throughput` - (Optional, Beta) Provisioned throughput measured in MiB per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
+* `data_disk_provisioned_throughput` - (Optional) Provisioned throughput measured in MiB per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
 
 * `node_count` - For a read pool instance, the number of nodes in the read pool. For read pools with auto scaling enabled, this field is read only.
 
@@ -478,6 +508,12 @@ The optional `settings.active_directory_config` subblock supports:
 
 * `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
     Can only be used with SQL Server.
+
+The optional `settings.entraid_config` block supports:
+
+* `application_id` - (Optional) The application ID for the Entra ID configuration. This must be paired with a tenant_id to be valid.
+
+* `tenant_id` - (Optional) The tenant ID for the Entra ID configuration. This must be paired with an application_id to be valid.
 
 The optional `settings.data_cache_config` subblock supports:
 
@@ -539,9 +575,11 @@ This setting can be updated, but it cannot be removed after it is set.
 
 * `ssl_mode` - (Optional) Specify how SSL connection should be enforced in DB connections. Supported values are `ALLOW_UNENCRYPTED_AND_ENCRYPTED`, `ENCRYPTED_ONLY`, and `TRUSTED_CLIENT_CERTIFICATE_REQUIRED` (not supported for SQL Server). See [API reference doc](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1/instances#ipconfiguration) for details.
 
-* `server_ca_mode` - (Optional) Specify how the server certificate's Certificate Authority is hosted. Supported values are `GOOGLE_MANAGED_INTERNAL_CA` and `GOOGLE_MANAGED_CAS_CA`.
+* `server_ca_mode` - (Optional) Specify how the server certificate's Certificate Authority is hosted. Supported values are `GOOGLE_MANAGED_INTERNAL_CA`, `GOOGLE_MANAGED_CAS_CA`, and `CUSTOMER_MANAGED_CAS_CA`.
 
 * `server_ca_pool` - (Optional) The resource name of the server CA pool for an instance with `CUSTOMER_MANAGED_CAS_CA` as the `server_ca_mode`.
+
+* `server_certificate_rotation_mode` - (Optional) Controls the automatic server certificate rotation feature. Supported values are `NO_AUTOMATIC_ROTATION`and `AUTOMATIC_ROTATION_DURING_MAINTENANCE`. `AUTOMATIC_ROTATION_DURING_MAINTENANCE` can only be set if `server_ca_mode` is either `GOOGLE_MANAGED_CAS_CA` or `CUSTOMER_MANAGED_CAS_CA`. See [API reference doc](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1/instances#ipconfiguration) for details.
 
 * `custom_subject_alternative_names` - (Optional) The custom subject alternative names for an instance with `CUSTOMER_MANAGED_CAS_CA` as the `server_ca_mode`.
 
@@ -619,6 +657,8 @@ when an Instance can automatically restart to apply updates. The maintenance win
 The optional `settings.insights_config` subblock for instances declares Query Insights([MySQL](https://cloud.google.com/sql/docs/mysql/using-query-insights), [PostgreSQL](https://cloud.google.com/sql/docs/postgres/using-query-insights)) configuration. It contains:
 
 * `query_insights_enabled` - True if Query Insights feature is enabled.
+
+* `enhanced_query_insights_enabled` - True if Enhanced Query Insights feature is enabled.
 
 * `query_string_length` - Maximum query length stored in bytes. Between 256 and 4500. Default to 1024. Higher query lengths are more useful for analytical queries, but they also require more memory. Changing the query length requires you to restart the instance. You can still add tags to queries that exceed the length limit.
 
@@ -698,6 +738,8 @@ The optional `point_in_time_restore_context` block supports:
 
 * `target_instance` - The name of the target instance.
 
+* `region` - The region of the target instance where the datasource will be restored. For example: "us-central1".
+
 * `private_network` - (Optional) The resource link for the VPC network from which the Cloud SQL instance is accessible for private IP. For example, "/projects/myProject/global/networks/default".
 
 * `preferred_zone` - (Optional) Point-in-time recovery of an instance to the specified zone. If no zone is specified, then clone to the same primary zone as the source instance.
@@ -713,6 +755,7 @@ The optional `point_in_time_restore_context` block supports:
 The optional `clone` block supports:
 
 * `source_instance_name` - (Required) Name of the source instance which will be cloned.
+* `source_project` - (Optional) Id of source project where source instances exits, required for cross project clone scenario.
 
 * `point_in_time` -  (Optional) The timestamp of the point in time that should be restored.
 

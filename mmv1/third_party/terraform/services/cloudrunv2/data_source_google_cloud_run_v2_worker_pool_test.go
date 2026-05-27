@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudrunv2"
 )
 
 func TestAccDataSourceGoogleCloudRunV2WorkerPool_basic(t *testing.T) {
@@ -40,7 +41,6 @@ resource "google_cloud_run_v2_worker_pool" "hello" {
   name     = "%s"
   location = "%s"
   deletion_protection = false
-  launch_stage = "BETA"
   
   template {
     containers {

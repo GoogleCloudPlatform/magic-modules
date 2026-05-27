@@ -27,6 +27,7 @@ kind: compute#Interconnect
 async:
   operation:
     base_url: '{{op_id}}'
+include_in_tgc_next: true
 custom_code:
   constants: templates/terraform/constants/interconnect.go.tmpl
   post_create: templates/terraform/post_create/labels.tmpl

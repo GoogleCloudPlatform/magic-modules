@@ -46,6 +46,8 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/bigquery_job.go.tmpl'
   encoder: 'templates/terraform/encoders/bigquery_job.go.tmpl'
+# exluding resource_identity due to dataset_id field
+exclude_identity_generation: true
 schema_version: 1
 state_upgraders: true
 examples:
@@ -54,6 +56,9 @@ examples:
     vars:
       job_id: 'job_query'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
@@ -71,6 +76,9 @@ examples:
     vars:
       job_id: 'job_query'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'query.0.default_dataset.0.dataset_id'
@@ -87,7 +95,7 @@ examples:
     primary_resource_id: 'job'
     vars:
       job_id: 'job_load'
- # Keep small(er) to avoid downstream acctest having too-long a bucket name
+      # Keep small(er) to avoid downstream acctest having too-long a bucket name
       bucket_name: 'bq-geojson'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -109,7 +117,7 @@ examples:
       - 'etag'
       - 'load.0.destination_table.0.table_id'
       - 'status.0.state'
- # there are a lot of examples for this resource, so omitting some that are similar to others
+    # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
   - name: 'bigquery_job_copy'
     primary_resource_id: 'job'
@@ -120,7 +128,9 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
@@ -133,20 +143,25 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'copy.0.destination_table.0.table_id'
       - 'copy.0.source_tables.0.table_id'
       - 'copy.0.source_tables.1.table_id'
       - 'status.0.state'
- # there are a lot of examples for this resource, so omitting some that are similar to others
+    # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
   - name: 'bigquery_job_extract'
     primary_resource_id: 'job'
     vars:
       job_id: 'job_extract'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
@@ -155,11 +170,14 @@ examples:
     vars:
       job_id: 'job_extract'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     ignore_read_extra:
       - 'etag'
       - 'extract.0.source_table.0.table_id'
       - 'status.0.state'
- # there are a lot of examples for this resource, so omitting some that are similar to others
+    # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
   - name: 'bigquery_job_query_reservation'
     exclude_docs: true

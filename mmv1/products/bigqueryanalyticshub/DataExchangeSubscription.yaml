@@ -40,7 +40,6 @@ sweeper:
 examples:
   - name: 'bigquery_analyticshub_dataexchange_subscription_basic'
     primary_resource_id: 'subscription'
-    primary_resource_name: 'fmt.Sprintf("tf_test_subscription_%s", context["random_suffix"])'
     region_override: 'us'
     ignore_read_extra:
       - 'last_modify_time'
@@ -57,6 +56,11 @@ examples:
       # Variables for the Destination Dataset created by the Subscription
       destination_dataset_id: 'subscribed_dest_dataset'
       destination_dataset_friendly_name: 'Subscribed Destination Dataset'
+    test_vars_overrides:
+      # for backward compatible
+      subscriber_contact_email: '"testuser@example.com" + randomSuffix'
+      # for backward compatible
+      destination_dataset_friendly_name: '"Subscribed Destination Dataset" + randomSuffix'
 virtual_fields:
   - name: 'refresh_policy'
     type: Enum

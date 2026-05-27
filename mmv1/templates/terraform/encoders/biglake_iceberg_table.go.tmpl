@@ -1,0 +1,39 @@
+	if d.HasChange("properties") {
+		oldProp, newProp := d.GetChange("properties")
+		oldMap := oldProp.(map[string]interface{})
+		newMap := newProp.(map[string]interface{})
+
+		removals := []string{}
+		for k := range oldMap {
+			if icebergTableIgnoredProperties[k] {
+				continue
+			}
+			if _, ok := newMap[k]; !ok {
+				removals = append(removals, k)
+			}
+		}
+
+		updates := map[string]string{}
+		for k, v := range newMap {
+			if icebergTableIgnoredProperties[k] {
+				continue
+			}
+			updates[k] = v.(string)
+		}
+
+		// Wrap in 'updates' and 'requirements' as per CommitTableRequest
+		return map[string]interface{}{
+			"requirements": []interface{}{},
+			"updates": []interface{}{
+				map[string]interface{}{
+					"action":  "set-properties",
+					"updates": updates,
+				},
+				map[string]interface{}{
+					"action":   "remove-properties",
+					"removals": removals,
+				},
+			},
+		}, nil
+	}
+	return nil, nil

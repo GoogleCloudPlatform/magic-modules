@@ -9,22 +9,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
-	"google.golang.org/api/googleapi"
-{{- end }}
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
@@ -53,14 +48,11 @@ func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 func TestAccComputeInstanceFromMachineImage_maxRunDuration(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	var expectedMaxRunDuration = compute.Duration{}
-	// Define in testAccComputeInstanceFromMachineImage_maxRunDuration
-	expectedMaxRunDuration.Nanos = 123
-	expectedMaxRunDuration.Seconds = 60
+	var expectedMaxRunDuration = map[string]interface{}{"nanos": float64(123), "seconds": "60"}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -83,12 +75,39 @@ func TestAccComputeInstanceFromMachineImage_maxRunDuration(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceFromMachineImage_preemptionNoticeDuration(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_instance_from_machine_image.foobar"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_preemptionNoticeDuration(instanceName, generatedInstanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+
+					// Check that fields were set based on the template
+					resource.TestCheckResourceAttr(resourceName, "scheduling.0.preemption_notice_duration.0.seconds", "120"),
+          resource.TestCheckResourceAttr(resourceName, "scheduling.0.preemption_notice_duration.0.nanos", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstanceFromMachineImage_terminationTime(t *testing.T) {
 	// Uses time.Now
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
@@ -118,13 +137,11 @@ func TestAccComputeInstanceFromMachineImage_terminationTime(t *testing.T) {
 func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
-	expectedLocalSsdRecoveryTimeout.Nanos = 0
-	expectedLocalSsdRecoveryTimeout.Seconds = 3600
+	var expectedLocalSsdRecoveryTimeout = map[string]interface{}{"nanos": float64(0), "seconds": "3600"}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -145,13 +162,11 @@ func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T
 func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
-	expectedLocalSsdRecoveryTimeout.Nanos = 0
-	expectedLocalSsdRecoveryTimeout.Seconds = 7200
+	var expectedLocalSsdRecoveryTimeout = map[string]interface{}{"nanos": float64(0), "seconds": "7200"}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -173,14 +188,20 @@ func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(
 func TestAccComputeInstanceFromMachineImageWithOverride_partnerMetadata(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
 	var namespace = "test.compute.googleapis.com"
-	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
-	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
-		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
+	expectedPartnerMetadata := make(map[string]map[string]interface{})
+	expectedPartnerMetadata[namespace] = map[string]interface{}{
+		"entries": map[string]interface{}{
+			"key1": "value1",
+			"key2": float64(2),
+			"key3": map[string]interface{}{
+				"key31": "value31",
+			},
+		},
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -203,7 +224,7 @@ func TestAccComputeInstanceFromMachineImageWithOverride_partnerMetadata(t *testi
 func TestAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
@@ -228,7 +249,7 @@ func TestAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(t *
 func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
@@ -259,7 +280,7 @@ func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
 func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -320,7 +341,7 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 func TestAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var resourceName = "google_compute_instance_from_machine_image.foobar"
 	var machineImageName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -347,6 +368,54 @@ func TestAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeInstanceFromMachineImage_VSSWindows(t *testing.T) {
+  t.Parallel()
+
+  var instance map[string]interface{}
+
+  context_1 := map[string]interface{}{
+    "instance1_name":       fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "image_name":           fmt.Sprintf("tf-test-image-%s", acctest.RandString(t, 10)),
+    "instance2_name":       fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "vss_flag":             true,
+    "guest_flush":          true,
+  }
+  context_2 := map[string]interface{}{
+    "instance1_name":       fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "image_name":           fmt.Sprintf("tf-test-image-%s", acctest.RandString(t, 10)),
+    "instance2_name":       fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+    "vss_flag":             false,
+    "guest_flush":          false,
+  }
+  
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+    ExternalProviders: map[string]resource.ExternalProvider{
+      "time": {},
+    },
+    CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeInstanceFromMachineImage_VSSWindows(context_1),
+        Check: resource.ComposeTestCheckFunc(
+          testAccCheckComputeInstanceExists(
+            t, "google_compute_instance_from_machine_image.foobar", &instance),
+        ),
+      },
+      {
+        Config: testAccComputeInstanceFromMachineImage_VSSWindows(context_2),
+        Check: resource.ComposeTestCheckFunc(
+          testAccCheckComputeInstanceExists(
+            t, "google_compute_instance_from_machine_image.foobar", &instance),
+        ),
+      },
+    },
+  })
+}
+{{- end }}
+
 func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -356,8 +425,15 @@ func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) fu
 				continue
 			}
 
-			_, err := config.NewComputeClient(config.UserAgent).Instances.Get(
-				config.Project, rs.Primary.Attributes["zone"], rs.Primary.ID).Do()
+		instanceURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s",
+				transport_tpg.BaseUrl(tpgcompute.Product, config), config.Project, rs.Primary.Attributes["zone"], rs.Primary.ID)
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   config.Project,
+				RawURL:    instanceURL,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("Instance still exists")
 			}
@@ -767,6 +843,71 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 	on_instance_stop_action {
 		discard_local_ssd = true
 	}
+  }
+}
+`, instance, instance, newInstance)
+}
+
+func testAccComputeInstanceFromMachineImage_preemptionNoticeDuration(instance, newInstance string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm" {
+  provider     = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-12"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n1-standard-1"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  scheduling {
+    automatic_restart = false
+    preemptible = true
+    provisioning_model = "SPOT"
+    instance_termination_action = "STOP"
+    preemption_notice_duration {
+      seconds = 120
+      nanos = 0
+    }
+  }
+
+}
+
+resource "google_compute_machine_image" "foobar" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar.self_link
+
+  labels = {
+    my_key = "my_value"
+  }
+  scheduling {
+    automatic_restart = false
+    preemptible = true
+    provisioning_model = "SPOT"
+    instance_termination_action = "STOP"
+    preemption_notice_duration {
+      seconds = 120
+      nanos = 0
+    }
   }
 }
 `, instance, instance, newInstance)
@@ -1241,7 +1382,7 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 func TestAccComputeInstanceFromMachineImage_IgmpQuery_v2(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	suffix := acctest.RandString(t, 10)
 	envRegion := envvar.GetTestRegionFromEnv()
@@ -1348,6 +1489,74 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 `, context)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeInstanceFromMachineImage_VSSWindows(context map[string]interface{}) string {
+  return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+
+  family  = "windows-2025"
+  project = "windows-cloud"
+}
+
+// Takes about 3 minutes for vm to be fully ready
+resource "google_compute_instance" "initialvm" {
+  provider     = google-beta
+
+  name         = "%{instance1_name}"
+  machine_type = "e2-standard-2"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+       type = "pd-ssd"
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+}
+
+// Need to wait for initialvm to be fully ready otherwise snapshot with guest_flush = true will fail.
+resource "time_sleep" "wait_240_seconds" {
+  create_duration = "240s"
+  depends_on = [google_compute_instance.initialvm]
+}
+
+resource "google_compute_machine_image" "foobar" {
+  provider = google-beta
+
+  name            = "%{image_name}"
+  source_instance = google_compute_instance.initialvm.self_link
+  guest_flush     = "%{guest_flush}"
+  depends_on = [ time_sleep.wait_240_seconds ]
+
+  // guest_flush is not a property of machine_image and therefore always ends up as false in the state.
+  // To properly test erase_windows_vss_signature = true, guest_flush would need to be true.
+  // However, after apply, a plan will always show a diff because guest_flush is false in state.
+  // We therefore need to ignore this field; otherwise, the test fails
+  lifecycle {
+    ignore_changes = [guest_flush]
+  }
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  provider = google-beta
+
+  name         = "%{instance2_name}"
+  zone         = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar.self_link
+
+  erase_windows_vss_signature = %{vss_flag}
+
+}
+`, context)
+}
+{{- end }}
 {{- else }}
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
 {{- end }}

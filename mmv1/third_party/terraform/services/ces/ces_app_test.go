@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/ces"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
 )
 
 func TestAccCESApp_update(t *testing.T) {
@@ -76,6 +78,7 @@ resource "google_ces_app" "ces_app_basic" {
   description = "Basic CES App example"
   display_name = "tf-test-my-app-%{random_suffix}"
   pinned = false
+  tool_execution_mode = "SEQUENTIAL"
 
   language_settings {
     default_language_code    = "en-US"
@@ -136,7 +139,7 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   model_settings {
-    model       = "gemini-1.5-flash"
+    model       = "gemini-3.0-flash-001"
     temperature = 0.5
   }
 
@@ -229,7 +232,6 @@ resource "google_ces_app" "ces_app_basic" {
   client_certificate_settings {
     tls_certificate = file("test-fixtures/cert.pem")
     private_key = google_secret_manager_secret_version.fake_secret_version.name
-    passphrase = "fakepassphrase"
   }
 
 
@@ -268,10 +270,11 @@ resource "google_ces_app" "ces_app_basic" {
   description = "Updated CES App example"
   display_name = "tf-test-my-app%{random_suffix}"
   pinned = true
+  tool_execution_mode = "PARALLEL"
 
   language_settings {
     default_language_code    = "en-ES"
-    supported_language_codes = ["en-US", "fr-FR"]
+    supported_language_codes = ["en-US", "fr-FR", "es-ES"]
     enable_multilingual_support = false
     fallback_action          = "escalate"
   }
@@ -328,7 +331,7 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   model_settings {
-    model       = "gemini-2.0-flash"
+    model       = "gemini-3.0-flash-001"
     temperature = 1.0
   }
 
@@ -420,7 +423,6 @@ resource "google_ces_app" "ces_app_basic" {
   client_certificate_settings {
     tls_certificate = file("test-fixtures/cert.pem")
     private_key = google_secret_manager_secret_version.fake_secret_version.name
-    passphrase = "fakepassphraseupdated"
   }
 
   # Root agent should not be specified when creating an app

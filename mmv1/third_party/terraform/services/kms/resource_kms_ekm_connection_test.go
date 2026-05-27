@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/kms"
 )
 
 func TestAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(t *testing.T) {
@@ -54,9 +55,6 @@ data "google_secret_manager_secret_version" "hostname" {
 data "google_secret_manager_secret_version" "servicedirectoryservice" {
   secret = "external-servicedirectoryservice"
   project = "315636579862"
-}
-data "google_project" "vpc-project" {
-  project_id = "cloud-ekm-refekm-playground"
 }
 data "google_project" "project" {
 }
@@ -131,9 +129,6 @@ resource "google_kms_ekm_connection_iam_policy" "policy" {
 
 func testAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "vpc-project" {
-  project_id = "cloud-ekm-refekm-playground"
-}
 data "google_project" "project" {
 }
 data "google_secret_manager_secret_version" "raw_der" {

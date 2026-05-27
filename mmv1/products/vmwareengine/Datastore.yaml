@@ -40,6 +40,9 @@ examples:
     vars:
       resource_name: filestore-datastore
       network_name: default
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"default" + randomSuffix'
     test_env_vars:
       region: "REGION"
       zone: "ZONE"
@@ -51,6 +54,9 @@ examples:
     vars:
       resource_name: netapp-datastore
       network_name: default
+    test_vars_overrides:
+      # for backward compatible
+      network_name: '"default" + randomSuffix'
     test_env_vars:
       region: "REGION"
       project: "PROJECT"
@@ -73,6 +79,12 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: RGF0YXN0b3Jl
+sweeper:
+  url_substitutions:
+    - region: "us-central1-a"
+    - region: "southamerica-west1-a"
+    - region: "me-west1-a"
+    - region: "me-west1-b"
 parameters:
   - name: location
     type: String

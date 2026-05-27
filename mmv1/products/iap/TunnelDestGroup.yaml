@@ -48,7 +48,6 @@ custom_code:
 examples:
   - name: 'iap_destgroup'
     primary_resource_id: 'dest_group'
-    primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
     external_providers: ["random", "time"]
 parameters:
   - name: 'region'

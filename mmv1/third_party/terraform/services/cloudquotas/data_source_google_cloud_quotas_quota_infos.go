@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -143,7 +145,7 @@ func dataSourceGoogleCloudQuotasQuotaInfosRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{CloudQuotasBasePath}}{{parent}}/locations/global/services/{{service}}/quotaInfos")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{parent}}/locations/global/services/{{service}}/quotaInfos")
 	if err != nil {
 		return fmt.Errorf("error setting api endpoint")
 	}
@@ -168,7 +170,7 @@ func dataSourceGoogleCloudQuotasQuotaInfosRead(d *schema.ResourceData, meta inte
 		if res["nextPageToken"] == nil || res["nextPageToken"].(string) == "" {
 			break
 		}
-		url, err = tpgresource.ReplaceVars(d, config, "{{CloudQuotasBasePath}}{{parent}}/locations/global/services/{{service}}/quotaInfos?pageToken="+res["nextPageToken"].(string))
+		url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{parent}}/locations/global/services/{{service}}/quotaInfos?pageToken="+res["nextPageToken"].(string))
 		if err != nil {
 			return fmt.Errorf("error setting api endpoint")
 		}
@@ -212,4 +214,13 @@ func flattenCloudQuotasQuotaInfo(rawQuotaInfo map[string]interface{}, d *schema.
 	quotaInfo["service_request_quota_uri"] = rawQuotaInfo["serviceRequestQuotaUri"]
 
 	return quotaInfo
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_cloud_quotas_quota_infos",
+		ProductName: "cloudquotas",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudQuotasQuotaInfos(),
+	}.Register()
 }

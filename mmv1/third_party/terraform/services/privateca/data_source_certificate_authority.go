@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -51,7 +52,7 @@ func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta in
 
 	// pem_csr is only applicable for SUBORDINATE CertificateAuthorities when their state is AWAITING_USER_ACTIVATION
 	if d.Get("type") == "SUBORDINATE" && d.Get("state") == "AWAITING_USER_ACTIVATION" {
-		url, err := tpgresource.ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
+		url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
 		if err != nil {
 			return err
 		}
@@ -85,4 +86,13 @@ func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta in
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_privateca_certificate_authority",
+		ProductName: "privateca",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourcePrivatecaCertificateAuthority(),
+	}.Register()
 }

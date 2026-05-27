@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -63,7 +64,7 @@ func dataSourceGoogleCloudIdentityGroupLookupRead(d *schema.ResourceData, meta i
 	}
 	id := gkId.(string)
 
-	groupsLookupCall := config.NewCloudIdentityClient(userAgent).Groups.Lookup().GroupKeyId(id)
+	groupsLookupCall := NewClient(config, userAgent).Groups.Lookup().GroupKeyId(id)
 
 	gkNamespace, ok := d.GetOk("group_key.0.namespace")
 	if ok {
@@ -98,4 +99,13 @@ func dataSourceGoogleCloudIdentityGroupLookupRead(d *schema.ResourceData, meta i
 	}
 	d.SetId(time.Now().UTC().String())
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_cloud_identity_group_lookup",
+		ProductName: "cloudidentity",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudIdentityGroupLookup(),
+	}.Register()
 }

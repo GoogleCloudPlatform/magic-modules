@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
@@ -18,21 +19,20 @@ func NewConfig(ctx context.Context, project, zone, region string, offline bool, 
 	}
 
 	// Search for default credentials
-	cfg.Credentials = transport_tpg.MultiEnvSearch([]string{
+	cfg.Credentials = envvar.MultiEnvSearch([]string{
 		"GOOGLE_CREDENTIALS",
 		"GOOGLE_CLOUD_KEYFILE_JSON",
 		"GCLOUD_KEYFILE_JSON",
 	})
 
-	cfg.AccessToken = transport_tpg.MultiEnvSearch([]string{
+	cfg.AccessToken = envvar.MultiEnvSearch([]string{
 		"GOOGLE_OAUTH_ACCESS_TOKEN",
 	})
 
-	cfg.ImpersonateServiceAccount = transport_tpg.MultiEnvSearch([]string{
+	cfg.ImpersonateServiceAccount = envvar.MultiEnvSearch([]string{
 		"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 	})
 
-	transport_tpg.ConfigureBasePaths(cfg)
 	if !offline {
 		if err := cfg.LoadAndValidate(ctx); err != nil {
 			return nil, errors.Wrap(err, "load and validate config")

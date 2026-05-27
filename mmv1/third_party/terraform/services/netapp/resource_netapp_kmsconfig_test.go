@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package netapp_test
 
 import (
@@ -9,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/netapp"
 )
 
 func TestAccNetappkmsconfig_kmsConfigCreateExample_Update(t *testing.T) {
@@ -16,7 +15,7 @@ func TestAccNetappkmsconfig_kmsConfigCreateExample_Update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-bootstrap-netapp-kmsconfig-key2").CryptoKey.Name,
+		"kms_key_name":  kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-bootstrap-netapp-kmsconfig-key2").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

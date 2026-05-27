@@ -61,7 +61,7 @@ examples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-managedkafka.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     external_providers: ["time"]
 parameters:
   - name: 'location'
@@ -153,7 +153,7 @@ properties:
   - name: 'brokerCapacityConfig'
     type: NestedObject
     description: "Capacity configuration at a per-broker level within the Kafka cluster. The config will be appled to each broker in the cluster."
-    ignore_read: true
+    is_missing_in_cai: true
     properties:
       - name: 'diskSizeGib'
         type: String

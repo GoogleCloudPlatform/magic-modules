@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/securityposture"
 )
 
 func TestAccSecurityposturePosture_securityposturePosture_update(t *testing.T) {
@@ -83,6 +84,25 @@ resource "google_securityposture_posture" "posture_test" {
     	description = "set of org policies"
     	policies {
     		policy_id = "policy_1"
+    		constraint {
+    			org_policy_constraint {
+    				canned_constraint_id = "storage.uniformBucketLevelAccess"
+    				policy_rules {
+    					enforce = true
+    				}
+    				policy_rules {
+    					enforce = false
+						condition {
+                            title = "Disable constraint for test"
+                            description = "Disable constraint for test"
+                            expression = "resource.matchTagId('tagKeys/123', 'tagValues/345')"
+					    }
+    				}						
+    			}
+    		}
+		}		
+    	policies {
+    		policy_id = "policy_2"
     		constraint {
     			org_policy_constraint_custom {
     				custom_constraint {

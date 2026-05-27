@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -101,7 +102,7 @@ func dataSourceGoogleComputeInterconnectLocationsRead(d *schema.ResourceData, me
 		return err
 	}
 	d.SetId(fmt.Sprintf("projects/%s", project))
-	list, err := config.NewComputeClient(userAgent).InterconnectLocations.List(project).Do()
+	list, err := NewClient(config, userAgent).InterconnectLocations.List(project).Do()
 	if err != nil {
 		return fmt.Errorf("Error retrieving list of interconnect locations: %s", err)
 	}
@@ -128,4 +129,13 @@ func dataSourceGoogleComputeInterconnectLocationsRead(d *schema.ResourceData, me
 		return fmt.Errorf("Error setting locations: %s", err)
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_interconnect_locations",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInterconnectLocations(),
+	}.Register()
 }

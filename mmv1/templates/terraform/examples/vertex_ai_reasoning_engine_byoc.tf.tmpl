@@ -1,0 +1,52 @@
+resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "name"}}"
+  description  = "Deployed with BYOC through Terraform"
+  region       = "us-central1"
+
+  spec {
+    container_spec {
+      image_uri = "us-central1-docker.pkg.dev/${data.google_project.project.project_id}/vertex-byoc/byoc-agent:latest" # image path
+    }
+  }
+
+  depends_on = [google_project_iam_member.vertex_ar_reader, google_project_iam_member.tenant_ar_reader]
+}
+
+
+# Provision and retrieve the tenant service agent through another agent
+resource "google_vertex_ai_reasoning_engine" "tenant_mds" {
+  display_name = "{{index $.Vars "name"}}-mds"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/mds_agent_src.tar.gz")
+      }
+
+      python_spec {
+        entrypoint_module = "metadata_agent"
+        entrypoint_object = "root_agent"
+      }
+    }
+  }
+}
+
+data "google_vertex_ai_reasoning_engine_query" "tenant_mds" {
+  region              = "us-central1"
+  reasoning_engine_id = google_vertex_ai_reasoning_engine.tenant_mds.name
+}
+
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "vertex_ar_reader" {
+  project = data.google_project.project.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "tenant_ar_reader" {
+  project = data.google_project.project.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:${jsondecode(data.google_vertex_ai_reasoning_engine_query.tenant_mds.output).output}"
+}

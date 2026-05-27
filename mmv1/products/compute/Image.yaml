@@ -60,7 +60,6 @@ custom_code:
 examples:
   - name: 'image_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-image%s", context["random_suffix"])'
     vars:
       disk_name: 'example-disk'
       image_name: 'example-image'
@@ -74,7 +73,6 @@ examples:
     vars:
       disk_name: 'example-disk'
       image_name: 'example-sl-image'
-      primary_resource_name: 'fmt.Sprintf("tf-test-sl-example-image%s", context["random_suffix"])'
 parameters:
 properties:
   - name: 'archiveSizeBytes'
@@ -145,6 +143,7 @@ properties:
             - 'SUSPEND_RESUME_COMPATIBLE'
             - 'TDX_CAPABLE'
             - 'SEV_LIVE_MIGRATABLE_V2'
+            - 'SNP_SVSM_CAPABLE'
   - name: 'imageEncryptionKey'
     type: NestedObject
     description: |
@@ -153,6 +152,7 @@ properties:
       After you encrypt an image with a customer-supplied key, you must
       provide the same key if you use the image later (e.g. to create a
       disk from the image)
+    immutable: true
     properties:
       - name: 'kmsKeySelfLink'
         type: String
@@ -187,6 +187,26 @@ properties:
     description: Labels to apply to this Image.
     update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
     update_verb: 'POST'
+  - name: "params"
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+      Additional params passed with the request, but not persisted as part of resource payload.
+    properties:
+      - name: "resourceManagerTags"
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the image. Tag keys and values have the
+          same definition as resource manager tags. Keys and values can be either in numeric format,
+          such as tagKeys/{tag_key_id} and tagValues/{tag_value_id} or in namespaced format such as
+          {org_id|projectId}/{tag_key_short_name} and {tag_value_short_name}. The field is ignored when empty.
+          The field is immutable and causes resource replacement when mutated. This field is only
+          set at create time and modifying this field after creation will trigger recreation.
+          To apply tags to an existing resource, see the google_tags_tag_binding resource.
+        api_name: "resourceManagerTags"
+        ignore_read: true
+        immutable: true
   - name: 'labelFingerprint'
     type: Fingerprint
     description: |
@@ -264,6 +284,7 @@ properties:
     description: |
       The customer-supplied encryption key of the source disk. Required if
       the source disk is protected by a customer-supplied encryption key.
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -314,6 +335,7 @@ properties:
     description: |
       The customer-supplied encryption key of the source image. Required if
       the source image is protected by a customer-supplied encryption key.
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -437,6 +459,7 @@ properties:
     description: |
       The customer-supplied encryption key of the source snapshot. Required if
       the source snapshot is protected by a customer-supplied encryption key.
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String

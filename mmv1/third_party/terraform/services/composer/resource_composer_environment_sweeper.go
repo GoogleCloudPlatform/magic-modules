@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	storage_tpg "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"errors"
 	"log"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
 	"google.golang.org/api/storage/v1"
 )
 
@@ -53,7 +54,7 @@ func testSweepComposerResources(region string) error {
 }
 
 func testSweepComposerEnvironments(config *transport_tpg.Config, region string) error {
-	found, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.List(
+	found, err := NewClient(config, config.UserAgent).Projects.Locations.Environments.List(
 		fmt.Sprintf("projects/%s/locations/%s", config.Project, region)).Do()
 	if err != nil {
 		return fmt.Errorf("error listing storage buckets for composer environment: %s", err)
@@ -91,14 +92,14 @@ func testSweepComposerEnvironments(config *transport_tpg.Config, region string) 
 		case "ERROR":
 			fallthrough
 		default:
-			op, deleteErr := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.Delete(e.Name).Do()
+			op, deleteErr := NewClient(config, config.UserAgent).Projects.Locations.Environments.Delete(e.Name).Do()
 			if deleteErr != nil {
-				allErrors = multierror.Append(allErrors, fmt.Errorf("composer: unable to delete environment %q: %s", e.Name, deleteErr))
+				allErrors = errors.Join(allErrors, fmt.Errorf("composer: unable to delete environment %q: %s", e.Name, deleteErr))
 				continue
 			}
 			waitErr := ComposerOperationWaitTime(config, op, config.Project, "Sweeping old test environments", config.UserAgent, 10*time.Minute)
 			if waitErr != nil {
-				allErrors = multierror.Append(allErrors, fmt.Errorf("composer: unable to delete environment %q: %s", e.Name, waitErr))
+				allErrors = errors.Join(allErrors, fmt.Errorf("composer: unable to delete environment %q: %s", e.Name, waitErr))
 			}
 		}
 	}
@@ -107,7 +108,7 @@ func testSweepComposerEnvironments(config *transport_tpg.Config, region string) 
 
 func testSweepComposerEnvironmentBuckets(config *transport_tpg.Config, region string) error {
 	artifactsBName := fmt.Sprintf("artifacts.%s.appspot.com", config.Project)
-	artifactBucket, err := config.NewStorageClient(config.UserAgent).Buckets.Get(artifactsBName).Do()
+	artifactBucket, err := storage_tpg.NewClient(config, config.UserAgent).Buckets.Get(artifactsBName).Do()
 	if err != nil {
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 			log.Printf("composer environment bucket %q not found, doesn't need to be cleaned up", artifactsBName)
@@ -118,7 +119,7 @@ func testSweepComposerEnvironmentBuckets(config *transport_tpg.Config, region st
 		return err
 	}
 
-	found, err := config.NewStorageClient(config.UserAgent).Buckets.List(config.Project).Prefix(region).Do()
+	found, err := storage_tpg.NewClient(config, config.UserAgent).Buckets.List(config.Project).Prefix(region).Do()
 	if err != nil {
 		return fmt.Errorf("error listing storage buckets created when testing composer environment: %s", err)
 	}
@@ -140,25 +141,23 @@ func testSweepComposerEnvironmentBuckets(config *transport_tpg.Config, region st
 
 func testSweepComposerEnvironmentCleanUpBucket(config *transport_tpg.Config, bucket *storage.Bucket) error {
 	var allErrors error
-	objList, err := config.NewStorageClient(config.UserAgent).Objects.List(bucket.Name).Do()
+	objList, err := storage_tpg.NewClient(config, config.UserAgent).Objects.List(bucket.Name).Do()
 	if err != nil {
-		allErrors = multierror.Append(allErrors,
-			fmt.Errorf("Unable to list objects to delete for bucket %q: %s", bucket.Name, err))
+		allErrors = errors.Join(allErrors, fmt.Errorf("unable to list objects to delete for bucket %q: %s", bucket.Name, err))
 	}
 
 	for _, o := range objList.Items {
-		if err := config.NewStorageClient(config.UserAgent).Objects.Delete(bucket.Name, o.Name).Do(); err != nil {
-			allErrors = multierror.Append(allErrors,
-				fmt.Errorf("Unable to delete object %q from bucket %q: %s", o.Name, bucket.Name, err))
+		if err := storage_tpg.NewClient(config, config.UserAgent).Objects.Delete(bucket.Name, o.Name).Do(); err != nil {
+			allErrors = errors.Join(allErrors, fmt.Errorf("unable to delete object %q from bucket %q: %s", o.Name, bucket.Name, err))
 		}
 	}
 
-	if err := config.NewStorageClient(config.UserAgent).Buckets.Delete(bucket.Name).Do(); err != nil {
-		allErrors = multierror.Append(allErrors, fmt.Errorf("Unable to delete bucket %q: %s", bucket.Name, err))
+	if err := storage_tpg.NewClient(config, config.UserAgent).Buckets.Delete(bucket.Name).Do(); err != nil {
+		allErrors = errors.Join(allErrors, fmt.Errorf("unable to delete bucket %q: %s", bucket.Name, err))
 	}
 
 	if allErrors != nil {
-		return fmt.Errorf("Unable to clean up bucket %q: %v", bucket.Name, allErrors)
+		return fmt.Errorf("unable to clean up bucket %q: %w", bucket.Name, allErrors)
 	}
 
 	log.Printf("Cleaned up bucket %q for composer environment tests", bucket.Name)

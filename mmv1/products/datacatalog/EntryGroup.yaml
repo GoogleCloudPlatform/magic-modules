@@ -49,12 +49,10 @@ custom_code:
 examples:
   - name: 'data_catalog_entry_group_basic'
     primary_resource_id: 'basic_entry_group'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_group%s", context["random_suffix"])'
     vars:
       entry_group_id: 'my_group'
   - name: 'data_catalog_entry_group_full'
     primary_resource_id: 'basic_entry_group'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_group%s", context["random_suffix"])'
     vars:
       entry_group_id: 'my_group'
 parameters:

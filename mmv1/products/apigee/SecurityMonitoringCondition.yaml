@@ -29,6 +29,7 @@ immutable: false
 import_format:
   - '{{org_id}}/securityMonitoringConditions/{{condition_id}}'
   - '{{org_id}}/{{condition_id}}'
+exclude_identity_generation: true
 custom_code:
   custom_import: "templates/terraform/custom_import/apigee_security_monitoring_condition.go.tmpl"
 examples:

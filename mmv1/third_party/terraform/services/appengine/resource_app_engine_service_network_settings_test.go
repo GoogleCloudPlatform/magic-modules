@@ -5,6 +5,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/appengine"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccAppEngineServiceNetworkSettings_update(t *testing.T) {
@@ -56,7 +58,7 @@ resource "google_app_engine_standard_app_version" "app" {
   service = "app-%{random_suffix}"
   delete_service_on_destroy = true
 
-  runtime = "nodejs20"
+  runtime = "nodejs22"
   entrypoint {
     shell = "node ./app.js"
   }
@@ -96,7 +98,7 @@ resource "google_app_engine_standard_app_version" "app" {
   service = "app-%{random_suffix}"
   delete_service_on_destroy = true
 
-  runtime = "nodejs20"
+  runtime = "nodejs22"
   entrypoint {
     shell = "node ./app.js"
   }

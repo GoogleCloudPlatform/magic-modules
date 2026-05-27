@@ -6,14 +6,18 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/datacatalog"
 )
 
 func TestAccDataCatalogTagTemplate_dataCatalogTagTemplate_updateFields(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"force_delete":  true,
-		"random_suffix": acctest.RandString(t, 10),
+		"force_delete":    true,
+		"tag_template_id": "tf_test_my_template" + randomSuffix,
+		"random_suffix":   randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -59,7 +63,7 @@ func TestAccDataCatalogTagTemplate_dataCatalogTagTemplate_updateFields(t *testin
 func testAccDataCatalogTagTemplate_dataCatalogTagTemplateUpdateFields(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_catalog_tag_template" "basic_tag_template" {
-  tag_template_id = "tf_test_my_template%{random_suffix}"
+  tag_template_id = "%{tag_template_id}"
   region = "us-central1"
   display_name = "Demo Tag Template Test Update"
 
@@ -98,7 +102,7 @@ resource "google_data_catalog_tag_template" "basic_tag_template" {
 func testAccDataCatalogTagTemplate_dataCatalogTagTemplateUpdatePrimitiveTypeOfFieldsWithRequired(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_catalog_tag_template" "basic_tag_template" {
-  tag_template_id = "tf_test_my_template%{random_suffix}"
+  tag_template_id = "%{tag_template_id}"
   region = "us-central1"
   display_name = "Demo Tag Template Test Update"
 
@@ -137,7 +141,7 @@ resource "google_data_catalog_tag_template" "basic_tag_template" {
 func testAccDataCatalogTagTemplate_dataCatalogTagTemplateUpdatePrimitiveTypeOfFieldsWithOptional(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_catalog_tag_template" "basic_tag_template" {
-  tag_template_id = "tf_test_my_template%{random_suffix}"
+  tag_template_id = "%{tag_template_id}"
   region = "us-central1"
   display_name = "Demo Tag Template Test Update"
 

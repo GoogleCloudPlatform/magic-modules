@@ -1,0 +1,41 @@
+resource "google_chronicle_data_table" "example" {
+  location       = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  data_table_id  = "{{index $.Vars "data_table_id"}}"
+  description    = "sample desc"
+  column_info {
+    column_index    = 0
+    original_column = "username"
+    column_type     = "STRING"
+  }
+  column_info {
+    column_index    = 1
+    original_column = "ip_address"
+    column_type     = "CIDR"
+  }
+}
+
+output "data_table_name" {
+  description = "The resource name of the data table."
+  value = google_chronicle_data_table.example.name
+}
+
+output "data_table_id" {
+  description = "The user-provided ID of the data table."
+  value = google_chronicle_data_table.example.data_table_id
+}
+
+output "data_table_uuid" {
+  description = "The system-generated UUID of the data table."
+  value = google_chronicle_data_table.example.data_table_uuid
+}
+
+output "data_table_description" {
+  description = "The description of the data table."
+  value = google_chronicle_data_table.example.description
+}
+
+output "data_table_create_time" {
+  description = "The creation time of the data table."
+  value = google_chronicle_data_table.example.create_time
+}

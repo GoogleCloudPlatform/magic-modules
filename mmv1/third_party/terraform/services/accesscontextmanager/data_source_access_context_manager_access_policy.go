@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -45,7 +46,7 @@ func dataSourceAccessContextManagerAccessPolicyRead(d *schema.ResourceData, meta
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{AccessContextManagerBasePath}}accessPolicies?parent={{parent}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"accessPolicies?parent={{parent}}")
 	if err != nil {
 		return err
 	}
@@ -135,4 +136,13 @@ type AccessPolicy struct {
 	Title  string   `json:"title"`
 	Parent string   `json:"parent"`
 	Scopes []string `json:"scopes"`
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_access_context_manager_access_policy",
+		ProductName: "accesscontextmanager",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAccessContextManagerAccessPolicy(),
+	}.Register()
 }

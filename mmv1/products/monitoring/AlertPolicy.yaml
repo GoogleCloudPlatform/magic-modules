@@ -58,30 +58,45 @@ examples:
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    test_vars_overrides:
+      # for backward compatible
+      alert_policy_display_name: '"My Alert Policy" + randomSuffix'
     exclude_test: true
   # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_evaluation_missing_data'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    test_vars_overrides:
+      # for backward compatible
+      alert_policy_display_name: '"My Alert Policy" + randomSuffix'
     exclude_test: true
   # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_forecast_options'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    test_vars_overrides:
+      # for backward compatible
+      alert_policy_display_name: '"My Alert Policy" + randomSuffix'
     exclude_test: true
   # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_promql_condition'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    test_vars_overrides:
+      # for backward compatible
+      alert_policy_display_name: '"My Alert Policy" + randomSuffix'
     exclude_test: true
   # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_sql_condition'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    test_vars_overrides:
+      # for backward compatible
+      alert_policy_display_name: '"My Alert Policy" + randomSuffix'
     exclude_test: true
 parameters:
 properties:
@@ -254,7 +269,6 @@ properties:
                       otherwise an error is returned.
                   - name: 'crossSeriesReducer'
                     type: Enum
-                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/monitoring_alert_policy_cross_series_reducer.go.tmpl'
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer
@@ -548,7 +562,6 @@ properties:
                       otherwise an error is returned.
                   - name: 'crossSeriesReducer'
                     type: Enum
-                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/monitoring_alert_policy_cross_series_reducer.go.tmpl'
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer
@@ -773,7 +786,6 @@ properties:
                       otherwise an error is returned.
                   - name: 'crossSeriesReducer'
                     type: Enum
-                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/monitoring_alert_policy_cross_series_reducer.go.tmpl'
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer

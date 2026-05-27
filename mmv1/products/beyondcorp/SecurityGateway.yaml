@@ -33,19 +33,19 @@ iam_policy:
 examples:
   - name: beyondcorp_security_gateway_basic
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"])'
     region_override: 'global'
     vars:
       security_gateway_name: default
+    test_vars_overrides:
+      # for backward compatible
+      security_gateway_name: '"default" + randomSuffix'
   - name: beyondcorp_security_gateway_logging
     primary_resource_id: example-logging
-    primary_resource_name: 'fmt.Sprintf("default-logging%s", context["random_suffix"])'
     region_override: 'global'
     vars:
       security_gateway_name: default-logging
   - name: beyondcorp_security_gateway_spa
     primary_resource_id: example-spa
-    primary_resource_name: 'fmt.Sprintf("default-spa%s", context["random_suffix"])'
     region_override: 'global'
     vars:
       security_gateway_name: default-spa
@@ -246,4 +246,4 @@ properties:
     allow_empty_object: true
     description: Settings related to Cloud Logging.
     properties:
-      [] # Meant to be an empty object with no properties for now.
+      []  # Meant to be an empty object with no properties for now.

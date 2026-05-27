@@ -3,6 +3,7 @@ package bigtable
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -81,7 +82,7 @@ func (u *BigtableInstanceIamUpdater) GetResourceIamPolicy() (*cloudresourcemanag
 		return nil, err
 	}
 
-	p, err := u.Config.NewBigTableProjectsInstancesClient(userAgent).GetIamPolicy(u.GetResourceId(), req).Do()
+	p, err := NewProjectsInstancesClient(u.Config, userAgent).GetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -107,7 +108,7 @@ func (u *BigtableInstanceIamUpdater) SetResourceIamPolicy(policy *cloudresourcem
 		return err
 	}
 
-	_, err = u.Config.NewBigTableProjectsInstancesClient(userAgent).SetIamPolicy(u.GetResourceId(), req).Do()
+	_, err = NewProjectsInstancesClient(u.Config, userAgent).SetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -143,4 +144,31 @@ func bigtableToResourceManagerPolicy(p *bigtableadmin.Policy) (*cloudresourceman
 		return nil, errwrap.Wrapf("Cannot convert a cloudresourcemanager policy to a bigtable policy: {{err}}", err)
 	}
 	return out, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_bigtable_instance_iam_binding",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamBinding(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_bigtable_instance_iam_member",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamMember(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_bigtable_instance_iam_policy",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamPolicy(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_bigtable_instance_iam_policy",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeIAMDataSource,
+		Schema:      tpgiamresource.DataSourceIamPolicy(IamBigtableInstanceSchema, NewBigtableInstanceUpdater),
+	}.Register()
 }

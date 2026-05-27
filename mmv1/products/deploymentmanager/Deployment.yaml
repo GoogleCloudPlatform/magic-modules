@@ -42,7 +42,7 @@ delete_url: 'projects/{{project}}/global/deployments/{{name}}?deletePolicy={{del
 immutable: true
 import_format:
   - 'projects/{{project}}/deployments/{{name}}'
- # Very long to support very long deployments
+# Very long to support very long deployments
 timeouts:
   insert_minutes: 60
   update_minutes: 60
@@ -62,13 +62,11 @@ custom_diff:
 examples:
   - name: 'deployment_manager_deployment_basic'
     primary_resource_id: 'deployment'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
     vars:
       deployment_name: 'my-deployment'
     exclude_test: true
   - name: 'deployment_manager_deployment_imports'
     primary_resource_id: 'deployment'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
     vars:
       deployment_name: 'my-deployment'
     exclude_test: true
@@ -102,7 +100,7 @@ parameters:
     enum_values:
       - 'ABANDON'
       - 'DELETE'
-    # Custom Update
+  # Custom Update
   - name: 'preview'
     type: Boolean
     description: |

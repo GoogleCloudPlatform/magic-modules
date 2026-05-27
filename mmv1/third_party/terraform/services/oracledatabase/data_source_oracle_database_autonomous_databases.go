@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -42,7 +43,7 @@ func dataSourceOracleDatabaseAutonomousDatabasesRead(d *schema.ResourceData, met
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{OracleDatabaseBasePath}}projects/{{project}}/locations/{{location}}/autonomousDatabases")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/autonomousDatabases")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -109,4 +110,13 @@ func flattenOracleDatabaseautonomousDatabases(v interface{}, d *schema.ResourceD
 		})
 	}
 	return transformed
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_oracle_database_autonomous_databases",
+		ProductName: "oracledatabase",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseAutonomousDatabases(),
+	}.Register()
 }

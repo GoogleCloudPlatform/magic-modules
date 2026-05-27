@@ -56,15 +56,15 @@ custom_code:
 examples:
   - name: 'spanner_instance_basic'
     primary_resource_id: 'example'
-      # Randomness
+    # Randomness
     skip_vcr: true
   - name: 'spanner_instance_processing_units'
     primary_resource_id: 'example'
-      # Randomness
+    # Randomness
     skip_vcr: true
   - name: 'spanner_instance_multi_regional'
     primary_resource_id: 'example'
-      # Randomness
+    # Randomness
     skip_vcr: true
 virtual_fields:
   - name: 'force_destroy'
@@ -74,8 +74,10 @@ virtual_fields:
     type: Boolean
     default_value: false
 tgc_tests:
-  - name: 'TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdateDisableAutoscaling'
-    skip: 'sometimes the CAI asset data for step3 is unavailable'
+  - name: TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdateDisableAutoscaling
+    skip: sometimes the CAI asset data for step3 is unavailable
+  - name: TestAccSpannerInstance_freeInstanceBasicUpdate
+    skip: sometimes the CAI asset data for step3 is unavailable
 parameters:
 properties:
   - name: 'name'
@@ -86,9 +88,9 @@ properties:
       in length.
       If not provided, a random string starting with `tf-` will be selected.
     immutable: true
-        # This resource supports a sort of odd autogenerate-if-not-set
-        # system, which is done in the encoder.  Consequently we have
-        # to interpret "not set" as "use the name in state".
+    # This resource supports a sort of odd autogenerate-if-not-set
+    # system, which is done in the encoder.  Consequently we have
+    # to interpret "not set" as "use the name in state".
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     validation:
@@ -270,18 +272,68 @@ properties:
               properties:
                 - name: 'autoscalingLimits'
                   type: NestedObject
-                  required: true
                   properties:
                     - name: 'minNodes'
                       type: Integer
-                      required: true
                       description: |
                         The minimum number of nodes for this specific replica.
+                      exactly_one_of:
+                        - 'min_nodes'
+                        - 'min_processing_units'
+                      required_with:
+                        - 'max_nodes'
                     - name: 'maxNodes'
                       type: Integer
-                      required: true
                       description: |
                         The maximum number of nodes for this specific replica.
+                      exactly_one_of:
+                        - 'max_nodes'
+                        - 'max_processing_units'
+                      required_with:
+                        - 'min_nodes'
+                    - name: 'minProcessingUnits'
+                      type: Integer
+                      description: |
+                        The minimum number of processing units for this specific replica.
+                        If set, this number should be multiples of 1000.
+                      exactly_one_of:
+                        - 'min_nodes'
+                        - 'min_processing_units'
+                      required_with:
+                        - 'max_processing_units'
+                    - name: 'maxProcessingUnits'
+                      type: Integer
+                      description: |
+                        The maximum number of processing units for this specific replica.
+                        If set, this number should be multiples of 1000 and be greater than or equal to
+                        min_processing_units.
+                      exactly_one_of:
+                        - 'max_nodes'
+                        - 'max_processing_units'
+                      required_with:
+                        - 'min_processing_units'
+                - name: 'autoscalingTargetHighPriorityCpuUtilizationPercent'
+                  type: Integer
+                  description: |
+                    The target high priority cpu utilization percentage that the autoscaler
+                    should be trying to achieve for this replica.
+                    This number is on a scale from 0 (no utilization) to 100 (full utilization).
+                - name: 'autoscalingTargetTotalCpuUtilizationPercent'
+                  type: Integer
+                  description: |
+                    The target total cpu utilization percentage that the autoscaler
+                    should be trying to achieve for this replica.
+                    This number is on a scale from 0 (no utilization) to 100 (full utilization).
+                - name: 'disableHighPriorityCpuAutoscaling'
+                  type: Boolean
+                  description: |
+                    If true, disables high priority CPU autoscaling for this replica and ignores
+                    high_priority_cpu_utilization_percent in the top-level autoscaling configuration.
+                - name: 'disableTotalCpuAutoscaling'
+                  type: Boolean
+                  description: |
+                    If true, disables total CPU autoscaling for this replica and ignores
+                    total_cpu_utilization_percent in the top-level autoscaling configuration.
   - name: 'edition'
     type: Enum
     description: |

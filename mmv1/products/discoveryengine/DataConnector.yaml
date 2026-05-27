@@ -54,6 +54,10 @@ examples:
     primary_resource_id: 'servicenow-basic'
     vars:
       collection_id: 'collection-id'
+  - name: 'discoveryengine_dataconnector_jira_with_actions'
+    primary_resource_id: 'jira-with-actions'
+    vars:
+      collection_id: 'collection-id'
 parameters:
   - name: 'location'
     type: String
@@ -103,10 +107,66 @@ properties:
   - name: 'dataSource'
     type: String
     description: |
-      The name of the data source.
-      Supported values: `salesforce`, `jira`, `confluence`, `bigquery`.
+      The identifier for the data source.
+      This is a partial list of supported connectors. Please refer to the
+      [documentation](https://docs.cloud.google.com/gemini/enterprise/docs/connectors/introduction-to-connectors-and-data-stores)
+      for the full list of connectors.
+
+      Supported first-party connectors include:
+
+      *   `bigquery`
+      *   `gcp_fhir`
+      *   `google_mail`
+      *   `google_drive`
+      *   `google_calendar`
+      *   `google_chat`
+
+      Supported third-party connectors include:
+      Generally available (GA) connectors:
+
+      *   `onedrive`
+      *   `outlook`
+      *   `confluence`
+      *   `jira`
+      *   `servicenow`
+      *   `sharepoint`
+
+      Preview connectors:
+
+      *   `asana`
+      *   `azure_active_directory`
+      *   `box`
+      *   `canva`
+      *   `confluence_server`
+      *   `custom_connector`
+      *   `docusign`
+      *   `dropbox`
+      *   `dynamics365`
+      *   `github`
+      *   `gitlab`
+      *   `hubspot`
+      *   `jira_server`
+      *   `linear`
+      *   `native_cloud_identity`
+      *   `notion`
+      *   `okta`
+      *   `pagerduty`
+      *   `peoplesoft`
+      *   `salesforce`
+      *   `shopify`
+      *   `slack`
+      *   `snowflake`
+      *   `teams`
+      *   `trello`
+      *   `workday`
+      *   `zendesk`
     required: true
     immutable: true
+  - name: 'dataSourceVersion'
+    type: Integer
+    description: |
+      The version of the data source. For example, `3` for Jira v3.
+    default_from_api: true
   - name: 'params'
     type: KeyValuePairs
     description: |
@@ -152,7 +212,8 @@ properties:
             * Confluence: `Content`, `Space`
         - name: 'keyPropertyMappings'
           type: KeyValuePairs
-          diff_suppress_func: 'DataConnectorEntitiesFieldsDiffSuppress'
+          diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
+          default_from_api: true
           description: |
             Attributes for indexing.
             Key: Field name.
@@ -174,7 +235,7 @@ properties:
         - name: 'params'
           type: String
           description: 'The parameters for the entity to facilitate data ingestion.'
-          diff_suppress_func: 'DataConnectorEntitiesFieldsDiffSuppress'
+          diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
           custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
           custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
           state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
@@ -233,6 +294,54 @@ properties:
       If this field is set and processed successfully, the DataStores created by
       this connector will be protected by the KMS key.
     immutable: true
+  - name: 'actionConfig'
+    type: NestedObject
+    description: |
+      Action configuration for the data connector. Configures action
+      capabilities for connectors that support the ACTIONS connector mode.
+    properties:
+      - name: 'actionParams'
+        type: KeyValuePairs
+        description: |
+          Params needed to configure the actions in the format of
+          String-to-String (Key, Value) pairs. Contains connection
+          credentials and configuration for the action connector.
+        ignore_read: true
+      - name: 'isActionConfigured'
+        type: Boolean
+        description: |
+          Whether the action connector is fully configured. Set by the system
+          after the action configuration is validated.
+        output: true
+      - name: 'createBapConnection'
+        type: Boolean
+        description: |
+          Whether to create a BAP (Business Application Platform) connection
+          for this action connector.
+        ignore_read: true
+  - name: 'bapConfig'
+    type: NestedObject
+    description: |
+      BAP (Business Application Platform) configuration for the data
+      connector. Controls which actions are enabled for connectors
+      using the ACTIONS connector mode.
+    properties:
+      - name: 'enabledActions'
+        type: Array
+        description: |
+          The list of enabled actions for this connector. Supported
+          values include: `create_issue`, `update_issue`,
+          `change_issue_status`, `create_comment`, `update_comment`,
+          `upload_attachment`.
+        item_type:
+          type: String
+      - name: 'supportedConnectorModes'
+        type: Array
+        description: |
+          The connector modes supported by the BAP configuration.
+          The possible values include: `ACTIONS`.
+        item_type:
+          type: String
   - name: 'actionState'
     type: String
     description: |
@@ -246,6 +355,43 @@ properties:
     description: |
       Whether customer has enabled static IP addresses for this connector.
     immutable: true
+  - name: 'destinationConfigs'
+    type: Array
+    description: |
+      Destination connector configurations for the data connector,
+      used to configure where data is served.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'key'
+          type: String
+          description: |
+            The key of the destination configuration, for example `url`.
+        - name: 'destinations'
+          type: Array
+          description: |
+            The list of destinations for this configuration.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'host'
+                type: String
+                description: |
+                  The host of the destination, for example
+                  `https://example.atlassian.net`.
+              - name: 'port'
+                type: Integer
+                description: |
+                  Target port number accepted by the destination.
+        - name: 'params'
+          type: String
+          description: 'Additional parameters for this destination config in structured json format.'
+          diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+          validation:
+            function: 'validation.StringIsJSON'
   - name: 'staticIpAddresses'
     type: Array
     description: |

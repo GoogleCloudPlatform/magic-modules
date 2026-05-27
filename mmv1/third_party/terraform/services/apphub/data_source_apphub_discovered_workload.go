@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -71,7 +72,7 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ApphubBasePath}}projects/{{project}}/locations/{{location}}/discoveredWorkloads:lookup?uri={{workload_uri}}"))
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/discoveredWorkloads:lookup?uri={{workload_uri}}")
 	if err != nil {
 		return err
 	}
@@ -159,4 +160,13 @@ func flattenApphubDiscoveredWorkloadDataLocation(v interface{}, d *schema.Resour
 
 func flattenApphubDiscoveredWorkloadDataZone(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_apphub_discovered_workload",
+		ProductName: "apphub",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceApphubDiscoveredWorkload(),
+	}.Register()
 }

@@ -52,7 +52,6 @@ sweeper:
 examples:
   - name: 'bigquery_connection_cloud_resource'
     primary_resource_id: 'connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-connection%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       connection_id: 'my-connection'
@@ -65,6 +64,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+      # for backward compatible
+      username: '"user" + randomSuffix'
     oics_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
@@ -82,6 +83,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+      # for backward compatible
+      username: '"user" + randomSuffix'
     oics_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
@@ -95,6 +98,9 @@ examples:
     vars:
       connection_id: 'my-connection'
       iam_role_id: 'arn:aws:iam::999999999999:role/omnirole'
+    test_vars_overrides:
+      # for backward compatible
+      iam_role_id: '"arn:aws:iam::999999999999:role/omnirole" + randomSuffix'
     external_providers: ["random", "time"]
   - name: 'bigquery_connection_azure'
     primary_resource_id: 'connection'
@@ -109,12 +115,18 @@ examples:
       connection_id: 'my-connection'
       database: 'projects/project/instances/instance/databases/database'
       database_role: 'database_role'
+    test_vars_overrides:
+      # for backward compatible
+      database: '"projects/project/instances/instance/databases/database" + randomSuffix'
     external_providers: ["random", "time"]
   - name: 'bigquery_connection_cloudspanner_databoost'
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
       database: 'projects/project/instances/instance/databases/database'
+    test_vars_overrides:
+      # for backward compatible
+      database: '"projects/project/instances/instance/databases/database" + randomSuffix'
     external_providers: ["random", "time"]
   - name: 'bigquery_connection_spark'
     primary_resource_id: 'connection'
@@ -133,12 +145,30 @@ examples:
       kms_key_name: 'projects/project/locations/us-central1/keyRings/us-central1/cryptoKeys/bq-key'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKey(t).CryptoKey.Name'
+      # for backward compatible
+      username: '"user" + randomSuffix'
     oics_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
       # password removed
       - 'cloud_sql.0.credential'
+  - name: 'bigquery_connection_connector_configuration'
+    primary_resource_id: 'connection'
+    vars:
+      connection_id: 'my-connection'
+      username: 'user'
+      password: 'password'
+    test_vars_overrides:
+      username: '"user" + randomSuffix'
+      password: '"password"'
+    ignore_read_extra:
+      # The plaintext password is redacted by the API on read, so it cannot
+      # be verified against the original config.
+      - 'configuration.0.authentication.0.username_password.0.password'
+    external_providers: ["random", "time"]
+    # Random provider
+    skip_vcr: true
 parameters:
 properties:
   - name: 'name'
@@ -195,6 +225,7 @@ properties:
       - 'cloud_spanner'
       - 'cloud_resource'
       - 'spark'
+      - 'configuration'
     properties:
       - name: 'instanceId'
         type: String
@@ -247,6 +278,7 @@ properties:
       - 'cloud_spanner'
       - 'cloud_resource'
       - 'spark'
+      - 'configuration'
     properties:
       - name: 'accessRole'
         type: NestedObject
@@ -281,6 +313,7 @@ properties:
       - 'cloud_spanner'
       - 'cloud_resource'
       - 'spark'
+      - 'configuration'
     properties:
       - name: 'application'
         type: String
@@ -326,6 +359,7 @@ properties:
       - 'cloud_spanner'
       - 'cloud_resource'
       - 'spark'
+      - 'configuration'
     properties:
       - name: 'database'
         type: String
@@ -383,6 +417,7 @@ properties:
       - 'cloud_spanner'
       - 'cloud_resource'
       - 'spark'
+      - 'configuration'
     properties:
       - name: 'serviceAccountId'
         type: String
@@ -402,6 +437,7 @@ properties:
       - 'cloud_spanner'
       - 'cloud_resource'
       - 'spark'
+      - 'configuration'
     properties:
       - name: 'serviceAccountId'
         type: String
@@ -422,3 +458,94 @@ properties:
           - name: 'dataprocCluster'
             type: String
             description: Resource name of an existing Dataproc Cluster to act as a Spark History Server for the connection if the form of projects/[projectId]/regions/[region]/clusters/[cluster_name].
+  - name: 'configuration'
+    type: NestedObject
+    description: |
+      Connector configuration. This is a generic configuration that is used to connect to
+      external data sources such as AlloyDB, MySQL, and PostgreSQL using the BigQuery
+      Connector framework.
+    exactly_one_of:
+      - 'cloud_sql'
+      - 'aws'
+      - 'azure'
+      - 'cloud_spanner'
+      - 'cloud_resource'
+      - 'spark'
+      - 'configuration'
+    properties:
+      - name: 'connectorId'
+        type: String
+        description: |
+          The ID of the connector. Possible values include `google-alloydb`, `google-cloudsql-mysql`,
+          `google-cloudsql-postgres`, and other connector IDs supported by the BigQuery Connector framework.
+        required: true
+        immutable: true
+      - name: 'endpoint'
+        type: NestedObject
+        description: Endpoint configuration for the connector.
+        properties:
+          - name: 'hostPort'
+            type: String
+            description: |
+              Host and port in the format of `host:port` for the connector endpoint.
+      - name: 'authentication'
+        type: NestedObject
+        description: Authentication configuration for the connector.
+        properties:
+          - name: 'usernamePassword'
+            type: NestedObject
+            description: Username/password authentication configuration.
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_configuration_authentication_flatten.go.tmpl'
+            properties:
+              - name: 'username'
+                type: String
+                description: Username for the connector.
+                required: true
+              - name: 'password'
+                type: NestedObject
+                description: Password configuration for the connector.
+                required: true
+                properties:
+                  - name: 'plaintext'
+                    type: String
+                    description: The plaintext password.
+                    required: true
+                    sensitive: true
+                  - name: 'secretType'
+                    type: String
+                    description: |
+                      Output only. The type of the secret.
+                    output: true
+          - name: 'serviceAccount'
+            type: String
+            description: |
+              Output only. The service account used for authenticating with the connector.
+            output: true
+      - name: 'network'
+        type: NestedObject
+        description: Network configuration for the connector.
+        properties:
+          - name: 'privateServiceConnect'
+            type: NestedObject
+            description: Private Service Connect configuration for the connector.
+            properties:
+              - name: 'networkAttachment'
+                type: String
+                description: |
+                  The resource name of a network attachment in the format of
+                  `projects/{project}/regions/{region}/networkAttachments/{networkAttachment}`.
+                required: true
+      - name: 'asset'
+        type: NestedObject
+        description: Asset configuration for the connector.
+        required: true
+        properties:
+          - name: 'database'
+            type: String
+            description: The name of the database.
+          - name: 'googleCloudResource'
+            type: String
+            description: |
+              The full resource name of the Google Cloud resource.
+              For AlloyDB, this is in the format of
+              `//alloydb.googleapis.com/projects/{project}/locations/{region}/clusters/{cluster}/instances/{instance}`.

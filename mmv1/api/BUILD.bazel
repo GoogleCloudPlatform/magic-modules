@@ -7,6 +7,7 @@ go_library(
         "compiler.go",
         "product.go",
         "resource.go",
+        "runtime.go",
         "timeouts.go",
         "type.go",
     ],
@@ -17,7 +18,6 @@ go_library(
         "//mmv1/api/resource",
         "//mmv1/api/utils",
         "//mmv1/google",
-        "@com_github_golang_glog//:glog",
         "@in_gopkg_yaml_v3//:yaml_v3",
         "@org_golang_x_exp//slices",
     ],
@@ -31,5 +31,9 @@ go_test(
         "type_test.go",
     ],
     embed = [":api"],
-    deps = ["//mmv1/api/product"],
+    deps = [
+        "//mmv1/api/product",
+        "//mmv1/api/resource",
+        "@com_github_google_go_cmp//cmp",
+    ],
 )

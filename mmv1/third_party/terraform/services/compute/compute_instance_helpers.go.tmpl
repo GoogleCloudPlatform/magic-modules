@@ -77,6 +77,32 @@ func flattenAliasIpRange(d *schema.ResourceData, ranges []*compute.AliasIpRange,
 	return sorted
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func flattenIpv6AliasRange(d *schema.ResourceData, ranges []*compute.AliasIpRange, i int) []map[string]interface{} {
+	prefix := fmt.Sprintf("network_interface.%d", i)
+
+	configData := []map[string]interface{}{}
+	for _, item := range d.Get(prefix + ".alias_ipv6_range").([]interface{}) {
+		configData = append(configData, item.(map[string]interface{}))
+	}
+
+	apiData := make([]map[string]interface{}, 0, len(ranges))
+	for _, ipRange := range ranges {
+		apiData = append(apiData, map[string]interface{}{
+			"ip_cidr_range":         ipRange.IpCidrRange,
+			"subnetwork_range_name": ipRange.SubnetworkRangeName,
+		})
+	}
+
+	//permadiff fix
+	sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "ip_cidr_range")
+	if err != nil {
+		return apiData
+	}
+	return sorted
+}
+{{- end }}
+
 func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 	if v == nil {
 		// We can't set default values for lists.
@@ -194,6 +220,15 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 	if v, ok := original["skip_guest_os_shutdown"]; ok {
 		scheduling.SkipGuestOsShutdown = v.(bool)
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "SkipGuestOsShutdown")
+	}
+
+	if v, ok := original["preemption_notice_duration"]; ok {
+		transformedPreemptionNoticeDuration, err := expandComputePreemptionNoticeDuration(v)
+		if err != nil {
+			return nil, err
+		}
+		scheduling.PreemptionNoticeDuration = transformedPreemptionNoticeDuration
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "PreemptionNoticeDuration")
 	}
 {{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
@@ -381,6 +416,10 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	if resp.GracefulShutdown != nil {
 		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(resp.GracefulShutdown)
 	}
+
+	if resp.PreemptionNoticeDuration != nil {
+		schedulingMap["preemption_notice_duration"] = flattenComputePreemptionNoticeDuration(resp.PreemptionNoticeDuration)
+	}
 {{- end }}
 
 	if resp.LocalSsdRecoveryTimeout != nil {
@@ -441,6 +480,36 @@ func flattenGracefulShutdown(v *compute.SchedulingGracefulShutdown) []interface{
 }
 
 func flattenGracefulShutdownMaxDuration(v *compute.Duration) []interface{} {
+	if v == nil {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["nanos"] = v.Nanos
+	transformed["seconds"] = v.Seconds
+	return []interface{}{transformed}
+}
+
+func expandComputePreemptionNoticeDuration(v interface{}) (*compute.Duration, error) {
+	l := v.([]interface{})
+	duration := compute.Duration{}
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+
+	if transformedNanos, ok := original["nanos"]; ok && transformedNanos != nil {
+		duration.Nanos = int64(transformedNanos.(int))
+	}
+
+	if transformedSeconds, ok := original["seconds"]; ok && transformedSeconds != nil {
+		duration.Seconds = int64(transformedSeconds.(int))
+	}
+
+	return &duration, nil
+}
+
+func flattenComputePreemptionNoticeDuration(v *compute.Duration) []interface{} {
 	if v == nil {
 		return nil
 	}
@@ -516,6 +585,9 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"subnetwork_project":  subnet.Project,
 			"access_config":       ac,
 			"alias_ip_range":      flattenAliasIpRange(d, iface.AliasIpRanges, i),
+			{{ if ne $.TargetVersionName `ga` -}}
+			"alias_ipv6_range":     flattenIpv6AliasRange(d, iface.AliasIpv6Ranges, i),
+			{{- end }}
 			"nic_type":            iface.NicType,
 			"stack_type":          iface.StackType,
 			"ipv6_access_config": flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
@@ -650,6 +722,9 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			Subnetwork:        sf.RelativeLink(),
 			AccessConfigs:     expandAccessConfigs(data["access_config"].([]interface{})),
 			AliasIpRanges:     expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
+			{{ if ne $.TargetVersionName `ga` -}}
+			AliasIpv6Ranges:   expandAliasIpRanges(data["alias_ipv6_range"].([]interface{})),
+			{{- end }}
 			NicType:           data["nic_type"].(string),
 			StackType:         data["stack_type"].(string),
 			QueueCount:        int64(data["queue_count"].(int)),

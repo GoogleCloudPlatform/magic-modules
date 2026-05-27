@@ -70,7 +70,7 @@ examples:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
     exclude_docs: true
-      # Random provider
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_full'
     primary_resource_id: 'default'
@@ -86,11 +86,11 @@ examples:
       stream_cmek: 'kms-name'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'stream_cmek': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'stream_cmek': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
-      # Random provider
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_postgresql'
     primary_resource_id: 'default'
@@ -120,6 +120,14 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
+      # for backward compatible
+      database_name: '"db" + randomSuffix'
+      # for backward compatible
+      database_password: '"password" + randomSuffix'
+      # for backward compatible
+      database_user: '"user" + randomSuffix'
+      # for backward compatible
+      stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_sql_server_change_tables'
     primary_resource_id: 'default'
@@ -135,7 +143,15 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
-    # Requires SQLServer Configuration
+      # Requires SQLServer Configuration
+      # for backward compatible
+      database_name: '"db" + randomSuffix'
+      # for backward compatible
+      database_password: '"password" + randomSuffix'
+      # for backward compatible
+      database_user: '"user" + randomSuffix'
+      # for backward compatible
+      stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_mysql_gtid'
     primary_resource_id: 'default'
@@ -151,7 +167,17 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
-    # Requires MySQL Configuration
+      # Requires MySQL Configuration
+      # for backward compatible
+      database_name: '"db" + randomSuffix'
+      # for backward compatible
+      database_password: '"password" + randomSuffix'
+      # for backward compatible
+      database_user: '"user" + randomSuffix'
+      # for backward compatible
+      mysql_name: '"mysql" + randomSuffix'
+      # for backward compatible
+      stream_id: '"stream" + randomSuffix'
     exclude_test: true
   - name: 'datastream_stream_postgresql_bigquery_dataset_id'
     primary_resource_id: 'default'
@@ -162,6 +188,9 @@ examples:
       instance_name: 'instance-name'
       sql_user_name: 'my-user'
       source_connection_profile_id: 'source-profile'
+    test_vars_overrides:
+      # for backward compatible
+      dataset_id: '"postgres" + randomSuffix'
     external_providers: ["random", "time"]
     # Random provider
     skip_vcr: true
@@ -178,11 +207,11 @@ examples:
       bigquery_destination_table_kms_key_name: 'bigquery-kms-name'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'bigquery_destination_table_kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'bigquery_destination_table_kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
-      # Random provider
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_bigquery_cross_project_source_hierachy'
     primary_resource_id: 'default'
@@ -202,7 +231,7 @@ examples:
     oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
-      # Random provider
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_bigquery_append_only'
     primary_resource_id: 'default'
@@ -219,7 +248,7 @@ examples:
     oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
-      # Random provider
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_bigquery_blmt'
     primary_resource_id: 'default'
@@ -523,6 +552,7 @@ properties:
             type: NestedObject
             allow_empty_object: true
             send_empty_value: true
+            default_from_api: true
             conflicts:
               - source_config.0.mysql_source_config.gtid
             description: |
@@ -1585,7 +1615,8 @@ properties:
             type: String
             description: |
               The maximum duration for which new events are added before a file is closed and a new file is created.
-              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". Defaults to 900s.
+              Values within the range of 15-60 seconds are allowed.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
             default_from_api: true
           - name: 'avroFileFormat'
             type: NestedObject

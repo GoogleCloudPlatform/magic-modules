@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/sql"
 )
 
 func TestAccSqlUser_mysql(t *testing.T) {
@@ -258,7 +260,7 @@ func testAccCheckGoogleSqlUserExists(t *testing.T, n string) resource.TestCheckF
 		name := rs.Primary.Attributes["name"]
 		instance := rs.Primary.Attributes["instance"]
 		host := rs.Primary.Attributes["host"]
-		users, err := config.NewSqlAdminClient(config.UserAgent).Users.List(config.Project,
+		users, err := sql.NewClient(config, config.UserAgent).Users.List(config.Project,
 			instance).Do()
 
 		if err != nil {
@@ -279,7 +281,7 @@ func testAccCheckGoogleSqlUserExistsWithName(t *testing.T, instance, name string
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		users, err := config.NewSqlAdminClient(config.UserAgent).Users.List(config.Project,
+		users, err := sql.NewClient(config, config.UserAgent).Users.List(config.Project,
 			instance).Do()
 
 		if err != nil {
@@ -307,7 +309,7 @@ func testAccSqlUserDestroyProducer(t *testing.T) func(s *terraform.State) error 
 			name := rs.Primary.Attributes["name"]
 			instance := rs.Primary.Attributes["instance"]
 			host := rs.Primary.Attributes["host"]
-			users, err := config.NewSqlAdminClient(config.UserAgent).Users.List(config.Project,
+			users, err := sql.NewClient(config, config.UserAgent).Users.List(config.Project,
 				instance).Do()
 
 			if users == nil {
@@ -551,7 +553,10 @@ func TestAccSqlUser_postgres_updateUserWithDatabaseRoles(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccSqlUserDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "testuser", "BUILT_IN", "password", `[]`),
@@ -580,7 +585,7 @@ func TestAccSqlUser_postgres_updateUserWithDatabaseRoles(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"password", "database_roles"},
 			},
 			{
-				Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "CLOUD_IAM_USER", "", `[]`),
+				Config: testGoogleSqlUser_postgres_iamUserWithDatabaseRoles(instance, "admin@hashicorptest.com", `[]`),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
 				),
@@ -593,7 +598,7 @@ func TestAccSqlUser_postgres_updateUserWithDatabaseRoles(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"password", "database_roles"},
 			},
 			{
-				Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "CLOUD_IAM_USER", "", `["cloudsqlsuperuser"]`),
+				Config: testGoogleSqlUser_postgres_iamUserWithDatabaseRoles(instance, "admin@hashicorptest.com", `["cloudsqlsuperuser"]`),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
 				),
@@ -712,6 +717,12 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 
+# TODO: Remove with resolution of https://github.com/hashicorp/terraform-provider-google/issues/14233
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_sql_database_instance.instance]
+  create_duration = "60s"
+}
+
 resource "google_service_account" "sa" {
   account_id   = "%s"
   display_name = "%s"
@@ -722,6 +733,7 @@ resource "google_service_account_key" "sa_key" {
 }
 
 resource "google_sql_user" "%s" {
+  depends_on = [time_sleep.wait_60_seconds]
   name     = trimsuffix(google_service_account.sa.email, ".gserviceaccount.com")
   instance = google_sql_database_instance.instance.name
   type     = "CLOUD_IAM_SERVICE_ACCOUNT"
@@ -754,6 +766,38 @@ resource "google_sql_user" "%s" {
   database_roles = %s
 }
 `, instance, strings.Split(username, "@")[0], username, password, usertype, roles)
+}
+
+func testGoogleSqlUser_postgres_iamUserWithDatabaseRoles(instance, username, roles string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "POSTGRES_9_6"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    database_flags {
+      name  = "cloudsql.iam_authentication"
+      value = "on"
+    }
+  }
+}
+
+# TODO: Remove with resolution of https://github.com/hashicorp/terraform-provider-google/issues/14233
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_sql_database_instance.instance]
+  create_duration = "60s"
+}
+
+resource "google_sql_user" "%s" {
+  depends_on = [time_sleep.wait_60_seconds]
+  name     = "%s"
+  type     = "CLOUD_IAM_USER"
+  instance = google_sql_database_instance.instance.name
+  database_roles = %s
+}
+`, instance, strings.Split(username, "@")[0], username, roles)
 }
 
 func testGoogleSqlUser_instanceWithActivationPolicy(instance, activationPolicy string) string {

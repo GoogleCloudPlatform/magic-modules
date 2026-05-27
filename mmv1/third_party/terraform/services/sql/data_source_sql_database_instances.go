@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -102,7 +103,7 @@ func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}
 		var instances *sqladmin.InstancesListResponse
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				instances, rerr = config.NewSqlAdminClient(userAgent).Instances.List(project).Filter(filter).PageToken(pageToken).Do()
+				instances, rerr = NewClient(config, userAgent).Instances.List(project).Filter(filter).PageToken(pageToken).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutRead),
@@ -215,4 +216,13 @@ func flattenReplicationClusterForDataSource(replicationCluster *sqladmin.Replica
 		data["dr_replica"] = replicationCluster.DrReplica
 	}
 	return []map[string]interface{}{data}
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_sql_database_instances",
+		ProductName: "sql",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSqlDatabaseInstances(),
+	}.Register()
 }

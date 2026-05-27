@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/ces"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccCESToolset_cesToolsetOpenapiServiceAccountAuthConfigExample_update(t *testing.T) {
@@ -49,6 +51,10 @@ func TestAccCESToolset_cesToolsetOpenapiServiceAccountAuthConfigExample_update(t
 
 func testAccCESToolset_cesToolsetOpenapiServiceAccountAuthConfigExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_service_account" "ces_test_service_account" {
+  account_id = "tf-test-sa-ces-%{random_suffix}"
+}
+
 resource "google_ces_app" "ces_app_for_toolset" {
   app_id = "tf-test-app-id%{random_suffix}"
   location = "us"
@@ -95,7 +101,8 @@ resource "google_ces_toolset" "ces_toolset_openapi_service_account_auth_config" 
     }
     api_authentication {
         service_account_auth_config {
-            service_account = "testaccount@gmail.com"
+            service_account = "${google_service_account.ces_test_service_account.email}"
+            scopes = ["https://www.googleapis.com/auth/cloud-platform"]
         }
     }
   }
@@ -105,6 +112,10 @@ resource "google_ces_toolset" "ces_toolset_openapi_service_account_auth_config" 
 
 func testAccCESToolset_cesToolsetOpenapiServiceAccountAuthConfigExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_service_account" "ces_test_service_account" {
+  account_id = "tf-test-sa-ces-%{random_suffix}"
+}
+
 resource "google_ces_app" "ces_app_for_toolset" {
   app_id = "tf-test-app-id%{random_suffix}"
   location = "us"
@@ -151,7 +162,8 @@ resource "google_ces_toolset" "ces_toolset_openapi_service_account_auth_config" 
     }
     api_authentication {
         service_account_auth_config {
-            service_account = "testaccountupdated@gmail.com"
+            service_account = "${google_service_account.ces_test_service_account.email}"
+            scopes = ["https://www.googleapis.com/auth/cloud-platform"]
         }
     }
   }
@@ -814,6 +826,10 @@ func TestAccCESToolset_cesToolsetMcpServiceAccountAuthConfigExample_update(t *te
 
 func testAccCESToolset_cesToolsetMcpServiceAccountAuthConfigExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_service_account" "ces_test_service_account" {
+  account_id = "tf-test-sa-ces-%{random_suffix}"
+}
+
 resource "google_ces_app" "ces_app_for_toolset" {
   app_id = "tf-test-app-id%{random_suffix}"
   location = "us"
@@ -847,7 +863,8 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
     }
     api_authentication {
         service_account_auth_config {
-            service_account = "testaccount@gmail.com"
+            service_account = "${google_service_account.ces_test_service_account.email}"
+            scopes = ["https://www.googleapis.com/auth/cloud-platform"]
         }
     }
   }
@@ -857,6 +874,10 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
 
 func testAccCESToolset_cesToolsetMcpServiceAccountAuthConfigExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_service_account" "ces_test_service_account" {
+  account_id = "tf-test-sa-ces-%{random_suffix}"
+}
+
 resource "google_ces_app" "ces_app_for_toolset" {
   app_id = "tf-test-app-id%{random_suffix}"
   location = "us"
@@ -890,7 +911,8 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
     }
     api_authentication {
         service_account_auth_config {
-            service_account = "testaccountupdated@gmail.com"
+            service_account = "${google_service_account.ces_test_service_account.email}"
+            scopes = ["https://www.googleapis.com/auth/cloud-platform"]
         }
     }
   }
@@ -1352,6 +1374,9 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
   display_name = "Basic toolset display name"
   mcp_toolset {
     server_address = "https://api.example.com/mcp/"
+    custom_headers = {
+      "X-Custom-Header" = "$context.variables.my_variable"
+    }
     tls_config {
         ca_certs {
           display_name="example"
@@ -1393,6 +1418,9 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
   display_name = "Basic toolset display name"
   mcp_toolset {
     server_address = "https://google.com/mcp"
+    custom_headers = {
+      "X-Custom-Header" = "$context.variables.my_variable"
+    }
     tls_config {
         ca_certs {
           display_name="example"

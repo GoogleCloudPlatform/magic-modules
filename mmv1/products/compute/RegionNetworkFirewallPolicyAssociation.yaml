@@ -45,6 +45,16 @@ examples:
     test_env_vars:
       project_name: PROJECT_NAME
       region: REGION
+  - name: region_network_firewall_policy_association_priority
+    min_version: beta
+    primary_resource_id: association
+    vars:
+      association_name: my-association
+      network_name: my-network
+      policy_name: my-policy
+    test_env_vars:
+      project_name: PROJECT_NAME
+      region: REGION
 parameters:
   - name: firewallPolicy
     type: ResourceRef
@@ -77,3 +87,9 @@ properties:
     description: |
       The short name of the firewall policy of the association.
     output: true
+  - name: priority
+    min_version: beta
+    description: |
+      An integer indicating the priority of an association.
+    type: Integer
+    default_from_api: true

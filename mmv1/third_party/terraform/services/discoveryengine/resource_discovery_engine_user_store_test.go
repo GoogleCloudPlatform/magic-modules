@@ -5,9 +5,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
 )
 
 func TestAccDiscoveryEngineUserStore_discoveryengineUserstoreBasicExample_update(t *testing.T) {
+	t.Skip("License Config creation has been deprecated at the project level for Gemini Enterprise")
 	t.Parallel()
 
 	context := map[string]interface{}{

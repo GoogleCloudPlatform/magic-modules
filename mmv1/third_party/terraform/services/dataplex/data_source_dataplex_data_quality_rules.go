@@ -6,6 +6,7 @@ import (
 	"unicode"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -305,7 +306,7 @@ func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interfa
 
 	data_scan_id := d.Get("data_scan_id").(string)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{DataplexBasePath}}projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}:generateDataQualityRules")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}:generateDataQualityRules")
 	if err != nil {
 		return err
 	}
@@ -331,4 +332,13 @@ func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interfa
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_dataplex_data_quality_rules",
+		ProductName: "dataplex",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceDataplexDataQualityRules(),
+	}.Register()
 }

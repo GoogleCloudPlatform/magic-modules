@@ -5,10 +5,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
 )
 
 func TestAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample_update(t *testing.T) {
 	t.Parallel()
+
+	// Skip in VCR until the test issue is resolved
+	// TODO(shuyama): Add GH issue link
+	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
@@ -19,7 +24,7 @@ func TestAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationeng
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample(context),
+				Config: testAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample_basic(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_recommendation_engine.media",
@@ -28,7 +33,7 @@ func TestAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationeng
 				ImportStateVerifyIgnore: []string{"common_config", "engine_id", "industry_vertical", "location"},
 			},
 			{
-				Config: testAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample(context),
+				Config: testAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample_update(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_recommendation_engine.media",
@@ -96,10 +101,10 @@ resource "google_discovery_engine_recommendation_engine" "media" {
   media_recommendation_engine_config {
     type                       = "recommended-for-you"
     optimization_objective     = "cvr"
-	optimization_objective_config {
-		target_field           = "watch-percentage"
-		target_field_value_float = 0.5
-	}
+  	optimization_objective_config {
+  		target_field           = "watch-percentage"
+  		target_field_value_float = 0.5
+  	}
     training_state             = "PAUSED"
     engine_features_config {
         recommended_for_you_config {

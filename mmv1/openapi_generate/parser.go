@@ -203,6 +203,8 @@ func findResources(doc *openapi3.T) map[string]*resource {
 		}
 		if name, op := buildOperation(key, pathValue.Patch, "Update"); op != nil {
 			getDefault(name).update = op
+		} else if name, op := buildOperation(key, pathValue.Put, "Update"); op != nil {
+			getDefault(name).update = op
 		}
 	}
 
@@ -293,6 +295,11 @@ func buildSingleton(resourceName string, in *resource, root *openapi3.T) api.Res
 	resourcePath := in.update.path
 
 	op := root.Paths.Find(resourcePath).Patch
+	verb := "PATCH"
+	if op == nil {
+		op = root.Paths.Find(resourcePath).Put
+		verb = "PUT"
+	}
 	parsedObjects := parseOpenApi(resourcePath, resourceName, op)
 
 	parameters := parsedObjects[0].([]*api.Type)
@@ -308,9 +315,9 @@ func buildSingleton(resourceName string, in *resource, root *openapi3.T) api.Res
 	resource.SelfLink = selfLink
 	resource.CreateUrl = fmt.Sprintf("%s=?updateMask=*", baseUrl)
 
-	resource.CreateVerb = "PATCH"
+	resource.CreateVerb = verb
 
-	resource.UpdateVerb = "PATCH"
+	resource.UpdateVerb = verb
 	resource.UpdateMask = true
 	if in.update.async {
 		resource.AutogenAsync = true
@@ -408,13 +415,16 @@ func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []a
 	}
 	returnArray := []any{}
 
+	seenRefs := make(map[string]bool)
+	seenPointers := make(map[*openapi3.Schema]bool)
+
 	parameters := []*api.Type{}
 	var idParam string
 	for _, param := range op.Parameters {
 		if strings.Contains(strings.ToLower(param.Value.Name), strings.ToLower(resourceName)) {
 			idParam = param.Value.Name
 		}
-		paramObj := WriteObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true)
+		paramObj := WriteObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true, seenRefs, seenPointers)
 		description := param.Value.Description
 		if strings.TrimSpace(description) == "" {
 			description = "No description"
@@ -430,7 +440,12 @@ func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []a
 		parameters = append(parameters, &paramObj)
 	}
 
-	properties := buildProperties(op.RequestBody.Value.Content["application/json"].Schema.Value.Properties, op.RequestBody.Value.Content["application/json"].Schema.Value.Required)
+	var properties []*api.Type
+	if op.RequestBody != nil && op.RequestBody.Value != nil && op.RequestBody.Value.Content != nil {
+		if mediaType, ok := op.RequestBody.Value.Content["application/json"]; ok && mediaType != nil && mediaType.Schema != nil && mediaType.Schema.Value != nil {
+			properties = buildProperties(mediaType.Schema.Value.Properties, mediaType.Schema.Value.Required, seenRefs, seenPointers)
+		}
+	}
 
 	returnArray = append(returnArray, parameters)
 	returnArray = append(returnArray, properties)
@@ -440,14 +455,25 @@ func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []a
 }
 
 func propType(prop *openapi3.SchemaRef) openapi3.Types {
-	if len(prop.Value.AllOf) > 0 {
-		return *prop.Value.AllOf[0].Value.Type
-	} else {
-		return *prop.Value.Type
+	if prop.Value == nil {
+		return openapi3.Types{"object"}
 	}
+	if len(prop.Value.AllOf) > 0 && prop.Value.AllOf[0].Value != nil && prop.Value.AllOf[0].Value.Type != nil {
+		return *prop.Value.AllOf[0].Value.Type
+	}
+	if prop.Value.Type == nil {
+		if len(prop.Value.Properties) > 0 {
+			return openapi3.Types{"object"}
+		}
+		if prop.Value.Items != nil {
+			return openapi3.Types{"array"}
+		}
+		return openapi3.Types{"object"}
+	}
+	return *prop.Value.Type
 }
 
-func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool) api.Type {
+func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool, seenRefs map[string]bool, seenPointers map[*openapi3.Schema]bool) api.Type {
 	var field api.Type
 
 	switch name {
@@ -459,6 +485,44 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		name = "location"
 	}
 	additionalDescription := ""
+
+	if obj.Ref != "" {
+		if seenRefs[obj.Ref] {
+			var field api.Type
+			field.Name = name
+			field.Type = "String"
+			field.CustomExpand = "templates/terraform/custom_expand/json_schema.tmpl"
+			field.CustomFlatten = "templates/terraform/custom_flatten/json_schema.tmpl"
+			field.Description = "Recursive field represented as JSON"
+			return field
+		}
+		// Copy map to isolate branches
+		newSeenRefs := make(map[string]bool)
+		for k, v := range seenRefs {
+			newSeenRefs[k] = v
+		}
+		newSeenRefs[obj.Ref] = true
+		seenRefs = newSeenRefs
+	}
+
+	if obj.Value != nil {
+		if seenPointers[obj.Value] {
+			var field api.Type
+			field.Name = name
+			field.Type = "String"
+			field.CustomExpand = "templates/terraform/custom_expand/json_schema.tmpl"
+			field.CustomFlatten = "templates/terraform/custom_flatten/json_schema.tmpl"
+			field.Description = "Recursive field represented as JSON"
+			return field
+		}
+		// Copy map to isolate branches
+		newSeenPointers := make(map[*openapi3.Schema]bool)
+		for k, v := range seenPointers {
+			newSeenPointers[k] = v
+		}
+		newSeenPointers[obj.Value] = true
+		seenPointers = newSeenPointers
+	}
 
 	if len(obj.Value.AllOf) > 0 {
 		obj = obj.Value.AllOf[0]
@@ -510,15 +574,15 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			field.KeyName = "TODO: CHANGEME"
 			var valueType api.Type
 			valueType.Type = "NestedObject"
-			valueType.Properties = buildProperties(obj.Value.AdditionalProperties.Schema.Value.Properties, obj.Value.AdditionalProperties.Schema.Value.Required)
+			valueType.Properties = buildProperties(obj.Value.AdditionalProperties.Schema.Value.Properties, obj.Value.AdditionalProperties.Schema.Value.Required, seenRefs, seenPointers)
 			field.ValueType = &valueType
 		} else {
-			field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+			field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required, seenRefs, seenPointers)
 		}
 	case "array":
 		field.Type = "Array"
 		var subField api.Type
-		typ := *obj.Value.Items.Value.Type
+		typ := propType(obj.Value.Items)
 		switch typ[0] {
 		case "string":
 			subField.Type = "String"
@@ -530,7 +594,7 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			subField.Type = "Boolean"
 		case "object":
 			subField.Type = "NestedObject"
-			subField.Properties = buildProperties(obj.Value.Items.Value.Properties, obj.Value.Items.Value.Required)
+			subField.Properties = buildProperties(obj.Value.Items.Value.Properties, obj.Value.Items.Value.Required, seenRefs, seenPointers)
 		}
 		field.ItemType = &subField
 	default:
@@ -566,14 +630,34 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		field.Immutable = true
 	}
 
+	if field.Output {
+		makeOutputOnly(&field)
+	}
+
 	return field
 }
 
-func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
+func makeOutputOnly(t *api.Type) {
+	if t == nil {
+		return
+	}
+	t.Output = true
+	for _, p := range t.Properties {
+		makeOutputOnly(p)
+	}
+	if t.ItemType != nil {
+		makeOutputOnly(t.ItemType)
+	}
+	if t.ValueType != nil {
+		makeOutputOnly(t.ValueType)
+	}
+}
+
+func buildProperties(props openapi3.Schemas, required []string, seenRefs map[string]bool, seenPointers map[*openapi3.Schema]bool) []*api.Type {
 	properties := []*api.Type{}
 	for _, k := range slices.Sorted(maps.Keys(props)) {
 		prop := props[k]
-		propObj := WriteObject(k, prop, propType(prop), false)
+		propObj := WriteObject(k, prop, propType(prop), false, seenRefs, seenPointers)
 		if slices.Contains(required, k) {
 			propObj.Required = true
 		}

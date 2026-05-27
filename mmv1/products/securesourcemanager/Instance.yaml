@@ -53,10 +53,10 @@ iam_policy:
     - '{{instance_id}}'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/securesourcemanager_deletion_policy.go.tmpl'
+deletion_policy_default: "PREVENT"
 examples:
   - name: 'secure_source_manager_instance_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       deletion_policy: 'PREVENT'
@@ -69,14 +69,13 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_cmek'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       kms_key_name: 'my-key'
       deletion_policy: 'PREVENT'
     test_vars_overrides:
       'deletion_policy': '"DELETE"'
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name'
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_policy': '"DELETE"'
     ignore_read_extra:
@@ -84,7 +83,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_trusted_cert'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
     ignore_read_extra:
@@ -93,7 +91,21 @@ examples:
     exclude_docs: true
   - name: 'secure_source_manager_instance_private'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
+    vars:
+      instance_id: 'my-instance'
+      ca_pool_id: 'ca-pool'
+      root_ca_id: 'root-ca'
+      deletion_policy: 'PREVENT'
+    test_vars_overrides:
+      'deletion_policy': '"DELETE"'
+    oics_vars_overrides:
+      'deletion_policy': '"DELETE"'
+    external_providers: ["time"]
+    ignore_read_extra:
+      - 'update_time'
+      - 'deletion_policy'
+  - name: 'secure_source_manager_instance_private_custom_host'
+    primary_resource_id: 'default'
     vars:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
@@ -109,7 +121,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_backend'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       network_id: 'my-network'
       subnet_id: 'my-subnet'
@@ -133,7 +144,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_endpoint'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       network_id: 'my-network'
       subnet_id: 'my-subnet'
@@ -154,7 +164,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_workforce_identity_federation'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       deletion_policy: 'PREVENT'
@@ -180,19 +189,6 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-virtual_fields:
-  - name: 'deletion_policy'
-    type: String
-    description: |
-      The deletion policy for the instance. Setting `ABANDON` allows the resource
-      to be abandoned, rather than deleted. Setting `DELETE` deletes the resource
-      and all its contents. Setting `PREVENT` prevents the resource from accidental
-      deletion by erroring out during plan.
-      Default is `PREVENT`.  Possible values are:
-        * DELETE
-        * PREVENT
-        * ABANDON
-    default_value: 'PREVENT'
 properties:
   - name: 'name'
     type: String
@@ -273,6 +269,27 @@ properties:
           'Indicate if it's private instance.'
         required: true
         immutable: true
+      - name: 'customHostConfig'
+        type: NestedObject
+        description: |
+          Custom host configuration for the instance.
+        properties:
+          - name: 'html'
+            type: String
+            description: 'HTML hostname.'
+            required: true
+          - name: 'api'
+            type: String
+            description: 'API hostname.'
+            required: true
+          - name: 'gitHttp'
+            type: String
+            description: 'Git HTTP hostname.'
+            required: true
+          - name: 'gitSsh'
+            type: String
+            description: 'Git SSH hostname.'
+            required: true
       - name: 'caPool'
         type: String
         description: |

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -71,7 +72,7 @@ func dataSourceGoogleSQLTiersRead(d *schema.ResourceData, meta interface{}) erro
 
 	log.Printf("[DEBUG] Fetching tiers for project %s", project)
 
-	response, err := config.NewSqlAdminClient(userAgent).Tiers.List(project).Do()
+	response, err := NewClient(config, userAgent).Tiers.List(project).Do()
 	if err != nil {
 		return fmt.Errorf("error retrieving tiers: %s", err)
 	}
@@ -107,4 +108,13 @@ func flattenTiers(items []*sqladmin.Tier) []map[string]interface{} {
 	}
 
 	return tiers
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_sql_tiers",
+		ProductName: "sql",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleSQLTiers(),
+	}.Register()
 }

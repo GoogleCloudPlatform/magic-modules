@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -88,7 +89,7 @@ func dataSourceArtifactRegistryDockerImagesRead(d *schema.ResourceData, meta int
 		return err
 	}
 
-	basePath, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}")
+	basePath, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config))
 	if err != nil {
 		return fmt.Errorf("Error setting Artifact Registry base path: %s", err)
 	}
@@ -188,4 +189,13 @@ func dataSourceArtifactRegistryDockerImagesRead(d *schema.ResourceData, meta int
 	d.SetId(resourcePath)
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_artifact_registry_docker_images",
+		ProductName: "artifactregistry",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryDockerImages(),
+	}.Register()
 }

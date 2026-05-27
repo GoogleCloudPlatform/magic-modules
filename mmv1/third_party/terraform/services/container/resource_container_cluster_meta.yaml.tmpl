@@ -13,6 +13,9 @@ cai_asset_name_formats:
   - {{"//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}"}}
   - {{"//container.googleapis.com/projects/{{project}}/zones/{{location}}/clusters/{{name}}"}}
 fields:
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'addonsConfig.agentSandboxConfig.enabled'
+{{- end }}
   - field: 'addons_config.cloudrun_config.disabled'
     api_field: 'addonsConfig.cloudRunConfig.disabled'
   - field: 'addons_config.cloudrun_config.load_balancer_type'
@@ -25,6 +28,7 @@ fields:
   - api_field: 'addonsConfig.gkeBackupAgentConfig.enabled'
   - api_field: 'addonsConfig.horizontalPodAutoscaling.disabled'
   - api_field: 'addonsConfig.httpLoadBalancing.disabled'
+  - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.istioConfig.auth'
 {{- end }}
@@ -33,9 +37,9 @@ fields:
 {{- end }}
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.kalmConfig.enabled'
-  - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- end }}
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enableLegacyLustrePort'
+  - api_field: 'addonsConfig.lustreCsiDriverConfig.disableMultiNic'
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enabled'
   - api_field: 'addonsConfig.networkPolicyConfig.disabled'
   - api_field: 'addonsConfig.parallelstoreCsiDriverConfig.enabled'
@@ -47,6 +51,16 @@ fields:
   - api_field: 'anonymousAuthenticationConfig.mode'
   - field: 'allow_net_admin'
     api_field: 'autopilot.workloadPolicyConfig.allowNetAdmin'
+  - field: 'autopilot_privileged_admission'
+    api_field: 'autopilot.privilegedAdmissionConfig.allowlistPaths'
+  - field: 'autopilot_cluster_policy_config.no_system_mutation'
+    api_field: 'autopilot.clusterPolicyConfig.noSystemMutation'
+  - field: 'autopilot_cluster_policy_config.no_system_impersonation'
+    api_field: 'autopilot.clusterPolicyConfig.noSystemImpersonation'
+  - field: 'autopilot_cluster_policy_config.no_unsafe_webhooks'
+    api_field: 'autopilot.clusterPolicyConfig.noUnsafeWebhooks'
+  - field: 'autopilot_cluster_policy_config.no_standard_node_pools'
+    api_field: 'autopilot.clusterPolicyConfig.noStandardNodePools'
   - api_field: 'authenticatorGroupsConfig.securityGroup'
   - api_field: 'binaryAuthorization.enabled'
   - api_field: 'binaryAuthorization.evaluationMode'
@@ -214,8 +228,15 @@ fields:
     api_field: 'maintenancePolicy.window.recurringWindow.recurrence'
   - field: 'maintenance_policy.recurring_window.start_time'
     api_field: 'maintenancePolicy.window.recurringWindow.window.startTime'
+  - api_field: 'maintenancePolicy.disruptionBudget.lastDisruptionTime'  
+  - api_field: 'maintenancePolicy.disruptionBudget.lastMinorVersionDisruptionTime'  
+  - api_field: 'maintenancePolicy.disruptionBudget.MinorVersionDisruptionInterval'
+  - api_field: 'maintenancePolicy.disruptionBudget.PatchVersionDisruptionInterval'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedOpentelemetryConfig.scope'
+{{- end }}
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'managedMachineLearningDiagnosticsConfig.enabled'
 {{- end }}
   - api_field: 'masterAuth.clientCertificate'
   - api_field: 'masterAuth.clientCertificateConfig.issueClientCertificate'
@@ -340,6 +361,7 @@ fields:
   - api_field: 'nodeConfig.kubeletConfig.topologyManager.policy'
   - api_field: 'nodeConfig.kubeletConfig.topologyManager.scope'
   - api_field: 'nodeConfig.labels'
+  - api_field: 'nodeConfig.linuxNodeConfig.accurateTimeConfig.enablePtpKvmTimeSync'
   - api_field: 'nodeConfig.linuxNodeConfig.cgroupMode'
   - field: 'node_config.linux_node_config.hugepages_config.hugepage_size_1g'
     api_field: 'nodeConfig.linuxNodeConfig.hugepages.hugepageSize1g'
@@ -349,6 +371,13 @@ fields:
   - api_field: 'nodeConfig.linuxNodeConfig.sysctls'
   - api_field: 'nodeConfig.linuxNodeConfig.transparentHugepageDefrag'
   - api_field: 'nodeConfig.linuxNodeConfig.transparentHugepageEnabled'
+  - api_field: 'nodeConfig.linuxNodeConfig.swapConfig.bootDiskProfile.swapSizeGib'
+  - api_field: 'nodeConfig.linuxNodeConfig.swapConfig.bootDiskProfile.swapSizePercent'
+  - api_field: 'nodeConfig.linuxNodeConfig.swapConfig.dedicatedLocalSsdProfile.diskCount'
+  - api_field: 'nodeConfig.linuxNodeConfig.swapConfig.enabled'
+  - api_field: 'nodeConfig.linuxNodeConfig.swapConfig.encryptionConfig.disabled'
+  - api_field: 'nodeConfig.linuxNodeConfig.swapConfig.ephemeralLocalSsdProfile.swapSizeGib'
+  - api_field: 'nodeConfig.linuxNodeConfig.swapConfig.ephemeralLocalSsdProfile.swapSizePercent'
   - api_field: 'nodeConfig.localNvmeSsdBlockConfig.localSsdCount'
   - api_field: 'nodeConfig.localSsdCount'
   - api_field: 'nodeConfig.localSsdEncryptionMode'
@@ -370,6 +399,7 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'nodeConfig.sandboxConfig.sandboxType'
 {{- end }}
+  - api_field: 'nodeConfig.sandboxConfig.type'
   - api_field: 'nodeConfig.secondaryBootDisks.diskImage'
   - api_field: 'nodeConfig.secondaryBootDisks.mode'
   - api_field: 'nodeConfig.serviceAccount'
@@ -422,10 +452,8 @@ fields:
     api_field: 'nodePools.name'
   - field: 'node_pool.name_prefix'
     provider_only: true
-  {{- if ne $.TargetVersionName "ga" }}
   - field: 'node_pool.network_config.accelerator_network_profile'
     api_field: 'nodePools.networkConfig.acceleratorNetworkProfile'
-  {{- end }}
   - field: 'node_pool.network_config.additional_node_network_configs.network'
     api_field: 'nodePools.networkConfig.additionalNodeNetworkConfigs.network'
   - field: 'node_pool.network_config.additional_node_network_configs.subnetwork'
@@ -616,6 +644,8 @@ fields:
     api_field: 'nodePools.config.kubeletConfig.topologyManager.scope'
   - field: 'node_pool.node_config.labels'
     api_field: 'nodePools.config.labels'
+  - field: 'node_pool.node_config.linux_node_config.accurate_time_config.enable_ptp_kvm_time_sync'
+    api_field: 'nodePools.config.linuxNodeConfig.accurateTimeConfig.enablePtpKvmTimeSync'
   - field: 'node_pool.node_config.linux_node_config.cgroup_mode'
     api_field: 'nodePools.config.linuxNodeConfig.cgroupMode'
   - field: 'node_pool.node_config.linux_node_config.hugepages_config.hugepage_size_1g'
@@ -630,6 +660,20 @@ fields:
     api_field: 'nodePools.config.linuxNodeConfig.transparentHugepageDefrag'
   - field: 'node_pool.node_config.linux_node_config.transparent_hugepage_enabled'
     api_field: 'nodePools.config.linuxNodeConfig.transparentHugepageEnabled'
+  - field: 'node_pool.node_config.linux_node_config.swap_config.boot_disk_profile.swap_size_gib'
+    api_field: 'nodePools.config.linuxNodeConfig.swapConfig.bootDiskProfile.swapSizeGib'
+  - field: 'node_pool.node_config.linux_node_config.swap_config.boot_disk_profile.swap_size_percent'
+    api_field: 'nodePools.config.linuxNodeConfig.swapConfig.bootDiskProfile.swapSizePercent'
+  - field: 'node_pool.node_config.linux_node_config.swap_config.dedicated_local_ssd_profile.disk_count'
+    api_field: 'nodePools.config.linuxNodeConfig.swapConfig.dedicatedLocalSsdProfile.diskCount'
+  - field: 'node_pool.node_config.linux_node_config.swap_config.enabled'
+    api_field: 'nodePools.config.linuxNodeConfig.swapConfig.enabled'
+  - field: 'node_pool.node_config.linux_node_config.swap_config.encryption_config.disabled'
+    api_field: 'nodePools.config.linuxNodeConfig.swapConfig.encryptionConfig.disabled'
+  - field: 'node_pool.node_config.linux_node_config.swap_config.ephemeral_local_ssd_profile.swap_size_gib'
+    api_field: 'nodePools.config.linuxNodeConfig.swapConfig.ephemeralLocalSsdProfile.swapSizeGib'
+  - field: 'node_pool.node_config.linux_node_config.swap_config.ephemeral_local_ssd_profile.swap_size_percent'
+    api_field: 'nodePools.config.linuxNodeConfig.swapConfig.ephemeralLocalSsdProfile.swapSizePercent'
   - field: 'node_pool.node_config.local_nvme_ssd_block_config.local_ssd_count'
     api_field: 'nodePools.config.localNvmeSsdBlockConfig.localSsdCount'
   - field: 'node_pool.node_config.local_ssd_count'
@@ -640,6 +684,10 @@ fields:
     api_field: 'nodePools.config.loggingConfig.variantConfig.variant'
   - field: 'node_pool.node_config.machine_type'
     api_field: 'nodePools.config.machineType'
+  - field: 'node_config.gpudirect_strategy'
+    api_field: 'nodeConfig.gpuDirectConfig.gpuDirectStrategy'
+  - field: 'node_pool.node_config.gpudirect_strategy'
+    api_field: 'nodePools.config.gpuDirectConfig.gpuDirectStrategy'
   - field: 'node_pool.node_config.max_run_duration'
     api_field: 'nodePools.config.maxRunDuration'
   - field: 'node_pool.node_config.metadata'
@@ -666,6 +714,8 @@ fields:
   - field: 'node_pool.node_config.sandbox_config.sandbox_type'
     api_field: 'nodePools.config.sandboxConfig.sandboxType'
 {{- end }}
+  - field: 'node_pool.node_config.sandbox_config.type'
+    api_field: 'nodePools.config.sandboxConfig.type'
   - field: 'node_pool.node_config.secondary_boot_disks.disk_image'
     api_field: 'nodePools.config.secondaryBootDisks.diskImage'
   - field: 'node_pool.node_config.secondary_boot_disks.mode'
@@ -800,11 +850,9 @@ fields:
   - api_field: 'secretManagerConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.rotationInterval'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'secretSyncConfig.enabled'
   - api_field: 'secretSyncConfig.rotationConfig.enabled'
   - api_field: 'secretSyncConfig.rotationConfig.rotationInterval'
-{{- end }}
   - api_field: 'securityPostureConfig.mode'
   - api_field: 'securityPostureConfig.vulnerabilityMode'
   - api_field: 'selfLink'
@@ -827,6 +875,7 @@ fields:
   - api_field: 'userManagedKeysConfig.aggregationCa'
   - api_field: 'userManagedKeysConfig.clusterCa'
   - api_field: 'userManagedKeysConfig.controlPlaneDiskEncryptionKey'
+  - api_field: 'userManagedKeysConfig.controlPlaneDiskEncryptionKeyVersions'
   - api_field: 'userManagedKeysConfig.etcdApiCa'
   - api_field: 'userManagedKeysConfig.etcdPeerCa'
   - api_field: 'userManagedKeysConfig.gkeopsEtcdBackupEncryptionKey'
@@ -837,3 +886,5 @@ fields:
   - api_field: 'workloadAltsConfig.enableAlts'
 {{- end }}
   - api_field: 'workloadIdentityConfig.workloadPool'
+  - field: 'deletion_policy'
+    provider_only: true

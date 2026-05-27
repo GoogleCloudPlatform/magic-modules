@@ -1,0 +1,37 @@
+resource "google_chronicle_data_access_scope" "test_scope_allow_everyone" {
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ data_access_scope_id = "{{index $.Vars "data_access_scope_id"}}"
+ description = "scope-description"
+ allowed_data_access_labels {
+   log_type = "GCP_CLOUDAUDIT"
+ }
+}
+
+resource "google_chronicle_data_table" "example_dt" {
+  location         = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  data_table_id  = "{{index $.Vars "data_table_id"}}"
+  description      = "Comprehensive test table with all teh fields"
+  row_time_to_live = "48h"
+
+  column_info {
+    column_index     = 0
+    original_column  = "username"
+    key_column       = true
+    mapped_column_path = "entity.user.userid"
+    repeated_values  = false
+  }
+  column_info {
+    column_index     = 1
+    original_column  = "ip_address"
+    column_type      = "CIDR"
+    key_column       = false
+    repeated_values  = false
+  }
+
+  scope_info {
+    data_access_scopes = [google_chronicle_data_access_scope.test_scope_allow_everyone.name]
+  }
+  depends_on = [google_chronicle_data_access_scope.test_scope_allow_everyone]
+}

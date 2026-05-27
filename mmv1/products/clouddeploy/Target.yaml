@@ -37,7 +37,6 @@ custom_code:
 examples:
   - name: 'clouddeploy_target_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cd-target%s", context["random_suffix"])'
     vars:
       target: 'cd-target'
 parameters:

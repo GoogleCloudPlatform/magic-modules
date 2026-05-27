@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/securityposture"
 )
 
 func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_update(t *testing.T) {
@@ -63,6 +65,14 @@ resource "google_securityposture_posture" "posture_one" {
                     policy_rules {
                         enforce = true
                     }
+                    policy_rules {
+                        enforce = false
+                        condition {
+                            title = "Disable constraint for test"
+                            description = "Disable constraint for test"
+                            expression = "resource.matchTagId('tagKeys/123', 'tagValues/345')"
+                        }
+                    }
                 }
             }
         }
@@ -106,6 +116,14 @@ resource "google_securityposture_posture" "posture_one" {
                     canned_constraint_id = "storage.publicAccessPrevention"
                     policy_rules {
                         enforce = true
+                    }
+                    policy_rules {
+                        enforce = false
+                        condition {
+                            title = "Disable constraint for test"
+                            description = "Disable constraint for test"
+                            expression = "resource.matchTagId('tagKeys/123', 'tagValues/345')"
+                        }
                     }
                 }
             }

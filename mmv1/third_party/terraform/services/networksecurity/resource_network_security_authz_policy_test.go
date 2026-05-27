@@ -7,6 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networksecurity"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networkservices"
 )
 
 func TestAccNetworkSecurityAuthzPolicy_networkServicesAuthzPolicyHttpRules(t *testing.T) {
@@ -155,7 +158,7 @@ resource "google_network_security_authz_policy" "default" {
 
   action = "CUSTOM"
   custom_provider {
-	authz_extension {
+  authz_extension {
       resources = [ google_network_services_authz_extension.default.id ]
     }
   }
@@ -233,8 +236,8 @@ resource "google_network_security_authz_policy" "default" {
           headers {
             name = "PrefixHeader"
             value {
-			        ignore_case = false
-			        prefix      = "prefix"
+              ignore_case = false
+              prefix      = "prefix"
             }
           }
 
@@ -245,7 +248,7 @@ resource "google_network_security_authz_policy" "default" {
               ignore_case = true
               suffix      = "suffix"
             }
-		      }
+          }
 
           # Exact
           headers {
@@ -411,8 +414,11 @@ func TestAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpUpdate(t *te
 	t.Skip("b/484137930")
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"policy_name":   "tf-test-my-mcp-policy" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -456,7 +462,7 @@ func testAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpUpdate(conte
 data "google_project" "project" {}
 
 resource "google_network_security_authz_policy" "default" {
-  name        = "tf-test-my-mcp-policy%{random_suffix}"
+  name        ="%{policy_name}"
   location    = "us-west1"
 
   target {

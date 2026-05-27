@@ -12,7 +12,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/servicemanagement/v1"
@@ -147,8 +149,14 @@ func ResourceEndpointsService() *schema.Resource {
 					},
 				},
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
-		CustomizeDiff: predictServiceId,
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+			predictServiceId,
+		),
 		UseJSONNumber: true,
 	}
 }
@@ -240,10 +248,10 @@ func resourceEndpointsServiceCreate(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] Create Endpoint Service %q", serviceName)
 
 	log.Printf("[DEBUG] Checking for existing ManagedService %q", serviceName)
-	_, err = config.NewServiceManClient(userAgent).Services.Get(serviceName).Do()
+	_, err = NewClient(config, userAgent).Services.Get(serviceName).Do()
 	if err != nil {
 		log.Printf("[DEBUG] Creating new ServiceManagement ManagedService %q", serviceName)
-		op, err := config.NewServiceManClient(userAgent).Services.Create(
+		op, err := NewClient(config, userAgent).Services.Create(
 			&servicemanagement.ManagedService{
 				ProducerProjectId: project,
 				ServiceName:       serviceName,
@@ -283,6 +291,11 @@ func expandEndpointServiceConfigSource(d *schema.ResourceData, meta interface{})
 }
 
 func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceEndpointsService) {
+		return ResourceEndpointsService().Read(d, meta)
+	}
+
 	// This update is not quite standard for a terraform resource.  Instead of
 	// using the go client library to send an HTTP request to update something
 	// serverside, we have to push a new configuration, wait for it to be
@@ -314,7 +327,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	// with any new features that arise - this is why you provide a YAML config
 	// instead of providing the config in HCL.
 	log.Printf("[DEBUG] Submitting config for ManagedService %q", serviceName)
-	op, err := config.NewServiceManClient(userAgent).Services.Configs.Submit(
+	op, err := NewClient(config, userAgent).Services.Configs.Submit(
 		serviceName,
 		&servicemanagement.SubmitConfigSourceRequest{
 			ConfigSource: cfgSource,
@@ -340,7 +353,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	log.Printf("[DEBUG] Creating new rollout for ManagedService %q", serviceName)
-	op, err = config.NewServiceManClient(userAgent).Services.Rollouts.Create(serviceName, &rollout).Do()
+	op, err = NewClient(config, userAgent).Services.Rollouts.Create(serviceName, &rollout).Do()
 	if err != nil {
 		return err
 	}
@@ -353,6 +366,13 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -361,7 +381,7 @@ func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[DEBUG] Deleting ManagedService %q", d.Id())
 
-	op, err := config.NewServiceManClient(userAgent).Services.Delete(d.Get("service_name").(string)).Do()
+	op, err := NewClient(config, userAgent).Services.Delete(d.Get("service_name").(string)).Do()
 	if err != nil {
 		return err
 	}
@@ -379,7 +399,7 @@ func resourceEndpointsServiceRead(d *schema.ResourceData, meta interface{}) erro
 
 	log.Printf("[DEBUG] Reading ManagedService %q", d.Id())
 
-	service, err := config.NewServiceManClient(userAgent).Services.GetConfig(d.Get("service_name").(string)).Do()
+	service, err := NewClient(config, userAgent).Services.GetConfig(d.Get("service_name").(string)).Do()
 	if err != nil {
 		return err
 	}
@@ -395,6 +415,10 @@ func resourceEndpointsServiceRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	if err := d.Set("endpoints", flattenServiceManagementEndpoints(service.Endpoints)); err != nil {
 		return fmt.Errorf("Error setting endpoints: %s", err)
+	}
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 
 	return nil
@@ -435,4 +459,13 @@ func flattenServiceManagementEndpoints(endpoints []*servicemanagement.Endpoint) 
 		}
 	}
 	return flattened
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_endpoints_service",
+		ProductName: "servicemanagement",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceEndpointsService(),
+	}.Register()
 }

@@ -1,6 +1,9 @@
 package container
 
 import (
+{{ if ne $.TargetVersionName `ga` -}}
+	"strings"
+{{- end }}
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -93,6 +96,151 @@ func TestValidateNodePoolAutoConfig(t *testing.T) {
 		if err := validateNodePoolAutoConfig(tc.Input); (err != nil) != tc.ExpectError {
 			t.Fatalf("bad: '%s', expected error: %t, received error: %t", tn, tc.ExpectError, (err != nil))
 		}
+	}
+}
+
+func TestSandboxTypeDiffSuppress(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		fieldKey         string
+		oldValue         string
+		newValue         string
+		sandboxTypeOld   interface{}
+		sandboxTypeNew   interface{}
+		typeOld          interface{}
+		typeNew          interface{}
+		expectedSuppress bool
+	}{
+		"sandbox_type field with type field set in config - should suppress": {
+			fieldKey:         "node_config.0.sandbox_config.0.sandbox_type",
+			oldValue:         "",
+			newValue:         "gvisor",
+			sandboxTypeOld:   nil,
+			sandboxTypeNew:   "gvisor",
+			typeOld:          nil,
+			typeNew:          "GVISOR",
+			expectedSuppress: true,
+		},
+		"type field with sandbox_type field set in config - should suppress": {
+			fieldKey:         "node_config.0.sandbox_config.0.type",
+			oldValue:         "",
+			newValue:         "GVISOR",
+			sandboxTypeOld:   nil,
+			sandboxTypeNew:   "gvisor",
+			typeOld:          nil,
+			typeNew:          "GVISOR",
+			expectedSuppress: true,
+		},
+		"sandbox_type field with no other field set - should not suppress": {
+			fieldKey:         "node_config.0.sandbox_config.0.sandbox_type",
+			oldValue:         "",
+			newValue:         "gvisor",
+			sandboxTypeOld:   nil,
+			sandboxTypeNew:   "gvisor",
+			typeOld:          nil,
+			typeNew:          nil,
+			expectedSuppress: false,
+		},
+		"type field with no other field set - should not suppress": {
+			fieldKey:         "node_config.0.sandbox_config.0.type",
+			oldValue:         "",
+			newValue:         "GVISOR",
+			sandboxTypeOld:   nil,
+			sandboxTypeNew:   nil,
+			typeOld:          nil,
+			typeNew:          "GVISOR",
+			expectedSuppress: false,
+		},
+		"sandbox_type field with empty type field - should not suppress": {
+			fieldKey:         "node_config.0.sandbox_config.0.sandbox_type",
+			oldValue:         "",
+			newValue:         "gvisor",
+			sandboxTypeOld:   nil,
+			sandboxTypeNew:   "gvisor",
+			typeOld:          nil,
+			typeNew:          "",
+			expectedSuppress: false,
+		},
+		"type field with empty sandbox_type field - should not suppress": {
+			fieldKey:         "node_config.0.sandbox_config.0.type",
+			oldValue:         "",
+			newValue:         "GVISOR",
+			sandboxTypeOld:   nil,
+			sandboxTypeNew:   "",
+			typeOld:          nil,
+			typeNew:          "GVISOR",
+			expectedSuppress: false,
+		},
+		"nested path - cluster node_pool sandbox_type with type set - should suppress": {
+			fieldKey:         "node_pool.0.node_config.0.sandbox_config.0.sandbox_type",
+			oldValue:         "",
+			newValue:         "gvisor",
+			sandboxTypeOld:   nil,
+			sandboxTypeNew:   "gvisor",
+			typeOld:          nil,
+			typeNew:          "GVISOR",
+			expectedSuppress: true,
+		},
+		"nested path - cluster node_pool type with sandbox_type set - should suppress": {
+			fieldKey:         "node_pool.0.node_config.0.sandbox_config.0.type",
+			oldValue:         "",
+			newValue:         "GVISOR",
+			sandboxTypeOld:   nil,
+			sandboxTypeNew:   "gvisor",
+			typeOld:          nil,
+			typeNew:          "GVISOR",
+			expectedSuppress: true,
+		},
+		"non-sandbox field - should not suppress": {
+			fieldKey:         "node_config.0.other_field",
+			oldValue:         "",
+			newValue:         "value",
+			sandboxTypeOld:   nil,
+			sandboxTypeNew:   nil,
+			typeOld:          nil,
+			typeNew:          nil,
+			expectedSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			before := make(map[string]interface{})
+			after := make(map[string]interface{})
+
+			var sandboxTypeKey, typeKey string
+			if strings.Contains(tc.fieldKey, "sandbox_type") {
+				root := strings.TrimSuffix(tc.fieldKey, "sandbox_type")
+				root = strings.TrimSuffix(root, ".")
+				sandboxTypeKey = root + ".sandbox_type"
+				typeKey = root + ".type"
+			} else if strings.Contains(tc.fieldKey, ".type") {
+				root := strings.TrimSuffix(tc.fieldKey, "type")
+				root = strings.TrimSuffix(root, ".")
+				sandboxTypeKey = root + ".sandbox_type"
+				typeKey = root + ".type"
+			}
+
+			if sandboxTypeKey != "" {
+				before[sandboxTypeKey] = tc.sandboxTypeOld
+				after[sandboxTypeKey] = tc.sandboxTypeNew
+			}
+			if typeKey != "" {
+				before[typeKey] = tc.typeOld
+				after[typeKey] = tc.typeNew
+			}
+
+			d := &tpgresource.ResourceDiffMock{
+				Before: before,
+				After:  after,
+			}
+
+			result := SandboxTypeDiffSuppress(tc.fieldKey, tc.oldValue, tc.newValue, d)
+			if result != tc.expectedSuppress {
+				t.Errorf("%s: expected suppress to be %v, but was %v", tn, tc.expectedSuppress, result)
+			}
+		})
 	}
 }
 {{- end }}

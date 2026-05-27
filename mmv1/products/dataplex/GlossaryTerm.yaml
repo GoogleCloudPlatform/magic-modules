@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+---
 name: 'GlossaryTerm'
 description: |
   Represents a collection of terms within a Glossary that are related to each other.
@@ -28,14 +29,13 @@ import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossa
 examples:
   - name: 'dataplex_glossary_term_basic'
     primary_resource_id: 'term_test_id'
-    primary_resource_name: 'fmt.Sprintf("tf-test-term-basic%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
     vars:
       term_name: 'term-basic'
   - name: 'dataplex_glossary_term_full'
     primary_resource_id: 'term_test_id_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-term-full%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
     vars:
       term_name: 'term-full'
+    external_providers: ["time"]
 parameters:
   - name: 'location'
     type: String

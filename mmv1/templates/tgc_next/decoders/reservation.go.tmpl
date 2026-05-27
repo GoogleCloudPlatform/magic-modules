@@ -1,0 +1,8 @@
+	if sr, ok := res["specificReservation"].(map[string]interface{}); ok {
+		if sourceTemplate, ok := sr["sourceInstanceTemplate"].(string); ok && sourceTemplate != "" {
+			// The API returns both expanded instance properties and the source template.
+			// Suppress instanceProperties to avoid an exactly_one_of conflict in Terraform.
+			delete(sr, "instanceProperties")
+		}
+	}
+	return res, hclData, nil

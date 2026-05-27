@@ -43,15 +43,21 @@ async:
 collection_url_key: 'items'
 custom_code:
   post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.tmpl'
+# excluding identity due to zone value inconsistency
+exclude_identity_generation: true
 sweeper:
   url_substitutions:
     - zone: "southamerica-west1-a"
+include_in_tgc_next: true
 examples:
   - name: 'target_instance_basic'
     primary_resource_id: 'default'
     vars:
       target_name: 'target'
       instance_name: 'target-vm'
+    test_vars_overrides:
+      # for backward compatible
+      target_name: '"target" + randomSuffix'
   - name: 'target_instance_custom_network'
     primary_resource_id: 'custom_network'
     min_version: 'beta'

@@ -41,6 +41,13 @@ examples:
       config_name: "basic-config"
       destination_name: "basic-destination"
 
+sweeper:
+  parent:
+    resource_type: "google_network_connectivity_multicloud_data_transfer_config"
+    child_field: "multicloud_data_transfer_config"
+    parent_field: "name"
+    parent_field_extract_name: true
+
 parameters:
   - name: 'multicloudDataTransferConfig'
     type: String
@@ -56,15 +63,14 @@ parameters:
     url_param_only: true
     description: |
       The location of the destination.
+properties:
   - name: 'name'
     type: String
     required: true
     immutable: true
-    url_param_only: true
+    ignore_read: true
     description: |
       The name of the destination.
-
-properties:
   - name: 'createTime'
     type: Time
     output: true

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -60,7 +61,7 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ContainerAttachedBasePath}}projects/{{project}}/locations/{{location}}:generateAttachedClusterInstallManifest")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}:generateAttachedClusterInstallManifest")
 	if err != nil {
 		return err
 	}
@@ -89,4 +90,13 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 
 	d.SetId(time.Now().UTC().String())
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_attached_install_manifest",
+		ProductName: "containerattached",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleContainerAttachedInstallManifest(),
+	}.Register()
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -35,7 +36,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 
 	id := fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, name)
 
-	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, name).Do()
+	instance, err := NewClient(config, userAgent).Instances.Get(project, zone, name).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Instance %s", name), id)
 	}
@@ -211,4 +212,13 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, tpgresource.GetResourceNameFromSelfLink(instance.Zone), instance.Name))
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_instance",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInstance(),
+	}.Register()
 }

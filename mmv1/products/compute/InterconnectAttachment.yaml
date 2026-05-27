@@ -41,6 +41,7 @@ custom_code:
   constants: 'templates/terraform/constants/interconnect_attachment.go.tmpl'
   post_create: 'templates/terraform/post_create/interconnect_attachment.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/interconnect_attachment.go.tmpl'
+include_in_tgc_next: true
 examples:
   - name: 'interconnect_attachment_basic'
     primary_resource_id: 'on_prem'

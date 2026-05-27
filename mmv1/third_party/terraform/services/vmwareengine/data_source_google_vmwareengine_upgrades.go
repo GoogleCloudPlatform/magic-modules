@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -47,9 +48,9 @@ func dataSourceVmwareengineUpgradesRead(d *schema.ResourceData, meta interface{}
 
 	var url string
 	if fetchSingleUpgrade {
-		url, err = tpgresource.ReplaceVars(d, config, "{{VmwareengineBasePath}}{{parent}}/upgrades/{{name}}")
+		url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{parent}}/upgrades/{{name}}")
 	} else {
-		url, err = tpgresource.ReplaceVars(d, config, "{{VmwareengineBasePath}}{{parent}}/upgrades")
+		url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{parent}}/upgrades")
 	}
 
 	if err != nil {
@@ -467,4 +468,13 @@ func flattenVmwareengineUpgradesTimeOfDay(v interface{}, d *schema.ResourceData,
 	}
 
 	return []interface{}{v}
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_vmwareengine_upgrades",
+		ProductName: "vmwareengine",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineUpgrades(),
+	}.Register()
 }

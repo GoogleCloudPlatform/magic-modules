@@ -1,0 +1,36 @@
+resource "google_project" "project" {
+  provider        = google-beta
+  name            = "{{index $.Vars "project_name"}}"
+  project_id      = "{{index $.Vars "project_name"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+}
+
+# Enable Dataform API
+resource "google_project_service" "dataform_api" {
+  provider           = google-beta
+  project            = google_project.project.project_id
+  service            = "dataform.googleapis.com"
+  disable_on_destroy = false
+}
+
+# Add a sleep to wait for IAM propagation after API enablement
+resource "time_sleep" "wait_for_dataform_api" {
+  create_duration = "30s"
+  depends_on      = [
+    google_project_service.dataform_api
+  ]
+}
+
+# Config without KMS key provided
+resource "google_dataform_config" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  region   = "us-central1"
+  project  = google_project.project.project_id
+
+  # Ensure IAM binding is created before the Dataform Config
+  depends_on = [
+    time_sleep.wait_for_dataform_api
+  ]
+}

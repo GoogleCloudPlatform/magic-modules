@@ -1,0 +1,171 @@
+package dataplex_test
+
+import (
+	"context"
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/dataplex"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
+)
+
+func TestAccDataplexZone_BasicZone(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataplexZoneDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataplexZone_BasicZone(context),
+			},
+			{
+				ResourceName:            "google_dataplex_zone.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccDataplexZone_BasicZoneUpdate0(context),
+			},
+			{
+				ResourceName:            "google_dataplex_zone.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccDataplexZone_BasicZone(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataplex_zone" "primary" {
+  discovery_spec {
+    enabled = false
+  }
+
+  lake     = google_dataplex_lake.basic.name
+  location = "%{region}"
+  name     = "tf-test-zone%{random_suffix}"
+
+  resource_spec {
+    location_type = "MULTI_REGION"
+  }
+
+  type         = "RAW"
+  description  = "Zone for DCL"
+  display_name = "Zone for DCL"
+  project      = "%{project_name}"
+  labels       = {}
+}
+
+resource "google_dataplex_lake" "basic" {
+  location     = "%{region}"
+  name         = "tf-test-lake%{random_suffix}"
+  description  = "Lake for DCL"
+  display_name = "Lake for DCL"
+  project      = "%{project_name}"
+
+  labels = {
+    my-lake = "exists"
+  }
+}
+
+
+`, context)
+}
+
+func testAccDataplexZone_BasicZoneUpdate0(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataplex_zone" "primary" {
+  discovery_spec {
+    enabled = false
+  }
+
+  lake     = google_dataplex_lake.basic.name
+  location = "%{region}"
+  name     = "tf-test-zone%{random_suffix}"
+
+  resource_spec {
+    location_type = "MULTI_REGION"
+  }
+
+  type         = "RAW"
+  description  = "Zone for DCL Updated"
+  display_name = "Zone for DCL"
+  project      = "%{project_name}"
+
+  labels = {
+    updated_label = "exists"
+  }
+}
+
+resource "google_dataplex_lake" "basic" {
+  location     = "%{region}"
+  name         = "tf-test-lake%{random_suffix}"
+  description  = "Lake for DCL"
+  display_name = "Lake for DCL"
+  project      = "%{project_name}"
+
+  labels = {
+    my-lake = "exists"
+  }
+}
+
+
+`, context)
+}
+
+func testAccCheckDataplexZoneDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "rs.google_dataplex_zone" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			billingProject := ""
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			obj := &dataplex.Zone{
+				Lake:        dcl.String(rs.Primary.Attributes["lake"]),
+				Location:    dcl.String(rs.Primary.Attributes["location"]),
+				Name:        dcl.String(rs.Primary.Attributes["name"]),
+				Type:        dataplex.ZoneTypeEnumRef(rs.Primary.Attributes["type"]),
+				Description: dcl.String(rs.Primary.Attributes["description"]),
+				DisplayName: dcl.String(rs.Primary.Attributes["display_name"]),
+				Project:     dcl.StringOrNil(rs.Primary.Attributes["project"]),
+				CreateTime:  dcl.StringOrNil(rs.Primary.Attributes["create_time"]),
+				State:       dataplex.ZoneStateEnumRef(rs.Primary.Attributes["state"]),
+				Uid:         dcl.StringOrNil(rs.Primary.Attributes["uid"]),
+				UpdateTime:  dcl.StringOrNil(rs.Primary.Attributes["update_time"]),
+			}
+
+			client := dataplex.NewDCLDataplexClient(config, config.UserAgent, billingProject, 0)
+			_, err := client.GetZone(context.Background(), obj)
+			if err == nil {
+				return fmt.Errorf("google_dataplex_zone still exists %v", obj)
+			}
+		}
+		return nil
+	}
+}

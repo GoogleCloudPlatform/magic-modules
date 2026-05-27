@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudrun"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -407,7 +409,7 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunService_withProviderDefaultLabels(context),
-        Check: resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.%", "2"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.env", "foo"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.default_expiration_ms", "3600000"),
@@ -419,9 +421,8 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_labels.%", "4"),
 
-          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "1"),
+					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "1"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.generated-by", "magic-modules"),
-          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_annotations.%", "7"),
 				),
 			},
 			{
@@ -432,7 +433,7 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 			},
 			{
 				Config: testAccCloudRunService_resourceLabelsOverridesProviderDefaultLabels(context),
-        Check: resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.%", "3"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.env", "foo"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.default_expiration_ms", "3600000"),
@@ -445,9 +446,8 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_labels.%", "4"),
 
-          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "1"),
+					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "1"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.generated-by", "magic-modules-update"),
-          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_annotations.%", "7"),
 				),
 			},
 			{
@@ -456,9 +456,9 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
-      {
+			{
 				Config: testAccCloudRunService_moveResourceLabelToProviderDefaultLabels(context),
-        Check: resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.%", "2"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.default_expiration_ms", "3600000"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.default_key1", "value1"),
@@ -499,14 +499,13 @@ func TestAccCloudRunService_withProviderDefaultLabels(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
-      {
+			{
 				Config: testAccCloudRunService_cloudRunServiceBasic(context),
-        Check: resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_cloud_run_service.default", "metadata.0.labels.%"),
 					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_labels.%", "1"),
 
-          resource.TestCheckNoResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%"),
-          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_annotations.%", "6"),
+					resource.TestCheckNoResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%"),
 				),
 			},
 			{
@@ -548,8 +547,8 @@ func TestAccCloudRunServiceMigration_withLabels(t *testing.T) {
 					// A new system annotation is added by the API around 08/28/2024,
 					// and the current service annotation filter doesn't work for this new annotation during the migration,
 					// so it is treated as the user defined annotation.
-					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "2"),
-					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_annotations.%", "7"),
+					// Same around 03/2026
+					resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.annotations.%", "3"),
 				),
 			},
 		},

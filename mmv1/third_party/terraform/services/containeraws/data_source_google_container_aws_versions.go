@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -55,7 +56,7 @@ func dataSourceGoogleContainerAwsVersionsRead(d *schema.ResourceData, meta inter
 		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ContainerAwsBasePath}}projects/{{project}}/locations/{{location}}/awsServerConfig")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/awsServerConfig")
 	if err != nil {
 		return err
 	}
@@ -83,4 +84,13 @@ func dataSourceGoogleContainerAwsVersionsRead(d *schema.ResourceData, meta inter
 
 	d.SetId(time.Now().UTC().String())
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_aws_versions",
+		ProductName: "containeraws",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleContainerAwsVersions(),
+	}.Register()
 }

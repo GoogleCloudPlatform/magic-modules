@@ -28,7 +28,7 @@ By default, running a full `make provider` command cleans the output directory (
 
 ## Generate a provider change
 
-1. Clone the `google` and `google-beta` provider repositories with the following commands:
+1. If you haven't already, clone the `google` and `google-beta` provider repositories with the following commands:
 
    ```bash
    git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src/github.com/hashicorp/terraform-provider-google

@@ -1,0 +1,310 @@
+package bigqueryanalyticshub_test
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+	"testing"
+
+	"cloud.google.com/go/bigquery"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"google.golang.org/api/googleapi"
+	"google.golang.org/api/option"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigqueryanalyticshub"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+// Always include dummy usages
+var _ = fmt.Sprintf
+var _ = terraform.State{}
+var _ = envvar.GetTestProjectFromEnv
+var _ = os.Getenv
+
+func AddBigQueryDatasetReplica(t *testing.T, projectID string, datasetID string, primaryLocation string, replicaLocation string) (string, error) {
+	ctx := context.Background()
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return "", fmt.Errorf("failed to bootstrap config")
+	}
+
+	client, err := bigquery.NewClient(ctx, projectID, option.WithTokenSource(config.TokenSource), option.WithUserAgent(config.UserAgent))
+	if err != nil {
+		return "", fmt.Errorf("failed to create BigQuery client: %w", err)
+	}
+	defer client.Close()
+
+	log.Printf("INFO: Attempting to create dataset '%s' in project '%s' at location '%s'", datasetID, projectID, primaryLocation)
+	datasetRef := client.Dataset(datasetID)
+	datasetMetadata := &bigquery.DatasetMetadata{
+		Location: primaryLocation,
+	}
+
+	err = datasetRef.Create(ctx, datasetMetadata)
+	if err != nil {
+		if ge, ok := err.(*googleapi.Error); ok && ge.Code == 409 {
+			log.Printf("INFO: BigQuery dataset '%s' already exists in project '%s' at location '%s'. Continuing.", datasetID, projectID, primaryLocation)
+		} else {
+			return "", fmt.Errorf("failed to create BigQuery dataset '%s': %w", datasetID, err)
+		}
+	} else {
+		log.Printf("INFO: Successfully created BigQuery dataset '%s' at location '%s'.", datasetID, primaryLocation)
+	}
+
+	sqlQuery := fmt.Sprintf(
+		"ALTER SCHEMA `%s` ADD REPLICA `%s` OPTIONS(location=`%s`)",
+		datasetID,
+		replicaLocation,
+		replicaLocation,
+	)
+
+	log.Printf("INFO: Executing BigQuery DDL query: %s", sqlQuery)
+
+	query := client.Query(sqlQuery)
+
+	job, err := query.Run(ctx)
+	if err != nil {
+		// Check if the error is an "Already Exists" error on submission
+		if ge, ok := err.(*googleapi.Error); ok && ge.Code == 409 && (strings.Contains(ge.Message, "Duplicate") || strings.Contains(ge.Message, "Already Exists")) {
+			log.Printf("INFO: Replica '%s' already exists for dataset '%s' (error on job submission). Continuing.", replicaLocation, datasetID)
+		} else {
+			return "", fmt.Errorf("failed to submit BigQuery DDL job for adding replica: %w", err)
+		}
+	} else {
+		status, waitErr := job.Wait(ctx)
+		if waitErr != nil {
+			// Check if the error is an "Already Exists" error after waiting
+			if ge, ok := waitErr.(*googleapi.Error); ok && ge.Code == 409 && (strings.Contains(ge.Message, "Duplicate") || strings.Contains(ge.Message, "Already Exists")) {
+				log.Printf("INFO: Replica '%s' already exists for dataset '%s' (error on job wait). Continuing.", replicaLocation, datasetID)
+			} else {
+				return "", fmt.Errorf("failed to wait for BigQuery job completion for adding replica: %w", waitErr)
+			}
+		} else if status != nil && status.Err() != nil {
+			// Check if the status error is an "Already Exists" error
+			if ge, ok := status.Err().(*googleapi.Error); ok && ge.Code == 409 && (strings.Contains(ge.Message, "Duplicate") || strings.Contains(ge.Message, "Already Exists")) {
+				log.Printf("INFO: Replica '%s' already exists for dataset '%s' (error in job status). Continuing.", replicaLocation, datasetID)
+			} else {
+				return "", fmt.Errorf("BigQuery job for adding replica completed with an error: %w", status.Err())
+			}
+		} else {
+			log.Printf("INFO: Successfully added BigQuery dataset replica '%s' for dataset '%s'.", replicaLocation, datasetID)
+		}
+	}
+
+	fullDatasetLocation := fmt.Sprintf("projects/%s/datasets/%s", projectID, datasetID)
+	return fullDatasetLocation, nil
+}
+
+func CleanupBigQueryDatasetAndReplica(t *testing.T, projectID, datasetID, replicaLocation string) {
+	log.Printf("[DEBUG] Cleanup: Starting cleanup for BigQuery dataset: projects/%s/datasets/%s", projectID, datasetID)
+	cleanupCtx := context.Background()
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return
+	}
+
+	client, cerr := bigquery.NewClient(cleanupCtx, projectID, option.WithTokenSource(config.TokenSource), option.WithUserAgent(config.UserAgent))
+	if cerr != nil {
+		log.Printf("[ERROR] Cleanup: Failed to create BigQuery client for dataset %s: %v", datasetID, cerr)
+		return
+	}
+	defer client.Close()
+
+	// Attempt to remove the replica first
+	dropReplicaSQL := fmt.Sprintf(
+		"ALTER SCHEMA `%s` DROP REPLICA `%s`",
+		datasetID,
+		replicaLocation,
+	)
+	log.Printf("[DEBUG] Cleanup: Dropping replica with SQL: %s", dropReplicaSQL)
+	dropQuery := client.Query(dropReplicaSQL)
+	dropJob, dropErr := dropQuery.Run(cleanupCtx)
+	if dropErr != nil {
+		log.Printf("[ERROR] Cleanup: Failed to submit BigQuery DDL job for dropping replica %s of dataset %s: %v", replicaLocation, datasetID, dropErr)
+	} else {
+		dropStatus, dropWaitErr := dropJob.Wait(cleanupCtx)
+		if dropWaitErr != nil {
+			log.Printf("[ERROR] Cleanup: Failed to wait for BigQuery job completion for dropping replica %s of dataset %s: %v", replicaLocation, datasetID, dropWaitErr)
+		} else if dropStatus.Err() != nil {
+			log.Printf("[ERROR] Cleanup: BigQuery job for dropping replica %s of dataset %s completed with an error: %v", replicaLocation, datasetID, dropStatus.Err())
+		} else {
+			log.Printf("[INFO] Cleanup: Successfully dropped BigQuery dataset replica: %s for dataset %s", replicaLocation, datasetID)
+		}
+	}
+
+	// Delete the main dataset (including any remaining contents)
+	log.Printf("[DEBUG] Cleanup: Deleting main BigQuery dataset: %s", datasetID)
+	err := client.Dataset(datasetID).DeleteWithContents(cleanupCtx)
+	if err != nil {
+		log.Printf("[ERROR] Cleanup: Failed to delete BigQuery dataset %s: %v", datasetID, err)
+	} else {
+		log.Printf("[INFO] Cleanup: Successfully deleted BigQuery dataset: %s", datasetID)
+	}
+}
+
+func TestAccBigqueryAnalyticsHubListingSubscription_differentProject(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryAnalyticsHubListingSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryAnalyticsHubListingSubscription_differentProject(context),
+			},
+			{
+				ResourceName:      "google_bigquery_analytics_hub_listing_subscription.subscription",
+				ImportStateIdFunc: testAccBigqueryAnalyticsHubListingSubscription_stateId,
+				ImportState:       true,
+			},
+		},
+	})
+}
+
+func TestAccBigqueryAnalyticsHubListingSubscription_multiregion(t *testing.T) {
+	if v := os.Getenv("TF_ACC"); v == "" {
+		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
+	}
+
+	t.Parallel()
+
+	randomDatasetSuffix := acctest.RandString(t, 10)
+	datasetID := fmt.Sprintf("tf_test_sub_replica_%s", randomDatasetSuffix)
+
+	bqdataset, err := AddBigQueryDatasetReplica(t, envvar.GetTestProjectFromEnv(), datasetID, "us", "eu")
+	if err != nil {
+		t.Fatalf("Failed to create BigQuery dataset and add replica: %v", err)
+	}
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"bqdataset":     bqdataset,
+	}
+
+	t.Cleanup(func() {
+		CleanupBigQueryDatasetAndReplica(t, envvar.GetTestProjectFromEnv(), datasetID, "eu")
+	})
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryAnalyticsHubListingSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryAnalyticsHubListingSubscription_multiregion(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "destination_dataset.0.replica_locations.#", "1"),
+					resource.TestCheckResourceAttr("google_bigquery_analytics_hub_listing_subscription.subscription", "destination_dataset.0.replica_locations.0", "eu"),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_analytics_hub_listing_subscription.subscription",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"data_exchange_id", "destination_dataset", "listing_id", "location"},
+			},
+		},
+	})
+}
+
+func testAccBigqueryAnalyticsHubListingSubscription_stateId(state *terraform.State) (string, error) {
+	resourceName := "google_bigquery_analytics_hub_listing_subscription.subscription"
+	var rawState map[string]string
+	for _, m := range state.Modules {
+		if len(m.Resources) > 0 {
+			if v, ok := m.Resources[resourceName]; ok {
+				rawState = v.Primary.Attributes
+			}
+		}
+	}
+
+	return fmt.Sprintf("projects/%s/locations/US/subscriptions/%s", envvar.GetTestProjectFromEnv(), rawState["subscription_id"]), nil
+}
+
+func testAccBigqueryAnalyticsHubListingSubscription_differentProject(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "subscription" {
+	dataset_id                  = "tf_test_sub_ds_%{random_suffix}"
+	location                    = "US"
+}
+
+resource "google_bigquery_analytics_hub_data_exchange" "subscription" {
+  location         = "US"
+  data_exchange_id = "tf_test_de_%{random_suffix}"
+  display_name     = "tf_test_de_%{random_suffix}"
+}
+
+resource "google_bigquery_analytics_hub_listing" "subscription" {
+  location         = "US"
+  data_exchange_id = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
+  listing_id       = "tf_test_listing_%{random_suffix}"
+  display_name     = "tf_test_listing_%{random_suffix}"
+
+  bigquery_dataset {
+    dataset = google_bigquery_dataset.subscription.id
+  }
+}
+
+resource "google_bigquery_analytics_hub_listing_subscription" "subscription" {
+  location = "US"
+  data_exchange_id = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
+  listing_id = google_bigquery_analytics_hub_listing.subscription.listing_id
+  destination_dataset {
+    location = "US"
+    dataset_reference {
+      dataset_id = "tf_test_dest_ds_%{random_suffix}"
+      project_id = google_bigquery_dataset.subscription.project
+    }
+  }
+}
+`, context)
+}
+
+func testAccBigqueryAnalyticsHubListingSubscription_multiregion(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_analytics_hub_data_exchange" "subscription" {
+  location         = "us"
+  data_exchange_id = "tf_test_de_%{random_suffix}"
+  display_name     = "tf_test_de_%{random_suffix}"
+}
+
+resource "google_bigquery_analytics_hub_listing" "subscription" {
+  location         = "us"
+  data_exchange_id = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
+  listing_id       = "tf_test_listing_%{random_suffix}"
+  display_name     = "tf_test_listing_%{random_suffix}"
+
+  bigquery_dataset {
+    dataset = "%{bqdataset}"
+    replica_locations = ["eu"]
+  }
+}
+
+resource "google_bigquery_analytics_hub_listing_subscription" "subscription" {
+  location         = "us"
+  data_exchange_id = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
+  listing_id       = google_bigquery_analytics_hub_listing.subscription.listing_id
+
+  destination_dataset {
+    location = "us"
+    dataset_reference {
+      project_id = google_bigquery_analytics_hub_data_exchange.subscription.project
+      dataset_id = "tf_test_sub_dest_ds_%{random_suffix}"
+    }
+    replica_locations = ["eu"]
+  }
+}
+`, context)
+}

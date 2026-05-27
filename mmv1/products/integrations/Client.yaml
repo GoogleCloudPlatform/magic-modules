@@ -49,7 +49,7 @@ examples:
     test_vars_overrides:
       key_ring_name: '"tftest-shared-keyring-1"'
       crypto_key_name: '"tftest-shared-key-1"'
-      kms_key: 'acctest.BootstrapKMSKeyInLocation(t, "us-east1")'
+      kms_key: 'kms.BootstrapKMSKeyInLocation(t, "us-east1")'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-integrations.iam.gserviceaccount.com"
         role: "roles/cloudkmskacls.serviceAgent"

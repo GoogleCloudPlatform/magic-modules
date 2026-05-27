@@ -42,6 +42,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
@@ -192,4 +193,3 @@ properties:
     description: |
       The state details of the Active Directory.
     output: true
-include_in_tgc_next: true

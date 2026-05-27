@@ -30,7 +30,6 @@ import_format:
 examples:
   - name: 'developer_connect_connection_new'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection-new%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection-new'
     test_env_vars:
@@ -38,7 +37,6 @@ examples:
     exclude_test: true
   - name: 'developer_connect_connection_existing_credentials'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection-cred%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection-cred'
       secret_name: "projects/your-project/secrets/your-secret-id/versions/latest"
@@ -48,54 +46,46 @@ examples:
     exclude_test: true
   - name: 'developer_connect_connection_github'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_github_doc'
     exclude_test: true
   - name: 'developer_connect_connection_github_enterprise'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_github_enterprise_doc'
     exclude_test: true
   - name: 'developer_connect_connection_gitlab'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_gitlab_doc'
     exclude_test: true
   - name: 'developer_connect_connection_gitlab_enterprise'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_gitlab_enterprise_doc'
     exclude_test: true
   - name: 'developer_connect_connection_bbc'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_bbc_doc'
     exclude_test: true
   - name: 'developer_connect_connection_bbdc'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_bbdc_doc'
     exclude_test: true
   - name: 'developer_connect_connection_http_conn_basic'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_http_conn_bearer'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
 autogen_async: true

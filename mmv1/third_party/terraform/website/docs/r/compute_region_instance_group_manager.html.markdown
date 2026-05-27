@@ -137,6 +137,13 @@ The following arguments are supported:
 
 * `region` - (Optional) The region where the managed instance group resides. If not provided, the provider region is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+
 - - -
 
 * `description` - (Optional) An optional textual description of the instance
@@ -205,6 +212,11 @@ group. You can specify one or more values. For more information, see the [offici
 * `params` - (Optional [Beta](../guides/provider_versions.html.markdown)) Input only additional params for instance group manager creation. Structure is [documented below](#nested_params). For more information, see [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/insert).
 
 * `instance_flexibility_policy` - (Optional) The flexibility policy for managed instance group. Instance flexibility allows managed instance group to create VMs from multiple types of machines. Instance flexibility configuration on managed instance group overrides instance template configuration. Structure is [documented below](#nested_instance_flexibility_policy).
+
+* `target_size_policy` - (Optional) The policy that specifies how the MIG creates its VMs to achieve the target size. Structure is [documented below](#nested_target_size_policy).
+
+* `resource_policies` - (Optional) Resource policies for this managed instance group. Structure is [documented below](#nested_resource_policies).
+
 - - -
 
 The `standby_policy` block supports:
@@ -592,6 +604,16 @@ params{
 ```
 
 * `resource_manager_tags` - (Optional) Resource manager tags to bind to the managed instance group. The tags are key-value pairs. Keys must be in the format tagKeys/123 and values in the format tagValues/456. For more information, see [Manage tags for resources](https://cloud.google.com/compute/docs/tag-resources)
+
+- - -
+
+<a name="nested_resource_policies"></a>The `resource_policies` block supports:
+
+* `workload_policy` - (Optional) The URL of the workload policy that is specified for this managed instance group. It can be a full or partial URL.
+
+<a name="nested_target_size_policy"></a>The `target_size_policy` block supports:
+
+* `mode` - (Required)The mode of target size policy based on which the MIG creates its VMs individually or all at once. Values: "BULK", "INDIVIDUAL".
 
 ## Attributes Reference
 

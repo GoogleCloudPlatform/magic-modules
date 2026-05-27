@@ -13,6 +13,7 @@
 
 ---
 name: 'Tag'
+api_resource_field: "."
 description: |
   Tags are used to attach custom metadata to Data Catalog resources. Tags conform to the specifications within their tag template.
 
@@ -97,7 +98,7 @@ examples:
       'force_delete': 'true'
     oics_vars_overrides:
       'force_delete': 'true'
- # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
+    # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
     exclude_docs: true
 parameters:
   - name: 'parent'

@@ -116,7 +116,7 @@ func createMap(packageNames []string, servicesDir string) (string, error) {
 	var b strings.Builder
 	// Add copyright header
 	b.WriteString("/*\n")
-	b.WriteString(" * Copyright (c) HashiCorp, Inc.\n")
+	b.WriteString(" * Copyright IBM Corp. 2014, 2026\n")
 	b.WriteString(" * SPDX-License-Identifier: MPL-2.0\n")
 	b.WriteString(" */\n\n")
 

@@ -1,0 +1,198 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'IcebergTable'
+description: |
+  IcebergTables are the primary objects in an IcebergCatalog.
+supports_indirect_user_project_override: true
+base_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables'
+self_link: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+id_format: 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+import_format:
+  - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+  - '{{project}}/{{catalog}}/{{namespace}}/{{name}}'
+  - '{{catalog}}/{{namespace}}/{{name}}'
+
+custom_code:
+  post_read: 'templates/terraform/post_read/biglake_iceberg_table.go.tmpl'
+  constants: 'templates/terraform/constants/biglake_iceberg_table.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/biglake_iceberg_table.go.tmpl'
+
+update_verb: 'POST'
+update_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+
+iam_policy:
+  base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+  parent_resource_attribute: 'name'
+
+
+  additional_parent_resource_attributes:
+    - 'catalog'
+    - 'namespace'
+  method_name_separator: ":"
+  fetch_iam_policy_verb: 'GET'
+  import_format:
+    - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+    - '{{name}}'
+  allowed_iam_role: 'roles/biglake.editor'
+  example_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_table.tf.tmpl'
+
+examples:
+  - name: 'biglake_iceberg_table_basic'
+    primary_resource_id: 'my_iceberg_table'
+    vars:
+      bucket_name: 'my-bucket'
+      namespace_id: 'my_namespace'
+      table_name: 'my_table'
+  - name: 'biglake_iceberg_table_update'
+    primary_resource_id: 'my_iceberg_table'
+    skip_test: true
+    vars:
+      bucket_name: 'my-bucket'
+      namespace_id: 'my_namespace'
+      table_name: 'my_table'
+
+parameters:
+  - name: 'catalog'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The name of the IcebergCatalog.
+  - name: 'namespace'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The parent namespace of the table.
+
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the table.
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the table.
+    immutable: true
+    default_from_api: true
+  - name: 'schema'
+    type: NestedObject
+    required: true
+    description: |
+      The schema of the table.
+    properties:
+      - name: 'type'
+        type: String
+        description: |
+          The type of the schema.
+        default_value: 'struct'
+      - name: 'schema_id'
+        api_name: 'schema-id'
+        type: Integer
+        output: true
+        description: |
+          The unique identifier of the schema.
+      - name: 'identifier_field_ids'
+        api_name: 'identifier-field-ids'
+        type: Array
+        item_type:
+          type: Integer
+        default_from_api: true
+        description: |
+          The field IDs that make up the identifier for the table.
+      - name: 'fields'
+        type: Array
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'id'
+              type: Integer
+              required: true
+              description: |
+                The unique identifier of the field.
+            - name: 'name'
+              type: String
+              required: true
+              description: |
+                The name of the field.
+            - name: 'type'
+              type: String
+              required: true
+              description: |
+                The type of the field.
+            - name: 'required'
+              type: Boolean
+              required: true
+              send_empty_value: true
+              description: |
+                Whether the field is required.
+            - name: 'doc'
+              type: String
+              description: |
+                A description of the field.
+  - name: 'partition_spec'
+    api_name: 'partition-spec'
+    type: NestedObject
+    default_from_api: true
+    description: |
+      The partition spec of the table.
+    properties:
+      - name: 'spec_id'
+        api_name: 'spec-id'
+        type: Integer
+        output: true
+        description: |
+          The unique identifier of the partition spec.
+      - name: 'fields'
+        type: Array
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'field_id'
+              api_name: 'field-id'
+              type: Integer
+              output: true
+              description: |
+                The unique identifier of the partition field.
+            - name: 'source_id'
+              api_name: 'source-id'
+              type: Integer
+              required: true
+              description: |
+                The source field ID for the partition field.
+            - name: 'name'
+              type: String
+              required: true
+              description: |
+                The name of the partition field.
+            - name: 'transform'
+              type: String
+              required: true
+              description: |
+                The transform to apply to the source field.
+  - name: 'properties'
+    type: KeyValuePairs
+    description: |
+      User-defined properties for the table.
+    required: false
+    default_from_api: true
+    diff_suppress_func: 'icebergTablePropertiesDiffSuppress'

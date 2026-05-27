@@ -35,6 +35,9 @@ async:
   operation:
     base_url: '{{op_id}}'
 include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccComputeResourcePolicy_withTopologyMode'
+    skip: 'The test should not in GA provider'
 custom_code:
   constants: templates/terraform/constants/compute_resource_policy.go.tmpl
 examples:
@@ -78,6 +81,11 @@ examples:
       name: gce-policy
   - name: resource_policy_workload_policy_accelerator_topology
     primary_resource_id: bar
+    vars:
+      name: gce-policy
+  - name: resource_policy_workload_policy_accelerator_topology_mode
+    primary_resource_id: bar
+    min_version: beta
     vars:
       name: gce-policy
   - name: resource_policy_workload_policy_max_topology_distance
@@ -414,10 +422,11 @@ properties:
         type: Enum
         description: |
           The maximum topology distance. This field can be set only when the workload policy type is HIGH_THROUGHPUT
-          and cannot be set if accelerator topology is set.
+          and cannot be set if accelerator topology or accelerator topology mode is set.
         immutable: true
         conflicts:
           - workload_policy.0.accelerator_topology
+          - workload_policy.0.accelerator_topology_mode
         enum_values:
           - BLOCK
           - CLUSTER
@@ -427,6 +436,24 @@ properties:
         description: |
           The accelerator topology. This field can be set only when the workload policy type is HIGH_THROUGHPUT
           and cannot be set if max topology distance is set.
+        immutable: true
+        conflicts:
+          - workload_policy.0.max_topology_distance
+      - name: acceleratorTopologyMode
+        type: Enum
+        is_missing_in_cai: true
+        description: |
+          Specifies the connection mode for the accelerator topology.
+          Supported values are:
+            * `AUTO_CONNECT`: The interconnected chips are pre-configured at the time of VM creation.
+            * `PROVISION_ONLY`: The interconnected chips are connected on demand. At the time of VM creation, the chips are not connected.
+
+          If not specified, the default is AUTO_CONNECT.
+          This field can be set only when the workload policy type is HIGH_THROUGHPUT and cannot be set if max topology distance is set.
+        min_version: beta
+        enum_values:
+          - AUTO_CONNECT
+          - PROVISION_ONLY
         immutable: true
         conflicts:
           - workload_policy.0.max_topology_distance

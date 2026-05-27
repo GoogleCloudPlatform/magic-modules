@@ -52,7 +52,6 @@ custom_code:
 examples:
   - name: 'privateca_capool_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-pool%s", context["random_suffix"])'
     vars:
       name: 'my-pool'
   - name: 'privateca_capool_all_fields'
@@ -61,7 +60,7 @@ examples:
       name: 'my-pool'
       cloud_kms_key: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
     test_vars_overrides:
-      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name'
+      'cloud_kms_key': 'kms.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name'
     # Test requires a beta-only resource
     min_version: beta
   - name: 'privateca_quickstart'
@@ -72,6 +71,9 @@ examples:
     exclude_test: true
     exclude_docs: true
 include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions'
+    skip: 'testing framework issue'
 parameters:
   - name: 'location'
     type: String

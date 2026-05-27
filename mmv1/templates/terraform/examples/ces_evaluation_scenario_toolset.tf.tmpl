@@ -1,0 +1,118 @@
+resource "google_ces_app" "app" {
+  provider = google-beta
+  app_id = "{{index $.Vars "app_id"}}"
+  location = "us"
+  display_name = "{{index $.Vars "app_display_name"}}"
+
+  language_settings {
+    default_language_code    = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_toolset" "toolset" {
+  provider = google-beta
+  toolset_id = "{{index $.Vars "toolset_id"}}"
+  location = "us"
+  app      = google_ces_app.app.app_id
+  display_name = "Basic toolset display name"
+  description = "Test description"
+  execution_type = "SYNCHRONOUS"
+
+  open_api_toolset {
+    open_api_schema = <<-EOT
+      openapi: 3.0.0
+      info:
+        title: My Sample API
+        version: 1.0.0
+        description: A simple API example
+      servers:
+        - url: https://api.example.com/v1
+      paths: {}
+    EOT
+    ignore_unknown_fields = false
+  }
+}
+
+resource "google_ces_evaluation" "ces_evaluation_scenario_toolset" {
+  provider = google-beta
+  evaluation_id = "{{index $.Vars "evaluation_id"}}"
+  display_name = "my-evaluation-scenario-toolset"
+  location     = "us"
+  app          = google_ces_app.app.app_id
+  description  = "Full evaluation for testing scenario with toolset"
+  tags         = ["test", "full", "scenario", "toolset"]
+
+  scenario {
+    task = "Test task"
+    max_turns = 5
+    rubrics = ["projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/rubrics/dummy-rubric"]
+    user_goal_behavior = "USER_GOAL_SATISFIED"
+    task_completion_behavior = "TASK_SATISFIED"
+    variable_overrides = {
+      key = "value"
+    }
+    evaluation_expectations = ["projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/evaluationExpectations/dummy-exp"]
+
+    user_facts {
+      name = "user_name"
+      value = "John Doe"
+    }
+
+    scenario_expectations {
+      tool_expectation {
+        expected_tool_call {
+          id = "tool-call-id"
+          toolset_tool {
+            toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/${google_ces_toolset.toolset.toolset_id}"
+            tool_id = "dummy-tool"
+          }
+          args = {
+            param = "value"
+          }
+        }
+        mock_tool_response {
+          id = "tool-call-id"
+          response = { result = "mocked" }
+          toolset_tool {
+            toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/${google_ces_toolset.toolset.toolset_id}"
+            tool_id = "dummy-tool"
+          }
+        }
+      }
+    }
+
+    scenario_expectations {
+      agent_response {
+        role = "agent"
+        chunks {
+          text = "Hello"
+        }
+        chunks {
+          tool_call {
+            id = "tool-call-id-3"
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/${google_ces_toolset.toolset.toolset_id}"
+              tool_id = "dummy-tool"
+            }
+            args = {
+              param = "value"
+            }
+          }
+        }
+        chunks {
+          tool_response {
+            id = "tool-call-id-3"
+            response = { result = "success" }
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/${google_ces_toolset.toolset.toolset_id}"
+              tool_id = "dummy-tool"
+            }
+          }
+        }
+      }
+    }
+  }
+}

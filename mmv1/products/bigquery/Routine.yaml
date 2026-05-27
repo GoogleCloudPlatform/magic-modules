@@ -25,6 +25,7 @@ base_url: 'projects/{{project}}/datasets/{{dataset_id}}/routines'
 self_link: 'projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}'
 import_format:
   - 'projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}'
+exclude_identity_generation: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -33,19 +34,16 @@ custom_code:
 examples:
   - name: 'bigquery_routine_basic'
     primary_resource_id: 'sproc'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
     vars:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - name: 'bigquery_routine_json'
     primary_resource_id: 'sproc'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
     vars:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - name: 'bigquery_routine_tvf'
     primary_resource_id: 'sproc'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
     vars:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
