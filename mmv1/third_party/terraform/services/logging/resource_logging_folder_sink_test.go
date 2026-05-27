@@ -8,6 +8,10 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	logging_tpg "github.com/hashicorp/terraform-provider-google/google/services/logging"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -277,7 +281,7 @@ func testAccCheckLoggingFolderSinkDestroyProducer(t *testing.T) func(s *terrafor
 
 			attributes := rs.Primary.Attributes
 
-			_, err := config.NewLoggingClient(config.UserAgent).Folders.Sinks.Get(attributes["id"]).Do()
+			_, err := logging_tpg.NewClient(config, config.UserAgent).Folders.Sinks.Get(attributes["id"]).Do()
 			if err == nil {
 				return fmt.Errorf("folder sink still exists")
 			}
@@ -295,7 +299,7 @@ func testAccCheckLoggingFolderSinkExists(t *testing.T, n string, sink *logging.L
 		}
 		config := acctest.GoogleProviderConfig(t)
 
-		si, err := config.NewLoggingClient(config.UserAgent).Folders.Sinks.Get(attributes["id"]).Do()
+		si, err := logging_tpg.NewClient(config, config.UserAgent).Folders.Sinks.Get(attributes["id"]).Do()
 		if err != nil {
 			return err
 		}

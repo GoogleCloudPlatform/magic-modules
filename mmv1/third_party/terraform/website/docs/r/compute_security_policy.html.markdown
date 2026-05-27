@@ -158,6 +158,31 @@ resource "google_compute_security_policy" "policy" {
 }
 ```
 
+## Example Usage - With advanced options config
+
+```hcl
+resource "google_compute_security_policy" "policy" {
+	name = "my-policy"
+
+  advanced_options_config {
+    json_parsing = "STANDARD"
+    json_custom_config {
+      content_types = [
+        "application/json",
+        "application/vnd.api+json",
+        "application/vnd.collection+json",
+        "application/vnd.hyper+json"
+      ]
+    }
+    log_level    = "VERBOSE"
+    user_ip_request_headers = [
+      "True-Client-IP",
+      "x-custom-ip"
+    ]
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -200,6 +225,13 @@ The following arguments are supported:
 * `terraform_labels` - The combination of labels configured directly on the resource and default labels configured on the provider.
 
 * `label_fingerprint` - The unique fingerprint of the labels.
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
 
 <a name="nested_advanced_options_config"></a>The `advanced_options_config` block supports:
 

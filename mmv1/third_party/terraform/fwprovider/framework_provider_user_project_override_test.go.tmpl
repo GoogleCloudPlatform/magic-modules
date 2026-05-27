@@ -9,8 +9,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/firebase"
 {{ if ne $.TargetVersionName `ga` -}}
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	ptu "github.com/hashicorp/terraform-provider-google/google/provider/testutils"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 {{- end }}
 )
 
@@ -250,8 +253,8 @@ func testAccFwProvider_UserProjectOverride(t *testing.T) {
 	billing := envvar.GetTestBillingAccountFromEnv(t)
 	pid := "tf-test-" + acctest.RandString(t, 10)
 
-	config := acctest.BootstrapConfig(t)
-	accessToken, err := acctest.SetupProjectsAndGetAccessToken(org, billing, pid, "firebase", config)
+	config := transport_tpg.BootstrapConfig(t)
+	accessToken, err := ptu.SetupProjectsAndGetAccessToken(org, billing, pid, "firebase", config)
 	if err != nil || accessToken == "" {
 		if err == nil {
 			t.Fatal("error when setting up projects and retrieving access token: access token is an empty string")
@@ -262,7 +265,7 @@ func testAccFwProvider_UserProjectOverride(t *testing.T) {
 	context := map[string]interface{}{
 		"user_project_override": false, // changed in config functions
 		"access_token":          accessToken,
-		"project_2":             pid + "-2", // acctest.SetupProjectsAndGetAccessToken creates project 1 with id = `pid`, and 2 = `pid` + "-2"
+		"project_2":             pid + "-2", // ptu.SetupProjectsAndGetAccessToken creates project 1 with id = `pid`, and 2 = `pid` + "-2"
 		"random_suffix":         acctest.RandString(t, 5),
 	}
 

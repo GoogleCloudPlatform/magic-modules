@@ -1,0 +1,28 @@
+package firebase
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"context"
+	"log"
+	"strings"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	firebase "google.golang.org/api/firebase/v1beta1"
+	"google.golang.org/api/option"
+)
+
+func NewClient(ctx context.Context, c *transport_tpg.Config, userAgent string) *firebase.Service {
+	firebaseClientBasePath := transport_tpg.RemoveBasePathVersion(transport_tpg.BaseUrl(Product, c))
+	firebaseClientBasePath = strings.ReplaceAll(firebaseClientBasePath, "/firebase/", "")
+	log.Printf("[INFO] Instantiating Google Cloud firebase client for path %s", firebaseClientBasePath)
+	clientFirebase, err := firebase.NewService(c.Context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client firebase: %s", err)
+		return nil
+	}
+	clientFirebase.UserAgent = userAgent
+	clientFirebase.BasePath = firebaseClientBasePath
+
+	return clientFirebase
+}
+{{- end }}

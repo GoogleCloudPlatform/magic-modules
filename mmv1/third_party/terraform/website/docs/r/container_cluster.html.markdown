@@ -314,7 +314,7 @@ region are guaranteed to support the same version.
     [SecretManagerConfig](https://cloud.google.com/secret-manager/docs/secret-manager-managed-csi-component) feature.
     Structure is [documented below](#nested_secret_manager_config).
 
-* `secret_sync_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for the
+* `secret_sync_config` - (Optional) Configuration for the
     [SecretSyncConfig](https://cloud.google.com/secret-manager/docs/sync-k8-secrets) feature.
     Structure is [documented below](#nested_secret_sync_config).
 
@@ -447,6 +447,14 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `rbac_binding_config` - (Optional)
   RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created. Structure is [documented below](#nested_rbac_binding_config).
 
+* `deletion_policy` - 
+  (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+  When a 'terraform destroy' or 'terraform apply' would delete the resource,
+  the command will fail if this field is set to "PREVENT" in Terraform state.
+  When set to "ABANDON", the command will remove the resource from Terraform
+  management without updating or deleting the resource in the API.
+  When set to "DELETE", deleting the resource is allowed.
+
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
@@ -462,6 +470,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
     has based on the resource usage of the existing pods.
     It is enabled by default;
     set `disabled = true` to disable.
+
+* `agent_sandbox_config` - (Optional, Beta) Configuration for the Agent Sandbox addon. Structure is documented below:
+    * `enabled` - (Required) Whether the Agent Sandbox addon is enabled.
 
 * `http_load_balancing` - (Optional) The status of the HTTP (L7) load balancing
     controller addon, which makes it easy to set up HTTP load balancers for services in a
@@ -547,7 +558,7 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.
    * `disable_multi_nic` When set to true, this disables multi-NIC support for the Lustre CSI driver. By default, GKE enables multi-NIC support, which allows the Lustre CSI driver to automatically detect and configure all suitable network interfaces on a node to maximize I/O performance for demanding workloads.
 
-* `pod_snapshot_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
+* `pod_snapshot_config` - (Optional) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -706,7 +717,7 @@ This block also contains several computed attributes, documented below.
 <a name="nested_logging_config"></a>The `logging_config` block supports:
 
 *  `enable_components` - (Required) The GKE components exposing logs. Supported values include:
-`SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, `SCHEDULER`, and `WORKLOADS`.
+`SYSTEM_COMPONENTS`, `KCP_VPA`, `APISERVER`, `CONTROLLER_MANAGER`, `SCHEDULER`, and `WORKLOADS`.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
@@ -967,6 +978,8 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
     (e.g. 'pd-standard', 'pd-balanced', 'pd-ssd', or 'hyperdisk-balanced'). Defaults to `hyperdisk-balanced` if `hyperdisk-balanced` is supported and `pd-balanced` is not supported for the machine type; otherwise defaults to `pd-balanced`. This is being migrated to `boot_disk.disk_type`, and must match if specified in both places. Prefer configuring `boot_disk`.
 
 * `enable_confidential_storage` - (Optional) Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
+
+* `gpudirect_strategy` - (Optional) The type of GPUDirect strategy to enable on the node. See the [GKE network docs](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/gpu-bandwidth-gpudirect-tcpx) for information on available modes.
 
 * `local_ssd_encryption_mode` - (Optional) Possible Local SSD encryption modes:
     Accepted values are:
@@ -1359,7 +1372,7 @@ notification_config {
 <a name="nested_secret_manager_config"></a>The `secret_manager_config` block supports:
 
 * `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
-* `rotation_config` (Optional) - config for secret manager auto rotation. Structure is [docuemented below](#rotation_config)
+* `rotation_config` (Optional) - config for secret manager auto rotation. Structure is [documented below](#rotation_config)
 
 <a name="rotation_config"></a>The `rotation_config` block supports:
 
@@ -1368,13 +1381,13 @@ notification_config {
 
 <a name="nested_secret_sync_config"></a>The `secret_sync_config` block supports:
 
-* `enabled` (Required, [Beta](../guides/provider_versions.html.markdown)) - Enable the Sync as K8s secret feature for this cluster.
-* `rotation_config` (Optional, [Beta](../guides/provider_versions.html.markdown)) - config for secret sync auto rotation. Structure is [docuemented below](#sync_rotation_config)
+* `enabled` (Required) - Enable the Sync as K8s secret feature for this cluster.
+* `rotation_config` (Optional) - config for secret sync auto rotation. Structure is [docuemented below](#sync_rotation_config)
 
 <a name="sync_rotation_config"></a>The `rotation_config` block supports:
 
-* `enabled` (Optional, [Beta](../guides/provider_versions.html.markdown)) - Enable the roation in Sync as K8s secret feature for this cluster.
-* `rotation_interval` (Optional, [Beta](../guides/provider_versions.html.markdown)) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
+* `enabled` (Optional) - Enable the roation in Sync as K8s secret feature for this cluster.
+* `rotation_interval` (Optional) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
 
 <a name="nested_user_managed_keys_config"></a>The `user_managed_keys_config` block supports:
 
@@ -1668,6 +1681,46 @@ linux_node_config {
 
 * `node_kernel_module_loading` - (Optional) Settings for kernel module loading. Structure is [documented below](#nested_node_kernel_module_loading_config).
 
+* `swap_config` - (Optional) Swap configuration for the node. Structure is [documented below](#nested_swap_config).
+
+* `accurate_time_config` - (Optional) Accurate time configuration for the node. Structure is [documented below](#nested_accurate_time_config).
+
+<a name="nested_swap_config"></a>The `swap_config` block supports:
+
+* `enabled` - (Optional) Enables or disables swap for the node pool.
+
+* `boot_disk_profile` - (Optional) Swap on the node's boot disk. Structure is [documented below](#nested_boot_disk_profile).
+
+* `dedicated_local_ssd_profile` - (Optional) Provisions a new, separate local NVMe SSD exclusively for swap. Structure is [documented below](#nested_dedicated_local_ssd_profile).
+
+* `ephemeral_local_ssd_profile` - (Optional) Swap on the local SSD shared with pod ephemeral storage. Structure is [documented below](#nested_ephemeral_local_ssd_profile).
+
+* `encryption_config` - (Optional) If omitted, swap space is encrypted by default. Structure is [documented below](#nested_encryption_config).
+
+<a name="nested_boot_disk_profile"></a>The `boot_disk_profile` block supports:
+
+* `swap_size_gib` - (Optional) Specifies the size of the swap space in gibibytes (GiB).
+
+* `swap_size_percent` - (Optional) Specifies the size of the swap space as a percentage of the boot disk size.
+
+<a name="nested_dedicated_local_ssd_profile"></a>The `dedicated_local_ssd_profile` block supports:
+
+* `disk_count` - (Optional) The number of physical local NVMe SSD disks to attach.
+
+<a name="nested_ephemeral_local_ssd_profile"></a>The `ephemeral_local_ssd_profile` block supports:
+
+* `swap_size_gib` - (Optional) Specifies the size of the swap space in gibibytes (GiB).
+
+* `swap_size_percent` - (Optional) Specifies the size of the swap space as a percentage of the ephemeral local SSD capacity.
+
+<a name="nested_encryption_config"></a>The `encryption_config` block supports:
+
+* `disabled` - (Optional) If true, swap space will not be encrypted. Defaults to false (encrypted).
+
+<a name="nested_accurate_time_config"></a>The `accurate_time_config` block supports:
+
+* `enable_ptp_kvm_time_sync` - (Optional) Whether to enable accurate time synchronization with PTP-KVM.
+
 <a name="nested_hugepages_config"></a>The `hugepages_config` block supports:
 
 * `hugepage_size_2m` - (Optional) Amount of 2M hugepages.
@@ -1723,7 +1776,7 @@ linux_node_config {
   * `enabled` (Required) - Whether writable cgroups are enabled.
 
 * `registry_hosts` (Optional) - Defines containerd registry host configuration. Each `registry_hosts` entry represents a `hosts.toml` file. See [customize containerd configuration in GKE nodes](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/customize-containerd-configuration#registryHosts) for more detail. Example:
-  ```hcl
+```hcl
 registry_hosts {
   server = "REGISTRY_SERVER_FQDN"
   hosts {
@@ -1755,7 +1808,7 @@ registry_hosts {
     }
   }
 }
-  ```
+```
 
 <a name="nested_vertical_pod_autoscaling"></a>The `vertical_pod_autoscaling` block supports:
 
@@ -1881,10 +1934,10 @@ exported:
 This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
-- `create` - Default is 40 minutes.
-- `read`   - Default is 40 minutes.
-- `update` - Default is 60 minutes.
-- `delete` - Default is 40 minutes.
+- `create` - Default is 90 minutes.
+- `read`   - Default is 90 minutes.
+- `update` - Default is 90 minutes.
+- `delete` - Default is 90 minutes.
 
 ## Import
 

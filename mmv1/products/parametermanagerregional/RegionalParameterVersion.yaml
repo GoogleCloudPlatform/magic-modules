@@ -54,7 +54,7 @@ examples:
       parameter_version_id: 'regional_parameter_version'
       kms_key: 'kms-key'
     test_vars_overrides:
-      'kms_key': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"

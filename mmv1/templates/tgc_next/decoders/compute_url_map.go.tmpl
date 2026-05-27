@@ -1,0 +1,83 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+
+// cleanCacheKeyPolicy removes empty lists for excludedQueryParameters and includedQueryParameters.
+// These fields are mutually exclusive in the Terraform schema. During round-trip conversion,
+// tfplan2cai might introduce empty lists for unconfigured fields (e.g., []), causing conflicts
+// when cai2hcl faithfully converts them back to HCL. Unsetting the empty lists avoids this conflict.
+cleanCacheKeyPolicy := func(cacheKeyPolicy map[string]interface{}) {
+	if excl, ok := cacheKeyPolicy["excludedQueryParameters"].([]interface{}); ok && len(excl) == 0 {
+		delete(cacheKeyPolicy, "excludedQueryParameters")
+	}
+	if incl, ok := cacheKeyPolicy["includedQueryParameters"].([]interface{}); ok && len(incl) == 0 {
+		delete(cacheKeyPolicy, "includedQueryParameters")
+	}
+}
+
+// cacheKeyPolicy can appear at multiple levels in a UrlMap resource.
+// We need to clean it up wherever it appears to handle multi-level configurations.
+
+// 1. Top-level defaultRouteAction
+if dra, ok := res["defaultRouteAction"].(map[string]interface{}); ok {
+	if cp, ok := dra["cachePolicy"].(map[string]interface{}); ok {
+		if ckp, ok := cp["cacheKeyPolicy"].(map[string]interface{}); ok {
+			cleanCacheKeyPolicy(ckp)
+		}
+	}
+}
+
+// 2. Within pathMatchers
+if pms, ok := res["pathMatchers"].([]interface{}); ok {
+	for _, vPm := range pms {
+		pm := vPm.(map[string]interface{})
+		
+		// pathMatcher.defaultRouteAction
+		if dra, ok := pm["defaultRouteAction"].(map[string]interface{}); ok {
+			if cp, ok := dra["cachePolicy"].(map[string]interface{}); ok {
+				if ckp, ok := cp["cacheKeyPolicy"].(map[string]interface{}); ok {
+					cleanCacheKeyPolicy(ckp)
+				}
+			}
+		}
+		
+		// pathMatcher.pathRules
+		if prs, ok := pm["pathRules"].([]interface{}); ok {
+			for _, vPr := range prs {
+				pr := vPr.(map[string]interface{})
+				if ra, ok := pr["routeAction"].(map[string]interface{}); ok {
+					if cp, ok := ra["cachePolicy"].(map[string]interface{}); ok {
+						if ckp, ok := cp["cacheKeyPolicy"].(map[string]interface{}); ok {
+							cleanCacheKeyPolicy(ckp)
+						}
+					}
+				}
+			}
+		}
+		
+		// pathMatcher.routeRules
+		if rrs, ok := pm["routeRules"].([]interface{}); ok {
+			for _, vRr := range rrs {
+				rr := vRr.(map[string]interface{})
+				if ra, ok := rr["routeAction"].(map[string]interface{}); ok {
+					if cp, ok := ra["cachePolicy"].(map[string]interface{}); ok {
+						if ckp, ok := cp["cacheKeyPolicy"].(map[string]interface{}); ok {
+							cleanCacheKeyPolicy(ckp)
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+return res, hclData, nil

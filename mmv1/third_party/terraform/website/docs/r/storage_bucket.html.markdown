@@ -238,6 +238,13 @@ The following arguments are supported:
 
 * `ip_filter` -  (Optional) The bucket IP filtering configuration. Specifies the network sources that can access the bucket, as well as its underlying objects. Structure is [documented below](#nested_ip_filter).
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 
 * `action` - (Required) The Lifecycle Rule's action configuration. A single block of this type is supported. Structure is [documented below](#nested_action).
@@ -442,6 +449,18 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 ```tf
 import {
   id = "{{project_id}}/{{bucket}}"
+  to = google_storage_bucket.default
+}
+```
+
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Storage buckets using identity values. For example:
+
+```tf
+import {
+  identity = {
+    project = "{{project_id}}"
+    name    = "{{bucket}}"
+  }
   to = google_storage_bucket.default
 }
 ```

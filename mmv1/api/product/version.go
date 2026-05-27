@@ -30,6 +30,12 @@ type Version struct {
 	CaiLegacyBaseUrl string `yaml:"cai_legacy_base_url,omitempty"`
 	BaseUrl          string `yaml:"base_url"`
 	Name             string
+	RepUrl           string `yaml:"rep_url,omitempty"`
+
+	// EXPERIMENTAL: RPC settings are not fully implemented, and should not be
+	// used at this time.
+	RPCAddress string `yaml:"rpc_address,omitempty"`
+	RPCPackage string `yaml:"rpc_package,omitempty"`
 }
 
 func (v *Version) Validate(pName string) {
@@ -43,4 +49,10 @@ func (v *Version) Validate(pName string) {
 
 func (v *Version) CompareTo(other *Version) int {
 	return slices.Index(ORDER, v.Name) - slices.Index(ORDER, other.Name)
+}
+
+// Whether this version supports regionalized endpoints (REP). The default
+// of regional vs global is controlled at the product level
+func (v *Version) RepEnabled() bool {
+	return v.RepUrl != ""
 }

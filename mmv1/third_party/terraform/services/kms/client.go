@@ -1,0 +1,29 @@
+package kms
+
+import (
+	"context"
+	"log"
+
+	"google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/option"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func NewClientWithCtx(ctx context.Context, c *transport_tpg.Config, userAgent string) *cloudkms.Service {
+	kmsClientBasePath := transport_tpg.RemoveBasePathVersion(transport_tpg.BaseUrl(Product, c))
+	log.Printf("[INFO] Instantiating Google Cloud KMS client for path %s", kmsClientBasePath)
+	clientKms, err := cloudkms.NewService(ctx, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client kms: %s", err)
+		return nil
+	}
+	clientKms.UserAgent = userAgent
+	clientKms.BasePath = kmsClientBasePath
+
+	return clientKms
+}
+
+func NewClient(c *transport_tpg.Config, userAgent string) *cloudkms.Service {
+	return NewClientWithCtx(c.Context, c, userAgent)
+}

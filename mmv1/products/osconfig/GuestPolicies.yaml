@@ -45,21 +45,21 @@ examples:
       instance_name: 'guest-policy-inst'
       guest_policy_id: 'guest-policy'
     ignore_read_extra:
- # project number is returned in rest response
+      # project number is returned in rest response
       - 'project'
   - name: 'os_config_guest_policies_packages'
     primary_resource_id: 'guest_policies'
     vars:
       guest_policy_id: 'guest-policy'
     ignore_read_extra:
- # project number is returned in rest response
+      # project number is returned in rest response
       - 'project'
   - name: 'os_config_guest_policies_recipes'
     primary_resource_id: 'guest_policies'
     vars:
       guest_policy_id: 'guest-policy'
     ignore_read_extra:
- # project number is returned in rest response
+      # project number is returned in rest response
       - 'project'
 parameters:
   - name: 'guestPolicyId'
