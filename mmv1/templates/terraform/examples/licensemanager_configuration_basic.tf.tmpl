@@ -1,7 +1,8 @@
 # Reference design doc: go/lima-terraform
-resource "google_licensemanager_configuration" "{{$.PrimaryResourceId}}" {
+resource "google_license_manager_configuration" "{{$.PrimaryResourceId}}" {
   location         = "us-central1"
   configuration_id = "{{index $.Vars "configuration_id"}}"
   product          = "Office2021ProfessionalPlus"
-  licensecount     = 10
+  license_count    = 10
 }
+

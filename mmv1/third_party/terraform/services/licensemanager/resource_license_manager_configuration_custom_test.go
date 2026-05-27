@@ -33,6 +33,11 @@ func TestAccLicenseManagerConfiguration_lifecycle(t *testing.T) {
 			{
 				Config: testAccLicenseManagerConfiguration_active(context, true, 15),
 			},
+			{
+				ResourceName:      "google_license_manager_configuration.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

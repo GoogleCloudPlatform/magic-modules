@@ -27,8 +27,6 @@ examples:
     primary_resource_id: "example-configuration"
     vars:
       configuration_id: "example-configuration"
-      product: "products/my-product"
-      licensecount: 10
 async:
   operation:
     base_url: '{{op_id}}'
