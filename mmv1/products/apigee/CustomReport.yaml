@@ -40,7 +40,7 @@ custom_code:
 examples:
   - name: 'apigee_custom_report_basic'
     vars:
-      project_id: 'my-project'
+      project_id: 'proj'
       network_name: 'apigee-network'
       range_name: 'apigee-range'
       display_name: 'my_custom_report'
@@ -48,7 +48,7 @@ examples:
   - name: 'apigee_custom_report_basic_test'
     primary_resource_id: 'apigee_custom_report'
     vars:
-      project_id: 'my-project'
+      project_id: 'proj'
       network_name: 'apigee-network'
       range_name: 'apigee-range'
       display_name: 'my_custom_report'
@@ -59,7 +59,7 @@ examples:
     external_providers: ["time"]
   - name: 'apigee_custom_report_full'
     vars:
-      project_id: 'my-project'
+      project_id: 'proj'
       network_name: 'apigee-network'
       range_name: 'apigee-range'
       display_name: 'my_detailed_report'
@@ -67,7 +67,7 @@ examples:
   - name: 'apigee_custom_report_full_test'
     primary_resource_id: 'apigee_custom_report'
     vars:
-      project_id: 'my-project'
+      project_id: 'proj'
       network_name: 'apigee-network'
       range_name: 'apigee-range'
       display_name: 'my_detailed_report'
@@ -146,22 +146,27 @@ properties:
     type: String
     description: |
       The start time for the report data. Typically a timestamp string.
+    ignore_read: true
   - name: 'toTime'
     type: String
     description: |
       The end time for the report data. Typically a timestamp string.
+    ignore_read: true
   - name: 'topk'
     type: String
     description: |
       The number of top results to return. Used for top-k queries.
+    ignore_read: true
   - name: 'limit'
     type: String
     description: |
       The maximum number of rows to return in the report.
+    ignore_read: true
   - name: 'offset'
     type: String
     description: |
       The offset for paginating through report results.
+    ignore_read: true
   - name: 'chartType'
     type: String
     description: |
@@ -176,6 +181,7 @@ properties:
     type: Array
     description: |
       Comments associated with the custom report.
+    ignore_read: true
     item_type:
       type: String
   - name: 'properties'
