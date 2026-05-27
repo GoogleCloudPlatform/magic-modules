@@ -78,6 +78,7 @@ properties:
         properties:
         - name: 'retentionDurationDays'
           type: Integer
+          send_empty_value: true
           description: |
             The retention duration for snapshots in the recycle bin after which the
             snapshots are automatically deleted from recycle bin.
