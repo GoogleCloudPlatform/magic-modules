@@ -1,6 +1,5 @@
 package dataplex_test
 
-{{- if ne $.TargetVersionName "ga" }}
 import (
 	"testing"
 
@@ -19,7 +18,7 @@ func TestAccDataplexDataProduct_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// STEP 1: Initial Creation
@@ -65,8 +64,6 @@ resource "google_dataplex_data_product" "example" {
   data_product_id = "%{data_product_id}"
   display_name    = "initial display name"
   owner_emails    = ["terraform-test@google.com"]
-
-  provider = google-beta
 }
 `, context)
 }
@@ -83,9 +80,6 @@ resource "google_dataplex_data_product" "example" {
   labels = {
     env = "test"
   }
-
-  provider = google-beta
 }
 `, context)
 }
-{{- end }}
