@@ -2,7 +2,7 @@ resource "google_compute_snapshot_recycle_bin_policy" "{{$.PrimaryResourceId}}" 
   provider = google-beta
 
   rules {
-    name = "default"
+    name = "some-project/12345/6789"
     standard_snapshots {
       retention_duration_days = 2
     }
