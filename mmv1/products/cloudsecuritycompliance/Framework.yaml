@@ -71,6 +71,7 @@ parameters:
       Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
+    default_from_api: true
     deprecation_message: "Use `parent` instead."
     exactly_one_of:
       - parent
