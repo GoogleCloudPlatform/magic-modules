@@ -59,27 +59,14 @@ samples:
           display_name: "rag-corpus-full"
   - name: "vertex_ai_rag_corpus_pinecone"
     primary_resource_id: "default"
-    exclude_test: true
     steps:
       - name: "vertex_ai_rag_corpus_pinecone"
         vars:
           description: "pinecone backend"
         resource_id_vars:
           display_name: "rag-corpus-pinecone"
-  - name: "vertex_ai_rag_corpus_vector_search"
-    primary_resource_id: "default"
-    exclude_test: true
-    steps:
-      - name: "vertex_ai_rag_corpus_vector_search"
-        vars:
-          description: "vertex vector search backend"
-        test_env_vars:
-          project: "PROJECT_NAME"
-        resource_id_vars:
-          display_name: "rag-corpus-vector-search"
   - name: "vertex_ai_rag_corpus_search_config"
     primary_resource_id: "default"
-    exclude_test: true
     steps:
       - name: "vertex_ai_rag_corpus_search_config"
         vars:
