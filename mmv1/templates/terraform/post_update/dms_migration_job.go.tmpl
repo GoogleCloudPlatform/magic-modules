@@ -95,11 +95,19 @@ if err != nil {
 }
 
 isTransitionToRunning := false
+isTransitionToNotStarted := false
 if d.HasChange("state") {
 	oldRaw, newRaw := d.GetChange("state")
 	if (oldRaw.(string) == "NOT_STARTED" || oldRaw.(string) == "") && newRaw.(string) == "RUNNING" {
 		isTransitionToRunning = true
 	}
+	if oldRaw.(string) == "RUNNING" && newRaw.(string) == "NOT_STARTED" {
+		isTransitionToNotStarted = true
+	}
+}
+
+if isTransitionToNotStarted {
+	return fmt.Errorf("Transition from RUNNING to NOT_STARTED is not supported. Please destroy and recreate the Migration Job if you need to reset it.")
 }
 
 isObjectsConfigUpdate := d.HasChange("objects_config")
@@ -127,17 +135,6 @@ if isTransitionToRunning || isObjectsConfigUpdate {
 			return uerr
 		}
 		return fmt.Errorf("Error waiting for Verify Migration Job operation: %s", err)
-	}
-}
-
-// Handle State Transitions
-if d.HasChange("state") {
-	oldRaw, newRaw := d.GetChange("state")
-	oldState := oldRaw.(string)
-	newState := newRaw.(string)
-
-	if oldState == "RUNNING" && newState == "NOT_STARTED" {
-		return fmt.Errorf("Transition from RUNNING to NOT_STARTED is not supported. Please destroy and recreate the Migration Job if you need to reset it.")
 	}
 
 	if isTransitionToRunning {
