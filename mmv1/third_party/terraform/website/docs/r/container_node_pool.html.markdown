@@ -364,3 +364,23 @@ $ terraform import google_container_node_pool.default {{project_id}}/{{location}
 
 $ terraform import google_container_node_pool.default {{location}}/{{cluster_id}}/{{pool_id}}
 ```
+
+<a name="nested_node_config"></a>The `node_config` block supports:
+
+* `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_linux_node_config).
+
+<a name="nested_linux_node_config"></a>The `linux_node_config` block supports:
+
+* `custom_node_init` - (Optional) Custom node init settings. Structure is [documented below](#nested_custom_node_init).
+
+<a name="nested_custom_node_init"></a>The `custom_node_init` block supports:
+
+* `init_script` - (Optional) The init script configuration. Structure is [documented below](#nested_init_script).
+
+<a name="nested_init_script"></a>The `init_script` block supports:
+
+* `gcs_uri` - (Optional) The Google Cloud Storage URI for storing the init script. Format: `gs://BUCKET_NAME/OBJECT_NAME`. The service account on the nodepool must have read access to the object. Conflicts with `gcp_secret_manager_secret_uri`.
+
+* `gcs_generation` - (Optional) The generation of the init script in Google Cloud Storage.
+
+* `gcp_secret_manager_secret_uri` - (Optional) The Google Cloud Secret Manager secret version URI for storing the init script. Format: `projects/PROJECT_ID/secrets/SECRET_NAME/versions/VERSION`. The service account on the nodepool must have access to the secret version. Conflicts with `gcs_uri`.
