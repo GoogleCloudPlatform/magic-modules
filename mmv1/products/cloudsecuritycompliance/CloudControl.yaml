@@ -61,7 +61,6 @@ parameters:
       * `projects/{{project}}`
       * `organizations/{{organization}}`
     immutable: true
-    output: true
     default_from_api: true
     url_param_only: true
     exactly_one_of:
