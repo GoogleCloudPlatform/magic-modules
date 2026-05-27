@@ -87,3 +87,14 @@ func validateHttpHeaders() schema.SchemaValidateFunc {
 		return
 	}
 }
+
+func is409SyncMutateCannotBeQueuedError(err error) (bool, string) {
+	if err == nil {
+		return false, ""
+	}
+	errStr := err.Error()
+	if strings.Contains(errStr, "Error 409") && strings.Contains(errStr, "sync mutate calls cannot be queued") {
+		return true, "sync mutate calls cannot be queued"
+	}
+	return false, ""
+}
