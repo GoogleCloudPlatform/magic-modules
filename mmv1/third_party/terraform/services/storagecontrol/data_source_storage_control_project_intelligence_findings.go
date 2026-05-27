@@ -271,6 +271,21 @@ func storageControlTopBucketsSchema() *schema.Schema {
 											Computed:    true,
 											Description: `The percentage increase in throttled requests for the object prefix.`,
 										},
+										"total_operations_count": {
+											Type:     schema.TypeString,
+											Computed: true,
+											Description: `The total count of operations for the object prefix.`,
+										},
+										"total_egress_bytes": {
+											Type:     schema.TypeString,
+											Computed: true,
+											Description: `The total cross-region egress volume in bytes from the object prefix.`,
+										},
+										"throttled_requests": {
+											Type:     schema.TypeString,
+											Computed: true,
+											Description: `The count of throttled requests for the object prefix.`,
+										},
 									},
 								},
 							},
