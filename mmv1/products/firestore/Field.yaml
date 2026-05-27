@@ -68,6 +68,24 @@ examples:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+  - name: 'firestore_field_timestamp_enterprise'
+    primary_resource_id: 'timestamp-enterprise'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+  - name: 'firestore_field_timestamp_with_ttl_offset_enterprise'
+    primary_resource_id: 'timestamp-with-offset-enterprise'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
   - name: 'firestore_field_timestamp'
     primary_resource_id: 'timestamp'
     vars:
