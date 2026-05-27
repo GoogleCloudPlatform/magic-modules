@@ -465,7 +465,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 		if errors.Is(err, os.ErrNotExist) {
 			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
 				log.Printf("no handwritten test file found at %s", handwrittenTestFilePath)
-				return nil
+				return tgc.addTestsByTestNameMatch(object)
 			}
 			handwrittenTestFilePath += ".tmpl"
 			data, err = fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)
