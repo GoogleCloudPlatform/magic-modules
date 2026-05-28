@@ -76,6 +76,12 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
+  - name: environmentId
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Id of the environment record.
 properties:
   - name: displayName
     type: String
@@ -84,14 +90,6 @@ properties:
       Name of the environment
       MAX_NAME_LENGTH = 256
     immutable: true
-  - name: environmentId
-    type: String
-    output: true
-    immutable: true
-    default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-    description: |-
-      Id of the environment record.
   - name: description
     type: String
     required: true
