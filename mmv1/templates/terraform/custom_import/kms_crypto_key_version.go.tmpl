@@ -3,7 +3,7 @@
 	importId := d.Id()
 	importByIdentity := importId == ""
 	var identityErr error
-	var identity *schema.ResourceIdentityData
+	var identity *schema.IdentityData
 	if importId == "" {
 		identity, identityErr = d.Identity()
 		if identityErr != nil || identity == nil {
