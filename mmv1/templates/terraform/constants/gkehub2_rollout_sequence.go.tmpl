@@ -146,6 +146,7 @@ func fetchCurrentTargetVersions(d *schema.ResourceData, meta interface{}) (strin
         return targetCPVer, targetNodeVer, nil
 }
 
+{{- if ne $.ProductMetadata.Compiler "terraformgoogleconversion-codegen" }}
 // Makes an UpgradeRolloutSequence call for the provided upgradeType and version.
 func triggerUpgradeRolloutSequence(d *schema.ResourceData, meta interface{}, upgradeType string, version string) error {
         config := meta.(*transport_tpg.Config)
@@ -195,3 +196,4 @@ func triggerUpgradeRolloutSequence(d *schema.ResourceData, meta interface{}, upg
 
         return nil
 }
+{{- end }}
