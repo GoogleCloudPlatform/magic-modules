@@ -1,0 +1,131 @@
+package compute_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+)
+
+func TestAccComputeHttpHealthCheck_update(t *testing.T) {
+	t.Parallel()
+
+	var healthCheck map[string]interface{}
+
+	hhckName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeHttpHealthCheckDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeHttpHealthCheck_update1(hhckName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeHttpHealthCheckExists(
+						t, "google_compute_http_health_check.foobar", &healthCheck),
+					testAccCheckComputeHttpHealthCheckRequestPath(
+						"/not_default", &healthCheck),
+					testAccCheckComputeHttpHealthCheckThresholds(
+						2, 2, &healthCheck),
+				),
+			},
+			{
+				Config: testAccComputeHttpHealthCheck_update2(hhckName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeHttpHealthCheckExists(
+						t, "google_compute_http_health_check.foobar", &healthCheck),
+					testAccCheckComputeHttpHealthCheckRequestPath(
+						"/", &healthCheck),
+					testAccCheckComputeHttpHealthCheckThresholds(
+						10, 10, &healthCheck),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckComputeHttpHealthCheckExists(t *testing.T, n string, healthCheck *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.Attributes["name"] == "" {
+			return fmt.Errorf("No name is set")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+
+		url := fmt.Sprintf("%sprojects/%s/global/httpHealthChecks/%s", transport_tpg.BaseUrl(compute.Product, config), config.Project, rs.Primary.Attributes["name"])
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return err
+		}
+
+		if found["name"].(string) != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("HttpHealthCheck not found")
+		}
+
+		*healthCheck = found
+
+		return nil
+	}
+}
+
+func testAccCheckComputeHttpHealthCheckRequestPath(path string, healthCheck *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if (*healthCheck)["requestPath"].(string) != path {
+			return fmt.Errorf("RequestPath doesn't match: expected %s, got %s", path, (*healthCheck)["requestPath"].(string))
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeHttpHealthCheckThresholds(healthy, unhealthy int64, healthCheck *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if int64((*healthCheck)["healthyThreshold"].(float64)) != healthy {
+			return fmt.Errorf("HealthyThreshold doesn't match: expected %d, got %d", healthy, int64((*healthCheck)["healthyThreshold"].(float64)))
+		}
+
+		if int64((*healthCheck)["unhealthyThreshold"].(float64)) != unhealthy {
+			return fmt.Errorf("UnhealthyThreshold doesn't match: expected %d, got %d", unhealthy, int64((*healthCheck)["unhealthyThreshold"].(float64)))
+		}
+
+		return nil
+	}
+}
+
+func testAccComputeHttpHealthCheck_update1(hhckName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_http_health_check" "foobar" {
+  name         = "%s"
+  description  = "Resource created for Terraform acceptance testing"
+  request_path = "/not_default"
+}
+`, hhckName)
+}
+
+func testAccComputeHttpHealthCheck_update2(hhckName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_http_health_check" "foobar" {
+  name                = "%s"
+  description         = "Resource updated for Terraform acceptance testing"
+  healthy_threshold   = 10
+  unhealthy_threshold = 10
+}
+`, hhckName)
+}

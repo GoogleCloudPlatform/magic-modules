@@ -11,7 +11,7 @@ import (
 func TestAccEphemeralGoogleClientConfig_basic(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -29,7 +29,7 @@ func TestAccEphemeralGoogleClientConfig_omitLocation(t *testing.T) {
 	t.Setenv("GOOGLE_REGION", "")
 	t.Setenv("GOOGLE_ZONE", "")
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -46,7 +46,7 @@ func TestAccEphemeralGoogleClientConfig_invalidCredentials(t *testing.T) {
 	badCreds := acctest.GenerateFakeCredentialsJson("test")
 	t.Setenv("GOOGLE_CREDENTIALS", badCreds)
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -61,7 +61,7 @@ func TestAccEphemeralGoogleClientConfig_invalidCredentials(t *testing.T) {
 func TestAccEphemeralGoogleClientConfig_usedInProvider(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

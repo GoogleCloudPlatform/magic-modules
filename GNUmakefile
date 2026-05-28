@@ -5,15 +5,15 @@ default: build
 
 # mm setup
 ifneq ($(PRODUCT),)
-  mmv1_compile=--product $(PRODUCT)
+  mmv1_args=--product $(PRODUCT)
 endif
 
 ifneq ($(RESOURCE),)
-  mmv1_compile += --resource $(RESOURCE)
+  mmv1_args += --resource $(RESOURCE)
 endif
 
 ifneq ($(OVERRIDES),)
-  mmv1_compile += --overrides $(OVERRIDES)
+  mmv1_args += --overrides $(OVERRIDES)
 endif
 
 UNAME := $(shell uname)
@@ -32,18 +32,31 @@ ifneq ($(SKIP_CLEAN),)
   endif
 endif
 
+ifeq ($(USE_BAZEL), 1)
+	MM_BINARY=../bazel-bin/mmv1/mmv1_/mmv1
+else
+	MM_BINARY=../bin/mmv1
+endif
+
 terraform build provider: validate_environment clean-provider mmv1
 	@echo "Provider generation process finished for $(VERSION) in $(OUTPUT_PATH)"
 
+mm_binary:
+	@echo "Building mmv1 binary";
+	if [ "$(USE_BAZEL)" != "1" ]; then \
+		cd mmv1 && go build -o $(MM_BINARY) .; \
+	else \
+		bazel build //mmv1;\
+	fi
 
-mmv1:
-	@echo "Executing mmv1 build for $(OUTPUT_PATH)"; 
+mmv1: mm_binary
+	@echo "Executing mmv1 build for $(OUTPUT_PATH)";
 	@cd mmv1;\
 		if [ "$(VERSION)" = "ga" ]; then \
-			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) \
-			&& go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
+			$(MM_BINARY) --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_args) \
+			&& $(MM_BINARY) --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_args); \
 		else \
-			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
+			$(MM_BINARY) --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_args); \
 		fi
 
 clean-provider: check_safe_build
@@ -82,24 +95,27 @@ clean-tgc:
 		rm -rf ./tfplan2cai/converters/google/provider;\
 		rm -rf ./tfplan2cai/converters/google/resources;\
 		rm -rf ./cai2hcl/*;\
-		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
+		rm -rf ./tfplan2cai/test/*;\
 		rm -rf ./pkg/*;\
 		rm -rf ./test/*;\
 		rm -rf ./cmd/*;\
 
-tgc:
-	cd mmv1;\
-		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile)\
-		&& go run . --version ga --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile)\
-		&& go run . --version ga --provider tgc_next --output $(OUTPUT_PATH) $(mmv1_compile);\
+tgc: mm_binary
+	@cd mmv1;\
+		$(MM_BINARY) --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_args)\
+		&& $(MM_BINARY) --version ga --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_args)\
+		&& $(MM_BINARY) --version ga --provider tgc_next --output $(OUTPUT_PATH) $(mmv1_args);\
 
-tf-oics:
-	cd mmv1;\
-		go run . --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_compile);\
+tf-oics: mm_binary
+	@cd mmv1;\
+		$(MM_BINARY) --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_args);\
 
 test:
-	cd mmv1; \
-		go test ./...
+	if [ "$(USE_BAZEL)" != "1" ]; then \
+		cd mmv1 && go test ./...; \
+	else \
+		bazel test //...;\
+	fi
 
 validate_environment: check_parameters check_safe_build
 

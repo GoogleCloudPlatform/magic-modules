@@ -1,0 +1,17 @@
+resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}" {
+  short_name = "{{index $.Vars "sec_policy_name"}}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  type         = "CLOUD_ARMOR"
+
+  advanced_options_config {
+    json_parsing = "STANDARD_WITH_GRAPHQL"
+    log_level    = "VERBOSE"
+    
+    json_custom_config {
+      content_types = ["application/vnd.api+json"]
+    }
+
+    user_ip_request_headers     = ["X-Forwarded-For"]
+    request_body_inspection_size = "64KB"
+  }
+}

@@ -1,0 +1,193 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: QaQuestion
+description: A single question to be scored by the Insights QA feature.
+base_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions
+self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{revision}}/qaQuestions/{{name}}
+autogen_status: UWFRdWVzdGlvbg==
+examples:
+  - name: contact_center_insights_qa_question_basic
+    primary_resource_id: default
+    vars:
+      scorecard_id: qa-scorecard
+      revision_id: qa-revision
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: qaScorecard
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: revision
+
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: abbreviation
+    type: String
+    description: |-
+      Short, descriptive string, used in the UI where it's not practical
+      to display the full question body. E.g., "Greeting".
+  - name: answerChoices
+    type: Array
+    description: A list of valid answers to the question, which the LLM must choose from.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: boolValue
+          type: Boolean
+          description: Boolean value.
+        - name: key
+          type: String
+          description: A short string used as an identifier.
+        - name: naValue
+          type: Boolean
+          description: |-
+            A value of "Not Applicable (N/A)". If provided, this field may only
+            be set to `true`. If a question receives this answer, it will be
+            excluded from any score calculations.
+        - name: numValue
+          type: Double
+          description: Numerical value.
+        - name: score
+          type: Double
+          description: |-
+            Numerical score of the answer, used for generating the overall score of
+            a QaScorecardResult. If the answer uses na_value, this field is unused.
+        - name: strValue
+          type: String
+          description: String value.
+  - name: answerInstructions
+    type: String
+    description: Instructions describing how to determine the answer.
+  - name: createTime
+    type: String
+    description: The time at which this question was created.
+    output: true
+  - name: metrics
+    type: NestedObject
+    description: |-
+      A wrapper representing metrics calculated against a test-set on a LLM that
+      was fine tuned for this question.
+    properties:
+      - name: accuracy
+        type: Double
+        description: |-
+          Accuracy of the model. Measures the percentage of correct answers the
+          model gave on the test set.
+        output: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the question.
+      Format:
+      projects/{project}/locations/{location}/qaScorecards/{qa_scorecard}/revisions/{revision}/qaQuestions/{qa_question}
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: order
+    type: Integer
+    description: Defines the order of the question within its parent scorecard revision.
+  - name: predefinedQuestionConfig
+    type: NestedObject
+    description: |-
+      Configuration for a predefined question. This field will only be set if the
+      Question Type is predefined.
+    properties:
+      - name: type
+        type: String
+        description: |-
+          The type of the predefined question.
+          Possible values:
+          CONVERSATION_OUTCOME
+          CONVERSATION_OUTCOME_ESCALATION_INITIATOR_ROLE
+  - name: qaQuestionDataOptions
+    type: NestedObject
+    description: Options for configuring the data used to generate the QA question.
+    properties:
+      - name: conversationDataOptions
+        type: NestedObject
+        description: |-
+          Options for configuring what metadata is included in the conversation data
+          used in QAI and Discovery Engine.
+        properties:
+          - name: includeDialogflowInteractionData
+            type: Boolean
+            description: |-
+              Whether to include the per turn Dialogflow interaction data in conversation
+              transcript.
+  - name: questionBody
+    type: String
+    description: Question text. E.g., "Did the agent greet the customer?"
+  - name: questionType
+    type: String
+    description: |-
+      The type of question.
+      Possible values:
+      CUSTOMIZABLE
+      PREDEFINED
+  - name: tags
+    type: Array
+    description: |-
+      Questions are tagged for categorization and scoring. Tags can either be:
+      - Default Tags: These are predefined categories. They are identified by
+      their string value (e.g., "BUSINESS", "COMPLIANCE", and "CUSTOMER").
+      - Custom Tags: These are user-defined categories. They are identified by
+      their full resource name (e.g.,
+      projects/{project}/locations/{location}/qaQuestionTags/{qa_question_tag}).
+      Both default and custom tags are used to group questions and to influence
+      the scoring of each question.
+    item_type:
+      type: String
+  - name: tuningMetadata
+    type: NestedObject
+    description: |-
+      Metadata about the tuning operation for the question. Will only be set if a
+      scorecard containing this question has been tuned.
+    properties:
+      - name: datasetValidationWarnings
+        type: Array
+        description: |-
+          A list of any applicable data validation warnings about the question's
+          feedback labels.
+        item_type:
+          type: String
+      - name: totalValidLabelCount
+        type: String
+        description: |-
+          Total number of valid labels provided for the question at the time of
+          tuining.
+      - name: tuningError
+        type: String
+        description: |-
+          Error status of the tuning operation for the question. Will only be set
+          if the tuning operation failed.
+  - name: updateTime
+    type: String
+    description: The most recent time at which the question was updated.
+    output: true

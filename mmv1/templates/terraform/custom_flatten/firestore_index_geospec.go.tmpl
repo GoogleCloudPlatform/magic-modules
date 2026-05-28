@@ -1,0 +1,13 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	// work around the inability to set default map fields
+	if v != nil && len(v.(map[string]interface{})) == 0 {
+		transformed := make(map[string]interface{})
+		transformed["geo_json_indexing_disabled"] = false
+		return []interface{}{transformed}
+	} else if v != nil && len(v.(map[string]interface{})) == 1 {
+		transformed := make(map[string]interface{})
+		transformed["geo_json_indexing_disabled"] = v.(map[string]interface{})["geoJsonIndexingDisabled"]
+		return []interface{}{transformed}
+	}
+	return v
+}

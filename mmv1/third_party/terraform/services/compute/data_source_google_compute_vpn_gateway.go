@@ -1,0 +1,109 @@
+package compute
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceGoogleComputeVpnGateway() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourceGoogleComputeVpnGatewayRead,
+
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"project": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"self_link": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"network": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+func dataSourceGoogleComputeVpnGatewayRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	region, err := tpgresource.GetRegion(d, config)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	name := d.Get("name").(string)
+	id := fmt.Sprintf("projects/%s/regions/%s/targetVpnGateways/%s", project, region, name)
+
+	url := fmt.Sprintf("%sprojects/%s/regions/%s/targetVpnGateways/%s", transport_tpg.BaseUrl(Product, config), project, region, name)
+	gateway, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("VPN Gateway Not Found : %s", name), id)
+	}
+	if err := d.Set("network", tpgresource.ConvertSelfLinkToV1(gateway["network"].(string))); err != nil {
+		return fmt.Errorf("Error setting network: %s", err)
+	}
+	if err := d.Set("region", gateway["region"]); err != nil {
+		return fmt.Errorf("Error setting region: %s", err)
+	}
+	if err := d.Set("self_link", gateway["selfLink"]); err != nil {
+		return fmt.Errorf("Error setting self_link: %s", err)
+	}
+	if err := d.Set("description", gateway["description"]); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	d.SetId(id)
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_vpn_gateway",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeVpnGateway(),
+	}.Register()
+}

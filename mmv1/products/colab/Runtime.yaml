@@ -53,7 +53,7 @@ examples:
       runtime_name: 'colab-runtime'
       key_name: 'my-crypto-key'
     test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'desired_state'
       - 'auto_upgrade'

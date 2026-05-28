@@ -276,6 +276,9 @@ properties:
       using PARTNER type this will be managed upstream.
     immutable: true
     default_from_api: true
+    # This field is not returned in the CAI asset for L2_DEDICATED attachment types.
+    # This could be an API issue, as the field is not in the API response as well.
+    is_missing_in_cai: true
   - name: 'ipsecInternalAddresses'
     type: Array
     description: |

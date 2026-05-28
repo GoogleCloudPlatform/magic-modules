@@ -1,0 +1,7 @@
+resource "google_dialogflow_sip_trunk" "basic_trunk" {
+  display_name = "{{index $.Vars "trunk_name"}}"
+  location     = "europe-west3"
+  expected_hostname = [
+    "{{index $.Vars "trunk_name"}}.example.com"
+  ]
+}

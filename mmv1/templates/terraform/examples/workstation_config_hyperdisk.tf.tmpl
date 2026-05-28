@@ -1,0 +1,40 @@
+resource "google_compute_network" "default" {
+  name                    = "{{index $.Vars "workstation_cluster_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "{{index $.Vars "workstation_cluster_name"}}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.default.name
+}
+
+resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
+  workstation_cluster_id = "{{index $.Vars "workstation_cluster_name"}}"
+  network                = google_compute_network.default.id
+  subnetwork             = google_compute_subnetwork.default.id
+  location               = "us-central1"
+}
+
+resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
+  workstation_config_id  = "{{index $.Vars "workstation_config_name"}}"
+  workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
+  location               = "us-central1"
+
+  host {
+    gce_instance {
+      # C3 machine types require Hyperdisk storage
+      machine_type = "c3-standard-22"
+    }
+  }
+
+  persistent_directories {
+    mount_path = "/home"
+    gce_hd {
+      size_gb         = 200
+      reclaim_policy  = "DELETE"
+      archive_timeout = "3600s"
+    }
+  }
+}

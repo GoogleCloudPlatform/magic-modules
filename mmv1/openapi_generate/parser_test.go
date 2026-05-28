@@ -25,12 +25,12 @@ func TestMapType(t *testing.T) {
 	}
 
 	petSchema := doc.Paths.Map()["/pets"].Post.RequestBody.Value.Content["application/json"].Schema
-	mmObject := WriteObject("pet", petSchema, propType(petSchema), false, make(map[string]bool))
+	mmObject := WriteObject("pet", petSchema, propType(petSchema), false, make(map[string]bool), make(map[*openapi3.Schema]bool))
 	if mmObject.KeyName == "" || mmObject.Type != "Map" {
 		t.Error("Failed to parse map type")
 	}
-	if len(mmObject.ValueType.Properties) != 5 {
-		t.Errorf("Expected 5 properties, found %d", len(mmObject.ValueType.Properties))
+	if len(mmObject.ValueType.Properties) != 6 {
+		t.Errorf("Expected 6 properties, found %d", len(mmObject.ValueType.Properties))
 	}
 
 	var recursivePet *api.Type
@@ -81,5 +81,91 @@ func TestFindResources(t *testing.T) {
 	}
 	if res["Breeds"].update == nil {
 		t.Error("Singleton update should be found")
+	}
+}
+
+func TestReadOnlyPropagation(t *testing.T) {
+	_ = NewOpenapiParser("/fake", "/fake")
+	ctx := t.Context()
+	loader := &openapi3.Loader{Context: ctx, IsExternalRefsAllowed: true}
+	doc, err := loader.LoadFromData(testData)
+	if err != nil {
+		t.Fatalf("Could not load data %s", err)
+	}
+	err = doc.Validate(ctx)
+	if err != nil {
+		t.Fatalf("Could not validate data %s", err)
+	}
+
+	petSchema := doc.Paths.Map()["/pets"].Post.RequestBody.Value.Content["application/json"].Schema
+	mmObject := WriteObject("pet", petSchema, propType(petSchema), false, make(map[string]bool), make(map[*openapi3.Schema]bool))
+
+	var readOnlyObject *api.Type
+	for _, p := range mmObject.ValueType.Properties {
+		if p.Name == "readOnlyObject" {
+			readOnlyObject = p
+			break
+		}
+	}
+
+	if readOnlyObject == nil {
+		t.Fatal("Failed to find readOnlyObject property")
+	}
+
+	if !readOnlyObject.Output {
+		t.Error("Expected readOnlyObject to have Output=true")
+	}
+
+	// Check nested string property
+	var nameProp *api.Type
+	var nestedProp *api.Type
+	var arrayNestedProp *api.Type
+	for _, p := range readOnlyObject.Properties {
+		switch p.Name {
+		case "name":
+			nameProp = p
+		case "nested":
+			nestedProp = p
+		case "arrayNested":
+			arrayNestedProp = p
+		}
+	}
+
+	if nameProp == nil || !nameProp.Output {
+		t.Errorf("Expected property 'name' under 'readOnlyObject' to be parsed and have Output=true, got: %+v", nameProp)
+	}
+
+	if nestedProp == nil || !nestedProp.Output {
+		t.Errorf("Expected property 'nested' under 'readOnlyObject' to be parsed and have Output=true, got: %+v", nestedProp)
+	} else {
+		var subNameProp *api.Type
+		for _, p := range nestedProp.Properties {
+			if p.Name == "subName" {
+				subNameProp = p
+				break
+			}
+		}
+		if subNameProp == nil || !subNameProp.Output {
+			t.Errorf("Expected 'subName' under 'nested' to have Output=true, got: %+v", subNameProp)
+		}
+	}
+
+	if arrayNestedProp == nil || !arrayNestedProp.Output {
+		t.Errorf("Expected property 'arrayNested' under 'readOnlyObject' to be parsed and have Output=true, got: %+v", arrayNestedProp)
+	} else {
+		if arrayNestedProp.ItemType == nil || !arrayNestedProp.ItemType.Output {
+			t.Errorf("Expected 'ItemType' of 'arrayNested' to have Output=true, got: %+v", arrayNestedProp.ItemType)
+		} else {
+			var itemSubNameProp *api.Type
+			for _, p := range arrayNestedProp.ItemType.Properties {
+				if p.Name == "itemSubName" {
+					itemSubNameProp = p
+					break
+				}
+			}
+			if itemSubNameProp == nil || !itemSubNameProp.Output {
+				t.Errorf("Expected 'itemSubName' under 'arrayNested.ItemType' to have Output=true, got: %+v", itemSubNameProp)
+			}
+		}
 	}
 }
