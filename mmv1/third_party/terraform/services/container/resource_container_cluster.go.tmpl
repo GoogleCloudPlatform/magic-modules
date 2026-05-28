@@ -23,9 +23,9 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 {{ if eq $.TargetVersionName `ga` }}
-"google.golang.org/api/container/v1"
+	"google.golang.org/api/container/v1"
 {{- else }}
-container "google.golang.org/api/container/v1beta1"
+	container "google.golang.org/api/container/v1beta1"
 {{- end }}
 )
 
@@ -36,30 +36,6 @@ func Rfc3339TimeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		return true
 	}
 	return false
-}
-
-func durationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if old == "" || new == "" {
-		return false
-	}
-	oldDuration, err := time.ParseDuration(old)
-	if err != nil {
-		return false
-	}
-	newDuration, err := time.ParseDuration(new)
-	if err != nil {
-		return false
-	}
-	return oldDuration == newDuration
-}
-
-func validateDuration(v interface{}, k string) (ws []string, errors []error) {
-	s := v.(string)
-	_, err := time.ParseDuration(s)
-	if err != nil {
-		errors = append(errors, fmt.Errorf("%q is not a valid duration: %s", k, err))
-	}
-	return
 }
 
 func durationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -313,8 +289,8 @@ func ResourceContainerCluster() *schema.Resource {
 	},
 
 		Importer: &schema.ResourceImporter{
-		State: resourceContainerClusterStateImporter,
-	},
+			State: resourceContainerClusterStateImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -325,247 +301,247 @@ func ResourceContainerCluster() *schema.Resource {
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
 
-		if len(value) > 40 {
-		errors = append(errors, fmt.Errorf(
-		"%q cannot be longer than 40 characters", k))
-	}
-		if !regexp.MustCompile("^[a-z0-9-]+$").MatchString(value) {
-		errors = append(errors, fmt.Errorf(
-		"%q can only contain lowercase letters, numbers and hyphens", k))
-	}
-		if !regexp.MustCompile("^[a-z]").MatchString(value) {
-		errors = append(errors, fmt.Errorf(
-		"%q must start with a letter", k))
-	}
-		if !regexp.MustCompile("[a-z0-9]$").MatchString(value) {
-		errors = append(errors, fmt.Errorf(
-		"%q must end with a number or a letter", k))
-	}
-		return
-	},
-	},
+					if len(value) > 40 {
+						errors = append(errors, fmt.Errorf(
+							"%q cannot be longer than 40 characters", k))
+					}
+					if !regexp.MustCompile("^[a-z0-9-]+$").MatchString(value) {
+						errors = append(errors, fmt.Errorf(
+							"%q can only contain lowercase letters, numbers and hyphens", k))
+					}
+					if !regexp.MustCompile("^[a-z]").MatchString(value) {
+						errors = append(errors, fmt.Errorf(
+							"%q must start with a letter", k))
+					}
+					if !regexp.MustCompile("[a-z0-9]$").MatchString(value) {
+						errors = append(errors, fmt.Errorf(
+							"%q must end with a number or a letter", k))
+					}
+					return
+				},
+			},
 
-		"operation": {
-		Type:     schema.TypeString,
-		Computed: true,
-	},
+			"operation": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 
-		"location": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
-		ForceNew:    true,
-		Description: `The location (region or zone) in which the cluster master will be created, as well as the default node location. If you specify a zone (such as us-central1-a), the cluster will be a zonal cluster with a single cluster master. If you specify a region (such as us-west1), the cluster will be a regional cluster with multiple masters spread across zones in the region, and with default node locations in those zones as well.`,
-	},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: `The location (region or zone) in which the cluster master will be created, as well as the default node location. If you specify a zone (such as us-central1-a), the cluster will be a zonal cluster with a single cluster master. If you specify a region (such as us-west1), the cluster will be a regional cluster with multiple masters spread across zones in the region, and with default node locations in those zones as well.`,
+			},
 
-		"node_locations": {
-		Type:        schema.TypeSet,
-		Optional:    true,
-		Computed:    true,
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Description: `The list of zones in which the cluster's nodes are located. Nodes must be in the region of their regional cluster or in the same region as their cluster's zone for zonal clusters. If this is specified for a zonal cluster, omit the cluster's zone.`,
-	},
+			"node_locations": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: `The list of zones in which the cluster's nodes are located. Nodes must be in the region of their regional cluster or in the same region as their cluster's zone for zonal clusters. If this is specified for a zonal cluster, omit the cluster's zone.`,
+			},
 
-		"deletion_protection": {
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     true,
-		Description: `When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the cluster will fail. When the field is set to false, deleting the cluster is allowed.`,
-	},
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: `When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the cluster will fail. When the field is set to false, deleting the cluster is allowed.`,
+			},
 
-		"addons_config": {
-		Type:        schema.TypeList,
-		Optional:    true,
-		Computed:    true,
-		MaxItems:    1,
-		Description: `The configuration for addons supported by GKE.`,
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"http_load_balancing": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: addonsConfigKeys,
-		MaxItems:     1,
-		Description:  `The status of the HTTP (L7) load balancing controller addon, which makes it easy to set up HTTP load balancers for services in a cluster. It is enabled by default; set disabled = true to disable.`,
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"disabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-	},
-	},
-	},
-	},
-		"horizontal_pod_autoscaling": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: addonsConfigKeys,
-		MaxItems:     1,
-		Description:  `The status of the Horizontal Pod Autoscaling addon, which increases or decreases the number of replica pods a replication controller has based on the resource usage of the existing pods. It ensures that a Heapster pod is running in the cluster, which is also used by the Cloud Monitoring service. It is enabled by default; set disabled = true to disable.`,
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"disabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-	},
-	},
-	},
-	},
-		"network_policy_config": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: addonsConfigKeys,
-		MaxItems:     1,
-		Description:  `Whether we should enable the network policy addon for the master. This must be enabled in order to enable network policy for the nodes. To enable this, you must also define a network_policy block, otherwise nothing will happen. It can only be disabled if the nodes already do not have network policies enabled. Defaults to disabled; set disabled = false to enable.`,
-		ConflictsWith: []string{"enable_autopilot"},
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"disabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-	},
-	},
-	},
-	},
-		"gcp_filestore_csi_driver_config": {
-		Type:          schema.TypeList,
-		Optional:      true,
-		Computed:      true,
-		AtLeastOneOf:  addonsConfigKeys,
-		MaxItems:      1,
-		Description:   `The status of the Filestore CSI driver addon, which allows the usage of filestore instance as volumes. Defaults to disabled for Standard clusters; set enabled = true to enable. It is enabled by default for Autopilot clusters; set enabled = true to enable it explicitly.`,
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"enabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-	},
-	},
-	},
-	},
-		"cloudrun_config": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: addonsConfigKeys,
-		MaxItems:     1,
-		Description:  `The status of the CloudRun addon. It is disabled by default. Set disabled = false to enable.`,
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"disabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-	},
-		"load_balancer_type": {
-		Type:         schema.TypeString,
-		ValidateFunc: validation.StringInSlice([]string{"LOAD_BALANCER_TYPE_INTERNAL"}, false),
-		Optional:     true,
-	},
-	},
-	},
-	},
-		"dns_cache_config": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: addonsConfigKeys,
-		MaxItems:     1,
-		Description:  `The status of the NodeLocal DNSCache addon. It is disabled by default. Set enabled = true to enable.`,
-		ConflictsWith: []string{"enable_autopilot"},
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"enabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-	},
-	},
-	},
-	},
-		"gce_persistent_disk_csi_driver_config": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: addonsConfigKeys,
-		MaxItems:     1,
-		Description:  `Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Set enabled = true to enable. The Compute Engine persistent disk CSI Driver is enabled by default on newly created clusters for the following versions: Linux clusters: GKE version 1.18.10-gke.2100 or later, or 1.19.3-gke.2100 or later.`,
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"enabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-	},
-	},
-	},
-	},
-		"gke_backup_agent_config": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: addonsConfigKeys,
-		MaxItems:     1,
-		Description:  `The status of the Backup for GKE Agent addon. It is disabled by default. Set enabled = true to enable.`,
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"enabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-	},
-	},
-	},
-	},
-		"gcs_fuse_csi_driver_config": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: addonsConfigKeys,
-		MaxItems:     1,
-		Description:  `The status of the GCS Fuse CSI driver addon, which allows the usage of gcs bucket as volumes. Defaults to disabled; set enabled = true to enable.`,
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"enabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-	},
-	},
-	},
-	},
-		"parallelstore_csi_driver_config": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: addonsConfigKeys,
-		MaxItems:     1,
-		Description:  `The status of the Parallelstore CSI driver addon, which allows the usage of Parallelstore instances as volumes. Defaults to disabled; set enabled = true to enable.`,
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"enabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-	},
-	},
-	},
-	},
-		"lustre_csi_driver_config": {
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: addonsConfigKeys,
-		MaxItems:     1,
-		Description:  `Configuration for the Lustre CSI driver. Defaults to disabled; set enabled = true to enable.`,
-		Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-		"enabled": {
-		Type:     schema.TypeBool,
-		Required: true,
-		Description: `Whether the Lustre CSI driver is enabled for this cluster.`,
-	},
-		"enable_legacy_lustre_port": {
-		Type:     schema.TypeBool,
-		Optional: true,
-		Description: `If set to true, the Lustre CSI driver will initialize LNet (the virtual network layer for Lustre kernel module) using port 6988.
+			"addons_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `The configuration for addons supported by GKE.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"http_load_balancing": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the HTTP (L7) load balancing controller addon, which makes it easy to set up HTTP load balancers for services in a cluster. It is enabled by default; set disabled = true to disable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"disabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"horizontal_pod_autoscaling": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Horizontal Pod Autoscaling addon, which increases or decreases the number of replica pods a replication controller has based on the resource usage of the existing pods. It ensures that a Heapster pod is running in the cluster, which is also used by the Cloud Monitoring service. It is enabled by default; set disabled = true to disable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"disabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"network_policy_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `Whether we should enable the network policy addon for the master. This must be enabled in order to enable network policy for the nodes. To enable this, you must also define a network_policy block, otherwise nothing will happen. It can only be disabled if the nodes already do not have network policies enabled. Defaults to disabled; set disabled = false to enable.`,
+							ConflictsWith: []string{"enable_autopilot"},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"disabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"gcp_filestore_csi_driver_config": {
+							Type:          schema.TypeList,
+							Optional:      true,
+							Computed:      true,
+							AtLeastOneOf:  addonsConfigKeys,
+							MaxItems:      1,
+							Description:   `The status of the Filestore CSI driver addon, which allows the usage of filestore instance as volumes. Defaults to disabled for Standard clusters; set enabled = true to enable. It is enabled by default for Autopilot clusters; set enabled = true to enable it explicitly.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"cloudrun_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the CloudRun addon. It is disabled by default. Set disabled = false to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"disabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+									"load_balancer_type": {
+										Type:         schema.TypeString,
+										ValidateFunc: validation.StringInSlice([]string{"LOAD_BALANCER_TYPE_INTERNAL"}, false),
+										Optional:     true,
+									},
+								},
+							},
+						},
+						"dns_cache_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the NodeLocal DNSCache addon. It is disabled by default. Set enabled = true to enable.`,
+							ConflictsWith: []string{"enable_autopilot"},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"gce_persistent_disk_csi_driver_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Set enabled = true to enable. The Compute Engine persistent disk CSI Driver is enabled by default on newly created clusters for the following versions: Linux clusters: GKE version 1.18.10-gke.2100 or later, or 1.19.3-gke.2100 or later.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"gke_backup_agent_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Backup for GKE Agent addon. It is disabled by default. Set enabled = true to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"gcs_fuse_csi_driver_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the GCS Fuse CSI driver addon, which allows the usage of gcs bucket as volumes. Defaults to disabled; set enabled = true to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"parallelstore_csi_driver_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Parallelstore CSI driver addon, which allows the usage of Parallelstore instances as volumes. Defaults to disabled; set enabled = true to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"lustre_csi_driver_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `Configuration for the Lustre CSI driver. Defaults to disabled; set enabled = true to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+										Description: `Whether the Lustre CSI driver is enabled for this cluster.`,
+									},
+									"enable_legacy_lustre_port": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Description: `If set to true, the Lustre CSI driver will initialize LNet (the virtual network layer for Lustre kernel module) using port 6988.
 										This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.`,
 									},
 									"disable_multi_nic": {
@@ -3299,9 +3275,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.NodeConfig = expandNodeConfig(d, "", []interface{}{})
 	}
 
-	if v, ok := d.GetOk("node_pool_defaults"); ok {
-		cluster.NodePoolDefaults = expandNodePoolDefaults(v)
-	}
+        if v, ok := d.GetOk("node_pool_defaults"); ok {
+                cluster.NodePoolDefaults = expandNodePoolDefaults(v)
+        }
 
 	if v, ok := d.GetOk("node_config"); ok {
 		cluster.NodeConfig = expandNodeConfig(d, "", v)
@@ -3339,11 +3315,11 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.IdentityServiceConfig = expandIdentityServiceConfig(v)
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := d.GetOk("tpu_config"); ok {
 		cluster.TpuConfig = expandContainerClusterTpuConfig(v)
 	}
-	{{- end }}
+{{- end }}
 
 	if v, ok := d.GetOk("resource_usage_export_config"); ok {
 		cluster.ResourceUsageExportConfig = expandResourceUsageExportConfig(v)
@@ -3377,9 +3353,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.EnterpriseConfig = expandEnterpriseConfig(v)
 	}
 
-	if v, ok := d.GetOk("anonymous_authentication_config"); ok {
-		cluster.AnonymousAuthenticationConfig = expandAnonymousAuthenticationConfig(v)
-	}
+  if v, ok := d.GetOk("anonymous_authentication_config"); ok {
+      cluster.AnonymousAuthenticationConfig = expandAnonymousAuthenticationConfig(v)
+  }
 
   if v, ok := d.GetOk("node_creation_config"); ok {
       cluster.NodeCreationConfig = expandNodeCreationConfig(v)
@@ -3389,7 +3365,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
     cluster.RbacBindingConfig = expandRBACBindingConfig(v)
   }
 
-	needUpdateAfterCreate := false
+  needUpdateAfterCreate := false
 
 	if len(aircs) > 0 {
 		needUpdateAfterCreate = true
@@ -3907,7 +3883,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("pod_security_policy_config", flattenPodSecurityPolicyConfig(cluster.PodSecurityPolicyConfig)); err != nil {
 		return err
 	}
@@ -3915,7 +3891,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("cluster_telemetry", flattenClusterTelemetry(cluster.ClusterTelemetry)); err != nil {
 		return err
 	}
-	{{- end }}
+{{- end }}
 	if err := d.Set("pod_autoscaling", flattenPodAutoscaling(cluster.PodAutoscaling)); err != nil {
 		return err
 	}
@@ -3978,31 +3954,31 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("managed_opentelemetry_config", flattenManagedOpenTelemetryConfig(cluster.ManagedOpentelemetryConfig)); err != nil {
 		return err
 	}
-	{{- end }}
+{{- end }}
 
 	if err := d.Set("node_pool_auto_config", flattenNodePoolAutoConfig(cluster.NodePoolAutoConfig)); err != nil {
 		return err
 	}
 
-	if err := d.Set("node_pool_defaults", flattenNodePoolDefaults(cluster.NodePoolDefaults)); err != nil {
-		return err
-	}
+        if err := d.Set("node_pool_defaults", flattenNodePoolDefaults(cluster.NodePoolDefaults)); err != nil {
+                return err
+        }
 
 	if err := d.Set("security_posture_config", flattenSecurityPostureConfig(cluster.SecurityPostureConfig)); err != nil {
 		return err
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("protect_config", flattenProtectConfig(cluster.ProtectConfig)); err != nil {
 		return err
 	}
-	{{- end }}
+{{- end }}
 
-	{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("workload_alts_config", flattenWorkloadAltsConfig(cluster.WorkloadAltsConfig)); err != nil {
 		return err
 	}
-	{{- end }}
+{{- end }}
 
 	if err := d.Set("enterprise_config", flattenEnterpriseConfig(cluster.EnterpriseConfig)); err != nil {
 		return err
@@ -4017,8 +3993,8 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("rbac_binding_config", flattenRBACBindingConfig(cluster.RbacBindingConfig)); err != nil {
-		return err
-	}
+    return err
+  }
 
 
     if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
@@ -4184,18 +4160,18 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("allow_net_admin") {
 		allowed := d.Get("allow_net_admin").(bool)
 		req := &container.UpdateClusterRequest{
-			Update: &container.ClusterUpdate{
-				DesiredAutopilotWorkloadPolicyConfig: &container.WorkloadPolicyConfig{
+		    Update: &container.ClusterUpdate{
+		        DesiredAutopilotWorkloadPolicyConfig: &container.WorkloadPolicyConfig{
 					AllowNetAdmin: allowed,
 				},
-			},
+		    },
 		}
 
-		updateF := updateFunc(req, "updating net admin for GKE autopilot workload policy config")
+	    updateF := updateFunc(req, "updating net admin for GKE autopilot workload policy config")
 		// Call update serially.
 		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			return err
-		}
+		    return err
+	    }
 
 		log.Printf("[INFO] GKE cluster %s's autopilot workload policy config allow_net_admin has been set to %v", d.Id(), allowed)
 	}
@@ -4394,7 +4370,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("enable_l4_ilb_subsetting") {
-		// This field can be changed from false to true but not from false to true. CustomizeDiff handles that check.
+	// This field can be changed from false to true but not from false to true. CustomizeDiff handles that check.
 		enabled := d.Get("enable_l4_ilb_subsetting").(bool)
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -4936,7 +4912,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-	// Set maintenance policy after upgrade so validation will use the new versions.
+        // Set maintenance policy after upgrade so validation will use the new versions.
 	if d.HasChange("maintenance_policy") {
 		req := &container.SetMaintenancePolicyRequest{
 			MaintenancePolicy: expandMaintenancePolicy(d, meta),
@@ -5111,7 +5087,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s database encryption config has been updated", d.Id())
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("pod_security_policy_config") {
 		c := d.Get("pod_security_policy_config")
 		req := &container.UpdateClusterRequest{
@@ -5138,7 +5114,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		log.Printf("[INFO] GKE cluster %s pod security policy config has been updated", d.Id())
 	}
-	{{- end }}
+{{- end }}
 
 	if d.HasChange("pod_autoscaling") {
 		c := d.Get("pod_autoscaling")
@@ -5211,7 +5187,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := updateFunc(req, "updating GKE secret sync add-on")
 		// Call update serially.
 		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			return err
+		return err
 		}
 	}
 	{{- end }}
@@ -5328,7 +5304,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s managed opentelemetry config has been updated", d.Id())
 	}
-	{{- end }}
+{{- end }}
 
 	if d.HasChange("effective_labels") {
 		resourceLabels := d.Get("effective_labels").(map[string]interface{})
@@ -5677,8 +5653,8 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
 				DesiredEnterpriseConfig: &container.DesiredEnterpriseConfig{
-					DesiredTier: d.Get("enterprise_config.0.desired_tier").(string),
-				},
+                         		DesiredTier: d.Get("enterprise_config.0.desired_tier").(string),
+                                },
 			},
 		}
 		updateF := updateFunc(req, "updating GKE cluster Enterprise Config")
@@ -5727,14 +5703,14 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				ForceSendFields:          []string{"DesiredRbacBindingConfig"},
 			}}
 
-		updateF := updateFunc(req, "updating GKE cluster RBAC binding config")
-		// Call update serially.
-		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			return err
-		}
+    updateF := updateFunc(req, "updating GKE cluster RBAC binding config")
+    // Call update serially.
+    if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+      return err
+    }
 
-		log.Printf("[INFO] GKE cluster %s's RBAC binding config has been updated", d.Id())
-	}
+    log.Printf("[INFO] GKE cluster %s's RBAC binding config has been updated", d.Id())
+  }
 
 	if d.HasChange("autopilot_cluster_policy_config") {
 		if v, ok := d.GetOk("autopilot_cluster_policy_config"); ok {
@@ -5753,7 +5729,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	d.Partial(false)
 
-	{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("cluster_telemetry") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -5785,13 +5761,13 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s Cluster Telemetry has been updated to %#v", d.Id(), req.Update.DesiredClusterTelemetry)
 	}
-	{{- end }}
+{{- end }}
 
 	if _, err := containerClusterAwaitRestingState(config, project, location, clusterName, userAgent, d.Timeout(schema.TimeoutUpdate)); err != nil {
 		return err
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("protect_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -5805,8 +5781,8 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s Protect Config has been updated to %#v", d.Id(), req.Update.DesiredProtectConfig)
 	}
-	{{- end }}
-	{{- if ne $.TargetVersionName "ga" }}
+{{- end }}
+{{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("workload_alts_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -5821,7 +5797,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s's WorkloadALTSConfig has been updated", d.Id())
 	}
-	{{- end }}
+{{- end }}
 
 	if d.HasChange("user_managed_keys_config") {
 		req := &container.UpdateClusterRequest{
@@ -6094,11 +6070,11 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	}
 
 	if v, ok := config["lustre_csi_driver_config"]; ok && len(v.([]interface{})) > 0 {
-		lustreConfig := v.([]interface{})[0].(map[string]interface{})
-		ac.LustreCsiDriverConfig = &container.LustreCsiDriverConfig{
-			Enabled: lustreConfig["enabled"].(bool),
-			ForceSendFields: []string{"Enabled"},
-		}
+        lustreConfig := v.([]interface{})[0].(map[string]interface{})
+        ac.LustreCsiDriverConfig = &container.LustreCsiDriverConfig{
+            Enabled: lustreConfig["enabled"].(bool),
+            ForceSendFields: []string{"Enabled"},
+        }
 
         // Check for enable_legacy_lustre_port
         if val, ok := lustreConfig["enable_legacy_lustre_port"]; ok {
@@ -6534,9 +6510,9 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 	}
 	var defaultCCConfig *container.DefaultComputeClassConfig
 	if defaultCCEnabled, ok := config["default_compute_class_enabled"]; ok {
-		defaultCCConfig = &container.DefaultComputeClassConfig{
-			Enabled: defaultCCEnabled.(bool),
-		}
+	  defaultCCConfig = &container.DefaultComputeClassConfig{
+	    Enabled: defaultCCEnabled.(bool),
+	  }
 	}
 	var defaults *container.AutoprovisioningNodePoolDefaults
 	if shouldInclude(d, "cluster_autoscaling.0.auto_provisioning_defaults") {
@@ -6734,8 +6710,8 @@ func expandProtectConfigWorkloadConfig(configured interface{}) *container.Worklo
 	}
 	workloadConfig := l[0].(map[string]interface{})
 	return &container.WorkloadConfig{
-		AuditMode: workloadConfig["audit_mode"].(string),
-	}
+				AuditMode: workloadConfig["audit_mode"].(string),
+			}
 }
 
 func flattenProtectConfig(pc *container.ProtectConfig) []map[string]interface{} {
@@ -7365,7 +7341,7 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 						Enabled:         autoRotationConfig["enabled"].(bool),
 					}
 				}
-			}
+		    }
 		}
 	}
 	return sc
@@ -7396,7 +7372,7 @@ func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig 
 						Enabled:         autoRotationConfig["enabled"].(bool),
 					}
 				}
-			}
+		    }
 		}
 	}
 	return sc
@@ -7508,7 +7484,7 @@ func expandFleet(configured interface{}) *container.Fleet {
 }
 
 func expandUserManagedKeysConfig(configured interface{}) *container.UserManagedKeysConfig {
-	l := configured.([]interface{})
+  l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
@@ -7587,7 +7563,7 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	}
 	mc := &container.MonitoringConfig{}
 	config := l[0].(map[string]interface{})
-	{{/* In version == 'ga' enable_components will always be specified. */}}
+{{/* In version == 'ga' enable_components will always be specified. */}}
 	if v, ok := config["enable_components"]; ok {
 		enable_components := v.([]interface{})
 		mc.ComponentConfig = &container.MonitoringComponentConfig{
@@ -7600,16 +7576,16 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 			Enabled: managed_prometheus["enabled"].(bool),
 		}
 		if autoMonitoring, ok := managed_prometheus["auto_monitoring_config"]; ok {
-			if autoMonitoringList, ok := autoMonitoring.([]interface{}); ok {
-				if len(autoMonitoringList) > 0 {
-					autoMonitoringConfig := autoMonitoringList[0].(map[string]interface{})
-					if scope, ok := autoMonitoringConfig["scope"].(string); ok && scope != "" {
-						mc.ManagedPrometheusConfig.AutoMonitoringConfig = &container.AutoMonitoringConfig{
-							Scope: scope,
-						}
-					}
-				}
-			}
+		    if autoMonitoringList, ok := autoMonitoring.([]interface{}); ok {
+		        if len(autoMonitoringList) > 0 {
+		            autoMonitoringConfig := autoMonitoringList[0].(map[string]interface{})
+		            if scope, ok := autoMonitoringConfig["scope"].(string); ok && scope != "" {
+		                mc.ManagedPrometheusConfig.AutoMonitoringConfig = &container.AutoMonitoringConfig{
+		                    Scope: scope,
+		                }
+		            }
+		        }
+		    }
 		}
 	}
 
@@ -7817,10 +7793,10 @@ func flattenBinaryAuthorization(c *container.BinaryAuthorization) []map[string]i
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled":         c.Enabled,
+                        "enabled":         c.Enabled,
 			"evaluation_mode": c.EvaluationMode,
 		})
-	}
+        }
 	return result
 }
 
@@ -7946,12 +7922,12 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		}
 		if rayConfig.RayClusterLoggingConfig != nil {
 			result["ray_operator_config"].([]map[string]any)[0]["ray_cluster_logging_config"] = []map[string]interface{}{{"{{"}}
-			"enabled": rayConfig.RayClusterLoggingConfig.Enabled,
+				"enabled": rayConfig.RayClusterLoggingConfig.Enabled,
 			{{"}}"}}
 		}
 		if rayConfig.RayClusterMonitoringConfig != nil {
 			result["ray_operator_config"].([]map[string]any)[0]["ray_cluster_monitoring_config"] = []map[string]interface{}{{"{{"}}
-			"enabled": rayConfig.RayClusterMonitoringConfig.Enabled,
+				"enabled": rayConfig.RayClusterMonitoringConfig.Enabled,
 			{{"}}"}}
 		}
 	}
@@ -7990,7 +7966,7 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 	}
 {{- end }}
 
-	{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName `ga` -}}
 	if c.IstioConfig != nil {
 		result["istio_config"] = []map[string]interface{}{
 			{
@@ -8244,9 +8220,9 @@ func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, con
 		}
 		return nil, nil
 	}
-	if err := d.Set("networking_mode", "VPC_NATIVE"); err != nil {
-		return nil, fmt.Errorf("Error setting networking_mode: %s", err)
-	}
+		if err := d.Set("networking_mode", "VPC_NATIVE"); err != nil {
+			return nil, fmt.Errorf("Error setting networking_mode: %s", err)
+		}
 
 	p := c.IpAllocationPolicy
 
@@ -8410,37 +8386,6 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 		}
 		return window
 	}
-	if mp.Window.RecurringMaintenanceWindow != nil {
-		window := []map[string]interface{}{
-			{
-				"recurring_maintenance_window": []map[string]interface{}{
-					{
-						"window_start_time": []map[string]interface{}{
-							{
-								"hours":   mp.Window.RecurringMaintenanceWindow.WindowStartTime.Hours,
-								"minutes": mp.Window.RecurringMaintenanceWindow.WindowStartTime.Minutes,
-								"seconds": mp.Window.RecurringMaintenanceWindow.WindowStartTime.Seconds,
-							},
-						},
-						"window_duration": mp.Window.RecurringMaintenanceWindow.WindowDuration,
-						"recurrence":      mp.Window.RecurringMaintenanceWindow.Recurrence,
-					},
-				},
-				"maintenance_exclusion": exclusions,
-			},
-		}
-
-		if mp.Window.RecurringMaintenanceWindow.DelayUntil != nil {
-			window[0]["recurring_maintenance_window"].([]map[string]interface{})[0]["delay_until"] = []map[string]interface{}{
-				{
-					"year":  mp.Window.RecurringMaintenanceWindow.DelayUntil.Year,
-					"month": mp.Window.RecurringMaintenanceWindow.DelayUntil.Month,
-					"day":   mp.Window.RecurringMaintenanceWindow.DelayUntil.Day,
-				},
-			}
-		}
-		return window
-	}
 	return nil
 }
 
@@ -8497,7 +8442,7 @@ func flattenClusterAutoscaling(a *container.ClusterAutoscaling) []map[string]int
 	r["auto_provisioning_locations"] = a.AutoprovisioningLocations
 
 	if a.DefaultComputeClassConfig != nil {
-		r["default_compute_class_enabled"] = a.DefaultComputeClassConfig.Enabled
+	  r["default_compute_class_enabled"] = a.DefaultComputeClassConfig.Enabled
 	}
 
 	return []map[string]interface{}{r}
@@ -8915,24 +8860,24 @@ func flattenAdvancedDatapathObservabilityConfig(c *container.AdvancedDatapathObs
 }
 
 func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[string]interface{} {
-	if c == nil {
-		return nil
-	}
+    if c == nil {
+        return nil
+    }
 
-	result := make(map[string]interface{})
-	result["enabled"] = c.Enabled
+    result := make(map[string]interface{})
+    result["enabled"] = c.Enabled
 
-	autoMonitoringList := []map[string]interface{}{}
-	if c.AutoMonitoringConfig != nil && c.AutoMonitoringConfig.Scope != "" {
-		autoMonitoringMap := map[string]interface{}{
-			"scope": c.AutoMonitoringConfig.Scope,
-		}
-		autoMonitoringList = append(autoMonitoringList, autoMonitoringMap)
-	}
+    autoMonitoringList := []map[string]interface{}{}
+    if c.AutoMonitoringConfig != nil && c.AutoMonitoringConfig.Scope != "" {
+        autoMonitoringMap := map[string]interface{}{
+            "scope": c.AutoMonitoringConfig.Scope,
+        }
+        autoMonitoringList = append(autoMonitoringList, autoMonitoringMap)
+    }
 
-	result["auto_monitoring_config"] = autoMonitoringList
+    result["auto_monitoring_config"] = autoMonitoringList
 
-	return []map[string]interface{}{result}
+    return []map[string]interface{}{result}
 }
 
 func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]interface{} {
