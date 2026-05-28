@@ -59,7 +59,11 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 		hclData["can_ip_forward"] = instance.CanIpForward
 	}
 	hclData["machine_type"] = tpgresource.GetResourceNameFromSelfLink(instance.MachineType)
-	hclData["network_performance_config"] = flattenNetworkPerformanceConfig(instance.NetworkPerformanceConfig)
+	if instance.NetworkPerformanceConfig != nil {
+		hclData["network_performance_config"] = flattenNetworkPerformanceConfig(map[string]interface{}{
+			"totalEgressBandwidthTier": instance.NetworkPerformanceConfig.TotalEgressBandwidthTier,
+		})
+	}
 
 	// Set the networks
 	networkInterfaces, _, _, err := flattenNetworkInterfacesTgc(instance.NetworkInterfaces, project)

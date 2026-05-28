@@ -137,9 +137,16 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}
 
-	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
+	networkPerformanceConfigMap, err := expandNetworkPerformanceConfig(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network performance config: %s", err)
+	}
+	var networkPerformanceConfig *compute.NetworkPerformanceConfig
+	if networkPerformanceConfigMap != nil {
+		networkPerformanceConfig = &compute.NetworkPerformanceConfig{}
+		if v, ok := networkPerformanceConfigMap["totalEgressBandwidthTier"].(string); ok {
+			networkPerformanceConfig.TotalEgressBandwidthTier = v
+		}
 	}
 
 	accels, err := expandInstanceGuestAccelerators(d, config)
