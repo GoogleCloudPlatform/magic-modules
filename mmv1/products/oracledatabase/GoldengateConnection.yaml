@@ -119,6 +119,7 @@ properties:
             description: |-
               The name of the AWS region.
               If not provided, Goldengate will default to 'us-west-1'.
+            default_from_api: true
           - name: endpoint
             type: String
             description: |-
@@ -126,6 +127,7 @@ properties:
               e.g.: 'https://kinesis.us-east-1.amazonaws.com'
               If not provided, Goldengate will default to
               'https://kinesis..amazonaws.com'.
+            default_from_api: true
           - name: secretAccessKeySecret
             type: String
             description: Secret access key to access the Amazon Kinesis.
@@ -174,6 +176,7 @@ properties:
           - name: region
             type: String
             description: The name of the AWS region where the bucket is created.
+            default_from_api: true
           - name: secretAccessKeySecret
             type: String
             description: Secret access key to access the Amazon S3 bucket.
@@ -206,6 +209,7 @@ properties:
               The endpoint used for authentication with Microsoft Entra ID (formerly
               Azure Active Directory). Default value:
               https://login.microsoftonline.com
+            default_from_api: true
           - name: azureTenantId
             type: String
             description: |-
@@ -660,6 +664,7 @@ properties:
                   - name: secretAccessKeySecret
                     type: String
                     description: The secret access key of Amazon S3.
+                    ignore_read: true
               - name: azureDataLakeStorageIcebergStorage
                 type: NestedObject
                 description: The Azure Data Lake Storage Iceberg storage.
@@ -751,26 +756,31 @@ properties:
           - name: jndiSecurityCredentialsSecret
             type: String
             description: The password associated to the principal.
+            ignore_read: true
           - name: jndiSecurityPrincipal
             type: String
             description: Specifies the identity of the principal (user) to be authenticated.
           - name: keyStoreFile
             type: String
             description: The content of the KeyStore file.
+            ignore_read: true
           - name: keyStorePassword
             type: String
             description: Input only. The KeyStore password in plain text.
+            ignore_read: true
           - name: keyStorePasswordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the KeyStore password.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: password
             type: String
             description: |-
               Input only. The password Oracle Goldengate uses to connect the Java Message Service
               in plain text.
+            ignore_read: true
           - name: passwordSecretVersion
             type: String
             description: |-
@@ -778,6 +788,7 @@ properties:
               the password Oracle Goldengate uses to connect the associated Java
               Message Service.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: securityProtocol
             type: String
             description: |-
@@ -789,27 +800,32 @@ properties:
           - name: sslKeyPassword
             type: String
             description: Input only. The password for the cert inside of the KeyStore in plain text.
+            ignore_read: true
           - name: sslKeyPasswordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the password for the cert inside of the KeyStore.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: technologyType
             type: String
             description: The technology type of JavaMessageServiceConnection.
           - name: trustStoreFile
             type: String
             description: The content of the TrustStore file.
+            ignore_read: true
           - name: trustStorePassword
             type: String
             description: Input only. The TrustStore password in plain text.
+            ignore_read: true
           - name: trustStorePasswordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the TrustStore password.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: useJndi
             type: Boolean
             description: |-
@@ -826,6 +842,7 @@ properties:
         properties:
           - name: bootstrapServers
             type: Array
+            ignore_read: true
             description: |-
               Kafka bootstrap. Equivalent of bootstrap.servers configuration property
               in Kafka: list of KafkaBootstrapServer objects specified by host/port.
@@ -843,6 +860,7 @@ properties:
                   description: The port of an endpoint usually specified for a connection.
                 - name: privateIpAddress
                   type: String
+                  ignore_read: true
                   description: |-
                     The private IP address of the connection's endpoint in the customer's VCN,
                     typically a database endpoint or a big data endpoint (e.g. Kafka bootstrap
@@ -859,30 +877,37 @@ properties:
           - name: consumerPropertiesFile
             type: String
             description: The content of the consumer.properties file.
+            ignore_read: true
           - name: keyStoreFile
             type: String
             description: The content of the KeyStore file.
+            ignore_read: true
           - name: keyStorePassword
             type: String
             description: Input only. The KeyStore password in plain text.
+            ignore_read: true
           - name: keyStorePasswordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the KeyStore password.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: password
             type: String
             description: Input only. The password for Kafka basic/SASL auth in plain text.
+            ignore_read: true
           - name: passwordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the password for Kafka basic/SASL auth.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: producerPropertiesFile
             type: String
             description: The content of the producer.properties file.
+            ignore_read: true
           - name: securityProtocol
             type: String
             description: |-
@@ -895,12 +920,14 @@ properties:
           - name: sslKeyPassword
             type: String
             description: Input only. The password for the cert inside of the KeyStore in plain text.
+            ignore_read: true
           - name: sslKeyPasswordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the password for the cert inside of the KeyStore.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: streamPoolId
             type: String
             description: The OCID of the stream pool being referenced.
@@ -910,15 +937,18 @@ properties:
           - name: trustStoreFile
             type: String
             description: The content of the TrustStore file.
+            ignore_read: true
           - name: trustStorePassword
             type: String
             description: Input only. The TrustStore password in plain text.
+            ignore_read: true
           - name: trustStorePasswordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the TrustStore password.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: useResourcePrincipal
             type: Boolean
             description: |-
@@ -1031,6 +1061,7 @@ properties:
             description: |-
               Optional Microsoft Fabric service endpoint.
               Default value: https://onelake.dfs.fabric.microsoft.com
+            default_from_api: true
           - name: technologyType
             type: String
             description: The technology type of MicrosoftFabricConnection.
@@ -1191,12 +1222,14 @@ properties:
           - name: password
             type: String
             description: Input only. The password Oracle Goldengate uses to connect to MySQL in plain text.
+            ignore_read: true
           - name: passwordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the password Oracle Goldengate uses to connect to MySQL.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: port
             type: Integer
             description: The port of an endpoint usually specified for a connection.
@@ -1213,21 +1246,25 @@ properties:
             description: |-
               Database Certificate - The content of a .pem or .crt file
               containing the server public key (for 1 and 2-way SSL).
+            ignore_read: true
           - name: sslCertFile
             type: String
             description: |-
               Client Certificate - The content of a .pem or .crt file
               containing the client public key (for 2-way SSL).
+            ignore_read: true
           - name: sslCrlFile
             type: String
             description: |-
               The list of certificates revoked by the trusted
               certificate authorities (Trusted CA).
+            ignore_read: true
           - name: sslKeyFile
             type: String
             description: |-
               Client Key - The content of a .pem or .crt file containing
               the client private key (for 2-way SSL).
+            ignore_read: true
           - name: sslMode
             type: String
             description: |-
@@ -1443,12 +1480,14 @@ properties:
             description: |-
               Input only. The password Oracle Goldengate uses for PostgreSQL connection in plain
               text.
+            ignore_read: true
           - name: passwordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the password Oracle Goldengate uses for PostgreSQL connection.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: port
             type: Integer
             description: The port of an endpoint usually specified for a connection.
@@ -1519,12 +1558,14 @@ properties:
           - name: password
             type: String
             description: Input only. The password Oracle Goldengate uses for Redis connection in plain text.
+            ignore_read: true
           - name: passwordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the password Oracle Goldengate uses for Redis connection.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: redisClusterId
             type: String
             description: The OCID of the Redis cluster.
@@ -1592,18 +1633,22 @@ properties:
             description: |-
               Input only. The password Oracle Goldengate uses to connect to Snowflake platform
               in plain text.
+            ignore_read: true
           - name: passwordSecretVersion
             type: String
             description: |-
               Input only. The resource name of a secret version in Secret Manager which contains
               the password Oracle Goldengate uses to connect to Snowflake platform.
               Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
           - name: privateKeyFile
             type: String
             description: The content of private key file in PEM format.
+            ignore_read: true
           - name: privateKeyPassphraseSecret
             type: String
             description: Password if the private key file is encrypted.
+            ignore_read: true
           - name: technologyType
             type: String
             description: The technology type of SnowflakeConnection.
@@ -1650,3 +1695,90 @@ examples:
       odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
       odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
       autonomous_database_id: '"do-not-delete-tf-adb"'
+  - name: 'oracledatabase_goldengate_connection_mysql'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-mysql-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_postgresql'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-pg-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_redis'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-redis-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_kafka'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-kafka-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_iceberg'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-iceberg-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_snowflake'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-snowflake-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_jms'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-jms-%s", acctest.RandString(t, 10))'
+
+
+
