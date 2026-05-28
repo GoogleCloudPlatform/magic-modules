@@ -656,6 +656,9 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     python_function {
         name = "example_function"
         python_code = "def example_function() -> int: return 0"
+        service_directory_config {
+            service = "projects/\${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
+        }
     }
 }
 `, context)
@@ -679,6 +682,9 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     python_function {
         name = "example_function_updated"
         python_code = "def example_function_updated() -> int: return 0"
+        service_directory_config {
+            service = "projects/\${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
+        }
     }
 }
 `, context)
@@ -947,23 +953,44 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
             }
         })
         data_mapping {
-            mode = "FIELD_MAPPING"
+            mode             = "FIELD_MAPPING"
+            source_tool_name = "projects/\${google_ces_app.my-app.project}/locations/us/apps/\${google_ces_app.my-app.app_id}/tools/source-tool"
             field_mappings = {
                 "key1" = "value1"
-                "key2" = "value2"
+            }
+            python_function {
+                name        = "transform_function"
+                python_code = "def transform_function(x): return x"
+                service_directory_config {
+                    service = "projects/\${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
+                }
             }
         }
         text_response_config {
-            type = "STATIC"
-            static_text = "example-static-text"
+            type                      = "STATIC"
+            static_text               = "example-static-text"
+            text_response_instruction = "example-instruction"
         }
         parameters {
-            type = "OBJECT"
-            properties = jsonencode({
-                param1 = {
-                    type = "STRING"
-                }
-            })
+            type                  = "ARRAY"
+            description           = "param-description"
+            title                 = "param-title"
+            nullable              = true
+            min_items             = 1
+            max_items             = 10
+            unique_items          = true
+            minimum               = 1.0
+            maximum               = 100.0
+            required              = ["field1"]
+            enum                  = ["value1", "value2"]
+            default               = jsonencode(["value1"])
+            additional_properties = jsonencode({ type = "STRING" })
+            any_of                = jsonencode([{ type = "STRING" }])
+            defs                  = jsonencode({ def1 = { type = "STRING" } })
+            ref                   = "#/defs/def1"
+            items                 = jsonencode({ type = "STRING" })
+            prefix_items          = jsonencode([{ type = "STRING" }])
+            properties            = jsonencode({ field1 = { type = "STRING" } })
         }
     }
 }
@@ -996,23 +1023,173 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
             }
         })
         data_mapping {
-            mode = "FIELD_MAPPING"
+            mode             = "FIELD_MAPPING"
+            source_tool_name = "projects/\${google_ces_app.my-app.project}/locations/us/apps/\${google_ces_app.my-app.app_id}/tools/source-tool-updated"
             field_mappings = {
                 "key1" = "value1-updated"
-                "key2" = "value2-updated"
+            }
+            python_function {
+                name        = "transform_function_updated"
+                python_code = "def transform_function_updated(x): return x"
+                service_directory_config {
+                    service = "projects/\${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc-updated"
+                }
             }
         }
         text_response_config {
-            type = "STATIC"
-            static_text = "example-static-text-updated"
+            type                      = "STATIC"
+            static_text               = "example-static-text-updated"
+            text_response_instruction = "example-instruction-updated"
         }
         parameters {
-            type = "OBJECT"
-            properties = jsonencode({
-                param1 = {
-                    type = "STRING"
-                }
-            })
+            type                  = "ARRAY"
+            description           = "param-description-updated"
+            title                 = "param-title-updated"
+            nullable              = false
+            min_items             = 2
+            max_items             = 20
+            unique_items          = false
+            minimum               = 2.0
+            maximum               = 200.0
+            required              = ["field1"]
+            enum                  = ["value1", "value3"]
+            default               = jsonencode(["value1"])
+            additional_properties = jsonencode({ type = "INTEGER" })
+            any_of                = jsonencode([{ type = "INTEGER" }])
+            defs                  = jsonencode({ def1 = { type = "INTEGER" } })
+            ref                   = "#/defs/def1"
+            items                 = jsonencode({ type = "INTEGER" })
+            prefix_items          = jsonencode([{ type = "INTEGER" }])
+            properties            = jsonencode({ field1 = { type = "INTEGER" } })
+        }
+    }
+}
+`, context)
+}
+
+func TestAccCESTool_cesToolDataStoreSourceBasicExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESToolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESTool_cesToolDataStoreSourceBasicExample_full(context),
+			},
+			{
+				ResourceName:            "google_ces_tool.ces_tool_datastore_source",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
+			},
+			{
+				Config: testAccCESTool_cesToolDataStoreSourceBasicExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_tool.ces_tool_datastore_source", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_tool.ces_tool_datastore_source",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
+			},
+		},
+	})
+}
+
+func testAccCESTool_cesToolDataStoreSourceBasicExample_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_discovery_engine_data_store" "basic" {
+  location                    = "global"
+  data_store_id               = "tf_test_tool_ds_id%{random_suffix}"
+  display_name                = "tf-test-structured-datastore"
+  industry_vertical           = "GENERIC"
+  content_config              = "NO_CONTENT"
+  solution_types              = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search = false
+}
+
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "tf-test-my-app%{random_suffix}"
+    app_id       = "tf-test-app-id%{random_suffix}"
+    time_zone_settings {   
+        time_zone = "America/Los_Angeles"
+    }
+    depends_on = [google_discovery_engine_data_store.basic]
+    lifecycle {
+        ignore_changes = [data_store_settings]
+    }
+}
+
+resource "google_ces_tool" "ces_tool_datastore_source" {
+    location       = "us"
+    app            = google_ces_app.my-app.name
+    tool_id        = "tf-test-ds-%{random_suffix}"
+    execution_type = "SYNCHRONOUS"
+    data_store_tool {
+        name        = "example-ds-tool%{random_suffix}"
+        description = "example-description"
+        filter_parameter_behavior = "ALWAYS_INCLUDE"
+        data_store_source {
+            data_store {
+                name = google_discovery_engine_data_store.basic.name
+            }
+            filter = "example_field: ANY(\"specific_example\")"
+        }
+    }
+}
+`, context)
+}
+
+func testAccCESTool_cesToolDataStoreSourceBasicExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_discovery_engine_data_store" "basic" {
+  location                    = "global"
+  data_store_id               = "tf_test_tool_ds_id%{random_suffix}"
+  display_name                = "tf-test-structured-datastore"
+  industry_vertical           = "GENERIC"
+  content_config              = "NO_CONTENT"
+  solution_types              = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search = false
+}
+
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "tf-test-my-app%{random_suffix}"
+    app_id       = "tf-test-app-id%{random_suffix}"
+    time_zone_settings {   
+        time_zone = "America/Los_Angeles"
+    }
+    depends_on = [google_discovery_engine_data_store.basic]
+    lifecycle {
+        ignore_changes = [data_store_settings]
+    }
+}
+
+resource "google_ces_tool" "ces_tool_datastore_source" {
+    location       = "us"
+    app            = google_ces_app.my-app.name
+    tool_id        = "tf-test-ds-%{random_suffix}"
+    execution_type = "SYNCHRONOUS"
+    data_store_tool {
+        name        = "example-ds-tool%{random_suffix}"
+        description = "example-description-updated"
+        filter_parameter_behavior = "NEVER_INCLUDE"
+        data_store_source {
+            data_store {
+                name = google_discovery_engine_data_store.basic.name
+            }
+            filter = "example_field: ANY(\"specific_example_updated\")"
         }
     }
 }
