@@ -1,7 +1,7 @@
 
 resource "google_compute_network" "default" {
   provider                = google-beta
-  name                    = "test-network"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 

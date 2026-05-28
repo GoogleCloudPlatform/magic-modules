@@ -1498,6 +1498,11 @@ properties:
                 based on the LLM classification.
               output: true
               properties:
+                - name: failOpen
+                  type: Boolean
+                  description: |-
+                    Determines the behavior when the guardrail encounters an LLM error.
+                  output: true
                 - name: customPolicy
                   type: NestedObject
                   description: |-

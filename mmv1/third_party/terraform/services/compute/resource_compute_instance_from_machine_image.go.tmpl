@@ -11,12 +11,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func ResourceComputeInstanceFromMachineImage() *schema.Resource {
@@ -147,65 +141,6 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		return err
 	}
 
-	sa := d.Get("service_account").([]interface{})
-	if len(sa) == 0 {
-		// ServiceAccount is required when the image is from a different project
-		accounts := make([]*compute.ServiceAccount, 1)
-		accounts[0] = &compute.ServiceAccount{
-			Email:  "default",
-			Scopes: nil,
-		}
-		instance.ServiceAccounts = accounts
-	}
-
-	src := d.Get("source_machine_image").(string)
-	instance.SourceMachineImage = src
-
-	// Add source machine image encryption key if specified
-	if encryptionKey := expandSourceMachineImageEncryptionKey(d); encryptionKey != nil {
-		instance.SourceMachineImageEncryptionKey = encryptionKey
-	}
-
-	tpl, err := tpgresource.ParseMachineImageFieldValue(src, d, config)
-	if err != nil {
-		return err
-	}
-
-	// obtain the project where the image resides (could be different from the default)
-	tmp := strings.Split(src, "projects/")
-	mi_project := strings.Split(tmp[len(tmp)-1], "/")[0]
-
-	miURL := fmt.Sprintf("%sprojects/%s/global/machineImages/%s", config.ComputeBasePath, mi_project, tpl.Name)
-	miRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   mi_project,
-		RawURL:    miURL,
-		UserAgent: userAgent,
-	})
-	if err != nil {
-		return err
-	}
-
-	instance.Disks, err = adjustInstanceFromMachineImageDisks(d, config, miRes, project)
-	if err != nil {
-		return err
-	}
-
-	// when we make the original call to expandComputeInstance expandScheduling is called, which sets default values.
-	// However, we want the values to be read from the machine image instead.
-	if _, hasSchedule := d.GetOk("scheduling"); !hasSchedule {
-		if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
-			if schedulingRaw, ok := srcProps["scheduling"]; ok {
-				schedBytes, _ := json.Marshal(schedulingRaw)
-				var sched compute.Scheduling
-				if jsonErr := json.Unmarshal(schedBytes, &sched); jsonErr == nil {
-					instance.Scheduling = &sched
-				}
-			}
-		}
-	}
-
 	// Force send all top-level fields that have been set in case they're overridden to zero values.
 	// Initialize ForceSendFields to empty so we don't get things that the instance resource
 	// always force-sends.
@@ -226,16 +161,95 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		}
 	}
 
-	log.Printf("[INFO] Requesting instance creation")
 	instanceBytes, err := json.Marshal(instance)
 	if err != nil {
 		return fmt.Errorf("Error marshaling instance: %s", err)
 	}
-	var instanceBody map[string]interface{}
+	instanceBody := map[string]interface{}{}
 	if err = json.Unmarshal(instanceBytes, &instanceBody); err != nil {
 		return fmt.Errorf("Error processing instance body: %s", err)
 	}
-	insertURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances", config.ComputeBasePath, project, z)
+
+	sa := d.Get("service_account").([]interface{})
+	if len(sa) == 0 {
+		// ServiceAccount is required when the image is from a different project
+		instanceBody["serviceAccounts"] = []interface{}{
+			map[string]interface{}{
+				"email": "default",
+			},
+		}
+	}
+
+	src := d.Get("source_machine_image").(string)
+	instanceBody["sourceMachineImage"] = src
+
+	// Add source machine image encryption key if specified
+	if encryptionKey := expandSourceMachineImageEncryptionKey(d); encryptionKey != nil {
+		instanceBody["sourceMachineImageEncryptionKey"] = encryptionKey
+	}
+
+	tpl, err := tpgresource.ParseMachineImageFieldValue(src, d, config)
+	if err != nil {
+		return err
+	}
+
+	// obtain the project where the image resides (could be different from the default)
+	tmp := strings.Split(src, "projects/")
+	mi_project := strings.Split(tmp[len(tmp)-1], "/")[0]
+
+	miURL := fmt.Sprintf("%sprojects/%s/global/machineImages/%s", transport_tpg.BaseUrl(Product, config), mi_project, tpl.Name)
+	miRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   mi_project,
+		RawURL:    miURL,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return err
+	}
+
+	disks, err := adjustInstanceFromMachineImageDisks(d, config, miRes, project)
+	if err != nil {
+		return err
+	}
+	instanceBody["disks"] = disks
+
+	// when we make the original call to expandComputeInstance expandScheduling is called, which sets default values.
+	// However, we want the values to be read from the machine image instead.
+	if _, hasSchedule := d.GetOk("scheduling"); !hasSchedule {
+		if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
+			if schedulingRaw, ok := srcProps["scheduling"].(map[string]interface{}); ok {
+				// Drop zero-value fields so the marshaled body matches the
+				// behavior of the typed compute.Scheduling JSON tags (omitempty).
+				filtered := map[string]interface{}{}
+				for k, v := range schedulingRaw {
+					switch val := v.(type) {
+					case bool:
+						if val {
+							filtered[k] = v
+						}
+					case string:
+						if val != "" {
+							filtered[k] = v
+						}
+					case float64:
+						if val != 0 {
+							filtered[k] = v
+						}
+					case nil:
+						// skip
+					default:
+						filtered[k] = v
+					}
+				}
+				instanceBody["scheduling"] = filtered
+			}
+		}
+	}
+
+	log.Printf("[INFO] Requesting instance creation")
+	insertURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances", transport_tpg.BaseUrl(Product, config), project, z)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "POST",
@@ -265,8 +279,8 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 
 // Instances have disks spread across multiple schema properties. This function
 // ensures that overriding one of these properties does not override the others.
-func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transport_tpg.Config, miRes map[string]interface{}, project string) ([]*compute.AttachedDisk, error) {
-	disks := []*compute.AttachedDisk{}
+func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transport_tpg.Config, miRes map[string]interface{}, project string) ([]interface{}, error) {
+	disks := []interface{}{}
 
 	var miDisks []interface{}
 	if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
@@ -292,10 +306,10 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 				autoDelete, _ := disk["autoDelete"].(bool)
 				diskType, _ := disk["type"].(string)
 				deviceName, _ := disk["deviceName"].(string)
-				newdisk := &compute.AttachedDisk{
-					AutoDelete: autoDelete,
-					Type:       diskType,
-					DeviceName: deviceName,
+				newdisk := map[string]interface{}{
+					"autoDelete": autoDelete,
+					"type":       diskType,
+					"deviceName": deviceName,
 				}
 				disks = append(disks, newdisk)
 				break
@@ -308,7 +322,9 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 		if err != nil {
 			return nil, err
 		}
-		disks = append(disks, scratchDisks...)
+		for _, sd := range scratchDisks {
+			disks = append(disks, sd)
+		}
 	} else {
 		// scratch disks were not overridden, so use the ones from the machine image
 		for _, rawDisk := range miDisks {
@@ -320,10 +336,10 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 			if diskType == "SCRATCH" {
 				autoDelete, _ := disk["autoDelete"].(bool)
 				deviceName, _ := disk["deviceName"].(string)
-				newdisk := &compute.AttachedDisk{
-					AutoDelete: autoDelete,
-					Type:       "SCRATCH",
-					DeviceName: deviceName,
+				newdisk := map[string]interface{}{
+					"autoDelete": autoDelete,
+					"type":       "SCRATCH",
+					"deviceName": deviceName,
 				}
 				disks = append(disks, newdisk)
 			}
@@ -353,10 +369,10 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 			if !isBoot && diskType != "SCRATCH" {
 				autoDelete, _ := disk["autoDelete"].(bool)
 				deviceName, _ := disk["deviceName"].(string)
-				newdisk := &compute.AttachedDisk{
-					AutoDelete: autoDelete,
-					Type:       diskType,
-					DeviceName: deviceName,
+				newdisk := map[string]interface{}{
+					"autoDelete": autoDelete,
+					"type":       diskType,
+					"deviceName": deviceName,
 				}
 				disks = append(disks, newdisk)
 			}
@@ -366,7 +382,7 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 	return disks, nil
 }
 
-func expandSourceMachineImageEncryptionKey(d tpgresource.TerraformResourceData) *compute.CustomerEncryptionKey {
+func expandSourceMachineImageEncryptionKey(d tpgresource.TerraformResourceData) map[string]interface{} {
 	if v, ok := d.GetOk("source_machine_image_encryption_key"); !ok || v == nil {
 		return nil
 	}
@@ -375,56 +391,56 @@ func expandSourceMachineImageEncryptionKey(d tpgresource.TerraformResourceData) 
 	if len(encryptionKeyList) == 0 || encryptionKeyList[0] == nil {
 		return nil
 	}
-	
+
 	encryptionKeyMap := encryptionKeyList[0].(map[string]interface{})
-	encryptionKey := &compute.CustomerEncryptionKey{}
-	
+	encryptionKey := map[string]interface{}{}
+
 	if rawKey, ok := encryptionKeyMap["raw_key"]; ok && rawKey != "" {
-		encryptionKey.RawKey = rawKey.(string)
+		encryptionKey["rawKey"] = rawKey.(string)
 	}
-	
+
 	if rsaKey, ok := encryptionKeyMap["rsa_encrypted_key"]; ok && rsaKey != "" {
-		encryptionKey.RsaEncryptedKey = rsaKey.(string)
+		encryptionKey["rsaEncryptedKey"] = rsaKey.(string)
 	}
-	
+
 	if kmsKey, ok := encryptionKeyMap["kms_key_name"]; ok && kmsKey != "" {
-		encryptionKey.KmsKeyName = kmsKey.(string)
+		encryptionKey["kmsKeyName"] = kmsKey.(string)
 	}
-	
+
 	if kmsKeyServiceAccount, ok := encryptionKeyMap["kms_key_service_account"]; ok && kmsKeyServiceAccount != "" {
-		encryptionKey.KmsKeyServiceAccount = kmsKeyServiceAccount.(string)
+		encryptionKey["kmsKeyServiceAccount"] = kmsKeyServiceAccount.(string)
 	}
-	
+
 	return encryptionKey
 }
 
-func flattenSourceMachineImageEncryptionKey(key *compute.CustomerEncryptionKey) []map[string]interface{} {
+func flattenSourceMachineImageEncryptionKey(key map[string]interface{}) []map[string]interface{} {
 	if key == nil {
 		return nil
 	}
-	
+
 	m := map[string]interface{}{}
-	
-	if key.RawKey != "" {
-		m["raw_key"] = key.RawKey
+
+	if rawKey, ok := key["rawKey"].(string); ok && rawKey != "" {
+		m["raw_key"] = rawKey
 	}
-	
-	if key.RsaEncryptedKey != "" {
-		m["rsa_encrypted_key"] = key.RsaEncryptedKey
+
+	if rsaKey, ok := key["rsaEncryptedKey"].(string); ok && rsaKey != "" {
+		m["rsa_encrypted_key"] = rsaKey
 	}
-	
-	if key.KmsKeyName != "" {
-		m["kms_key_name"] = key.KmsKeyName
+
+	if kmsKey, ok := key["kmsKeyName"].(string); ok && kmsKey != "" {
+		m["kms_key_name"] = kmsKey
 	}
-	
-	if key.KmsKeyServiceAccount != "" {
-		m["kms_key_service_account"] = key.KmsKeyServiceAccount
+
+	if kmsKeyServiceAccount, ok := key["kmsKeyServiceAccount"].(string); ok && kmsKeyServiceAccount != "" {
+		m["kms_key_service_account"] = kmsKeyServiceAccount
 	}
-	
-	if key.Sha256 != "" {
-		m["sha256"] = key.Sha256
+
+	if sha256, ok := key["sha256"].(string); ok && sha256 != "" {
+		m["sha256"] = sha256
 	}
-	
+
 	return []map[string]interface{}{m}
 }
 

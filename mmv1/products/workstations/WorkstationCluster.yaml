@@ -65,6 +65,15 @@ examples:
     test_vars_overrides:
       'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
       'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
+samples:
+  - name: "workstation_cluster_urls"
+    primary_resource_id: "default"
+    steps:
+      - name: "workstation_cluster_custom_urls"
+        vars:
+          cluster_id: "custom-urls-cluster"
+        resource_id_vars:
+          cluster_network_name: "workstations-network"
 parameters:
   - name: 'workstationClusterId'
     type: String
@@ -120,6 +129,17 @@ properties:
     type: String
     description: |
       Human-readable name for this resource.
+  - name: 'workstationAuthorizationUrl'
+    type: String
+    default_from_api: true
+    description: |
+      Specifies the redirect URL for unauthorized requests received by workstation VMs in this cluster.
+      Redirects to this endpoint will send a base64 encoded `state` query param containing the target workstation name and original request hostname. The endpoint is responsible for retrieving a token using `GenerateAccessToken` and redirecting back to the original hostname with the token.
+  - name: 'workstationLaunchUrl'
+    type: String
+    description: |
+      Specifies the launch URL for workstations in this cluster. Requests sent to unstarted workstations will be redirected to this URL.
+      Requests redirected to the launch endpoint will be sent with a `workstation` query parameter containing the full workstation resource. The launch endpoint is responsible for starting the workstation, polling it until it reaches `STATE_RUNNING`, and then issuing a redirect to the workstation's host URL.
   - name: 'degraded'
     type: Boolean
     description: |

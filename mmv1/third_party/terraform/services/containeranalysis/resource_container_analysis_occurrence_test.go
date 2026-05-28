@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/binaryauthorization"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/containeranalysis"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -35,7 +37,7 @@ func getTestOccurrenceAttestationPayload(t *testing.T) string {
 
 func getSignedTestOccurrenceAttestationPayload(
 	t *testing.T, config *transport_tpg.Config,
-	signingKey acctest.BootstrappedKMS, rawPayload string) string {
+	signingKey kms.BootstrappedKMS, rawPayload string) string {
 	pbytes := []byte(rawPayload)
 	ssum := sha512.Sum512(pbytes)
 	hashed := base64.StdEncoding.EncodeToString(ssum[:])
@@ -63,7 +65,7 @@ func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 		return
 	}
 
-	signKey := acctest.BootstrapKMSKeyWithPurpose(t, "ASYMMETRIC_SIGN")
+	signKey := kms.BootstrapKMSKeyWithPurpose(t, "ASYMMETRIC_SIGN")
 	payload := getTestOccurrenceAttestationPayload(t)
 	signed := getSignedTestOccurrenceAttestationPayload(t, config, signKey, payload)
 	params := map[string]interface{}{
@@ -102,10 +104,10 @@ func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 	}
 
 	payload := getTestOccurrenceAttestationPayload(t)
-	key1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key1")
+	key1 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key1")
 	signature1 := getSignedTestOccurrenceAttestationPayload(t, config, key1, payload)
 
-	key2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key2")
+	key2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key2")
 	signature2 := getSignedTestOccurrenceAttestationPayload(t, config, key2, payload)
 
 	paramsMultipleSignatures := map[string]interface{}{

@@ -86,7 +86,7 @@ examples:
       hub_name: 'basic-hub1'
       vpn_tunnel_1_spoke_name: 'vpn-tunnel-1-spoke'
       vpn_tunnel_2_spoke_name: 'vpn-tunnel-2-spoke'
-  # Skip due to multiple fine-grained resources
+    # Skip due to multiple fine-grained resources
     test_vars_overrides:
       # for backward compatible
       vpn_tunnel_1_name: '"tunnel1" + randomSuffix'

@@ -3,11 +3,10 @@ module github.com/hashicorp/terraform-provider-google
 go 1.26.0
 
 require (
-	bitbucket.org/creachadair/stringset v0.0.11
 	cloud.google.com/go/auth v0.20.0
 	cloud.google.com/go/auth/oauth2adapt v0.2.8
 	cloud.google.com/go/bigquery v1.74.0
-	cloud.google.com/go/bigtable v1.46.0
+	cloud.google.com/go/bigtable v1.47.0
 	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc

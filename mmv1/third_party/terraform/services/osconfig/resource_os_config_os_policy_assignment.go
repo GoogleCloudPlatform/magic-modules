@@ -34,6 +34,7 @@ func ResourceOSConfigOSPolicyAssignment() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -1064,6 +1065,9 @@ For a given OS policy assignment, there is only one revision with a value of 'tr
 				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      "The project for the resource",
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1112,7 +1116,7 @@ func resourceOSConfigOSPolicyAssignmentCreate(d *schema.ResourceData, meta inter
 	// Shorten long form project id to short form.
 	billingProject = tpgresource.GetResourceNameFromSelfLink(project)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments?osPolicyAssignmentId={{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/osPolicyAssignments?osPolicyAssignmentId={{name}}")
 	if err != nil {
 		return err
 	}
@@ -1197,7 +1201,7 @@ func resourceOSConfigOSPolicyAssignmentRead(d *schema.ResourceData, meta interfa
 	// Shorten long form project id to short form
 	billingProject = tpgresource.GetResourceNameFromSelfLink(project)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -1272,10 +1276,19 @@ func resourceOSConfigOSPolicyAssignmentRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error reading OSPolicyAssignment: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceOSConfigOSPolicyAssignment) {
+		return ResourceOSConfigOSPolicyAssignment().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1317,7 +1330,7 @@ func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta inter
 		obj["rollout"] = rolloutProp
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -1386,6 +1399,13 @@ func resourceOSConfigOSPolicyAssignmentUpdate(d *schema.ResourceData, meta inter
 }
 
 func resourceOSConfigOSPolicyAssignmentDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1401,7 +1421,7 @@ func resourceOSConfigOSPolicyAssignmentDelete(d *schema.ResourceData, meta inter
 	// Shorten long form project id to short form
 	billingProject = tpgresource.GetResourceNameFromSelfLink(project)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{OSConfigBasePath}}projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/osPolicyAssignments/{{name}}")
 	if err != nil {
 		return err
 	}

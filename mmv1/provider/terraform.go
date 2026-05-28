@@ -104,12 +104,12 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
+		t.GenerateSingularDataSource(object, *templateData, outputFolder, generateCode, generateDocs)
 
 		if generateCode {
 			// log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
-			t.GenerateSingularDataSource(object, *templateData, outputFolder)
 			t.GenerateSingularDataSourceTests(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
@@ -155,12 +155,38 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
 			templateData.GenerateResourceFile(targetFilePath, object)
 		}
+
+		t.GenerateListResource(object, templateData, targetFolder)
 	}
 
 	if generateDocs {
 		targetFolder := t.makeFolder(outputFolder, "website", "docs", "r")
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
 		templateData.GenerateDocumentationFile(targetFilePath, object)
+
+		if object.GenerateListResource {
+			listDocFolder := t.makeFolder(outputFolder, "website", "docs", "list-resources")
+			listDocFilePath := path.Join(listDocFolder, fmt.Sprintf("%s.html.markdown", object.TerraformName()))
+			templateData.GenerateListResourceDocumentationFile(listDocFilePath, object)
+		}
+	}
+}
+
+func (t *Terraform) GenerateListResource(object api.Resource, templateData TemplateData, targetFolder string) {
+	if object.GenerateListResource {
+		if object.ExcludeIdentityGeneration {
+			log.Fatalf("generate_list_resource requires identity support; remove exclude_identity_generation from resource %q or disable generate_list_resource", object.Name)
+		}
+		if object.ExcludeRead {
+			log.Fatalf("generate_list_resource requires read support; remove exclude_read from resource %q or disable generate_list_resource", object.Name)
+		}
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s.go", t.ResourceGoFilename(object)))
+		templateData.GenerateFile(targetFilePath, "templates/terraform/list_resource.go.tmpl", object, true,
+			"templates/terraform/list_resource.go.tmpl",
+			"templates/terraform/list_resource_method.go.tmpl",
+		)
+
+		t.GenerateListResourceQueryTest(object, templateData, targetFolder)
 	}
 }
 
@@ -249,6 +275,17 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	templateData.GenerateTestFile(targetFilePath, object)
 }
 
+func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder string) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Samples == nil || !t.hasEligibleSample(object) {
+		return
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateQueryTestFile(targetFilePath, object)
+}
+
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
 	if !object.ShouldGenerateSweepers() {
 		return
@@ -273,14 +310,22 @@ func (t *Terraform) GenerateResourceSweeperFile(object api.Resource, targetFileP
 	templateData.GenerateSweeperFile(targetFilePath, object)
 }
 
-func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData TemplateData, outputFolder string) {
+func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
 	if !object.ShouldGenerateSingularDataSource() {
 		return
 	}
 
-	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s.go", t.ResourceGoFilename(object)))
-	templateData.GenerateDataSourceFile(targetFilePath, object)
+	if generateCode {
+		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s.go", t.ResourceGoFilename(object)))
+		templateData.GenerateDataSourceFile(targetFilePath, object)
+	}
+
+	if generateDocs {
+		targetFolder := t.makeFolder(outputFolder, "website", "docs", "d")
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
+		templateData.GenerateDataSourceDocumentationFile(targetFilePath, object)
+	}
 }
 
 func (t *Terraform) GenerateSingularDataSourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
@@ -505,7 +550,28 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 	// save the folder name to foldersCopiedToGoogleDir
 	var foldersCopiedToGoogleDir []string
 	if generateCode {
-		foldersCopiedToGoogleDir = []string{"third_party/terraform/services", "third_party/terraform/acctest", "third_party/terraform/sweeper", "third_party/terraform/provider", "third_party/terraform/registry", "third_party/terraform/tpgdclresource", "third_party/terraform/tpgiamresource", "third_party/terraform/tpgresource", "third_party/terraform/transport", "third_party/terraform/fwmodels", "third_party/terraform/fwprovider", "third_party/terraform/fwtransport", "third_party/terraform/fwresource", "third_party/terraform/fwutils", "third_party/terraform/fwvalidators", "third_party/terraform/verify", "third_party/terraform/envvar", "third_party/terraform/functions", "third_party/terraform/test-fixtures"}
+		foldersCopiedToGoogleDir = []string{
+			"third_party/terraform/acctest",
+			"third_party/terraform/allservices",
+			"third_party/terraform/envvar",
+			"third_party/terraform/functions",
+			"third_party/terraform/fwmodels",
+			"third_party/terraform/fwprovider",
+			"third_party/terraform/fwresource",
+			"third_party/terraform/fwtransport",
+			"third_party/terraform/fwutils",
+			"third_party/terraform/fwvalidators",
+			"third_party/terraform/provider",
+			"third_party/terraform/registry",
+			"third_party/terraform/services",
+			"third_party/terraform/sweeper",
+			"third_party/terraform/test-fixtures",
+			"third_party/terraform/tpgdclresource",
+			"third_party/terraform/tpgiamresource",
+			"third_party/terraform/tpgresource",
+			"third_party/terraform/transport",
+			"third_party/terraform/verify",
+		}
 	}
 	googleDir := "google"
 	if versionName != "ga" {
@@ -622,7 +688,25 @@ func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 
 	// Case 2: When compile all of files except .tmpl in a folder to the google directory of downstream repository,
 	// save the folder name to foldersCopiedToGoogleDir
-	foldersCompiledToGoogleDir := []string{"third_party/terraform/services", "third_party/terraform/acctest", "third_party/terraform/sweeper", "third_party/terraform/provider", "third_party/terraform/tpgdclresource", "third_party/terraform/tpgiamresource", "third_party/terraform/tpgresource", "third_party/terraform/transport", "third_party/terraform/fwmodels", "third_party/terraform/fwprovider", "third_party/terraform/fwtransport", "third_party/terraform/fwresource", "third_party/terraform/verify", "third_party/terraform/envvar", "third_party/terraform/functions", "third_party/terraform/test-fixtures"}
+	foldersCompiledToGoogleDir := []string{
+		"third_party/terraform/acctest",
+		"third_party/terraform/allservices",
+		"third_party/terraform/envvar",
+		"third_party/terraform/functions",
+		"third_party/terraform/fwmodels",
+		"third_party/terraform/fwprovider",
+		"third_party/terraform/fwresource",
+		"third_party/terraform/fwtransport",
+		"third_party/terraform/provider",
+		"third_party/terraform/services",
+		"third_party/terraform/sweeper",
+		"third_party/terraform/test-fixtures",
+		"third_party/terraform/tpgdclresource",
+		"third_party/terraform/tpgiamresource",
+		"third_party/terraform/tpgresource",
+		"third_party/terraform/transport",
+		"third_party/terraform/verify",
+	}
 	googleDir := "google"
 	if versionName != "ga" {
 		googleDir = fmt.Sprintf("google-%s", versionName)

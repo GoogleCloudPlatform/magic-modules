@@ -150,6 +150,9 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     fwvalidators.NonNegativeDurationValidator(),
                 },
             },
+            "deletion_policy": schema.StringAttribute{
+                Optional: true,
+            },
             "request_reason": schema.StringAttribute{
                 Optional: true,
             },
@@ -213,6 +216,17 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     transport_tpg.CustomEndpointValidator(),
                 },
             },
+
+            // Generated Products. Although these will only be _populated_ for registered products, they
+            // must always be present to match the ProviderModel struct.
+            {{- range $product := $.Products }}
+            "{{ underscore $product.Name }}_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
+            {{- end }}
         },
         Blocks: map[string]schema.Block{
             "batching": schema.ListNestedBlock{
@@ -256,14 +270,6 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
         },
     }
-	for _, p := range registry.ListProducts() {
-        resp.Schema.Attributes[p.CustomEndpointField] = &schema.StringAttribute{
-            Optional:     true,
-            Validators: []validator.String{
-                transport_tpg.CustomEndpointValidator(),
-            },
-        }
-	}
 }
 
 // Configure prepares the metadata/'meta' required for data sources and resources to function.

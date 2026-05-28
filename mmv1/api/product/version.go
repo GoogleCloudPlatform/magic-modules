@@ -31,6 +31,11 @@ type Version struct {
 	BaseUrl          string `yaml:"base_url"`
 	Name             string
 	RepUrl           string `yaml:"rep_url,omitempty"`
+
+	// EXPERIMENTAL: RPC settings are not fully implemented, and should not be
+	// used at this time.
+	RPCAddress string `yaml:"rpc_address,omitempty"`
+	RPCPackage string `yaml:"rpc_package,omitempty"`
 }
 
 func (v *Version) Validate(pName string) {

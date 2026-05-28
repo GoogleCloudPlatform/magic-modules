@@ -13,6 +13,9 @@ cai_asset_name_formats:
   - {{"//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}"}}
   - {{"//container.googleapis.com/projects/{{project}}/zones/{{location}}/clusters/{{name}}"}}
 fields:
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'addonsConfig.agentSandboxConfig.enabled'
+{{- end }}
   - field: 'addons_config.cloudrun_config.disabled'
     api_field: 'addonsConfig.cloudRunConfig.disabled'
   - field: 'addons_config.cloudrun_config.load_balancer_type'
@@ -25,6 +28,7 @@ fields:
   - api_field: 'addonsConfig.gkeBackupAgentConfig.enabled'
   - api_field: 'addonsConfig.horizontalPodAutoscaling.disabled'
   - api_field: 'addonsConfig.httpLoadBalancing.disabled'
+  - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.istioConfig.auth'
 {{- end }}
@@ -33,7 +37,6 @@ fields:
 {{- end }}
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.kalmConfig.enabled'
-  - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- end }}
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enableLegacyLustrePort'
   - api_field: 'addonsConfig.lustreCsiDriverConfig.disableMultiNic'
@@ -327,6 +330,7 @@ fields:
   - api_field: 'nodeConfig.kubeletConfig.cpuCfsQuota'
   - api_field: 'nodeConfig.kubeletConfig.cpuCfsQuotaPeriod'
   - api_field: 'nodeConfig.kubeletConfig.cpuManagerPolicy'
+  - api_field: 'nodeConfig.kubeletConfig.crashLoopBackOff.maxContainerRestartPeriod'
   - api_field: 'nodeConfig.kubeletConfig.evictionMaxPodGracePeriodSeconds'
   - api_field: 'nodeConfig.kubeletConfig.evictionMinimumReclaim.imagefsAvailable'
   - api_field: 'nodeConfig.kubeletConfig.evictionMinimumReclaim.imagefsInodesFree'
@@ -579,6 +583,8 @@ fields:
     api_field: 'nodePools.config.kubeletConfig.cpuCfsQuotaPeriod'
   - field: 'node_pool.node_config.kubelet_config.cpu_manager_policy'
     api_field: 'nodePools.config.kubeletConfig.cpuManagerPolicy'
+  - field: 'node_pool.node_config.kubelet_config.crash_loop_back_off.max_container_restart_period'
+    api_field: 'nodePools.config.kubeletConfig.crashLoopBackOff.maxContainerRestartPeriod'
   - field: 'node_pool.node_config.kubelet_config.eviction_max_pod_grace_period_seconds'
     api_field: 'nodePools.config.kubeletConfig.evictionMaxPodGracePeriodSeconds'
   - field: 'node_pool.node_config.kubelet_config.eviction_minimum_reclaim.imagefs_available'
@@ -681,6 +687,10 @@ fields:
     api_field: 'nodePools.config.loggingConfig.variantConfig.variant'
   - field: 'node_pool.node_config.machine_type'
     api_field: 'nodePools.config.machineType'
+  - field: 'node_config.gpudirect_strategy'
+    api_field: 'nodeConfig.gpuDirectConfig.gpuDirectStrategy'
+  - field: 'node_pool.node_config.gpudirect_strategy'
+    api_field: 'nodePools.config.gpuDirectConfig.gpuDirectStrategy'
   - field: 'node_pool.node_config.max_run_duration'
     api_field: 'nodePools.config.maxRunDuration'
   - field: 'node_pool.node_config.metadata'
@@ -843,11 +853,9 @@ fields:
   - api_field: 'secretManagerConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.rotationInterval'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'secretSyncConfig.enabled'
   - api_field: 'secretSyncConfig.rotationConfig.enabled'
   - api_field: 'secretSyncConfig.rotationConfig.rotationInterval'
-{{- end }}
   - api_field: 'securityPostureConfig.mode'
   - api_field: 'securityPostureConfig.vulnerabilityMode'
   - api_field: 'selfLink'
@@ -881,3 +889,5 @@ fields:
   - api_field: 'workloadAltsConfig.enableAlts'
 {{- end }}
   - api_field: 'workloadIdentityConfig.workloadPool'
+  - field: 'deletion_policy'
+    provider_only: true

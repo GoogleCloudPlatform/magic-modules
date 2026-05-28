@@ -1,9 +1,10 @@
 // Handle the "Send Empty" override logic
 if v, ok := d.GetOk("send_secondary_ip_range_if_empty"); ok && v.(bool) {
-	if sv, ok := d.GetOk("secondary_ip_range"); ok {
+	oldRanges, _ := d.GetChange("secondary_ip_range")
+	if oldRanges != nil {
 		configValue := d.GetRawConfig().GetAttr("secondary_ip_range")
-		stateValue := sv.([]interface{})
-		if configValue.LengthInt() == 0 && len(stateValue) != 0 {
+		stateValue := oldRanges.([]interface{})
+		if (configValue.IsNull() || configValue.LengthInt() == 0) && len(stateValue) != 0 {
 			log.Printf("[DEBUG] Sending empty secondary_ip_range in update")
 			obj := make(map[string]interface{})
 			obj["secondaryIpRanges"] = make([]interface{}, 0)
