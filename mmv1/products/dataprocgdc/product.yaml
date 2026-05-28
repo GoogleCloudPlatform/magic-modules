@@ -14,8 +14,8 @@
 ---
 name: DataprocGdc
 display_name: Dataproc on GDC
-scopes:
-  - https://www.googleapis.com/auth/cloud-platform
 versions:
   - name: ga
     base_url: https://dataprocgdc.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform

@@ -13,24 +13,35 @@
 
 ---
 name: MulticastGroupRangeActivation
-description: Create a multicast group range activation in the specified location of the current project.
+description: Create a multicast group range activation in the specified location
+  of the current project.
 references:
   guides:
-    Create Multicast Group Range Activation: https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#activate_the_group_range
-  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupRangeActivations
+    'Create Multicast Group Range Activation': 'https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#activate_the_group_range'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupRangeActivations'
 base_url: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations
+update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations/{{multicast_group_range_activation_id}}
 create_url: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations?multicastGroupRangeActivationId={{multicast_group_range_activation_id}}
-update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations/{{multicast_group_range_activation_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations/{{multicast_group_range_activation_id}}
 sweeper:
   url_substitutions:
-    - location: us-central1-b
+    - location: "us-central1-b"
+examples:
+  - name: network_services_multicast_group_range_activation_basic
+    primary_resource_id: mgra_test
+    vars:
+      network_name: test-network-mgra
+      domain_name: test-domain-mgra
+      domain_activation_name: test-domain-activation-mgra
+      internal_range_name: test-internal-range-mgra
+      group_range_name: test-group-range-mgra
+      group_range_activation_name: test-mgra-mgra
+autogen_async: true
 async:
-  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 20
@@ -41,23 +52,11 @@ async:
     - create
     - delete
     - update
+  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: TXVsdGljYXN0R3JvdXBSYW5nZUFjdGl2YXRpb24=
-autogen_async: true
-samples:
-  - name: network_services_multicast_group_range_activation_basic
-    primary_resource_id: mgra_test
-    steps:
-      - name: network_services_multicast_group_range_activation_basic
-        resource_id_vars:
-          network_name: test-network-mgra
-          domain_name: test-domain-mgra
-          domain_activation_name: test-domain-activation-mgra
-          internal_range_name: test-internal-range-mgra
-          group_range_name: test-group-range-mgra
-          group_range_activation_name: test-mgra-mgra
 parameters:
   - name: location
     type: String

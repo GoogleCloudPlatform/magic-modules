@@ -12,131 +12,117 @@
 # limitations under the License.
 
 ---
-name: TlsRoute
+name: 'TlsRoute'
 description: |
   TlsRoute defines how traffic should be routed based on SNI and other matching L3 attributes.
 references:
   guides:
-  api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.tlsRoutes
+  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.tlsRoutes'
 docs:
-base_url: projects/{{project}}/locations/{{location}}/tlsRoutes
-self_link: projects/{{project}}/locations/{{location}}/tlsRoutes/{{name}}
-create_url: projects/{{project}}/locations/{{location}}/tlsRoutes?tlsRouteId={{name}}
+base_url: 'projects/{{project}}/locations/{{location}}/tlsRoutes'
+self_link: 'projects/{{project}}/locations/{{location}}/tlsRoutes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/tlsRoutes?tlsRouteId={{name}}'
+update_verb: 'PATCH'
 update_mask: true
-update_verb: PATCH
 import_format:
-  - projects/{{project}}/locations/{{location}}/tlsRoutes/{{name}}
-  - projects/{{project}}/locations/global/tlsRoutes/{{name}}
+  - 'projects/{{project}}/locations/{{location}}/tlsRoutes/{{name}}'
+  - 'projects/{{project}}/locations/global/tlsRoutes/{{name}}'
 timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
+autogen_async: true
 async:
-  type: OpAsync
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
   operation:
+    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-    base_url: '{{op_id}}'
-  actions: [create, delete, update]
   result:
     resource_inside_response: false
 schema_version: 1
 state_upgraders: true
-autogen_async: true
 custom_code:
-samples:
-  - name: network_services_tls_route_basic
-    primary_resource_id: default
-    steps:
-      - name: network_services_tls_route_basic
-        resource_id_vars:
-          resource_name: my-tls-route
-          backend_service_name: my-backend-service
-          health_check_name: backend-service-health-check
-  - name: network_services_tls_route_regional_basic
-    primary_resource_id: default
-    steps:
-      - name: network_services_tls_route_regional_basic
-        resource_id_vars:
-          resource_name: my-tls-route
-          backend_service_name: my-backend-service
-          health_check_name: backend-service-health-check
-  - name: network_services_tls_route_mesh_basic
-    primary_resource_id: default
-    steps:
-      - name: network_services_tls_route_mesh_basic
-        resource_id_vars:
-          resource_name: my-tls-route
-          backend_service_name: my-backend-service
-          health_check_name: backend-service-health-check
-  - name: network_services_tls_route_gateway_basic
-    primary_resource_id: default
-    steps:
-      - name: network_services_tls_route_gateway_basic
-        resource_id_vars:
-          resource_name: my-tls-route
-          backend_service_name: my-backend-service
-          health_check_name: backend-service-health-check
-  - name: network_services_tls_route_target_tcp_proxy_basic
+examples:
+  - name: 'network_services_tls_route_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'backend-service-health-check'
+  - name: 'network_services_tls_route_regional_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'backend-service-health-check'
+  - name: 'network_services_tls_route_mesh_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'backend-service-health-check'
+  - name: 'network_services_tls_route_gateway_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'backend-service-health-check'
+  - name: 'network_services_tls_route_target_tcp_proxy_basic'
     min_version: beta
-    primary_resource_id: default
-    steps:
-      - name: network_services_tls_route_target_tcp_proxy_basic
-        min_version: beta
-        resource_id_vars:
-          resource_name: my-tls-route
-          target_tcp_proxy_name: my-target-tcp-proxy
-          backend_service_name: my-backend-service
-          health_check_name: my-health-check
-  - name: network_services_tls_route_region_target_tcp_proxy_basic
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      target_tcp_proxy_name: 'my-target-tcp-proxy'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'my-health-check'
+  - name: 'network_services_tls_route_region_target_tcp_proxy_basic'
     min_version: beta
-    primary_resource_id: default
-    steps:
-      - name: network_services_tls_route_region_target_tcp_proxy_basic
-        min_version: beta
-        resource_id_vars:
-          resource_name: my-tls-route
-          target_tcp_proxy_name: my-target-tcp-proxy
-          backend_service_name: my-backend-service
-          health_check_name: my-health-check
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-route'
+      target_tcp_proxy_name: 'my-target-tcp-proxy'
+      backend_service_name: 'my-backend-service'
+      health_check_name: 'my-health-check'
 parameters:
-  - name: name
+  - name: 'name'
     type: String
     description: |
       Name of the TlsRoute resource.
     url_param_only: true
     required: true
     immutable: true
-  - name: location
-    type: String
+  - name: 'location'
+    type: 'String'
     description: |
       Location (region) of the TLS Route.
     immutable: true
-    default_value: global
+    default_value: 'global'
     url_param_only: true
 properties:
-  - name: selfLink
+  - name: 'selfLink'
     type: String
     description: |
       Server-defined URL of this resource.
     output: true
-  - name: createTime
+  - name: 'createTime'
     type: Time
     description: |
       Time the TlsRoute was created in UTC.
     output: true
-  - name: updateTime
+  - name: 'updateTime'
     type: Time
     description: |
       Time the TlsRoute was updated in UTC.
     output: true
-  - name: description
+  - name: 'description'
     type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - name: meshes
+  - name: 'meshes'
     type: Array
     description: |
       Meshes defines a list of meshes this TlsRoute is attached to, as one of the routing rules to route the requests served by the mesh.
@@ -145,7 +131,7 @@ properties:
     send_empty_value: true
     item_type:
       type: String
-  - name: gateways
+  - name: 'gateways'
     type: Array
     description: |
       Gateways defines a list of gateways this TlsRoute is attached to, as one of the routing rules to route the requests served by the gateway.
@@ -153,7 +139,7 @@ properties:
     send_empty_value: true
     item_type:
       type: String
-  - name: targetProxies
+  - name: 'targetProxies'
     type: Array
     description: |
       TargetProxies defines a list of target proxies this TlsRoute is attached to, as one of the routing rules to route the requests served by the load balancer.
@@ -161,7 +147,7 @@ properties:
     send_empty_value: true
     item_type:
       type: String
-  - name: rules
+  - name: 'rules'
     type: Array
     description: |
       Rules that define how traffic is routed and handled.
@@ -170,7 +156,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: matches
+        - name: 'matches'
           type: Array
           description: |
             Matches define the predicate used to match requests to a given action.
@@ -178,7 +164,7 @@ properties:
           item_type:
             type: NestedObject
             properties:
-              - name: sniHost
+              - name: 'sniHost'
                 type: Array
                 description: |
                   SNI (server name indicator) to match against. SNI will be matched against all wildcard domains, i.e. www.example.com will be first matched against www.example.com, then *.example.com, then *.com.
@@ -186,31 +172,31 @@ properties:
                 send_empty_value: true
                 item_type:
                   type: String
-              - name: alpn
+              - name: 'alpn'
                 type: Array
                 description: |
                   ALPN (Application-Layer Protocol Negotiation) to match against. Examples: "http/1.1", "h2". At least one of sniHost and alpn is required. Up to 5 alpns across all matches can be set.
                 send_empty_value: true
                 item_type:
                   type: String
-        - name: action
+        - name: 'action'
           type: NestedObject
           description: |
             Required. A detailed rule defining how to route traffic.
           required: true
           properties:
-            - name: destinations
+            - name: 'destinations'
               type: Array
               description: |
                 The destination to which traffic should be forwarded.
               item_type:
                 type: NestedObject
                 properties:
-                  - name: serviceName
+                  - name: 'serviceName'
                     type: String
                     description: |
                       The URL of a BackendService to route traffic to.
-                  - name: weight
+                  - name: 'weight'
                     type: Integer
                     description: |
                       Specifies the proportion of requests forwarded to the backend referenced by the serviceName field.

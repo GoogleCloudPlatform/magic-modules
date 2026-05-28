@@ -21,36 +21,30 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/agents/{{name}}
-samples:
+examples:
   - name: ces_agent_basic
     primary_resource_id: ces_agent_basic
-    steps:
-      - name: ces_agent_basic
-        resource_id_vars:
-          agent_display_name: my-agent
-          agent_id: agent-id
-          app_display_name: my-app
-          app_id: app-id
-          child_agent_id: child-agent-id
-          toolset_id: toolset-id
+    vars:
+      agent_display_name: my-agent
+      agent_id: agent-id
+      app_display_name: my-app
+      app_id: app-id
+      child_agent_id: child-agent-id
+      toolset_id: toolset-id
   - name: ces_agent_remote_dialogflow_agent
     primary_resource_id: ces_agent_remote_dialogflow_agent
-    steps:
-      - name: ces_agent_remote_dialogflow_agent
-        resource_id_vars:
-          agent_display_name: my-agent
-          agent_id: agent-id
-          app_display_name: my-app
-          app_id: app-id
+    vars:
+      agent_display_name: my-agent
+      agent_id: agent-id
+      app_display_name: my-app
+      app_id: app-id
   - name: ces_agent_remote_dialogflow_agent_interruption
     primary_resource_id: ces_agent_remote_dialogflow_agent_interruption
-    steps:
-      - name: ces_agent_remote_dialogflow_agent_interruption
-        resource_id_vars:
-          agent_display_name: my-agent
-          agent_id: agent-id
-          app_display_name: my-app
-          app_id: app-id
+    vars:
+      agent_display_name: my-agent
+      agent_id: agent-id
+      app_display_name: my-app
+      app_id: app-id
 parameters:
   - name: location
     type: String

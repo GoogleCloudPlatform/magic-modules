@@ -31,38 +31,28 @@ custom_code:
   encoder: templates/terraform/encoders/os_config_patch_deployment.go.tmpl
   decoder: templates/terraform/decoders/os_config_patch_deployment.go.tmpl
   custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
-samples:
+examples:
   - name: os_config_patch_deployment_basic
     primary_resource_id: patch
-    steps:
-      - name: os_config_patch_deployment_basic
-        resource_id_vars:
-          patch_deployment_id: patch-deploy
+    vars:
+      patch_deployment_id: patch-deploy
   - name: os_config_patch_deployment_daily
     primary_resource_id: patch
-    steps:
-      - name: os_config_patch_deployment_daily
-        resource_id_vars:
-          patch_deployment_id: patch-deploy
+    vars:
+      patch_deployment_id: patch-deploy
   - name: os_config_patch_deployment_daily_midnight
     primary_resource_id: patch
-    steps:
-      - name: os_config_patch_deployment_daily_midnight
-        resource_id_vars:
-          patch_deployment_id: patch-deploy
+    vars:
+      patch_deployment_id: patch-deploy
   - name: os_config_patch_deployment_instance
     primary_resource_id: patch
-    steps:
-      - name: os_config_patch_deployment_instance
-        resource_id_vars:
-          instance_name: patch-deploy-inst
-          patch_deployment_id: patch-deploy
+    vars:
+      instance_name: patch-deploy-inst
+      patch_deployment_id: patch-deploy
   - name: os_config_patch_deployment_full
     primary_resource_id: patch
-    steps:
-      - name: os_config_patch_deployment_full
-        resource_id_vars:
-          patch_deployment_id: patch-deploy
+    vars:
+      patch_deployment_id: patch-deploy
 parameters:
   - name: patchDeploymentId
     type: String

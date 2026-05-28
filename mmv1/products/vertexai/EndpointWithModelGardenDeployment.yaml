@@ -18,116 +18,106 @@ description: |
   Create an Endpoint and deploy a Model Garden model to it.
 references:
   guides:
-    Use models in Model Garden: https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models
-    Overview of Model Garden: https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models
-    Overview of self-deployed models: https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/self-deployed-models
-  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations/deploy
+    "Use models in Model Garden": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models"
+    "Overview of Model Garden": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models"
+    "Overview of self-deployed models": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/self-deployed-models"
+  api: "https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations/deploy"
 docs:
-base_url: projects/{{project}}/locations/{{location}}:deploy
+id_format: "projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}"
+base_url: "projects/{{project}}/locations/{{location}}:deploy"
+self_link: "projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}"
+create_url: "projects/{{project}}/locations/{{location}}:deploy"
 immutable: true
-self_link: projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}
-create_url: projects/{{project}}/locations/{{location}}:deploy
-id_format: projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}
+exclude_read: true
+exclude_import: true  # the resource does not support import
 timeouts:
   insert_minutes: 180
   delete_minutes: 20
-exclude_import: true # the resource does not support import
+autogen_status: RW5kcG9pbnRXaXRoTW9kZWxHYXJkZW5EZXBsb3ltZW50
 async:
-  type: OpAsync
+  actions: ["create"]
+  type: "OpAsync"
   operation:
     timeouts:
       insert_minutes: 180
-    base_url: '{{op_id}}'
-  actions: [create]
+    base_url: "{{op_id}}"
   result:
     resource_inside_response: true
-exclude_read: true
-autogen_status: RW5kcG9pbnRXaXRoTW9kZWxHYXJkZW5EZXBsb3ltZW50
 custom_code:
-  post_create: templates/terraform/post_create/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl
-  custom_delete: templates/terraform/custom_delete/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl
-samples:
-  - name: vertex_ai_deploy_basic
-    primary_resource_id: deploy
-    exclude_test: true # handwritten test required since resource does not support import
-    steps:
-      - name: vertex_ai_deploy_basic
-        resource_id_vars:
-          project: vertex-ai
-          publisher_model_name: publisher_model_name
-        ignore_read_extra:
-          - project
-  - name: vertex_ai_deploy_huggingface_model
-    primary_resource_id: deploy
-    exclude_test: true # handwritten test required since resource does not support import
-    steps:
-      - name: vertex_ai_deploy_huggingface_model
-        resource_id_vars:
-          project: vertex-ai
-          publisher_model_name: publisher_model_name
-        ignore_read_extra:
-          - project
-  - name: vertex_ai_deploy_with_configs
-    primary_resource_id: deploy
-    exclude_test: true # handwritten test required since resource does not support import
-    steps:
-      - name: vertex_ai_deploy_with_configs
-        resource_id_vars:
-          project: vertex-ai
-          publisher_model_name: publisher_model_name
-        ignore_read_extra:
-          - project
-  - name: vertex_ai_deploy_multiple_models_in_parallel
-    primary_resource_id: deploy
-    exclude_test: true # handwritten test required since resource does not support import
-    steps:
-      - name: vertex_ai_deploy_multiple_models_in_parallel
-        resource_id_vars:
-          project: vertex-ai
-          publisher_model_name: publisher_model_name
-        ignore_read_extra:
-          - project
-  - name: vertex_ai_deploy_multiple_models_in_sequence
-    primary_resource_id: deploy
-    exclude_test: true # handwritten test required since resource does not support import
-    steps:
-      - name: vertex_ai_deploy_multiple_models_in_sequence
-        resource_id_vars:
-          project: vertex-ai
-          publisher_model_name: publisher_model_name
-        ignore_read_extra:
-          - project
-  - name: vertex_ai_deploy_psc_endpoint
-    primary_resource_id: deploy
-    exclude_test: true # handwritten test required since resource does not support import
-    steps:
-      - name: vertex_ai_deploy_psc_endpoint
-        resource_id_vars:
-          project: vertex-ai
-          publisher_model_name: publisher_model_name
-        ignore_read_extra:
-          - project
-  - name: vertex_ai_deploy_psc_endpoint_automated
-    primary_resource_id: deploy
-    exclude_test: true # handwritten test required since resource does not support import
-    steps:
-      - name: vertex_ai_deploy_psc_endpoint_automated
-        resource_id_vars:
-          project: vertex-ai
-          publisher_model_name: publisher_model_name
-        ignore_read_extra:
-          - project
+  post_create: "templates/terraform/post_create/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
+  custom_delete: "templates/terraform/custom_delete/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
+examples:
+  - name: "vertex_ai_deploy_basic"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_huggingface_model"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_with_configs"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_multiple_models_in_parallel"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_multiple_models_in_sequence"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_psc_endpoint"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_psc_endpoint_automated"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `location`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description:
+      Resource ID segment making up resource `location`. It identifies the
+      resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
 properties:
   - name: endpoint
     type: String
-    description: Resource ID segment making up resource `endpoint`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description:
+      Resource ID segment making up resource `endpoint`. It identifies the
+      resource within its parent collection as described in https://google.aip.dev/122.
     url_param_only: true
     output: true
   - name: deployedModelId
@@ -151,16 +141,16 @@ properties:
       `publishers/{publisher}/models/{publisher_model}@{version_id}`, or
       `publishers/hf-{hugging-face-author}/models/{hugging-face-model-name}@001`.
     exactly_one_of:
-      - publisher_model_name
-      - hugging_face_model_id
+      - "publisher_model_name"
+      - "hugging_face_model_id"
   - name: huggingFaceModelId
     type: String
     description: |-
       The Hugging Face model to deploy.
       Format: Hugging Face model ID like `google/gemma-2-2b-it`.
     exactly_one_of:
-      - publisher_model_name
-      - hugging_face_model_id
+      - "publisher_model_name"
+      - "hugging_face_model_id"
   - name: modelConfig
     type: NestedObject
     description: The model config to use for the deployment.
@@ -326,7 +316,9 @@ properties:
                       Defaults to HTTP. Acceptable values are "HTTP" or "HTTPS".
                   - name: httpHeaders
                     type: Array
-                    description: Custom headers to set in the request. HTTP allows repeated headers.
+                    description:
+                      Custom headers to set in the request. HTTP allows repeated
+                      headers.
                     item_type:
                       type: NestedObject
                       properties:
@@ -345,7 +337,9 @@ properties:
                 properties:
                   - name: port
                     type: Integer
-                    description: Port number of the gRPC service. Number must be in the range 1 to 65535.
+                    description:
+                      Port number of the gRPC service. Number must be in the range
+                      1 to 65535.
                   - name: service
                     type: String
                     description: |-
@@ -450,7 +444,9 @@ properties:
                       Defaults to HTTP. Acceptable values are "HTTP" or "HTTPS".
                   - name: httpHeaders
                     type: Array
-                    description: Custom headers to set in the request. HTTP allows repeated headers.
+                    description:
+                      Custom headers to set in the request. HTTP allows repeated
+                      headers.
                     item_type:
                       type: NestedObject
                       properties:
@@ -469,7 +465,9 @@ properties:
                 properties:
                   - name: port
                     type: Integer
-                    description: Port number of the gRPC service. Number must be in the range 1 to 65535.
+                    description:
+                      Port number of the gRPC service. Number must be in the range
+                      1 to 65535.
                   - name: service
                     type: String
                     description: |-
@@ -702,7 +700,9 @@ properties:
                       Defaults to HTTP. Acceptable values are "HTTP" or "HTTPS".
                   - name: httpHeaders
                     type: Array
-                    description: Custom headers to set in the request. HTTP allows repeated headers.
+                    description:
+                      Custom headers to set in the request. HTTP allows repeated
+                      headers.
                     item_type:
                       type: NestedObject
                       properties:
@@ -729,7 +729,9 @@ properties:
                       If this is not specified, the default behavior is defined by gRPC.
                   - name: port
                     type: Integer
-                    description: Port number of the gRPC service. Number must be in the range 1 to 65535.
+                    description:
+                      Port number of the gRPC service. Number must be in the range
+                      1 to 65535.
               - name: tcpSocket
                 type: NestedObject
                 description: |-
@@ -866,13 +868,15 @@ properties:
         properties:
           - name: enablePrivateServiceConnect
             type: Boolean
-            description: Required. If true, expose the IndexEndpoint via private service connect.
+            description: |-
+              Required. If true, expose the IndexEndpoint via private service connect.
             required: true
             immutable: true
           - name: projectAllowlist
             type: Array
             immutable: true
-            description: A list of Projects from which the forwarding rule will target the service attachment.
+            description: |-
+              A list of Projects from which the forwarding rule will target the service attachment.
             item_type:
               type: String
           - name: pscAutomationConfigs
@@ -894,23 +898,27 @@ properties:
                 required: true
               - name: ipAddress
                 type: String
-                description: Output only. IP address rule created by the PSC service automation.
+                description: |-
+                  Output only. IP address rule created by the PSC service automation.
                 output: true
               - name: forwardingRule
                 type: String
-                description: Output only. Forwarding rule created by the PSC service automation.
+                description: |-
+                  Output only. Forwarding rule created by the PSC service automation.
                 output: true
               - name: state
                 type: Enum
-                description: Output only. The state of the PSC service automation.
+                description: |-
+                  Output only. The state of the PSC service automation.
                 output: true
                 enum_values:
-                  - PSC_AUTOMATION_STATE_UNSPECIFIED
-                  - PSC_AUTOMATION_STATE_SUCCESSFUL
-                  - PSC_AUTOMATION_STATE_FAILED
+                  - 'PSC_AUTOMATION_STATE_UNSPECIFIED'
+                  - 'PSC_AUTOMATION_STATE_SUCCESSFUL'
+                  - 'PSC_AUTOMATION_STATE_FAILED'
               - name: errorMessage
                 type: String
-                description: Output only. Error message if the PSC service automation failed.
+                description: |-
+                  Output only. Error message if the PSC service automation failed.
                 output: true
           - name: serviceAttachment
             type: String
@@ -985,7 +993,8 @@ properties:
                 immutable: true
               - name: acceleratorType
                 type: String
-                description: |-
+                description: |2-
+
                   Possible values:
                   ACCELERATOR_TYPE_UNSPECIFIED
                   NVIDIA_TESLA_K80

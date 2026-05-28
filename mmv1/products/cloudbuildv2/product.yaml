@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: Cloudbuildv2
-display_name: Cloud Build v2
-scopes:
-  - https://www.googleapis.com/auth/cloud-platform
+name: 'Cloudbuildv2'
+display_name: 'Cloud Build v2'
 versions:
-  - name: ga
-    base_url: https://cloudbuild.googleapis.com/v2/
+  - name: 'ga'
+    base_url: 'https://cloudbuild.googleapis.com/v2/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'

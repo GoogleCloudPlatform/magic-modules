@@ -15,22 +15,33 @@
 name: DataSharingWithGoogleSettingBinding
 api_resource_type_kind: SettingBinding
 api_variant_patterns:
-  - projects/{project}/locations/{location}/dataSharingWithGoogleSettings/{dataSharingWithGoogleSetting}/settingBindings/{settingBinding}
+  - 'projects/{project}/locations/{location}/dataSharingWithGoogleSettings/{dataSharingWithGoogleSetting}/settingBindings/{settingBinding}'
 description: The resource for managing DataSharingWithGoogle setting bindings for Admin Control.
 references:
   guides:
-    Gemini Cloud Assist overview: https://cloud.google.com/gemini/docs/cloud-assist/overview
+    'Gemini Cloud Assist overview': 'https://cloud.google.com/gemini/docs/cloud-assist/overview'
 base_url: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings
 self_link: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings/{{setting_binding_id}}
 create_url: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings?settingBindingId={{setting_binding_id}}
-update_mask: true
 update_verb: PATCH
+update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings/{{setting_binding_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings/{{setting_binding_id}}
 mutex: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
+examples:
+  - name: gemini_data_sharing_with_google_setting_binding_basic
+    primary_resource_id: example
+    exclude_test: true
+    vars:
+      data_sharing_with_google_setting_id: ls-tf1
+      setting_binding_id: ls-tf1b1
+      target: projects/980109375338
+    test_vars_overrides:
+      # for backward compatible
+      target: '"projects/980109375338" + randomSuffix'
+autogen_async: true
 async:
-  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 90
@@ -41,24 +52,11 @@ async:
     - create
     - delete
     - update
+  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: U2V0dGluZ0JpbmRpbmc=
-autogen_async: true
-samples:
-  - name: gemini_data_sharing_with_google_setting_binding_basic
-    primary_resource_id: example
-    exclude_test: true
-    steps:
-      - name: gemini_data_sharing_with_google_setting_binding_basic
-        resource_id_vars:
-          data_sharing_with_google_setting_id: ls-tf1
-          setting_binding_id: ls-tf1b1
-          target: projects/980109375338
-        test_vars_overrides:
-          # for backward compatible
-          target: '"projects/980109375338" + randomSuffix'
 parameters:
   - name: location
     type: String
@@ -73,14 +71,16 @@ parameters:
     required: true
   - name: settingBindingId
     type: String
-    description: Required. Id of the setting binding.
+    description: |-
+      Required. Id of the setting binding.
     immutable: true
     url_param_only: true
     required: true
 properties:
   - name: product
     type: String
-    description: Product type of the setting binding. Values include GEMINI_IN_BIGQUERY, GEMINI_CLOUD_ASSIST, etc. See [product reference](https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.dataSharingWithGoogleSettings.settingBindings) for a complete list.
+    description: |-
+      Product type of the setting binding. Values include GEMINI_IN_BIGQUERY, GEMINI_CLOUD_ASSIST, etc. See [product reference](https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.dataSharingWithGoogleSettings.settingBindings) for a complete list.
     default_from_api: true
   - name: name
     type: String

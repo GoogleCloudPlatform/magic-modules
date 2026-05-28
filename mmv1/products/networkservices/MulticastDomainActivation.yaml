@@ -13,24 +13,35 @@
 
 ---
 name: MulticastDomainActivation
-description: Create a multicast domain activation in the specified location of the current project.
+description: Create a multicast domain activation in the specified location of
+  the current project.
 references:
   guides:
-    Create Multicast Domain Activation: https://docs.cloud.google.com/vpc/docs/multicast/create-domains#activate-domain
-  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastDomainActivations
+    'Create Multicast Domain Activation': 'https://docs.cloud.google.com/vpc/docs/multicast/create-domains#activate-domain'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastDomainActivations'
 base_url: projects/{{project}}/locations/{{location}}/multicastDomainActivations
-self_link: projects/{{project}}/locations/{{location}}/multicastDomainActivations/{{multicast_domain_activation_id}}
-create_url: projects/{{project}}/locations/{{location}}/multicastDomainActivations?multicastDomainActivationId={{multicast_domain_activation_id}}
 update_mask: true
+self_link:
+  projects/{{project}}/locations/{{location}}/multicastDomainActivations/{{multicast_domain_activation_id}}
+create_url:
+  projects/{{project}}/locations/{{location}}/multicastDomainActivations?multicastDomainActivationId={{multicast_domain_activation_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/multicastDomainActivations/{{multicast_domain_activation_id}}
+id_format:
+  projects/{{project}}/locations/{{location}}/multicastDomainActivations/{{multicast_domain_activation_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastDomainActivations/{{multicast_domain_activation_id}}
 sweeper:
   url_substitutions:
-    - location: us-central1-b
+    - location: "us-central1-b"
+examples:
+  - name: network_services_multicast_domain_activation_basic
+    primary_resource_id: mda_test
+    vars:
+      network_name: test-network-mda
+      domain_name: test-domain-mda
+      domain_activation_name: test-domain-activation-mda
+autogen_async: true
 async:
-  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 20
@@ -41,24 +52,17 @@ async:
     - create
     - delete
     - update
+  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: TXVsdGljYXN0RG9tYWluQWN0aXZhdGlvbg==
-autogen_async: true
-samples:
-  - name: network_services_multicast_domain_activation_basic
-    primary_resource_id: mda_test
-    steps:
-      - name: network_services_multicast_domain_activation_basic
-        resource_id_vars:
-          network_name: test-network-mda
-          domain_name: test-domain-mda
-          domain_activation_name: test-domain-activation-mda
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the
+      resource within its parent collection as described in
+      https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
@@ -75,7 +79,7 @@ parameters:
 properties:
   - name: adminNetwork
     type: String
-    description: The URL of the admin network.
+    description: 'The URL of the admin network.'
     output: true
   - name: createTime
     type: String

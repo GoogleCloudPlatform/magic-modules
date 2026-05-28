@@ -40,31 +40,25 @@ async:
     resource_inside_response: true
 taint_resource_on_failed_create: true
 include_in_tgc_next: true
-samples:
+examples:
   - name: gkeonprem_vmware_cluster_basic
     primary_resource_id: cluster-basic
-    steps:
-      - name: gkeonprem_vmware_cluster_basic
-        resource_id_vars:
-          name: cluster-basic
-        test_env_vars:
-          project: fake-backend-360322
+    vars:
+      name: cluster-basic
+    test_env_vars:
+      project: fake-backend-360322
   - name: gkeonprem_vmware_cluster_f5lb
     primary_resource_id: cluster-f5lb
-    steps:
-      - name: gkeonprem_vmware_cluster_f5lb
-        resource_id_vars:
-          name: cluster-f5lb
-        test_env_vars:
-          project: fake-backend-360322
+    vars:
+      name: cluster-f5lb
+    test_env_vars:
+      project: fake-backend-360322
   - name: gkeonprem_vmware_cluster_manuallb
     primary_resource_id: cluster-manuallb
-    steps:
-      - name: gkeonprem_vmware_cluster_manuallb
-        resource_id_vars:
-          name: cluster-manuallb
-        test_env_vars:
-          project: fake-backend-360322
+    vars:
+      name: cluster-manuallb
+    test_env_vars:
+      project: fake-backend-360322
 parameters:
   - name: name
     type: String

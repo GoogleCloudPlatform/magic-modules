@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: CES
-display_name: Customer Engagement Suite
-scopes:
-  - https://www.googleapis.com/auth/cloud-platform
+name: 'CES'
+display_name: 'Customer Engagement Suite'
 versions:
-  - name: ga
-    base_url: https://ces.googleapis.com/v1/
-  - name: beta
-    base_url: https://ces.googleapis.com/v1beta/
+  - name: 'ga'
+    base_url: 'https://ces.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://ces.googleapis.com/v1beta/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'

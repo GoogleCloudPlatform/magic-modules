@@ -12,88 +12,84 @@
 # limitations under the License.
 
 ---
-name: FeatureGroupFeature
+name: 'FeatureGroupFeature'
 api_resource_type_kind: Feature
 api_variant_patterns:
-  - projects/{project}/locations/{location}/featureGroups/{featureGroup}/features/{feature}
+  - 'projects/{project}/locations/{location}/featureGroups/{featureGroup}/features/{feature}'
 description: Vertex AI Feature Group Feature is feature metadata information.
 references:
   guides:
-    Creating a Feature: https://cloud.google.com/vertex-ai/docs/featurestore/latest/create-feature
-  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureGroups.features
+    'Creating a Feature': 'https://cloud.google.com/vertex-ai/docs/featurestore/latest/create-feature'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureGroups.features'
 docs:
-base_url: projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features
-self_link: projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}
-create_url: projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features?featureId={{name}}
+base_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features'
+self_link: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features?featureId={{name}}'
+update_verb: 'PATCH'
 update_mask: true
-update_verb: PATCH
 import_format:
-  - projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}
+  - 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  type: OpAsync
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-  actions: [create, delete, update]
   result:
     resource_inside_response: true
 custom_code:
-samples:
-  - name: vertex_ai_feature_group_feature
-    primary_resource_id: feature_group_feature
-    steps:
-      - name: vertex_ai_feature_group_feature
-        resource_id_vars:
-          job_id: job_load
-          name: example_feature
-          feature_group_name: example_feature_group
-  - name: vertex_ai_feature_group_feature_with_version_column_name
-    primary_resource_id: feature_group_feature
-    exclude_basic_doc: true
-    steps:
-      - name: vertex_ai_feature_group_feature_with_version_column_name
-        resource_id_vars:
-          job_id: job_load
-          name: example_feature
-          feature_group_name: example_feature_group
+examples:
+  - name: 'vertex_ai_feature_group_feature'
+    primary_resource_id: 'feature_group_feature'
+    vars:
+      job_id: 'job_load'
+      name: 'example_feature'
+      feature_group_name: 'example_feature_group'
+  - name: 'vertex_ai_feature_group_feature_with_version_column_name'
+    primary_resource_id: 'feature_group_feature'
+    vars:
+      job_id: 'job_load'
+      name: 'example_feature'
+      feature_group_name: 'example_feature_group'
+    exclude_docs: true
 parameters:
-  - name: featureGroup
+  - name: 'featureGroup'
     type: String
     description: The name of the Feature Group.
     url_param_only: true
     required: true
     immutable: true
-  - name: region
+  - name: 'region'
     type: String
     description: The region for the resource. It should be the same as the feature group's region.
     url_param_only: true
     required: true
     immutable: true
 properties:
-  - name: name
+  - name: 'name'
     type: String
     description: The resource name of the Feature Group Feature.
     url_param_only: true
     required: true
     immutable: true
-  - name: createTime
+  - name: 'createTime'
     type: String
     description: The timestamp of when the FeatureGroup was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
-  - name: updateTime
+  - name: 'updateTime'
     type: String
     description: The timestamp of when the FeatureGroup was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
-  - name: labels
+  - name: 'labels'
     type: KeyValueLabels
     description: The labels with user-defined metadata to organize your FeatureGroup.
-  - name: description
+  - name: 'description'
     type: String
     description: The description of the FeatureGroup.
-  - name: versionColumnName
+  - name: 'versionColumnName'
     type: String
     description: The name of the BigQuery Table/View column hosting data for this version. If no value is provided, will use featureId.
     default_from_api: true

@@ -12,100 +12,101 @@
 # limitations under the License.
 
 ---
-name: MetadataStore
-description: Instance of a metadata store. Contains a set of metadata that can be queried.
+name: 'MetadataStore'
+description: |-
+  Instance of a metadata store. Contains a set of metadata that can be queried.
+min_version: 'beta'
 references:
   guides:
-    Official Documentation: https://cloud.google.com/vertex-ai/docs
-  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.metadataStores
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.metadataStores'
 docs:
-base_url: projects/{{project}}/locations/{{region}}/metadataStores
-min_version: beta
-immutable: true
-self_link: projects/{{project}}/locations/{{region}}/metadataStores/{{name}}
-create_url: projects/{{project}}/locations/{{region}}/metadataStores?metadataStoreId={{name}}
 id_format: '{{name}}'
+base_url: 'projects/{{project}}/locations/{{region}}/metadataStores'
+self_link: 'projects/{{project}}/locations/{{region}}/metadataStores/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/metadataStores?metadataStoreId={{name}}'
+immutable: true
 timeouts:
   insert_minutes: 40
   update_minutes: 20
   delete_minutes: 20
 async:
-  type: OpAsync
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
   operation:
+    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 40
       update_minutes: 20
       delete_minutes: 20
-    base_url: '{{op_id}}'
-  actions: [create, delete, update]
   result:
     resource_inside_response: true
 custom_code:
-samples:
-  - name: vertex_ai_metadata_store
-    primary_resource_id: store
+examples:
+  - name: 'vertex_ai_metadata_store'
+    primary_resource_id: 'store'
+    vars:
+      name: 'test-store'
     exclude_test: true
-    steps:
-      - name: vertex_ai_metadata_store
-        resource_id_vars:
-          name: test-store
 parameters:
-  - name: region
+  - name: 'region'
     type: String
     description: The region of the Metadata Store. eg us-central1
-    min_version: beta
+    min_version: 'beta'
     url_param_only: true
     immutable: true
     default_from_api: true
 properties:
-  - name: name
+  - name: 'name'
     type: String
-    description: The name of the MetadataStore. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
-    min_version: beta
+    description:
+      The name of the MetadataStore. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    min_version: 'beta'
     url_param_only: true
     immutable: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
-  - name: description
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'description'
     type: String
     description: Description of the MetadataStore.
-    min_version: beta
+    min_version: 'beta'
     immutable: true
-  - name: createTime
+  - name: 'createTime'
     type: String
     description: |
       The timestamp of when the MetadataStore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-    min_version: beta
+    min_version: 'beta'
     output: true
-  - name: updateTime
+  - name: 'updateTime'
     type: String
     description: |
       The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-    min_version: beta
+    min_version: 'beta'
     output: true
-  - name: encryptionSpec
+  - name: 'encryptionSpec'
     type: NestedObject
     description: |
       Customer-managed encryption key spec for a MetadataStore. If set, this MetadataStore and all sub-resources of this MetadataStore will be secured by this key.
-    min_version: beta
+    min_version: 'beta'
     immutable: true
     properties:
-      - name: kmsKeyName
+      - name: 'kmsKeyName'
         type: String
         description: |
           Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
           Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
-        min_version: beta
+        min_version: 'beta'
         immutable: true
-  - name: state
+  - name: 'state'
     type: NestedObject
     description: |
       State information of the MetadataStore.
-    min_version: beta
+    min_version: 'beta'
     output: true
     properties:
-      - name: diskUtilizationBytes
+      - name: 'diskUtilizationBytes'
         type: String
         description: |
           The disk utilization of the MetadataStore in bytes.
-        min_version: beta
+        min_version: 'beta'
         output: true
