@@ -908,3 +908,25 @@ func TestIdentityPropertiesIncludesMissingImportIdentifiers(t *testing.T) {
 		t.Fatalf("dataset_id should be required when synthesized from import format")
 	}
 }
+
+func TestIdentityPropertiesSkipsSyntheticNameWhenNotInSchema(t *testing.T) {
+	t.Parallel()
+
+	r := api.Resource{
+		BaseUrl: "projects/{{project}}/locations/{{location}}/encryptionSpec",
+		Parameters: []*api.Type{
+			{Name: "location", Type: "string"},
+		},
+	}
+
+	got := r.IdentityProperties()
+	gotNames := make([]string, 0, len(got))
+	for _, p := range got {
+		gotNames = append(gotNames, p.Name)
+	}
+
+	wantNames := []string{"location", "project"}
+	if diff := cmp.Diff(wantNames, gotNames); diff != "" {
+		t.Fatalf("IdentityProperties() names mismatch (-want +got):\n%s", diff)
+	}
+}

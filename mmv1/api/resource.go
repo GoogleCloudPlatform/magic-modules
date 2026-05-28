@@ -731,6 +731,12 @@ func (r Resource) IdentityProperties() []*Type {
 		if includedValues[field] || field == "project" || field == "zone" || field == "region" {
 			continue
 		}
+		// Avoid creating an identity-only synthetic `name` field when the resource
+		// schema does not define one. This commonly happens with singleton resources
+		// when import format defaults to base_url/{{name}}.
+		if field == "name" {
+			continue
+		}
 		props = append(props, &Type{Name: field, Type: "string", Required: true})
 		includedValues[field] = true
 	}
