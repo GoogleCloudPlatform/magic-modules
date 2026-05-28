@@ -21,15 +21,15 @@ references:
 min_version: 'beta'
 
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
-self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{name}}
 update_mask: true
 update_verb: PATCH
 # The API does not support deletion of FindingsRefinements.
 exclude_delete: true
 import_format:
-  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement_id}}
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{name}}
 autogen_status: RmluZGluZ3NSZWZpbmVtZW50
 
 examples:
@@ -89,7 +89,10 @@ properties:
     description: Display name of the findings refinement.
   - name: name
     type: String
+    immutable: true
+    default_from_api: true
     output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     description: |-
       Full resource name for the findings refinement.
       Format:
@@ -139,12 +142,3 @@ properties:
     type: String
     description: The timestamp of when the findings refinement was last updated.
     output: true
-  - name: findings_refinement_id
-    type: String
-    output: true
-    immutable: true
-    api_name: name
-    default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-    description: |-
-      Findings Refinement Id is the ID of the Findings Refinement.
