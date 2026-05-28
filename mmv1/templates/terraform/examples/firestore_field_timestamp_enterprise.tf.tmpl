@@ -1,8 +1,9 @@
 resource "google_firestore_database" "database" {
-  project     = "{{index $.TestEnvVars "project_id"}}"
-  name        = "{{index $.Vars "database_id"}}"
-  location_id = "nam5"
-  type        = "FIRESTORE_NATIVE"
+  project          = "{{index $.TestEnvVars "project_id"}}"
+  name             = "{{index $.Vars "database_id"}}"
+  location_id      = "nam5"
+  type             = "FIRESTORE_NATIVE"
+  database_edition = "ENTERPRISE"
 
   delete_protection_state = "{{index $.Vars "delete_protection_state"}}"
   deletion_policy         = "DELETE"
@@ -18,9 +19,6 @@ resource "google_firestore_field" "{{$.PrimaryResourceId}}" {
   # timestamp values in this field.
   ttl_config {}
 
-  # Disable all built-in single field indexes for the field.
-  #
-  # Omit this block for Enterprise Edition databases, which do not
+  # Omit the index_config block for Enterprise Edition databases, which do not
   # have built-in single field indexes.
-  index_config {}
 }

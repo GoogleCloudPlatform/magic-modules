@@ -14,9 +14,12 @@ resource "google_firestore_field" "{{$.PrimaryResourceId}}" {
   collection = "chatrooms"
   field      = "timestamp"
 
-  # Enable a TTL policy with no expiration offset for the collection based on
-  # timestamp values in this field.
-  ttl_config {}
+  # Enable a TTL policy for the collection based on timestamp values in the field.
+  ttl_config {
+    # The expiration time is 30d after the timestamp value.
+    # 30d * 24 * 60 * 60 = 2592000s
+    expiration_offset = "2592000s"
+  }
 
   # Disable all built-in single field indexes for the field.
   #
