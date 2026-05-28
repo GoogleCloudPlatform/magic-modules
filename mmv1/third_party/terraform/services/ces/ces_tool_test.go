@@ -1018,4 +1018,3 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
 }
 `, context)
 }
-
