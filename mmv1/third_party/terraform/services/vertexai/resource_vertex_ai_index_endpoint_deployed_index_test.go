@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/vertexai"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-  
-  _ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 // Regression test for the import failure that surfaced as
