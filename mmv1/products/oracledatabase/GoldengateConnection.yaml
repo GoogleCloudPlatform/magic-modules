@@ -1780,5 +1780,3 @@ examples:
       deletion_protection: false
       goldengate_connection_id: 'fmt.Sprintf("tf-conn-jms-%s", acctest.RandString(t, 10))'
 
-
-
