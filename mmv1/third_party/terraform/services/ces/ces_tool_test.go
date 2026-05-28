@@ -1,11 +1,18 @@
 package ces_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck" // Add this import
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccCESTool_cesToolClientFunctionBasicExample_update(t *testing.T) {
@@ -674,4 +681,189 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     }
 }
 `, context)
+}
+
+// TestAccCESTool_cesToolDataStoreToolEngineSourceNoEngineExample exercises the
+// no-engine pattern: a google_ces_tool with engine_source that references a
+// data store directly, without an explicit engine. CES creates an internal
+// ces-c-* engine server-side to back this tool. That engine is not managed by
+// Terraform and blocks data store deletion at destroy time. The cleanup step
+// below explicitly deletes any ces-c-* engines referencing the test data store
+// before the framework runs its final destroy.
+func TestAccCESTool_cesToolDataStoreToolEngineSourceNoEngineExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESToolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESTool_cesToolDataStoreToolEngineSourceNoEngineExample(context),
+			},
+			{
+				ResourceName:            "google_ces_tool.ces_tool_data_store_tool_engine_source_no_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
+			},
+			// Clean up auto-created CES engines (ces-c-*) that reference the
+			// test data store. These are created server-side by CES when a tool
+			// uses engine_source without an explicit engine. They are not
+			// Terraform-managed and would otherwise block data store deletion
+			// in the framework's final destroy.
+			{
+				Config:   testAccCESTool_cesToolDataStoreToolEngineSourceNoEngineExample(context),
+				PlanOnly: true,
+				Check: testAccCESTool_cleanupOrphanedCesEngines(
+					t, "google_discovery_engine_data_store.basic"),
+			},
+		},
+	})
+}
+
+func testAccCESTool_cesToolDataStoreToolEngineSourceNoEngineExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_discovery_engine_data_store" "basic" {
+  location                    = "global"
+  data_store_id               = "tf_test_tool_data_store_id_no_engine%{random_suffix}"
+  display_name                = "tf-test-structured-datastore"
+  industry_vertical           = "GENERIC"
+  content_config              = "NO_CONTENT"
+  solution_types              = ["SOLUTION_TYPE_CHAT"]
+  create_advanced_site_search = false
+}
+
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "tf-test-my-app%{random_suffix}"
+    app_id       = "tf-test-app-id%{random_suffix}"
+    time_zone_settings {
+        time_zone = "America/Los_Angeles"
+    }
+}
+
+resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_no_engine" {
+    location       = "us"
+    app            = google_ces_app.my-app.name
+    tool_id        = "tf_test_ces_tool_basic5%{random_suffix}"
+    execution_type = "SYNCHRONOUS"
+    data_store_tool {
+        name        = "example-tool"
+        description = "example-description"
+        engine_source {
+            data_store_sources {
+                data_store {
+                    name = google_discovery_engine_data_store.basic.name
+                }
+            }
+        }
+    }
+}
+`, context)
+}
+
+// testAccCESTool_cleanupOrphanedCesEngines deletes any ces-c-* engines created
+// server-side by CES that still reference the given data store. CES does not
+// clean up these engines when its tools or apps are deleted, so they would
+// otherwise block data store deletion with a 400 error. Without this cleanup
+// the framework's final destroy fails.
+func testAccCESTool_cleanupOrphanedCesEngines(t *testing.T, dataStoreResourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		rs, ok := s.RootModule().Resources[dataStoreResourceName]
+		if !ok {
+			return fmt.Errorf("Not found in state: %v", dataStoreResourceName)
+		}
+
+		dataStoreId := rs.Primary.Attributes["data_store_id"]
+		if dataStoreId == "" {
+			return fmt.Errorf("data_store_id missing on %v", dataStoreResourceName)
+		}
+
+		listURL, err := tpgresource.ReplaceVarsForTest(config, rs,
+			"{{DiscoveryEngineBasePath}}projects/{{project}}/locations/{{location}}/collections/default_collection/engines")
+		if err != nil {
+			return fmt.Errorf("Error constructing list URL: %v", err)
+		}
+
+		listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    listURL,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("Error listing engines: %v", err)
+		}
+
+		engines, ok := listRes["engines"].([]interface{})
+		if !ok || len(engines) == 0 {
+			return nil
+		}
+
+		baseURL, err := tpgresource.ReplaceVarsForTest(config, rs,
+			"{{DiscoveryEngineBasePath}}")
+		if err != nil {
+			return fmt.Errorf("Error constructing base URL: %v", err)
+		}
+
+		project := rs.Primary.Attributes["project"]
+		if project == "" {
+			project = config.Project
+		}
+
+		for _, e := range engines {
+			engine, ok := e.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			name, _ := engine["name"].(string)
+			if name == "" {
+				continue
+			}
+			engineId := name[strings.LastIndex(name, "/")+1:]
+			// Only delete CES auto-created engines.
+			if !strings.HasPrefix(engineId, "ces-c-") {
+				continue
+			}
+			// Only delete engines that reference our test data store.
+			refsDataStore := false
+			if dsIds, ok := engine["dataStoreIds"].([]interface{}); ok {
+				for _, ds := range dsIds {
+					if dsStr, ok := ds.(string); ok && dsStr == dataStoreId {
+						refsDataStore = true
+						break
+					}
+				}
+			}
+			if !refsDataStore {
+				continue
+			}
+
+			deleteURL := baseURL + name
+			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "DELETE",
+				RawURL:    deleteURL,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil {
+				return fmt.Errorf("Error deleting orphaned CES engine %s: %v", name, err)
+			}
+
+			if err := discoveryengine.DiscoveryEngineOperationWaitTime(
+				config, res, project, "Deleting orphaned CES engine",
+				config.UserAgent, 10*time.Minute,
+			); err != nil {
+				return fmt.Errorf("Error waiting for delete of orphaned CES engine %s: %v", name, err)
+			}
+		}
+
+		return nil
+	}
 }

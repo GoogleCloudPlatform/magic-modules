@@ -49,6 +49,11 @@ examples:
       tool_id: 'ces_tool_basic5'
       app_id: 'app-id'
       data_store_id: "tool_data_store_id_no_engine"
+    # The auto-generated test cannot clean up CES-internal engines that are
+    # created server-side when a tool uses engine_source without an explicit
+    # engine. These engines block data store deletion at destroy time.
+    # A handwritten test in ces_tool_test.go performs the cleanup explicitly.
+    exclude_test: true
   - name: "ces_tool_google_search_tool_basic"
     primary_resource_id: "ces_tool_google_search_tool_basic"
     vars:
