@@ -1,0 +1,49 @@
+minCPChanged := d.HasChange("min_control_plane_version")
+minNodeChanged := d.HasChange("min_node_version")
+
+if !minCPChanged && !minNodeChanged {
+        return nil
+}
+
+log.Printf("[DEBUG] Polling RolloutSequence initialization.")
+if err := pollSequenceInitialization(d, meta); err != nil {
+        return fmt.Errorf("failed to wait for RolloutSequence to initialize: %w", err)
+}
+
+log.Printf("[DEBUG] Fetching current RolloutSequence target versions.")
+targetCPVer, targetNodeVer, err := fetchCurrentTargetVersions(d, meta)
+if err != nil {
+        return err
+}
+
+if minCPChanged {
+        minCPVer := d.Get("min_control_plane_version").(string)
+        shouldUpgrade, err := shouldUpgradeRolloutSequence(minCPVer, targetCPVer)
+        if err != nil {
+                return err
+        }
+        if shouldUpgrade {
+                log.Printf("[DEBUG] min_control_plane_version (%s) > target_control_plane_version (%s). Upgrading RolloutSequence.", minCPVer, targetCPVer)
+                if err := triggerUpgradeRolloutSequence(d, meta, "CONTROL_PLANE", minCPVer); err != nil {
+                        return err
+                }
+        } else {
+                log.Printf("[DEBUG] min_control_plane_version (%s) <= target_control_plane_version (%s). Skipping RolloutSequence upgrade.", minCPVer, targetCPVer)
+        }
+}
+
+if minNodeChanged {
+        minNodeVer := d.Get("min_node_version").(string)
+        shouldUpgrade, err := shouldUpgradeRolloutSequence(minNodeVer, targetNodeVer)
+        if err != nil {
+                return err
+        }
+        if shouldUpgrade {
+                log.Printf("[DEBUG] min_node_version (%s) > target_node_version (%s). Upgrading RolloutSequence.", minNodeVer, targetNodeVer)
+                if err := triggerUpgradeRolloutSequence(d, meta, "NODE", minNodeVer); err != nil {
+                        return err
+                }
+        } else {
+                log.Printf("[DEBUG] min_node_version (%s) <= target_node_version (%s). Skipping RolloutSequence upgrade.", minNodeVer, targetNodeVer)
+        }
+}
