@@ -70,6 +70,14 @@ See [Provider Versions](../guides/provider_versions.html.markdown) for more deta
 ## {{ $.IamTerraformName }}_policy
 
 ```hcl
+resource "google_service_account" "sa" {
+{{- if eq $.MinVersionObj.Name "beta" }}
+  provider = google-beta
+{{- end }}
+  account_id   = "my-custom-sa"
+  display_name = "My Custom Service Account"
+}
+
 data "google_iam_policy" "admin" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
@@ -77,7 +85,7 @@ data "google_iam_policy" "admin" {
   binding {
     role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
     members = [
-      "user:jane@example.com",
+      "serviceAccount:${google_service_account.sa.email}",
     ]
   }
 }
@@ -100,6 +108,14 @@ resource "{{ $.IamTerraformName }}_policy" "policy" {
 With IAM Conditions:
 
 ```hcl
+resource "google_service_account" "sa" {
+{{- if eq $.MinVersionObj.Name "beta" }}
+  provider = google-beta
+{{- end }}
+  account_id   = "my-custom-sa"
+  display_name = "My Custom Service Account"
+}
+
 data "google_iam_policy" "admin" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
@@ -107,7 +123,7 @@ data "google_iam_policy" "admin" {
   binding {
     role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
     members = [
-      "user:jane@example.com",
+      "serviceAccount:${google_service_account.sa.email}",
     ]
 
     condition {
@@ -136,6 +152,14 @@ resource "{{ $.IamTerraformName }}_policy" "policy" {
 ## {{ $.IamTerraformName }}_binding
 
 ```hcl
+resource "google_service_account" "sa" {
+{{- if eq $.MinVersionObj.Name "beta" }}
+  provider = google-beta
+{{- end }}
+  account_id   = "my-custom-sa"
+  display_name = "My Custom Service Account"
+}
+
 resource "{{ $.IamTerraformName }}_binding" "binding" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
@@ -149,7 +173,7 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
 {{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   members = [
-    "user:jane@example.com",
+    "serviceAccount:${google_service_account.sa.email}",
   ]
 }
 ```
@@ -157,6 +181,14 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
 With IAM Conditions:
 
 ```hcl
+resource "google_service_account" "sa" {
+{{- if eq $.MinVersionObj.Name "beta" }}
+  provider = google-beta
+{{- end }}
+  account_id   = "my-custom-sa"
+  display_name = "My Custom Service Account"
+}
+
 resource "{{ $.IamTerraformName }}_binding" "binding" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
@@ -170,7 +202,7 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
 {{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   members = [
-    "user:jane@example.com",
+    "serviceAccount:${google_service_account.sa.email}",
   ]
 
   condition {
@@ -184,6 +216,14 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
 ## {{ $.IamTerraformName }}_member
 
 ```hcl
+resource "google_service_account" "sa" {
+{{- if eq $.MinVersionObj.Name "beta" }}
+  provider = google-beta
+{{- end }}
+  account_id   = "my-custom-sa"
+  display_name = "My Custom Service Account"
+}
+
 resource "{{ $.IamTerraformName }}_member" "member" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
@@ -196,13 +236,21 @@ resource "{{ $.IamTerraformName }}_member" "member" {
 {{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
 {{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
-  member = "user:jane@example.com"
+  member = "serviceAccount:${google_service_account.sa.email}"
 }
 ```
 {{ if $.IamPolicy.IamConditionsRequestType }}
 With IAM Conditions:
 
 ```hcl
+resource "google_service_account" "sa" {
+{{- if eq $.MinVersionObj.Name "beta" }}
+  provider = google-beta
+{{- end }}
+  account_id   = "my-custom-sa"
+  display_name = "My Custom Service Account"
+}
+
 resource "{{ $.IamTerraformName }}_member" "member" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
@@ -215,7 +263,7 @@ resource "{{ $.IamTerraformName }}_member" "member" {
 {{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
 {{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole}}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
-  member = "user:jane@example.com"
+  member = "serviceAccount:${google_service_account.sa.email}"
 
   condition {
     title       = "expires_after_2019_12_31"
