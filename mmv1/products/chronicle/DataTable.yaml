@@ -14,42 +14,42 @@
 ---
 name: DataTable
 description: Represents a Chronicle Data Table, a multicolumn structure used to ingest your own data into Google SecOps.
-references:
-  guides:
-    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
-  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataTables
+
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables
-self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables?dataTableId={{data_table_id}}
-update_mask: true
-update_verb: PATCH
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}
+
+update_verb: PATCH
+update_mask: true
+deletion_policy_default: "DEFAULT"
 deletion_policy_custom_docs: true
-deletion_policy_default: DEFAULT
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataTables'
+examples:
+  - name: 'chronicle_data_table_basic'
+    primary_resource_id: 'example'
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    vars:
+      data_table_id: 'terraform_test'
+  - name: 'chronicle_data_table_with_optional_fields'
+    primary_resource_id: 'example_dt'
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    vars:
+      data_table_id: 'tf_test_full'
+      data_access_scope_id: 'tf-scope-opt'
 autogen_status: RGF0YVRhYmxl
+
 custom_code:
-  pre_delete: templates/terraform/pre_delete/chronicle_data_table.go.tmpl
-samples:
-  - name: chronicle_data_table_basic
-    primary_resource_id: example
-    steps:
-      - name: chronicle_data_table_basic
-        test_env_vars:
-          chronicle_id: CHRONICLE_ID
-        resource_id_vars:
-          data_table_id: terraform_test
-  - name: chronicle_data_table_with_optional_fields
-    primary_resource_id: example_dt
-    steps:
-      - name: chronicle_data_table_with_optional_fields
-        test_env_vars:
-          chronicle_id: CHRONICLE_ID
-        resource_id_vars:
-          data_table_id: tf_test_full
-          data_access_scope_id: tf-scope-opt
+  pre_delete: 'templates/terraform/pre_delete/chronicle_data_table.go.tmpl'
+
 virtual_fields:
-  - name: deletion_policy
+  - name: 'deletion_policy'
     description: |
       The policy governing the deletion of the data table.
       If set to `FORCE`, allows the deletion of the data table even if it contains rows.
@@ -65,6 +65,7 @@ virtual_fields:
     type: String
     # excluded from generation due to Universal Deletion Policy
     exclude: true
+
 parameters:
   - name: location
     type: String
@@ -193,7 +194,7 @@ properties:
       type: String
   - name: scopeInfo
     type: NestedObject
-    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     description: DataTableScopeInfo specifies the scope info of the data table.
     properties:
       - name: dataAccessScopes

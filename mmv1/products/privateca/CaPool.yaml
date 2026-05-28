@@ -12,78 +12,70 @@
 # limitations under the License.
 
 ---
-name: CaPool
+name: 'CaPool'
 description: |
   A CaPool represents a group of CertificateAuthorities that form a trust anchor. A CaPool can be used to manage
   issuance policies for one or more CertificateAuthority resources and to rotate CA certificates in and out of the
   trust anchor.
 references:
   guides:
-    Certificate Authority Service Overview: https://cloud.google.com/certificate-authority-service/docs/overview
-  api: https://cloud.google.com/certificate-authority-service/docs/reference/rest/v1/projects.locations.caPools
+    'Certificate Authority Service Overview': 'https://cloud.google.com/certificate-authority-service/docs/overview'
+  api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest/v1/projects.locations.caPools'
 docs:
-base_url: projects/{{project}}/locations/{{location}}/caPools
-self_link: projects/{{project}}/locations/{{location}}/caPools/{{name}}
-create_url: projects/{{project}}/locations/{{location}}/caPools?caPoolId={{name}}
+base_url: 'projects/{{project}}/locations/{{location}}/caPools'
+self_link: 'projects/{{project}}/locations/{{location}}/caPools/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/caPools?caPoolId={{name}}'
+update_verb: 'PATCH'
 update_mask: true
-update_verb: PATCH
-iam_policy:
-  method_name_separator: ':'
-  allowed_iam_role: roles/privateca.certificateManager
-  parent_resource_attribute: ca_pool
-  sample_config_body: templates/terraform/iam/example_config_body/privateca_ca_pool.tf.tmpl
-  iam_conditions_request_type: QUERY_PARAM_NESTED
 import_format:
-  - projects/{{project}}/locations/{{location}}/caPools/{{name}}
+  - 'projects/{{project}}/locations/{{location}}/caPools/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+autogen_async: true
 async:
-  type: OpAsync
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-  actions: [create, delete, update]
   result:
     resource_inside_response: true
-autogen_async: true
-include_in_tgc_next: true
-tgc_tests:
-  - name: TestAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions
-    skip: testing framework issue
+iam_policy:
+  method_name_separator: ':'
+  allowed_iam_role: 'roles/privateca.certificateManager'
+  parent_resource_attribute: 'ca_pool'
+  iam_conditions_request_type: 'QUERY_PARAM_NESTED'
+  example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.tmpl'
 custom_code:
-  tgc_decoder: templates/tgc_next/decoders/privateca_capool.go.tmpl
-samples:
-  - name: privateca_capool_basic
-    primary_resource_id: default
-    steps:
-      - name: privateca_capool_basic
-        resource_id_vars:
-          name: my-pool
-  - name: privateca_capool_all_fields
-    primary_resource_id: default
+  tgc_decoder: 'templates/tgc_next/decoders/privateca_capool.go.tmpl'
+examples:
+  - name: 'privateca_capool_basic'
+    primary_resource_id: 'default'
+    vars:
+      name: 'my-pool'
+  - name: 'privateca_capool_all_fields'
+    primary_resource_id: 'default'
+    vars:
+      name: 'my-pool'
+      cloud_kms_key: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
+    test_vars_overrides:
+      'cloud_kms_key': 'kms.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name'
     # Test requires a beta-only resource
     min_version: beta
-    steps:
-      - name: privateca_capool_all_fields
-        resource_id_vars:
-          name: my-pool
-          cloud_kms_key: projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key
-        test_vars_overrides:
-          cloud_kms_key: kms.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name
-        # Test requires a beta-only resource
-        min_version: beta
-  - name: privateca_quickstart
-    primary_resource_id: default
+  - name: 'privateca_quickstart'
+    primary_resource_id: 'default'
+    vars:
+      my_ca_pool: 'my-ca-pool'
+      my_certificate: 'my-certificate'
     exclude_test: true
-    exclude_basic_doc: true
-    steps:
-      - name: privateca_quickstart
-        resource_id_vars:
-          my_ca_pool: my-ca-pool
-          my_certificate: my-certificate
+    exclude_docs: true
+include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions'
+    skip: 'testing framework issue'
 parameters:
-  - name: location
+  - name: 'location'
     type: String
     description: |
       Location of the CaPool. A full list of valid locations can be found by
@@ -92,28 +84,28 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: name
+  - name: 'name'
     type: String
     description: |
       The name for this CaPool.
     url_param_only: true
     required: true
     immutable: true
-  - name: tier
+  - name: 'tier'
     type: Enum
     description: |
       The Tier of this CaPool.
     required: true
     immutable: true
     enum_values:
-      - ENTERPRISE
-      - DEVOPS
-  - name: issuancePolicy
+      - 'ENTERPRISE'
+      - 'DEVOPS'
+  - name: 'issuancePolicy'
     type: NestedObject
     description: |
       The IssuancePolicy to control how Certificates will be issued from this CaPool.
     properties:
-      - name: allowedKeyTypes
+      - name: 'allowedKeyTypes'
         type: Array
         description: |
           If any AllowedKeyType is specified, then the certificate request's public key must match one of the key types listed here.
@@ -121,36 +113,36 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: rsa
+            - name: 'rsa'
               type: NestedObject
               description: |
                 Describes an RSA key that may be used in a Certificate issued from a CaPool.
               properties:
-                - name: minModulusSize
+                - name: 'minModulusSize'
                   type: String
                   description: |
                     The minimum allowed RSA modulus size, in bits. If this is not set, or if set to zero, the
                     service-level min RSA modulus size will continue to apply.
-                - name: maxModulusSize
+                - name: 'maxModulusSize'
                   type: String
                   description: |
                     The maximum allowed RSA modulus size, in bits. If this is not set, or if set to zero, the
                     service will not enforce an explicit upper bound on RSA modulus sizes.
-            - name: ellipticCurve
+            - name: 'ellipticCurve'
               type: NestedObject
               description: |
                 Represents an allowed Elliptic Curve key type.
               properties:
-                - name: signatureAlgorithm
+                - name: 'signatureAlgorithm'
                   type: Enum
                   description: |
                     The algorithm used.
                   required: true
                   enum_values:
-                    - ECDSA_P256
-                    - ECDSA_P384
-                    - EDDSA_25519
-      - name: backdateDuration
+                    - 'ECDSA_P256'
+                    - 'ECDSA_P384'
+                    - 'EDDSA_25519'
+      - name: 'backdateDuration'
         type: String
         description: |
           The duration to backdate all certificates issued from this CaPool. If not set, the
@@ -158,262 +150,264 @@ properties:
           time). If set, the certificates will be issued with a not_before_time of the issuance
           time minus the backdate_duration. The not_after_time will be adjusted to preserve the
           requested lifetime. The backdate_duration must be less than or equal to 48 hours.
-      - name: maximumLifetime
+      - name: 'maximumLifetime'
         type: String
         description: |
           The maximum lifetime allowed for issued Certificates. Note that if the issuing CertificateAuthority
           expires before a Certificate's requested maximumLifetime, the effective lifetime will be explicitly truncated to match it.
-      - name: allowedIssuanceModes
+      - name: 'allowedIssuanceModes'
         type: NestedObject
         description: |
           IssuanceModes specifies the allowed ways in which Certificates may be requested from this CaPool.
         properties:
-          - name: allowCsrBasedIssuance
+          - name: 'allowCsrBasedIssuance'
             type: Boolean
             description: |
               When true, allows callers to create Certificates by specifying a CSR.
             required: true
-          - name: allowConfigBasedIssuance
+          - name: 'allowConfigBasedIssuance'
             type: Boolean
             description: |
               When true, allows callers to create Certificates by specifying a CertificateConfig.
             required: true
-      - name: identityConstraints
+      - name: 'identityConstraints'
         type: NestedObject
         description: |
           Describes constraints on identities that may appear in Certificates issued through this CaPool.
           If this is omitted, then this CaPool will not add restrictions on a certificate's identity.
         properties:
-          - name: allowSubjectPassthrough
+          - name: 'allowSubjectPassthrough'
             type: Boolean
             description: |
               If this is set, the Subject field may be copied from a certificate request into the signed certificate.
               Otherwise, the requested Subject will be discarded.
             required: true
             send_empty_value: true
-          - name: allowSubjectAltNamesPassthrough
+          - name: 'allowSubjectAltNamesPassthrough'
             type: Boolean
             description: |
               If this is set, the SubjectAltNames extension may be copied from a certificate request into the signed certificate.
               Otherwise, the requested SubjectAltNames will be discarded.
             required: true
             send_empty_value: true
-          - name: celExpression
+          - name: 'celExpression'
             type: NestedObject
             description: |
               A CEL expression that may be used to validate the resolved X.509 Subject and/or Subject Alternative Name before a
               certificate is signed. To see the full allowed syntax and some examples,
               see https://cloud.google.com/certificate-authority-service/docs/cel-guide
             properties:
-              - name: expression
+              - name: 'expression'
                 type: String
                 description: |
                   Textual representation of an expression in Common Expression Language syntax.
                 required: true
-              - name: title
+              - name: 'title'
                 type: String
                 description: |
                   Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
-              - name: description
+              - name: 'description'
                 type: String
                 description: |
                   Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
-              - name: location
+              - name: 'location'
                 type: String
                 description: |
                   String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
-      - name: baselineValues
+      - name: 'baselineValues'
         type: NestedObject
         description: |
           A set of X.509 values that will be applied to all certificates issued through this CaPool. If a certificate request
           includes conflicting values for the same properties, they will be overwritten by the values defined here. If a certificate
           request uses a CertificateTemplate that defines conflicting predefinedValues for the same properties, the certificate
           issuance request will fail.
-        custom_flatten: templates/terraform/custom_flatten/privateca_certificate_509_config.go.tmpl
-        custom_expand: templates/terraform/custom_expand/privateca_certificate_509_config.go.tmpl
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.tmpl'
         properties:
-          - name: additionalExtensions
+          - name: 'additionalExtensions'
             type: Array
             description: |
               Specifies an X.509 extension, which may be used in different parts of X.509 objects like certificates, CSRs, and CRLs.
             item_type:
               type: NestedObject
               properties:
-                - name: critical
+                - name: 'critical'
                   type: Boolean
                   description: |
                     Indicates whether or not this extension is critical (i.e., if the client does not know how to
                     handle this extension, the client should consider this to be an error).
                   required: true
-                - name: value
+                - name: 'value'
                   type: String
                   description: |
                     The value of this X.509 extension. A base64-encoded string.
                   required: true
-                - name: objectId
+                - name: 'objectId'
                   type: NestedObject
                   description: |
                     Describes values that are relevant in a CA certificate.
                   required: true
                   properties:
-                    - name: objectIdPath
+                    - name: 'objectIdPath'
                       type: Array
                       description: |
                         An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
                       required: true
                       item_type:
                         type: Integer
-          - name: policyIds
+          - name: 'policyIds'
             type: Array
             description: |
               Describes the X.509 certificate policy object identifiers, per https://tools.ietf.org/html/rfc5280#section-4.2.1.4.
             item_type:
               type: NestedObject
               properties:
-                - name: objectIdPath
+                - name: 'objectIdPath'
                   type: Array
                   description: |
                     An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
                   required: true
                   item_type:
                     type: Integer
-          - name: aiaOcspServers
+          - name: 'aiaOcspServers'
             type: Array
             description: |
               Describes Online Certificate Status Protocol (OCSP) endpoint addresses that appear in the
               "Authority Information Access" extension in the certificate.
             item_type:
               type: String
-          - name: caOptions
+          - name: 'caOptions'
             type: NestedObject
             description: |
               Describes values that are relevant in a CA certificate.
             required: true
             properties:
-              - name: isCa
+              - name: 'isCa'
                 type: Boolean
                 description: |
                   When true, the "CA" in Basic Constraints extension will be set to true.
-              - name: nonCa
+              - name: 'nonCa'
                 type: Boolean
                 description: |
                   When true, the "CA" in Basic Constraints extension will be set to false.
                   If both `is_ca` and `non_ca` are unset, the extension will be omitted from the CA certificate.
                 url_param_only: true
-              - name: maxIssuerPathLength
+              - name: 'maxIssuerPathLength'
                 type: Integer
                 description: |
                   Refers to the "path length constraint" in Basic Constraints extension. For a CA certificate, this value describes the depth of
                   subordinate CA certificates that are allowed. If this value is less than 0, the request will fail.
-              - name: zeroMaxIssuerPathLength
+              - name: 'zeroMaxIssuerPathLength'
                 type: Boolean
                 description: |
                   When true, the "path length constraint" in Basic Constraints extension will be set to 0.
                   if both `max_issuer_path_length` and `zero_max_issuer_path_length` are unset,
                   the max path length will be omitted from the CA certificate.
                 url_param_only: true
-          - name: keyUsage
+          - name: 'keyUsage'
             type: NestedObject
             description: |
               Indicates the intended use for keys that correspond to a certificate.
             required: true
             properties:
-              - name: baseKeyUsage
+              - name: 'baseKeyUsage'
                 type: NestedObject
                 description: |
                   Describes high-level ways in which a key may be used.
                 required: true
                 properties:
-                  - name: digitalSignature
+                  - name: 'digitalSignature'
                     type: Boolean
                     description: |
                       The key may be used for digital signatures.
-                  - name: contentCommitment
+                  - name: 'contentCommitment'
                     type: Boolean
                     description: |
                       The key may be used for cryptographic commitments. Note that this may also be referred to as "non-repudiation".
-                  - name: keyEncipherment
+                  - name: 'keyEncipherment'
                     type: Boolean
                     description: |
                       The key may be used to encipher other keys.
-                  - name: dataEncipherment
+                  - name: 'dataEncipherment'
                     type: Boolean
                     description: |
                       The key may be used to encipher data.
-                  - name: keyAgreement
+                  - name: 'keyAgreement'
                     type: Boolean
                     description: |
                       The key may be used in a key agreement protocol.
-                  - name: certSign
+                  - name: 'certSign'
                     type: Boolean
                     description: |
                       The key may be used to sign certificates.
-                  - name: crlSign
+                  - name: 'crlSign'
                     type: Boolean
                     description: |
                       The key may be used sign certificate revocation lists.
-                  - name: encipherOnly
+                  - name: 'encipherOnly'
                     type: Boolean
                     description: |
                       The key may be used to encipher only.
-                  - name: decipherOnly
+                  - name: 'decipherOnly'
                     type: Boolean
                     description: |
                       The key may be used to decipher only.
-              - name: extendedKeyUsage
+              - name: 'extendedKeyUsage'
                 type: NestedObject
                 description: |
                   Describes high-level ways in which a key may be used.
                 required: true
                 properties:
-                  - name: serverAuth
+                  - name: 'serverAuth'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.1. Officially described as "TLS WWW server authentication", though regularly used for non-WWW TLS.
-                  - name: clientAuth
+                  - name: 'clientAuth'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.2. Officially described as "TLS WWW client authentication", though regularly used for non-WWW TLS.
-                  - name: codeSigning
+                  - name: 'codeSigning'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.3. Officially described as "Signing of downloadable executable code client authentication".
-                  - name: emailProtection
+                  - name: 'emailProtection'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.4. Officially described as "Email protection".
-                  - name: timeStamping
+                  - name: 'timeStamping'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.8. Officially described as "Binding the hash of an object to a time".
-                  - name: ocspSigning
+                  - name: 'ocspSigning'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.9. Officially described as "Signing OCSP responses".
-              - name: unknownExtendedKeyUsages
+              - name: 'unknownExtendedKeyUsages'
                 type: Array
                 description: |
                   An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: objectIdPath
+                    - name: 'objectIdPath'
                       type: Array
                       description: |
                         An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
                       required: true
                       item_type:
                         type: Integer
-          - name: nameConstraints
+          - name: 'nameConstraints'
             type: NestedObject
             description: |
               Describes the X.509 name constraints extension.
             properties:
-              - name: critical
+              - name: 'critical'
                 type: Boolean
-                description: Indicates whether or not the name constraints are marked critical.
+                description:
+                  Indicates whether or not the name constraints are marked
+                  critical.
                 required: true
-              - name: permittedDnsNames
+              - name: 'permittedDnsNames'
                 type: Array
                 description: |
                   Contains permitted DNS names. Any DNS name that can be
@@ -423,7 +417,7 @@ properties:
                   would satisfy `example.com` while `example1.com` does not.
                 item_type:
                   type: String
-              - name: excludedDnsNames
+              - name: 'excludedDnsNames'
                 type: Array
                 description: |
                   Contains excluded DNS names. Any DNS name that can be
@@ -433,7 +427,7 @@ properties:
                   would satisfy `example.com` while `example1.com` does not.
                 item_type:
                   type: String
-              - name: permittedIpRanges
+              - name: 'permittedIpRanges'
                 type: Array
                 description: |
                   Contains the permitted IP ranges. For IPv4 addresses, the ranges
@@ -442,7 +436,7 @@ properties:
                   addresses.
                 item_type:
                   type: String
-              - name: excludedIpRanges
+              - name: 'excludedIpRanges'
                 type: Array
                 description: |
                   Contains the excluded IP ranges. For IPv4 addresses, the ranges
@@ -451,7 +445,7 @@ properties:
                   addresses.
                 item_type:
                   type: String
-              - name: permittedEmailAddresses
+              - name: 'permittedEmailAddresses'
                 type: Array
                 description: |
                   Contains the permitted email addresses. The value can be a particular
@@ -460,7 +454,7 @@ properties:
                   all email addresses in that domain.
                 item_type:
                   type: String
-              - name: excludedEmailAddresses
+              - name: 'excludedEmailAddresses'
                 type: Array
                 description: |
                   Contains the excluded email addresses. The value can be a particular
@@ -469,7 +463,7 @@ properties:
                   all email addresses in that domain.
                 item_type:
                   type: String
-              - name: permittedUris
+              - name: 'permittedUris'
                 type: Array
                 description: |
                   Contains the permitted URIs that apply to the host part of the name.
@@ -477,7 +471,7 @@ properties:
                   leading period (like `.example.com`)
                 item_type:
                   type: String
-              - name: excludedUris
+              - name: 'excludedUris'
                 type: Array
                 description: |
                   Contains the excluded URIs that apply to the host part of the name.
@@ -485,20 +479,20 @@ properties:
                   leading period (like `.example.com`)
                 item_type:
                   type: String
-  - name: publishingOptions
+  - name: 'publishingOptions'
     type: NestedObject
     description: |
       The PublishingOptions to follow when issuing Certificates from any CertificateAuthority in this CaPool.
-    diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
-      - name: publishCaCert
+      - name: 'publishCaCert'
         type: Boolean
         description: |
           When true, publishes each CertificateAuthority's CA certificate and includes its URL in the "Authority Information Access"
           X.509 extension in all issued Certificates. If this is false, the CA certificate will not be published and the corresponding
           X.509 extension will not be written in issued certificates.
         required: true
-      - name: publishCrl
+      - name: 'publishCrl'
         type: Boolean
         description: |
           When true, publishes each CertificateAuthority's CRL and includes its URL in the "CRL Distribution Points" X.509 extension
@@ -506,30 +500,30 @@ properties:
           be written in issued certificates. CRLs will expire 7 days from their creation. However, we will rebuild daily. CRLs are
           also rebuilt shortly after a certificate is revoked.
         required: true
-      - name: encodingFormat
+      - name: 'encodingFormat'
         type: Enum
         description: |
           Specifies the encoding format of each CertificateAuthority's CA
           certificate and CRLs. If this is omitted, CA certificates and CRLs
           will be published in PEM.
         enum_values:
-          - PEM
-          - DER
-  - name: labels
+          - 'PEM'
+          - 'DER'
+  - name: 'labels'
     type: KeyValueLabels
     description: |
       Labels with user-defined metadata.
 
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
       "1.3kg", "count": "3" }.
-  - name: encryptionSpec
+  - name: 'encryptionSpec'
     type: NestedObject
     description: |
       Used when customer would like to encrypt data at rest. The customer-provided key will be used
       to encrypt the Subject, SubjectAltNames and PEM-encoded certificate fields. When unspecified,
       customer data will remain unencrypted.
     properties:
-      - name: cloudKmsKey
+      - name: 'cloudKmsKey'
         type: String
         description: |
           The resource name for an existing Cloud KMS key in the format

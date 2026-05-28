@@ -1,7 +1,0 @@
-resource "google_iam_workload_identity_pool" "{{$.PrimaryResourceId}}" {
-  workload_identity_pool_id = "{{index $.ResourceIdVars "workload_identity_pool_id"}}"
-  display_name              = "Name of the pool"
-  description               = "Identity pool operates in FEDERATION_ONLY mode"
-  disabled                  = true
-  mode                      = "FEDERATION_ONLY"
-}

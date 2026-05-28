@@ -20,6 +20,7 @@ description: |
   Once expired, Cloud KMS will no longer be able to import or unwrap any key material that
   was wrapped with the `KeyRingImportJob`'s public key.
 
+
   ~> **Note:** KeyRingImportJobs cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed KeyRingImportJob will remove it from state but
   *will not delete the resource from the project.*
@@ -37,15 +38,13 @@ include_in_tgc_next: true
 cai_asset_name_format: '{{key_ring}}/importJobs/{{import_job_id}}'
 custom_code:
   custom_import: templates/terraform/custom_import/kms_key_ring_import_job.go.tmpl
-samples:
+examples:
   - name: kms_key_ring_import_job
     primary_resource_id: import-job
     exclude_test: true
-    steps:
-      - name: kms_key_ring_import_job
-        resource_id_vars:
-          cryptokey: cryptokey-example
-          keyring: keyring-example
+    vars:
+      cryptokey: cryptokey-example
+      keyring: keyring-example
 parameters:
   - name: keyRing
     type: String

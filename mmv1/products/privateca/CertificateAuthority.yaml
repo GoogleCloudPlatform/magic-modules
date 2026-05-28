@@ -12,162 +12,150 @@
 # limitations under the License.
 
 ---
-name: CertificateAuthority
+name: 'CertificateAuthority'
 description: |
   A CertificateAuthority represents an individual Certificate Authority. A
   CertificateAuthority can be used to create Certificates.
 references:
   guides:
-    Official Documentation: https://cloud.google.com/certificate-authority-service
-  api: https://cloud.google.com/certificate-authority-service/docs/reference/rest
+    'Official Documentation': 'https://cloud.google.com/certificate-authority-service'
+  api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest'
 docs:
   warning: |
     On newer versions of the provider, you must explicitly set `deletion_protection=false`
     (and run `terraform apply` to write the field to state) in order to destroy a CertificateAuthority.
     It is recommended to not set this field (or set it to true) until you're ready to destroy.
-base_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities
-self_link: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}
-create_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities?certificateAuthorityId={{certificate_authority_id}}
-delete_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}?ignoreActiveCertificates={{ignore_active_certificates_on_deletion}}&skipGracePeriod={{skip_grace_period}}
+base_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities'
+self_link: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities?certificateAuthorityId={{certificate_authority_id}}'
+update_verb: 'PATCH'
 update_mask: true
-update_verb: PATCH
+delete_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}?ignoreActiveCertificates={{ignore_active_certificates_on_deletion}}&skipGracePeriod={{skip_grace_period}}'
 import_format:
-  - projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}
+  - 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_diff:
-  - resourcePrivateCaCACustomDiff
+autogen_async: true
 async:
-  type: OpAsync
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-  actions: [create, delete, update]
   result:
     resource_inside_response: true
-autogen_async: true
 custom_code:
-  decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
-  constants: templates/terraform/constants/privateca_certificate_authority.go.tmpl
-  pre_create: templates/terraform/pre_create/privateca_certificate_authority.go.tmpl
-  post_create: templates/terraform/post_create/privateca_certificate_authority.go.tmpl
-  pre_update: templates/terraform/pre_update/privateca_certificate_authority.go.tmpl
-  pre_delete: templates/terraform/pre_delete/privateca_authority_disable.go.tmpl
-  post_import: templates/terraform/post_import/privateca_import.go.tmpl
-  test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.tmpl
-samples:
-  - name: privateca_certificate_authority_basic
-    primary_resource_id: default
-    steps:
-      - name: privateca_certificate_authority_basic
-        resource_id_vars:
-          certificate_authority_id: my-certificate-authority
-          pool_name: ca-pool
-          pool_location: us-central1
-          deletion_protection: "true"
-        test_vars_overrides:
-          pool_name: BootstrapSharedCaPoolInLocation(t, "us-central1")
-          pool_location: '"us-central1"'
-          deletion_protection: "false"
-        ignore_read_extra:
-          - deletion_protection
-  - name: privateca_certificate_authority_basic_no_org
-    primary_resource_id: default
-    steps:
-      - name: privateca_certificate_authority_basic_no_org
-        resource_id_vars:
-          certificate_authority_id: my-certificate-authority
-          pool_name: ca-pool
-          pool_location: us-central1
-          deletion_protection: "true"
-        test_vars_overrides:
-          pool_name: BootstrapSharedCaPoolInLocation(t, "us-central1")
-          pool_location: '"us-central1"'
-          deletion_protection: "false"
-        ignore_read_extra:
-          - deletion_protection
+  constants: 'templates/terraform/constants/privateca_certificate_authority.go.tmpl'
+  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/privateca_certificate_authority.go.tmpl'
+  post_create: 'templates/terraform/post_create/privateca_certificate_authority.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/privateca_certificate_authority.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/privateca_authority_disable.go.tmpl'
+  post_import: 'templates/terraform/post_import/privateca_import.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/privateca_certificate_authority.go.tmpl'
+custom_diff:
+  - 'resourcePrivateCaCACustomDiff'
+examples:
+  - name: 'privateca_certificate_authority_basic'
+    primary_resource_id: 'default'
+    vars:
+      certificate_authority_id: 'my-certificate-authority'
+      pool_name: 'ca-pool'
+      pool_location: 'us-central1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_location': '"us-central1"'
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
+  - name: 'privateca_certificate_authority_basic_no_org'
+    primary_resource_id: 'default'
+    vars:
+      certificate_authority_id: 'my-certificate-authority'
+      pool_name: 'ca-pool'
+      pool_location: 'us-central1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_location': '"us-central1"'
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   # This example is meant to confirm that it's possible to make
   # a CA without specifying the organization field
-  - name: privateca_certificate_authority_subordinate
-    primary_resource_id: default
+  - name: 'privateca_certificate_authority_subordinate'
+    primary_resource_id: 'default'
+    vars:
+      certificate_authority_id: 'my-certificate-authority'
+      pool_name: 'ca-pool'
+      pool_location: 'us-central1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_location': '"us-central1"'
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
+      - 'subordinate_config.0.certificate_authority'
+      # This example ultimately generates a random id making replaying impossible at
+      # https://github.com/hashicorp/terraform-provider-google-beta/blob/22bfbbcf2250054e622743c4a35a872e43ed5aed/google-beta/privateca_ca_utils.go#L147
     skip_vcr: true
-    steps:
-      - name: privateca_certificate_authority_subordinate
-        resource_id_vars:
-          certificate_authority_id: my-certificate-authority
-          pool_name: ca-pool
-          pool_location: us-central1
-          deletion_protection: "true"
-        test_vars_overrides:
-          pool_name: BootstrapSharedCaPoolInLocation(t, "us-central1")
-          pool_location: '"us-central1"'
-          deletion_protection: "false"
-        ignore_read_extra:
-          - deletion_protection
-          - subordinate_config.0.certificate_authority
-          # This example ultimately generates a random id making replaying impossible at
-          # https://github.com/hashicorp/terraform-provider-google-beta/blob/22bfbbcf2250054e622743c4a35a872e43ed5aed/google-beta/privateca_ca_utils.go#L147
-  - name: privateca_certificate_authority_byo_key
-    primary_resource_id: default
+  - name: 'privateca_certificate_authority_byo_key'
+    primary_resource_id: 'default'
+    vars:
+      kms_key_name: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
+      certificate_authority_id: 'my-certificate-authority'
+      pool_name: 'ca-pool'
+      pool_location: 'us-central1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_location': '"us-central1"'
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
     # Skip test because it depends on a beta resource, but PrivateCA does
     # not have a beta endpoint
     exclude_test: true
     # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
-    steps:
-      - name: privateca_certificate_authority_byo_key
-        resource_id_vars:
-          kms_key_name: projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key
-          certificate_authority_id: my-certificate-authority
-          pool_name: ca-pool
-          pool_location: us-central1
-          deletion_protection: "true"
-        test_vars_overrides:
-          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name
-          pool_name: BootstrapSharedCaPoolInLocation(t, "us-central1")
-          pool_location: '"us-central1"'
-          deletion_protection: "false"
-        ignore_read_extra:
-          - deletion_protection
-  - name: privateca_certificate_authority_custom_ski
-    primary_resource_id: default
+  - name: 'privateca_certificate_authority_custom_ski'
+    primary_resource_id: 'default'
+    vars:
+      kms_key_name: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
+      certificate_authority_id: 'my-certificate-authority'
+      pool_name: 'ca-pool'
+      pool_location: 'us-central1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_location': '"us-central1"'
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
     # Signing custom keys requires a service account which does not exist for the terraform testing project
     exclude_test: true
     # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
-    steps:
-      - name: privateca_certificate_authority_custom_ski
-        resource_id_vars:
-          kms_key_name: projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key
-          certificate_authority_id: my-certificate-authority
-          pool_name: ca-pool
-          pool_location: us-central1
-          deletion_protection: "true"
-        test_vars_overrides:
-          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name
-          pool_name: BootstrapSharedCaPoolInLocation(t, "us-central1")
-          pool_location: '"us-central1"'
-          deletion_protection: "false"
-        ignore_read_extra:
-          - deletion_protection
-  - name: privateca_certificate_authority_basic_with_custom_cdp_aia_urls
-    primary_resource_id: default
-    steps:
-      - name: privateca_certificate_authority_basic_with_custom_cdp_aia_urls
-        resource_id_vars:
-          certificate_authority_id: my-certificate-authority
-          pool_name: ca-pool
-          pool_location: us-central1
-          deletion_protection: "true"
-        test_vars_overrides:
-          pool_name: BootstrapSharedCaPoolInLocation(t, "us-central1")
-          pool_location: '"us-central1"'
-          deletion_protection: "false"
-        ignore_read_extra:
-          - deletion_protection
+  - name: 'privateca_certificate_authority_basic_with_custom_cdp_aia_urls'
+    primary_resource_id: 'default'
+    vars:
+      certificate_authority_id: 'my-certificate-authority'
+      pool_name: 'ca-pool'
+      pool_location: 'us-central1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'pool_name': 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_location': '"us-central1"'
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
-  - name: deletion_protection
+  - name: 'deletion_protection'
     description: |
       Whether Terraform will be prevented from destroying the CertificateAuthority.
       When the field is set to true or unset in Terraform state, a `terraform apply`
@@ -175,26 +163,26 @@ virtual_fields:
       When the field is set to false, deleting the CertificateAuthority is allowed.
     type: Boolean
     default_value: true
-  - name: desired_state
+  - name: 'desired_state'
     description: |
       Desired state of the CertificateAuthority. Set this field to `STAGED` to create a `STAGED` root CA.
       Possible values: ENABLED, DISABLED, STAGED.
     type: String
 parameters:
 properties:
-  - name: pem_ca_certificate
+  - name: 'pem_ca_certificate'
     type: String
     description: |
       The signed CA certificate issued from the subordinated CA's CSR. This is needed when activating the subordiante CA with a third party issuer.
     url_param_only: true
-  - name: ignore_active_certificates_on_deletion
+  - name: 'ignore_active_certificates_on_deletion'
     type: Boolean
     description: |
       This field allows the CA to be deleted even if the CA has active certs. Active certs include both unrevoked and unexpired certs.
       Use with care. Defaults to `false`.
     url_param_only: true
     default_value: false
-  - name: skip_grace_period
+  - name: 'skip_grace_period'
     type: Boolean
     description: |
       If this flag is set, the Certificate Authority will be deleted as soon as
@@ -203,7 +191,7 @@ properties:
       Use with care. Defaults to `false`.
     url_param_only: true
     default_value: false
-  - name: location
+  - name: 'location'
     type: String
     description: |
       Location of the CertificateAuthority. A full list of valid locations can be found by
@@ -211,25 +199,25 @@ properties:
     url_param_only: true
     required: true
     immutable: true
-  - name: certificateAuthorityId
+  - name: 'certificateAuthorityId'
     type: String
     description: The user provided Resource ID for this Certificate Authority.
     url_param_only: true
     required: true
     immutable: true
-  - name: pool
+  - name: 'pool'
     type: String
     description: The name of the CaPool this Certificate Authority belongs to.
     url_param_only: true
     required: true
     immutable: true
-  - name: name
+  - name: 'name'
     type: String
     description: |
       The resource name for this CertificateAuthority in the format
       projects/*/locations/*/certificateAuthorities/*.
     output: true
-  - name: type
+  - name: 'type'
     type: Enum
     description: |
       The Type of this CertificateAuthority.
@@ -237,35 +225,40 @@ properties:
       ~> **Note:** For `SUBORDINATE` Certificate Authorities, they need to
       be activated before they can issue certificates.
     immutable: true
-    default_value: SELF_SIGNED
+    default_value: "SELF_SIGNED"
     enum_values:
-      - SELF_SIGNED
-      - SUBORDINATE
-  - name: config
+      - 'SELF_SIGNED'
+      - 'SUBORDINATE'
+  - name: 'config'
     type: NestedObject
-    description: The config used to create a self-signed X.509 certificate or CSR.
+    description:
+      The config used to create a self-signed X.509 certificate or CSR.
     required: true
     immutable: true
     properties:
-      - name: subjectKeyId
+      - name: 'subjectKeyId'
         type: NestedObject
-        description: When specified this provides a custom SKI to be used in the certificate. This should only be used to maintain a SKI of an existing CA originally created outside CA service, which was not generated using method (1) described in RFC 5280 section 4.2.1.2..
+        description:
+          When specified this provides a custom SKI to be used in the certificate.
+          This should only be used to maintain a SKI of an existing CA originally
+          created outside CA service, which was not generated using method (1)
+          described in RFC 5280 section 4.2.1.2..
         immutable: true
         properties:
-          - name: keyId
+          - name: 'keyId'
             type: String
             description: The value of the KeyId in lowercase hexadecimal.
             immutable: true
-      - name: x509Config
+      - name: 'x509Config'
         type: NestedObject
         description: |
           Describes how some of the technical X.509 fields in a certificate should be populated.
         required: true
         immutable: true
-        custom_flatten: templates/terraform/custom_flatten/privateca_certificate_509_config.go.tmpl
-        custom_expand: templates/terraform/custom_expand/privateca_certificate_509_config.go.tmpl
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.tmpl'
         properties:
-          - name: additionalExtensions
+          - name: 'additionalExtensions'
             type: Array
             description: |
               Specifies an X.509 extension, which may be used in different parts of X.509 objects like certificates, CSRs, and CRLs.
@@ -273,27 +266,27 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: critical
+                - name: 'critical'
                   type: Boolean
                   description: |
                     Indicates whether or not this extension is critical (i.e., if the client does not know how to
                     handle this extension, the client should consider this to be an error).
                   required: true
                   immutable: true
-                - name: value
+                - name: 'value'
                   type: String
                   description: |
                     The value of this X.509 extension. A base64-encoded string.
                   required: true
                   immutable: true
-                - name: objectId
+                - name: 'objectId'
                   type: NestedObject
                   description: |
                     Describes values that are relevant in a CA certificate.
                   required: true
                   immutable: true
                   properties:
-                    - name: objectIdPath
+                    - name: 'objectIdPath'
                       type: Array
                       description: |
                         An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
@@ -301,7 +294,7 @@ properties:
                       immutable: true
                       item_type:
                         type: Integer
-          - name: policyIds
+          - name: 'policyIds'
             type: Array
             description: |
               Describes the X.509 certificate policy object identifiers, per https://tools.ietf.org/html/rfc5280#section-4.2.1.4.
@@ -309,7 +302,7 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: objectIdPath
+                - name: 'objectIdPath'
                   type: Array
                   description: |
                     An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
@@ -317,7 +310,7 @@ properties:
                   immutable: true
                   item_type:
                     type: Integer
-          - name: aiaOcspServers
+          - name: 'aiaOcspServers'
             type: Array
             description: |
               Describes Online Certificate Status Protocol (OCSP) endpoint addresses that appear in the
@@ -325,34 +318,34 @@ properties:
             immutable: true
             item_type:
               type: String
-          - name: caOptions
+          - name: 'caOptions'
             type: NestedObject
             description: |
               Describes values that are relevant in a CA certificate.
             required: true
             immutable: true
             properties:
-              - name: isCa
+              - name: 'isCa'
                 type: Boolean
                 description: |
                   When true, the "CA" in Basic Constraints extension will be set to true.
                 required: true
                 immutable: true
-              - name: nonCa
+              - name: 'nonCa'
                 type: Boolean
                 description: |
                   When true, the "CA" in Basic Constraints extension will be set to false.
                   If both `is_ca` and `non_ca` are unset, the extension will be omitted from the CA certificate.
                 url_param_only: true
                 immutable: true
-              - name: maxIssuerPathLength
+              - name: 'maxIssuerPathLength'
                 type: Integer
                 description: |
                   Refers to the "path length constraint" in Basic Constraints extension. For a CA certificate, this value describes the depth of
                   subordinate CA certificates that are allowed. If this value is less than 0, the request will fail. Setting the value to 0
                   requires setting `zero_max_issuer_path_length = true`.
                 immutable: true
-              - name: zeroMaxIssuerPathLength
+              - name: 'zeroMaxIssuerPathLength'
                 type: Boolean
                 description: |
                   When true, the "path length constraint" in Basic Constraints extension will be set to 0.
@@ -360,103 +353,103 @@ properties:
                   the max path length will be omitted from the CA certificate.
                 url_param_only: true
                 immutable: true
-          - name: keyUsage
+          - name: 'keyUsage'
             type: NestedObject
             description: |
               Indicates the intended use for keys that correspond to a certificate.
             required: true
             immutable: true
             properties:
-              - name: baseKeyUsage
+              - name: 'baseKeyUsage'
                 type: NestedObject
                 description: |
                   Describes high-level ways in which a key may be used.
                 required: true
                 immutable: true
                 properties:
-                  - name: digitalSignature
+                  - name: 'digitalSignature'
                     type: Boolean
                     description: |
                       The key may be used for digital signatures.
                     immutable: true
-                  - name: contentCommitment
+                  - name: 'contentCommitment'
                     type: Boolean
                     description: |
                       The key may be used for cryptographic commitments. Note that this may also be referred to as "non-repudiation".
                     immutable: true
-                  - name: keyEncipherment
+                  - name: 'keyEncipherment'
                     type: Boolean
                     description: |
                       The key may be used to encipher other keys.
                     immutable: true
-                  - name: dataEncipherment
+                  - name: 'dataEncipherment'
                     type: Boolean
                     description: |
                       The key may be used to encipher data.
                     immutable: true
-                  - name: keyAgreement
+                  - name: 'keyAgreement'
                     type: Boolean
                     description: |
                       The key may be used in a key agreement protocol.
                     immutable: true
-                  - name: certSign
+                  - name: 'certSign'
                     type: Boolean
                     description: |
                       The key may be used to sign certificates.
                     immutable: true
-                  - name: crlSign
+                  - name: 'crlSign'
                     type: Boolean
                     description: |
                       The key may be used sign certificate revocation lists.
                     immutable: true
-                  - name: encipherOnly
+                  - name: 'encipherOnly'
                     type: Boolean
                     description: |
                       The key may be used to encipher only.
                     immutable: true
-                  - name: decipherOnly
+                  - name: 'decipherOnly'
                     type: Boolean
                     description: |
                       The key may be used to decipher only.
                     immutable: true
-              - name: extendedKeyUsage
+              - name: 'extendedKeyUsage'
                 type: NestedObject
                 description: |
                   Describes high-level ways in which a key may be used.
                 required: true
                 immutable: true
                 properties:
-                  - name: serverAuth
+                  - name: 'serverAuth'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.1. Officially described as "TLS WWW server authentication", though regularly used for non-WWW TLS.
                     immutable: true
-                  - name: clientAuth
+                  - name: 'clientAuth'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.2. Officially described as "TLS WWW client authentication", though regularly used for non-WWW TLS.
                     immutable: true
-                  - name: codeSigning
+                  - name: 'codeSigning'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.3. Officially described as "Signing of downloadable executable code client authentication".
                     immutable: true
-                  - name: emailProtection
+                  - name: 'emailProtection'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.4. Officially described as "Email protection".
                     immutable: true
-                  - name: timeStamping
+                  - name: 'timeStamping'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.8. Officially described as "Binding the hash of an object to a time".
                     immutable: true
-                  - name: ocspSigning
+                  - name: 'ocspSigning'
                     type: Boolean
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.9. Officially described as "Signing OCSP responses".
                     immutable: true
-              - name: unknownExtendedKeyUsages
+              - name: 'unknownExtendedKeyUsages'
                 type: Array
                 description: |
                   An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
@@ -464,7 +457,7 @@ properties:
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: objectIdPath
+                    - name: 'objectIdPath'
                       type: Array
                       description: |
                         An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
@@ -472,18 +465,20 @@ properties:
                       immutable: true
                       item_type:
                         type: Integer
-          - name: nameConstraints
+          - name: 'nameConstraints'
             type: NestedObject
             description: |
               Describes the X.509 name constraints extension.
             immutable: true
             properties:
-              - name: critical
+              - name: 'critical'
                 type: Boolean
-                description: Indicates whether or not the name constraints are marked critical.
+                description:
+                  Indicates whether or not the name constraints are marked
+                  critical.
                 required: true
                 immutable: true
-              - name: permittedDnsNames
+              - name: 'permittedDnsNames'
                 type: Array
                 description: |
                   Contains permitted DNS names. Any DNS name that can be
@@ -494,7 +489,7 @@ properties:
                 immutable: true
                 item_type:
                   type: String
-              - name: excludedDnsNames
+              - name: 'excludedDnsNames'
                 type: Array
                 description: |
                   Contains excluded DNS names. Any DNS name that can be
@@ -505,7 +500,7 @@ properties:
                 immutable: true
                 item_type:
                   type: String
-              - name: permittedIpRanges
+              - name: 'permittedIpRanges'
                 type: Array
                 description: |
                   Contains the permitted IP ranges. For IPv4 addresses, the ranges
@@ -515,7 +510,7 @@ properties:
                 immutable: true
                 item_type:
                   type: String
-              - name: excludedIpRanges
+              - name: 'excludedIpRanges'
                 type: Array
                 description: |
                   Contains the excluded IP ranges. For IPv4 addresses, the ranges
@@ -525,7 +520,7 @@ properties:
                 immutable: true
                 item_type:
                   type: String
-              - name: permittedEmailAddresses
+              - name: 'permittedEmailAddresses'
                 type: Array
                 description: |
                   Contains the permitted email addresses. The value can be a particular
@@ -535,7 +530,7 @@ properties:
                 immutable: true
                 item_type:
                   type: String
-              - name: excludedEmailAddresses
+              - name: 'excludedEmailAddresses'
                 type: Array
                 description: |
                   Contains the excluded email addresses. The value can be a particular
@@ -545,7 +540,7 @@ properties:
                 immutable: true
                 item_type:
                   type: String
-              - name: permittedUris
+              - name: 'permittedUris'
                 type: Array
                 description: |
                   Contains the permitted URIs that apply to the host part of the name.
@@ -554,7 +549,7 @@ properties:
                 immutable: true
                 item_type:
                   type: String
-              - name: excludedUris
+              - name: 'excludedUris'
                 type: Array
                 description: |
                   Contains the excluded URIs that apply to the host part of the name.
@@ -563,102 +558,107 @@ properties:
                 immutable: true
                 item_type:
                   type: String
-      - name: subjectConfig
+      - name: 'subjectConfig'
         type: NestedObject
         description: |
           Specifies some of the values in a certificate that are related to the subject.
         required: true
         immutable: true
         properties:
-          - name: subject
+          - name: 'subject'
             type: NestedObject
-            description: Contains distinguished name fields such as the location and organization.
+            description:
+              Contains distinguished name fields such as the location and
+              organization.
             required: true
             immutable: true
             properties:
-              - name: countryCode
+              - name: 'countryCode'
                 type: String
                 description: The country code of the subject.
                 immutable: true
-              - name: organization
+              - name: 'organization'
                 type: String
                 description: The organization of the subject.
                 immutable: true
-              - name: organizationalUnit
+              - name: 'organizationalUnit'
                 type: String
                 description: The organizational unit of the subject.
                 immutable: true
-              - name: locality
+              - name: 'locality'
                 type: String
                 description: The locality or city of the subject.
                 immutable: true
-              - name: province
+              - name: 'province'
                 type: String
-                description: The province, territory, or regional state of the subject.
+                description:
+                  The province, territory, or regional state of the subject.
                 immutable: true
-              - name: streetAddress
+              - name: 'streetAddress'
                 type: String
                 description: The street address of the subject.
                 immutable: true
-              - name: postalCode
+              - name: 'postalCode'
                 type: String
                 description: The postal code of the subject.
                 immutable: true
-              - name: commonName
+              - name: 'commonName'
                 type: String
                 description: The common name of the distinguished name.
                 required: true
                 immutable: true
-          - name: subjectAltName
+          - name: 'subjectAltName'
             type: NestedObject
             description: The subject alternative name fields.
             immutable: true
             properties:
-              - name: dnsNames
+              - name: 'dnsNames'
                 type: Array
                 description: Contains only valid, fully-qualified host names.
                 immutable: true
                 at_least_one_of:
-                  - config.0.subject_config.0.subject_alt_name.0.dns_names
-                  - config.0.subject_config.0.subject_alt_name.0.uris
-                  - config.0.subject_config.0.subject_alt_name.0.email_addresses
-                  - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+                  - 'config.0.subject_config.0.subject_alt_name.0.dns_names'
+                  - 'config.0.subject_config.0.subject_alt_name.0.uris'
+                  - 'config.0.subject_config.0.subject_alt_name.0.email_addresses'
+                  - 'config.0.subject_config.0.subject_alt_name.0.ip_addresses'
                 item_type:
                   type: String
-              - name: uris
+              - name: 'uris'
                 type: Array
                 description: Contains only valid RFC 3986 URIs.
                 immutable: true
                 at_least_one_of:
-                  - config.0.subject_config.0.subject_alt_name.0.dns_names
-                  - config.0.subject_config.0.subject_alt_name.0.uris
-                  - config.0.subject_config.0.subject_alt_name.0.email_addresses
-                  - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+                  - 'config.0.subject_config.0.subject_alt_name.0.dns_names'
+                  - 'config.0.subject_config.0.subject_alt_name.0.uris'
+                  - 'config.0.subject_config.0.subject_alt_name.0.email_addresses'
+                  - 'config.0.subject_config.0.subject_alt_name.0.ip_addresses'
                 item_type:
                   type: String
-              - name: emailAddresses
+              - name: 'emailAddresses'
                 type: Array
                 description: Contains only valid RFC 2822 E-mail addresses.
                 immutable: true
                 at_least_one_of:
-                  - config.0.subject_config.0.subject_alt_name.0.dns_names
-                  - config.0.subject_config.0.subject_alt_name.0.uris
-                  - config.0.subject_config.0.subject_alt_name.0.email_addresses
-                  - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+                  - 'config.0.subject_config.0.subject_alt_name.0.dns_names'
+                  - 'config.0.subject_config.0.subject_alt_name.0.uris'
+                  - 'config.0.subject_config.0.subject_alt_name.0.email_addresses'
+                  - 'config.0.subject_config.0.subject_alt_name.0.ip_addresses'
                 item_type:
                   type: String
-              - name: ipAddresses
+              - name: 'ipAddresses'
                 type: Array
-                description: Contains only valid 32-bit IPv4 addresses or RFC 4291 IPv6 addresses.
+                description:
+                  Contains only valid 32-bit IPv4 addresses or RFC 4291 IPv6
+                  addresses.
                 immutable: true
                 at_least_one_of:
-                  - config.0.subject_config.0.subject_alt_name.0.dns_names
-                  - config.0.subject_config.0.subject_alt_name.0.uris
-                  - config.0.subject_config.0.subject_alt_name.0.email_addresses
-                  - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+                  - 'config.0.subject_config.0.subject_alt_name.0.dns_names'
+                  - 'config.0.subject_config.0.subject_alt_name.0.uris'
+                  - 'config.0.subject_config.0.subject_alt_name.0.email_addresses'
+                  - 'config.0.subject_config.0.subject_alt_name.0.ip_addresses'
                 item_type:
                   type: String
-  - name: lifetime
+  - name: 'lifetime'
     type: String
     description: |
       The desired lifetime of the CA certificate. Used to create the "notBeforeTime" and
@@ -666,8 +666,8 @@ properties:
       fractional digits, terminated by 's'. Example: "3.5s".
     immutable: true
     # 10 years
-    default_value: 315360000s
-  - name: keySpec
+    default_value: "315360000s"
+  - name: 'keySpec'
     type: NestedObject
     description: |
       Used when issuing certificates for this CertificateAuthority. If this CertificateAuthority
@@ -676,41 +676,41 @@ properties:
     required: true
     immutable: true
     properties:
-      - name: cloudKmsKeyVersion
+      - name: 'cloudKmsKeyVersion'
         type: String
         description: |
           The resource name for an existing Cloud KMS CryptoKeyVersion in the format
           `projects/*/locations/*/keyRings/*/cryptoKeys/*/cryptoKeyVersions/*`.
         immutable: true
         exactly_one_of:
-          - key_spec.0.cloud_kms_key_version
-          - key_spec.0.algorithm
-      - name: algorithm
+          - 'key_spec.0.cloud_kms_key_version'
+          - 'key_spec.0.algorithm'
+      - name: 'algorithm'
         type: Enum
         description: |
           The algorithm to use for creating a managed Cloud KMS key for a for a simplified
           experience. All managed keys will be have their ProtectionLevel as HSM.
         immutable: true
         exactly_one_of:
-          - key_spec.0.cloud_kms_key_version
-          - key_spec.0.algorithm
+          - 'key_spec.0.cloud_kms_key_version'
+          - 'key_spec.0.algorithm'
         enum_values:
-          - SIGN_HASH_ALGORITHM_UNSPECIFIED
-          - RSA_PSS_2048_SHA256
-          - RSA_PSS_3072_SHA256
-          - RSA_PSS_4096_SHA256
-          - RSA_PKCS1_2048_SHA256
-          - RSA_PKCS1_3072_SHA256
-          - RSA_PKCS1_4096_SHA256
-          - EC_P256_SHA256
-          - EC_P384_SHA384
-  - name: subordinateConfig
+          - 'SIGN_HASH_ALGORITHM_UNSPECIFIED'
+          - 'RSA_PSS_2048_SHA256'
+          - 'RSA_PSS_3072_SHA256'
+          - 'RSA_PSS_4096_SHA256'
+          - 'RSA_PKCS1_2048_SHA256'
+          - 'RSA_PKCS1_3072_SHA256'
+          - 'RSA_PKCS1_4096_SHA256'
+          - 'EC_P256_SHA256'
+          - 'EC_P384_SHA384'
+  - name: 'subordinateConfig'
     type: NestedObject
     description: |
       If this is a subordinate CertificateAuthority, this field will be set
       with the subordinate configuration, which describes its issuers.
     properties:
-      - name: certificateAuthority
+      - name: 'certificateAuthority'
         type: String
         description: |
           This can refer to a CertificateAuthority that was used to create a
@@ -718,39 +718,39 @@ properties:
           and usability purposes only. The resource name is in the format
           `projects/*/locations/*/caPools/*/certificateAuthorities/*`.
         exactly_one_of:
-          - subordinate_config.0.certificate_authority
-          - subordinate_config.0.pem_issuer_chain
-        diff_suppress_func: tpgresource.CompareResourceNames
+          - 'subordinate_config.0.certificate_authority'
+          - 'subordinate_config.0.pem_issuer_chain'
+        diff_suppress_func: 'tpgresource.CompareResourceNames'
         # certificateAuthority is not included in the response since the sub-CA is activated via specifing pemIssuerChain
-        custom_flatten: templates/terraform/custom_flatten/privateca_certificate_authority_subordinate_config_certificate_authority.go.tmpl
-      - name: pemIssuerChain
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_authority_subordinate_config_certificate_authority.go.tmpl'
+      - name: 'pemIssuerChain'
         type: NestedObject
         description: |
           Contains the PEM certificate chain for the issuers of this CertificateAuthority,
           but not pem certificate for this CA itself.
         default_from_api: true
         exactly_one_of:
-          - subordinate_config.0.certificate_authority
-          - subordinate_config.0.pem_issuer_chain
+          - 'subordinate_config.0.certificate_authority'
+          - 'subordinate_config.0.pem_issuer_chain'
         properties:
-          - name: pemCertificates
+          - name: 'pemCertificates'
             type: Array
             description: |
               Expected to be in leaf-to-root order according to RFC 5246.
             item_type:
               type: String
-  - name: state
+  - name: 'state'
     type: Enum
     description: The State for this CertificateAuthority.
     output: true
     enum_values:
-      - STATE_UNSPECIFIED
-      - ENABLED
-      - DISABLED
-      - STAGED
-      - AWAITING_USER_ACTIVATION
-      - PENDING_DELETION
-  - name: pemCaCertificates
+      - 'STATE_UNSPECIFIED'
+      - 'ENABLED'
+      - 'DISABLED'
+      - 'STAGED'
+      - 'AWAITING_USER_ACTIVATION'
+      - 'PENDING_DELETION'
+  - name: 'pemCaCertificates'
     type: Array
     description: |
       This CertificateAuthority's certificate chain, including the current
@@ -760,7 +760,7 @@ properties:
     output: true
     item_type:
       type: String
-  - name: gcsBucket
+  - name: 'gcsBucket'
     type: String
     description: |
       The name of a Cloud Storage bucket where this CertificateAuthority will publish content,
@@ -769,19 +769,19 @@ properties:
       my-bucket, you would simply specify `my-bucket`. If not specified, a managed bucket will be
       created.
     immutable: true
-  - name: accessUrls
+  - name: 'accessUrls'
     type: NestedObject
     description: |
       URLs for accessing content published by this CA, such as the CA certificate and CRLs.
     output: true
     properties:
-      - name: caCertificateAccessUrl
+      - name: 'caCertificateAccessUrl'
         type: String
         description: |
           The URL where this CertificateAuthority's CA certificate is published. This will only be
           set for CAs that have been activated.
         output: true
-      - name: crlAccessUrls
+      - name: 'crlAccessUrls'
         type: Array
         description: |
           The URL where this CertificateAuthority's CRLs are published. This will only be set for
@@ -789,7 +789,7 @@ properties:
         output: true
         item_type:
           type: String
-  - name: createTime
+  - name: 'createTime'
     type: String
     description: |
       The time at which this CertificateAuthority was created.
@@ -797,7 +797,7 @@ properties:
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: updateTime
+  - name: 'updateTime'
     type: String
     description: |
       The time at which this CertificateAuthority was updated.
@@ -805,26 +805,26 @@ properties:
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: labels
+  - name: 'labels'
     type: KeyValueLabels
     description: |
       Labels with user-defined metadata.
 
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
       "1.3kg", "count": "3" }.
-  - name: userDefinedAccessUrls
+  - name: 'userDefinedAccessUrls'
     type: NestedObject
     description: |
       Custom URLs for accessing content published by this CA, such as the CA certificate and CRLs,
       that can be specified by users.
     properties:
-      - name: aiaIssuingCertificateUrls
+      - name: 'aiaIssuingCertificateUrls'
         type: Array
         description: |
           A list of URLs where this CertificateAuthority's CA certificate is published that is specified by users.
         item_type:
           type: String
-      - name: crlAccessUrls
+      - name: 'crlAccessUrls'
         type: Array
         description: |
           A list of URLs where this CertificateAuthority's CRLs are published that is specified by users.

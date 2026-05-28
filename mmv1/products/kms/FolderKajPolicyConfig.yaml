@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: FolderKajPolicyConfig
+name: 'FolderKajPolicyConfig'
 api_resource_type_kind: KeyAccessJustificationsPolicyConfig
 api_variant_patterns:
-  - folders/{{folder}}/kajPolicyConfig
+  - 'folders/{{folder}}/kajPolicyConfig'
 description: |
   `FolderKajPolicyConfigs` is a folder-level singleton resource
   used to configure the default KAJ policy of newly created key.
@@ -23,66 +23,63 @@ description: |
   ~> **Note:** FolderKajPolicyConfigs cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed FolderKajPolicyConfigs will remove it from state but
   *will not delete the resource from Google Cloud Platform.*
+min_version: 'beta'
 references:
   guides:
-    Set default Key Access Justifications policy: https://cloud.google.com/assured-workloads/key-access-justifications/docs/set-default-policy
-  api: https://cloud.google.com/kms/docs/reference/rest/v1/KeyAccessJustificationsPolicyConfig
+    'Set default Key Access Justifications policy': 'https://cloud.google.com/assured-workloads/key-access-justifications/docs/set-default-policy'
+  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/KeyAccessJustificationsPolicyConfig'
 docs:
-base_url: folders/{{folder}}/kajPolicyConfig
-min_version: beta
-self_link: folders/{{folder}}/kajPolicyConfig
+id_format: 'folders/{{folder}}/kajPolicyConfig'
+base_url: 'folders/{{folder}}/kajPolicyConfig'
+self_link: 'folders/{{folder}}/kajPolicyConfig'
 # This is a singleton resource that is already created, so create
 # is really an update, and therefore should be PATCHed.
-create_url: folders/{{folder}}/kajPolicyConfig?updateMask=defaultKeyAccessJustificationPolicy
-update_url: folders/{{folder}}/kajPolicyConfig?updateMask=defaultKeyAccessJustificationPolicy
-create_verb: PATCH
-update_verb: PATCH
-id_format: folders/{{folder}}/kajPolicyConfig
+create_url: 'folders/{{folder}}/kajPolicyConfig?updateMask=defaultKeyAccessJustificationPolicy'
+create_verb: 'PATCH'
+update_url: 'folders/{{folder}}/kajPolicyConfig?updateMask=defaultKeyAccessJustificationPolicy'
+update_verb: 'PATCH'
+# This is a singleton resource that cannot be deleted.
+exclude_delete: true
+exclude_sweeper: true
 import_format:
-  - folders/{{folder}}/kajPolicyConfig
+  - 'folders/{{folder}}/kajPolicyConfig'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-exclude_sweeper: true
-# This is a singleton resource that cannot be deleted.
-exclude_delete: true
 custom_code:
-  post_create: templates/terraform/post_create/sleep_1_min.go.tmpl
-  post_update: templates/terraform/post_create/sleep_1_min.go.tmpl
-samples:
-  - name: kms_folder_kaj_policy_config_basic
+  post_create: 'templates/terraform/post_create/sleep_1_min.go.tmpl'
+  post_update: 'templates/terraform/post_create/sleep_1_min.go.tmpl'
+examples:
+  - name: 'kms_folder_kaj_policy_config_basic'
     # random external provider
     skip_vcr: true
-    primary_resource_id: example
-    min_version: beta
-    external_providers: [random, time]
-    steps:
-      - name: kms_folder_kaj_policy_config_basic
-        min_version: beta
-        resource_id_vars:
-          folder_name: folder-kajc
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
+    primary_resource_id: "example"
+    min_version: 'beta'
+    vars:
+      folder_name: 'folder-kajc'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["random", "time"]
 parameters:
-  - name: folder
+  - name: 'folder'
     type: String
     description: |
       The numeric folder number for which to retrieve config.
-    min_version: beta
+    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
 properties:
-  - name: defaultKeyAccessJustificationPolicy
+  - name: 'defaultKeyAccessJustificationPolicy'
     type: NestedObject
     description: |
       The default key access justification policy used when a CryptoKey is
       created in this folder. This is only used when a Key Access Justifications
       policy is not provided in the CreateCryptoKeyRequest.
     properties:
-      - name: allowedAccessReasons
+      - name: 'allowedAccessReasons'
         type: Array
         description: |
           A KeyAccessJustificationsPolicy specifies zero or more allowed
@@ -95,14 +92,14 @@ properties:
             https://cloud.google.com/assured-workloads/key-access-justifications/docs/justification-codes
             for the detailed semantic meaning of justification reason codes.
           enum_values:
-            - CUSTOMER_INITIATED_SUPPORT
-            - GOOGLE_INITIATED_SERVICE
-            - THIRD_PARTY_DATA_REQUEST
-            - GOOGLE_INITIATED_REVIEW
-            - CUSTOMER_INITIATED_ACCESS
-            - GOOGLE_INITIATED_SYSTEM_OPERATION
-            - REASON_NOT_EXPECTED
-            - MODIFIED_CUSTOMER_INITIATED_ACCESS
-            - MODIFIED_GOOGLE_INITIATED_SYSTEM_OPERATION
-            - GOOGLE_RESPONSE_TO_PRODUCTION_ALERT
-            - CUSTOMER_AUTHORIZED_WORKFLOW_SERVICING
+            - 'CUSTOMER_INITIATED_SUPPORT'
+            - 'GOOGLE_INITIATED_SERVICE'
+            - 'THIRD_PARTY_DATA_REQUEST'
+            - 'GOOGLE_INITIATED_REVIEW'
+            - 'CUSTOMER_INITIATED_ACCESS'
+            - 'GOOGLE_INITIATED_SYSTEM_OPERATION'
+            - 'REASON_NOT_EXPECTED'
+            - 'MODIFIED_CUSTOMER_INITIATED_ACCESS'
+            - 'MODIFIED_GOOGLE_INITIATED_SYSTEM_OPERATION'
+            - 'GOOGLE_RESPONSE_TO_PRODUCTION_ALERT'
+            - 'CUSTOMER_AUTHORIZED_WORKFLOW_SERVICING'
