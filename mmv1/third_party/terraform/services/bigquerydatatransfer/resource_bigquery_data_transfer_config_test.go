@@ -304,6 +304,7 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 		"booleanParam":           testAccBigqueryDataTransferConfig_copy_booleanParam,
 		"update_params":          testAccBigqueryDataTransferConfig_force_new_update_params,
 		"update_service_account": testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account,
+		"schedule_options_v2":    testAccBigqueryDataTransferConfig_scheduleOptionsV2_timeBased,
 		// Multiple connector.authentication.* fields have been deprecated and return 400 errors
 		// "salesforce":             testAccBigqueryDataTransferConfig_salesforce_basic,
 	}
@@ -335,6 +336,32 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, random_suffix, "third", start_time, end_time, "y"),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.query_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
+func testAccBigqueryDataTransferConfig_scheduleOptionsV2_timeBased(t *testing.T) {
+	// Uses time.Now
+	acctest.SkipIfVcr(t)
+	random_suffix := acctest.RandString(t, 10)
+	now := time.Now().UTC()
+	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
+	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDataTransferConfig_scheduleOptionsV2(random_suffix, "third", start_time, end_time),
 			},
 			{
 				ResourceName:            "google_bigquery_data_transfer_config.query_config",
@@ -681,6 +708,62 @@ resource "google_bigquery_data_transfer_config" "query_config" {
   }
 }
 `, random_suffix, random_suffix, random_suffix2, schedule, start_time, end_time, letter)
+}
+
+func testAccBigqueryDataTransferConfig_scheduleOptionsV2(random_suffix, schedule, start_time, end_time string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "permissions" {
+  project = data.google_project.project.project_id
+
+  role   = "roles/iam.serviceAccountTokenCreator"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
+}
+
+resource "google_bigquery_dataset" "my_dataset" {
+  depends_on = [google_project_iam_member.permissions]
+
+  dataset_id    = "my_dataset%s"
+  friendly_name = "foo"
+  description   = "bar"
+  location      = "asia-northeast1"
+}
+
+resource "google_bigquery_table" "my_table" {
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+  table_id   = "my_table"
+  schema     = <<EOF
+  [
+    { "name": "name", "type": "STRING" },
+    { "name": "x", "type": "INTEGER" }
+  ]
+  EOF
+}
+
+resource "google_bigquery_data_transfer_config" "query_config" {
+  depends_on = [google_project_iam_member.permissions]
+
+  display_name           = "my-query-%s"
+  location               = "asia-northeast1"
+  data_source_id         = "scheduled_query"
+  schedule_options_v2 {
+    time_based_schedule {
+      schedule   = "%s sunday of quarter 00:00"
+      start_time = "%s"
+      end_time   = "%s"
+    }
+  }
+  destination_dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+  params = {
+    destination_table_name_template = google_bigquery_table.my_table.table_id
+    write_disposition               = "WRITE_APPEND"
+    query                           = "SELECT name FROM tabl WHERE x = 'y'"
+  }
+}
+`, random_suffix, random_suffix, schedule, start_time, end_time)
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_service_account(random_suffix string) string {
