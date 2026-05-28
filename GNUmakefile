@@ -34,8 +34,11 @@ ifneq ($(SKIP_CLEAN),)
 	endif
 endif
 
-# Default to bazel if available
-ifneq ($(shell which bazel),)
+# Default to bazel if available (and not on GHA)
+ifeq ($(GITHUB_ACTIONS),true)
+	_ := $(shell printf "\e[1;32mINFO:\e[0m Running in GitHub actions; not using bazel\n" 1>&2)
+	USE_BAZEL=0
+else ifneq ($(shell which bazel),)
 	ifneq ($(USE_BAZEL), 0)
 		_ := $(shell printf "\e[1;32mINFO:\e[0m bazel detected; set USE_BAZEL=0 to disable bazel usage\n" 1>&2)
 		USE_BAZEL=1
