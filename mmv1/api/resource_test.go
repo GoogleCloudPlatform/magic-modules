@@ -884,3 +884,27 @@ func TestSample_TestServiceDependencies(t *testing.T) {
 		})
 	}
 }
+
+func TestIdentityPropertiesIncludesMissingImportIdentifiers(t *testing.T) {
+	t.Parallel()
+
+	r := api.Resource{
+		BaseUrl:      "projects/{{project}}/datasets",
+		ImportFormat: []string{"projects/{{project}}/datasets/{{dataset_id}}"},
+	}
+
+	got := r.IdentityProperties()
+	gotNames := make([]string, 0, len(got))
+	for _, p := range got {
+		gotNames = append(gotNames, p.Name)
+	}
+
+	wantNames := []string{"project", "dataset_id"}
+	if diff := cmp.Diff(wantNames, gotNames); diff != "" {
+		t.Fatalf("IdentityProperties() names mismatch (-want +got):\n%s", diff)
+	}
+
+	if !got[1].Required {
+		t.Fatalf("dataset_id should be required when synthesized from import format")
+	}
+}

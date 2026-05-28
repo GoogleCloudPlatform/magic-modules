@@ -710,19 +710,29 @@ func (r Resource) IdentityProperties() []*Type {
 		identities = nil
 	}
 	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, identities, r.BaseUrl)[0])
-	optionalValues := map[string]bool{"project": false, "zone": false, "region": false}
+	includedValues := make(map[string]bool)
 	for _, p := range r.AllProperties() {
-		if slices.Contains(importFormat, google.Underscore(p.Name)) {
+		name := google.Underscore(p.Name)
+		if slices.Contains(importFormat, name) {
 			props = append(props, p)
-			optionalValues[p.Name] = true
+			includedValues[name] = true
 		}
 	}
 
 	hasField := map[string]bool{"project": r.HasProject(), "zone": r.HasZone(), "region": r.HasRegion()}
 	for _, field := range []string{"project", "zone", "region"} { // prevents duplicates
-		if slices.Contains(importFormat, field) && !optionalValues[field] && hasField[field] {
+		if slices.Contains(importFormat, field) && !includedValues[field] && hasField[field] {
 			props = append(props, &Type{Name: field, Type: "string"})
+			includedValues[field] = true
 		}
+	}
+
+	for _, field := range importFormat {
+		if includedValues[field] || field == "project" || field == "zone" || field == "region" {
+			continue
+		}
+		props = append(props, &Type{Name: field, Type: "string", Required: true})
+		includedValues[field] = true
 	}
 
 	if len(r.CustomCode.CustomIdentity) > 0 {
