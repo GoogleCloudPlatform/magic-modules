@@ -803,7 +803,6 @@ maintenance_policy {
 ```
 
 * `recurring_maintenance_window` - Defines a recurring window for maintenance operations.
-
   *   `delay_until`: (Optional) Specifies the initial date when the recurring window can start.
       *   `day`: The day of the month (integer value between 1 and 31).
       *   `month`: The month of the year (integer value between 1 and 12).
