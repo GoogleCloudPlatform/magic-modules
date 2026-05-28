@@ -1,7 +1,22 @@
 
 	config := meta.(*transport_tpg.Config)
+	identity, identityErr := d.Identity()
 
-	cryptoKeyVersionId, err := parseKmsCryptoKeyVersionId(d.Id(), config)
+	importId := d.Id()
+	if importId == "" {
+		if identityErr != nil || identity == nil {
+			return nil, fmt.Errorf("Error reading import identity: %s", identityErr)
+		}
+
+		identityName, ok := identity.Get("name").(string)
+		if !ok || identityName == "" {
+			return nil, fmt.Errorf("Error reading import identity: missing required identity field \"name\"")
+		}
+
+		importId = identityName
+	}
+
+	cryptoKeyVersionId, err := parseKmsCryptoKeyVersionId(importId, config)
 	if err != nil {
 		return nil, err
 	}
@@ -11,6 +26,15 @@
 	if err := d.Set("name", cryptoKeyVersionId.Name); err != nil {
 		return nil, fmt.Errorf("Error setting name: %s", err)
 	}
+
+	if identityErr == nil && identity != nil {
+		if err := identity.Set("name", cryptoKeyVersionId.Name); err != nil {
+			return nil, fmt.Errorf("Error setting identity name: %s", err)
+		}
+	} else {
+		log.Printf("[DEBUG] (Import) identity not set: %s", identityErr)
+	}
+
 	id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
