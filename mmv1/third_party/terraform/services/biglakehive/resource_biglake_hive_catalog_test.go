@@ -46,7 +46,7 @@ func TestAccBiglakeHiveHiveCatalog_biglakeHiveCatalog_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckBiglakeHiveHiveCatalogDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -78,11 +78,14 @@ func TestAccBiglakeHiveHiveCatalog_biglakeHiveCatalog_update(t *testing.T) {
 
 func testAccBiglakeHiveHiveCatalog_biglakeHiveCatalog_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google-beta" {
+}
 resource "google_storage_bucket" "bucket_for_my_hive_catalog" {
   name          = "%{name}"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
+  provider      = google-beta
 }
 
 resource "google_biglake_hive_catalog" "my_hive_catalog" {
@@ -93,6 +96,7 @@ resource "google_biglake_hive_catalog" "my_hive_catalog" {
     depends_on = [
       google_storage_bucket.bucket_for_my_hive_catalog
     ]
+	provider      = google-beta
 }
 `, context)
 }
