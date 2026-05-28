@@ -640,16 +640,27 @@ func TestAccCESTool_cesToolPythonFunctionBasicExample_update(t *testing.T) {
 
 func testAccCESTool_cesToolPythonFunctionBasicExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_service_directory_namespace" "basic" {
+  namespace_id = "tf-test-ns-%{random_suffix}"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "basic" {
+  service_id   = "tf-test-svc-%{random_suffix}"
+  namespace    = google_service_directory_namespace.basic.id
+}
+
 resource "google_ces_app" "my-app" {
-    location     = "us"
+    location     = "us-central1"
     display_name = "tf-test-my-app%{random_suffix}"
     app_id       = "tf-test-app-id%{random_suffix}"
     time_zone_settings {   
         time_zone = "America/Los_Angeles"
     }
 }
+
 resource "google_ces_tool" "ces_tool_python_function_basic" {
-    location       = "us"
+    location       = "us-central1"
     app            = google_ces_app.my-app.name
     tool_id        = "tf_test_ces_tool_basic5%{random_suffix}"
     execution_type = "SYNCHRONOUS"
@@ -657,7 +668,7 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
         name = "example_function"
         python_code = "def example_function() -> int: return 0"
         service_directory_config {
-            service = "projects/${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
+            service = google_service_directory_service.basic.id
         }
     }
 }
@@ -666,16 +677,27 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
 
 func testAccCESTool_cesToolPythonFunctionBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_service_directory_namespace" "basic" {
+  namespace_id = "tf-test-ns-%{random_suffix}"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "basic" {
+  service_id   = "tf-test-svc-%{random_suffix}"
+  namespace    = google_service_directory_namespace.basic.id
+}
+
 resource "google_ces_app" "my-app" {
-    location     = "us"
+    location     = "us-central1"
     display_name = "tf-test-my-app%{random_suffix}"
     app_id       = "tf-test-app-id%{random_suffix}"
     time_zone_settings {   
         time_zone = "America/Los_Angeles"
     }
 }
+
 resource "google_ces_tool" "ces_tool_python_function_basic" {
-    location       = "us"
+    location       = "us-central1"
     app            = google_ces_app.my-app.name
     tool_id        = "tf_test_ces_tool_basic5%{random_suffix}"
     execution_type = "SYNCHRONOUS"
@@ -683,7 +705,7 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
         name = "example_function_updated"
         python_code = "def example_function_updated() -> int: return 0"
         service_directory_config {
-            service = "projects/${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
+            service = google_service_directory_service.basic.id
         }
     }
 }
@@ -929,8 +951,18 @@ func TestAccCESTool_cesToolWidgetToolBasicExample_update(t *testing.T) {
 
 func testAccCESTool_cesToolWidgetToolBasicExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_service_directory_namespace" "basic" {
+  namespace_id = "tf-test-ns-%{random_suffix}"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "basic" {
+  service_id   = "tf-test-svc-%{random_suffix}"
+  namespace    = google_service_directory_namespace.basic.id
+}
+
 resource "google_ces_app" "my-app" {
-    location     = "us"
+    location     = "us-central1"
     display_name = "tf-test-my-app%{random_suffix}"
     app_id       = "tf-test-app-id%{random_suffix}"
     time_zone_settings {   
@@ -939,7 +971,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_tool" "ces_tool_widget_basic" {
-    location       = "us"
+    location       = "us-central1"
     app            = google_ces_app.my-app.name
     tool_id        = "tf-test-widget-%{random_suffix}"
     execution_type = "SYNCHRONOUS"
@@ -954,15 +986,15 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
         })
         data_mapping {
             mode             = "FIELD_MAPPING"
-            source_tool_name = "projects/${google_ces_app.my-app.project}/locations/us/apps/${google_ces_app.my-app.app_id}/tools/source-tool"
+            source_tool_name = "projects/${google_ces_app.my-app.project}/locations/us-central1/apps/${google_ces_app.my-app.app_id}/tools/source-tool"
             field_mappings = {
                 "key1" = "value1"
             }
             python_function {
                 name        = "transform_function"
-                python_code = "def transform_function(x): return x"
+                python_code = "def transform_function(x: int) -> int: return x"
                 service_directory_config {
-                    service = "projects/${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
+                    service = google_service_directory_service.basic.id
                 }
             }
         }
@@ -999,8 +1031,18 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
 
 func testAccCESTool_cesToolWidgetToolBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_service_directory_namespace" "basic" {
+  namespace_id = "tf-test-ns-%{random_suffix}"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "basic" {
+  service_id   = "tf-test-svc-%{random_suffix}"
+  namespace    = google_service_directory_namespace.basic.id
+}
+
 resource "google_ces_app" "my-app" {
-    location     = "us"
+    location     = "us-central1"
     display_name = "tf-test-my-app%{random_suffix}"
     app_id       = "tf-test-app-id%{random_suffix}"
     time_zone_settings {   
@@ -1009,7 +1051,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_tool" "ces_tool_widget_basic" {
-    location       = "us"
+    location       = "us-central1"
     app            = google_ces_app.my-app.name
     tool_id        = "tf-test-widget-%{random_suffix}"
     execution_type = "SYNCHRONOUS"
@@ -1024,15 +1066,15 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
         })
         data_mapping {
             mode             = "FIELD_MAPPING"
-            source_tool_name = "projects/${google_ces_app.my-app.project}/locations/us/apps/${google_ces_app.my-app.app_id}/tools/source-tool-updated"
+            source_tool_name = "projects/${google_ces_app.my-app.project}/locations/us-central1/apps/${google_ces_app.my-app.app_id}/tools/source-tool-updated"
             field_mappings = {
                 "key1" = "value1-updated"
             }
             python_function {
                 name        = "transform_function_updated"
-                python_code = "def transform_function_updated(x): return x"
+                python_code = "def transform_function_updated(x: int) -> int: return x"
                 service_directory_config {
-                    service = "projects/${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc-updated"
+                    service = google_service_directory_service.basic.id
                 }
             }
         }
