@@ -651,7 +651,7 @@ resource "google_service_directory_service" "basic" {
 }
 
 resource "google_ces_app" "my-app" {
-    location     = "us-central1"
+    location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
     app_id       = "tf-test-app-id%{random_suffix}"
     time_zone_settings {   
@@ -660,7 +660,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_tool" "ces_tool_python_function_basic" {
-    location       = "us-central1"
+    location       = "us"
     app            = google_ces_app.my-app.name
     tool_id        = "tf_test_ces_tool_basic5%{random_suffix}"
     execution_type = "SYNCHRONOUS"
@@ -688,7 +688,7 @@ resource "google_service_directory_service" "basic" {
 }
 
 resource "google_ces_app" "my-app" {
-    location     = "us-central1"
+    location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
     app_id       = "tf-test-app-id%{random_suffix}"
     time_zone_settings {   
@@ -697,7 +697,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_tool" "ces_tool_python_function_basic" {
-    location       = "us-central1"
+    location       = "us"
     app            = google_ces_app.my-app.name
     tool_id        = "tf_test_ces_tool_basic5%{random_suffix}"
     execution_type = "SYNCHRONOUS"
@@ -962,7 +962,7 @@ resource "google_service_directory_service" "basic" {
 }
 
 resource "google_ces_app" "my-app" {
-    location     = "us-central1"
+    location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
     app_id       = "tf-test-app-id%{random_suffix}"
     time_zone_settings {   
@@ -971,7 +971,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_tool" "ces_tool_widget_basic" {
-    location       = "us-central1"
+    location       = "us"
     app            = google_ces_app.my-app.name
     tool_id        = "tf-test-widget-%{random_suffix}"
     execution_type = "SYNCHRONOUS"
@@ -986,7 +986,7 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
         })
         data_mapping {
             mode             = "FIELD_MAPPING"
-            source_tool_name = "projects/${google_ces_app.my-app.project}/locations/us-central1/apps/${google_ces_app.my-app.app_id}/tools/source-tool"
+            source_tool_name = "projects/${google_ces_app.my-app.project}/locations/us/apps/${google_ces_app.my-app.app_id}/tools/source-tool"
             field_mappings = {
                 "key1" = "value1"
             }
@@ -1042,7 +1042,7 @@ resource "google_service_directory_service" "basic" {
 }
 
 resource "google_ces_app" "my-app" {
-    location     = "us-central1"
+    location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
     app_id       = "tf-test-app-id%{random_suffix}"
     time_zone_settings {   
@@ -1051,7 +1051,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_tool" "ces_tool_widget_basic" {
-    location       = "us-central1"
+    location       = "us"
     app            = google_ces_app.my-app.name
     tool_id        = "tf-test-widget-%{random_suffix}"
     execution_type = "SYNCHRONOUS"
@@ -1066,7 +1066,7 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
         })
         data_mapping {
             mode             = "FIELD_MAPPING"
-            source_tool_name = "projects/${google_ces_app.my-app.project}/locations/us-central1/apps/${google_ces_app.my-app.app_id}/tools/source-tool-updated"
+            source_tool_name = "projects/${google_ces_app.my-app.project}/locations/us/apps/${google_ces_app.my-app.app_id}/tools/source-tool-updated"
             field_mappings = {
                 "key1" = "value1-updated"
             }
