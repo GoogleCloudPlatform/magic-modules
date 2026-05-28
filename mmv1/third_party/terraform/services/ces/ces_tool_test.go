@@ -657,7 +657,7 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
         name = "example_function"
         python_code = "def example_function() -> int: return 0"
         service_directory_config {
-            service = "projects/\${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
+            service = "projects/${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
         }
     }
 }
@@ -683,7 +683,7 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
         name = "example_function_updated"
         python_code = "def example_function_updated() -> int: return 0"
         service_directory_config {
-            service = "projects/\${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
+            service = "projects/${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
         }
     }
 }
@@ -954,7 +954,7 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
         })
         data_mapping {
             mode             = "FIELD_MAPPING"
-            source_tool_name = "projects/\${google_ces_app.my-app.project}/locations/us/apps/\${google_ces_app.my-app.app_id}/tools/source-tool"
+            source_tool_name = "projects/${google_ces_app.my-app.project}/locations/us/apps/${google_ces_app.my-app.app_id}/tools/source-tool"
             field_mappings = {
                 "key1" = "value1"
             }
@@ -962,7 +962,7 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
                 name        = "transform_function"
                 python_code = "def transform_function(x): return x"
                 service_directory_config {
-                    service = "projects/\${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
+                    service = "projects/${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc"
                 }
             }
         }
@@ -1024,7 +1024,7 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
         })
         data_mapping {
             mode             = "FIELD_MAPPING"
-            source_tool_name = "projects/\${google_ces_app.my-app.project}/locations/us/apps/\${google_ces_app.my-app.app_id}/tools/source-tool-updated"
+            source_tool_name = "projects/${google_ces_app.my-app.project}/locations/us/apps/${google_ces_app.my-app.app_id}/tools/source-tool-updated"
             field_mappings = {
                 "key1" = "value1-updated"
             }
@@ -1032,7 +1032,7 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
                 name        = "transform_function_updated"
                 python_code = "def transform_function_updated(x): return x"
                 service_directory_config {
-                    service = "projects/\${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc-updated"
+                    service = "projects/${google_ces_app.my-app.project}/locations/us/namespaces/ns/services/svc-updated"
                 }
             }
         }
