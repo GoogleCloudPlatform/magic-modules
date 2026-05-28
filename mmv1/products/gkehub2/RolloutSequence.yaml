@@ -186,7 +186,7 @@ properties:
         output: true
 
 virtual_fields:
-  - name: 'minControlPlaneVersion'
+  - name: 'min_control_plane_version'
     type: String
     description: |
       Minimum control plane version that the clusters in the sequence should be upgraded to.
@@ -195,7 +195,7 @@ virtual_fields:
       Should be a valid [semantic version](https://semver.org/).
       Version aliases are supported, as described in the [cluster version docs](https://docs.cloud.google.com/kubernetes-engine/versioning#specifying_cluster_version).
       Supported formats: `1.X`, `1.X.Y`, `1.X.Y-gke.N`.
-  - name: 'minNodeVersion'
+  - name: 'min_node_version'
     type: String
     description: |
       Minimum node version that the clusters in the sequence should be upgraded to.
