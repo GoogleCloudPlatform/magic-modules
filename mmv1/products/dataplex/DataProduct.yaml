@@ -20,7 +20,6 @@ references:
   guides:
     'Introduction to Data Products': 'https://cloud.google.com/dataplex/docs/data-products-overview'
   api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts'
-min_version: beta
 
 base_url: 'projects/{{project}}/locations/{{location}}/dataProducts'
 self_link: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
@@ -144,3 +143,6 @@ properties:
             - name: 'googleGroup'
               type: String
               description: 'Email of the Google Group.'
+            - name: 'serviceAccount'
+              type: String
+              description: 'Specifies the email of the producer service account.'
