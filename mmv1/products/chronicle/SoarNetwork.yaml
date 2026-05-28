@@ -60,8 +60,6 @@ parameters:
   - name: soarNetworkId
     type: String
     output: true
-    immutable: true
-    default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
     description: |-
       Id of the soarNetwork record.
