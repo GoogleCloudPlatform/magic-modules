@@ -803,6 +803,61 @@ maintenance_policy {
 ```
 
 * `recurring_maintenance_window` - Defines a recurring window for maintenance operations.
+
+  *   `delay_until`: (Optional) Specifies the initial date when the recurring window can start.
+      *   `day`: The day of the month (integer value between 1 and 31).
+      *   `month`: The month of the year (integer value between 1 and 12).
+      *   `year`: The year (integer value).
+
+  *   `window_start_time`: The time of day when each maintenance window instance begins.
+      *   `hours`: The hour of the day (integer value between 0 and 23).
+      *   `minutes`: The minute of the hour (integer value between 0 and 59).
+      *   `seconds`: The second of the minute (integer value between 0 and 59).
+
+  *   `window_duration`: The length of each maintenance window instance. Specified as a sequence of decimal numbers, each with an optional fraction and a unit suffix, such as `"300s"`, `"1.5m"`, and `"2h45m"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". The value must be a positive duration.
+
+  *   `recurrence`: Defines when the window recurs, using the [RFC5545](https://tools.ietf.org/html/rfc5545#section-3.8.5.3) RRULE format.
+
+Examples:
+```
+maintenance_policy {
+  recurring_maintenance_window {
+    delay_until {
+      day   = 1
+      month = 8
+      year  = 2019
+    }
+    window_start_time {
+      hours   = 2
+      minutes = 0
+      seconds = 0
+    }
+    window_duration = "4h"
+    recurrence      = "FREQ=DAILY"
+  }
+}
+```
+
+```
+maintenance_policy {
+  recurring_maintenance_window {
+    delay_until {
+      day   = 1
+      month = 1
+      year  = 2019
+    }
+    window_start_time {
+      hours   = 9
+      minutes = 0
+      seconds = 0
+    }
+    window_duration = "8h"
+    recurrence      = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
+  }
+}
+```
+
+* `recurring_maintenance_window` - Defines a recurring window for maintenance operations.
   *   `delay_until`: (Optional) Specifies the initial date when the recurring window can start.
       *   `day`: The day of the month (integer value between 1 and 31).
       *   `month`: The month of the year (integer value between 1 and 12).
