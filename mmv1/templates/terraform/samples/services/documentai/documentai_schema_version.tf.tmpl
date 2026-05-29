@@ -1,0 +1,21 @@
+resource "google_document_ai_schema" "schema" {
+  location     = "us"
+  display_name = "{{index $.Vars "schema_display_name"}}"
+}
+
+resource "google_document_ai_schema_version" "{{$.PrimaryResourceId}}" {
+  schema_id = google_document_ai_schema.schema.name
+  location  = "us"
+
+  display_name = "{{index $.Vars "version_display_name"}}"
+
+  schema {
+    display_name = "Schema"
+    
+    entity_types {
+      name         = "custom_entity"
+      display_name = "Custom Entity"
+      base_types   = ["document"]
+    }
+  }
+}
