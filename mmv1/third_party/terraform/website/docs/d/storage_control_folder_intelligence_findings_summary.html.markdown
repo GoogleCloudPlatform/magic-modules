@@ -34,7 +34,7 @@ The following attributes are exported:
 
 * `id` - an identifier for the resource with format `folders/{{folder}}/locations/{{location}}/intelligenceFindingsSummary`
 
-* `finding_summaries` - The list of FindingSummary summaries. Structure is documented below.
+* `finding_summaries` - The list of FindingSummary summaries. Structure is [documented below](#nested_finding_summaries).
 
 <a name="nested_finding_summaries"></a>The `finding_summaries` block contains:
 
@@ -50,7 +50,7 @@ The following attributes are exported:
 
 * `severity` - Severity of the finding.
 
-* `summary_details` - The SummaryDetails resources. Structure is documented below.
+* `summary_details` - The SummaryDetails resources. Structure is [documented below](#nested_summary_details).
 
 <a name="nested_summary_details"></a>The `summary_details` block contains:
 

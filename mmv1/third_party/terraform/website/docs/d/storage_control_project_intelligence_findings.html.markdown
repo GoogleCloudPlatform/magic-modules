@@ -34,7 +34,7 @@ The following attributes are exported:
 
 * `id` - an identifier for the resource with format `projects/{{project}}/locations/{{location}}/intelligenceFindings`
 
-* `findings` - The list of intelligence findings. Structure is documented below.
+* `findings` - The list of intelligence findings. Structure is [documented below](#nested_findings).
 
 <a name="nested_findings"></a>The `findings` block contains:
 
@@ -56,15 +56,15 @@ The following attributes are exported:
 
 * `associated_resources` - Resources associated with the finding.
 
-* `observation_period` - The observation period of the finding. Structure is documented below.
+* `observation_period` - The observation period of the finding. Structure is [documented below](#nested_observation_period).
 
-* `coldline_and_archival_storage_operations_spike` - A finding about a spike in Class A or Class B operations on Coldline or Archive Cloud Storage objects. Structure is documented below.
+* `coldline_and_archival_storage_operations_spike` - A finding about a spike in Class A or Class B operations on Coldline or Archive Cloud Storage objects. Structure is [documented below](#nested_coldline_and_archival_storage_operations_spike).
 
-* `throttled_requests_spike` - A finding about a spike in throttled requests (429 errors) within a project. Structure is documented below.
+* `throttled_requests_spike` - A finding about a spike in throttled requests (429 errors) within a project. Structure is [documented below](#nested_throttled_requests_spike).
 
-* `cross_region_egress_spike` - A finding about a spike in cross-region egress from Cloud Storage. Structure is documented below.
+* `cross_region_egress_spike` - A finding about a spike in cross-region egress from Cloud Storage. Structure is [documented below](#nested_cross_region_egress_spike).
 
-* `storage_growth_above_trend` - A finding about a spike in storage growth (bytes or object count) that is outside the normal historical trend. Structure is documented below.
+* `storage_growth_above_trend` - A finding about a spike in storage growth (bytes or object count) that is outside the normal historical trend. Structure is [documented below](#nested_storage_growth_above_trend).
 
 <a name="nested_observation_period"></a>The `observation_period` block contains:
 
@@ -78,7 +78,7 @@ The following attributes are exported:
 
 * `percentage_increase` - The percentage increase over historical trend.
 
-* `top_buckets` - The top buckets contributing to the spike. Structure is documented below.
+* `top_buckets` - The top buckets contributing to the spike. Structure is [documented below](#nested_top_buckets).
 
 <a name="nested_throttled_requests_spike"></a>The `throttled_requests_spike` block contains:
 
@@ -86,7 +86,7 @@ The following attributes are exported:
 
 * `percentage_increase` - The percentage increase over historical trend.
 
-* `top_buckets` - The top buckets contributing to the spike. Structure is documented below.
+* `top_buckets` - The top buckets contributing to the spike. Structure is [documented below](#nested_top_buckets).
 
 <a name="nested_cross_region_egress_spike"></a>The `cross_region_egress_spike` block contains:
 
@@ -94,7 +94,7 @@ The following attributes are exported:
 
 * `percentage_increase` - The percentage increase over historical trend.
 
-* `top_buckets` - The top buckets contributing to the spike. Structure is documented below.
+* `top_buckets` - The top buckets contributing to the spike. Structure is [documented below](#nested_top_buckets).
 
 <a name="nested_storage_growth_above_trend"></a>The `storage_growth_above_trend` block contains:
 
@@ -102,7 +102,7 @@ The following attributes are exported:
 
 * `percentage_increase` - The percentage increase over historical trend.
 
-* `top_buckets` - The top buckets contributing to the spike. Structure is documented below.
+* `top_buckets` - The top buckets contributing to the spike. Structure is [documented below](#nested_top_buckets).
 
 <a name="nested_top_buckets"></a>The `top_buckets` block contains:
 
@@ -118,13 +118,13 @@ The following attributes are exported:
 
 * `throttled_requests` - The number of throttled requests for this bucket.
 
-* `contribution` - The breakdown of prefixes contributing to the spike. Structure is documented below.
+* `contribution` - The breakdown of prefixes contributing to the spike. Structure is [documented below](#nested_contribution).
 
-* `error` - Error details if the bucket details cannot be retrieved. Structure is documented below.
+* `error` - Error details if the bucket details cannot be retrieved. Structure is [documented below](#nested_error).
 
 <a name="nested_contribution"></a>The `contribution` block contains:
 
-* `top_prefixes` - A list of top prefixes contributing to the finding. Structure is documented below.
+* `top_prefixes` - A list of top prefixes contributing to the finding. Structure is [documented below](#nested_top_prefixes).
 
 <a name="nested_top_prefixes"></a>The `top_prefixes` block contains:
 
