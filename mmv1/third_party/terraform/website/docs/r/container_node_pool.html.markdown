@@ -145,7 +145,7 @@ cluster.
     with the specified prefix. Conflicts with `name`.
 
 * `node_config` - (Optional) Parameters used in creating the node pool. See
-    [google_container_cluster](container_cluster.html#nested_node_config) for schema.
+    [google_container_cluster](container_cluster.html#nested_node_config) for schema or structure is documented below (#nested_node_config).
 
 * `network_config` - (Optional) The network configuration of the pool. Such as
     configuration for [Adding Pod IP address ranges](https://cloud.google.com/kubernetes-engine/docs/how-to/multi-pod-cidr)) to the node pool. Or enabling private nodes. Structure is

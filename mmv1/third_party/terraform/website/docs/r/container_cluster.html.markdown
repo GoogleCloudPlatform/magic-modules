@@ -278,7 +278,7 @@ region are guaranteed to support the same version.
     Terraform. Structure is [documented below](#nested_node_config).
 
 * `node_pool` - (Optional) List of node pools associated with this cluster.
-    See [google_container_node_pool](container_node_pool.html) for schema.
+    See [google_container_node_pool](container_node_pool.html) for schema or structure is documented below (#nested_node_pool).
     **Warning:** node pools defined inside a cluster can't be changed (or added/removed) after
     cluster creation without deleting and recreating the entire cluster. Unless you absolutely need the ability
     to say "these are the _only_ node pools associated with this cluster", use the
@@ -1991,3 +1991,15 @@ For example, the following fields will show diffs if set in config:
 ## User Project Overrides
 
 This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).
+
+<a name="nested_node_pool"></a>The `node_pool` block supports:
+
+* `node_config` - (Optional) Parameters used in creating the node pool. Structure is [documented below](#nested_node_pool_node_config).
+
+<a name="nested_node_pool_node_config"></a>The `node_pool_node_config` block supports:
+
+* `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_node_pool_linux_node_config).
+
+<a name="nested_node_pool_linux_node_config"></a>The `node_pool_linux_node_config` block supports:
+
+* `custom_node_init` - (Optional) Custom node init settings. Structure is [documented below](#nested_custom_node_init).
