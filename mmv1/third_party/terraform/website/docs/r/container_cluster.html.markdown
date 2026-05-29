@@ -278,7 +278,7 @@ region are guaranteed to support the same version.
     Terraform. Structure is [documented below](#nested_node_config).
 
 * `node_pool` - (Optional) List of node pools associated with this cluster.
-    See [google_container_node_pool](container_node_pool.html) for schema or structure is documented below (#nested_node_pool).
+    See [google_container_node_pool](container_node_pool.html) for schema.
     **Warning:** node pools defined inside a cluster can't be changed (or added/removed) after
     cluster creation without deleting and recreating the entire cluster. Unless you absolutely need the ability
     to say "these are the _only_ node pools associated with this cluster", use the
@@ -1764,18 +1764,6 @@ linux_node_config {
 * `gcs_generation` - (Optional) The generation of the init script in Google Cloud Storage. If `gcs_uri` is used, `gcs_generation` is required.
 
 * `gcp_secret_manager_secret_uri` - (Optional) The Google Cloud Secret Manager secret version URI for storing the init script. Format: `projects/PROJECT_ID/secrets/SECRET_NAME/versions/VERSION`. The service account on the nodepool must have access to the secret version. Conflicts with `gcs_uri`.
-
-<a name="nested_node_pool"></a>The `node_pool` block supports:
-
-* `node_config` - (Optional) Parameters used in creating the node pool. Structure is [documented below](#nested_node_pool_node_config).
-
-<a name="nested_node_pool_node_config"></a>The `node_pool_node_config` block supports:
-
-* `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_node_pool_linux_node_config).
-
-<a name="nested_node_pool_linux_node_config"></a>The `node_pool_linux_node_config` block supports:
-
-* `custom_node_init` - (Optional) Custom node init settings. Structure is [documented below](#nested_custom_node_init).
 
 <a name="nested_containerd_config"></a>The `containerd_config` block supports:
 

@@ -145,7 +145,7 @@ cluster.
     with the specified prefix. Conflicts with `name`.
 
 * `node_config` - (Optional) Parameters used in creating the node pool. See
-    [google_container_cluster](container_cluster.html#nested_node_config) for schema or structure is documented below (#nested_node_config).
+    [google_container_cluster](container_cluster.html#nested_node_config) for schema.
 
 * `network_config` - (Optional) The network configuration of the pool. Such as
     configuration for [Adding Pod IP address ranges](https://cloud.google.com/kubernetes-engine/docs/how-to/multi-pod-cidr)) to the node pool. Or enabling private nodes. Structure is
@@ -319,26 +319,6 @@ cluster.
     * `"SPECIFIC_RESERVATION"`: Must consume from a specific reservation. Must specify key value fields for specifying the reservations.
 * `key` (Optional) The label key of a reservation resource. To target a SPECIFIC_RESERVATION by name, specify "compute.googleapis.com/reservation-name" as the key and specify the name of your reservation as its value.
 * `values` (Optional) The list of label values of reservation resources. For example: the name of the specific reservation when using a key of "compute.googleapis.com/reservation-name"
-
-<a name="nested_node_config"></a>The `node_config` block supports:
-
-* `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_linux_node_config).
-
-<a name="nested_linux_node_config"></a>The `linux_node_config` block supports:
-
-* `custom_node_init` - (Optional) Custom node init settings. Structure is [documented below](#nested_custom_node_init).
-
-<a name="nested_custom_node_init"></a>The `custom_node_init` block supports:
-
-* `init_script` - (Optional) The init script configuration. Structure is [documented below](#nested_init_script).
-
-<a name="nested_init_script"></a>The `init_script` block supports:
-
-* `gcs_uri` - (Optional) The Google Cloud Storage URI for storing the init script. Format: `gs://BUCKET_NAME/OBJECT_NAME`. The service account on the nodepool must have read access to the object. Conflicts with `gcp_secret_manager_secret_uri`.
-
-* `gcs_generation` - (Optional) The generation of the init script in Google Cloud Storage.
-
-* `gcp_secret_manager_secret_uri` - (Optional) The Google Cloud Secret Manager secret version URI for storing the init script. Format: `projects/PROJECT_ID/secrets/SECRET_NAME/versions/VERSION`. The service account on the nodepool must have access to the secret version. Conflicts with `gcs_uri`.
 
 ## Attributes Reference
 
