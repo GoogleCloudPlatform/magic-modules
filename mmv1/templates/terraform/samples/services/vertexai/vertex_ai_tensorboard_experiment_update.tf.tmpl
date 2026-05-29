@@ -1,0 +1,15 @@
+resource "google_vertex_ai_tensorboard" "tensorboard" {
+  display_name = "Tensorboard for Experiment"
+  region       = "us-central1"
+}
+
+resource "google_vertex_ai_tensorboard_experiment" "{{$.PrimaryResourceId}}" {
+  display_name            = "sample experiment updated"
+  description             = "updated description"
+  tensorboard             = basename(google_vertex_ai_tensorboard.tensorboard.id)
+  tensorboard_experiment_id = "{{index $.ResourceIdVars "tensorboardExperimentId"}}"
+  labels                  = {
+    "key" : "value-updated"
+    "new-key" : "new-value"
+  }
+}
