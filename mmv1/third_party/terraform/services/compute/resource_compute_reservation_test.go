@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccComputeReservation_update(t *testing.T) {
@@ -183,9 +184,9 @@ func TestAccComputeReservation_resourceManagerTags(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	suffixName := acctest.RandString(t, 10)
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-reservations-tagkey", "organizations/"+org, make(map[string]interface{}))
+	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "crm-reservations-tagkey", "organizations/"+org, make(map[string]interface{}))
 	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-reservations-tagvalue", sharedTagkey, org)
+	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "crm-reservations-tagvalue", sharedTagkey, org)
 
 	context := map[string]interface{}{
 		"reservation_name": fmt.Sprintf("tf-test-reservation-rmt-%s", suffixName),
