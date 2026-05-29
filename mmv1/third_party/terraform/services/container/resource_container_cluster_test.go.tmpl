@@ -18226,7 +18226,7 @@ func TestAccContainerCluster_withCustomNodeInitGcs(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
 			},
 		},
 	})
@@ -18297,7 +18297,7 @@ func TestAccContainerCluster_withCustomNodeInitSecret(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
 			},
 		},
 	})
@@ -18329,6 +18329,13 @@ resource "google_project_iam_member" "secret_accessor" {
   member  = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [
+    google_project_iam_member.secret_accessor
+  ]
+}
+
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -18350,7 +18357,7 @@ resource "google_container_cluster" "primary" {
   }
 
   depends_on = [
-    google_project_iam_member.secret_accessor
+    time_sleep.wait_60_seconds
   ]
 }
 `, secretId, cluster, networkName, subnetworkName)
@@ -18382,7 +18389,7 @@ func TestAccContainerCluster_withCustomNodeInitInline(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "remove_default_node_pool"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "remove_default_node_pool", "min_master_version"},
 			},
 		},
 	})
@@ -18424,6 +18431,13 @@ resource "google_project_iam_member" "secret_accessor" {
   project = data.google_project.project.project_id
   role    = "roles/secretmanager.secretAccessor"
   member  = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [
+    google_project_iam_member.secret_accessor
+  ]
 }
 
 resource "google_container_cluster" "primary" {
@@ -18469,7 +18483,7 @@ resource "google_container_cluster" "primary" {
   }
 
   depends_on = [
-    google_project_iam_member.secret_accessor
+    time_sleep.wait_60_seconds
   ]
 }
 `, bucket, secretId, cluster, networkName, subnetworkName)

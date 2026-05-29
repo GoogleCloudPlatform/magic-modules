@@ -7103,6 +7103,13 @@ resource "google_container_cluster" "cluster" {
   subnetwork    = "%s"
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [
+    google_project_iam_member.secret_accessor
+  ]
+}
+
 resource "google_container_node_pool" "np_with_custom_node_init_secret" {
   name               = "%s"
   location           = "us-central1-a"
@@ -7120,7 +7127,7 @@ resource "google_container_node_pool" "np_with_custom_node_init_secret" {
   }
 
   depends_on = [
-    google_project_iam_member.secret_accessor
+    time_sleep.wait_60_seconds
   ]
 }
 `, secretId, cluster, networkName, subnetworkName, np)
