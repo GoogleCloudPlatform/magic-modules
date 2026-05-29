@@ -137,9 +137,16 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}
 
-	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
+	networkPerformanceConfigMap, err := expandNetworkPerformanceConfig(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network performance config: %s", err)
+	}
+	var networkPerformanceConfig *compute.NetworkPerformanceConfig
+	if networkPerformanceConfigMap != nil {
+		networkPerformanceConfig = &compute.NetworkPerformanceConfig{}
+		if v, ok := networkPerformanceConfigMap["totalEgressBandwidthTier"].(string); ok {
+			networkPerformanceConfig.TotalEgressBandwidthTier = v
+		}
 	}
 
 	accels, err := expandInstanceGuestAccelerators(d, config)
@@ -150,6 +157,21 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	reservationAffinity, err := expandReservationAffinity(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating reservation affinity: %s", err)
+	}
+
+	instanceEncryptionKeyMap := expandComputeInstanceEncryptionKey(d)
+	var instanceEncryptionKey *compute.CustomerEncryptionKey
+	if instanceEncryptionKeyMap != nil {
+		instanceEncryptionKey = &compute.CustomerEncryptionKey{}
+		if v, ok := instanceEncryptionKeyMap["kmsKeyName"].(string); ok {
+			instanceEncryptionKey.KmsKeyName = v
+		}
+		if v, ok := instanceEncryptionKeyMap["sha256"].(string); ok {
+			instanceEncryptionKey.Sha256 = v
+		}
+		if v, ok := instanceEncryptionKeyMap["kmsKeyServiceAccount"].(string); ok {
+			instanceEncryptionKey.KmsKeyServiceAccount = v
+		}
 	}
 
 	// Create the instance information
@@ -166,7 +188,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Tags:                       resourceInstanceTags(d),
 		Params:                     params,
 		Labels:                     tpgresource.ExpandLabels(d),
-		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
+		ServiceAccounts:            expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
 		GuestAccelerators:          accels,
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Scheduling:                 scheduling,
@@ -179,7 +201,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
-		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
+		InstanceEncryptionKey:      instanceEncryptionKey,
 	}, nil
 }
 

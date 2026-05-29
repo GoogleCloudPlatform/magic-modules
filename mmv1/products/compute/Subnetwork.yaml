@@ -44,6 +44,7 @@ references:
 base_url: projects/{{project}}/regions/{{region}}/subnetworks
 immutable: true
 has_self_link: true
+generate_list_resource: true
 bypass_clientside_update_check: true
 collection_url_key: items
 iam_policy:
@@ -56,7 +57,6 @@ id_format: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
 custom_diff:
   - customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)
   - sendSecondaryIpRangeIfEmptyDiff
-  - resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff
   - resourceComputeSubnetworkSecondaryIpRangeCustomDiff
 sweeper:
   url_substitutions:
@@ -236,8 +236,6 @@ properties:
     custom_tgc_flatten: 'templates/tgc_next/custom_flatten/compute_subnetwork_ip_cidr_range.go.tmpl'
   - name: reservedInternalRange
     type: ResourceRef
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/networkconnectivity_prefixed_name.go.tmpl'
     description: |
       The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
       E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
@@ -314,6 +312,7 @@ properties:
     update_id: secondaryIpRanges
     fingerprint_name: fingerprint
     send_empty_value: true
+    unordered_list: true
     default_from_api: true
     item_type:
       type: NestedObject
@@ -330,7 +329,6 @@ properties:
             function: verify.ValidateGCEName
         - name: ipCidrRange
           type: String
-          diff_suppress_func: IpDiffSuppress
           description: |
             The range of IP addresses belonging to this subnetwork secondary
             range. Provide this property when you create the subnetwork.
@@ -341,8 +339,6 @@ properties:
             function: verify.ValidateIpCidrRange
           default_from_api: true
         - name: reservedInternalRange
-          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-          custom_flatten: 'templates/terraform/custom_flatten/networkconnectivity_prefixed_name.go.tmpl'
           type: ResourceRef
           description: |
             The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
@@ -595,6 +591,7 @@ properties:
     description: |
       'Configures subnet mask resolution for this subnetwork.'
     immutable: true
+    is_missing_in_cai: true
     enum_values:
       - ARP_ALL_RANGES
       - ARP_PRIMARY_RANGE

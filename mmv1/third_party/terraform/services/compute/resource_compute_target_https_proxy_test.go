@@ -3,24 +3,20 @@ package compute_test
 import (
 	"fmt"
 	"testing"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/networksecurity"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/certificatemanager"
-	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
-  "github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-{{- if eq $.TargetVersionName "ga" }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/certificatemanager"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networksecurity"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 const (
 	canonicalSslCertificateTemplate  = "https://www.googleapis.com/compute/v1/projects/%s/global/sslCertificates/%s"
-	canonicalSslPolicyTemplate  = "https://www.googleapis.com/compute/v1/projects/%s/global/sslPolicies/%s"
+	canonicalSslPolicyTemplate       = "https://www.googleapis.com/compute/v1/projects/%s/global/sslPolicies/%s"
 	canonicalCertificateMapTemplate  = "//certificatemanager.googleapis.com/projects/%s/locations/global/certificateMaps/%s"
 	canonicalServerTlsPolicyTemplate = "//networksecurity.googleapis.com/projects/%s/locations/global/serverTlsPolicies/%s"
 )
@@ -28,7 +24,7 @@ const (
 func TestAccComputeTargetHttpsProxy_update(t *testing.T) {
 	t.Parallel()
 
-	var proxy compute.TargetHttpsProxy
+	var proxy map[string]interface{}
 	resourceSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -66,67 +62,67 @@ func TestAccComputeTargetHttpsProxy_update(t *testing.T) {
 func TestAccComputeTargetHttpsProxy_certificateMap(t *testing.T) {
 	t.Parallel()
 
-	var proxy compute.TargetHttpsProxy
+	var proxy map[string]interface{}
 	resourceSuffix := acctest.RandString(t, 10)
 
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        CheckDestroy:             testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
-        Steps: []resource.TestStep{
-            {
-                Config: testAccComputeTargetHttpsProxy_certificateMap(resourceSuffix),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckComputeTargetHttpsProxyExists(
-                        t, "google_compute_target_https_proxy.foobar", &proxy),
-                    testAccComputeTargetHttpsProxyDescription("Resource created for Terraform acceptance testing", &proxy),
-                    testAccComputeTargetHttpsProxyHasCertificateMap(t, "tf-test-certmap-"+resourceSuffix, &proxy),
-                ),
-            },
-        },
-    })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeTargetHttpsProxy_certificateMap(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetHttpsProxyExists(
+						t, "google_compute_target_https_proxy.foobar", &proxy),
+					testAccComputeTargetHttpsProxyDescription("Resource created for Terraform acceptance testing", &proxy),
+					testAccComputeTargetHttpsProxyHasCertificateMap(t, "tf-test-certmap-"+resourceSuffix, &proxy),
+				),
+			},
+		},
+	})
 }
 
 func TestAccComputeTargetHttpsProxyServerTlsPolicy_update(t *testing.T) {
 	t.Parallel()
 
-	var proxy compute.TargetHttpsProxy
+	var proxy map[string]interface{}
 	resourceSuffix := acctest.RandString(t, 10)
 
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        CheckDestroy:             testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
-        Steps: []resource.TestStep{
-            {
-                Config: testAccComputeTargetHttpsProxyWithoutServerTlsPolicy(resourceSuffix),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckComputeTargetHttpsProxyExists(
-                        t, "google_compute_target_https_proxy.foobar", &proxy),
-										testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t, &proxy),
-                ),
-            },
-            {
-                Config: testAccComputeTargetHttpsProxyWithServerTlsPolicy(resourceSuffix),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckComputeTargetHttpsProxyExists(
-                        t, "google_compute_target_https_proxy.foobar", &proxy),
-										testAccComputeTargetHttpsProxyHasServerTlsPolicy(t, "tf-test-server-tls-policy-"+resourceSuffix, &proxy),
-                ),
-            },
-            {
-                Config: testAccComputeTargetHttpsProxyWithoutServerTlsPolicy(resourceSuffix),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckComputeTargetHttpsProxyExists(
-                        t, "google_compute_target_https_proxy.foobar", &proxy),
-										testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t, &proxy),
-                ),
-            },
-        },
-    })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeTargetHttpsProxyWithoutServerTlsPolicy(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetHttpsProxyExists(
+						t, "google_compute_target_https_proxy.foobar", &proxy),
+					testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t, &proxy),
+				),
+			},
+			{
+				Config: testAccComputeTargetHttpsProxyWithServerTlsPolicy(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetHttpsProxyExists(
+						t, "google_compute_target_https_proxy.foobar", &proxy),
+					testAccComputeTargetHttpsProxyHasServerTlsPolicy(t, "tf-test-server-tls-policy-"+resourceSuffix, &proxy),
+				),
+			},
+			{
+				Config: testAccComputeTargetHttpsProxyWithoutServerTlsPolicy(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetHttpsProxyExists(
+						t, "google_compute_target_https_proxy.foobar", &proxy),
+					testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t, &proxy),
+				),
+			},
+		},
+	})
 }
 
-func testAccCheckComputeTargetHttpsProxyExists(t *testing.T, n string, proxy *compute.TargetHttpsProxy) resource.TestCheckFunc {
+func testAccCheckComputeTargetHttpsProxyExists(t *testing.T, n string, proxy *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -140,40 +136,49 @@ func testAccCheckComputeTargetHttpsProxyExists(t *testing.T, n string, proxy *co
 		config := acctest.GoogleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
-		found, err := compute_tpg.NewClient(config, config.UserAgent).TargetHttpsProxies.Get(
-			config.Project, name).Do()
+		url := fmt.Sprintf("%sprojects/%s/global/targetHttpsProxies/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), config.Project, name)
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		if found.Name != name {
+		if found["name"].(string) != name {
 			return fmt.Errorf("TargetHttpsProxy not found")
 		}
 
-		*proxy = *found
+		*proxy = found
 
 		return nil
 	}
 }
 
-func testAccComputeTargetHttpsProxyDescription(description string, proxy *compute.TargetHttpsProxy) resource.TestCheckFunc {
+func testAccComputeTargetHttpsProxyDescription(description string, proxy *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if proxy.Description != description {
-			return fmt.Errorf("Wrong description: expected '%s' got '%s'", description, proxy.Description)
+		got, _ := (*proxy)["description"].(string)
+		if got != description {
+			return fmt.Errorf("Wrong description: expected '%s' got '%s'", description, got)
 		}
 
 		return nil
 	}
 }
 
-func testAccComputeTargetHttpsProxyHasSslCertificate(t *testing.T, cert string, proxy *compute.TargetHttpsProxy) resource.TestCheckFunc {
+func testAccComputeTargetHttpsProxyHasSslCertificate(t *testing.T, cert string, proxy *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 		certUrl := fmt.Sprintf(canonicalSslCertificateTemplate, config.Project, cert)
 
-		for _, sslCertificate := range proxy.SslCertificates {
-			if tpgresource.ConvertSelfLinkToV1(sslCertificate) == certUrl {
-				return nil
+		if sslCerts, ok := (*proxy)["sslCertificates"].([]interface{}); ok {
+			for _, raw := range sslCerts {
+				if tpgresource.ConvertSelfLinkToV1(raw.(string)) == certUrl {
+					return nil
+				}
 			}
 		}
 
@@ -181,12 +186,12 @@ func testAccComputeTargetHttpsProxyHasSslCertificate(t *testing.T, cert string, 
 	}
 }
 
-func testAccComputeTargetHttpsProxyHasSslPolicy(t *testing.T, sslPolicy string, proxy *compute.TargetHttpsProxy) resource.TestCheckFunc {
-  return func(s *terraform.State) error {
+func testAccComputeTargetHttpsProxyHasSslPolicy(t *testing.T, sslPolicy string, proxy *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 		sslPolicyUrl := fmt.Sprintf(canonicalSslPolicyTemplate, config.Project, sslPolicy)
 
-    if tpgresource.ConvertSelfLinkToV1(proxy.SslPolicy) == sslPolicyUrl {
+		if v, ok := (*proxy)["sslPolicy"].(string); ok && tpgresource.ConvertSelfLinkToV1(v) == sslPolicyUrl {
 			return nil
 		}
 
@@ -194,12 +199,12 @@ func testAccComputeTargetHttpsProxyHasSslPolicy(t *testing.T, sslPolicy string, 
 	}
 }
 
-func testAccComputeTargetHttpsProxyHasServerTlsPolicy(t *testing.T, policy string, proxy *compute.TargetHttpsProxy) resource.TestCheckFunc {
-  return func(s *terraform.State) error {
+func testAccComputeTargetHttpsProxyHasServerTlsPolicy(t *testing.T, policy string, proxy *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 		serverTlsPolicyUrl := fmt.Sprintf(canonicalServerTlsPolicyTemplate, config.Project, policy)
 
-    if tpgresource.ConvertSelfLinkToV1(proxy.ServerTlsPolicy) == serverTlsPolicyUrl {
+		if v, ok := (*proxy)["serverTlsPolicy"].(string); ok && tpgresource.ConvertSelfLinkToV1(v) == serverTlsPolicyUrl {
 			return nil
 		}
 
@@ -207,9 +212,9 @@ func testAccComputeTargetHttpsProxyHasServerTlsPolicy(t *testing.T, policy strin
 	}
 }
 
-func testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t *testing.T, proxy *compute.TargetHttpsProxy) resource.TestCheckFunc {
+func testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t *testing.T, proxy *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if proxy.ServerTlsPolicy != "" {
+		if v, ok := (*proxy)["serverTlsPolicy"].(string); ok && v != "" {
 			return fmt.Errorf("Server Tls Policy found: expected 'null'")
 		}
 
@@ -217,12 +222,12 @@ func testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t *testing.T, proxy *c
 	}
 }
 
-func testAccComputeTargetHttpsProxyHasCertificateMap(t *testing.T, certificateMap string, proxy *compute.TargetHttpsProxy) resource.TestCheckFunc {
+func testAccComputeTargetHttpsProxyHasCertificateMap(t *testing.T, certificateMap string, proxy *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 		certificateMapUrl := fmt.Sprintf(canonicalCertificateMapTemplate, config.Project, certificateMap)
 
-		if tpgresource.ConvertSelfLinkToV1(proxy.CertificateMap) == certificateMapUrl {
+		if v, ok := (*proxy)["certificateMap"].(string); ok && tpgresource.ConvertSelfLinkToV1(v) == certificateMapUrl {
 			return nil
 		}
 

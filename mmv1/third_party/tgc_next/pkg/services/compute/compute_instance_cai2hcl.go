@@ -59,7 +59,11 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 		hclData["can_ip_forward"] = instance.CanIpForward
 	}
 	hclData["machine_type"] = tpgresource.GetResourceNameFromSelfLink(instance.MachineType)
-	hclData["network_performance_config"] = flattenNetworkPerformanceConfig(instance.NetworkPerformanceConfig)
+	if instance.NetworkPerformanceConfig != nil {
+		hclData["network_performance_config"] = flattenNetworkPerformanceConfig(map[string]interface{}{
+			"totalEgressBandwidthTier": instance.NetworkPerformanceConfig.TotalEgressBandwidthTier,
+		})
+	}
 
 	// Set the networks
 	networkInterfaces, _, _, err := flattenNetworkInterfacesTgc(instance.NetworkInterfaces, project)
@@ -99,7 +103,13 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)
 	hclData["reservation_affinity"] = flattenReservationAffinityTgc(instance.ReservationAffinity)
 	hclData["key_revocation_action_type"] = strings.TrimSuffix(instance.KeyRevocationActionType, "_ON_KEY_REVOCATION")
-	hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKey(instance.InstanceEncryptionKey)
+	if instance.InstanceEncryptionKey != nil {
+		hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKey(map[string]interface{}{
+			"kmsKeyName":           instance.InstanceEncryptionKey.KmsKeyName,
+			"sha256":               instance.InstanceEncryptionKey.Sha256,
+			"kmsKeyServiceAccount": instance.InstanceEncryptionKey.KmsKeyServiceAccount,
+		})
+	}
 
 	// TODO: convert details from the boot disk assets (separate disk assets) into initialize_params in cai2hcl?
 	// It needs to integrate the disk assets into instance assets with the resolver.

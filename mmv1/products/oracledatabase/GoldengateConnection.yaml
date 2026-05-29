@@ -1,0 +1,1781 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: GoldengateConnection
+description: GoldengateConnection is a resource that represents metadata to establish a connection to a source or target data.
+base_url: projects/{{project}}/locations/{{location}}/goldengateConnections
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/goldengateConnections/{{goldengate_connection_id}}
+create_url: projects/{{project}}/locations/{{location}}/goldengateConnections?goldengateConnectionId={{goldengate_connection_id}}
+id_format: projects/{{project}}/locations/{{location}}/goldengateConnections/{{goldengate_connection_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/goldengateConnections/{{goldengate_connection_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+    timeouts:
+      insert_minutes: 30
+      delete_minutes: 30
+      update_minutes: 30
+  actions:
+    - create
+    - delete
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+custom_code:
+  pre_delete: "templates/terraform/pre_delete/oracledatabase_goldengate_connection.go.tmpl"
+autogen_status: R29sZGVuZ2F0ZUNvbm5lY3Rpb24=
+autogen_async: true
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: goldengateConnectionId
+    type: String
+    required: true
+    description: |-
+      The ID of the GoldengateConnection to create. This value is
+      restricted to (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of
+      63 characters in length. The value must start with a letter and end with a
+      letter or a number.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: The date and time that the GoldengateConnection was created.
+    output: true
+  - name: entitlementId
+    type: String
+    description: |-
+      The ID of the subscription entitlement associated with the
+      GoldengateConnection.
+    output: true
+  - name: gcpOracleZone
+    type: String
+    description: |-
+      The GCP Oracle zone where Oracle GoldengateConnection is hosted.
+      Example: us-east4-b-r2.
+      If not specified, the system will pick a zone based on availability.
+    default_from_api: true
+  - name: labels
+    type: KeyValueLabels
+    description: The labels or tags associated with the GoldengateConnection.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the GoldengateConnection resource in the following format:
+      projects/{project}/locations/{region}/goldengateConnections/{goldengate_connection}
+    output: true
+  - name: ociUrl
+    type: String
+    description: HTTPS link to OCI resources exposed to Customer via UI Interface.
+    output: true
+  - name: odbNetwork
+    type: String
+    description: |-
+      The name of the OdbNetwork associated with the GoldengateConnection.
+      The format is
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}.
+      It is optional but if specified, this should match the parent ODBNetwork
+      of the OdbSubnet.
+  - name: odbSubnet
+    type: String
+    description: |-
+      The name of the OdbSubnet associated with the GoldengateConnection for IP
+      allocation.
+      Format:
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbSubnets/{odb_subnet}
+  - name: properties
+    type: NestedObject
+    required: true
+    description: The properties of a GoldengateConnection.
+    properties:
+      - name: amazonKinesisConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateAmazonKinesisConnection.
+        properties:
+          - name: accessKeyId
+            type: String
+            description: Access key ID to access the Amazon Kinesis.
+          - name: awsRegion
+            type: String
+            description: |-
+              The name of the AWS region.
+              If not provided, Goldengate will default to 'us-west-1'.
+            default_from_api: true
+          - name: endpoint
+            type: String
+            description: |-
+              The endpoint URL of the Amazon Kinesis service.
+              e.g.: 'https://kinesis.us-east-1.amazonaws.com'
+              If not provided, Goldengate will default to
+              'https://kinesis..amazonaws.com'.
+            default_from_api: true
+          - name: secretAccessKeySecret
+            type: String
+            description: Secret access key to access the Amazon Kinesis.
+          - name: technologyType
+            type: String
+            description: The technology type of AmazonKinesisConnection.
+      - name: amazonRedshiftConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateAmazonRedshiftConnection.
+        properties:
+          - name: connectionUrl
+            type: String
+            description: |-
+              Connection URL.
+              e.g.:
+              'jdbc:redshift://aws-redshift-instance.aaaaaaaaaaaa.us-east-2.redshift.amazonaws.com:5439/mydb'
+          - name: password
+            type: String
+            description: |-
+              Input only. The password Oracle Goldengate uses for Amazon Redshift connection
+              in plain text.
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses for Amazon Redshift connection.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: technologyType
+            type: String
+            description: The technology type of AmazonRedshiftConnection.
+          - name: username
+            type: String
+            description: |-
+              The username Oracle Goldengate uses to connect the associated system of
+              the given technology.
+      - name: amazonS3ConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateAmazonS3Connection.
+        properties:
+          - name: accessKeyId
+            type: String
+            description: Access key ID to access the Amazon S3 bucket.
+          - name: endpoint
+            type: String
+            description: The Amazon Endpoint for S3.
+          - name: region
+            type: String
+            description: The name of the AWS region where the bucket is created.
+            default_from_api: true
+          - name: secretAccessKeySecret
+            type: String
+            description: Secret access key to access the Amazon S3 bucket.
+          - name: technologyType
+            type: String
+            description: The technology type of AmazonS3Connection.
+      - name: azureDataLakeStorageConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateAzureDataLakeStorageConnection.
+        properties:
+          - name: account
+            type: String
+            description: Sets the Azure storage account name.
+          - name: accountKeySecret
+            type: String
+            description: |-
+              Azure storage account key. This property is required when
+              'authentication_type' is set to 'SHARED_KEY'.
+          - name: authenticationType
+            type: String
+            description: |-
+              Authentication mechanism to access Azure Data Lake Storage.
+              Possible values:
+              SHARED_KEY
+              SHARED_ACCESS_SIGNATURE
+              AZURE_ACTIVE_DIRECTORY
+          - name: azureAuthorityHost
+            type: String
+            description: |-
+              The endpoint used for authentication with Microsoft Entra ID (formerly
+              Azure Active Directory). Default value:
+              https://login.microsoftonline.com
+            default_from_api: true
+          - name: azureTenantId
+            type: String
+            description: |-
+              Azure tenant ID of the application. This property is required when
+              'authentication_type' is set to 'AZURE_ACTIVE_DIRECTORY'.
+          - name: clientId
+            type: String
+            description: |-
+              Azure client ID of the application. This property is required when
+              'authentication_type' is set to 'AZURE_ACTIVE_DIRECTORY'.
+          - name: clientSecret
+            type: String
+            description: Azure client secret (aka application password) for authentication.
+          - name: endpoint
+            type: String
+            description: |-
+              Azure Storage service endpoint.
+              e.g: https://test.blob.core.windows.net
+          - name: sasTokenSecret
+            type: String
+            description: |-
+              Credential that uses a shared access signature (SAS) to authenticate to
+              an Azure Service.
+          - name: technologyType
+            type: String
+            description: The technology type of AzureDataLakeStorageConnection.
+      - name: azureSynapseAnalyticsConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateAzureSynapseAnalyticsConnection.
+        properties:
+          - name: connectionString
+            type: String
+            description: |-
+              JDBC connection string.
+              e.g.:
+              'jdbc:sqlserver://.sql.azuresynapse.net:1433;database=;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.sql.azuresynapse.net;loginTimeout=300;'
+          - name: password
+            type: String
+            description: |-
+              Input only. The password Oracle Goldengate uses for Azure Synapse Analytics
+              connection in plain text.
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses for Azure Synapse Analytics
+              connection.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: technologyType
+            type: String
+            description: The technology type of AzureSynapseAnalyticsConnection.
+          - name: username
+            type: String
+            description: |-
+              The username Oracle Goldengate uses to connect the associated system of
+              the given technology.
+      - name: connectionType
+        type: String
+        required: true
+        description: |-
+          The connection type.
+          Possible values:
+          GOLDENGATE
+          KAFKA
+          KAFKA_SCHEMA_REGISTRY
+          MYSQL
+          JAVA_MESSAGE_SERVICE
+          MICROSOFT_SQLSERVER
+          OCI_OBJECT_STORAGE
+          ORACLE
+          AZURE_DATA_LAKE_STORAGE
+          POSTGRESQL
+          AZURE_SYNAPSE_ANALYTICS
+          SNOWFLAKE
+          AMAZON_S3
+          HDFS
+          ORACLE_AI_DATA_PLATFORM
+          ORACLE_NOSQL
+          MONGODB
+          AMAZON_KINESIS
+          AMAZON_REDSHIFT
+          DB2
+          REDIS
+          ELASTICSEARCH
+          GENERIC
+          GOOGLE_CLOUD_STORAGE
+          GOOGLE_BIGQUERY
+          DATABRICKS
+          GOOGLE_PUBSUB
+          MICROSOFT_FABRIC
+          ICEBERG
+      - name: databricksConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateDatabricksConnection.
+        properties:
+          - name: authenticationType
+            type: String
+            description: |-
+              Authentication type for Databricks.
+              Possible values:
+              PERSONAL_ACCESS_TOKEN
+              OAUTH_M2M
+          - name: clientId
+            type: String
+            description: OAuth client id, only applicable for authentication_type == OAUTH_M2M
+          - name: clientSecret
+            type: String
+            description: OAuth client secret, only applicable for authentication_type == OAUTH_M2M
+          - name: connectionUrl
+            type: String
+            description: |-
+              Connection URL.
+              e.g.:
+              'jdbc:databricks://adb-33934.4.azuredatabricks.net:443/default;transportMode=http;ssl=1;httpPath=sql/protocolv1/o/3393########44/0##3-7-hlrb'
+          - name: password
+            type: String
+            description: Input only. The password used to connect to Databricks in plain text.
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password used to connect to Databricks.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: storageCredential
+            type: String
+            description: |-
+              External storage credential name to access files on object
+              storage such as ADLS Gen2, S3 or Cloud Storage.
+          - name: technologyType
+            type: String
+            description: The technology type of DatabricksConnection.
+      - name: db2ConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateDb2Connection.
+        properties:
+          - name: additionalAttributes
+            type: Array
+            description: |-
+              An array of name-value pair attribute entries.
+              Used as additional parameters in connection string.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: key
+                  type: String
+                  required: true
+                  description: The name of the property entry.
+                - name: value
+                  type: String
+                  required: true
+                  description: The value of the property entry.
+          - name: database
+            type: String
+            description: The name of the database.
+          - name: host
+            type: String
+            description: The name or address of a host.
+          - name: password
+            type: String
+            description: Input only. The password Oracle Goldengate uses for Db2 connection in plain text.
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses for Db2 connection.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: port
+            type: Integer
+            description: The port of an endpoint usually specified for a connection.
+          - name: securityProtocol
+            type: String
+            description: |-
+              Security protocol for the DB2 database.
+              Possible values:
+              PLAIN
+              TLS
+          - name: sslClientKeystashFile
+            type: String
+            description: |-
+              The keystash file which contains the encrypted password to
+              the key database file. Not supported for IBM Db2 for i.
+          - name: sslClientKeystoredbFile
+            type: String
+            description: |-
+              The keystore file created at the client containing the
+              server certificate / CA root certificate. Not supported for IBM Db2 for i.
+          - name: sslServerCertificateFile
+            type: String
+            description: |-
+              The file which contains the self-signed server certificate
+              / Certificate Authority (CA) certificate.
+          - name: technologyType
+            type: String
+            description: The technology type of Db2Connection.
+          - name: username
+            type: String
+            description: The username Oracle Goldengate uses to connect to the DB2 database.
+      - name: description
+        type: String
+        description: Metadata about this specific object.
+      - name: displayName
+        type: String
+        required: true
+        description: An object's Display Name.
+      - name: elasticsearchConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateElasticsearchConnection.
+        properties:
+          - name: authenticationType
+            type: String
+            description: |-
+              Authentication type for Elasticsearch.
+              Possible values:
+              NONE
+              BASIC
+          - name: fingerprint
+            type: String
+            description: |-
+              Fingerprint required by TLS security protocol.
+              Eg.: '6152b2dfbff200f973c5074a5b91d06ab3b472c07c09a1ea57bb7fd406cdce9c'
+          - name: password
+            type: String
+            description: |-
+              Input only. The password Oracle Goldengate uses for Elastic Search connection
+              in plain text.
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses for Elastic Search connection.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: securityProtocol
+            type: String
+            description: |-
+              Security protocol for Elasticsearch.
+              Possible values:
+              PLAIN
+              TLS
+          - name: servers
+            type: String
+            description: |-
+              Comma separated list of Elasticsearch server addresses, specified as
+              host:port entries, where :port is optional. If port is not specified, it
+              defaults to 9200. Example:
+              "server1.example.com:4000,server2.example.com:4000"
+          - name: technologyType
+            type: String
+            description: The technology type of ElasticsearchConnection.
+          - name: username
+            type: String
+            description: |-
+              The username Oracle Goldengate uses to connect the associated system of
+              the given technology.
+      - name: genericConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateGenericConnectionProperties.
+        properties:
+          - name: host
+            type: String
+            description: The host of the GenericConnection.
+          - name: technologyType
+            type: String
+            description: The technology type.
+      - name: goldengateConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateGoldengateConnectionProperties.
+        properties:
+          - name: goldengateDeploymentId
+            type: String
+            description: |-
+              The name of the GoldengateDeployment associated with the
+              GoldengateConnection.
+              Format:
+              projects/{project}/locations/{location}/goldengateDeployments/{goldengate_deployment}
+          - name: host
+            type: String
+            description: The host of the GoldengateConnection.
+          - name: password
+            type: String
+            description: Input only. The password used to connect to the Oracle Goldengate in plain text.
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password used to connect to the Oracle Goldengate.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: port
+            type: Integer
+            description: The port of the GoldengateConnection.
+          - name: technologyType
+            type: String
+            description: The technology type.
+          - name: username
+            type: String
+            description: The username credential.
+      - name: googleBigQueryConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateGoogleBigQueryConnectionProperties.
+        properties:
+          - name: serviceAccountKeyFile
+            type: String
+            description: |-
+              The service account key file Cloud Storage containing the
+              credentials required to use Google BigQuery.
+          - name: technologyType
+            type: String
+            description: The technology type.
+      - name: googleCloudStorageConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateGoogleCloudStorageConnectionProperties.
+        properties:
+          - name: serviceAccountKeyFile
+            type: String
+            description: |-
+              The service account key Cloud Storage file containing the
+              credentials required to use Google Cloud Storage.
+          - name: technologyType
+            type: String
+            description: The technology type.
+      - name: googlePubsubConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateGooglePubsubConnection.
+        properties:
+          - name: serviceAccountKeyFile
+            type: String
+            description: |-
+              The content of the service account key file containing the
+              credentials required to use Google Pub/Sub.
+          - name: technologyType
+            type: String
+            description: The technology type of GooglePubsubConnection.
+      - name: hdfsConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateHdfsConnection.
+        properties:
+          - name: coreSiteXml
+            type: String
+            description: |-
+              The content of the Hadoop Distributed File System
+              configuration file (core-site.xml).
+          - name: technologyType
+            type: String
+            description: The technology type of HdfsConnection.
+      - name: icebergConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateIcebergConnection.
+        properties:
+          - name: catalog
+            type: NestedObject
+            required: true
+            description: The Iceberg catalog details.
+            properties:
+              - name: catalogType
+                type: String
+                required: true
+                description: |-
+                  The type of Iceberg catalog.
+                  Possible values:
+                  GLUE
+                  HADOOP
+                  NESSIE
+                  POLARIS
+                  REST
+              - name: glueIcebergCatalog
+                type: NestedObject
+                description: The Glue Iceberg catalog.
+                properties:
+                  - name: glueId
+                    type: String
+                    required: true
+                    description: The catalog ID of Glue.
+              - name: nessieIcebergCatalog
+                type: NestedObject
+                description: The Nessie Iceberg catalog.
+                properties:
+                  - name: branch
+                    type: String
+                    required: true
+                    description: The Nessie branch.
+                  - name: uri
+                    type: String
+                    required: true
+                    description: The Nessie uri.
+              - name: polarisIcebergCatalog
+                type: NestedObject
+                description: The Polaris Iceberg catalog.
+                properties:
+                  - name: clientId
+                    type: String
+                    required: true
+                    description: The Polaris client ID.
+                  - name: clientSecret
+                    type: String
+                    description: The Polaris client secret.
+                  - name: polarisCatalog
+                    type: String
+                    required: true
+                    description: The catalog name within Polaris.
+                  - name: principalRole
+                    type: String
+                    required: true
+                    description: The Polaris principal role.
+                  - name: uri
+                    type: String
+                    required: true
+                    description: The Polaris uri.
+              - name: restIcebergCatalog
+                type: NestedObject
+                description: The REST Iceberg catalog.
+                properties:
+                  - name: properties
+                    type: String
+                    description: |-
+                      The content of the configuration file containing additional properties for
+                      the REST catalog.
+                  - name: uri
+                    type: String
+                    required: true
+                    description: The REST uri.
+          - name: storage
+            type: NestedObject
+            required: true
+            description: The Iceberg storage details.
+            properties:
+              - name: amazonS3IcebergStorage
+                type: NestedObject
+                description: The Amazon S3 Iceberg storage.
+                properties:
+                  - name: accessKeyId
+                    type: String
+                    required: true
+                    description: The access key ID of Amazon S3.
+                  - name: bucket
+                    type: String
+                    required: true
+                    description: The bucket of Amazon S3.
+                  - name: endpoint
+                    type: String
+                    description: The endpoint of Amazon S3.
+                  - name: region
+                    type: String
+                    required: true
+                    description: The region of Amazon S3.
+                  - name: schemeType
+                    type: String
+                    required: true
+                    description: |-
+                      The scheme type of Amazon S3.
+                      Possible values:
+                      S3
+                      S3A
+                  - name: secretAccessKeySecret
+                    type: String
+                    description: The secret access key of Amazon S3.
+                    ignore_read: true
+              - name: azureDataLakeStorageIcebergStorage
+                type: NestedObject
+                description: The Azure Data Lake Storage Iceberg storage.
+                properties:
+                  - name: accountKeySecret
+                    type: String
+                    description: The account key of Azure Data Lake Storage.
+                  - name: azureAccount
+                    type: String
+                    required: true
+                    description: The account of Azure Data Lake Storage.
+                  - name: container
+                    type: String
+                    required: true
+                    description: The container of Azure Data Lake Storage.
+                  - name: endpoint
+                    type: String
+                    description: The endpoint of Azure Data Lake Storage.
+              - name: googleCloudStorageIcebergStorage
+                type: NestedObject
+                description: The Google Cloud Storage Iceberg storage.
+                properties:
+                  - name: bucket
+                    type: String
+                    required: true
+                    description: The bucket of Google Cloud Storage.
+                  - name: projectId
+                    type: String
+                    required: true
+                    description: The project ID of Google Cloud Storage.
+                  - name: serviceAccountKeyFile
+                    type: String
+                    description: The service account key file of Google Cloud Storage.
+              - name: storageType
+                type: String
+                required: true
+                description: |-
+                  The type of Iceberg storage.
+                  Possible values:
+                  AMAZON_S3
+                  GOOGLE_CLOUD_STORAGE
+                  AZURE_DATA_LAKE_STORAGE
+          - name: technologyType
+            type: String
+            required: true
+            description: The technology type of Iceberg connection.
+      - name: ingressIpAddresses
+        type: Array
+        description: The Ingress IPs of the GoldengateConnection.
+        output: true
+        item_type:
+          type: String
+      - name: javaMessageServiceConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateJavaMessageServiceConnection.
+        properties:
+          - name: authenticationType
+            type: String
+            description: |-
+              Authentication type for Java Message Service.
+              Possible values:
+              NONE
+              BASIC
+          - name: connectionFactory
+            type: String
+            description: |-
+              The Java class implementing javax.jms.ConnectionFactory interface supplied
+              by the JMS provider.
+          - name: connectionUrl
+            type: String
+            description: |-
+              Connection URL of the Java Message Service, specifying the protocol, host,
+              and port. e.g.: 'mq://myjms.host.domain:7676'
+          - name: jndiConnectionFactory
+            type: String
+            description: |-
+              The Connection Factory can be looked up using this name.
+              e.g.: 'ConnectionFactory'
+          - name: jndiInitialContextFactory
+            type: String
+            description: |-
+              The implementation of javax.naming.spi.InitialContextFactory interface
+              used to obtain initial naming context.
+          - name: jndiProviderUrl
+            type: String
+            description: |-
+              The URL that Java Message Service will use to contact the JNDI provider.
+              e.g.: 'tcp://myjms.host.domain:61616?jms.prefetchPolicy.all=1000'
+          - name: jndiSecurityCredentialsSecret
+            type: String
+            description: The password associated to the principal.
+            ignore_read: true
+          - name: jndiSecurityPrincipal
+            type: String
+            description: Specifies the identity of the principal (user) to be authenticated.
+          - name: keyStoreFile
+            type: String
+            description: The content of the KeyStore file.
+            ignore_read: true
+          - name: keyStorePassword
+            type: String
+            description: Input only. The KeyStore password in plain text.
+            ignore_read: true
+          - name: keyStorePasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the KeyStore password.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: password
+            type: String
+            description: |-
+              Input only. The password Oracle Goldengate uses to connect the Java Message Service
+              in plain text.
+            ignore_read: true
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses to connect the associated Java
+              Message Service.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: securityProtocol
+            type: String
+            description: |-
+              Security protocol for Java Message Service.
+              Possible values:
+              PLAIN
+              TLS
+              MTLS
+          - name: sslKeyPassword
+            type: String
+            description: Input only. The password for the cert inside of the KeyStore in plain text.
+            ignore_read: true
+          - name: sslKeyPasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password for the cert inside of the KeyStore.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: technologyType
+            type: String
+            description: The technology type of JavaMessageServiceConnection.
+          - name: trustStoreFile
+            type: String
+            description: The content of the TrustStore file.
+            ignore_read: true
+          - name: trustStorePassword
+            type: String
+            description: Input only. The TrustStore password in plain text.
+            ignore_read: true
+          - name: trustStorePasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the TrustStore password.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: useJndi
+            type: Boolean
+            description: |-
+              If set to true, Java Naming and Directory Interface (JNDI) properties
+              should be provided.
+          - name: username
+            type: String
+            description: |-
+              The username Oracle Goldengate uses to connect to the Java Message
+              Service.
+      - name: kafkaConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateKafkaConnection.
+        properties:
+          - name: bootstrapServers
+            type: Array
+            ignore_read: true
+            description: |-
+              Kafka bootstrap. Equivalent of bootstrap.servers configuration property
+              in Kafka: list of KafkaBootstrapServer objects specified by host/port.
+              Used for establishing the initial connection to the Kafka cluster.
+              Example: "server1.example.com:9092,server2.example.com:9092"
+            item_type:
+              type: NestedObject
+              properties:
+                - name: host
+                  type: String
+                  required: true
+                  description: The name or address of a host.
+                - name: port
+                  type: Integer
+                  description: The port of an endpoint usually specified for a connection.
+                - name: privateIpAddress
+                  type: String
+                  ignore_read: true
+                  description: |-
+                    The private IP address of the connection's endpoint in the customer's VCN,
+                    typically a database endpoint or a big data endpoint (e.g. Kafka bootstrap
+                    server). In case the privateIp is provided, the subnetId must also be
+                    provided. In case the privateIp (and the subnetId) is not provided it is
+                    assumed the datasource is publicly accessible. In case the connection is
+                    accessible only privately, the lack of privateIp will result in not being
+                    able to access the connection.
+          - name: clusterId
+            type: String
+            description: |-
+              The OCID of the Kafka cluster being referenced from OCI Streaming with
+              Apache Kafka.
+          - name: consumerPropertiesFile
+            type: String
+            description: The content of the consumer.properties file.
+            ignore_read: true
+          - name: keyStoreFile
+            type: String
+            description: The content of the KeyStore file.
+            ignore_read: true
+          - name: keyStorePassword
+            type: String
+            description: Input only. The KeyStore password in plain text.
+            ignore_read: true
+          - name: keyStorePasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the KeyStore password.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: password
+            type: String
+            description: Input only. The password for Kafka basic/SASL auth in plain text.
+            ignore_read: true
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password for Kafka basic/SASL auth.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: producerPropertiesFile
+            type: String
+            description: The content of the producer.properties file.
+            ignore_read: true
+          - name: securityProtocol
+            type: String
+            description: |-
+              Security Type for Kafka.
+              Possible values:
+              SSL
+              SASL_SSL
+              PLAINTEXT
+              SASL_PLAINTEXT
+          - name: sslKeyPassword
+            type: String
+            description: Input only. The password for the cert inside of the KeyStore in plain text.
+            ignore_read: true
+          - name: sslKeyPasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password for the cert inside of the KeyStore.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: streamPoolId
+            type: String
+            description: The OCID of the stream pool being referenced.
+          - name: technologyType
+            type: String
+            description: The technology type of KafkaConnection.
+          - name: trustStoreFile
+            type: String
+            description: The content of the TrustStore file.
+            ignore_read: true
+          - name: trustStorePassword
+            type: String
+            description: Input only. The TrustStore password in plain text.
+            ignore_read: true
+          - name: trustStorePasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the TrustStore password.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: useResourcePrincipal
+            type: Boolean
+            description: |-
+              Specifies that the user intends to authenticate to the instance using a
+              resource principal. Applicable only for OCI Streaming connections.
+          - name: username
+            type: String
+            description: |-
+              The username Oracle Goldengate uses to connect the associated system of
+              the given technology.
+      - name: kafkaSchemaRegistryConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateKafkaSchemaRegistryConnection.
+        properties:
+          - name: authenticationType
+            type: String
+            description: |-
+              Used authentication mechanism to access Schema Registry.
+              Possible values:
+              NONE
+              BASIC
+              MUTUAL
+          - name: keyStoreFile
+            type: String
+            description: The content of the KeyStore file.
+          - name: keyStorePassword
+            type: String
+            description: Input only. The KeyStore password in plain text.
+          - name: keyStorePasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the KeyStore password.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: password
+            type: String
+            description: Input only. The password to access Schema Registry in plain text.
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password to access Schema Registry using basic authentication.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: sslKeyPassword
+            type: String
+            description: Input only. The password for the cert inside the KeyStore in plain text.
+          - name: sslKeyPasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password for the cert inside the KeyStore.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: technologyType
+            type: String
+            description: The technology type of KafkaSchemaRegistryConnection.
+          - name: trustStoreFile
+            type: String
+            description: The content of the TrustStore file.
+          - name: trustStorePassword
+            type: String
+            description: Input only. The TrustStore password in plain text.
+          - name: trustStorePasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the TrustStore password.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: url
+            type: String
+            description: |-
+              Kafka Schema Registry URL.
+              e.g.: 'https://server1.us.oracle.com:8081'
+          - name: username
+            type: String
+            description: |-
+              The username to access Schema Registry using basic authentication.
+              This value is injected into
+              'schema.registry.basic.auth.user.info=user:password' configuration
+              property.
+      - name: lifecycleDetails
+        type: String
+        description: |-
+          Describes the object's current state in detail. For example, it can be
+          used to provide actionable information for a resource in a Failed state.
+        output: true
+      - name: lifecycleState
+        type: String
+        description: |-
+          The lifecycle state of the connection.
+          Possible values:
+          CREATING
+          ACTIVE
+          UPDATING
+          DELETING
+          DELETED
+          FAILED
+        output: true
+      - name: microsoftFabricConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateMicrosoftFabricConnection.
+        properties:
+          - name: clientId
+            type: String
+            description: Azure client ID of the application.
+          - name: clientSecret
+            type: String
+            description: Client secret associated with the client id.
+          - name: endpoint
+            type: String
+            description: |-
+              Optional Microsoft Fabric service endpoint.
+              Default value: https://onelake.dfs.fabric.microsoft.com
+            default_from_api: true
+          - name: technologyType
+            type: String
+            description: The technology type of MicrosoftFabricConnection.
+          - name: tenantId
+            type: String
+            description: Azure tenant ID of the application.
+      - name: microsoftSqlserverConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateMicrosoftSqlserverConnection.
+        properties:
+          - name: additionalAttributes
+            type: Array
+            description: |-
+              An array of name-value pair attribute entries.
+              Used as additional parameters in connection string.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: key
+                  type: String
+                  required: true
+                  description: The name of the property entry.
+                - name: value
+                  type: String
+                  required: true
+                  description: The value of the property entry.
+          - name: database
+            type: String
+            description: The name of the database.
+          - name: host
+            type: String
+            description: The name or address of a host.
+          - name: password
+            type: String
+            description: |-
+              Input only. The password Oracle Goldengate uses for Microsoft SQL Server connection
+              in plain text.
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses for Microsoft SQL Server
+              connection.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: port
+            type: Integer
+            description: The port of an endpoint usually specified for a connection.
+          - name: securityProtocol
+            type: String
+            description: |-
+              Security Type for Microsoft SQL Server.
+              Possible values:
+              PLAIN
+              TLS
+          - name: serverCertificateValidationRequired
+            type: Boolean
+            description: |-
+              If set to true, the driver validates the certificate that is sent by the
+              database server.
+          - name: sslCaFile
+            type: String
+            description: |-
+              Database Certificate - The content of a .pem or .crt file
+              containing the server public key (for 1-way SSL).
+          - name: technologyType
+            type: String
+            description: The technology type of MicrosoftSqlserverConnection.
+          - name: username
+            type: String
+            description: |-
+              The username Oracle Goldengate uses to connect to the Microsoft SQL
+              Server.
+      - name: mongodbConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateMongodbConnection.
+        properties:
+          - name: connectionString
+            type: String
+            description: |-
+              MongoDB connection string.
+              e.g.: 'mongodb://mongodb0.example.com:27017/recordsrecords'
+          - name: databaseId
+            type: String
+            description: The OCID of the Oracle Autonomous Json Database.
+          - name: password
+            type: String
+            description: |-
+              Input only. The password Oracle Goldengate uses to connect the Mongodb connection in
+              plain text.
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses to connect the Mongodb connection.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: securityProtocol
+            type: String
+            description: |-
+              Security Type for MongoDB.
+              Possible values:
+              PLAIN
+              TLS
+              MTLS
+          - name: technologyType
+            type: String
+            description: The technology type of MongodbConnection.
+          - name: tlsCaFile
+            type: String
+            description: |-
+              Database Certificate - The content of a .pem file,
+              containing the server public key (for 1 and 2-way SSL).
+          - name: tlsCertificateKeyFile
+            type: String
+            description: |-
+              Client Certificate - The content of a .pem file, containing
+              the client public key (for 2-way SSL).
+          - name: tlsCertificateKeyFilePassword
+            type: String
+            description: Input only. The Client Certificate key file password in plain text.
+          - name: tlsCertificateKeyFilePasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the Client Certificate key file password in Secret Manager.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: username
+            type: String
+            description: The username Oracle Goldengate uses to connect to the database.
+      - name: mysqlConnectionProperties
+        type: NestedObject
+        description: Properties of GoldengateMysqlConnection.
+        properties:
+          - name: additionalAttributes
+            type: Array
+            description: |-
+              An array of name-value pair attribute entries.
+              Used as additional parameters in connection string.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: key
+                  type: String
+                  required: true
+                  description: The name of the property entry.
+                - name: value
+                  type: String
+                  required: true
+                  description: The value of the property entry.
+          - name: database
+            type: String
+            description: The name of the database.
+          - name: dbSystemId
+            type: String
+            description: The OCID of the database system being referenced.
+          - name: host
+            type: String
+            description: The name or address of a host.
+          - name: password
+            type: String
+            description: Input only. The password Oracle Goldengate uses to connect to MySQL in plain text.
+            ignore_read: true
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses to connect to MySQL.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: port
+            type: Integer
+            description: The port of an endpoint usually specified for a connection.
+          - name: securityProtocol
+            type: String
+            description: |-
+              Security Type for MySQL.
+              Possible values:
+              PLAIN
+              TLS
+              MTLS
+          - name: sslCaFile
+            type: String
+            description: |-
+              Database Certificate - The content of a .pem or .crt file
+              containing the server public key (for 1 and 2-way SSL).
+            ignore_read: true
+          - name: sslCertFile
+            type: String
+            description: |-
+              Client Certificate - The content of a .pem or .crt file
+              containing the client public key (for 2-way SSL).
+            ignore_read: true
+          - name: sslCrlFile
+            type: String
+            description: |-
+              The list of certificates revoked by the trusted
+              certificate authorities (Trusted CA).
+            ignore_read: true
+          - name: sslKeyFile
+            type: String
+            description: |-
+              Client Key - The content of a .pem or .crt file containing
+              the client private key (for 2-way SSL).
+            ignore_read: true
+          - name: sslMode
+            type: String
+            description: |-
+              SSL modes for MySQL.
+              Possible values:
+              DISABLED
+              PREFERRED
+              REQUIRED
+              VERIFY_CA
+              VERIFY_IDENTITY
+          - name: technologyType
+            type: String
+            description: The technology type of MysqlConnection.
+          - name: username
+            type: String
+            description: |-
+              The username Oracle Goldengate uses to connect the associated system of
+              the given technology.
+      - name: ociObjectStorageConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateOciObjectStorageConnection.
+        properties:
+          - name: privateKeyFile
+            type: String
+            description: |-
+              The content of the private key file (PEM file)
+              corresponding to the API key of the fingerprint.
+          - name: privateKeyPassphraseSecret
+            type: String
+            description: The passphrase of the private key.
+          - name: publicKeyFingerprint
+            type: String
+            description: The fingerprint of the API Key of the user specified by the userId.
+          - name: region
+            type: String
+            description: |-
+              The name of the region of OCI Object Storage. e.g.: us-ashburn-1
+              If the region is not provided, backend will default to the default region.
+          - name: technologyType
+            type: String
+            description: The technology type of OciObjectStorageConnection.
+          - name: tenancyId
+            type: String
+            description: The OCID of the related OCI tenancy.
+          - name: useResourcePrincipal
+            type: Boolean
+            description: |-
+              Specifies that the user intends to authenticate to the instance using a
+              resource principal.
+          - name: userId
+            type: String
+            description: |-
+              The OCID of the OCI user who will access the Object Storage.
+              The user must have write access to the bucket they want to connect to.
+      - name: ocid
+        type: String
+        description: |-
+          The [OCID] of the connection being
+          referenced.
+        output: true
+      - name: oracleAiDataPlatformConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateOracleAIDataPlatformConnection.
+        properties:
+          - name: connectionUrl
+            type: String
+            description: Connection URL. It must start with 'jdbc:spark://'
+          - name: privateKeyFile
+            type: String
+            description: |-
+              The content of the private key file (PEM file)
+              corresponding to the API key of the fingerprint.
+          - name: privateKeyPassphraseSecret
+            type: String
+            description: The passphrase of the private key.
+          - name: publicKeyFingerprint
+            type: String
+            description: The fingerprint of the API Key of the user specified by the user_id.
+          - name: region
+            type: String
+            description: 'The name of the region. e.g.: us-ashburn-1'
+          - name: technologyType
+            type: String
+            description: The technology type of OracleAiDataPlatformConnection.
+          - name: tenancyId
+            type: String
+            description: The OCID of the related OCI tenancy.
+          - name: useResourcePrincipal
+            type: Boolean
+            description: |-
+              Specifies that the user intends to authenticate to the instance using a
+              resource principal.
+          - name: userId
+            type: String
+            description: The OCID of the OCI user who will access.
+      - name: oracleConnectionProperties
+        type: NestedObject
+        description: The properties of Goldengate Oracle Database Connection.
+        properties:
+          - name: authenticationMode
+            type: String
+            description: |-
+              Authentication mode.
+              Possible values:
+              TLS
+              MTLS
+            default_from_api: true
+          - name: connectionString
+            type: String
+            description: |-
+              Connect descriptor or Easy Connect Naming method used to connect to a
+              database.
+            ignore_read: true
+          - name: gcpOracleDatabaseId
+            type: String
+            description: |-
+              Database instance id of database in Oracle Database @ Google Cloud.
+              If gcp_oracle_database_id is provided, connection_string must be empty.
+            ignore_read: true
+          - name: password
+            type: String
+            description: Input only. The password Oracle Goldengate uses in plain text.
+            ignore_read: true
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: sessionMode
+            type: String
+            description: |-
+              The mode of the database connection session to be established by the data
+              client.
+              Possible values:
+              DIRECT
+              REDIRECT
+            default_from_api: true
+          - name: technologyType
+            type: String
+            description: The technology type.
+          - name: username
+            type: String
+            description: The username Oracle Goldengate uses to connect.
+          - name: walletFile
+            type: String
+            description: |-
+              The wallet contents Oracle Goldengate uses to make connections to a
+              database.
+      - name: oracleNosqlConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateOracleNosqlConnection.
+        properties:
+          - name: privateKeyFile
+            type: String
+            description: |-
+              The content of the private key file (PEM file)
+              corresponding to the API key of the fingerprint.
+          - name: privateKeyPassphraseSecret
+            type: String
+            description: The passphrase of the private key.
+          - name: publicKeyFingerprint
+            type: String
+            description: The fingerprint of the API Key of the user specified by the userId.
+          - name: region
+            type: String
+            description: 'The name of the region. e.g.: us-ashburn-1'
+          - name: technologyType
+            type: String
+            description: The technology type of OracleNosqlConnection.
+          - name: tenancyId
+            type: String
+            description: The OCID of the OCI tenancy.
+          - name: useResourcePrincipal
+            type: Boolean
+            description: |-
+              Specifies that the user intends to authenticate to the instance using a
+              resource principal.
+          - name: userId
+            type: String
+            description: The OCID of the OCI user who will access the Oracle NoSQL database.
+      - name: postgresqlConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengatePostgresqlConnection.
+        properties:
+          - name: additionalAttributes
+            type: Array
+            description: |-
+              An array of name-value pair attribute entries.
+              Used as additional parameters in connection string.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: key
+                  type: String
+                  required: true
+                  description: The name of the property entry.
+                - name: value
+                  type: String
+                  required: true
+                  description: The value of the property entry.
+          - name: database
+            type: String
+            description: The name of the database.
+          - name: dbSystemId
+            type: String
+            description: The OCID of the database system being referenced.
+          - name: host
+            type: String
+            description: The name or address of a host.
+          - name: password
+            type: String
+            description: |-
+              Input only. The password Oracle Goldengate uses for PostgreSQL connection in plain
+              text.
+            ignore_read: true
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses for PostgreSQL connection.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: port
+            type: Integer
+            description: The port of an endpoint usually specified for a connection.
+          - name: securityProtocol
+            type: String
+            description: |-
+              Security protocol for PostgreSQL.
+              Possible values:
+              PLAIN
+              TLS
+              MTLS
+          - name: sslCaFile
+            type: String
+            description: |-
+              The certificate of the trusted certificate authorities
+              (Trusted CA) for PostgreSQL.
+          - name: sslCertFile
+            type: String
+            description: The certificate of the PostgreSQL server.
+          - name: sslCrlFile
+            type: String
+            description: |-
+              The list of certificates revoked by the trusted
+              certificate authorities (Trusted CA).
+          - name: sslKeyFile
+            type: String
+            description: The private key of the PostgreSQL server.
+          - name: sslMode
+            type: String
+            description: |-
+              SSL modes for PostgreSQL.
+              Possible values:
+              PREFER
+              REQUIRE
+              VERIFY_CA
+              VERIFY_FULL
+          - name: technologyType
+            type: String
+            description: The technology type of PostgresqlConnection.
+          - name: username
+            type: String
+            description: |-
+              The username Oracle Goldengate uses to connect the associated system of
+              the given technology.
+      - name: redisConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateRedisConnection.
+        properties:
+          - name: authenticationType
+            type: String
+            description: |-
+              Authentication type for Redis.
+              Possible values:
+              NONE
+              BASIC
+          - name: keyStoreFile
+            type: String
+            description: The content of the KeyStore file.
+          - name: keyStorePassword
+            type: String
+            description: Input only. The KeyStore password in plain text.
+          - name: keyStorePasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the KeyStore password.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: password
+            type: String
+            description: Input only. The password Oracle Goldengate uses for Redis connection in plain text.
+            ignore_read: true
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses for Redis connection.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: redisClusterId
+            type: String
+            description: The OCID of the Redis cluster.
+          - name: securityProtocol
+            type: String
+            description: |-
+              Security protocol for Redis.
+              Possible values:
+              PLAIN
+              TLS
+              MTLS
+          - name: servers
+            type: String
+            description: |-
+              Comma separated list of Redis server addresses, specified as host:port
+              entries, where :port is optional. If port is not specified, it defaults
+              to 6379. Example: "server1.example.com:6379,server2.example.com:6379"
+          - name: technologyType
+            type: String
+            description: The technology type of RedisConnection.
+          - name: trustStoreFile
+            type: String
+            description: The content of the TrustStore file.
+          - name: trustStorePassword
+            type: String
+            description: Input only. The TrustStore password in plain text.
+          - name: trustStorePasswordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the TrustStore password.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+          - name: username
+            type: String
+            description: |-
+              The username Oracle Goldengate uses to connect the associated system of
+              the given technology.
+      - name: routingMethod
+        type: String
+        description: |-
+          The routing method for the GoldengateConnection.
+          Possible values:
+          SHARED_DEPLOYMENT_ENDPOINT
+          DEDICATED_ENDPOINT
+        default_from_api: true
+      - name: snowflakeConnectionProperties
+        type: NestedObject
+        description: The properties of GoldengateSnowflakeConnection.
+        properties:
+          - name: authenticationType
+            type: String
+            description: |-
+              Used authentication mechanism to access Snowflake.
+              Possible values:
+              BASIC
+              KEY_PAIR
+          - name: connectionUrl
+            type: String
+            description: |-
+              JDBC connection URL.
+              e.g.:
+              'jdbc:snowflake://.snowflakecomputing.com/?warehouse=&db='
+          - name: password
+            type: String
+            description: |-
+              Input only. The password Oracle Goldengate uses to connect to Snowflake platform
+              in plain text.
+            ignore_read: true
+          - name: passwordSecretVersion
+            type: String
+            description: |-
+              Input only. The resource name of a secret version in Secret Manager which contains
+              the password Oracle Goldengate uses to connect to Snowflake platform.
+              Format: projects/{project}/secrets/{secret}/versions/{version}.
+            ignore_read: true
+          - name: privateKeyFile
+            type: String
+            description: The content of private key file in PEM format.
+            ignore_read: true
+          - name: privateKeyPassphraseSecret
+            type: String
+            description: Password if the private key file is encrypted.
+            ignore_read: true
+          - name: technologyType
+            type: String
+            description: The technology type of SnowflakeConnection.
+          - name: username
+            type: String
+            description: The username Oracle Goldengate uses to connect to Snowflake.
+      - name: updateTime
+        type: String
+        description: The time the resource was last updated.
+        output: true
+virtual_fields:
+  - name: "deletion_protection"
+    type: Boolean
+    default_value: true
+    description: "Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail."
+examples:
+  - name: 'oracledatabase_goldengate_connection_basic'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-basic-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_full'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      odb_network: 'projects/my-project/locations/us-east4/odbNetworks/my-network'
+      odb_subnet: 'projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet'
+      autonomous_database_id: 'my-autonomous-database'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      deletion_protection: false
+      project: '"oci-terraform-testing-prod"'
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-full-%s", acctest.RandString(t, 10))'
+      odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
+      odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+      autonomous_database_id: '"do-not-delete-tf-adb"'
+  - name: 'oracledatabase_goldengate_connection_mysql'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-mysql-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_postgresql'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-pg-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_redis'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-redis-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_kafka'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-kafka-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_iceberg'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-iceberg-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_snowflake'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-snowflake-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_goldengate_connection_jms'
+    primary_resource_id: 'connection'
+    vars:
+      project: 'my-project'
+      goldengate_connection_id: 'my-connection'
+      deletion_protection: true
+    ignore_read_extra:
+      - "deletion_protection"
+    test_vars_overrides:
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: false
+      goldengate_connection_id: 'fmt.Sprintf("tf-conn-jms-%s", acctest.RandString(t, 10))'
