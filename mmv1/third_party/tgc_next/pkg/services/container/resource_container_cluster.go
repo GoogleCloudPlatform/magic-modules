@@ -41,6 +41,30 @@ func Rfc3339TimeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return false
 }
 
+func durationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return false
+	}
+	oldDuration, err := time.ParseDuration(old)
+	if err != nil {
+		return false
+	}
+	newDuration, err := time.ParseDuration(new)
+	if err != nil {
+		return false
+	}
+	return oldDuration == newDuration
+}
+
+func validateDuration(v interface{}, k string) (ws []string, errors []error) {
+	s := v.(string)
+	_, err := time.ParseDuration(s)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q is not a valid duration: %s", k, err))
+	}
+	return
+}
+
 var (
 	instanceGroupManagerURL = regexp.MustCompile(fmt.Sprintf("projects/(%s)/zones/([a-z0-9-]*)/instanceGroupManagers/([^/]*)", verify.ProjectRegex))
 

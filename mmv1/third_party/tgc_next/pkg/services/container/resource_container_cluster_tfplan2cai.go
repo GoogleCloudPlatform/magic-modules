@@ -3,6 +3,7 @@ package container
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
