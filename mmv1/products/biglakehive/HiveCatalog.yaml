@@ -23,7 +23,6 @@ references:
 min_version: beta
 base_url: 'hive/v1beta/projects/{{project}}/catalogs'
 self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{name}}'
-immutable: false
 create_url: 'hive/v1beta/projects/{{project}}/catalogs?hiveCatalogId={{name}}&primary_location={{primary_location}}'
 update_verb: 'PATCH'
 update_mask: true
