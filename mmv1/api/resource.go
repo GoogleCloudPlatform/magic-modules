@@ -746,9 +746,15 @@ func (r Resource) ListResultDisplayNameKeyStrings() []string {
 	if slices.ContainsFunc(r.RootProperties(), func(p *Type) bool { return p.Name == "display_name" }) {
 		keys = append(keys, "display_name")
 	}
+	if slices.ContainsFunc(r.RootProperties(), func(p *Type) bool { return p.Name == "name" }) {
+		keys = append(keys, "name")
+	}
 	markers := regexp.MustCompile(`\{\{(\w+)\}\}`).FindAllStringSubmatch(r.IdFormat, -1)
 	if len(markers) > 0 {
-		keys = append(keys, markers[len(markers)-1][1])
+		tail := markers[len(markers)-1][1]
+		if !slices.Contains(keys, tail) {
+			keys = append(keys, tail)
+		}
 	}
 	return keys
 }
