@@ -1765,6 +1765,18 @@ linux_node_config {
 
 * `gcp_secret_manager_secret_uri` - (Optional) The Google Cloud Secret Manager secret version URI for storing the init script. Format: `projects/PROJECT_ID/secrets/SECRET_NAME/versions/VERSION`. The service account on the nodepool must have access to the secret version. Conflicts with `gcs_uri`.
 
+<a name="nested_node_pool"></a>The `node_pool` block supports:
+
+* `node_config` - (Optional) Parameters used in creating the node pool. Structure is [documented below](#nested_node_pool_node_config).
+
+<a name="nested_node_pool_node_config"></a>The `node_pool_node_config` block supports:
+
+* `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_node_pool_linux_node_config).
+
+<a name="nested_node_pool_linux_node_config"></a>The `node_pool_linux_node_config` block supports:
+
+* `custom_node_init` - (Optional) Custom node init settings. Structure is [documented below](#nested_custom_node_init).
+
 <a name="nested_containerd_config"></a>The `containerd_config` block supports:
 
 * `private_registry_access_config` (Optional) - Configuration for private container registries. There are two fields in this config:
@@ -1991,15 +2003,3 @@ For example, the following fields will show diffs if set in config:
 ## User Project Overrides
 
 This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).
-
-<a name="nested_node_pool"></a>The `node_pool` block supports:
-
-* `node_config` - (Optional) Parameters used in creating the node pool. Structure is [documented below](#nested_node_pool_node_config).
-
-<a name="nested_node_pool_node_config"></a>The `node_pool_node_config` block supports:
-
-* `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_node_pool_linux_node_config).
-
-<a name="nested_node_pool_linux_node_config"></a>The `node_pool_linux_node_config` block supports:
-
-* `custom_node_init` - (Optional) Custom node init settings. Structure is [documented below](#nested_custom_node_init).
