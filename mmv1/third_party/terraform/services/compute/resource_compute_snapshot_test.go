@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccComputeSnapshot_encryption(t *testing.T) {
@@ -217,6 +217,13 @@ func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
 		"project_id":    pid,
 	}
 
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagUser",
+		},
+	})
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -241,14 +248,6 @@ resource "google_tags_tag_value" "tag_value" {
   short_name = "tf-test-value-%{random_suffix}"
 }
 
-data "google_client_openid_userinfo" "me" {}
-
-resource "google_tags_tag_value_iam_member" "value_user" {
-  tag_value = google_tags_tag_value.tag_value.name
-  role      = "roles/resourcemanager.tagUser"
-  member    = "serviceAccount:${data.google_client_openid_userinfo.me.email}"
-}
-
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
@@ -271,7 +270,6 @@ resource "google_compute_snapshot" "foobar" {
       "${google_tags_tag_key.tag_key.id}" = "${google_tags_tag_value.tag_value.id}"
     }
   }
-  depends_on = [google_tags_tag_value_iam_member.value_user]
 }
 `, context)
 }
