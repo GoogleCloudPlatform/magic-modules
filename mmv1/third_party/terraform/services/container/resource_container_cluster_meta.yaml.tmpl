@@ -229,7 +229,6 @@ fields:
     api_field: 'maintenancePolicy.window.recurringWindow.recurrence'
   - field: 'maintenance_policy.recurring_window.start_time'
     api_field: 'maintenancePolicy.window.recurringWindow.window.startTime'
-{{- if ne $.TargetVersionName "ga" }}
   - field: 'maintenance_policy.recurring_maintenance_window.window_start_time.hours'
     api_field: 'maintenancePolicy.window.recurringMaintenanceWindow.windowStartTime.hours'
   - field: 'maintenance_policy.recurring_maintenance_window.window_start_time.minutes'
@@ -246,7 +245,6 @@ fields:
     api_field: 'maintenancePolicy.window.recurringMaintenanceWindow.delayUntil.day'
   - field: 'maintenance_policy.recurring_maintenance_window.recurrence'
     api_field: 'maintenancePolicy.window.recurringMaintenanceWindow.recurrence'
-{{- end }}
   - api_field: 'maintenancePolicy.disruptionBudget.lastDisruptionTime'
   - api_field: 'maintenancePolicy.disruptionBudget.lastMinorVersionDisruptionTime'  
   - api_field: 'maintenancePolicy.disruptionBudget.MinorVersionDisruptionInterval'
