@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
@@ -760,15 +761,19 @@ func resourceComputeSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParams
 	}
 }
 
-// resourceComputeSecurityPolicyRuleHash hashes security policy rules by priority.
-// Rules are uniquely identified by priority, so using priority as the hash
-// allows Terraform to correctly match old and new rules during plan/apply,
-// preventing unnecessary rule recreation when non-priority fields have subtle
-// differences between API response and config (e.g. empty defaults).
+// resourceComputeSecurityPolicyRuleHash hashes security policy rules by priority and action.
+// Using only priority causes hash collisions when two rules share the same priority (which
+// the API rejects, but which users may write transiently), causing schema.Set to silently
+// drop one rule and bypass the duplicate-priority validation in rulesCustomizeDiff.
+// Including action ensures distinct rules always produce distinct hashes while still
+// excluding volatile optional fields (description, preview, match sub-fields) that the
+// API may return as empty strings instead of nil, preventing unnecessary rule recreation.
 func resourceComputeSecurityPolicyRuleHash(v interface{}) int {
 	raw := v.(map[string]interface{})
-	// Use priority as the hash since it uniquely identifies a rule.
-	return raw["priority"].(int)
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%d-", raw["priority"].(int)))
+	buf.WriteString(fmt.Sprintf("%s-", raw["action"].(string)))
+	return tpgresource.Hashcode(buf.String())
 }
 
 func rulesCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
