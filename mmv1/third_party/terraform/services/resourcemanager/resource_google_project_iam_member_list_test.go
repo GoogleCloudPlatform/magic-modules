@@ -23,7 +23,6 @@ func TestAccProjectIamMemberList_basic(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			// List resources require Terraform >= 1.14.0 (terraform query / .tfquery.hcl).
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
@@ -88,7 +87,6 @@ func testAccProjectIamMemberListQuery(project string) string {
 list "google_project_iam_member" "test" {
   provider = google
 
-  # include_resource allows result.resource.* fields to be present in query output
   include_resource = true
 
   config {
