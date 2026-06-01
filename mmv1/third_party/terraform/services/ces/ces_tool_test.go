@@ -10,8 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck" // Add this import
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/ces"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
+	"github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccCESTool_cesToolClientFunctionBasicExample_update(t *testing.T) {
