@@ -58,6 +58,21 @@ func (listR *GoogleDnsRecordSetResource) Metadata(ctx context.Context, req resou
 	}
 }
 
+// validateListRequest validates the list request configuration
+func validateListRequest(data GoogleDnsRecordSetListModel) error {
+	// managed_zone is required
+	if data.ManagedZone.IsNull() || data.ManagedZone.IsUnknown() {
+		return fmt.Errorf("managed_zone is required for listing DNS record sets")
+	}
+
+	managedZone := data.ManagedZone.ValueString()
+	if managedZone == "" {
+		return fmt.Errorf("managed_zone cannot be empty")
+	}
+
+	return nil
+}
+
 func (listR *GoogleDnsRecordSetResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	var data GoogleDnsRecordSetListModel
 	diags := req.Config.Get(ctx, &data)
@@ -67,10 +82,16 @@ func (listR *GoogleDnsRecordSetResource) List(ctx context.Context, req list.List
 		return
 	}
 
+	if err := validateListRequest(data); err != nil {
+		diags.AddError("Invalid request parameters", err.Error())
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+
 	if listR.Client == nil {
 		diags = append(diags, frameworkdiag.NewErrorDiagnostic(
 			"provider not configured",
-			"The Google provider client is not available; ensure the prtovider is configured.",
+			"The Google provider client is not available; ensure the provider is configured.",
 		))
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
@@ -90,10 +111,14 @@ func (listR *GoogleDnsRecordSetResource) List(ctx context.Context, req list.List
 	}
 
 	stream.Results = func(push func(list.ListResult) bool) {
+		// Initialize diags within the stream function to capture errors from the API call
+		var streamDiags frameworkdiag.Diagnostics
+
 		err := ListDnsRecordSets(listR.Client, project, managedZone, recordName, recordType, func(rd *schema.ResourceData) error {
 			result := req.NewListResult(ctx)
 
 			if err := listR.SetResult(ctx, req.IncludeResource, &result, rd); err != nil {
+				streamDiags.AddError("Failed to set result", err.Error())
 				return err
 			}
 
@@ -104,13 +129,17 @@ func (listR *GoogleDnsRecordSetResource) List(ctx context.Context, req list.List
 		})
 
 		if err != nil {
-			diags.AddError("API Error", err.Error())
+			streamDiags.AddError("API Error listing DNS record sets", fmt.Sprintf("Failed to list DNS record sets in zone %q: %v", managedZone, err))
 			result := req.NewListResult(ctx)
-			result.Diagnostics = diags
+			result.Diagnostics = streamDiags
 			push(result)
+			return
 		}
 
-		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		// Only set stream diagnostics if there were errors during result processing
+		if streamDiags.HasError() {
+			stream.Results = list.ListResultsStreamDiagnostics(streamDiags)
+		}
 	}
 }
 
@@ -159,6 +188,15 @@ func flattenGoogleDNSRecordSetListItem(
 	return nil
 }
 
+var recordSetSchemaCache *schema.Resource
+
+func getRecordSetSchema() *schema.Resource {
+	if recordSetSchemaCache == nil {
+		recordSetSchemaCache = ResourceDnsRecordSet()
+	}
+	return recordSetSchemaCache
+}
+
 func ListDnsRecordSets(
 	config *transport_tpg.Config,
 	project string,
@@ -171,7 +209,13 @@ func ListDnsRecordSets(
 		return fmt.Errorf("provider client is not configured")
 	}
 
-	tempData := ResourceDnsRecordSet().Data(&terraform.InstanceState{})
+	// Validate required parameters
+	if managedZone == "" {
+		return fmt.Errorf("managed_zone is required for listing DNS record sets")
+	}
+
+	schema := getRecordSetSchema()
+	tempData := schema.Data(&terraform.InstanceState{})
 	if project != "" {
 		if err := tempData.Set("project", project); err != nil {
 			return fmt.Errorf("error setting project on temporary resource data: %w", err)
@@ -197,7 +241,7 @@ func ListDnsRecordSets(
 
 	return req.Pages(context.Background(), func(resp *googledns.ResourceRecordSetsListResponse) error {
 		for _, rrset := range resp.Rrsets {
-			rd := ResourceDnsRecordSet().Data(&terraform.InstanceState{})
+			rd := schema.Data(&terraform.InstanceState{})
 
 			if err := flattenGoogleDNSRecordSetListItem(rrset, rd, project, managedZone); err != nil {
 				return err
