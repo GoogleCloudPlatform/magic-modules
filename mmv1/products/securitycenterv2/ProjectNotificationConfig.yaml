@@ -38,6 +38,8 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_location_and_config_id.go.tmpl'
 # exluding resource_identity due to custom_import
 exclude_identity_generation: true
+include_in_tgc_next: true
+cai_asset_name_format: 'projects/{{project}}/locations/{{location}}/notificationConfigs/{{config_id}}'
 sweeper:
   url_substitutions:
     - region: "global"
