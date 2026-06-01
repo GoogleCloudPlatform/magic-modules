@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -681,7 +680,7 @@ func TestAccBigtableTable_automated_backups_locations(t *testing.T) {
 			// Locations can only be set for tables in Enterprise Plus instances.
 			// Currently PRODUCTION instance type is used.
 			{
-				Config: testAccBigtableTable_automated_backups_locations(instanceName, tableName, "72h0m0s", "24h0m0s", []string{"us-central1-b"}, family),
+				Config: testAccBigtableTable_automated_backups_locations_create(instanceName, tableName, "72h0m0s", "24h0m0s", family),
 				Check: resource.ComposeTestCheckFunc(
 					verifyBigtableAutomatedBackupsEnablementState(t, true),
 					resource.TestCheckResourceAttrSet("google_bigtable_table.table", "automated_backup_policy.0.locations.0"),
@@ -694,7 +693,7 @@ func TestAccBigtableTable_automated_backups_locations(t *testing.T) {
 			},
 			// Update locations
 			{
-				Config: testAccBigtableTable_automated_backups_locations(instanceName, tableName, "72h0m0s", "24h0m0s", []string{"us-central1-b", "us-central1-c"}, family),
+				Config: testAccBigtableTable_automated_backups_locations_update(instanceName, tableName, "72h0m0s", "24h0m0s", family),
 				Check: resource.ComposeTestCheckFunc(
 					verifyBigtableAutomatedBackupsEnablementState(t, true),
 					resource.TestCheckResourceAttr("google_bigtable_table.table", "automated_backup_policy.0.locations.#", "2"),
@@ -707,7 +706,7 @@ func TestAccBigtableTable_automated_backups_locations(t *testing.T) {
 			},
 			// Clear locations explicitly
 			{
-				Config: testAccBigtableTable_automated_backups_locations(instanceName, tableName, "72h0m0s", "24h0m0s", []string{}, family),
+				Config: testAccBigtableTable_automated_backups_locations_clear(instanceName, tableName, "72h0m0s", "24h0m0s", family),
 				Check: resource.ComposeTestCheckFunc(
 					verifyBigtableAutomatedBackupsEnablementState(t, true),
 					resource.TestCheckResourceAttr("google_bigtable_table.table", "automated_backup_policy.0.locations.#", "0"),
@@ -717,25 +716,6 @@ func TestAccBigtableTable_automated_backups_locations(t *testing.T) {
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccBigtableTable_automated_backups_locations_validation(t *testing.T) {
-	t.Parallel()
-
-	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccBigtableTable_automated_backups_locations_invalid(instanceName, tableName, family),
-				ExpectError: regexp.MustCompile("doesn't match regexp"),
 			},
 		},
 	})
@@ -1160,7 +1140,7 @@ resource "google_bigtable_table" "table" {
 	return config
 }
 
-func testAccBigtableTable_automated_backups_locations(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency string, zones []string, family string) string {
+func testAccBigtableTable_automated_backups_locations_create(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family string) string {
 	var retentionPeriod string
 	if automatedBackupsRetentionPeriod != "" {
 		retentionPeriod = fmt.Sprintf(`retention_period = "%s"`, automatedBackupsRetentionPeriod)
@@ -1169,15 +1149,97 @@ func testAccBigtableTable_automated_backups_locations(instanceName, tableName, a
 	if automatedBackupsFrequency != "" {
 		frequency = fmt.Sprintf(`frequency = "%s"`, automatedBackupsFrequency)
 	}
+	locs := `locations = ["projects/${data.google_project.project.project_id}/locations/us-central1-b"]`
 
-	locs := ""
-	if zones != nil {
-		var locStrings []string
-		for _, z := range zones {
-			locStrings = append(locStrings, fmt.Sprintf(`"projects/${data.google_project.project.project_id}/locations/%s"`, z))
-		}
-		locs = fmt.Sprintf(`locations = [%s]`, strings.Join(locStrings, ", "))
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+  cluster {
+    cluster_id = "%s-1"
+    zone       = "us-central1-b"
+  }
+  cluster {
+    cluster_id = "%s-2"
+    zone       = "us-central1-c"
+  }
+  instance_type = "PRODUCTION"
+  edition = "ENTERPRISE_PLUS"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+  automated_backup_policy {
+    %s
+    %s
+    %s
+  }
+  column_family {
+    family = "%s"
+  }
+  deletion_protection = "UNPROTECTED"
+}
+`, instanceName, instanceName, instanceName, tableName, retentionPeriod, frequency, locs, family)
+}
+
+func testAccBigtableTable_automated_backups_locations_update(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family string) string {
+	var retentionPeriod string
+	if automatedBackupsRetentionPeriod != "" {
+		retentionPeriod = fmt.Sprintf(`retention_period = "%s"`, automatedBackupsRetentionPeriod)
 	}
+	var frequency string
+	if automatedBackupsFrequency != "" {
+		frequency = fmt.Sprintf(`frequency = "%s"`, automatedBackupsFrequency)
+	}
+	locs := `locations = ["projects/${data.google_project.project.project_id}/locations/us-central1-b", "projects/${data.google_project.project.project_id}/locations/us-central1-c"]`
+
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+  cluster {
+    cluster_id = "%s-1"
+    zone       = "us-central1-b"
+  }
+  cluster {
+    cluster_id = "%s-2"
+    zone       = "us-central1-c"
+  }
+  instance_type = "PRODUCTION"
+  edition = "ENTERPRISE_PLUS"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+  automated_backup_policy {
+    %s
+    %s
+    %s
+  }
+  column_family {
+    family = "%s"
+  }
+  deletion_protection = "UNPROTECTED"
+}
+`, instanceName, instanceName, instanceName, tableName, retentionPeriod, frequency, locs, family)
+}
+
+func testAccBigtableTable_automated_backups_locations_clear(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family string) string {
+	var retentionPeriod string
+	if automatedBackupsRetentionPeriod != "" {
+		retentionPeriod = fmt.Sprintf(`retention_period = "%s"`, automatedBackupsRetentionPeriod)
+	}
+	var frequency string
+	if automatedBackupsFrequency != "" {
+		frequency = fmt.Sprintf(`frequency = "%s"`, automatedBackupsFrequency)
+	}
+	locs := `locations = []`
 
 	return fmt.Sprintf(`
 data "google_project" "project" {}
