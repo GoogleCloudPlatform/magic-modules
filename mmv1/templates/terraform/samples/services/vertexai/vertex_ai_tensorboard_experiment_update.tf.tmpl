@@ -9,6 +9,7 @@ resource "google_vertex_ai_tensorboard_experiment" "{{$.PrimaryResourceId}}" {
   description             = "updated description"
   tensorboard             = basename(google_vertex_ai_tensorboard.tensorboard.id)
   tensorboard_experiment_id = "{{index $.ResourceIdVars "tensorboardExperimentId"}}"
+  source                  = "a custom training job"
   labels                  = {
     "key" : "value-updated"
     "new-key" : "new-value"
