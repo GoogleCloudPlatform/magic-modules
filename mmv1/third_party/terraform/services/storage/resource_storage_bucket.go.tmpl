@@ -1268,9 +1268,6 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	// Create a bounded semaphore channel allowing up to 2000 uncompleted deletion tasks in the queue
 	sem := make(chan struct{}, 2000)
 
-	// Declare a separate WaitGroup specifically for long-running anywhere cache deletion
-	var cacheWg sync.WaitGroup
-
 	// delete anywhere caches
 	cacheList, _ := getAnywhereCacheListResult(d, config) // intentionally ignore errors on list- this requires extra permissions (storage.anywhereCaches.list) and we fall through if not permissioned
 	if len(cacheList) != 0 {
@@ -1281,14 +1278,12 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		}
 
 		log.Printf("[DEBUG] Attempting to destroy %v anywhere caches on bucket %q due to `force_destroy` being set to true.", len(cacheList), bucket)
-		cacheWg.Add(1)
-		go func() {
-			defer cacheWg.Done()
-			err := deleteAnywhereCacheIfAny(d, config)
+		wp.Submit(func() {
+			err = deleteAnywhereCacheIfAny(d, config)
 			if err != nil {
 				deleteCacheError = fmt.Errorf("error deleting the caches on the bucket %s : %w", bucket, err)
 			}
-		}()
+		})
 	}
 
 	// delete objects
@@ -1361,11 +1356,8 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	// Wait for all force-destroyed children (objects) to finish getting destroyed
+	// Wait for all force-destroyed children (objects, anywhereCaches) to finish getting destroyed
 	wp.StopWait()
-
-	// Wait for independent anywhere cache cleanup to finish
-	cacheWg.Wait()
 
 	// destroy bucket
 	err = retry.Retry(1*time.Minute, func() *retry.RetryError {
