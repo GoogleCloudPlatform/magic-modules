@@ -1284,11 +1284,11 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		cacheWg.Add(1)
 		go func() {
 			defer cacheWg.Done()
-			err = deleteAnywhereCacheIfAny(d, config)
+			err := deleteAnywhereCacheIfAny(d, config)
 			if err != nil {
 				deleteCacheError = fmt.Errorf("error deleting the caches on the bucket %s : %w", bucket, err)
 			}
-		})
+		}()
 	}
 
 	// delete objects
