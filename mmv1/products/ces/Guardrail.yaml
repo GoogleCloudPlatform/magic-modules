@@ -394,6 +394,8 @@ properties:
               including those that would normally be skipped.
       - name: defaultSettings
         type: NestedObject
+        send_empty_value: true
+        allow_empty_object: true
         description: Configuration for default system security settings.
         properties:
           - name: defaultPromptTemplate
