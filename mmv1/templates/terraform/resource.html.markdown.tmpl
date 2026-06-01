@@ -41,7 +41,7 @@ To get more information about {{$.Name}}, see:
     * [{{$title}}]({{$link}})
 		{{- end }}
 	{{- end }}
-	{{- if or (gt (len $.Examples) 0) (gt (len $.Samples) 0) }}
+	{{- if gt (len $.Samples) 0 }}
 {{ "" }}
 	{{- end }}
 {{- else }}
