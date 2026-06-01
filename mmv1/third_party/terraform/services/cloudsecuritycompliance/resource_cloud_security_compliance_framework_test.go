@@ -22,7 +22,7 @@ resource "google_cloud_security_compliance_framework" "example" {
   
   cloud_control_details {
 		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
-		major_revision_id = "1"
+		major_revision_id = "2"
     
     parameters {
       name = "location"
@@ -228,7 +228,7 @@ resource "google_cloud_security_compliance_framework" "example" {
   
   cloud_control_details {
 		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
-		major_revision_id = "1"
+		major_revision_id = "2"
     
     parameters {
       name = "location"

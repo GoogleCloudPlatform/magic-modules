@@ -9,7 +9,7 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   
   cloud_control_details {
 		name              = "projects/${data.google_project.project.number}/locations/global/cloudControls/builtin-assess-resource-availability"
-		major_revision_id = "1"
+		major_revision_id = "2"
     
     parameters {
       name = "location"
