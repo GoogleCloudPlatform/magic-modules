@@ -158,7 +158,7 @@ properties:
     type: Enum
     description: |
       The current migration job state.
-    default_from_api: true
+    output: true
     custom_flatten: templates/terraform/custom_flatten/dms_migration_job_state.go.tmpl
     enum_values:
       - NOT_STARTED
