@@ -51,6 +51,13 @@ examples:
       app_id: app-id
       guardrail_display_name: my-guardrail
       guardrail_id: guardrail-id
+  - name: ces_guardrail_llm_prompt_security_default_settings
+    primary_resource_id: ces_guardrail_llm_prompt_security_default_settings
+    vars:
+      app_display_name: my-app
+      app_id: app-id
+      guardrail_display_name: my-guardrail
+      guardrail_id: guardrail-id
   - name: ces_guardrail_code_callback
     primary_resource_id: ces_guardrail_code_callback
     vars:
