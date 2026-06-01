@@ -1,0 +1,7 @@
+resource "google_chronicle_parser_extension" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  logtype  = "CISCO_DHCP" # Unique log type to prevent CI parallel test collisions
+  validation_skipped = true
+  cbn_snippet = "ZHVtbXkgZXh0ZW5zaW9uIHNuaXBwZXQ=" # Base64 encoded "dummy extension snippet"
+}

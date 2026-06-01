@@ -1,0 +1,215 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ParserExtension
+description: |-
+  A parser extension allows customers to extend or customize the behavior of an existing prebuilt or custom parser.
+  It enables extracting additional fields from raw logs without modifying the base parser.
+references:
+  guides:
+    'Custom parsers overview': 'https://cloud.google.com/chronicle/docs/detection/custom-parsers-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.logTypes.parserExtensions'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parserExtensions
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parserExtensions/{{parserextension}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parserExtensions
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parserExtensions/{{parserextension}}
+autogen_status: UGFyc2VyRXh0ZW5zaW9u
+autogen_async: false
+examples:
+  - name: 'chronicle_parserextension_basic'
+    primary_resource_id: example
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    ignore_read_extra:
+      - 'state'
+      - 'state_last_changed_time'
+      - 'validation_report'
+      - 'extension_validation_report'
+  - name: 'chronicle_parserextension_full'
+    primary_resource_id: example
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    ignore_read_extra:
+      - 'state'
+      - 'state_last_changed_time'
+      - 'validation_report'
+      - 'extension_validation_report'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: logtype
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: parserextension
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: Output only. The server-generated ID of the parser extension.
+properties:
+  - name: cbnSnippet
+    type: String
+    description: Parser config could be a cbn snippet.
+  - name: createTime
+    type: String
+    description: The time the parser extension was created.
+    output: true
+  - name: dynamicParsing
+    type: NestedObject
+    description: A representation of a parser extension as dynamic parsing config.
+    properties:
+      - name: optedFields
+        type: Array
+        description: List of fields to be parsed.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: path
+              type: String
+              description: Path of the log field.
+            - name: sampleValue
+              type: String
+              description: Sample value of the log field.
+  - name: extensionValidationReport
+    type: String
+    output: true
+    description: |-
+      The latest extension
+      validation report for this extension.
+  - name: fieldExtractors
+    type: NestedObject
+    description: A representation of a parser extension as a set of field extractors.
+    properties:
+      - name: appendRepeatedFields
+        type: Boolean
+        description: |-
+          Whether to append repeated fields or not.
+          When false, repeated fields will be replaced.
+      - name: extractors
+        type: Array
+        description: List of FieldExtractors.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: destinationPath
+              type: String
+              description: |-
+                Path in generated event which is to be populated. This is required if the
+                FieldExtractor is used to specify the parser extension.
+            - name: fieldPath
+              type: String
+              description: |-
+                Field path could be a json path, xml path or csv column name
+                depending on log format. It refers to a section or substring in raw log.
+                This is required if the FieldExtractor is used to specify the parser
+                extension.
+            - name: preconditionOp
+              type: String
+              description: |-
+                Operator used for precondition.
+                Possible values:
+                EQUALS
+                NOT_EQUALS
+            - name: preconditionPath
+              type: String
+              description: |-
+                Precondition path could be a json path, xml path or csv column name
+                depending on log format. It refers to a section or substring in raw log.
+            - name: preconditionValue
+              type: String
+              description: Precondition value.
+            - name: value
+              type: String
+              description: Value to be mapped to the destination path directly.
+      - name: logFormat
+        type: String
+        description: |-
+          Possible values:
+          JSON
+          CSV
+          XML
+      - name: preprocessConfig
+        type: NestedObject
+        description: PreProcessConfig holds the GROK expression to extract the syslog header.
+        properties:
+          - name: grokRegex
+            type: String
+            description: |-
+              GROK Regex to extract the structured part of the log.
+              syntax documentation:
+              www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html
+          - name: target
+            type: String
+            description: |-
+              Target field name for the structured part of the log.
+              This should match a SEMANTIC identifier from the grok expression.
+      - name: transformedCbnSnippet
+        type: String
+        description: CBN snippet generated from field extractors.
+        output: true
+  - name: lastLiveTime
+    type: String
+    output: true
+    description: The time the config was last serving live traffic.
+  - name: log
+    type: String
+    description: Raw log used to assist the user in creation of augmentation.
+  - name: name
+    type: String
+    description: |-
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/logTypes/{logtype}/parserExtensions/{parserExtension}
+    output: true
+  - name: state
+    type: String
+    description: |-
+      The state of the parser extension
+      Possible values:
+      NEW
+      VALIDATING
+      LIVE
+      REJECTED
+      INTERNAL_ERROR
+      VALIDATED
+      ARCHIVED
+      VALIDATION_SKIPPED
+    output: true
+  - name: stateLastChangedTime
+    type: String
+    output: true
+    description: The time the config state was last changed.
+  - name: validationReport
+    type: String
+    description: The validation report generated during extension validation.
+    output: true
+  - name: validationSkipped
+    type: Boolean
+    description: |-
+      Flag to bypass parser extension validation.
+      If enabled, the parser extension won't be rejected during the validation
+      phase and validation will be skipped.
