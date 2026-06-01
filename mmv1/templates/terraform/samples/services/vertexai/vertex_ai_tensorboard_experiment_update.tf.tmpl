@@ -4,6 +4,7 @@ resource "google_vertex_ai_tensorboard" "tensorboard" {
 }
 
 resource "google_vertex_ai_tensorboard_experiment" "{{$.PrimaryResourceId}}" {
+  location                = "us-central1"
   display_name            = "sample experiment updated"
   description             = "updated description"
   tensorboard             = basename(google_vertex_ai_tensorboard.tensorboard.id)
