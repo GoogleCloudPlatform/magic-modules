@@ -691,6 +691,8 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
 func TestAccCESTool_cesToolDataStoreToolEngineSourceNoEngineExample(t *testing.T) {
 	t.Parallel()
 
+acctest.SkipIfVcr(t)
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
