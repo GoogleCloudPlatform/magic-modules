@@ -34,6 +34,9 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccAccessApprovalSettings/project'
 custom_code:
   pre_create: 'templates/terraform/update_mask.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/clear_project_access_approval_settings.go.tmpl'
