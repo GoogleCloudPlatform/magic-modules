@@ -36,9 +36,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-  constants: templates/terraform/custom_code/hypercomputecluster_cluster_utils.go.tmpl
-custom_diff:
-  - 'hypercomputeclusterClusterCustomizeDiff'
+  constants: templates/terraform/custom_code/hypercomputecluster_cluster_storage_resources_hash.go.tmpl
 autogen_status: Q2x1c3Rlcg==
 parameters:
   - name: location
@@ -181,6 +179,7 @@ properties:
     output: true
   - name: networkResources
     type: Map
+    required: true
     description: |-
       Network resources available to the cluster. Must contain at most one value.
       Keys specify the ID of the network resource by which it can be referenced
