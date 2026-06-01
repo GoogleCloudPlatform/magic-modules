@@ -75,6 +75,18 @@ examples:
     skip_test: true  # temporary b/484137930
     vars:
       policy_name: 'my-mcp-policy'
+  - name: 'network_security_authz_policy_with_network_rules'
+    primary_resource_id: 'default'
+    min_version: beta
+    vars:
+      resource_name: 'authz-policy'
+      gateway_name: 'swp-gateway'
+      network_name: 'lb-network'
+      subnet_name: 'backend-subnet'
+      proxy_subnet_name: 'proxy-only-subnet'
+      swp_policy: 'swp-policy'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 parameters:
   - name: 'name'
     type: String
@@ -675,6 +687,708 @@ properties:
                                     type: Boolean
                                     description: |
                                       Specifies that the string match should be case insensitive.
+            - name: 'notOperations'
+              type: Array
+              description: |
+                Describes the negated properties of the targets of a request. Matches requests for operations that do not match the criteria specified in this field. At least one of operations or notOperations must be specified. Limited to 1 not_operation.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'headerSet'
+                    type: NestedObject
+                    description: |
+                      A list of headers to match against in http header.
+                    properties:
+                      - name: 'headers'
+                        type: Array
+                        description: |
+                          A list of headers to match against in http header. The match can be one of exact, prefix, suffix, or contains (substring match). The match follows AND semantics which means all the headers must match. Matches are always case sensitive unless the ignoreCase is set. Limited to 10 matches.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: 'name'
+                              type: String
+                              description: |
+                                Specifies the name of the header in the request.
+                            - name: 'value'
+                              type: NestedObject
+                              description: |
+                                Specifies how the header match will be performed.
+                              properties:
+                                - name: 'ignoreCase'
+                                  type: Boolean
+                                  description: |
+                                    If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                                - name: 'exact'
+                                  type: String
+                                  description: |
+                                    The input string must match exactly the string specified here.
+                                    Examples:
+                                    * abc only matches the value abc.
+                                - name: 'prefix'
+                                  type: String
+                                  description: |
+                                    The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                    Examples:
+                                    * abc matches the value abc.xyz
+                                - name: 'suffix'
+                                  type: String
+                                  description: |
+                                    The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                    Examples:
+                                    * abc matches the value xyz.abc
+                                - name: 'contains'
+                                  type: String
+                                  description: |
+                                    The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                                    Examples:
+                                    * abc matches the value xyz.abc.def
+                  - name: 'hosts'
+                    type: Array
+                    description: |
+                      A list of HTTP Hosts to match against. The match can be one of exact, prefix, suffix, or contains (substring match). Matches are always case sensitive unless the ignoreCase is set.
+                      Limited to 10 matches.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'ignoreCase'
+                          type: Boolean
+                          description: |
+                            If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                        - name: 'exact'
+                          type: String
+                          description: |
+                            The input string must match exactly the string specified here.
+                            Examples:
+                            * abc only matches the value abc.
+                        - name: 'prefix'
+                          type: String
+                          description: |
+                            The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value abc.xyz
+                        - name: 'suffix'
+                          type: String
+                          description: |
+                            The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc
+                        - name: 'contains'
+                          type: String
+                          description: |
+                            The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc.def
+                  - name: 'paths'
+                    type: Array
+                    description: |
+                      A list of paths to match against. The match can be one of exact, prefix, suffix, or contains (substring match). Matches are always case sensitive unless the ignoreCase is set.
+                      Limited to 10 matches.
+                      Note that this path match includes the query parameters. For gRPC services, this should be a fully-qualified name of the form /package.service/method.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'ignoreCase'
+                          type: Boolean
+                          description: |
+                            If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                        - name: 'exact'
+                          type: String
+                          description: |
+                            The input string must match exactly the string specified here.
+                            Examples:
+                            * abc only matches the value abc.
+                        - name: 'prefix'
+                          type: String
+                          description: |
+                            The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value abc.xyz
+                        - name: 'suffix'
+                          type: String
+                          description: |
+                            The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc
+                        - name: 'contains'
+                          type: String
+                          description: |
+                            The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc.def
+                  - name: 'methods'
+                    type: Array
+                    description: |
+                      A list of HTTP methods to match against. Each entry must be a valid HTTP method name (GET, PUT, POST, HEAD, PATCH, DELETE, OPTIONS). It only allows exact match and is always case sensitive.
+                    item_type:
+                      type: String
+        - name: 'when'
+          type: String
+          description: |
+            CEL expression that describes the conditions to be satisfied for the action. The result of the CEL expression is ANDed with the from and to. Refer to the CEL language reference for a list of available attributes.
+  - name: 'networkRules'
+    type: Array
+    description: |
+      A list of authorization HTTP rules to match against the incoming request.A policy match occurs when at least one HTTP rule matches the request or when no HTTP rules are specified in the policy. At least one HTTP Rule is required for Allow or Deny Action.
+      Limited to 5 rules.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'from'
+          type: NestedObject
+          description: |
+            Describes properties of one or more sources of a request.
+          properties:
+            - name: 'sources'
+              type: Array
+              description: |
+                Describes the properties of a request's sources. At least one of sources or notSources must be specified. Limited to 1 source. A match occurs when ANY source (in sources or notSources) matches the request. Within a single source, the match follows AND semantics across fields and OR semantics within a single field, i.e. a match occurs when ANY principal matches AND ANY ipBlocks match.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'ipBlocks'
+                    type: Array
+                    description: |
+                      A list of IP addresses or IP address ranges to match against the source IP address of the request. Limited to 10 ipBlocks per Authorization Policy
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'prefix'
+                          type: String
+                          description: The address prefix.
+                          required: true
+                        - name: 'length'
+                          type: Integer
+                          description: The length of the address range.
+                          required: true
+                  - name: 'principals'
+                    type: Array
+                    description: |
+                      A list of identities derived from the client's certificate. This field will not match on a request unless mutual TLS is enabled for the Forwarding rule or Gateway. Each identity is a string whose value is matched against the URI SAN, or DNS SAN or the subject field in the client's certificate. The match can be exact, prefix, suffix or a substring match. One of exact, prefix, suffix or contains must be specified.
+                      Limited to 5 principals.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'principalSelector'
+                          type: Enum
+                          description: |
+                            An enum to decide what principal value the principal rule will match against. If not specified, the PrincipalSelector is CLIENT_CERT_URI_SAN.
+                          default_value: "CLIENT_CERT_URI_SAN"
+                          enum_values:
+                            - 'PRINCIPAL_SELECTOR_UNSPECIFIED'
+                            - 'CLIENT_CERT_URI_SAN'
+                            - 'CLIENT_CERT_DNS_NAME_SAN'
+                            - 'CLIENT_CERT_COMMON_NAME'
+                        - name: 'principal'
+                          type: NestedObject
+                          description: |
+                            Required. A non-empty string whose value is matched against the principal value based on the principalSelector.
+                            Only exact match can be applied for CLIENT_CERT_URI_SAN, CLIENT_CERT_DNS_NAME_SAN, CLIENT_CERT_COMMON_NAME selectors.
+                          properties:
+                            - name: 'ignoreCase'
+                              type: Boolean
+                              description: |
+                                If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                            - name: 'exact'
+                              type: String
+                              description: |
+                                The input string must match exactly the string specified here.
+                                Examples:
+                                * abc only matches the value abc.
+                            - name: 'prefix'
+                              type: String
+                              description: |
+                                The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value abc.xyz
+                            - name: 'suffix'
+                              type: String
+                              description: |
+                                The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value xyz.abc
+                            - name: 'contains'
+                              type: String
+                              description: |
+                                The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value xyz.abc.def
+                        - name: 'ignoreCase'
+                          type: Boolean
+                          description: |
+                            If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                          deprecation_message: '`principals.ignore_case` is deprecated and will be removed in a future major release. Use `principals.principal.ignore_case` instead.'
+                        - name: 'exact'
+                          type: String
+                          description: |
+                            The input string must match exactly the string specified here.
+                            Examples:
+                            * abc only matches the value abc.
+                          deprecation_message: '`principals.exact` is deprecated and will be removed in a future major release. Use `principals.principal.exact` instead.'
+                        - name: 'prefix'
+                          type: String
+                          description: |
+                            The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value abc.xyz
+                          deprecation_message: '`principals.prefix` is deprecated and will be removed in a future major release. Use `principals.principal.prefix` instead.'
+                        - name: 'suffix'
+                          type: String
+                          description: |
+                            The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc
+                          deprecation_message: '`principals.suffix` is deprecated and will be removed in a future major release. Use `principals.principal.suffix` instead.'
+                        - name: 'contains'
+                          type: String
+                          description: |
+                            The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc.def
+                          deprecation_message: '`principals.contains` is deprecated and will be removed in a future major release. Use `principals.principal.contains` instead.'
+                  - name: 'resources'
+                    type: Array
+                    description: |
+                      A list of resources to match against the resource of the source VM of a request.
+                      Limited to 5 resources.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'tagValueIdSet'
+                          type: NestedObject
+                          description: |
+                            A list of resource tag value permanent IDs to match against the resource manager tags value associated with the source VM of a request.
+                          properties:
+                            - name: 'ids'
+                              type: Array
+                              description: |
+                                A list of resource tag value permanent IDs to match against the resource manager tags value associated with the source VM of a request. The match follows AND semantics which means all the ids must match.
+                                Limited to 5 matches.
+                              item_type:
+                                type: String
+                        - name: 'iamServiceAccount'
+                          type: NestedObject
+                          description: |
+                            An IAM service account to match against the source service account of the VM sending the request.
+                          properties:
+                            - name: 'ignoreCase'
+                              type: Boolean
+                              description: |
+                                If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                            - name: 'exact'
+                              type: String
+                              description: |
+                                The input string must match exactly the string specified here.
+                                Examples:
+                                * abc only matches the value abc.
+                            - name: 'prefix'
+                              type: String
+                              description: |
+                                The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value abc.xyz
+                            - name: 'suffix'
+                              type: String
+                              description: |
+                                The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value xyz.abc
+                            - name: 'contains'
+                              type: String
+                              description: |
+                                The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value xyz.abc.def
+            - name: 'notSources'
+              type: Array
+              description: |
+                Describes the negated properties of request sources. Matches requests from sources that do not match the criteria specified in this field. At least one of sources or notSources must be specified. Limited to 1 not_source.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'ipBlocks'
+                    type: Array
+                    description: |
+                      A list of IP addresses or IP address ranges to match against the source IP address of the request. Limited to 10 ipBlocks per Authorization Policy
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'prefix'
+                          type: String
+                          description: The address prefix.
+                          required: true
+                        - name: 'length'
+                          type: Integer
+                          description: The length of the address range.
+                          required: true
+                  - name: 'principals'
+                    type: Array
+                    description: |
+                      A list of identities derived from the client's certificate. This field will not match on a request unless mutual TLS is enabled for the Forwarding rule or Gateway. Each identity is a string whose value is matched against the URI SAN, or DNS SAN or the subject field in the client's certificate. The match can be exact, prefix, suffix or a substring match. One of exact, prefix, suffix or contains must be specified.
+                      Limited to 5 principals.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'principalSelector'
+                          type: Enum
+                          description: |
+                            An enum to decide what principal value the principal rule will match against. If not specified, the PrincipalSelector is CLIENT_CERT_URI_SAN.
+                          default_value: "CLIENT_CERT_URI_SAN"
+                          enum_values:
+                            - 'PRINCIPAL_SELECTOR_UNSPECIFIED'
+                            - 'CLIENT_CERT_URI_SAN'
+                            - 'CLIENT_CERT_DNS_NAME_SAN'
+                            - 'CLIENT_CERT_COMMON_NAME'
+                        - name: 'principal'
+                          type: NestedObject
+                          description: |
+                            Required. A non-empty string whose value is matched against the principal value based on the principalSelector.
+                            Only exact match can be applied for CLIENT_CERT_URI_SAN, CLIENT_CERT_DNS_NAME_SAN, CLIENT_CERT_COMMON_NAME selectors.
+                          properties:
+                            - name: 'ignoreCase'
+                              type: Boolean
+                              description: |
+                                If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                            - name: 'exact'
+                              type: String
+                              description: |
+                                The input string must match exactly the string specified here.
+                                Examples:
+                                * abc only matches the value abc.
+                            - name: 'prefix'
+                              type: String
+                              description: |
+                                The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value abc.xyz
+                            - name: 'suffix'
+                              type: String
+                              description: |
+                                The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value xyz.abc
+                            - name: 'contains'
+                              type: String
+                              description: |
+                                The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value xyz.abc.def
+                        - name: 'ignoreCase'
+                          type: Boolean
+                          description: |
+                            If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                          deprecation_message: '`principals.ignore_case` is deprecated and will be removed in a future major release. Use `principals.principal.ignore_case` instead.'
+                        - name: 'exact'
+                          type: String
+                          description: |
+                            The input string must match exactly the string specified here.
+                            Examples:
+                            * abc only matches the value abc.
+                          deprecation_message: '`principals.exact` is deprecated and will be removed in a future major release. Use `principals.principal.exact` instead.'
+                        - name: 'prefix'
+                          type: String
+                          description: |
+                            The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value abc.xyz
+                          deprecation_message: '`principals.prefix` is deprecated and will be removed in a future major release. Use `principals.principal.prefix` instead.'
+                        - name: 'suffix'
+                          type: String
+                          description: |
+                            The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc
+                          deprecation_message: '`principals.suffix` is deprecated and will be removed in a future major release. Use `principals.principal.suffix` instead.'
+                        - name: 'contains'
+                          type: String
+                          description: |
+                            The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc.def
+                          deprecation_message: '`principals.contains` is deprecated and will be removed in a future major release. Use `principals.principal.contains` instead.'
+                  - name: 'resources'
+                    type: Array
+                    description: |
+                      A list of resources to match against the resource of the source VM of a request.
+                      Limited to 5 resources.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'tagValueIdSet'
+                          type: NestedObject
+                          description: |
+                            A list of resource tag value permanent IDs to match against the resource manager tags value associated with the source VM of a request.
+                          properties:
+                            - name: 'ids'
+                              type: Array
+                              description: |
+                                A list of resource tag value permanent IDs to match against the resource manager tags value associated with the source VM of a request. The match follows AND semantics which means all the ids must match.
+                                Limited to 5 matches.
+                              item_type:
+                                type: String
+                        - name: 'iamServiceAccount'
+                          type: NestedObject
+                          description: |
+                            An IAM service account to match against the source service account of the VM sending the request.
+                          properties:
+                            - name: 'ignoreCase'
+                              type: Boolean
+                              description: |
+                                If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                            - name: 'exact'
+                              type: String
+                              description: |
+                                The input string must match exactly the string specified here.
+                                Examples:
+                                * abc only matches the value abc.
+                            - name: 'prefix'
+                              type: String
+                              description: |
+                                The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value abc.xyz
+                            - name: 'suffix'
+                              type: String
+                              description: |
+                                The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value xyz.abc
+                            - name: 'contains'
+                              type: String
+                              description: |
+                                The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                                Examples:
+                                * abc matches the value xyz.abc.def
+        - name: 'to'
+          type: NestedObject
+          description: |
+            Describes properties of one or more targets of a request
+          properties:
+            - name: 'operations'
+              type: Array
+              description: |
+                Describes properties of one or more targets of a request. At least one of operations or notOperations must be specified. Limited to 1 operation. A match occurs when ANY operation (in operations or notOperations) matches. Within an operation, the match follows AND semantics across fields and OR semantics within a field, i.e. a match occurs when ANY path matches AND ANY header matches and ANY method matches.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'headerSet'
+                    type: NestedObject
+                    description: |
+                      A list of headers to match against in http header.
+                    properties:
+                      - name: 'headers'
+                        type: Array
+                        description: |
+                          A list of headers to match against in http header. The match can be one of exact, prefix, suffix, or contains (substring match). The match follows AND semantics which means all the headers must match. Matches are always case sensitive unless the ignoreCase is set. Limited to 10 matches.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: 'name'
+                              type: String
+                              description: |
+                                Specifies the name of the header in the request.
+                            - name: 'value'
+                              type: NestedObject
+                              description: |
+                                Specifies how the header match will be performed.
+                              properties:
+                                - name: 'ignoreCase'
+                                  type: Boolean
+                                  description: |
+                                    If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                                - name: 'exact'
+                                  type: String
+                                  description: |
+                                    The input string must match exactly the string specified here.
+                                    Examples:
+                                    * abc only matches the value abc.
+                                - name: 'prefix'
+                                  type: String
+                                  description: |
+                                    The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                    Examples:
+                                    * abc matches the value abc.xyz
+                                - name: 'suffix'
+                                  type: String
+                                  description: |
+                                    The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                                    Examples:
+                                    * abc matches the value xyz.abc
+                                - name: 'contains'
+                                  type: String
+                                  description: |
+                                    The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                                    Examples:
+                                    * abc matches the value xyz.abc.def
+                  - name: 'hosts'
+                    type: Array
+                    description: |
+                      A list of HTTP Hosts to match against. The match can be one of exact, prefix, suffix, or contains (substring match). Matches are always case sensitive unless the ignoreCase is set.
+                      Limited to 10 matches.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'ignoreCase'
+                          type: Boolean
+                          description: |
+                            If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                        - name: 'exact'
+                          type: String
+                          description: |
+                            The input string must match exactly the string specified here.
+                            Examples:
+                            * abc only matches the value abc.
+                        - name: 'prefix'
+                          type: String
+                          description: |
+                            The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value abc.xyz
+                        - name: 'suffix'
+                          type: String
+                          description: |
+                            The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc
+                        - name: 'contains'
+                          type: String
+                          description: |
+                            The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc.def
+                  - name: 'paths'
+                    type: Array
+                    description: |
+                      A list of paths to match against. The match can be one of exact, prefix, suffix, or contains (substring match). Matches are always case sensitive unless the ignoreCase is set.
+                      Limited to 10 matches.
+                      Note that this path match includes the query parameters. For gRPC services, this should be a fully-qualified name of the form /package.service/method.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'ignoreCase'
+                          type: Boolean
+                          description: |
+                            If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                        - name: 'exact'
+                          type: String
+                          description: |
+                            The input string must match exactly the string specified here.
+                            Examples:
+                            * abc only matches the value abc.
+                        - name: 'prefix'
+                          type: String
+                          description: |
+                            The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value abc.xyz
+                        - name: 'suffix'
+                          type: String
+                          description: |
+                            The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc
+                        - name: 'contains'
+                          type: String
+                          description: |
+                            The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc.def
+                  - name: 'methods'
+                    type: Array
+                    description: |
+                      A list of HTTP methods to match against. Each entry must be a valid HTTP method name (GET, PUT, POST, HEAD, PATCH, DELETE, OPTIONS). It only allows exact match and is always case sensitive.
+                    item_type:
+                      type: String
+                  - name: 'mcp'
+                    type: NestedObject
+                    description: Defines the MCP protocol attributes to match on. MCP based match is allowed only when the AuthzPolicy points to an AgentGateway.
+                    properties:
+                      - name: 'baseProtocolMethodsOption'
+                        type: Enum
+                        description: |
+                          If specified, matches on the MCP protocol’s non-access specific methods namely: * initialize/ * completion/ * logging/ * notifications/ * ping
+                        default_value: "SKIP_BASE_PROTOCOL_METHODS"
+                        enum_values:
+                          - 'SKIP_BASE_PROTOCOL_METHODS'
+                          - 'MATCH_BASE_PROTOCOL_METHODS'
+                      - name: 'methods'
+                        type: Array
+                        description: |
+                          Defines a set of MCP methods and associated parameters to match on. It is recommended to use this field to match on tools, prompts and resource accesses while setting the includeBaseProtocolMethods to true to match on all the other MCP protocol methods.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: 'name'
+                              type: String
+                              required: true
+                              description: |
+                                The MCP method to match against. Allowed values are as follows:
+                                1) “tools”, “prompts”, “resources” - these will match against all sub methods under the respective methods.
+                                2) “prompts/list”, “tools/list”, “resources/list”, “resources/templates/list”
+                                3) “prompts/get”, “tools/call”, “resources/subscribe”, “resources/unsubscribe”, “resources/read”
+                                Params cannot be specified for categories 1) and 2).
+                            - name: 'params'
+                              type: Array
+                              description: |
+                                MCP method parameters to match against.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'exact'
+                                    type: String
+                                    description: |
+                                      An exact match on the MCP method parameter name.
+                                  - name: 'prefix'
+                                    type: String
+                                    description: |
+                                      A prefix match on the MCP method parameter name.
+                                  - name: 'suffix'
+                                    type: String
+                                    description: |
+                                      A suffix match on the MCP method parameter name.
+                                  - name: 'contains'
+                                    type: String
+                                    description: |
+                                      A substring match on the MCP method parameter name.
+                                  - name: 'ignoreCase'
+                                    type: Boolean
+                                    description: |
+                                      Specifies that the string match should be case insensitive.
+                  - name: 'snis'
+                    type: Array
+                    description: |
+                      Optional. A list of SNIs to match against. The match can be one of exact, prefix, suffix, or contains (substring match). If there is no SNI (i.e. plaintext HTTP traffic), the request will be denied. Matches are always case sensitive unless the ignoreCase is set. Limited to 10 SNIs per Authorization Policy.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'ignoreCase'
+                          type: Boolean
+                          description: |
+                            If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
+                        - name: 'exact'
+                          type: String
+                          description: |
+                            The input string must match exactly the string specified here.
+                            Examples:
+                            * abc only matches the value abc.
+                        - name: 'prefix'
+                          type: String
+                          description: |
+                            The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value abc.xyz
+                        - name: 'suffix'
+                          type: String
+                          description: |
+                            The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc
+                        - name: 'contains'
+                          type: String
+                          description: |
+                            The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
+                            Examples:
+                            * abc matches the value xyz.abc.def
             - name: 'notOperations'
               type: Array
               description: |
