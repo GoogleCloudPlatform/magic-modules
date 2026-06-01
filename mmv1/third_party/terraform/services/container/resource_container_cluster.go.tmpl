@@ -281,12 +281,12 @@ func ResourceContainerCluster() *schema.Resource {
 		SchemaVersion: 2,
 		MigrateState:  resourceContainerClusterMigrateState,
 		StateUpgraders: []schema.StateUpgrader{
-	{
-		Type:    resourceContainerClusterResourceV1().CoreConfigSchema().ImpliedType(),
-		Upgrade: ResourceContainerClusterUpgradeV1,
-		Version: 1,
-	},
-	},
+			{
+				Type:    resourceContainerClusterResourceV1().CoreConfigSchema().ImpliedType(),
+				Upgrade: ResourceContainerClusterUpgradeV1,
+				Version: 1,
+			},
+		},
 
 		Importer: &schema.ResourceImporter{
 			State: resourceContainerClusterStateImporter,
@@ -3926,7 +3926,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 {{- end }}
 
-	{{ if ne $.TargetVersionName "ga" }}
+{{ if ne $.TargetVersionName "ga" }}
 	if err := d.Set("managed_opentelemetry_config", flattenManagedOpenTelemetryConfig(cluster.ManagedOpentelemetryConfig)); err != nil {
 		return err
 	}
@@ -5142,7 +5142,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s secret manager csi add-on has been updated", d.Id())
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("secret_sync_config") {
 		req := &container.UpdateClusterRequest{}
 		if c, ok := d.GetOk("secret_sync_config"); !ok {
@@ -5162,7 +5161,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 		}
 	}
-	{{- end }}
 
 	if d.HasChange("workload_identity_config") {
 		// Because GKE uses a non-RESTful update function, when removing the
@@ -6064,7 +6062,7 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	}
 {{- end }}
 
-	{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.IstioConfig = &container.IstioConfig{
@@ -6311,35 +6309,6 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 			DisruptionBudget: budget,
 			ResourceVersion: resourceVersion,
 		}
-	}
-	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
-		rmw := recurringMaintenanceWindow.([]interface{})[0].(map[string]interface{})
-		duration, _ := time.ParseDuration(rmw["window_duration"].(string))
-
-		policy := &container.MaintenancePolicy{
-			Window: &container.MaintenanceWindow{
-				MaintenanceExclusions: exclusions,
-				RecurringMaintenanceWindow: &container.RecurringMaintenanceWindow{
-					WindowStartTime: &container.TimeOfDay{
-						Hours:   int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["hours"].(int)),
-						Minutes: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["minutes"].(int)),
-						Seconds: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["seconds"].(int)),
-					},
-					WindowDuration: fmt.Sprintf("%ds", int(duration.Seconds())),
-					Recurrence:     rmw["recurrence"].(string),
-				},
-			},
-			ResourceVersion: resourceVersion,
-		}
-
-		if _, ok := rmw["delay_until"]; ok && len(rmw["delay_until"].([]interface{})) == 1 {
-			policy.Window.RecurringMaintenanceWindow.DelayUntil = &container.Date{
-				Year:  int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["year"].(int)),
-				Month: int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["month"].(int)),
-				Day:   int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["day"].(int)),
-			}
-		}
-		return policy
 	}
 	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
 		rmw := recurringMaintenanceWindow.([]interface{})[0].(map[string]interface{})
