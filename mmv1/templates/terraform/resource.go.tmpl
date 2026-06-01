@@ -319,11 +319,6 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
-		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
-    }
-{{- end }}
 
     log.Printf("[DEBUG] Creating new {{ $.Name -}}: %#v", obj)
 {{- if $.NestedQuery -}}
@@ -587,11 +582,6 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if err != nil {
             return nil, err
         }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
-            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
-        }
-{{- end }}
 
         billingProject := ""
 
@@ -691,11 +681,6 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
-		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
-    }
-{{- end }}
 
     billingProject := ""
 
@@ -983,11 +968,6 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
-        return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
-    }
-{{- end }}
 
     log.Printf("[DEBUG] Updating {{ $.Name }} %q: %#v", d.Id(), obj)
 	headers := make(http.Header)
@@ -1094,11 +1074,6 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         if err != nil {
             return err
         }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(getUrl, "{{"{{"}}location{{"}}"}}") {
-            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", getUrl)
-        }
-{{- end }}
 {{		                if $.SupportsIndirectUserProjectOverride -}}
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
             billingProject = parts[1]
@@ -1189,11 +1164,6 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         if err != nil {
             return err
         }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
-            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
-        }
-{{- end }}
 
         headers := make(http.Header)
 {{                  if $.CustomCode.PreUpdate -}}
@@ -1337,11 +1307,6 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
-		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
-    }
-{{- end }}
     {{/*If the deletion of the object requires sending a request body, the custom code will set 'obj' */}}
     var obj map[string]interface{}
     {{- if and $.NestedQuery $.NestedQuery.ModifyByPatch }}
