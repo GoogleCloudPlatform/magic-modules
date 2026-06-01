@@ -258,7 +258,6 @@ func ResourceDnsRecordSet() *schema.Resource {
 			"type": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Description: `The DNS record set type.`,
 			},
 

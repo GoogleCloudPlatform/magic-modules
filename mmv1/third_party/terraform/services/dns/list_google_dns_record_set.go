@@ -7,6 +7,7 @@ import (
 
 	frameworkdiag "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -47,6 +48,14 @@ func NewGoogleDnsRecordSetListResource() list.ListResource {
 		{Name: "type", Kind: tpgresource.ListConfigKindString, Optional: true},
 	}
 	return listR
+}
+
+func (listR *GoogleDnsRecordSetResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	listR.ListResourceMetadata.Metadata(ctx, req, resp)
+
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (listR *GoogleDnsRecordSetResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
