@@ -41,7 +41,7 @@ To get more information about {{$.Name}}, see:
     * [{{$title}}]({{$link}})
 		{{- end }}
 	{{- end }}
-	{{- if or (gt (len $.Examples) 0) (gt (len $.Samples) 0) }}
+	{{- if gt (len $.Samples) 0 }}
 {{ "" }}
 	{{- end }}
 {{- else }}
@@ -62,26 +62,6 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 ~> **Note:**  All arguments marked as write-only values will not be stored in the state: {{ $.WriteOnlyPropsToString }}.
 [Read more about Write-only Arguments](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
 {{ end }}
-{{- if $.Examples }}
-	{{- range $e := $.Examples }}
-		{{- if not $e.ExcludeDocs }}
-			{{- if not (or $e.ExcludeTest $e.TestEnvVars) }}
-<div class = "oics-button" style="float: right; margin: 0 0 -15px">
-  <a href="{{ $e.OiCSLink }}" target="_blank">
-    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
-  </a>
-</div>
-			{{- end }}
-## Example Usage - {{ title (camelize $e.Name "upper" )}}
-
-
-```hcl
-{{ $e.DocumentationHCLText -}}
-```
-		{{- end }}
-	{{- end }}
-{{- end }}
-
 {{- if $.Samples }}
 	{{- range $sample := $.Samples }}
 		{{- range $index, $step := $sample.Steps }}

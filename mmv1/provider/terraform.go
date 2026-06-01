@@ -223,18 +223,6 @@ func (t *Terraform) GenerateResourceMetadataFile(object api.Resource, targetFile
 	templateData.GenerateMetadataFile(targetFilePath, object)
 }
 
-func (t *Terraform) hasEligibleExample(object api.Resource) bool {
-	for _, example := range object.Examples {
-		if example.ExcludeTest {
-			continue
-		}
-		if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
-			return true
-		}
-	}
-	return false
-}
-
 func (t *Terraform) hasEligibleSample(object api.Resource) bool {
 	for _, sample := range object.Samples {
 		if sample.ExcludeTest {
@@ -247,23 +235,9 @@ func (t *Terraform) hasEligibleSample(object api.Resource) bool {
 	return false
 }
 
-func (t *Terraform) GenerateResourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
-	if !t.hasEligibleExample(object) {
-		return
-	}
-
-	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
-	templateData.GenerateTestFileLegacy(targetFilePath, object)
-}
-
 func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
-	if object.Samples != nil && object.Examples != nil {
-		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
-	}
 	if object.Examples != nil {
-		t.GenerateResourceTestsLegacy(object, templateData, outputFolder)
-		return
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 
 	if !t.hasEligibleSample(object) {
@@ -276,8 +250,8 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 }
 
 func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder string) {
-	if object.Samples != nil && object.Examples != nil {
-		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	if object.Examples != nil {
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 	if object.Samples == nil || !t.hasEligibleSample(object) {
 		return
@@ -328,24 +302,9 @@ func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData
 	}
 }
 
-func (t *Terraform) GenerateSingularDataSourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
-	if !object.ShouldGenerateSingularDataSourceTests() {
-		return
-	}
-
-	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
-	templateData.GenerateDataSourceTestFileLegacy(targetFilePath, object)
-
-}
-
 func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
-	if object.Samples != nil && object.Examples != nil {
-		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
-	}
 	if object.Examples != nil {
-		t.GenerateSingularDataSourceTestsLegacy(object, templateData, outputFolder)
-		return
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 
 	if !object.ShouldGenerateSingularDataSourceTests() {
@@ -404,38 +363,9 @@ func (t *Terraform) GenerateOperationFile(object api.Resource, targetFilePath st
 	templateData.GenerateOperationFile(targetFilePath, object)
 }
 
-// Generate the IAM policy for this object. This is used to query and test
-// IAM policies separately from the resource itself
-func (t *Terraform) GenerateIamPolicyLegacy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
-	if object.IamPolicy.ExampleConfigBody == "" {
-		object.IamPolicy.ExampleConfigBody = "templates/terraform/iam/iam_attributes_legacy.go.tmpl"
-	}
-	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || slices.Index(product.ORDER, object.IamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName)) {
-		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
-		templateData.GenerateIamPolicyFile(targetFilePath, object)
-
-		// Only generate test if testable examples exist.
-		examples := google.Reject(object.Examples, func(e *resource.Examples) bool {
-			return e.ExcludeTest
-		})
-		if len(examples) != 0 {
-			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.ResourceGoFilename(object)))
-			templateData.GenerateIamPolicyTestFileLegacy(targetFilePath, object)
-		}
-	}
-	if generateDocs {
-		t.GenerateIamDocumentation(object, templateData, outputFolder, generateCode, generateDocs)
-	}
-}
-
 func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
-	if object.Samples != nil && object.Examples != nil {
-		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
-	}
 	if object.Examples != nil {
-		t.GenerateIamPolicyLegacy(object, templateData, outputFolder, generateCode, generateDocs)
-		return
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 
 	if object.IamPolicy.SampleConfigBody == "" {
