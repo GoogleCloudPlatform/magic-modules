@@ -79,6 +79,10 @@ parameters:
       The ID of the data product.
 
 properties:
+  - name: 'name'
+    type: String
+    output: true
+    description: 'The relative resource name of the data product.'
   - name: 'uid'
     type: String
     output: true
@@ -146,3 +150,11 @@ properties:
             - name: 'serviceAccount'
               type: String
               description: 'Specifies the email of the producer service account.'
+iam_policy:
+  method_name_suffix: DataProduct
+  parent_resource_attribute: data_product_id
+  method_name_separator: ':'
+  exclude_import_test: true
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
+    - '{{data_product_id}}'
