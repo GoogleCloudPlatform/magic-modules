@@ -403,6 +403,7 @@ properties:
               description: 'Optional. The URL of the Subnetwork resource for this instance.'
             - name: 'ipAddress'
               type: String
+              api_name: 'networkIP'
               description: 'Optional. An IPv4 internal IP address to assign to the instance.'
             - name: 'ipv6Address'
               type: String
@@ -427,6 +428,7 @@ properties:
                     description: 'Optional. The name of this access configuration.'
                   - name: 'externalIp'
                     type: String
+                    api_name: 'natIP'
                   - name: 'externalIpv6'
                     type: String
                   - name: 'externalIpv6PrefixLength'
@@ -458,6 +460,7 @@ properties:
                     description: 'Optional. The name of this access configuration.'
                   - name: 'externalIp'
                     type: String
+                    api_name: 'natIP'
                   - name: 'externalIpv6'
                     type: String
                   - name: 'externalIpv6PrefixLength'
@@ -535,10 +538,12 @@ properties:
           - 'ENABLE_BIDIRECTIONAL_ACCESS_TO_GOOGLE'
       - name: 'allocationAffinity'
         type: NestedObject
+        api_name: 'reservationAffinity'
         description: 'Optional. Specifies the reservations that this instance can consume from.'
         properties:
           - name: 'consumeAllocationType'
             type: Enum
+            api_name: 'consumeReservationType'
             enum_values:
               - 'TYPE_UNSPECIFIED'
               - 'NO_RESERVATION'
