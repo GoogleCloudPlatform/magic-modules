@@ -17,6 +17,7 @@ import (
 	"google.golang.org/api/iam/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -91,7 +92,7 @@ func flattenGoogleServiceAccountListItem(res map[string]interface{}, d *schema.R
 		return err
 	}
 	d.SetId(sa.Name)
-	return populateResourceData(d, &sa)
+	return populateResourceData(d, &sa, config)
 }
 
 func ListServiceAccounts(config *transport_tpg.Config, project string, callback func(rd *schema.ResourceData) error) error {
@@ -104,7 +105,7 @@ func ListServiceAccounts(config *transport_tpg.Config, project string, callback 
 			return fmt.Errorf("error setting project on temporary resource data: %w", err)
 		}
 	}
-	url, err := tpgresource.ReplaceVars(d, config, "{{IAMBetaBasePath}}projects/{{project}}/serviceAccounts")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(iambeta.Product, config)+"projects/{{project}}/serviceAccounts")
 	if err != nil {
 		return err
 	}
@@ -125,6 +126,7 @@ func ListServiceAccounts(config *transport_tpg.Config, project string, callback 
 	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
 		Config:         config,
 		TempData:       d,
+		Resource:       ResourceGoogleServiceAccount(),
 		ListURL:        url,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,

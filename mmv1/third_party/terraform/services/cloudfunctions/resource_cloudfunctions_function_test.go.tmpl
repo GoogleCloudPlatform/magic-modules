@@ -8,8 +8,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudbuild"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/vpcaccess"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/artifactregistry"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcloudfunctions "github.com/hashicorp/terraform-provider-google/google/services/cloudfunctions"
+{{ if ne $.TargetVersionName `ga` -}}
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+{{- end }}
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"google.golang.org/api/cloudfunctions/v1"
 )
 
@@ -26,7 +37,7 @@ const testSecretEnvVarFunctionPath = "./test-fixtures/secret_environment_variabl
 const testSecretVolumesMountFunctionPath = "./test-fixtures/secret_volumes_mount.js"
 
 func bootstrapGcfAdminAgents(t *testing.T) {
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcf-admin-robot.iam.gserviceaccount.com",
 			Role:   "roles/vpcaccess.admin",
@@ -312,7 +323,7 @@ func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	kmsKey := kms.BootstrapKMSKeyInLocation(t, "us-central1")
 	funcResourceName := "google_cloudfunctions_function.function"
 	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", acctest.RandString(t, 10))
 	functionName := fmt.Sprintf("tf-cmek-test-%s", acctest.RandString(t, 10))

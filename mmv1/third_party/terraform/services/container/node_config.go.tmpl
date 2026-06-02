@@ -272,6 +272,14 @@ func schemaNodeConfig() *schema.Schema {
 
 				"boot_disk": schemaBootDiskConfig(),
 
+				"gpudirect_strategy": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Computed:    true,
+					DiffSuppressFunc: tpgresource.CaseDiffSuppress,
+					Description: `The type of GPUDirect strategy to enable on the node.`,
+				},
+
 				"guest_accelerator": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -981,6 +989,21 @@ func schemaNodeConfig() *schema.Schema {
                                                                         },
                                                                 },
                                                         },
+							"crash_loop_back_off": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `Contains configuration options to modify node-level parameters for container restart behavior.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"max_container_restart_period": {
+											Type: schema.TypeString,
+											Optional: true,
+											Description: `The maximum duration the backoff delay can accrue to for container restarts.`,
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1503,6 +1526,10 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		nc.MachineType = v.(string)
 	}
 
+	if v, ok := nodeConfig["gpudirect_strategy"]; ok {
+		nc.GpuDirectConfig = expandGpuDirectConfig(v)
+	}
+
 	if v, ok := nodeConfig["guest_accelerator"]; ok {
 		accels := v.([]interface{})
 		guestAccelerators := make([]*container.AcceleratorConfig, 0, len(accels))
@@ -1857,6 +1884,17 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 	return nc
 }
 
+// GPUDirectConfig is currently directly stored as a GpuDirectStrategy string.
+func expandGpuDirectConfig(v interface{}) *container.GPUDirectConfig {
+	if v == nil  || v.(string) == "" {
+		return nil
+	}
+
+	return &container.GPUDirectConfig{
+		GpuDirectStrategy: v.(string),
+	}
+}
+
 func expandBootDiskConfig(v interface{}) *container.BootDisk {
 	bd := &container.BootDisk{}
 	if v == nil {
@@ -2067,6 +2105,14 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
                 }
                 kConfig.EvictionMinimumReclaim = reclaim
         }
+	if v, ok := cfg["crash_loop_back_off"]; ok && len(v.([]interface{})) > 0 {
+		clb := v.([]interface{})[0].(map[string]interface{})
+		crashLoopBackOff := &container.CrashLoopBackOffConfig{}
+		if val, ok := clb["max_container_restart_period"]; ok {
+			crashLoopBackOff.MaxContainerRestartPeriod = val.(string)
+		}
+		kConfig.CrashLoopBackOff = crashLoopBackOff
+	}
 	return kConfig
 }
 
@@ -2743,6 +2789,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"disk_size_gb":             c.DiskSizeGb,
 		"disk_type":                c.DiskType,
 		"boot_disk":                flattenBootDiskConfig(c.BootDisk),
+		"gpudirect_strategy": 		flattenGpuDirectConfig(c.GpuDirectConfig),
 		"guest_accelerator":        flattenContainerGuestAccelerators(c.Accelerators),
 		"local_ssd_count":          c.LocalSsdCount,
 		"logging_variant":          flattenLoggingVariant(c.LoggingConfig),
@@ -2825,6 +2872,15 @@ func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]int
 	}
 
 	return rmt
+}
+
+// GPUDirectConfig currently only has one field, flatten directly to string.
+func flattenGpuDirectConfig(c *container.GPUDirectConfig) string {
+	if c == nil {
+		return ""
+	}
+
+	return c.GpuDirectStrategy
 }
 
 func flattenAdvancedMachineFeaturesConfig(c *container.AdvancedMachineFeatures) []map[string]interface{} {
@@ -3173,6 +3229,7 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 			"eviction_soft":                          flattenEvictionSignals(c.EvictionSoft),
 			"eviction_soft_grace_period":             flattenEvictionGracePeriod(c.EvictionSoftGracePeriod),
 			"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c.EvictionMinimumReclaim),
+			"crash_loop_back_off":                    flattenCrashLoopBackOffConfig(c.CrashLoopBackOff),
 		})
 	}
 	return result
@@ -3209,6 +3266,15 @@ func flattenNodePoolAutoConfigNodeKubeletConfig(c *container.NodeKubeletConfig) 
 	return result
 }
 
+func flattenCrashLoopBackOffConfig(c *container.CrashLoopBackOffConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"max_container_restart_period": c.MaxContainerRestartPeriod,
+		})
+	}
+	return result
+}
 
 func flattenEvictionSignals(c *container.EvictionSignals) []map[string]interface{} {
         result := []map[string]interface{}{}

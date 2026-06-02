@@ -101,10 +101,11 @@ var (
 		"addons_config.0.parallelstore_csi_driver_config",
 		"addons_config.0.lustre_csi_driver_config",
 		"addons_config.0.slice_controller_config",
+		"addons_config.0.pod_snapshot_config",
 	{{- if ne $.TargetVersionName "ga" }}
+		"addons_config.0.agent_sandbox_config",
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
-		"addons_config.0.pod_snapshot_config",
 	{{- end }}
 	}
 
@@ -231,6 +232,7 @@ func ResourceContainerCluster() *schema.Resource {
 		Delete: resourceContainerClusterDelete,
 
 		CustomizeDiff: customdiff.All(
+            		tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			resourceNodeConfigEmptyGuestAccelerator,
 			customdiff.ForceNewIfChange("enable_l4_ilb_subsetting", isBeenEnabled),
 			customdiff.ForceNewIfChange("enable_fqdn_network_policy", isBeenEnabled),
@@ -527,6 +529,23 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"pod_snapshot_config": {
+							Type: schema.TypeList,
+							Optional: true,
+							Computed: true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems: 1,
+							Description: `Configuration for the Pod Snapshot feature.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type: schema.TypeBool,
+										Required: true,
+										Description: `Whether the Pod Snapshot feature is enabled for this cluster.`,
+									},
+								},
+							},
+						},
 						{{- if ne $.TargetVersionName "ga" }}
 						"istio_config": {
 							Type:         schema.TypeList,
@@ -565,23 +584,6 @@ func ResourceContainerCluster() *schema.Resource {
 									"enabled": {
 										Type:     schema.TypeBool,
 										Required: true,
-									},
-								},
-							},
-						},
-						"pod_snapshot_config": {
-							Type: schema.TypeList,
-							Optional: true,
-							Computed: true,
-							AtLeastOneOf: addonsConfigKeys,
-							MaxItems: 1,
-							Description: `Configuration for the Pod Snapshot feature.`,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"enabled": {
-										Type: schema.TypeBool,
-										Required: true,
-										Description: `Whether the Pod Snapshot feature is enabled for this cluster.`,
 									},
 								},
 							},
@@ -682,6 +684,25 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						{{- if ne $.TargetVersionName "ga" }}
+						"agent_sandbox_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Agent Sandbox addon. It is disabled by default. Set enabled = true to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether the Agent Sandbox feature is enabled.`,
+									},
+								},
+							},
+						},
+						{{- end }}
 					},
 				},
 			},
@@ -1163,10 +1184,10 @@ func ResourceContainerCluster() *schema.Resource {
 						"enable_components": {
 							Type:        schema.TypeList,
 							Required:    true,
-							Description: `GKE components exposing logs. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, KCP_CONNECTION, KCP_SSHD, KCP_HPA, SCHEDULER, and WORKLOADS.`,
+							Description: `GKE components exposing logs. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, KCP_CONNECTION, KCP_SSHD, KCP_HPA, KCP_VPA, SCHEDULER, and WORKLOADS.`,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
-								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "KCP_CONNECTION", "KCP_SSHD", "KCP_HPA", "SCHEDULER", "WORKLOADS"}, false),
+								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "KCP_CONNECTION", "KCP_SSHD", "KCP_HPA", "KCP_VPA", "SCHEDULER", "WORKLOADS"}, false),
 							},
 						},
 					},
@@ -1810,7 +1831,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-{{ if ne $.TargetVersionName `ga` -}}
 			"secret_sync_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1849,7 +1869,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-{{- end }}
 			"project": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -2863,6 +2882,9 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+	//UDP schema start
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+	//UDP schema end
 		},
 	}
 }
@@ -3025,9 +3047,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 {{- end }}
 		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 		SecretManagerConfig: 	 expandSecretManagerConfig(d.Get("secret_manager_config")),
-{{- if ne $.TargetVersionName "ga" }}
 		SecretSyncConfig: 	 expandSecretSyncConfig(d.Get("secret_sync_config")),
-{{- end }}
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
 		Autopilot: &container.Autopilot{
@@ -3761,12 +3781,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(cluster.SecretManagerConfig)); err != nil {
 		return err
 	}
-{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("secret_sync_config", flattenSecretSyncConfig(cluster.SecretSyncConfig)); err != nil {
 		return err
 	}
-{{- end }}
-
 	if err := tpgresource.SetLabels(cluster.ResourceLabels, d, "resource_labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
@@ -3857,10 +3874,20 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
     return err
   }
 
+        
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+        return err
+    }
+    
 	return nil
 }
 
 func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) error {
+    
+    if tpgresource.DeletionPolicyPreUpdate(d, ResourceContainerCluster) {
+        return ResourceContainerCluster().Read(d, meta)
+    }
+    
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -5021,7 +5048,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s secret manager csi add-on has been updated", d.Id())
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("secret_sync_config") {
 		req := &container.UpdateClusterRequest{}
 		if c, ok := d.GetOk("secret_sync_config"); !ok {
@@ -5041,7 +5067,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 		}
 	}
-{{- end }}
 
 	if d.HasChange("workload_identity_config") {
 		// Because GKE uses a non-RESTful update function, when removing the
@@ -5654,7 +5679,14 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) error {
-	if d.Get("deletion_protection").(bool) {
+    
+    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+        return err
+    }else if ok{
+        return nil
+    }
+    	
+    	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with cluster deletion.")
 	}
 	config := meta.(*transport_tpg.Config)
@@ -5918,6 +5950,24 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
     }
 
+	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
+{{ if ne $.TargetVersionName `ga` -}}
+	if v, ok := config["agent_sandbox_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.AgentSandboxConfig = &container.AgentSandboxConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+{{- end }}
+
 {{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
@@ -5931,14 +5981,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	if v, ok := config["kalm_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.KalmConfig = &container.KalmConfig{
-			Enabled:         addon["enabled"].(bool),
-			ForceSendFields: []string{"Enabled"},
-		}
-	}
-
-	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
-		addon := v.([]interface{})[0].(map[string]interface{})
-		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
 			Enabled:         addon["enabled"].(bool),
 			ForceSendFields: []string{"Enabled"},
 		}
@@ -7024,7 +7066,6 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 	return sc
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -7055,7 +7096,6 @@ func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig 
 	}
 	return sc
 }
-{{- end }}
 
 func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint {
 	if v == nil {
@@ -7627,6 +7667,23 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 			},
 		}
 	}
+	if c.PodSnapshotConfig != nil {
+		result["pod_snapshot_config"] = []map[string]interface{}{
+			{
+				"enabled": c.PodSnapshotConfig.Enabled,
+			},
+		}
+	}
+
+{{ if ne $.TargetVersionName `ga` -}}
+	if c.AgentSandboxConfig != nil {
+		result["agent_sandbox_config"] = []map[string]interface{}{
+			{
+				"enabled": c.AgentSandboxConfig.Enabled,
+			},
+		}
+	}
+{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if c.IstioConfig != nil {
@@ -7642,14 +7699,6 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		result["kalm_config"] = []map[string]interface{}{
 			{
 				"enabled": c.KalmConfig.Enabled,
-			},
-		}
-	}
-
-	if c.PodSnapshotConfig != nil {
-		result["pod_snapshot_config"] = []map[string]interface{}{
-			{
-				"enabled": c.PodSnapshotConfig.Enabled,
 			},
 		}
 	}
@@ -8253,7 +8302,6 @@ func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]i
 	return []map[string]interface{}{result}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenSecretSyncConfig(c *container.SecretSyncConfig) []map[string]interface{} {
 	if c == nil {
 		return []map[string]interface{}{
@@ -8280,8 +8328,6 @@ func flattenSecretSyncConfig(c *container.SecretSyncConfig) []map[string]interfa
 	result["rotation_config"] = rotationList
 	return []map[string]interface{}{result}
 }
-{{- end }}
-
 
 func flattenResourceUsageExportConfig(c *container.ResourceUsageExportConfig) []map[string]interface{} {
 	if c == nil {
@@ -8843,7 +8889,6 @@ func DatabaseEncryptionSuppress(k, old, new string, d *schema.ResourceData) bool
         return false
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func SecretSyncCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "secret_sync_config.#" && old == "1" && new == "0" {
 		if v, ok := r.GetOk("secret_sync_config"); ok {
@@ -8857,7 +8902,6 @@ func SecretSyncCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	}
 	return false
 }
-{{- end }}
 
 func containerClusterNetworkPolicyDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
 	// if network_policy configuration is empty, we store it as populated and enabled=false, and
@@ -9120,6 +9164,30 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 
 	return nil
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func expandAgentSandboxConfig(v interface{}) *container.AgentSandboxConfig {
+    l := v.([]interface{})
+    if len(l) == 0 || l[0] == nil {
+        return nil
+    }
+    raw := l[0].(map[string]interface{})
+    return &container.AgentSandboxConfig{
+        Enabled: raw["enabled"].(bool),
+    }
+}
+
+func flattenAgentSandboxConfig(v *container.AgentSandboxConfig) []interface{} {
+    if v == nil {
+        return nil
+    }
+    return []interface{}{
+        map[string]interface{}{
+            "enabled": v.Enabled,
+        },
+    }
+}
+{{- end }}
 
 func init() {
 	registry.Schema{

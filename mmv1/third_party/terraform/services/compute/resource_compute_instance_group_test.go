@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -182,7 +183,7 @@ func testAccComputeInstanceGroup_destroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 			url := fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroups/%s",
-				config.ComputeBasePath, config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
+				transport_tpg.BaseUrl(compute.Product, config), config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
 			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "GET",
@@ -213,7 +214,7 @@ func testAccComputeInstanceGroup_exists(t *testing.T, n string, instanceGroup *m
 		config := acctest.GoogleProviderConfig(t)
 
 		url := fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroups/%s",
-			config.ComputeBasePath, config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
+			transport_tpg.BaseUrl(compute.Product, config), config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
 		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
@@ -245,7 +246,7 @@ func testAccComputeInstanceGroup_updated(t *testing.T, n string, size int64, ins
 		config := acctest.GoogleProviderConfig(t)
 
 		url := fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroups/%s",
-			config.ComputeBasePath, config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
+			transport_tpg.BaseUrl(compute.Product, config), config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
 		instanceGroupRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
@@ -283,7 +284,7 @@ func testAccComputeInstanceGroup_named_ports(t *testing.T, n string, np map[stri
 		config := acctest.GoogleProviderConfig(t)
 
 		url := fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroups/%s",
-			config.ComputeBasePath, config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
+			transport_tpg.BaseUrl(compute.Product, config), config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"])
 		instanceGroupRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
@@ -339,7 +340,7 @@ func testAccComputeInstanceGroup_hasCorrectNetwork(t *testing.T, nInstanceGroup 
 			Method:  "GET",
 			Project: config.Project,
 			RawURL: fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroups/%s",
-				config.ComputeBasePath, config.Project, rsInstanceGroup.Primary.Attributes["zone"], rsInstanceGroup.Primary.Attributes["name"]),
+				transport_tpg.BaseUrl(compute.Product, config), config.Project, rsInstanceGroup.Primary.Attributes["zone"], rsInstanceGroup.Primary.Attributes["name"]),
 			UserAgent: config.UserAgent,
 		})
 		if err != nil {
@@ -358,7 +359,7 @@ func testAccComputeInstanceGroup_hasCorrectNetwork(t *testing.T, nInstanceGroup 
 			Method:  "GET",
 			Project: config.Project,
 			RawURL: fmt.Sprintf("%sprojects/%s/global/networks/%s",
-				config.ComputeBasePath, config.Project, rsNetwork.Primary.Attributes["name"]),
+				transport_tpg.BaseUrl(compute.Product, config), config.Project, rsNetwork.Primary.Attributes["name"]),
 			UserAgent: config.UserAgent,
 		})
 		if err != nil {

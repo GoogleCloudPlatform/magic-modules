@@ -234,6 +234,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			pitrSupportDbCustomizeDiff,
 			nodeCountCustomDiff,
 			autoUpgradeEnabledCustomizeDiff,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -544,7 +545,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							DiffSuppressFunc: caseDiffDashSuppress,
 							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HYPERDISK_BALANCED.`,
 						},
-{{- if ne $.TargetVersionName "ga" }}
 						"data_disk_provisioned_iops": {
 							Type:        schema.TypeInt,
 							Optional:    true,
@@ -557,7 +557,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Computed:    true,
 							Description: `Provisioned throughput measured in MiB per second for the data disk. This field is only used for HYPERDISK_BALANCED disk types.`,
 						},
-{{- end }}
 						"connection_pool_config": {
 							Type:     schema.TypeSet,
 							Optional: true,
@@ -1493,6 +1492,9 @@ API (for read pools, effective_availability_type may differ from availability_ty
 					},
 				},
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1842,10 +1844,8 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		DataApiAccess:                 _settings["data_api_access"].(string),
 		DataDiskSizeGb:                int64(_settings["disk_size"].(int)),
 		DataDiskType:                  _settings["disk_type"].(string),
-{{- if ne $.TargetVersionName "ga" }}
 		DataDiskProvisionedIops:       int64(_settings["data_disk_provisioned_iops"].(int)),
 		DataDiskProvisionedThroughput: int64(_settings["data_disk_provisioned_throughput"].(int)),
-{{- end }}
 		PricingPlan:                   _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled:     _settings["deletion_protection_enabled"].(bool),
 		EnableGoogleMlIntegration:     _settings["enable_google_ml_integration"].(bool),
@@ -2417,6 +2417,11 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
                 return fmt.Errorf("Error setting dns_names: %s", err)
         }
 	d.SetId(instance.Name)
+	
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	
 
 	return nil
 }
@@ -2430,6 +2435,11 @@ const (
 )
 
 func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceSqlDatabaseInstance) {
+	    return ResourceSqlDatabaseInstance().Read(d, meta)
+	}
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -2923,6 +2933,13 @@ func serverCertificateRotationModeDiffSuppress(_, oldMode, newMode string, _ *sc
 }
 
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+	
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
+	}
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -3013,10 +3030,8 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		"data_api_access":                  settings.DataApiAccess,
 		"disk_type":                        settings.DataDiskType,
 		"disk_size":                        settings.DataDiskSizeGb,
-{{- if ne $.TargetVersionName "ga" }}
 		"data_disk_provisioned_iops":       settings.DataDiskProvisionedIops,
 		"data_disk_provisioned_throughput": settings.DataDiskProvisionedThroughput,
-{{- end }}
 		"pricing_plan":                     settings.PricingPlan,
 		"user_labels":                      settings.UserLabels,
 		"password_validation_policy":       settings.PasswordValidationPolicy,

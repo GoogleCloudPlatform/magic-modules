@@ -33,9 +33,12 @@ timeouts:
   delete_minutes: 60
 autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
+  actions: ['create', 'delete']
   type: 'OpAsync'
   operation:
+    timeouts:
+      insert_minutes: 60
+      delete_minutes: 60
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
@@ -50,6 +53,23 @@ examples:
     test_vars_overrides:
       # for backward compatible
       create_without_validation: '"false" + randomSuffix'
+      network_name: '"my-network" + randomSuffix'
+      private_connection_id: '"my-connection" + randomSuffix'
+  - name: 'database_migration_service_private_connection_psc'
+    primary_resource_id: 'default'
+    vars:
+      private_connection_id: 'my-connection'
+      attachment_name: 'my-attachment'
+      create_without_validation: 'false'
+      network_name: 'my-network'
+      subnetwork_name: 'my-subnetwork'
+    test_vars_overrides:
+      # for backward compatible
+      create_without_validation: '"false" + randomSuffix'
+      attachment_name: '"my-attachment" + randomSuffix'
+      private_connection_id: '"my-connection" + randomSuffix'
+      network_name: '"my-network" + randomSuffix'
+      subnetwork_name: '"my-subnetwork" + randomSuffix'
 parameters:
   - name: 'privateConnectionId'
     type: String
@@ -109,7 +129,8 @@ properties:
     description: |
       The VPC Peering configuration is used to create VPC peering
       between databasemigrationservice and the consumer's VPC.
-    required: true
+    exactly_one_of:
+      - 'pscInterfaceConfig'
     properties:
       - name: 'vpcName'
         type: String
@@ -121,4 +142,18 @@ properties:
         type: String
         description: |
           A free subnet for peering. (CIDR of /29)
+        required: true
+  - name: 'pscInterfaceConfig'
+    type: NestedObject
+    description: |
+      The PSC Interface configuration is used to create PSC Interface
+      between DMS's internal VPC and the consumer's PSC.
+    exactly_one_of:
+      - 'vpcPeeringConfig'
+    properties:
+      - name: 'networkAttachment'
+        type: String
+        description: |
+          Fully qualified name of the Network Attachment that DMS will connect to.
+          Format: projects/{project}/regions/{region}/networkAttachments/{name}
         required: true

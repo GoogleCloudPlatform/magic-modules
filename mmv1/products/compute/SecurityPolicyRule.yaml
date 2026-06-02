@@ -69,12 +69,19 @@ examples:
     test_vars_overrides:
       # for backward compatible
       sec_policy_name: '"policywithmultiplerules" + randomSuffix'
+  - name: 'security_policy_rule_advanced_features'
+    primary_resource_id: 'policy'
+    vars:
+      sec_policy_name: 'policyruletest'
+    test_vars_overrides:
+      sec_policy_name: '"policyruletest" + randomSuffix'
   - name: 'security_policy_rule_with_body_exclude'
     primary_resource_id: 'policy_rule_one'
     min_version: 'beta'
     vars:
       sec_policy_name: 'policyruletest'
       backend_name: 'backendpolicy'
+      network_name: 'test-network'
     test_vars_overrides:
       # for backward compatible
       sec_policy_name: '"policyruletest" + randomSuffix'
@@ -123,19 +130,19 @@ properties:
             description: |
               Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.
             required: true
-          # >> These fields are not yet supported, following the global security policy resource.
-          #   name: 'title'
-          #   type: String
-          #   description: |
-          #     Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
-          #   name: 'description'
-          #   type: String
-          #   description: |
-          #     Optional. Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
-          #   name: 'location'
-          #   type: String
-          #   description: |
-          #     Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
+      # >> These fields are not yet supported, following the global security policy resource.
+      #   name: 'title'
+      #   type: String
+      #   description: |
+      #     Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
+      #   name: 'description'
+      #   type: String
+      #   description: |
+      #     Optional. Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+      #   name: 'location'
+      #   type: String
+      #   description: |
+      #     Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
       - name: 'exprOptions'
         type: NestedObject
         description: |

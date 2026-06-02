@@ -484,6 +484,13 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `The name of a Google Compute Engine machine type.`,
 				},
 
+				"gpudirect_strategy": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					ForceNew:    true,
+					Description: `GPUDirect RDMA strategy for the node pool.`,
+				},
+
 				"metadata": {
 					Type:        schema.TypeMap,
 					Optional:    true,
@@ -720,6 +727,21 @@ func schemaNodeConfig() *schema.Schema {
 								Optional:     true,
 								ValidateFunc: validation.StringInSlice([]string{"static", "none", ""}, false),
 								Description:  `Control the CPU management policy on the node.`,
+							},
+							"crash_loop_back_off": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `Contains configuration options to modify node-level parameters for container restart behavior.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"max_container_restart_period": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `The maximum duration the backoff delay can accrue to for container restarts.`,
+										},
+									},
+								},
 							},
 							"memory_manager": {
 								Type:        schema.TypeList,
@@ -1447,6 +1469,10 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 		nc.MachineType = v.(string)
 	}
 
+	if v, ok := nodeConfig["gpudirect_strategy"]; ok {
+		nc.GpuDirectConfig = expandGpuDirectConfig(v)
+	}
+
 	if v, ok := nodeConfig["guest_accelerator"]; ok {
 		accels := v.([]interface{})
 		guestAccelerators := make([]*container.AcceleratorConfig, 0, len(accels))
@@ -1954,7 +1980,26 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		}
 		kConfig.EvictionMinimumReclaim = reclaim
 	}
+	if val, ok := cfg["crash_loop_back_off"]; ok {
+		kConfig.CrashLoopBackOff = expandCrashLoopBackOffConfig(val)
+	}
 	return kConfig
+}
+
+func expandCrashLoopBackOffConfig(v interface{}) *container.CrashLoopBackOffConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+	config := &container.CrashLoopBackOffConfig{}
+	if maxContainerRestartPeriod, ok := cfg["max_container_restart_period"]; ok {
+		config.MaxContainerRestartPeriod = maxContainerRestartPeriod.(string)
+	}
+	return config
 }
 
 func expandTopologyManager(v interface{}) *container.TopologyManager {
@@ -2521,6 +2566,7 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 
 	transformed := map[string]interface{}{
 		"machine_type":                       c["machineType"],
+		"gpudirect_strategy":                 flattenGpuDirectConfig(c["gpuDirectConfig"]),
 		"containerd_config":                  flattenContainerdConfig(c["containerdConfig"]),
 		"disk_size_gb":                       c["diskSizeGb"],
 		"disk_type":                          c["diskType"],
@@ -2544,22 +2590,23 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"min_cpu_platform":                   c["minCpuPlatform"],
 		"shielded_instance_config":           flattenShieldedInstanceConfig(c["shieldedInstanceConfig"]),
 		"sandbox_config":                     flattenSandboxConfig(c["sandboxConfig"]),
-		"taint":                              flattenEffectiveTaints(c["taints"]),
-		"workload_metadata_config":           flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
-		"confidential_nodes":                 flattenConfidentialNodes(c["confidentialNodes"]),
-		"boot_disk_kms_key":                  c["bootDiskKmsKey"],
-		"kubelet_config":                     flattenKubeletConfig(c["kubeletConfig"]),
-		"linux_node_config":                  flattenLinuxNodeConfig(c["linuxNodeConfig"]),
-		"windows_node_config":                flattenWindowsNodeConfig(c["windowsNodeConfig"]),
-		"node_group":                         c["nodeGroup"],
-		"advanced_machine_features":          flattenAdvancedMachineFeaturesConfig(c["advancedMachineFeatures"]),
-		"max_run_duration":                   c["maxRunDuration"],
-		"flex_start":                         c["flexStart"],
-		"sole_tenant_config":                 flattenSoleTenantConfig(c["soleTenantConfig"]),
-		"fast_socket":                        flattenFastSocket(c["fastSocket"]),
-		"resource_manager_tags":              flattenResourceManagerTags(c["resourceManagerTags"]),
-		"enable_confidential_storage":        c["enableConfidentialStorage"],
-		"local_ssd_encryption_mode":          c["localSsdEncryptionMode"],
+		// TODO: need to differentiate the new resource and existing resource
+		// "taint":                              flattenEffectiveTaints(c["taints"]),
+		"workload_metadata_config":    flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
+		"confidential_nodes":          flattenConfidentialNodes(c["confidentialNodes"]),
+		"boot_disk_kms_key":           c["bootDiskKmsKey"],
+		"kubelet_config":              flattenKubeletConfig(c["kubeletConfig"]),
+		"linux_node_config":           flattenLinuxNodeConfig(c["linuxNodeConfig"]),
+		"windows_node_config":         flattenWindowsNodeConfig(c["windowsNodeConfig"]),
+		"node_group":                  c["nodeGroup"],
+		"advanced_machine_features":   flattenAdvancedMachineFeaturesConfig(c["advancedMachineFeatures"]),
+		"max_run_duration":            c["maxRunDuration"],
+		"flex_start":                  c["flexStart"],
+		"sole_tenant_config":          flattenSoleTenantConfig(c["soleTenantConfig"]),
+		"fast_socket":                 flattenFastSocket(c["fastSocket"]),
+		"resource_manager_tags":       flattenResourceManagerTags(c["resourceManagerTags"]),
+		"enable_confidential_storage": c["enableConfidentialStorage"],
+		"local_ssd_encryption_mode":   c["localSsdEncryptionMode"],
 	}
 
 	// Suppress Default Value
@@ -3031,6 +3078,23 @@ func flattenKubeletConfig(v interface{}) []map[string]interface{} {
 		"eviction_soft":                          flattenEvictionSignals(c["evictionSoft"]),
 		"eviction_soft_grace_period":             flattenEvictionGracePeriod(c["evictionSoftGracePeriod"]),
 		"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c["evictionMinimumReclaim"]),
+		"crash_loop_back_off":                    flattenCrashLoopBackOffConfig(c["crashLoopBackOff"]),
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenCrashLoopBackOffConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"max_container_restart_period": c["maxContainerRestartPeriod"],
 	}
 
 	return []map[string]interface{}{transformed}
@@ -3593,4 +3657,32 @@ func flattenFastSocket(v interface{}) []map[string]interface{} {
 	}
 
 	return []map[string]interface{}{transformed}
+}
+
+// GPUDirectConfig is currently directly stored as a GpuDirectStrategy string.
+func expandGpuDirectConfig(v interface{}) *container.GPUDirectConfig {
+	if v == nil || v.(string) == "" {
+		return nil
+	}
+
+	return &container.GPUDirectConfig{
+		GpuDirectStrategy: v.(string),
+	}
+}
+
+// GPUDirectConfig currently only has one field, flatten directly to string.
+func flattenGpuDirectConfig(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return ""
+	}
+
+	strategy, ok := c["gpuDirectStrategy"].(string)
+	if !ok {
+		return ""
+	}
+	return strategy
 }

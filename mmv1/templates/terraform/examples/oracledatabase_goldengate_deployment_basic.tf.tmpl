@@ -1,0 +1,17 @@
+resource "google_oracle_database_goldengate_deployment" "{{$.PrimaryResourceId}}" {
+  goldengate_deployment_id = "{{index $.Vars "goldengate_deployment_id"}}"
+  display_name             = "{{index $.Vars "goldengate_deployment_id"}} display name"
+  location                 = "us-east4"
+  project                  = "{{index $.Vars "project"}}"
+  odb_subnet               = "{{index $.Vars "odb_subnet"}}"
+
+  properties {
+    deployment_type = "DATABASE_ORACLE"
+    ogg_data {
+      admin_username = "admin"
+      admin_password = "123Abpassword!"
+      deployment     = "deployment"
+    }
+  }
+  deletion_policy = "{{index $.Vars "deletion_policy"}}"
+}

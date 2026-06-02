@@ -51,7 +51,7 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
     test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: 'folder'
     type: String
