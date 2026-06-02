@@ -154,26 +154,9 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
 	}
 
-	reservationAffinityMap, err := expandReservationAffinity(d)
+	reservationAffinity, err := expandReservationAffinityTgc(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating reservation affinity: %s", err)
-	}
-	var reservationAffinity *compute.ReservationAffinity
-	if reservationAffinityMap != nil {
-		reservationAffinity = &compute.ReservationAffinity{}
-		if v, ok := reservationAffinityMap["consumeReservationType"].(string); ok {
-			reservationAffinity.ConsumeReservationType = v
-		}
-		if v, ok := reservationAffinityMap["key"].(string); ok {
-			reservationAffinity.Key = v
-		}
-		if vals, ok := reservationAffinityMap["values"].([]interface{}); ok {
-			for _, v := range vals {
-				if s, ok := v.(string); ok {
-					reservationAffinity.Values = append(reservationAffinity.Values, s)
-				}
-			}
-		}
 	}
 
 	instanceEncryptionKeyMap := expandComputeInstanceEncryptionKey(d)
@@ -658,4 +641,31 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		scheduling.TerminationTime = v.(string)
 	}
 	return scheduling, nil
+}
+
+func expandReservationAffinityTgc(d tpgresource.TerraformResourceData) (*compute.ReservationAffinity, error) {
+	_, ok := d.GetOk("reservation_affinity")
+	if !ok {
+		return nil, nil
+	}
+
+	prefix := "reservation_affinity.0"
+	reservationAffinityType := d.Get(prefix + ".type").(string)
+
+	affinity := &compute.ReservationAffinity{
+		ConsumeReservationType: reservationAffinityType,
+	}
+
+	_, hasSpecificReservation := d.GetOk(prefix + ".specific_reservation")
+	if (reservationAffinityType == "SPECIFIC_RESERVATION") != hasSpecificReservation {
+		return nil, fmt.Errorf("specific_reservation must be set when reservation_affinity is SPECIFIC_RESERVATION, and not set otherwise")
+	}
+
+	if hasSpecificReservation {
+		prefix = prefix + ".specific_reservation.0"
+		affinity.Key = d.Get(prefix + ".key").(string)
+		affinity.Values = tpgresource.ConvertStringArr(d.Get(prefix + ".values").([]interface{}))
+	}
+
+	return affinity, nil
 }
