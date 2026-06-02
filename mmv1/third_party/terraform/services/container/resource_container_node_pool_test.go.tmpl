@@ -1659,11 +1659,11 @@ func TestAccContainerNodePool_withNodeDrainConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerNodePool_withPrivateNodeDrainConfig(cluster, nodePool, networkName, subnetworkName,  "pdb_timeout_duration", "300s"),
-        ExpectError: regexp.MustCompile(`customized node drain timeout is not enabled for this project`),
+        ExpectError: regexp.MustCompile(`node drain timeout is not enabled for this project`),
 			},
 			{
 				Config: testAccContainerNodePool_withPrivateNodeDrainConfig(cluster, nodePool, networkName, subnetworkName,  "grace_termination_duration", "300s"),
-        ExpectError: regexp.MustCompile(`customized node drain timeout is not enabled for this project`),
+        ExpectError: regexp.MustCompile(`node drain timeout is not enabled for this project`),
 			},
 		},
 	})
