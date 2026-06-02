@@ -129,6 +129,7 @@ properties:
       - name: templateOnly
         type: Boolean
         default_from_api: true
+        send_empty_value: true
         description: |-
           Only allows users to use AI Logic via prompt templates for this project.
           If true, only calls using server templates are permitted.
