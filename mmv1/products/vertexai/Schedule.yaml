@@ -14,10 +14,10 @@
 ---
 name: Schedule
 description: An online schedule that triggers running pipeline jobs or notebook execution jobs.
-base_url: projects/{{project}}/locations/{{region}}/schedules
-self_link: projects/{{project}}/locations/{{region}}/schedules/{{name}}
+base_url: projects/{{project}}/locations/{{location}}/schedules
+self_link: projects/{{project}}/locations/{{location}}/schedules/{{name}}
 import_format:
-  - projects/{{project}}/locations/{{region}}/schedules/{{name}}
+  - projects/{{project}}/locations/{{location}}/schedules/{{name}}
 update_mask: true
 update_verb: PATCH
 async:
@@ -40,6 +40,13 @@ samples:
           display_name: test-schedule
           max_concurrent_run_count: 2
           cron: "*/5 * * * *"
+          allow_queueing: true
+          max_concurrent_active_run_count: 2
+          max_run_count: "10"
+          end_time: "2030-01-02T00:00:00Z"
+          preflight_validations: true
+          pipeline_job_label_value: "value-one"
+          failure_policy: "PIPELINE_FAILURE_POLICY_FAIL_FAST"
       - name: vertex_ai_schedule
         resource_id_vars:
           pipeline_job_id: pipeline-job
@@ -47,13 +54,37 @@ samples:
           display_name: test-schedule-updated
           max_concurrent_run_count: 3
           cron: "*/10 * * * *"
+          allow_queueing: false
+          max_concurrent_active_run_count: 3
+          max_run_count: "12"
+          end_time: "2030-01-03T00:00:00Z"
+          preflight_validations: false
+          pipeline_job_label_value: "value-updated"
+          failure_policy: "PIPELINE_FAILURE_POLICY_FAIL_SLOW"
+  - name: vertex_ai_schedule_notebook
+    primary_resource_id: schedule
+    steps:
+      - name: vertex_ai_schedule_notebook
+        resource_id_vars:
+          pipeline_job_id: notebook-job
+        vars:
+          display_name: test-schedule-notebook
+          max_concurrent_run_count: 2
+          cron: "*/5 * * * *"
+      - name: vertex_ai_schedule_notebook
+        resource_id_vars:
+          pipeline_job_id: notebook-job
+        vars:
+          display_name: test-schedule-notebook-updated
+          max_concurrent_run_count: 3
+          cron: "*/10 * * * *"
 parameters:
-  - name: region
+  - name: location
     type: String
-    description: The region of the Schedule. eg us-central1
+    description: The location of the Schedule. eg us-central1
     immutable: true
     url_param_only: true
-    default_from_api: true
+    required: true
 properties:
   - name: allowQueueing
     type: Boolean
