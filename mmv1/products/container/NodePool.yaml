@@ -95,6 +95,18 @@ properties:
                 type: 'Boolean'
                 description: 'Enable PTP KVM time sync.'
                 is_missing_in_cai: true
+      - name: 'kubeletConfig'
+        type: 'NestedObject'
+        description: 'Node kubelet configs.'
+        properties:
+          - name: 'crashLoopBackOff'
+            type: 'NestedObject'
+            description: 'Contains configuration options to modify node-level parameters for container restart behavior.'
+            properties:
+              - name: 'maxContainerRestartPeriod'
+                type: 'String'
+                description: 'The maximum duration the backoff delay can accrue to for container restarts.'
+                is_missing_in_cai: true
       - name: 'taint'
         type: 'Array'
         api_name: 'taints'

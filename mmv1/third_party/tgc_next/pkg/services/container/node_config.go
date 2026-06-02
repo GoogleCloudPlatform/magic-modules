@@ -728,6 +728,21 @@ func schemaNodeConfig() *schema.Schema {
 								ValidateFunc: validation.StringInSlice([]string{"static", "none", ""}, false),
 								Description:  `Control the CPU management policy on the node.`,
 							},
+							"crash_loop_back_off": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `Contains configuration options to modify node-level parameters for container restart behavior.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"max_container_restart_period": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `The maximum duration the backoff delay can accrue to for container restarts.`,
+										},
+									},
+								},
+							},
 							"memory_manager": {
 								Type:        schema.TypeList,
 								Optional:    true,
@@ -1965,7 +1980,26 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		}
 		kConfig.EvictionMinimumReclaim = reclaim
 	}
+	if val, ok := cfg["crash_loop_back_off"]; ok {
+		kConfig.CrashLoopBackOff = expandCrashLoopBackOffConfig(val)
+	}
 	return kConfig
+}
+
+func expandCrashLoopBackOffConfig(v interface{}) *container.CrashLoopBackOffConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+	config := &container.CrashLoopBackOffConfig{}
+	if maxContainerRestartPeriod, ok := cfg["max_container_restart_period"]; ok {
+		config.MaxContainerRestartPeriod = maxContainerRestartPeriod.(string)
+	}
+	return config
 }
 
 func expandTopologyManager(v interface{}) *container.TopologyManager {
@@ -3044,6 +3078,23 @@ func flattenKubeletConfig(v interface{}) []map[string]interface{} {
 		"eviction_soft":                          flattenEvictionSignals(c["evictionSoft"]),
 		"eviction_soft_grace_period":             flattenEvictionGracePeriod(c["evictionSoftGracePeriod"]),
 		"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c["evictionMinimumReclaim"]),
+		"crash_loop_back_off":                    flattenCrashLoopBackOffConfig(c["crashLoopBackOff"]),
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenCrashLoopBackOffConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"max_container_restart_period": c["maxContainerRestartPeriod"],
 	}
 
 	return []map[string]interface{}{transformed}
