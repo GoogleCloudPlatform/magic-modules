@@ -1164,9 +1164,9 @@ resource "google_bigtable_table" "table" {
   name          = "%s"
   instance_name = google_bigtable_instance.instance.name
   automated_backup_policy {
-    %s
-    %s
-    %s
+retention_period = "%s"
+frequency = "%s"
+locations = ["projects/${data.google_project.project.project_id}/locations/us-central1-b"]
   }
   column_family {
     family = "%s"
