@@ -1400,17 +1400,6 @@ properties:
       - name: pythonCode
         type: String
         description: The Python code to execute for the tool.
-      - name: serviceDirectoryConfig
-        type: NestedObject
-        description: Configuration for tools using Service Directory.
-        properties:
-          - name: service
-            type: String
-            description: |-
-              The name of Service Directory service.
-              Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
-              Location of the service directory must be the same as the location of the app.
-            required: true
   - name: updateTime
     type: String
     description: Timestamp when the tool was last updated.
@@ -1613,17 +1602,6 @@ properties:
                   The description of the Python function, parsed from the python code's
                   docstring.
                 output: true
-              - name: serviceDirectoryConfig
-                type: NestedObject
-                description: Configuration for tools using Service Directory.
-                properties:
-                  - name: service
-                    type: String
-                    description: |-
-                      The name of Service Directory service.
-                      Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
-                      Location of the service directory must be the same as the location of the app.
-                    required: true
           - name: mode
             type: String
             description: |-

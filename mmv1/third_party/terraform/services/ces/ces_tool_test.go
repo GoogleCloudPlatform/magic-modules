@@ -640,16 +640,6 @@ func TestAccCESTool_cesToolPythonFunctionBasicExample_update(t *testing.T) {
 
 func testAccCESTool_cesToolPythonFunctionBasicExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_service_directory_namespace" "basic" {
-  namespace_id = "tf-test-ns-%{random_suffix}"
-  location     = "us-central1"
-}
-
-resource "google_service_directory_service" "basic" {
-  service_id   = "tf-test-svc-%{random_suffix}"
-  namespace    = google_service_directory_namespace.basic.id
-}
-
 resource "google_ces_app" "my-app" {
     location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
@@ -667,9 +657,6 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     python_function {
         name = "example_function"
         python_code = "def example_function() -> int: return 0"
-        service_directory_config {
-            service = google_service_directory_service.basic.id
-        }
     }
 }
 `, context)
@@ -677,16 +664,6 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
 
 func testAccCESTool_cesToolPythonFunctionBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_service_directory_namespace" "basic" {
-  namespace_id = "tf-test-ns-%{random_suffix}"
-  location     = "us-central1"
-}
-
-resource "google_service_directory_service" "basic" {
-  service_id   = "tf-test-svc-%{random_suffix}"
-  namespace    = google_service_directory_namespace.basic.id
-}
-
 resource "google_ces_app" "my-app" {
     location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
@@ -704,9 +681,6 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     python_function {
         name = "example_function_updated"
         python_code = "def example_function_updated() -> int: return 0"
-        service_directory_config {
-            service = google_service_directory_service.basic.id
-        }
     }
 }
 `, context)
@@ -951,16 +925,6 @@ func TestAccCESTool_cesToolWidgetToolBasicExample_update(t *testing.T) {
 
 func testAccCESTool_cesToolWidgetToolBasicExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_service_directory_namespace" "basic" {
-  namespace_id = "tf-test-ns-%{random_suffix}"
-  location     = "us-central1"
-}
-
-resource "google_service_directory_service" "basic" {
-  service_id   = "tf-test-svc-%{random_suffix}"
-  namespace    = google_service_directory_namespace.basic.id
-}
-
 resource "google_ces_app" "my-app" {
     location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
@@ -993,9 +957,6 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
             python_function {
                 name        = "transform_function"
                 python_code = "def transform_function(x: int) -> int: return x"
-                service_directory_config {
-                    service = google_service_directory_service.basic.id
-                }
             }
         }
         text_response_config {
@@ -1031,16 +992,6 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
 
 func testAccCESTool_cesToolWidgetToolBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_service_directory_namespace" "basic" {
-  namespace_id = "tf-test-ns-%{random_suffix}"
-  location     = "us-central1"
-}
-
-resource "google_service_directory_service" "basic" {
-  service_id   = "tf-test-svc-%{random_suffix}"
-  namespace    = google_service_directory_namespace.basic.id
-}
-
 resource "google_ces_app" "my-app" {
     location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
@@ -1073,9 +1024,6 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
             python_function {
                 name        = "transform_function_updated"
                 python_code = "def transform_function_updated(x: int) -> int: return x"
-                service_directory_config {
-                    service = google_service_directory_service.basic.id
-                }
             }
         }
         text_response_config {
