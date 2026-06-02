@@ -423,6 +423,7 @@ properties:
               `gs://bucket-name`'
           - name: jobState
             type: String
+            output: true
             description: 'Possible values:
 
               JOB_STATE_QUEUED
@@ -483,6 +484,7 @@ properties:
             description: The user-defined parameters to use during notebook execution.
           - name: scheduleResourceName
             type: String
+            output: true
             description: 'The Schedule resource name if this job is triggered by one. Format:
 
               `projects/{project_id}/locations/{location}/schedules/{schedule_id}`'
@@ -750,21 +752,7 @@ properties:
                   `PipelineJob.pipeline_spec.schema_version` 2.1.0, such as pipelines built
 
                   using Kubeflow Pipelines SDK 1.9 or higher and the v2 DSL.'
-              - name: parameters
-                type: KeyValuePairs
-                default_from_api: true
-                description: 'Deprecated. Use RuntimeConfig.parameter_values instead. The
-                  runtime
 
-                  parameters of the PipelineJob. The parameters will be passed into
-
-                  PipelineJob.pipeline_spec to replace the placeholders at runtime.
-
-                  This field is used by pipelines built using
-
-                  `PipelineJob.pipeline_spec.schema_version` 2.0.0 or lower, such as
-
-                  pipelines built using Kubeflow Pipelines SDK 1.8 or lower.'
           - name: scheduleName
             type: String
             description: 'The schedule resource name.
@@ -793,6 +781,7 @@ properties:
             output: true
           - name: state
             type: String
+            output: true
             description: 'Possible values:
 
               PIPELINE_STATE_QUEUED
@@ -812,6 +801,7 @@ properties:
               PIPELINE_STATE_PAUSED'
           - name: templateMetadata
             type: NestedObject
+            output: true
             description: 'Pipeline template metadata if PipelineJob.template_uri is from
               supported
 
@@ -821,6 +811,7 @@ properties:
             properties:
               - name: version
                 type: String
+                output: true
                 description: 'The version_name in artifact registry.
 
 
@@ -911,13 +902,16 @@ properties:
     output: true
   - name: lastScheduledRunResponse
     type: NestedObject
+    output: true
     description: Status of a scheduled run.
     properties:
       - name: runResponse
         type: String
+        output: true
         description: The response of the scheduled run.
       - name: scheduledRunTime
         type: String
+        output: true
         description: The scheduled run time based on the user-specified schedule.
   - name: maxConcurrentActiveRunCount
     type: String
