@@ -1231,16 +1231,6 @@ resource "google_bigtable_table" "table" {
 }
 
 func testAccBigtableTable_automated_backups_locations_clear(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family string) string {
-	var retentionPeriod string
-	if automatedBackupsRetentionPeriod != "" {
-		retentionPeriod = fmt.Sprintf(`retention_period = "%s"`, automatedBackupsRetentionPeriod)
-	}
-	var frequency string
-	if automatedBackupsFrequency != "" {
-		frequency = fmt.Sprintf(`frequency = "%s"`, automatedBackupsFrequency)
-	}
-	locs := `locations = []`
-
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
