@@ -95,7 +95,6 @@ func ResourceDnsRecordSet() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceDnsRecordSetImportState,
 		},
-
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
@@ -123,6 +122,10 @@ func ResourceDnsRecordSet() *schema.Resource {
 					},
 				}
 			},
+		},
+
+		ResourceBehavior: schema.ResourceBehavior{
+			MutableIdentity: true,
 		},
 
 		Schema: map[string]*schema.Schema{
