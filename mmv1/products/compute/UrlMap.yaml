@@ -40,6 +40,9 @@ include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccComputeUrlMap_cachePolicyMultiLevelUpdate'
     skip: 'Index mismatch in path_matcher due to test framework limitation'
+  - name: 'TestAccComputeUrlMap_imageOptimizationPolicyMultiLevelUpdate'
+    skip: 'Index mismatch in path_matcher due to test framework limitation'
+
 custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/compute_url_map.go.tmpl'
 examples:
@@ -307,6 +310,13 @@ examples:
     test_vars_overrides:
       # for backward compatible
       url_map_name: '"urlmap" + randomSuffix'
+  - name: 'url_map_image_optimization_policy'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'example'
+      http_health_check_name: 'health-check'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -733,6 +743,22 @@ properties:
                   routeAction cannot contain any  weightedBackendServices. Only one of routeAction
                   or urlRedirect must be set.
                 properties:
+                  - name: 'imageOptimizationPolicy'
+                    type: NestedObject
+                    min_version: beta
+                    description: |
+                      Specifies the image optimization policy for this route.
+                    properties:
+                      - name: 'queryParameterInterpretation'
+                        type: Enum
+                        description: |
+                          How query parameters are interpreted for cache key matches.
+                          Possible values:
+                            - DISABLED
+                            - ENABLED
+                        enum_values:
+                          - 'DISABLED'
+                          - 'ENABLED'
                   - name: 'corsPolicy'
                     type: NestedObject
                     description: |
@@ -1797,6 +1823,22 @@ properties:
                   routeAction cannot contain any  weightedBackendServices. Only one of routeAction
                   or urlRedirect must be set.
                 properties:
+                  - name: 'imageOptimizationPolicy'
+                    type: NestedObject
+                    min_version: beta
+                    description: |
+                      Specifies the image optimization policy for this route.
+                    properties:
+                      - name: 'queryParameterInterpretation'
+                        type: Enum
+                        description: |
+                          How query parameters are interpreted for cache key matches.
+                          Possible values:
+                            - DISABLED
+                            - ENABLED
+                        enum_values:
+                          - 'DISABLED'
+                          - 'ENABLED'
                   - name: 'corsPolicy'
                     type: NestedObject
                     description: |
@@ -2966,6 +3008,22 @@ properties:
                     The value must be between 0.0 and 100.0 inclusive.
                   validation:
                     function: 'validation.FloatBetween(0, 100)'
+            - name: 'imageOptimizationPolicy'
+              type: NestedObject
+              min_version: beta
+              description: |
+                Specifies the image optimization policy for this route.
+              properties:
+                - name: 'queryParameterInterpretation'
+                  type: Enum
+                  description: |
+                    How query parameters are interpreted for cache key matches.
+                    Possible values:
+                      - DISABLED
+                      - ENABLED
+                  enum_values:
+                    - 'DISABLED'
+                    - 'ENABLED'
             - name: 'corsPolicy'
               type: NestedObject
               description: |
@@ -3608,6 +3666,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.image_optimization_policy'
         exactly_one_of:
           - 'default_service'
           - 'default_url_redirect'
@@ -3715,6 +3774,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'pathPrefixRewrite'
             type: String
@@ -3753,6 +3813,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'seconds'
             type: String
@@ -3804,6 +3865,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'retryConditions'
             type: Array
@@ -3884,6 +3946,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'backendService'
             type: ResourceRef
@@ -3902,6 +3965,32 @@ properties:
               The value must be between 0.0 and 100.0 inclusive.
             validation:
               function: 'validation.FloatBetween(0, 100)'
+      - name: 'imageOptimizationPolicy'
+        type: NestedObject
+        min_version: beta
+        description: |
+          Specifies the image optimization policy for this route.
+        at_least_one_of:
+          - 'default_route_action.0.weighted_backend_services'
+          - 'default_route_action.0.url_rewrite'
+          - 'default_route_action.0.timeout'
+          - 'default_route_action.0.retry_policy'
+          - 'default_route_action.0.request_mirror_policy'
+          - 'default_route_action.0.cors_policy'
+          - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.image_optimization_policy'
+        properties:
+          - name: 'queryParameterInterpretation'
+            type: Enum
+            description: |
+              How query parameters are interpreted for cache key matches.
+              Possible values:
+                - DISABLED
+                - ENABLED
+            enum_values:
+              - 'DISABLED'
+              - 'ENABLED'
       - name: 'corsPolicy'
         type: NestedObject
         description: |
@@ -3916,6 +4005,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'allowOrigins'
             type: Array
@@ -4056,6 +4146,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'delay'
             type: NestedObject
