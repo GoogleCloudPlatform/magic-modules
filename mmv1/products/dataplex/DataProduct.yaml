@@ -87,6 +87,15 @@ properties:
     type: String
     output: true
     description: 'System generated unique ID.'
+  - name: 'accessApprovalConfig'
+    type: NestedObject
+    description: 'Configuration for access approval for the data product.'
+    properties:
+      - name: 'approverEmails'
+        type: Array
+        item_type:
+          type: String
+        description: 'Specifies the email addresses of users who are potential approvers.'
   - name: 'displayName'
     type: String
     required: true
