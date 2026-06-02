@@ -91,6 +91,9 @@ func ProcessResourceFile(filePath, serviceName, examplesSourceDir, samplesDestDi
 		} else {
 			// fmt.Printf("  - Copied '%s'\n", sourceFileName)
 			fmt.Print()
+			if err := os.Remove(sourcePath); err != nil {
+				log.Printf("Failed to delete '%s': %v\n", sourcePath, err)
+			}
 		}
 	}
 
