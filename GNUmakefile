@@ -7,15 +7,15 @@ default: build
 
 # mm setup
 ifneq ($(PRODUCT),)
-	mmv1_args=--product $(PRODUCT)
+  mmv1_args=--product $(PRODUCT)
 endif
 
 ifneq ($(RESOURCE),)
-	mmv1_args += --resource $(RESOURCE)
+  mmv1_args += --resource $(RESOURCE)
 endif
 
 ifneq ($(OVERRIDES),)
-	mmv1_args += --overrides $(OVERRIDES)
+  mmv1_args += --overrides $(OVERRIDES)
 endif
 
 UNAME := $(shell uname)
