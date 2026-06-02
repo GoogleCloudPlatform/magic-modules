@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -60,6 +61,10 @@ func DataSourceGoogleFolder() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"management_project": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"deletion_policy": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -122,4 +127,13 @@ func lookupOrganizationName(parent, userAgent string, d *schema.ResourceData, co
 	} else {
 		return "", fmt.Errorf("Unknown parent type '%s' on folder '%s'", parent, d.Id())
 	}
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_folder",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleFolder(),
+	}.Register()
 }

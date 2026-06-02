@@ -1,0 +1,23 @@
+updateMask := []string{}
+
+if d.HasChange("access_settings") {
+    updateMask = append(updateMask, "accessSettings")
+}
+if d.HasChange("ui_settings") {
+    updateMask = append(updateMask, "uiSettings")
+}
+if d.HasChange("ui_branding") {
+    updateMask = append(updateMask, "uiBranding")
+}
+if d.HasChange("homepage_setting") {
+    updateMask = append(updateMask, "homepageSetting")
+}
+
+if len(updateMask) == 0 {
+    updateMask = []string{"displayName", "accessSettings", "uiSettings", "uiBranding", "homepageSetting"}
+}
+
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+    return err
+}

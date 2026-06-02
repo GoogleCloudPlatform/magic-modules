@@ -1,0 +1,6 @@
+if v, ok := d.GetOkExists("entry_group_id"); ok && strings.HasPrefix(v.(string), "@") {
+      url, err = transport_tpg.AddQueryParams(url, map[string]string{"allow_missing": "false", 
+                                                                     "updateMask": "aspects"})
+} else {
+      url, err = transport_tpg.AddQueryParams(url, map[string]string{"allow_missing": "true"})     
+}

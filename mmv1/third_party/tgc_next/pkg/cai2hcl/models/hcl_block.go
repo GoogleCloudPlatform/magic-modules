@@ -48,9 +48,6 @@ func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
 				return err
 			}
 		case objValType.IsCollectionType():
-			if objVal.LengthInt() == 0 && !objValType.IsSetType() {
-				continue
-			}
 			// Presumes map should not contain object type.
 			if !objValType.IsMapType() && objValType.ElementType().IsObjectType() {
 				listIterator := objVal.ElementIterator()
@@ -65,9 +62,6 @@ func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
 			}
 			fallthrough
 		default:
-			if objValType.FriendlyName() == "string" && objVal.AsString() == "" {
-				continue
-			}
 			body.SetAttributeValue(objKey.AsString(), objVal)
 		}
 	}

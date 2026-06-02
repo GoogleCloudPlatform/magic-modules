@@ -50,14 +50,12 @@ custom_code:
 examples:
   - name: 'dataplex_entry_type_basic'
     primary_resource_id: 'test_entry_type_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-entry-type%s", context["random_suffix"])'
     vars:
       entry_type_name: 'entry-type-basic'
     test_env_vars:
       project_name: 'PROJECT_NAME'
   - name: 'dataplex_entry_type_full'
     primary_resource_id: 'test_entry_type_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-entry-type%s", context["random_suffix"])'
     vars:
       entry_type_name: 'entry-type-full'
     test_env_vars:

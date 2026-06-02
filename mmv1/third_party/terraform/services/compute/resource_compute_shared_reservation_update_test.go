@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/orgpolicy"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccComputeSharedReservation_update(t *testing.T) {
@@ -21,7 +24,10 @@ func TestAccComputeSharedReservation_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckComputeReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeReservation_sharedReservation_basic(context),
@@ -64,10 +70,15 @@ resource "google_project" "owner_project" {
   deletion_policy = "DELETE"
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [google_project.owner_project, google_project.guest_project, google_project.guest_project_second, google_project.guest_project_third]
+}
 
 resource "google_project_service" "compute" {
   project = google_project.owner_project.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_project" "guest_project" {
@@ -108,16 +119,24 @@ resource "google_org_policy_policy" "shared_reservation_org_policy" {
 resource "google_project_service" "compute_second_project" {
   project = google_project.guest_project.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_project_service" "compute_third_project" {
   project = google_project.guest_project_second.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_project_service" "compute_fourth_project" {
   project = google_project.guest_project_third.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute, google_project_service.compute_second_project, google_project_service.compute_third_project, google_project_service.compute_fourth_project]
 }
 
 resource "google_compute_reservation" "gce_reservation" {
@@ -139,7 +158,7 @@ resource "google_compute_reservation" "gce_reservation" {
       project_id = google_project.guest_project.project_id
     }
   }
-  depends_on = [google_org_policy_policy.shared_reservation_org_policy,google_project_service.compute,google_project_service.compute_second_project,google_project_service.compute_third_project]
+  depends_on = [google_org_policy_policy.shared_reservation_org_policy, time_sleep.wait_120_seconds]
 }
 `, context)
 }
@@ -154,9 +173,15 @@ resource "google_project" "owner_project" {
   deletion_policy = "DELETE"
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [google_project.owner_project, google_project.guest_project, google_project.guest_project_second, google_project.guest_project_third]
+}
+
 resource "google_project_service" "compute" {
   project = google_project.owner_project.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_project" "guest_project" {
@@ -197,16 +222,24 @@ resource "google_org_policy_policy" "shared_reservation_org_policy" {
 resource "google_project_service" "compute_second_project" {
   project = google_project.guest_project.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_project_service" "compute_third_project" {
   project = google_project.guest_project_second.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_project_service" "compute_fourth_project" {
   project = google_project.guest_project_third.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute, google_project_service.compute_second_project, google_project_service.compute_third_project, google_project_service.compute_fourth_project]
 }
 
 resource "google_compute_reservation" "gce_reservation" {
@@ -236,7 +269,7 @@ resource "google_compute_reservation" "gce_reservation" {
       project_id = google_project.guest_project_third.project_id
     }
   }
-  depends_on = [google_org_policy_policy.shared_reservation_org_policy,google_project_service.compute,google_project_service.compute_second_project,google_project_service.compute_third_project]
+  depends_on = [google_org_policy_policy.shared_reservation_org_policy, time_sleep.wait_120_seconds]
 }
 `, context)
 }

@@ -1,15 +1,17 @@
 package accesscontextmanager_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/accesscontextmanager"
 )
 
-func TestAccDataSourceAccessContextManagerServicePerimeter_basicTest(t *testing.T) {
+func testAccDataSourceAccessContextManagerServicePerimeter_basicTest(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	policyTitle := "my title"
@@ -42,7 +44,10 @@ data "google_access_context_manager_access_policy" "policy" {
 `, map[string]interface{}{"org": org, "policyTitle": policyTitle})
 }
 
-func TestAccDataSourceAccessContextManagerServicePerimeter_scopedPolicyTest(t *testing.T) {
+func testAccDataSourceAccessContextManagerServicePerimeter_scopedPolicyTest(t *testing.T) {
+	if os.Getenv("GOOGLE_ACM_SCOPED_POLICIES_ENABLED") == "" {
+		t.Skip("GOOGLE_ACM_SCOPED_POLICIES_ENABLED is not set; skipping test that requires a scoped AccessPolicy")
+	}
 
 	org := envvar.GetTestOrgFromEnv(t)
 	project := envvar.GetTestProjectNumberFromEnv()

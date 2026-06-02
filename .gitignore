@@ -48,13 +48,15 @@ mmv1/build/*
 
 # vscode workspace settings
 .vscode
+*.code-workspace
 
 # ignore serialization generation build data
 tpgtools/temp.serial
 tpgtools/serialization.go
 
-# ignore magician binary
+# ignore built binaries
 .ci/magician/magician
+/bin
 
 # ignore leftover testlogs and cassettes
 .ci/magician/testlogs
@@ -66,3 +68,5 @@ tpgtools/serialization.go
 MODULE.bazel.lock
 go.work
 go.work.sum
+terraform-provider-google/
+debug_output/

@@ -156,6 +156,27 @@ resource "google_storage_bucket" "hns-enabled" {
   }
 }
 ```
+## Example Usage - Enabling encryption enforcement config
+
+```hcl
+resource "google_storage_bucket" "hns-enabled" {
+  name          = "hns-enabled-bucket"
+  location      = "US"
+  force_destroy = true
+
+  encryption  {
+    google_managed_encryption_enforcement_config {
+      restriction_mode = "FullyRestricted"
+    }
+    customer_managed_encryption_enforcement_config {
+      restriction_mode = "FullyRestricted"
+    }
+    customer_supplied_encryption_enforcement_config {
+      restriction_mode = "NotRestricted"
+    }
+  }
+}
+```
 
 ## Argument Reference
 
@@ -167,9 +188,7 @@ The following arguments are supported:
 
 - - -
 
-* `force_destroy` - (Optional, Default: false) When deleting a bucket, this
-    boolean option will delete all contained objects. If you try to delete a
-    bucket that contains objects, Terraform will fail that run.
+* `force_destroy` - (Optional, Default: false) When true, before deleting a bucket, delete all objects within the bucket, or Anywhere Caches caching data for that bucket. Otherwise, buckets with objects/caches will fail. Anywhere Cache requires additional permissions to interact with and will be assumed not present when Terraform is not permissioned, attempting to delete the bucket anyways. This may result in the objects in the bucket getting destroyed but not the bucket itself if there is a cache in use with the bucket. Force deletion may take a long time to delete buckets with lots of objects or with any Anywhere Caches (80m+).
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
@@ -218,6 +237,13 @@ The following arguments are supported:
 * `updated` -  (Computed) The time at which the bucket's metadata or IAM policy was last updated, in RFC 3339 format.
 
 * `ip_filter` -  (Optional) The bucket IP filtering configuration. Specifies the network sources that can access the bucket, as well as its underlying objects. Structure is [documented below](#nested_ip_filter).
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
 
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 
@@ -306,7 +332,7 @@ The following arguments are supported:
 
 <a name="nested_encryption"></a>The `encryption` block supports:
 
-* `default_kms_key_name`: The `id` of a Cloud KMS key that will be used to encrypt objects inserted into this bucket, if no encryption method is specified.
+* `default_kms_key_name` -  (Optional) The `id` of a Cloud KMS key that will be used to encrypt objects inserted into this bucket, if no encryption method is specified.
   You must pay attention to whether the crypto key is available in the location that this bucket is created in.
   See [the docs](https://cloud.google.com/storage/docs/encryption/using-customer-managed-keys) for more details.
 
@@ -320,6 +346,17 @@ The following arguments are supported:
   This data source calls an API which creates the account if required, ensuring your Terraform applies cleanly and repeatedly irrespective of the
   state of the project.
   You should take care for race conditions when the same Terraform manages IAM policy on the Cloud KMS crypto key. See the data source page for more details.
+
+* `google_managed_encryption_enforcement_config`: (Optional) If omitted, then new objects with GMEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_google_managed_encryption_enforcement_config).
+
+* `customer_managed_encryption_enforcement_config`: (Optional) If omitted, then new objects with CMEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_customer_managed_encryption_enforcement_config).
+
+* `customer_supplied_encryption_enforcement_config`: (Optional) If omitted, then new objects with CSEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_customer_supplied_encryption_enforcement_config).
+* `google_managed_encryption_enforcement_config` - (Optional) If omitted, then new objects with GMEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_google_managed_encryption_enforcement_config).
+
+* `customer_managed_encryption_enforcement_config` - (Optional) If omitted, then new objects with CMEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_customer_managed_encryption_enforcement_config).
+
+* `customer_supplied_encryption_enforcement_config` - (Optional) If omitted, then new objects with CSEK encryption-type is allowed. If set, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only, Structure is documented below [documented below](#nested_customer_supplied_encryption_enforcement_config).
 
 <a name="nested_custom_placement_config"></a>The `custom_placement_config` block supports:
 
@@ -361,6 +398,24 @@ The following arguments are supported:
 
 * `allowed_ip_cidr_ranges` - The list of public or private IPv4 and IPv6 CIDR ranges that can access the bucket.
 
+<a name="nested_google_managed_encryption_enforcement_config"></a>The `google_managed_encryption_enforcement_config` block supports:
+
+* `restriction_mode` - (Required) Whether Google Managed Encryption (GMEK) is restricted for new objects within the bucket. If FullyRestricted, new objects can't be created using GMEK encryption. If NotRestricted or unset, creation of new objects with GMEK encryption is allowed.
+
+* `effective_time` - Time from which the config was effective.
+
+<a name="nested_customer_supplied_encryption_enforcement_config"></a>The `customer_supplied_encryption_enforcement_config` block supports:
+
+* `restriction_mode` - (Required) Whether Customer Supplied Encryption (CSEK) is restricted for new objects within the bucket. If FullyRestricted, new objects can't be created using CSEK encryption. If NotRestricted or unset, creation of new objects with CSEK encryption is allowed.
+
+* `effective_time` - Time from which the config was effective.
+
+<a name="nested_customer_managed_encryption_enforcement_config"></a>The `customer_managed_encryption_enforcement_config` block supports:
+
+* `restriction_mode` - (Required) Whether Customer Managed Encryption (CMEK) is restricted for new objects within the bucket. If FullyRestricted, new objects can't be created using CMEK encryption. If NotRestricted or unset, creation of new objects with CMEK encryption is allowed.
+
+* `effective_time` - Time from which the config was effective.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -394,6 +449,18 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 ```tf
 import {
   id = "{{project_id}}/{{bucket}}"
+  to = google_storage_bucket.default
+}
+```
+
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Storage buckets using identity values. For example:
+
+```tf
+import {
+  identity = {
+    project = "{{project_id}}"
+    name    = "{{bucket}}"
+  }
   to = google_storage_bucket.default
 }
 ```

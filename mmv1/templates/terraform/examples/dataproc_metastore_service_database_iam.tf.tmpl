@@ -41,6 +41,7 @@ resource "google_dataproc_cluster" "dp_cluster" {
 
 resource "google_dataproc_job" "hive" {
   region = google_dataproc_cluster.dp_cluster.region
+  wait_for_completion = true
 
   force_delete = true
   placement {
@@ -57,11 +58,3 @@ resource "google_dataproc_job" "hive" {
     ]
   }
 }
-
-# There is no simple way to wait on the Dataproc job to be SUCCESS
-# rather than RUNNING.
-resource "time_sleep" "wait_hive_job" {
-  create_duration = "90s"
-  depends_on      = [google_dataproc_job.hive]
-}
-

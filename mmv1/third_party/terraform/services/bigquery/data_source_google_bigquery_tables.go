@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -69,7 +70,7 @@ func DataSourceGoogleBigQueryTablesRead(d *schema.ResourceData, meta interface{}
 
 	for {
 
-		url, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables")
+		url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/datasets/{{dataset_id}}/tables")
 		if err != nil {
 			return err
 		}
@@ -144,4 +145,13 @@ func flattenDataSourceGoogleBigQueryTablesList(res interface{}) []map[string]int
 	}
 
 	return tables
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_bigquery_tables",
+		ProductName: "bigquery",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleBigQueryTables(),
+	}.Register()
 }

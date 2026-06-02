@@ -83,10 +83,16 @@ examples:
   - name: 'access_context_manager_service_perimeter_egress_policy'
     vars:
       egress_policy_title: 'egress policy title'
+    test_vars_overrides:
+      # for backward compatible
+      egress_policy_title: '"egress policy title" + randomSuffix'
     exclude_test: true
   - name: 'access_context_manager_service_perimeter_egress_policy_granular_controls'
     vars:
       egress_policy_title: 'granular controls egress policy title'
+    test_vars_overrides:
+      # for backward compatible
+      egress_policy_title: '"granular controls egress policy title" + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'perimeter'
@@ -221,7 +227,7 @@ properties:
                       Value for permission should be a valid Cloud IAM permission for the
                       corresponding `serviceName` in `ApiOperation`.
   - name: 'title'
-    type: 'string'
+    type: String
     description: |
       Human readable title. Must be unique within the perimeter. Does not affect behavior.
   - name: 'accessPolicyId'
@@ -230,6 +236,7 @@ properties:
       The name of the Access Policy this resource belongs to.
     ignore_read: true
     output: true
+    client_side: true
   - name: 'etag'
     type: String
     output: true

@@ -139,6 +139,15 @@ resource "google_compute_instance" "test2" {
     queue_count = 0
   }
 
+  reservation_affinity {
+    specific_reservation {
+      key    = "compute.googleapis.com/reservation-name"
+      values = ["my-reservation"]
+    }
+
+    type = "SPECIFIC_RESERVATION"
+  }
+
   scheduling {
     automatic_restart = true
     preemptible       = false

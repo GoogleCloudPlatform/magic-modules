@@ -154,6 +154,8 @@ cluster.
 * `node_count` - (Optional) The number of nodes per instance group. This field can be used to
     update the number of nodes per instance group but should not be used alongside `autoscaling`.
 
+* `node_drain_config` - (Optional) The node drain configuration of the pool. Structure is [documented below](#nested_node_drain_config).
+
 * `project` - (Optional) The ID of the project in which to create the node pool. If blank,
     the provider-configured project will be used.
 
@@ -172,6 +174,13 @@ cluster.
 
 * `queued_provisioning` - (Optional) Specifies node pool-level settings of queued provisioning.
     Structure is [documented below](#nested_queued_provisioning).
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
 
 <a name="nested_autoscaling"></a>The `autoscaling` block supports (either total or per zone limits are required):
 
@@ -223,6 +232,8 @@ cluster.
 
 * `subnetwork` - (Optional) The subnetwork path for the node pool. Format: `projects/{project}/regions/{region}/subnetworks/{subnetwork}`. If the cluster is associated with multiple subnetworks, the subnetwork for the node pool is picked based on the IP utilization during node pool creation and is immutable
 
+* `accelerator_network_profile` (Optional, (../guides/provider_versions.html.markdown)) - Specifies the accelerator network profile for nodes in this node pool. Setting to `"auto"` enables GKE to automatically configure high-performance networking settings for nodes with accelerators (like GPUs). GKE manages the underlying resources (like VPCs and subnets) for this configuration.
+
 <a name="nested_additional_node_network_configs"></a>The `additional_node_network_configs` block supports:
 
 * `network` - Name of the VPC where the additional interface belongs.
@@ -240,11 +251,14 @@ cluster.
 <a name="network_performance_config"></a>The `network_performance_config` block supports:
 
 * `total_egress_bandwidth_tier` (Required) - Specifies the total network bandwidth tier for the NodePool. [Valid values](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters.nodePools#NodePool.Tier) include: "TIER_1" and "TIER_UNSPECIFIED".
-* ```
 
 <a name="pod_cidr_overprovision_config"></a>The `pod_cidr_overprovision_config` block supports:
 
 * `disabled` (Required) - Whether pod cidr overprovision is disabled.
+
+<a name="nested_node_drain_config"></a>The `node_drain_config` block supports:
+
+* `respect_pdb_during_node_pool_deletion` - (Optional) Whether to respect PodDisruptionBudget policy during node pool deletion.
 
 <a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
 
@@ -265,15 +279,15 @@ cluster.
 
 <a name="nested_blue_green_settings"></a>The `blue_green_settings` block supports:
 
-* `standard_rollout_policy` - (Required) Specifies the standard policy settings for blue-green upgrades.
+-> Note: Exactly one of `standard_rollout_policy` or `autoscaled_rollout_policy` must be set.
+
+* `standard_rollout_policy` - (Optional) Specifies the standard policy settings for blue-green upgrades.
     * `batch_percentage` - (Optional) Percentage of the blue pool nodes to drain in a batch.
     * `batch_node_count` - (Optional) Number of blue nodes to drain in a batch.
     * `batch_soak_duration` - (Optionial) Soak time after each batch gets drained.
 
-* `local_ssd_encryption_mode` - (Optional) Possible Local SSD encryption modes:
-    Accepted values are:
-    * `STANDARD_ENCRYPTION`: The given node will be encrypted using keys managed by Google infrastructure and the keys wll be deleted when the node is deleted.
-    * `EPHEMERAL_KEY_ENCRYPTION`: The given node will opt-in for using ephemeral key for encrypting Local SSDs. The Local SSDs will not be able to recover data in case of node crash.
+* `autoscaled_rollout_policy` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Autoscaled rollout policy for blue-green upgrade.
+    * `wait_for_drain_duration` - (Optional) Time in seconds to wait after cordoning the blue pool before draining the nodes.
 
 * `node_pool_soak_duration` - (Optional) Time needed after draining the entire blue pool.
     After this period, the blue pool will be cleaned up.
@@ -322,9 +336,9 @@ In addition to the arguments listed above, the following computed attributes are
 `google_container_node_pool` provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
-- `create` - (Default `30 minutes`) Used for adding node pools
-- `update` - (Default `30 minutes`) Used for updates to node pools
-- `delete` - (Default `30 minutes`) Used for removing node pools.
+- `create` - (Default `60 minutes`) Used for adding node pools
+- `update` - (Default `60 minutes`) Used for updates to node pools
+- `delete` - (Default `60 minutes`) Used for removing node pools.
 
 ## Import
 

@@ -18,6 +18,7 @@ package {{ lower $.ProductMetadata.Name }}
 
 import (
   "encoding/base64"
+  "encoding/json"
   "fmt"
   "log"
   "reflect"
@@ -70,6 +71,7 @@ var (
     _ = transport_tpg.Config{}
     _ = verify.ProjectRegex
     _ = googleapi.Error{}
+    _ = json.Unmarshal
 )
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
@@ -92,6 +94,12 @@ func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, conf
         if location == "" {
             location = "global"
         }
+        // Store the ID now
+	    id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
+	    if err != nil {
+		    return nil, fmt.Errorf("Error constructing id: %s", err)
+	    }
+	    d.SetId(id)
         return []caiasset.Asset{
             {
                 Name: name,
@@ -99,7 +107,7 @@ func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, conf
                 Resource: &caiasset.AssetResource{
                     Version: "{{ $apiVersion }}",
                     DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
-                    DiscoveryName: "{{ or $.ApiResourceTypeKind $.Name }}",
+                    DiscoveryName:        "{{ or $.ApiResourceTypeKind $.Name }}",
                     Data: obj,
                     Location:             location,
                 },
@@ -129,7 +137,7 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
     }
 {{- end}}
 
-{{ if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
+{{ if and $.CustomCode.Encoder (not $.CustomCode.TGCIgnoreTerraformEncoder) -}}
     obj, err = resource{{ $.ResourceName -}}Encoder(d, config, obj)
     if err != nil {
         return nil, err
@@ -146,15 +154,15 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
 {{- end}}
 }
 
-{{if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
+{{if and $.CustomCode.Encoder (not $.CustomCode.TGCIgnoreTerraformEncoder) -}}
 func resource{{ $.ResourceName -}}Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ $.CustomTemplate $.CustomCode.Encoder false -}}
+{{ customTemplate $ $.CustomCode.Encoder false -}}
 }
 {{- end}}
 
 {{if $.CustomCode.TgcEncoder -}}
 func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ $.CustomTemplate $.CustomCode.TgcEncoder false -}}
+{{ customTemplate $ $.CustomCode.TgcEncoder false -}}
 }
 {{- end}}
 

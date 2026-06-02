@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package compute
 
 import (
@@ -7,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -95,7 +94,7 @@ func dataSourceGoogleComputeSubnetworksRead(d *schema.ResourceData, meta interfa
 
 	subnetworks := make([]map[string]interface{}, 0)
 
-	subnetworkList, err := config.NewComputeClient(userAgent).Subnetworks.List(project, region).Filter(filter).Do()
+	subnetworkList, err := NewClient(config, userAgent).Subnetworks.List(project, region).Filter(filter).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Subnetworks : %s %s", project, region))
 	}
@@ -124,4 +123,13 @@ func dataSourceGoogleComputeSubnetworksRead(d *schema.ResourceData, meta interfa
 	))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_subnetworks",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeSubnetworks(),
+	}.Register()
 }

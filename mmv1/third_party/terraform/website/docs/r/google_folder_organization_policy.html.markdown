@@ -12,13 +12,13 @@ Allows management of Organization Policies for a Google Cloud Folder.
 
 To get more information about Organization Policies, see:
 
-* [API documentation](https://cloud.google.com/resource-manager/reference/rest/v1/folders/setOrgPolicy)
+* [API documentation](https://docs.cloud.google.com/resource-manager/reference/rest/v1/folders/setOrgPolicy)
 * How-to Guides
-    * [Introduction to the Organization Policy Service](https://cloud.google.com/resource-manager/docs/organization-policy/overview)
+    * [Introduction to the Organization Policy Service](https://docs.cloud.google.com/resource-manager/docs/organization-policy/overview)
 
 ## Example Usage
 
-To set policy with a [boolean constraint](https://cloud.google.com/resource-manager/docs/organization-policy/quickstart-boolean-constraints):
+To set policy with a [boolean constraint](https://docs.cloud.google.com/resource-manager/docs/organization-policy/quickstart-boolean-constraints):
 
 ```hcl
 resource "google_folder_organization_policy" "serial_port_policy" {
@@ -32,7 +32,7 @@ resource "google_folder_organization_policy" "serial_port_policy" {
 ```
 
 
-To set a policy with a [list constraint](https://cloud.google.com/resource-manager/docs/organization-policy/quickstart-list-constraints):
+To set a policy with a [list constraint](https://docs.cloud.google.com/resource-manager/docs/organization-policy/quickstart-list-constraints):
 
 ```hcl
 resource "google_folder_organization_policy" "services_policy" {
@@ -84,7 +84,7 @@ The following arguments are supported:
 
 * `folder` - (Required) The resource name of the folder to set the policy for. Its format is folders/{folder_id}.
 
-* `constraint` - (Required) The name of the Constraint the Policy is configuring, for example, `serviceuser.services`. Check out the [complete list of available constraints](https://cloud.google.com/resource-manager/docs/organization-policy/understanding-constraints#available_constraints).
+* `constraint` - (Required) The name of the Constraint the Policy is configuring, for example, `serviceuser.services`. Check out the [complete list of available constraints](https://docs.cloud.google.com/resource-manager/docs/organization-policy/understanding-constraints#available_constraints).
 
 - - -
 
@@ -99,6 +99,13 @@ can also be used to allow or deny all values. Structure is [documented below](#n
 
 ~> **Note:** If none of [`boolean_policy`, `list_policy`, `restore_policy`] are defined the policy for a given constraint will
 effectively be unset. This is represented in the UI as the constraint being 'Inherited'.
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
 
 - - -
 

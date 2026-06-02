@@ -71,3 +71,18 @@ func IsEmpty(v interface{}) bool {
 		return val.IsZero()
 	}
 }
+
+const (
+	ColorReset = "\033[0m"
+	ColorRed   = "\033[31m"
+)
+
+type ErrTransformer func(error) error
+
+func TransformErrs(fn ErrTransformer, errs []error) (prefixedErrs []error) {
+	for _, err := range errs {
+		prefixedErrs = append(prefixedErrs, fn(err))
+	}
+
+	return prefixedErrs
+}

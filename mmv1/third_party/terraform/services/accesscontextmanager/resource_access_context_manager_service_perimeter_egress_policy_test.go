@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/accesscontextmanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -17,15 +19,13 @@ import (
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
 func testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest(t *testing.T) {
-	// Multiple fine-grained resources
-	acctest.SkipIfVcr(t)
 	org := envvar.GetTestOrgFromEnv(t)
 
 	// Bootstrap a service account to use as egress from identity
 	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	serviceAccount := acctest.BootstrapServiceAccount(t, "acm-egress-2", initialServiceAccount)
+	serviceAccount := iambeta.BootstrapServiceAccount(t, "acm-egress-2", initialServiceAccount)
 
-	//projects := acctest.BootstrapServicePerimeterProjects(t, 1)
+	//projects := BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "perimeter"
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
@@ -54,7 +54,7 @@ func testAccCheckAccessContextManagerServicePerimeterEgressPolicyDestroyProducer
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{perimeter}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(accesscontextmanager.Product, config)+"{{perimeter}}")
 			if err != nil {
 				return err
 			}
@@ -138,6 +138,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 		resources = ["*"]
 		roles = ["roles/bigquery.admin"]
 	}
+	depends_on = [google_access_context_manager_service_perimeter_egress_policy.test-access1]
 }
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "test-access3" {
@@ -148,6 +149,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 		}
 		source_restriction = "SOURCE_RESTRICTION_ENABLED"
 	}
+	depends_on = [google_access_context_manager_service_perimeter_egress_policy.test-access2]
 }
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "test-identity1" {
@@ -163,6 +165,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-i
 			}
 		}
 	}
+	depends_on = [google_access_context_manager_service_perimeter_egress_policy.test-access3]
 }
 
 `, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber, strings.ToUpper(serviceAccount))

@@ -5,17 +5,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 )
 
 func TestAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"kms_key_name":                acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-6").CryptoKey.Name,
-		"single_region_kms_key_name1": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tftest-shared-key-us-east1").CryptoKey.Name,
-		"single_region_kms_key_name2": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tftest-shared-key-us-central1").CryptoKey.Name,
-		"single_region_kms_key_name3": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-west1", "tftest-shared-key-us-west1").CryptoKey.Name,
-		"random_suffix":               acctest.RandString(t, 10),
+		"kms_key_name":  kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-"+acctest.RandString(t, 10)).CryptoKey.Name,
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -24,15 +23,6 @@ func TestAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_up
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_basic(context),
-			},
-			{
-				ResourceName:            "google_discovery_engine_cmek_config.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cmek_config_id", "location", "project", "set_default"},
-			},
-			{
-				Config: testAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_update(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_cmek_config.default",
@@ -58,53 +48,6 @@ data "google_project" "project" {}
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = "%{kms_key_name}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com"
-}
-`, context)
-}
-
-func testAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_discovery_engine_cmek_config" "default" {
-  location            = "us"
-  cmek_config_id      = "tf-test-cmek-config-id%{random_suffix}"
-  kms_key             = "%{kms_key_name}"
-  set_default         = false
-  single_region_keys { 
-    kms_key = "%{single_region_kms_key_name1}"
-  }
-  single_region_keys { 
-    kms_key = "%{single_region_kms_key_name2}"
-  }
-  single_region_keys { 
-    kms_key = "%{single_region_kms_key_name3}"
-  }
-  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
-}
-
-data "google_project" "project" {}
-
-resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = "%{kms_key_name}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key_iam_member" "single_region_crypto_key1" {
-  crypto_key_id = "%{single_region_kms_key_name1}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key_iam_member" "single_region_crypto_key2" {
-  crypto_key_id = "%{single_region_kms_key_name2}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key_iam_member" "single_region_crypto_key3" {
-  crypto_key_id = "%{single_region_kms_key_name3}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com"
 }

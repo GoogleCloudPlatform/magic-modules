@@ -13,6 +13,7 @@
 
 ---
 name: 'PolicyBasedRoute'
+include_in_tgc_next: true
 description:
   'Policy-based Routes are more powerful routes that route L4 network traffic based on not just destination IP, but also source IP, protocol and more. A Policy-based Route always take precedence when it conflicts with other types of routes.'
 references:
@@ -88,7 +89,7 @@ properties:
         enum_values:
           - 'IPV4'
           - 'IPV6'
- # probably could have been an enum, but it's a string in the API
+      # probably could have been an enum, but it's a string in the API
       - name: 'ipProtocol'
         type: String
         description: |
@@ -180,7 +181,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
- # technically enum, but doesn't matter for output fields
+        # technically enum, but doesn't matter for output fields
         - name: 'code'
           type: String
           description: |

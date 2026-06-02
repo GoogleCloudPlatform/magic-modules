@@ -27,8 +27,8 @@ import (
 func Underscore(source string) string {
 	tmp := regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`).ReplaceAllString(source, "${1}_${2}")
 	tmp = regexp.MustCompile(`([a-z\d])([A-Z])`).ReplaceAllString(tmp, "${1}_${2}")
-	tmp = strings.Replace(tmp, "-", "_", 1)
-	tmp = strings.Replace(tmp, ".", "_", 1)
+	tmp = strings.ReplaceAll(tmp, "-", "_")
+	tmp = strings.ReplaceAll(tmp, ".", "_")
 	tmp = strings.ToLower(tmp)
 	return tmp
 }

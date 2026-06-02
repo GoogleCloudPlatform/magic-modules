@@ -41,7 +41,7 @@ func resourceDatastreamStreamCustomDiff(_ context.Context, diff *schema.Resource
 	return resourceDatastreamStreamCustomDiffFunc(diff)
 }
 
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 // waitForDatastreamStreamReady waits for an agent pool to reach a stable state to indicate that it's ready.
 func waitForDatastreamStreamReady(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
 	return retry.Retry(timeout, func() *retry.RetryError {

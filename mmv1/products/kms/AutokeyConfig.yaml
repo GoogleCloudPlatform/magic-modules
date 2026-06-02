@@ -32,11 +32,11 @@ base_url: 'folders/{{folder}}/autokeyConfig'
 self_link: 'folders/{{folder}}/autokeyConfig'
 # This is a singleton resource that is already created, so create
 # is really an update, and therefore should be PATCHed.
-create_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+create_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject,keyProjectResolutionMode'
 create_verb: 'PATCH'
-update_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+update_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject,keyProjectResolutionMode'
 update_verb: 'PATCH'
-delete_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+delete_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject,keyProjectResolutionMode'
 delete_verb: 'PATCH'
 import_format:
   - 'folders/{{folder}}/autokeyConfig'
@@ -50,19 +50,19 @@ custom_code:
   pre_read: 'templates/terraform/pre_read/kms_autokey_config_folder.go.tmpl'
   pre_update: 'templates/terraform/pre_update/kms_autokey_config_folder.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/kms_autokey_config_folder.go.tmpl'
-  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
-  post_update: 'templates/terraform/post_create/sleep.go.tmpl'
+  post_create: 'templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl'
+  post_update: 'templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/kms_autokey_config.go.tmpl'
 # Using a handwritten sweeper because of pre_delete.
 exclude_sweeper: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 examples:
   - name: 'kms_autokey_config_all'
     primary_resource_id: 'example-autokeyconfig'
     # test depends upon google_project_service_identity service which is still in beta, so we need to keep test limited to beta
     min_version: 'beta'
     vars:
-      folder_name: 'my-folder'
+      folder_name: 'folder-cfg'
       key_project_name: 'key-proj'
     test_env_vars:
       org_id: 'ORG_ID'
@@ -88,3 +88,10 @@ properties:
     type: String
     description: 'The etag of the AutokeyConfig for optimistic concurrency control.'
     output: true
+  - name: 'keyProjectResolutionMode'
+    type: Enum
+    description: 'How Autokey determines which project to use when provisioning CMEK keys.'
+    enum_values:
+      - 'DEDICATED_KEY_PROJECT'
+      - 'RESOURCE_PROJECT'
+      - 'DISABLED'

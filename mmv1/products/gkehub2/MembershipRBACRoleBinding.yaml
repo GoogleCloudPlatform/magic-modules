@@ -47,7 +47,6 @@ exclude_sweeper: true
 examples:
   - name: 'gkehub_membership_rbac_role_binding_basic'
     primary_resource_id: 'membership_rbac_role_binding'
-    primary_resource_name: 'fmt.Sprintf(\"tf-test-membership%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-rbac-role-binding%s\", context[\"random_suffix\"])'
     min_version: 'beta'
     vars:
       cluster_name: 'basic-cluster'
@@ -59,8 +58,8 @@ examples:
       location: 'global'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
 parameters:

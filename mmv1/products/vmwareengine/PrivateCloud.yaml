@@ -51,7 +51,7 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/vmwareengine_private_cloud.go.tmpl'
   post_delete: 'templates/terraform/post_delete/private_cloud.go.tmpl'
 sweeper:
-  query_string: "?delay_hours=0"
+  query_string: "?delay_hours=0&force=true"
   url_substitutions:
     - region: "us-central1-a"
     - region: "southamerica-west1-a"
@@ -215,10 +215,7 @@ properties:
           The map of cluster node types in this cluster,
           where the key is canonical identifier of the node type (corresponds to the NodeType).
         key_name: 'node_type_id'
-        key_description: |
-          Canonical identifier of the NodeType.
         value_type:
-          name: nodeTypeConfig
           type: NestedObject
           properties:
             - name: 'nodeCount'
@@ -271,9 +268,7 @@ properties:
               Currently the map must contain only one element
               that describes the autoscaling policy for compute nodes.
             key_name: 'autoscale_policy_id'
-            key_description: 'The key is the identifier of the policy.'
             value_type:
-              name: AutoscalingPolicy
               type: NestedObject
               properties:
                 - name: 'nodeTypeId'

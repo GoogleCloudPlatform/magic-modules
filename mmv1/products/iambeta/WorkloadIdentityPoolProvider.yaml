@@ -26,7 +26,7 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -179,7 +179,7 @@ properties:
         * `attribute.{custom_attribute}`:
           `principalSet://iam.googleapis.com/projects/{project}/locations/{location}/workloadIdentityPools/{pool}/attribute.{custom_attribute}/{value}`
 
-      Each value must be a [Common Expression Language](https://opensource.google/projects/cel)
+      Each value must be a [Common Expression Language](https://github.com/google/cel-spec)
       function that maps an identity provider credential to the normalized attribute specified
       by the corresponding map key.
 
@@ -215,7 +215,7 @@ properties:
   - name: 'attributeCondition'
     type: String
     description: |
-      [A Common Expression Language](https://opensource.google/projects/cel) expression, in
+      [A Common Expression Language](https://github.com/google/cel-spec) expression, in
       plain text, to restrict what otherwise valid authentication credentials issued by the
       provider should not be accepted.
 
@@ -312,7 +312,7 @@ properties:
           }
           ```
         required: false
-        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        diff_suppress_func: 'jwksJsonDiffSuppress'
         is_missing_in_cai: true
   - name: 'saml'
     type: NestedObject

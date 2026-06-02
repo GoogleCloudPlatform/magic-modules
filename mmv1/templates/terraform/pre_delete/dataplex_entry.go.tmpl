@@ -1,0 +1,5 @@
+if v, ok := d.GetOkExists("entry_group_id"); ok && strings.HasPrefix(v.(string), "@") {
+      // Ingestion based resources need to be removed from terraform state but cannot be deleted in Dataplex.
+      d.SetId("")
+      return nil
+}

@@ -44,10 +44,10 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
     - '{{name}}'
 custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'gkebackup_backupplan_basic'
     primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-basic-plan%s", context["random_suffix"])'
     vars:
       name: 'basic-plan'
       cluster_name: 'basic-cluster'
@@ -58,8 +58,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_autopilot'
@@ -72,8 +72,8 @@ examples:
       subnetwork_name: 'default'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_cmek'
@@ -89,13 +89,12 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_nslabels'
     primary_resource_id: 'nslabels'
-    primary_resource_name: 'fmt.Sprintf("tf-test-nslabels-plan%s", context["random_suffix"])'
     vars:
       name: 'nslabels-plan'
       cluster_name: 'nslabels-cluster'
@@ -106,8 +105,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_full'
@@ -122,8 +121,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_permissive'
@@ -138,8 +137,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_rpo_daily_window'
@@ -154,8 +153,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_rpo_weekly_window'
@@ -170,8 +169,8 @@ examples:
       project: 'PROJECT_NAME'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'network_name': 'compute.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
 parameters:
@@ -381,7 +380,7 @@ properties:
                           - 'FRIDAY'
                           - 'SATURDAY'
                           - 'SUNDAY'
-            # Exclusion Window Object - End
+  # Exclusion Window Object - End
   - name: 'etag'
     type: String
     description: |
@@ -520,6 +519,11 @@ properties:
     type: Integer
     description: |
       The number of Kubernetes Pods backed up in the last successful Backup created via this BackupPlan.
+    output: true
+  - name: 'protectedNamespaceCount'
+    type: Integer
+    description: |
+      The number of Kubernetes Namespaces backed up in the last successful Backup created via this BackupPlan.
     output: true
   - name: 'state'
     type: String

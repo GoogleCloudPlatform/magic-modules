@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccDataSourceGoogleProjectOrganizationPolicy_basic(t *testing.T) {
@@ -30,7 +31,7 @@ func testAccDataSourceGoogleProjectOrganizationPolicy_basic(project string) stri
 	return fmt.Sprintf(`
 resource "google_project_organization_policy" "resource" {
   project    = "%s"
-  constraint = "constraints/compute.trustedImageProjects"
+  constraint = "constraints/cloudscheduler.allowedTargetTypes"
 
   list_policy {
     allow {
@@ -41,7 +42,7 @@ resource "google_project_organization_policy" "resource" {
 
 data "google_project_organization_policy" "data" {
   project    = google_project_organization_policy.resource.project
-  constraint = "constraints/compute.trustedImageProjects"
+  constraint = "constraints/cloudscheduler.allowedTargetTypes"
 }
 `, project)
 }

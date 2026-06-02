@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -59,7 +60,7 @@ func DataSourceArtifactRegistryTagRead(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error setting Artifact Registry project: %s", err)
 	}
 
-	basePath, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}")
+	basePath, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config))
 	if err != nil {
 		return fmt.Errorf("Error setting Artifact Registry base path: %s", err)
 	}
@@ -119,4 +120,13 @@ func DataSourceArtifactRegistryTagRead(d *schema.ResourceData, meta interface{})
 	d.SetId(name)
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_artifact_registry_tag",
+		ProductName: "artifactregistry",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryTag(),
+	}.Register()
 }

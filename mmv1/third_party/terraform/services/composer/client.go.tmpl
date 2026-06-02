@@ -1,0 +1,28 @@
+package composer
+
+import (
+	"log"
+
+	"google.golang.org/api/option"
+{{- if eq $.TargetVersionName "ga" }}
+	"google.golang.org/api/composer/v1"
+{{- else }}
+	"google.golang.org/api/composer/v1beta1"
+{{- end }}
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func NewClient(c *transport_tpg.Config, userAgent string) *composer.Service {
+	composerClientBasePath := transport_tpg.RemoveBasePathVersion(transport_tpg.BaseUrl(Product, c))
+	log.Printf("[INFO] Instantiating Cloud Composer client for path %s", composerClientBasePath)
+	clientComposer, err := composer.NewService(c.Context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client composer: %s", err)
+		return nil
+	}
+	clientComposer.UserAgent = userAgent
+	clientComposer.BasePath = composerClientBasePath
+
+	return clientComposer
+}

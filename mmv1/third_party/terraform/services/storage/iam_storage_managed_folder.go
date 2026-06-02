@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -163,7 +164,7 @@ func (u *StorageManagedFolderIamUpdater) SetResourceIamPolicy(policy *cloudresou
 }
 
 func (u *StorageManagedFolderIamUpdater) qualifyManagedFolderUrl(methodIdentifier string) (string, error) {
-	urlTemplate := fmt.Sprintf("{{StorageBasePath}}b/%s/managedFolders/%s/%s", u.bucket, url.PathEscape(u.managedFolder), methodIdentifier)
+	urlTemplate := fmt.Sprintf(transport_tpg.BaseUrl(Product, u.Config)+"b/%s/managedFolders/%s/%s", u.bucket, url.PathEscape(u.managedFolder), methodIdentifier)
 	url, err := tpgresource.ReplaceVars(u.d, u.Config, urlTemplate)
 	if err != nil {
 		return "", err
@@ -181,4 +182,31 @@ func (u *StorageManagedFolderIamUpdater) GetMutexKey() string {
 
 func (u *StorageManagedFolderIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("storage managedfolder %q", u.GetResourceId())
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_managed_folder_iam_member",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamMember(StorageManagedFolderIamSchema, StorageManagedFolderIamUpdaterProducer, StorageManagedFolderIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_storage_managed_folder_iam_binding",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamBinding(StorageManagedFolderIamSchema, StorageManagedFolderIamUpdaterProducer, StorageManagedFolderIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_storage_managed_folder_iam_policy",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamPolicy(StorageManagedFolderIamSchema, StorageManagedFolderIamUpdaterProducer, StorageManagedFolderIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_storage_managed_folder_iam_policy",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeIAMDataSource,
+		Schema:      tpgiamresource.DataSourceIamPolicy(StorageManagedFolderIamSchema, StorageManagedFolderIamUpdaterProducer),
+	}.Register()
 }

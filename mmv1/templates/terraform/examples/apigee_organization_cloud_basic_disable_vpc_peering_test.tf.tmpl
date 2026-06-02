@@ -11,11 +11,14 @@ resource "google_project_service" "apigee" {
   service = "apigee.googleapis.com"
 }
 
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_300_seconds" {
+  create_duration = "300s"
   depends_on = [google_project_service.apigee]
 }
 
+resource "time_sleep" "wait_after_destroy" {
+  destroy_duration = "150s"
+}
 
 resource "google_apigee_organization" "{{$.PrimaryResourceId}}" {
   description         = "Terraform-provisioned basic Apigee Org without VPC Peering."
@@ -23,11 +26,7 @@ resource "google_apigee_organization" "{{$.PrimaryResourceId}}" {
   project_id          = google_project.project.project_id
   disable_vpc_peering = true
   depends_on          = [
-    time_sleep.wait_120_seconds,
+    time_sleep.wait_300_seconds,
+    time_sleep.wait_after_destroy,
   ]
-}
-
-resource "time_sleep" "wait_after_destroy" {
-  destroy_duration = "150s"
-  depends_on = [google_apigee_organization.{{$.PrimaryResourceId}}]
 }

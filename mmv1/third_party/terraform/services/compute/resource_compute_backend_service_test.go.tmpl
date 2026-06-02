@@ -10,7 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networksecurity"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudrun"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccComputeBackendService_basic(t *testing.T) {
@@ -1312,9 +1316,9 @@ func TestAccComputeBackendService_resourceManagerTags(t *testing.T) {
 
 	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-bs-tagkey", "organizations/"+org, make(map[string]interface{}))
+	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "crm-bs-tagkey", "organizations/"+org, make(map[string]interface{}))
 	sharedTagkey,_ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-bs-tagvalue", sharedTagkey, org)
+	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "crm-bs-tagvalue", sharedTagkey, org)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2900,7 +2904,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_backend_service" "lipsum" {
-  name        = "test-lipsum-backend-service-%s"
+  name        = "tf-test-lipsum-backend-service-%s"
   description = "Hello World 1234"
   protocol    = "TCP"
   timeout_sec = %v
@@ -2915,7 +2919,7 @@ resource "google_compute_backend_service" "lipsum" {
 }
 
 resource "google_compute_instance_group_manager" "foobar" {
-  name = "test-foobar-instance-group-manager-%s"
+  name = "tf-test-foobar-instance-group-manager-%s"
   version {
     instance_template = google_compute_instance_template.foobar.self_link
     name              = "primary"
@@ -2926,7 +2930,7 @@ resource "google_compute_instance_group_manager" "foobar" {
 }
 
 resource "google_compute_instance_template" "foobar" {
-  name         = "test-foobar-instance-template-%s"
+  name         = "tf-test-foobar-instance-template-%s"
   machine_type = "e2-medium"
 
   network_interface {
@@ -2941,7 +2945,7 @@ resource "google_compute_instance_template" "foobar" {
 }
 
 resource "google_compute_health_check" "health_check" {
-  name = "test-health-check-%s"
+  name = "tf-test-health-check-%s"
   http_health_check {
     port = 80
   }
@@ -3435,4 +3439,45 @@ resource "google_compute_http_health_check" "zero" {
   timeout_sec        = 1
 }
 `, serviceName, tagKey, tagValue, checkName)
+}
+
+func TestAccComputeBackendService_iapOauthClientIdPermadiff(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Step 1: Explicitly set to a single space (simulating API state)
+				Config: testAccComputeBackendService_iapOauthClientId(context, " "),
+			},
+			{
+				// Step 2: Remove it from config (set to empty)
+				// With the fix, this should NOT trigger an update.
+				Config: testAccComputeBackendService_iapOauthClientId(context, ""),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
+func testAccComputeBackendService_iapOauthClientId(context map[string]interface{}, clientId string) string {
+	context["client_id"] = clientId
+	return acctest.Nprintf(`
+resource "google_compute_backend_service" "myservice" {
+  name = "tf-test-iap-diff-%{random_suffix}"
+  iap {
+    enabled = true
+    oauth2_client_id = "%{client_id}"
+    oauth2_client_secret = "my-secret"
+  }
+  load_balancing_scheme = "EXTERNAL"
+}
+`, context)
 }

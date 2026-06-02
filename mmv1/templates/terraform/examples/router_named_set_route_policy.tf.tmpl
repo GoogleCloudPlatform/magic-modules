@@ -1,0 +1,58 @@
+resource "google_compute_network" "my_network" {
+  provider = google-beta
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_router" "my_router" {
+  provider = google-beta
+  name    = "{{index $.Vars "router_name"}}"
+  network = google_compute_network.my_network.name
+  region  = "us-central1"
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_router_named_set" "my_prefix_set" {
+  provider = google-beta
+  name        = "{{index $.Vars "named_set_name"}}"
+  router      = google_compute_router.my_router.name
+  region      = google_compute_router.my_router.region
+  description = "My example prefix named set"
+  type        = "NAMED_SET_TYPE_PREFIX"
+
+  elements {
+    expression = "'10.0.0.0/8'"
+    title      = "private-range"
+  }
+
+  elements {
+    expression = "'172.16.0.0/12'"
+  }
+
+  elements {
+    expression = "prefix('192.168.10.0/24').orLonger()"
+    title      = "or-longer-example"
+  }
+}
+
+resource "google_compute_router_route_policy" "my_route_policy" {
+  provider = google-beta
+  name   = "{{index $.Vars "route_policy_name"}}"
+  router = google_compute_router.my_router.name
+  region = google_compute_router.my_router.region
+  type   = "ROUTE_POLICY_TYPE_EXPORT"
+
+  terms {
+    priority = 1
+    match {
+      # The CEL expression uses string interpolation to dynamically inject the Named Set's name.
+      # This ensures Terraform understands the dependency between the policy and the set.
+      expression = "destination.inAnyRange(prefixSets('${google_compute_router_named_set.my_prefix_set.name}'))"
+    }
+    actions {
+      expression = "accept()"
+    }
+  }
+}

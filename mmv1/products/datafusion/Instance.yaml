@@ -39,24 +39,25 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+    - 'projects/{{project}}/locations/{{region}}/instances/{{name}}'
     - '{{name}}'
 custom_code:
   constants: 'templates/terraform/constants/data_fusion_instance_option.go.tmpl'
   pre_update: 'templates/terraform/pre_update/datafusion_instance_update.go.tmpl'
+include_in_tgc_next: true
 sweeper:
   url_substitutions:
     - region: "us-central1"
 examples:
   - name: 'data_fusion_instance_basic'
     primary_resource_id: 'basic_instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_name: 'my-instance'
       prober_test_run: ''
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_full'
     primary_resource_id: 'extended_instance'
     vars:
@@ -67,6 +68,7 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_psc'
     primary_resource_id: 'psc_instance'
     vars:
@@ -78,10 +80,12 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_cmek'
     primary_resource_id: 'cmek'
     vars:
       instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_enterprise'
     primary_resource_id: 'enterprise_instance'
     vars:
@@ -90,14 +94,29 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_event'
     primary_resource_id: 'event'
     vars:
       instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_zone'
     primary_resource_id: 'zone'
     vars:
       instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
+  - name: 'data_fusion_instance_patch_revision'
+    primary_resource_id: 'data_fusion_instance_patch_revision'
+    vars:
+      instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
+tgc_tests:
+  - name: 'TestAccDatafusionInstance_tags'
+    skip: 'fix it after patch_revision is released in v7.18.0'
+  - name: 'TestAccDataFusionInstance_update'
+    skip: 'fix it after patch_revision is released in v7.18.0'
+  - name: 'TestAccDataFusionInstanceEnterprise_update'
+    skip: 'fix it after patch_revision is released in v7.18.0'
 parameters:
   - name: 'region'
     type: String
@@ -207,6 +226,11 @@ properties:
     type: String
     description: |
       Current version of the Data Fusion.
+    default_from_api: true
+  - name: 'patchRevision'
+    type: String
+    description: |
+      Current patch revision of the Data Fusion.
     default_from_api: true
   - name: 'serviceAccount'
     type: String
@@ -372,6 +396,72 @@ properties:
           enum_values:
             - 'ENABLED'
             - 'DISABLED'
+  - name: 'maintenancePolicy'
+    type: NestedObject
+    description: |
+      Configure the maintenance policy for this instance.
+    properties:
+      - name: 'maintenanceWindow'
+        type: NestedObject
+        description: |
+          The maintenance window of the instance.
+        properties:
+          - name: 'recurringTimeWindow'
+            type: NestedObject
+            description: |
+              The recurring time window of the maintenance window.
+            required: true
+            properties:
+              - name: 'window'
+                type: NestedObject
+                description: |
+                  The window representing the start and end time of recurrences. This field ignores the date components of the provided timestamps. Only the time of day and duration between start and end time are relevant.
+                required: true
+                properties:
+                  - name: 'startTime'
+                    type: String
+                    description: |
+                      The start time of the time window provided in RFC 3339 format.
+                    required: true
+                  - name: 'endTime'
+                    type: String
+                    description: |
+                      The end time of the time window provided in RFC 3339 format.
+                    required: true
+              - name: 'recurrence'
+                type: String
+                description: |
+                  An RRULE with format RFC-5545 for how this window reccurs. They go on for the span of time between the start and end time. The only supported FREQ value is "WEEKLY". To have something repeat every weekday, use: "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR".
+                required: true
+
+  - name: 'maintenanceEvents'
+    type: Array
+    description: |
+      The maintenance events for this instance.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'startTime'
+          type: String
+          description: |
+            The start time of the maintenance event provided in RFC 3339 format.
+          output: true
+        - name: 'endTime'
+          type: String
+          description: |
+            The end time of the maintenance event provided in RFC 3339 format.
+          output: true
+        - name: 'state'
+          type: Enum
+          description: |
+            The state of the maintenance event.
+          output: true
+          enum_values:
+            - 'STATE_UNSPECIFIED'
+            - 'SCHEDULED'
+            - 'STARTED'
+            - 'COMPLETED'
   - name: 'tags'
     type: KeyValuePairs
     description: |

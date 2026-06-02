@@ -8,7 +8,7 @@ description: |-
 
 Creates and manages service account keys, which allow the use of a service account with Google Cloud.
 
--> **Warning**: This resource persists a sensitive credential in plaintext in the [remote state](https://www.terraform.io/language/state/sensitive-data) used by Terraform.
+-> **Warning**: This resource persists a sensitive credential in plaintext in the [remote state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data) used by Terraform.
 Please take appropriate measures to protect your remote state.
 
 * [API documentation](https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts.keys)
@@ -100,6 +100,13 @@ Valid values are listed at
 * `public_key_data` (Optional) Public key data to create a service account key for given service account. The expected format for this field is a base64 encoded X509_PEM and it conflicts with `public_key_type` and `private_key_type`.
 
 * `keepers` (Optional) Arbitrary map of values that, when changed, will trigger a new key to be generated.
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
 
 ## Attributes Reference
 

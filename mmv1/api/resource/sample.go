@@ -39,8 +39,14 @@ type Sample struct {
 	// unskipping the test. If this is not empty, the test will be skipped.
 	SkipTest string `yaml:"skip_test,omitempty"`
 
+	// SkipFunc is a function call to a custom skip check
+	SkipFunc string `yaml:"skip_func,omitempty"`
+
 	// Whether to skip generating tests for this resource
 	ExcludeTest bool `yaml:"exclude_test,omitempty"`
+
+	// Whether to EXCLUDE the first step from doc generation
+	ExcludeBasicDoc bool `yaml:"exclude_basic_doc,omitempty"`
 
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
@@ -70,10 +76,6 @@ type Sample struct {
 	// If set, this will override the default resource type implied from the
 	// object parent
 	PrimaryResourceType string `yaml:"primary_resource_type,omitempty"`
-
-	// The name of the primary resource for use in IAM tests. IAM tests need
-	// a reference to the primary resource to create IAM policies for
-	PrimaryResourceName string `yaml:"primary_resource_name,omitempty"`
 
 	// Steps
 	Steps []*Step
@@ -108,6 +110,28 @@ func (s *Sample) TestSteps() []*Step {
 	})
 }
 
+// TestServiceDependencies returns a map of service names to import aliases that are required
+// by this sample's steps.
+func (s *Sample) TestServiceDependencies(resourcePrefixServiceMap map[string]string) map[string]string {
+	deps := map[string]string{}
+	if len(s.BootstrapIam) > 0 {
+		deps["resourcemanager"] = ""
+	}
+	for _, step := range s.TestSteps() {
+		for service, alias := range step.TestServiceDependencies(resourcePrefixServiceMap) {
+			if depsAlias, ok := deps[service]; ok && alias != depsAlias {
+				if (alias == "_" && depsAlias == "") || (alias == "" && depsAlias == "_") {
+					deps[service] = ""
+					continue
+				}
+				log.Fatalf("Conflicting aliases (%s vs %s) for service dependency %s for sample %s", depsAlias, alias, service, s.Name)
+			}
+			deps[service] = alias
+		}
+	}
+	return deps
+}
+
 func (s *Sample) ResourceType(terraformName string) string {
 	if s.PrimaryResourceType != "" {
 		return s.PrimaryResourceType
@@ -115,18 +139,20 @@ func (s *Sample) ResourceType(terraformName string) string {
 	return terraformName
 }
 
-func (s *Sample) Validate(rName string) {
+func (s *Sample) Validate(rName string) (es []error) {
 	if s.Name == "" {
-		log.Fatalf("Missing `name` for one sample in resource %s", rName)
+		es = append(es, fmt.Errorf("missing `name` for one sample in resource %s", rName))
 	}
-	s.ValidateExternalProviders()
+	es = append(es, s.ValidateExternalProviders()...)
 
 	for _, step := range s.Steps {
-		step.Validate(rName, s.Name)
+		es = append(es, step.Validate(rName, s.Name)...)
 	}
+
+	return es
 }
 
-func (s *Sample) ValidateExternalProviders() {
+func (s *Sample) ValidateExternalProviders() (es []error) {
 	// Official providers supported by HashiCorp
 	// https://registry.terraform.io/search/providers?namespace=hashicorp&tier=official
 	HASHICORP_PROVIDERS := []string{"aws", "random", "null", "template", "azurerm", "kubernetes", "local",
@@ -142,6 +168,8 @@ func (s *Sample) ValidateExternalProviders() {
 	}
 
 	if len(unallowedProviders) > 0 {
-		log.Fatalf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+		es = append(es, fmt.Errorf("providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders))
 	}
+
+	return es
 }

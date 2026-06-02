@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
@@ -61,7 +63,7 @@ func testAccKMSFolderKajPolicyConfig_basic(context map[string]interface{}) strin
 # Create Folder in GCP Organization.
 resource "google_folder" "kaj_folder" {
 	provider     = google-beta
-	display_name = "tf-test-my-folder%{random_suffix}"
+	display_name = "tf-test-folder-kaj-%{random_suffix}"
 	parent       = "organizations/%{org_id}"
 	deletion_protection = false
 }
@@ -114,7 +116,7 @@ func testAccKMSFolderKajPolicyConfig_update(context map[string]interface{}) stri
 # Create Folder in GCP Organization.
 resource "google_folder" "kaj_folder" {
 	provider     = google-beta
-	display_name = "tf-test-my-folder%{random_suffix}"
+	display_name = "tf-test-folder-kaup-%{random_suffix}"
 	parent       = "organizations/%{org_id}"
 	deletion_protection = false
 }

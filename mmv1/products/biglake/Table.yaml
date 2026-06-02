@@ -12,20 +12,20 @@
 # limitations under the License.
 
 ---
-name: 'Table'
+name: Table
 description: |
   Represents a table.
 references:
   guides:
-    'Manage open source metadata with BigLake Metastore': 'https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_tables'
-  api: 'https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs.databases.tables'
+    Manage open source metadata with BigLake Metastore: https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_tables
+  api: https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs.databases.tables
 docs:
-id_format: '{{database}}/tables/{{name}}'
 base_url: '{{database}}/tables'
 self_link: '{{database}}/tables/{{name}}'
 create_url: '{{database}}/tables?tableId={{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
+id_format: '{{database}}/tables/{{name}}'
 import_format:
   - '{{%database}}/tables/{{name}}'
 timeouts:
@@ -33,16 +33,18 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'biglake_table'
-    primary_resource_id: 'table'
-    vars:
-      name: 'my_table'
-      catalog: 'my_catalog'
-      database: 'my_database'
-      bucket: 'my_bucket'
+samples:
+  - name: biglake_table
+    primary_resource_id: table
+    steps:
+      - name: biglake_table
+        resource_id_vars:
+          name: my_table
+          catalog: my_catalog
+          database: my_database
+          bucket: my_bucket
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Output only. The name of the Table. Format:
@@ -50,14 +52,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'database'
+  - name: database
     type: String
     description: |
       The id of the parent database.
     url_param_only: true
     immutable: true
 properties:
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       Output only. The creation time of the table. A timestamp in RFC3339 UTC
@@ -65,7 +67,7 @@ properties:
       digits. Examples: "2014-10-02T15:01:23Z" and
       "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       Output only. The last modification time of the table. A timestamp in
@@ -73,7 +75,7 @@ properties:
       fractional digits. Examples: "2014-10-02T15:01:23Z" and
       "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'deleteTime'
+  - name: deleteTime
     type: String
     description: |
       Output only. The deletion time of the table. Only set after the
@@ -81,7 +83,7 @@ properties:
       nanosecond resolution and up to nine fractional digits. Examples:
       "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'expireTime'
+  - name: expireTime
     type: String
     description: |
       Output only. The time when this table is considered expired. Only set
@@ -89,7 +91,7 @@ properties:
       with nanosecond resolution and up to nine fractional digits. Examples:
       "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'etag'
+  - name: etag
     type: String
     description: |
       The checksum of a table object computed by the server based on the value
@@ -97,41 +99,41 @@ properties:
       has an up-to-date value before proceeding. It is only checked for update
       table operations.
     output: true
-  - name: 'type'
+  - name: type
     type: Enum
     description: |
       The database type.
     enum_values:
-      - 'HIVE'
-  - name: 'hiveOptions'
+      - HIVE
+  - name: hiveOptions
     type: NestedObject
     description: |
       Options of a Hive table.
     properties:
-      - name: 'parameters'
+      - name: parameters
         type: KeyValuePairs
         description: |
           Stores user supplied Hive table parameters. An object containing a
           list of "key": value pairs.
           Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-      - name: 'tableType'
+      - name: tableType
         type: String
         description: |
           Hive table type. For example, MANAGED_TABLE, EXTERNAL_TABLE.
-      - name: 'storageDescriptor'
+      - name: storageDescriptor
         type: NestedObject
         description: |
           Stores physical storage information on the data.
         properties:
-          - name: 'locationUri'
+          - name: locationUri
             type: String
             description: |
               Cloud Storage folder URI where the table data is stored, starting with "gs://".
-          - name: 'inputFormat'
+          - name: inputFormat
             type: String
             description: |
               The fully qualified Java class name of the input format.
-          - name: 'outputFormat'
+          - name: outputFormat
             type: String
             description: |
               The fully qualified Java class name of the output format.

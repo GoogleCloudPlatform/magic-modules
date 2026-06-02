@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudsecuritycompliance"
 )
 
 func testAccCloudSecurityComplianceFramework_basic(context map[string]interface{}) string {
@@ -28,6 +29,52 @@ resource "google_cloud_security_compliance_framework" "example" {
       name = "location"
       parameter_value {
         string_value = "us-central1"
+      }
+    }
+    parameters {
+      name = "oneof-parameter"
+      parameter_value {
+        oneof_value {
+          name = "test-oneof"
+          parameter_value {
+            string_value = "test-value"
+          }
+        }
+      }
+    }
+    parameters {
+      name = "bool-parameter"
+      parameter_value {
+        oneof_value {
+          name = "bool-oneof"
+          parameter_value {
+            bool_value = true
+          }
+        }
+      }
+    }
+    parameters {
+      name = "number-parameter"
+      parameter_value {
+        oneof_value {
+          name = "number-oneof"
+          parameter_value {
+            number_value = 123.45
+          }
+        }
+      }
+    }
+    parameters {
+      name = "string-list-parameter"
+      parameter_value {
+        oneof_value {
+          name = "string-list-oneof"
+          parameter_value {
+            string_list_value {
+              values = ["value1", "value2"]
+            }
+          }
+        }
       }
     }
   }
@@ -92,6 +139,52 @@ resource "google_cloud_security_compliance_framework" "example" {
       name = "region"
       parameter_value {
         string_value = "eu"
+      }
+    }
+    parameters {
+      name = "oneof-parameter"
+      parameter_value {
+        oneof_value {
+          name = "updated-oneof"
+          parameter_value {
+            string_value = "updated-value"
+          }
+        }
+      }
+    }
+    parameters {
+      name = "bool-parameter"
+      parameter_value {
+        oneof_value {
+          name = "bool-oneof"
+          parameter_value {
+            bool_value = true
+          }
+        }
+      }
+    }
+    parameters {
+      name = "number-parameter"
+      parameter_value {
+        oneof_value {
+          name = "number-oneof"
+          parameter_value {
+            number_value = 678.90
+          }
+        }
+      }
+    }
+    parameters {
+      name = "string-list-parameter"
+      parameter_value {
+        oneof_value {
+          name = "string-list-oneof"
+          parameter_value {
+            string_list_value {
+              values = ["value3", "value4"]
+            }
+          }
+        }
       }
     }
   }

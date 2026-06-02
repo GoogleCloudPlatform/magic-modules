@@ -1,0 +1,11 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	parts := v.([]interface{})
+	s := make([]string, len(parts))
+	for i, p := range parts {
+		s[i] = p.(string)
+	}
+	return strings.Join(s, "\x1f")
+}

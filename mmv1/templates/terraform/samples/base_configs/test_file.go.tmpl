@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 // ----------------------------------------------------------------------------
@@ -15,26 +15,60 @@
 //
 // ----------------------------------------------------------------------------
 
+{{ $needsPlancheck := false -}}
+{{- range $s := $.Res.TestSamples -}}
+  {{- if gt (len $s.TestSteps) 1 -}}
+    {{- $needsPlancheck = true -}}
+  {{- end -}}
+{{- end -}}
+
 package {{ $.Res.PackageName }}_test
 
+{{if or (gt (len $.Res.TestSamples) 0) (not $.Res.ExcludeDelete) -}}
 import (
-{{- if not $.Res.ExcludeDelete }}
-	{{- if not $.Res.CustomCode.TestCheckDestroy }}
 	"fmt"
-	{{- end }}
+	"log"
+	"strconv"
 	"strings"
-{{- end }}
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-{{- if not $.Res.ExcludeDelete }}
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
+{{- if $needsPlancheck }}
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 {{- end }}
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
+	"{{ $.ImportPath  }}/services/{{ lower $.Res.ProductMetadata.Name }}"
+{{- range $service, $alias := $.Res.TestServiceDependencies }}
+	{{ $alias }} "{{ $.ImportPath  }}/services/{{ $service }}"
+{{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
+
+	"google.golang.org/api/googleapi"
+
+)
+
+{{if $.Res.CustomCode.TestConstants -}} 
+    {{- customTemplate $ $.Res.CustomCode.TestConstants true -}}
+{{- end}}
+
+var (
+	_ = fmt.Sprintf
+	_ = log.Print
+	_ = strconv.Atoi
+	_ = strings.Trim
+	_ = time.Now
+	_ = resource.TestMain
+	_ = terraform.NewState
+	_ = envvar.TestEnvVar
+	_ = tpgresource.SetLabels
+	_ = transport_tpg.Config{}
+	_ = googleapi.Error{}
+	_ = {{ lower $.Res.ProductMetadata.Name }}.Product
 )
 
 {{ range $s := $.Res.TestSamples }}
@@ -43,13 +77,17 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	t.Skip("{{$s.SkipTest}}")
 	{{- end }}
 
+	{{- if $s.SkipFunc }}
+	{{$s.SkipFunc}}
+	{{- end}}
+
 	{{- if $s.SkipVcr }}
 	acctest.SkipIfVcr(t)
 	{{- end }}
 	t.Parallel()
 
 	{{- if $s.BootstrapIam }}
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 	{{- range $iam := $s.BootstrapIam }}
 		{
 			Member: "{{$iam.Member}}",
@@ -59,18 +97,21 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	})
 	{{- end }}
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	{{- range $i, $st := $s.TestSteps }}
 	{{- if eq $i 0 }}
 
 	context := map[string]interface{}{
 	{{- else }}
+	
 	context_{{ $i }} := map[string]interface{}{
 	{{- end }}
 		{{- template "EnvVarContext" dict "TestEnvVars" $st.TestEnvVars "HasNewLine" false}}
-		{{- range $varKey, $varVal := $st.TestVarsOverrides }}
-		"{{$varKey}}": {{$varVal}},
+		{{- range $varKey, $varVal := $st.TestContextVars }}
+		"{{$varKey}}": {{ $varVal }},
 		{{- end }}
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randomSuffix,
 	}
 	{{- end }}
 
@@ -114,6 +155,14 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToString $st }},
 			{{- end }}
 			},
+			{{- if not $.Res.ExcludeIdentityGeneration }}
+			{
+				ResourceName:       "{{ $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
+			{{- end }}
 			{{- end }}
 		{{- end }}
 		},
@@ -143,15 +192,19 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 				continue
 			}
 	{{ if $.Res.CustomCode.TestCheckDestroy }}
-	{{ $.Res.CustomTemplate $.Res.CustomCode.TestCheckDestroy false -}}
+	{{ customTemplate $.Res $.Res.CustomCode.TestCheckDestroy false -}}
 	{{- else }}
 
 		config := acctest.GoogleProviderConfig(t)
-
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}{{$.Res.ProductMetadata.Name}}{{"BasePath}}"}}{{$.Res.SelfLinkUri}}")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl({{ lower $.Res.ProductMetadata.Name }}.Product, config)+"{{$.Res.SelfLinkUri}}")
 		if err != nil {
 			return err
 		}
+{{- if $.Res.ProductMetadata.Version.RepEnabled }}
+		if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+			return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+		}
+{{- end }}
 
 		billingProject := ""
 
@@ -181,4 +234,5 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		return nil
 	}
 }
+{{- end }}
 {{- end }}

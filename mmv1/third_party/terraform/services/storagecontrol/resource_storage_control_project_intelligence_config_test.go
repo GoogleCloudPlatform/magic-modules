@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package storagecontrol_test
 
 import (
@@ -8,13 +6,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storagecontrol"
 )
 
 func TestAccStorageControlProjectIntelligenceConfig_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       acctest.BootstrapProject(t, "tf-boot-stor-int-", envvar.GetTestBillingAccountFromEnv(t), []string{"storage.googleapis.com"}).ProjectId,
+		"project":       resourcemanager.BootstrapProject(t, "tf-boot-stor-int-", envvar.GetTestBillingAccountFromEnv(t), []string{"storage.googleapis.com"}).ProjectId,
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -41,7 +43,7 @@ func dataSourceVmwareengineVcenterCredentialsRead(d *schema.ResourceData, meta i
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{VmwareengineBasePath}}{{parent}}:showVcenterCredentials")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{parent}}:showVcenterCredentials")
 	if err != nil {
 		return err
 	}
@@ -87,4 +89,13 @@ func flattenVmwareengineVcenterCredentailsUsername(v interface{}, d *schema.Reso
 
 func flattenVmwareengineVcenterCredentailsPassword(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_vmwareengine_vcenter_credentials",
+		ProductName: "vmwareengine",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVmwareengineVcenterCredentials(),
+	}.Register()
 }

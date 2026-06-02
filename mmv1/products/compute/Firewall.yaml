@@ -38,6 +38,7 @@ docs:
 base_url: 'projects/{{project}}/global/firewalls'
 has_self_link: true
 update_verb: 'PATCH'
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -50,7 +51,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/firewall.tmpl'
   constants: 'templates/terraform/constants/firewall.tmpl'
@@ -260,6 +261,7 @@ properties:
       `source_ranges`, `source_tags` or `source_service_accounts` is required.
     is_set: true
     diff_suppress_func: 'diffSuppressSourceRanges'
+    set_hash_func: tpgresource.IpAddrSetHashFunc
     item_type:
       type: String
   - name: 'sourceServiceAccounts'

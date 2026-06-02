@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -53,7 +54,7 @@ func testGoogleFolderServiceIdentity_basic(context map[string]interface{}) strin
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
   parent = "organizations/%{org_id}"
-  display_name = "test-folder-%{random_suffix}"
+  display_name = "tf-test-folder-%{random_suffix}"
   deletion_protection = false
 }
 

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/healthcare"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -150,7 +151,7 @@ func testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists(t *testing.T, bindin
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.Hl7V2StoreId()).Do()
+		p, err := healthcare.NewClient(config, config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.Hl7V2StoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -186,7 +187,7 @@ func testAccCheckGoogleHealthcareHl7V2StoreIamMemberExists(t *testing.T, n, role
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.Hl7V2StoreId()).Do()
+		p, err := healthcare.NewClient(config, config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.Hl7V2StoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -221,7 +222,7 @@ func testAccCheckGoogleHealthcareHl7V2StoreIamPolicyExists(t *testing.T, n, role
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.Hl7V2StoreId()).Do()
+		p, err := healthcare.NewClient(config, config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.Hl7V2StoreId()).Do()
 		if err != nil {
 			return err
 		}

@@ -9,4 +9,7 @@ resource "google_colab_runtime_template" "{{$.PrimaryResourceId}}" {
   network_spec {
     enable_internet_access = true
   }
+
+  software_config {
+  }
 }

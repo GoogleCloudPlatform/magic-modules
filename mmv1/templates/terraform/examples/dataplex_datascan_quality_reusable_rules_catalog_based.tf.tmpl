@@ -1,0 +1,187 @@
+data "google_project" "project" {
+  project_id = "{{index $.TestEnvVars "project_name"}}"
+}
+
+resource "google_service_account" "sa" {
+  account_id   = "tf-test-sa-%{random_suffix}"
+  display_name = "DataScan Service Account"
+  project      = "{{index $.TestEnvVars "project_name"}}"
+}
+
+resource "google_service_account_iam_member" "dataplex_sa_impersonate" {
+  service_account_id = google_service_account.sa.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-dataplex.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "sa_bq_data_viewer" {
+  project = "{{index $.TestEnvVars "project_name"}}"
+  role    = "roles/bigquery.dataViewer"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_project_iam_member" "sa_bq_job_user" {
+  project = "{{index $.TestEnvVars "project_name"}}"
+  role    = "roles/bigquery.jobUser"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_bigquery_dataset" "tf_test_dataset" {
+  dataset_id                  = "tf_test_dataset_id_%{random_suffix}"
+  default_table_expiration_ms = 3600000
+  delete_contents_on_destroy  = true
+  project                     = "{{index $.TestEnvVars "project_name"}}"
+  location                    = "us-central1"
+
+  depends_on = [
+    google_service_account_iam_member.dataplex_sa_impersonate,
+    google_project_iam_member.sa_bq_data_viewer,
+    google_project_iam_member.sa_bq_job_user
+  ]
+}
+
+resource "google_bigquery_table" "tf_test_table" {
+  dataset_id          = google_bigquery_dataset.tf_test_dataset.dataset_id
+  table_id            = "tf_test_table_id_%{random_suffix}"
+  deletion_protection = false
+  project             = "{{index $.TestEnvVars "project_name"}}"
+  schema              = <<SCHEMA_EOF
+    [
+    {
+      "name": "name",
+      "type": "STRING",
+      "mode": "NULLABLE"
+    }
+    ]
+  SCHEMA_EOF
+}
+
+resource "google_dataplex_entry_group" "test_group" {
+  location       = "us-central1"
+  entry_group_id = "test-group-%{random_suffix}"
+  project        = "{{index $.TestEnvVars "project_name"}}"
+}
+
+resource "google_dataplex_entry" "test_entry" {
+  location       = "us-central1"
+  entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
+  entry_id       = "test-entry-%{random_suffix}"
+  entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
+  project        = data.google_project.project.number
+  aspects {
+    aspect_key = "655216118709.global.data-quality-rule-template"
+    aspect {
+      data = jsonencode({
+        dimension = "VALIDITY"
+        sqlCollection = [
+          {
+            query = "SELECT * FROM $${param(table_name)} WHERE $${param(column_name)} IS NULL"
+          }
+        ]
+        inputParameters = {
+          table_name = { description = "Table Name" }
+          column_name = { description = "Column Name" }
+        }
+      })
+    }
+  }
+}
+
+resource "time_sleep" "wait_for_bq_sync" {
+  depends_on = [google_bigquery_table.tf_test_table]
+  create_duration = "300s"
+}
+
+resource "google_dataplex_entry" "bq_table_entry" {
+  entry_group_id = "@bigquery"
+  project = data.google_project.project.project_id
+  location = "us-central1"
+  entry_id = "bigquery.googleapis.com/projects/${data.google_project.project.project_id}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table.table_id}"
+  entry_type = "projects/655216118709/locations/global/entryTypes/bigquery-table"
+  fully_qualified_name = "bigquery:${data.google_project.project.project_id}.${google_bigquery_dataset.tf_test_dataset.dataset_id}.${google_bigquery_table.tf_test_table.table_id}"
+  parent_entry = "projects/${data.google_project.project.project_id}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/${data.google_project.project.project_id}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}"
+
+  depends_on = [
+    time_sleep.wait_for_bq_sync,
+    google_dataplex_entry.test_entry
+  ]
+
+  aspects {
+    aspect_key = "655216118709.global.data-rules@Schema.name"
+    aspect {
+      data = jsonencode({
+        rules = [
+          {
+            name = "rule-to-filter-out"
+            dimension = "VALIDITY"
+            type = "TEMPLATE_REFERENCE"
+            templateReference = {
+              name = google_dataplex_entry.test_entry.name
+              values = {
+                table_name = { value = "\u0060${data.google_project.project.project_id}.${google_bigquery_dataset.tf_test_dataset.dataset_id}.${google_bigquery_table.tf_test_table.table_id}\u0060" }
+                column_name = { value = "name" }
+              }
+            }
+            attributes = {
+              "priority" = "low"
+            }
+          },
+          {
+            name = "non-null-check-name-manual"
+            dimension = "VALIDITY"
+            type = "TEMPLATE_REFERENCE"
+            templateReference = {
+              name = google_dataplex_entry.test_entry.name
+              values = {
+                table_name = { value = "\u0060${data.google_project.project.project_id}.${google_bigquery_dataset.tf_test_dataset.dataset_id}.${google_bigquery_table.tf_test_table.table_id}\u0060" }
+                column_name = { value = "name" }
+              }
+            }
+            attributes = {
+              "priority" = "high"
+            }
+          }
+        ]
+      })
+    }
+  }
+}
+
+resource "time_sleep" "wait_for_aspect_propagation" {
+  depends_on = [google_dataplex_entry.bq_table_entry]
+  create_duration = "300s"
+}
+
+resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  data_scan_id = "{{index $.Vars "datascan_name"}}"
+  display_name = "Catalog Datascan Quality"
+  description  = "Example resource - Catalog Datascan Quality"
+
+  data {
+    resource = "//bigquery.googleapis.com/projects/${data.google_project.project.project_id}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table.table_id}"
+  }
+
+  execution_spec {
+    trigger {
+      on_demand {}
+    }
+  }
+
+  execution_identity {
+    service_account {
+      email = google_service_account.sa.email
+    }
+  }
+
+  data_quality_spec {
+    enable_catalog_based_rules = true
+    filter = "attributes.priority = \"high\""
+  }
+
+  project = data.google_project.project.project_id
+  
+  depends_on = [
+    time_sleep.wait_for_aspect_propagation
+  ]
+}

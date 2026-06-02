@@ -43,7 +43,6 @@ custom_code:
 examples:
   - name: 'clouddeploy_delivery_pipeline_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cd-delivery-pipeline%s", context["random_suffix"])'
     vars:
       delivery_pipeline: 'cd-delivery-pipeline'
 parameters:

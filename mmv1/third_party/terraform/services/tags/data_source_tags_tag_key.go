@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
+	cloudresourcemanagerv3 "google.golang.org/api/cloudresourcemanager/v3"
 )
 
 func DataSourceGoogleTagsTagKey() *schema.Resource {
@@ -49,6 +51,10 @@ func DataSourceGoogleTagsTagKey() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"allowed_values_regex": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -60,13 +66,13 @@ func dataSourceGoogleTagsTagKeyRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	var tagKeyMatch *resourceManagerV3.TagKey
+	var tagKeyMatch *cloudresourcemanagerv3.TagKey
 	parent := d.Get("parent").(string)
 	shortName := d.Get("short_name").(string)
 	token := ""
 
 	for paginate := true; paginate; {
-		resp, err := config.NewResourceManagerV3Client(userAgent).TagKeys.List().Parent(parent).PageSize(300).PageToken(token).Do()
+		resp, err := resourcemanagerv3.NewClient(config, userAgent).TagKeys.List().Parent(parent).PageSize(300).PageToken(token).Do()
 		if err != nil {
 			return fmt.Errorf("error reading tag key list: %s", err)
 		}
@@ -104,6 +110,18 @@ func dataSourceGoogleTagsTagKeyRead(d *schema.ResourceData, meta interface{}) er
 	if err := d.Set("description", tagKeyMatch.Description); err != nil {
 		return fmt.Errorf("Error setting tag key description: %s", err)
 	}
+	if err := d.Set("allowed_values_regex", tagKeyMatch.AllowedValuesRegex); err != nil {
+		return fmt.Errorf("Error setting tag key allowed_values_regex: %s", err)
+	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_tags_tag_key",
+		ProductName: "tags",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleTagsTagKey(),
+	}.Register()
 }

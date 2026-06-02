@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/hashicorp/terraform-provider-google/google/services/cloudrun"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -16,6 +17,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+var _ = cloudrun.Product
 
 var fictionalSchema = map[string]*schema.Schema{
 	"location": {
@@ -973,7 +976,10 @@ func TestConflictError(t *testing.T) {
 		t.Error("did not find that a 409 was a conflict error.")
 	}
 	if !tpgresource.IsConflictError(errwrap.Wrapf("wrap", confErr)) {
-		t.Error("did not find that a wrapped 409 was a conflict error.")
+		t.Error("did not find that a wrapped (errwrap) 409 was a conflict error.")
+	}
+	if !tpgresource.IsConflictError(fmt.Errorf("wrap: %w", confErr)) {
+		t.Error("did not find that a wrapped (fmt.Errorf) 409 was a conflict error.")
 	}
 	confErr = &googleapi.Error{
 		Code: 412,
@@ -983,6 +989,9 @@ func TestConflictError(t *testing.T) {
 	}
 	if !tpgresource.IsConflictError(errwrap.Wrapf("wrap", confErr)) {
 		t.Error("did not find that a wrapped 412 was a conflict error.")
+	}
+	if !tpgresource.IsConflictError(fmt.Errorf("wrap: %w", confErr)) {
+		t.Error("did not find that a wrapped (fmt.Errorf) 412 was a conflict error.")
 	}
 	// skipping negative tests as other cases may be added later.
 }
@@ -1128,11 +1137,12 @@ func TestReplaceVars(t *testing.T) {
 		"base path recursive replacement": {
 			Template: "{{CloudRunBasePath}}namespaces/{{project}}/services",
 			Config: &transport_tpg.Config{
-				Project:          "default-project",
-				Region:           "default-region",
-				CloudRunBasePath: "https://{{region}}-run.googleapis.com/",
+				Project: "default-project",
 			},
-			Expected: "https://default-region-run.googleapis.com/namespaces/default-project/services",
+			SchemaValues: map[string]interface{}{
+				"location": "whatever",
+			},
+			Expected: "https://whatever-run.googleapis.com/namespaces/default-project/services",
 		},
 	}
 

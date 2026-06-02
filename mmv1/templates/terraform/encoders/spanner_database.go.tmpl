@@ -11,7 +11,7 @@ log.Printf("[DEBUG] Preparing to create new Database. Any extra DDL statements w
 delete(obj, "name")
 delete(obj, "instance")
 {{/* These are added back in post-create, but do not remove for Validator. */}}
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 delete(obj, "versionRetentionPeriod")
 delete(obj, "extraStatements")
 delete(obj, "enableDropProtection")

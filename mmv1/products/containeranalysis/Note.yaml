@@ -48,7 +48,6 @@ custom_code:
 examples:
   - name: 'container_analysis_note_basic'
     primary_resource_id: 'note'
-    primary_resource_name: 'fmt.Sprintf("tf-test-attestor-note%s", context["random_suffix"])'
     vars:
       note_name: 'attestor-note'
   - name: 'container_analysis_note_attestation_full'

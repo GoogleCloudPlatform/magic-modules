@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/servicedirectory"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -90,11 +91,6 @@ resource "google_service_directory_service" "example" {
 resource "google_service_directory_endpoint" "example" {
   endpoint_id = "%s"
   service     = google_service_directory_service.example.id
-
-  metadata = {
-    stage  = "prod"
-    region = "us-central1"
-  }
 
   address = "1.2.3.4"
   port    = 5353

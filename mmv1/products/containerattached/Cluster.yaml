@@ -39,37 +39,51 @@ timeouts:
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-gkemulticloud.googleapis.com/v1/{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
   constants: 'templates/terraform/constants/containerattached_cluster_diff.go.tmpl'
   pre_update: 'templates/terraform/pre_update/containerattached_update.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/container_attached_deletion_policy.go.tmpl'
+deletion_policy_custom_docs: true
 examples:
   - name: 'container_attached_cluster_basic'
     primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"basic" + randomSuffix'
   - name: 'container_attached_cluster_full'
     primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"basic" + randomSuffix'
   - name: 'container_attached_cluster_ignore_errors'
     primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"basic" + randomSuffix'
     ignore_read_extra:
       - 'deletion_policy'
 virtual_fields:
   - name: 'deletion_policy'
-    description: 'Policy to determine what flags to send on delete. Possible values: DELETE, DELETE_IGNORE_ERRORS'
+    description: |
+      Policy to determine what flags to send on delete.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+
+      Possible values: DELETE, DELETE_IGNORE_ERRORS, PREVENT, ABANDON'. Defaults to 'DELETE'.
     type: String
-    default_value: "DELETE"
+    # excluded from generation due to Universal Deletion Policy
+    exclude: true
 parameters:
 properties:
   - name: 'location'

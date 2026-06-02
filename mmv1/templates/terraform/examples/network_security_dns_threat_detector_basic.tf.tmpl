@@ -1,13 +1,9 @@
 resource "google_compute_network" "foobar" {
-  provider = google-beta
-
   name                    = "{{index $.Vars "vpc_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_network_security_dns_threat_detector" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
-
   name                     = "{{index $.Vars "resource_name"}}"
   location                 = "global"
   threat_detector_provider = "INFOBLOX"

@@ -1,0 +1,4 @@
+// Forcefully delete data table even if there are any rows associated.
+if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "FORCE" {
+    url = url + "?force=true"
+}

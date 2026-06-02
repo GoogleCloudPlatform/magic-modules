@@ -5,6 +5,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/apigee"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"testing"
 )
 
@@ -80,14 +84,14 @@ resource "google_project_service" "servicenetworking" {
   service = "servicenetworking.googleapis.com"
   depends_on = [google_project_service.compute]
 }
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_300_seconds" {
+  create_duration = "300s"
   depends_on = [google_project_service.servicenetworking]
 }
 resource "google_compute_network" "apigee_network" {
   name       = "apigee-network"
   project    = google_project.project.project_id
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_300_seconds]
 }
 resource "google_compute_global_address" "apigee_range" {
   name          = "apigee-range"
@@ -118,6 +122,10 @@ resource "google_apigee_instance" "apigee_instance" {
   org_id             = google_apigee_organization.apigee_org.id
   peering_cidr_range = "SLASH_22"
 }
+resource "google_apigee_environment" "env_dev" {
+  name   = "dev"
+  org_id = google_apigee_organization.apigee_org.id
+}
 resource "google_apigee_api_product" "apigee_api_product" {
   org_id        = google_apigee_organization.apigee_org.id
   name              = "tf-test%{random_suffix}"
@@ -132,7 +140,7 @@ resource "google_apigee_api_product" "apigee_api_product" {
   quota_time_unit     = "day"
   quota_counter_scope = "PROXY"
 
-  environments = ["dev", "hom"]
+  environments = ["dev"]
   scopes = [
     "read:weather",
     "write:reports"
@@ -274,7 +282,8 @@ resource "google_apigee_api_product" "apigee_api_product" {
   }
 
   depends_on = [
-    google_apigee_instance.apigee_instance
+    google_apigee_instance.apigee_instance,
+	google_apigee_environment.env_dev
   ]
 }
 `, context)
@@ -308,14 +317,14 @@ resource "google_project_service" "servicenetworking" {
   service = "servicenetworking.googleapis.com"
   depends_on = [google_project_service.compute]
 }
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_300_seconds" {
+  create_duration = "300s"
   depends_on = [google_project_service.servicenetworking]
 }
 resource "google_compute_network" "apigee_network" {
   name       = "apigee-network"
   project    = google_project.project.project_id
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_300_seconds]
 }
 resource "google_compute_global_address" "apigee_range" {
   name          = "apigee-range"
@@ -356,6 +365,14 @@ resource "google_apigee_developer" "apigee_developer" {
     google_apigee_instance.apigee_instance
   ]
 }
+resource "google_apigee_environment" "env_dev" {
+  name   = "dev"
+  org_id = google_apigee_organization.apigee_org.id
+}
+resource "google_apigee_environment" "env_hom" {
+  name   = "hom"
+  org_id = google_apigee_organization.apigee_org.id
+}
 resource "google_apigee_api_product" "apigee_api_product" {
   org_id        = google_apigee_organization.apigee_org.id
   name              = "tf-test%{random_suffix}"
@@ -370,7 +387,7 @@ resource "google_apigee_api_product" "apigee_api_product" {
   quota_time_unit     = "day"
   quota_counter_scope = "PROXY"
 
-  environments = ["dev"]
+  environments = ["dev", "hom"]
   scopes = [
     "read:weather"
   ]
@@ -511,7 +528,9 @@ resource "google_apigee_api_product" "apigee_api_product" {
   }
 
   depends_on = [
-    google_apigee_instance.apigee_instance
+    google_apigee_instance.apigee_instance,
+	google_apigee_environment.env_dev,
+	google_apigee_environment.env_hom
   ]
 }
 `, context)

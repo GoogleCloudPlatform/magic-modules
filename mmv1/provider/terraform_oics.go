@@ -17,34 +17,32 @@ package provider
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 )
 
 type TerraformOiCS struct {
 	TargetVersionName string
 
-	Version product.Version
-
 	Product *api.Product
 
 	StartTime time.Time
+
+	templateFS fs.FS
 }
 
-func NewTerraformOiCS(product *api.Product, versionName string, startTime time.Time) TerraformOiCS {
+func NewTerraformOiCS(product *api.Product, versionName string, startTime time.Time, templateFS fs.FS) TerraformOiCS {
 	toics := TerraformOiCS{
 		Product:           product,
 		TargetVersionName: versionName,
-		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
+		templateFS:        templateFS,
 	}
-
-	toics.Product.SetPropertiesBasedOnVersion(&toics.Version)
 
 	return toics
 }
@@ -55,7 +53,7 @@ func (toics TerraformOiCS) Generate(outputFolder, resourceToGenerate string, gen
 
 func (toics TerraformOiCS) GenerateObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range toics.Product.Objects {
-		object.ExcludeIfNotInVersion(&toics.Version)
+		object.ExcludeIfNotInVersion(toics.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
 			log.Printf("Excluding %s per user request", object.Name)
@@ -67,7 +65,7 @@ func (toics TerraformOiCS) GenerateObjects(outputFolder, resourceToGenerate stri
 }
 
 func (toics TerraformOiCS) GenerateObject(object api.Resource, outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
-	templateData := NewTemplateData(outputFolder, toics.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, toics.TargetVersionName, toics.templateFS)
 
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
@@ -75,57 +73,9 @@ func (toics TerraformOiCS) GenerateObject(object api.Resource, outputFolder, res
 	}
 }
 
-func (toics TerraformOiCS) GenerateResourceLegacy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
-	if !generateDocs {
-		return
-	}
-
-	for _, example := range object.TestExamples() {
-		if len(example.TestEnvVars) > 0 {
-			continue
-		}
-
-		example.SetOiCSHCLText()
-
-		targetFolder := path.Join(outputFolder, example.Name)
-
-		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-			log.Println(fmt.Errorf("error creating oics example directory %v: %v", targetFolder, err))
-		}
-
-		oicsExampleTemplatePath := "templates/terraform/examples/base_configs/oics_example_file.tf.tmpl"
-		oicsExampleTemplates := []string{
-			oicsExampleTemplatePath,
-		}
-		templateData.GenerateFile(path.Join(targetFolder, "main.tf"), oicsExampleTemplatePath, example, false, oicsExampleTemplates...)
-
-		tutorialTemplatePath := "templates/terraform/examples/base_configs/tutorial.md.tmpl"
-		tutorialTemplates := []string{
-			tutorialTemplatePath,
-		}
-		templateData.GenerateFile(path.Join(targetFolder, "tutorial.md"), tutorialTemplatePath, example, false, tutorialTemplates...)
-
-		backingTemplatePath := "templates/terraform/examples/base_configs/example_backing_file.tf.tmpl"
-		backingTemplates := []string{
-			backingTemplatePath,
-		}
-		templateData.GenerateFile(path.Join(targetFolder, "backing_file.tf"), backingTemplatePath, example, false, backingTemplates...)
-
-		motdTemplatePath := "templates/terraform/examples/static/motd.tmpl"
-		motdTemplates := []string{
-			motdTemplatePath,
-		}
-		templateData.GenerateFile(path.Join(targetFolder, "motd"), motdTemplatePath, example, false, motdTemplates...)
-	}
-}
-
 func (toics TerraformOiCS) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
-	if object.Samples != nil && object.Examples != nil {
-		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
-	}
 	if object.Examples != nil {
-		toics.GenerateResourceLegacy(object, templateData, outputFolder, generateCode, generateDocs)
-		return
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 
 	if !generateDocs {
@@ -138,7 +88,7 @@ func (toics TerraformOiCS) GenerateResource(object api.Resource, templateData Te
 				continue
 			}
 
-			step.SetOiCSHCLText()
+			step.SetOiCSHCLText(toics.templateFS)
 
 			targetFolder := path.Join(outputFolder, step.Name)
 

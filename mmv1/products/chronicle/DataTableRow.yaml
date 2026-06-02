@@ -1,0 +1,93 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: DataTableRow
+description: Represents a single row in a data table.
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows/{{data_table_row}}
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows/{{data_table_row}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows/{{data_table_row}}
+
+update_verb: PATCH
+update_mask: true
+
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataTables.dataTableRows'
+examples:
+  - name: 'chronicle_data_table_row_basic'
+    config_path: 'templates/terraform/examples/chronicle_data_table_row_basic.tf.tmpl'
+    primary_resource_id: 'example_row'
+    test_env_vars:
+      instance_id: 'CHRONICLE_ID'
+    vars:
+      data_table_id: 'terraform_test'
+autogen_status: RGF0YVRhYmxlUm93
+parameters:
+  - name: location
+    type: String
+    description: The GCP location of the Chronicle instance.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: instance
+    type: String
+    description: The Chronicle instance ID.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: dataTableId
+    type: String
+    description: The ID of the parent DataTable.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: dataTableRow
+    type: String
+    description: The ID of the DataTable Row.
+    immutable: true
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+
+properties:
+  - name: createTime
+    type: String
+    description: DataTableRow create time
+    output: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the data table row.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/dataTables/{data_table_id}/dataTableRows/{data_table_row}
+    output: true
+  - name: rowTimeToLive
+    type: String
+    description: User-provided TTL of the data table row.
+  - name: updateTime
+    type: String
+    description: DataTableRow update time
+    output: true
+  - name: values
+    type: Array
+    required: true
+    immutable: true
+    description: |-
+      All column values for a single row. The values should be in the same order
+      as the columns of the data tables.
+    item_type:
+      type: String

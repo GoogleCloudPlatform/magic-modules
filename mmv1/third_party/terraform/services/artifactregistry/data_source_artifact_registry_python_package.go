@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -89,7 +90,7 @@ func DataSourceArtifactRegistryPythonPackageRead(d *schema.ResourceData, meta in
 		// fetch package by version
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.pythonPackages/get
 		packageUrlSafe := url.QueryEscape(packageName)
-		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/pythonPackages/%s:%s", packageUrlSafe, version))
+		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/pythonPackages/%s:%s", packageUrlSafe, version))
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -108,7 +109,7 @@ func DataSourceArtifactRegistryPythonPackageRead(d *schema.ResourceData, meta in
 	} else {
 		// fetch the list of packages, ordered by update time
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.pythonPackages/list
-		urlRequest, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/pythonPackages")
+		urlRequest, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/pythonPackages")
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -272,4 +273,13 @@ func convertPythonPackageResponseToStruct(res map[string]interface{}) PythonPack
 	}
 
 	return pythonPackage
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_artifact_registry_python_package",
+		ProductName: "artifactregistry",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryPythonPackage(),
+	}.Register()
 }

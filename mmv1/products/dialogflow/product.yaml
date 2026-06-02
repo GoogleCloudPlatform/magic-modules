@@ -15,6 +15,8 @@
 name: 'Dialogflow'
 display_name: 'Dialogflow'
 versions:
+  - name: 'beta'
+    base_url: 'https://dialogflow.googleapis.com/v2beta1/'
   - name: 'ga'
     base_url: 'https://dialogflow.googleapis.com/v2/'
 scopes:

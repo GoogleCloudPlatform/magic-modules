@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"os"
@@ -9,12 +9,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 )
 
 func TestResourceMinVersionObj(t *testing.T) {
 	t.Parallel()
-	p := Product{
+	p := api.Product{
 		Name: "test",
 		Versions: []*product.Version{
 			&product.Version{
@@ -34,12 +38,12 @@ func TestResourceMinVersionObj(t *testing.T) {
 
 	cases := []struct {
 		description string
-		obj         Resource
+		obj         api.Resource
 		expected    string
 	}{
 		{
 			description: "resource minVersion is empty",
-			obj: Resource{
+			obj: api.Resource{
 				Name:            "test",
 				MinVersion:      "",
 				ProductMetadata: &p,
@@ -48,7 +52,7 @@ func TestResourceMinVersionObj(t *testing.T) {
 		},
 		{
 			description: "resource minVersion is not empty",
-			obj: Resource{
+			obj: api.Resource{
 				Name:            "test",
 				MinVersion:      "beta",
 				ProductMetadata: &p,
@@ -74,7 +78,7 @@ func TestResourceMinVersionObj(t *testing.T) {
 
 func TestResourceNotInVersion(t *testing.T) {
 	t.Parallel()
-	p := Product{
+	p := api.Product{
 		Name: "test",
 		Versions: []*product.Version{
 			&product.Version{
@@ -94,13 +98,13 @@ func TestResourceNotInVersion(t *testing.T) {
 
 	cases := []struct {
 		description string
-		obj         Resource
+		obj         api.Resource
 		input       *product.Version
 		expected    bool
 	}{
 		{
 			description: "ga is in version if MinVersion is empty",
-			obj: Resource{
+			obj: api.Resource{
 				Name:            "test",
 				MinVersion:      "",
 				ProductMetadata: &p,
@@ -112,7 +116,7 @@ func TestResourceNotInVersion(t *testing.T) {
 		},
 		{
 			description: "ga is not in version if MinVersion is beta",
-			obj: Resource{
+			obj: api.Resource{
 				Name:            "test",
 				MinVersion:      "beta",
 				ProductMetadata: &p,
@@ -142,40 +146,40 @@ func TestResourceServiceVersion(t *testing.T) {
 
 	cases := []struct {
 		description string
-		obj         Resource
+		obj         api.Resource
 		expected    string
 	}{
 		{
 			description: "BaseUrl does not start with a version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl: "test",
 			},
 			expected: "",
 		},
 		{
 			description: "BaseUrl starts with / and does not include a version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl: "/test",
 			},
 			expected: "",
 		},
 		{
 			description: "BaseUrl starts with a version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl: "v3/test",
 			},
 			expected: "v3",
 		},
 		{
 			description: "BaseUrl starts with a / followed by version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl: "/v3/test",
 			},
 			expected: "v3",
 		},
 		{
 			description: "CaiBaseUrl does not start with a version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl:    "apis/serving.knative.dev/v1/namespaces/{{project}}/services",
 				CaiBaseUrl: "projects/{{project}}/locations/{{location}}/services",
 			},
@@ -183,7 +187,7 @@ func TestResourceServiceVersion(t *testing.T) {
 		},
 		{
 			description: "CaiBaseUrl starts with a version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl:    "apis/serving.knative.dev/v1/namespaces/{{project}}/services",
 				CaiBaseUrl: "v1/projects/{{project}}/locations/{{location}}/services",
 			},
@@ -199,123 +203,6 @@ func TestResourceServiceVersion(t *testing.T) {
 
 			if got, want := tc.obj.ServiceVersion(), tc.expected; got != want {
 				t.Errorf("expected %q to be %q", got, want)
-			}
-		})
-	}
-}
-
-func TestLeafProperties(t *testing.T) {
-	t.Parallel()
-
-	cases := []struct {
-		description string
-		obj         Resource
-		expected    Type
-	}{
-		{
-			description: "non-nested type",
-			obj: Resource{
-				BaseUrl: "test",
-				Properties: []*Type{
-					{
-						Name: "basic",
-						Type: "String",
-					},
-				},
-			},
-			expected: Type{
-				Name: "basic",
-			},
-		},
-		{
-			description: "nested type",
-			obj: Resource{
-				BaseUrl: "test",
-				Properties: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "NestedObject",
-								Properties: []*Type{
-									{
-										Name: "bars",
-										Type: "Array",
-										ItemType: &Type{
-											Type: "NestedObject",
-											Properties: []*Type{
-												{
-													Name: "fooBar",
-													Type: "String",
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "fooBar",
-			},
-		},
-		{
-			description: "nested virtual",
-			obj: Resource{
-				BaseUrl: "test",
-				VirtualFields: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "String",
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "foo",
-			},
-		},
-		{
-			description: "nested param",
-			obj: Resource{
-				BaseUrl: "test",
-				Parameters: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "String",
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "foo",
-			},
-		},
-	}
-
-	for _, tc := range cases {
-		tc := tc
-
-		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
-
-			tc.obj.SetDefault(nil)
-			if got, want := tc.obj.LeafProperties(), tc.expected; got[0].Name != want.Name {
-				t.Errorf("expected %q to be %q", got[0].Name, want.Name)
 			}
 		})
 	}
@@ -356,34 +243,34 @@ func TestMagicianLocation(t *testing.T) {
 	}
 
 	// Check if package is under mmv1
-	magicianPath := filepath.Join(dir, RELATIVE_MAGICIAN_LOCATION)
+	magicianPath := filepath.Join(dir, api.RELATIVE_MAGICIAN_LOCATION)
 	relPath, err := filepath.Rel(magicianPath, pwd)
 	if err != nil {
 		t.Fatalf("Failed to get relative path: %v", err)
 	}
 	if strings.HasPrefix(relPath, "..") {
-		t.Errorf("Current package is not under %s. Path from magician dir to current dir: %s", RELATIVE_MAGICIAN_LOCATION, relPath)
+		t.Errorf("Current package is not under %s. Path from magician dir to current dir: %s", api.RELATIVE_MAGICIAN_LOCATION, relPath)
 	}
 }
 
 func TestHasPostCreateComputedFields(t *testing.T) {
 	cases := []struct {
 		name, description string
-		resource          Resource
+		resource          api.Resource
 		want              bool
 	}{
 		{
 			name: "no properties",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
 			},
 			want: false,
 		},
 		{
 			name: "no computed properties",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name: "resource",
 					},
@@ -393,9 +280,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "output-only property",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:   "field",
 						Output: true,
@@ -406,9 +293,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "output-only property in id_format",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:   "resource",
 						Output: true,
@@ -419,9 +306,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "output-only property in id_format with ignore_read",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:       "resource",
 						Output:     true,
@@ -433,9 +320,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "default_from_api property",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:           "field",
 						DefaultFromApi: true,
@@ -446,9 +333,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "default_from_api property in id_format",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:           "resource",
 						DefaultFromApi: true,
@@ -459,9 +346,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "default_from_api property in id_format with ignore_read",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:           "resource",
 						DefaultFromApi: true,
@@ -473,9 +360,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "converts prop.name to snake case",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource_id}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:   "resourceId",
 						Output: true,
@@ -486,10 +373,10 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "includes fields in self link that aren't in id format",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource_id}}",
 				SelfLink: "{{name}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:   "name",
 						Output: true,
@@ -515,17 +402,19 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 func TestResourceAddExtraFields(t *testing.T) {
 	t.Parallel()
 
-	createTestResource := func(name string) *Resource {
-		return &Resource{
+	createTestResource := func(name, pn string) *api.Resource {
+		r := &api.Resource{
 			Name: name,
-			ProductMetadata: &Product{
+			ProductMetadata: &api.Product{
 				Name: "testproduct",
 			},
 		}
+		r.ProductMetadata.SetCompiler(pn)
+		return r
 	}
 
-	createTestType := func(name, typeStr string, options ...func(*Type)) *Type {
-		t := &Type{
+	createTestType := func(name, typeStr string, options ...func(*api.Type)) *api.Type {
+		t := &api.Type{
 			Name: name,
 			Type: typeStr,
 		}
@@ -533,37 +422,37 @@ func TestResourceAddExtraFields(t *testing.T) {
 			option(t)
 		}
 		if t.ResourceMetadata == nil {
-			t.ResourceMetadata = &Resource{
+			t.ResourceMetadata = &api.Resource{
 				Immutable: false,
 			}
 		}
 		return t
 	}
 
-	withWriteOnly := func(writeOnly bool) func(*Type) {
-		return func(t *Type) { t.WriteOnly = writeOnly }
+	withWriteOnly := func(writeOnly bool) func(*api.Type) {
+		return func(t *api.Type) { t.WriteOnly = writeOnly }
 	}
-	withRequired := func(required bool) func(*Type) {
-		return func(t *Type) { t.Required = required }
+	withRequired := func(required bool) func(*api.Type) {
+		return func(t *api.Type) { t.Required = required }
 	}
-	withDescription := func(desc string) func(*Type) {
-		return func(t *Type) { t.Description = desc }
+	withDescription := func(desc string) func(*api.Type) {
+		return func(t *api.Type) { t.Description = desc }
 	}
-	withProperties := func(props []*Type) func(*Type) {
-		return func(t *Type) { t.Properties = props }
+	withProperties := func(props []*api.Type) func(*api.Type) {
+		return func(t *api.Type) { t.Properties = props }
 	}
 
 	t.Run("WriteOnly property adds companion fields", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		writeOnlyProp := createTestType("password", "String",
 			withWriteOnly(true),
 			withRequired(true),
 			withDescription("A password field"),
 		)
 
-		props := []*Type{writeOnlyProp}
+		props := []*api.Type{writeOnlyProp}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 3 {
@@ -601,17 +490,39 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 	})
 
+	t.Run("WriteOnly property doesn't add companion fields for tgc", func(t *testing.T) {
+		t.Parallel()
+
+		resource := createTestResource("testresource", "terraformgoogleconversionnext")
+		writeOnlyProp := createTestType("password", "String",
+			withWriteOnly(true),
+			withRequired(true),
+			withDescription("A password field"),
+		)
+
+		props := []*api.Type{writeOnlyProp}
+		result := resource.AddExtraFields(props, nil)
+
+		if len(result) != 1 {
+			t.Errorf("Expected 1 property as WriteOnly fields should not be added, got %d", len(result))
+		}
+
+		if writeOnlyProp.WriteOnly {
+			t.Error("Original WriteOnly property should have WriteOnly set to false after processing")
+		}
+	})
+
 	t.Run("KeyValueLabels property adds terraform and effective labels", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
-		labelsType := &Type{
+		resource := createTestResource("testresource", "terraform")
+		labelsType := &api.Type{
 			Name:        "labels",
 			Type:        "KeyValueLabels",
 			Description: "Resource labels",
 		}
 
-		props := []*Type{labelsType}
+		props := []*api.Type{labelsType}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 3 {
@@ -657,15 +568,15 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("KeyValueLabels with ExcludeAttributionLabel adds different CustomDiff", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		resource.ExcludeAttributionLabel = true
 
-		labelsType := &Type{
+		labelsType := &api.Type{
 			Name: "labels",
 			Type: "KeyValueLabels",
 		}
 
-		props := []*Type{labelsType}
+		props := []*api.Type{labelsType}
 		resource.AddExtraFields(props, nil)
 
 		expectedDiff := "tpgresource.SetLabelsDiffWithoutAttributionLabel"
@@ -677,15 +588,15 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("KeyValueLabels with metadata parent adds metadata CustomDiff", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
-		parent := &Type{Name: "metadata"}
+		resource := createTestResource("testresource", "terraform")
+		parent := &api.Type{Name: "metadata"}
 
-		labelsType := &Type{
+		labelsType := &api.Type{
 			Name: "labels",
 			Type: "KeyValueLabels",
 		}
 
-		props := []*Type{labelsType}
+		props := []*api.Type{labelsType}
 		resource.AddExtraFields(props, parent)
 
 		expectedDiff := "tpgresource.SetMetadataLabelsDiff"
@@ -697,14 +608,14 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("KeyValueAnnotations property adds effective annotations", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
-		annotationsType := &Type{
+		resource := createTestResource("testresource", "terraform")
+		annotationsType := &api.Type{
 			Name:        "annotations",
 			Type:        "KeyValueAnnotations",
 			Description: "Resource annotations",
 		}
 
-		props := []*Type{annotationsType}
+		props := []*api.Type{annotationsType}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 2 {
@@ -738,12 +649,12 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("NestedObject with properties processes recursively", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 
 		nestedWriteOnly := createTestType("nestedPassword", "String", withWriteOnly(true))
-		nestedObject := createTestType("config", "NestedObject", withProperties([]*Type{nestedWriteOnly}))
+		nestedObject := createTestType("config", "NestedObject", withProperties([]*api.Type{nestedWriteOnly}))
 
-		props := []*Type{nestedObject}
+		props := []*api.Type{nestedObject}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 1 {
@@ -762,10 +673,10 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("Empty NestedObject properties are not processed", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
-		emptyNestedObject := createTestType("config", "NestedObject", withProperties([]*Type{}))
+		resource := createTestResource("testresource", "terraform")
+		emptyNestedObject := createTestType("config", "NestedObject", withProperties([]*api.Type{}))
 
-		props := []*Type{emptyNestedObject}
+		props := []*api.Type{emptyNestedObject}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 1 {
@@ -779,10 +690,10 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("WriteOnly property already ending with Wo is skipped", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		woProperty := createTestType("passwordWo", "String", withWriteOnly(true))
 
-		props := []*Type{woProperty}
+		props := []*api.Type{woProperty}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 1 {
@@ -797,10 +708,10 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("Regular properties are passed through unchanged", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		regularProp := createTestType("name", "String", withRequired(true))
 
-		props := []*Type{regularProp}
+		props := []*api.Type{regularProp}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 1 {
@@ -818,13 +729,13 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("Multiple property types processed correctly", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 
 		regularProp := createTestType("name", "String")
 		writeOnlyProp := createTestType("password", "String", withWriteOnly(true))
-		labelsType := &Type{Name: "labels", Type: "KeyValueLabels"}
+		labelsType := &api.Type{Name: "labels", Type: "KeyValueLabels"}
 
-		props := []*Type{regularProp, writeOnlyProp, labelsType}
+		props := []*api.Type{regularProp, writeOnlyProp, labelsType}
 		result := resource.AddExtraFields(props, nil)
 
 		// Should have: name + password + passwordWo + passwordWoVersion + labels + terraformLabels + effectiveLabels = 7
@@ -844,4 +755,132 @@ func TestResourceAddExtraFields(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestSample_TestServiceDependencies(t *testing.T) {
+	cases := []struct {
+		name     string
+		resource api.Resource
+		want     map[string]string
+	}{
+		{
+			name: "empty",
+			resource: api.Resource{
+				ProductMetadata: &api.Product{Name: "Apigee"},
+				Samples: []*resource.Sample{
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{},
+								TestHCLText:     "",
+							},
+						},
+					},
+				},
+				Runtime: api.Runtime{
+					ResourcePrefixServiceMap: map[string]string{},
+				},
+			},
+			want: map[string]string{},
+		},
+		{
+			name: "no conflict",
+			resource: api.Resource{
+				ProductMetadata: &api.Product{Name: "Apigee"},
+				Samples: []*resource.Sample{
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{
+									"network": "compute.BootstrapSubnet",
+								},
+								TestHCLText: "",
+							},
+						},
+					},
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{
+									"network": "compute.BootstrapSubnet",
+								},
+								TestHCLText: "",
+							},
+						},
+					},
+				},
+				Runtime: api.Runtime{
+					ResourcePrefixServiceMap: map[string]string{},
+				},
+			},
+			want: map[string]string{
+				"compute": "",
+			},
+		},
+		{
+			name: "underscore vs empty string conflict",
+			resource: api.Resource{
+				ProductMetadata: &api.Product{Name: "Apigee"},
+				Samples: []*resource.Sample{
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{
+									"network": "compute.BootstrapSubnet",
+								},
+								TestHCLText: "",
+							},
+						},
+					},
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{},
+								TestHCLText:     `resource "google_compute_instance"`,
+							},
+						},
+					},
+				},
+				Runtime: api.Runtime{
+					ResourcePrefixServiceMap: map[string]string{
+						"google_compute_": "compute",
+					},
+				},
+			},
+			want: map[string]string{
+				"compute": "",
+			},
+		},
+		{
+			name: "remove current product",
+			resource: api.Resource{
+				ProductMetadata: &api.Product{Name: "Compute"},
+				Samples: []*resource.Sample{
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{
+									"network": "compute.BootstrapSubnet",
+								},
+								TestHCLText: "",
+							},
+						},
+					},
+				},
+				Runtime: api.Runtime{
+					ResourcePrefixServiceMap: map[string]string{},
+				},
+			},
+			want: map[string]string{},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := tc.resource.TestServiceDependencies()
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Errorf("TestServiceDependencies() mismatch (-want +got:\n%s", diff)
+			}
+		})
+	}
 }

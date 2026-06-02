@@ -21,7 +21,6 @@ references:
     'Configure managed workload identity authentication for Compute Engine': 'https://cloud.google.com/iam/docs/create-managed-workload-identities'
     'Configure managed workload identity authentication for GKE': 'https://cloud.google.com/iam/docs/create-managed-workload-identities-gke'
   api: 'https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools.namespaces'
-min_version: beta
 base_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces'
 self_link: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces/{{workload_identity_pool_namespace_id}}'
 create_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces?workloadIdentityPoolNamespaceId={{workload_identity_pool_namespace_id}}'

@@ -3,6 +3,7 @@ load("@rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "google",
     srcs = [
+        "fs.go",
         "slice_utils.go",
         "string_utils.go",
         "template_utils.go",
@@ -19,6 +20,7 @@ go_library(
 go_test(
     name = "google_test",
     srcs = [
+        "fs_test.go",
         "slice_utils_test.go",
         "string_utils_test.go",
     ],

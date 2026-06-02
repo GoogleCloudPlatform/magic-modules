@@ -1,0 +1,7 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+  	if tpgresource.IsEmptyValue(reflect.ValueOf(v.(string))) {
+		return nil, nil
+	}
+
+	return tpgresource.GetResourceNameFromSelfLink(v.(string)), nil
+}

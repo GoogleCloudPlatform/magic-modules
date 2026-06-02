@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccComputeNodeGroup_update(t *testing.T) {
@@ -113,18 +114,18 @@ func testAccComputeNodeGroup_update(groupName, tmplPrefix, tmplToUse string) str
 resource "google_compute_node_template" "tmpl1" {
   name      = "%s-first"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_template" "tmpl2" {
   name      = "%s-second"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_group" "nodes" {
   name        = "%s"
-  zone        = "us-central1-a"
+  zone        = "us-central1-b"
   description = "example google_compute_node_group for Terraform Google Provider"
 
   initial_size = 1
@@ -139,18 +140,18 @@ func testAccComputeNodeGroup_update2(groupName, tmplPrefix, tmplToUse string) st
 resource "google_compute_node_template" "tmpl1" {
   name      = "%s-first"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_template" "tmpl2" {
   name      = "%s-second"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_group" "nodes" {
   name        = "%s"
-  zone        = "us-central1-a"
+  zone        = "us-central1-b"
   description = "example google_compute_node_group for Terraform Google Provider"
 
   autoscaling_policy {
@@ -169,7 +170,7 @@ func testAccComputeNodeGroup_fail(groupName, tmplPrefix, tmplToUse string) strin
 resource "google_compute_node_template" "tmpl1" {
   name      = "%s-first"
   region    = "us-central1"
-  node_type = "n1-node-96-624"
+  node_type = "c2-node-60-240"
 }
 
 resource "google_compute_node_group" "nodes" {

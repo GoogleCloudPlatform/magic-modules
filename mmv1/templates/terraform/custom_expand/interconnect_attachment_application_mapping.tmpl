@@ -1,0 +1,42 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+    l := v.([]interface{})
+    m := make(map[string]interface{}, len(l))
+    for _, raw := range l {
+        if raw == nil {
+            continue
+        }
+        original := raw.(map[string]interface{})
+        transformed := make(map[string]interface{})
+
+        vlanID := original["vlan_id"].(string)
+        if vlanID == "" {
+            continue
+        }
+
+        if v, ok := original["name"]; ok {
+            transformed["name"] = v
+        }
+        if v, ok := original["appliance_ip_address"]; ok {
+            transformed["applianceIpAddress"] = v
+        }
+
+        if v, ok := original["inner_vlan_to_appliance_mappings"]; ok {
+            innerList := v.([]interface{})
+            transformedInnerList := make([]interface{}, 0, len(innerList))
+            for _, itemRaw := range innerList {
+                item := itemRaw.(map[string]interface{})
+                transformedItem := make(map[string]interface{})
+                if ip, ok := item["inner_appliance_ip_address"]; ok {
+                    transformedItem["innerApplianceIpAddress"] = ip
+                }
+                if tags, ok := item["inner_vlan_tags"]; ok {
+                    transformedItem["innerVlanTags"] = tags
+                }
+                transformedInnerList = append(transformedInnerList, transformedItem)
+            }
+            transformed["innerVlanToApplianceMappings"] = transformedInnerList
+        }
+        m[vlanID] = transformed
+    }
+    return m, nil
+}

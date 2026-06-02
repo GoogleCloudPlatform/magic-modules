@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -54,7 +55,7 @@ func dataSourceGoogleKmsSecretCiphertextRead(d *schema.ResourceData, meta interf
 		Plaintext: plaintext,
 	}
 
-	encryptCall := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.Encrypt(cryptoKeyId.CryptoKeyId(), kmsEncryptRequest)
+	encryptCall := NewClient(config, userAgent).Projects.Locations.KeyRings.CryptoKeys.Encrypt(cryptoKeyId.CryptoKeyId(), kmsEncryptRequest)
 	if config.UserProjectOverride {
 		encryptCall.Header().Set("X-Goog-User-Project", cryptoKeyId.KeyRingId.Project)
 	}
@@ -72,4 +73,13 @@ func dataSourceGoogleKmsSecretCiphertextRead(d *schema.ResourceData, meta interf
 	d.SetId(d.Get("crypto_key").(string))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_kms_secret_ciphertext",
+		ProductName: "kms",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsSecretCiphertext(),
+	}.Register()
 }

@@ -1,0 +1,169 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RolloutPlan'
+kind: 'compute#rolloutPlan'
+description: |
+  A RolloutPlan is the customer-defined strategy to divide a large-scale change
+  into smaller increments, referred to as "waves". Each wave targets a specific
+  portion of the overall affected area and defines criteria that must be met
+  before progressing to the subsequent wave.
+min_version: 'beta'
+references:
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/rolloutPlans'
+base_url: 'projects/{{project}}/global/rolloutPlans'
+has_self_link: true
+immutable: true
+
+create_url: 'projects/{{project}}/global/rolloutPlans'
+create_verb: 'POST'
+delete_url: 'projects/{{project}}/global/rolloutPlans/{{name}}'
+
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+
+examples:
+  - name: 'rollout_plan_basic'
+    primary_resource_id: 'default'
+
+parameters:
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    description: |
+      Name of the resource. Provided by the client when the resource is created.
+      The name must be 1-63 characters long, and comply with RFC1035.
+
+properties:
+  - name: 'description'
+    type: String
+    description: 'An optional description of this resource.'
+  - name: 'locationScope'
+    type: Enum
+    description: 'The location scope of the rollout plan.'
+    enum_values:
+      - 'LOCATION_SCOPE_UNSPECIFIED'
+      - 'ZONAL'
+      - 'REGIONAL'
+  - name: 'waves'
+    type: Array
+    required: true
+    description: 'The waves included in this rollout plan.'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'displayName'
+          type: String
+          description: 'The display name of this wave of the rollout plan.'
+        - name: 'number'
+          type: Integer
+          output: true
+          description: 'The wave number.'
+        - name: 'selectors'
+          type: Array
+          required: true
+          description: |
+            The selectors for this wave. There is a logical AND between each selector
+            defined in a wave, so a resource must satisfy the criteria of *all* the
+            specified selectors to be in scope for the wave.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'resourceHierarchySelector'
+                type: NestedObject
+                description: 'Roll out to resources by Cloud Resource Manager resource hierarchy nodes such as projects, folders, orgs.'
+                properties:
+                  - name: 'includedOrganizations'
+                    type: Array
+                    description: 'Format: "organizations/{organization_id}"'
+                    item_type:
+                      type: String
+                  - name: 'includedFolders'
+                    type: Array
+                    description: 'Format: "folders/{folder_id}"'
+                    item_type:
+                      type: String
+                  - name: 'includedProjects'
+                    type: Array
+                    description: 'Format: "projects/{project_id}"'
+                    item_type:
+                      type: String
+              - name: 'locationSelector'
+                type: NestedObject
+                description: 'Roll out to resources by location.'
+                properties:
+                  - name: 'includedLocations'
+                    type: Array
+                    description: 'Example: "us-central1-a"'
+                    item_type:
+                      type: String
+        - name: 'validation'
+          type: NestedObject
+          required: true
+          description: 'The validation to be performed before progressing to the next wave.'
+          properties:
+            - name: 'type'
+              type: String
+              required: true
+              description: |
+                The type of the validation. Possible values:
+                "manual": The system waits for an end-user approval API before progressing to the next wave.
+                "time": The system waits for a user specified duration before progressing to the next wave.
+            - name: 'timeBasedValidationMetadata'
+              type: NestedObject
+              description: 'Metadata required if type = "time".'
+              properties:
+                - name: 'waitDuration'
+                  type: String
+                  description: |
+                    The duration that the system waits in between waves. This wait starts
+                    after all changes in the wave are rolled out.
+        - name: 'orchestrationOptions'
+          type: NestedObject
+          description: 'Options to control the pace of orchestration of a wave.'
+          properties:
+            - name: 'maxConcurrentLocations'
+              type: Integer
+              description: 'Maximum number of locations to be orchestrated in parallel.'
+            - name: 'maxConcurrentResourcesPerLocation'
+              type: Integer
+              description: 'Maximum number of resources to be orchestrated per location in parallel.'
+            - name: 'delays'
+              type: Array
+              description: 'Delays, if any, to be added between batches of projects.'
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'duration'
+                    type: String
+                    description: 'The duration of the delay, if any, to be added between batches of projects.'
+                  - name: 'delimiter'
+                    type: Enum
+                    description: 'Controls whether the delay should only be added between batches of projects corresponding to different locations, or also between batches of projects corresponding to the same location.'
+                    enum_values:
+                      - 'DELIMITER_UNSPECIFIED'
+                      - 'DELIMITER_LOCATION'
+                      - 'DELIMITER_BATCH'
+                  - name: 'type'
+                    type: Enum
+                    description: 'Controls whether the specified duration is to be added at the end of each batch, or if the total processing time for each batch will be padded if needed to meet the specified duration.'
+                    enum_values:
+                      - 'TYPE_UNSPECIFIED'
+                      - 'TYPE_OFFSET'
+                      - 'TYPE_MINIMUM'

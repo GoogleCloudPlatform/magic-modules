@@ -1,0 +1,17 @@
+resource "google_firebase_ai_logic_prompt_template" "basic" {
+  provider = google-beta
+  location = "global"
+  template_id = "{{index $.Vars "template_id"}}"
+  template_string = <<EOF
+---
+model: googleai/gemini-1.5-flash
+---
+Hello World
+EOF
+}
+
+resource "google_firebase_ai_logic_prompt_template_lock" "basic_lock" {
+  provider = google-beta
+  location = google_firebase_ai_logic_prompt_template.basic.location
+  template_id = google_firebase_ai_logic_prompt_template.basic.template_id
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) HashiCorp, Inc.
+ * Copyright IBM Corp. 2014, 2026
  * SPDX-License-Identifier: MPL-2.0
  */
 
@@ -77,46 +77,9 @@ fun BuildSteps.downloadTerraformBinary() {
 
 // RunSweepers runs sweepers, and relies on set build configuration parameters
 fun BuildSteps.runSweepers(sweeperStepName: String) {
-    step(ScriptBuildStep {
-        name = "Compile Sweeper Test Binary"
-        workingDir = "%PACKAGE_PATH%"
-        scriptContent = """
-            #!/bin/bash
-            export TEST_FILE_COUNT=$(ls ./*_test.go | wc -l)
-            if test ${'$'}TEST_FILE_COUNT -gt "0"; then
-                echo "Compiling sweeper test binary"
-                go test -c -o test-binary
-            else
-                echo "Skipping compilation of test binary; no Go test files found"
-            fi
-        """.trimIndent()
-    })
-
-    step(ScriptBuildStep {
+    step(ScriptBuildStep{
         name = sweeperStepName
-        workingDir = "%PACKAGE_PATH%"
-        scriptContent = """
-            #!/bin/bash
-            if ! test -f "./test-binary"; then
-              echo "Skipping sweeper execution; file ./test-binary does not exist."
-              exit 0
-            fi
-            
-            # Set sweeper environment variables
-            export SWEEPER_REGIONS="%SWEEPER_REGIONS%"
-            export SWEEP_ALLOW_FAILURES="true"
-            export SWEEP_RUN="%SWEEP_RUN%"
-            
-            export TEST_COUNT=${'$'}(./test-binary -test.list="%TEST_PREFIX%" | wc -l)
-            echo "Found ${'$'}{TEST_COUNT} sweeper tests that match the given test prefix %TEST_PREFIX%"
-            if test ${'$'}TEST_COUNT -le "0"; then
-              echo "Skipping sweeper execution; no tests to run"
-              exit 0
-            fi
-            
-            echo "Starting sweeper tests"  
-            ./test-binary -test.list="%TEST_PREFIX%" | teamcity-go-test -test ./test-binary -parallelism "%PARALLELISM%" -timeout "%TIMEOUT%h"
-        """.trimIndent()
+        scriptContent = "go test -v \"%PACKAGE_PATH%\" -run=\"%TEST_PREFIX%\" -sweep=\"%SWEEPER_REGIONS%\" -sweep-allow-failures -sweep-run=\"%SWEEP_RUN%\" -timeout 30m -json"
     })
 }
 
@@ -196,6 +159,7 @@ fun BuildSteps.saveArtifactsToGCS() {
                 FOLDER="manual/%teamcity.project.id%/${'$'}{BRANCH_NAME}"
             fi
 
+            echo "Uploading artifacts to GCS folder: ${'$'}{FOLDER}"
             # Copy logs to GCS
             gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-logs/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
 
@@ -203,6 +167,9 @@ fun BuildSteps.saveArtifactsToGCS() {
             rm google-account.json
             gcloud auth application-default revoke
             gcloud auth revoke --all
+
+            BUILD_NUMBER="%system.build.number%"
+            echo "BUILD_NUMBER: ${'$'}{BUILD_NUMBER}"
 
             echo "Finished"
         """.trimIndent()

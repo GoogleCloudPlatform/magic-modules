@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
 )
 
 func TestAccDiscoveryEngineAssistant_discoveryengineAssistantBasicExample_update(t *testing.T) {
@@ -64,7 +65,7 @@ resource "google_discovery_engine_assistant" "basic" {
   location                      = "global"
   collection_id                 = "default_collection"
   engine_id                     = google_discovery_engine_search_engine.basic.engine_id
-  assistant_id                  = "tf-test-assistant-id%{random_suffix}"
+  assistant_id                  = "default_assistant"
   display_name                  = "tf-test-Assistant"
   description                   = "Assistant Description"
   generation_config {
@@ -109,7 +110,7 @@ resource "google_discovery_engine_assistant" "basic" {
   location                      = "global"
   collection_id                 = "default_collection"
   engine_id                     = google_discovery_engine_search_engine.basic.engine_id
-  assistant_id                  = "tf-test-assistant-id%{random_suffix}"
+  assistant_id                  = "default_assistant"
   display_name                  = "updated-tf-test-Assistant"
   description                   = "New Assistant Description"
   generation_config {

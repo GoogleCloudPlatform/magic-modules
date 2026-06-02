@@ -13,6 +13,7 @@
 
 ---
 name: 'InboundSamlConfig'
+include_in_tgc_next: true
 description: |
   Inbound SAML configuration for a Identity Toolkit project.
 

@@ -1,0 +1,108 @@
+package compute
+
+import (
+	"fmt"
+	"log"
+	"sort"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceGoogleComputeNodeTypes() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourceGoogleComputeNodeTypesRead,
+		Schema: map[string]*schema.Schema{
+			"project": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"zone": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"names": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+		},
+	}
+}
+
+func dataSourceGoogleComputeNodeTypesRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	zone, err := tpgresource.GetZone(d, config)
+	if err != nil {
+		return fmt.Errorf("Please specify zone to get appropriate node types for zone. Unable to get zone: %s", err)
+	}
+
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/nodeTypes", transport_tpg.BaseUrl(Product, config), project, zone)
+	resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return err
+	}
+	var rawItems []interface{}
+	if items, ok := resp["items"].([]interface{}); ok {
+		rawItems = items
+	}
+	nodeTypes := flattenComputeNodeTypes(rawItems)
+	log.Printf("[DEBUG] Received Google Compute Regions: %q", nodeTypes)
+
+	if err := d.Set("names", nodeTypes); err != nil {
+		return fmt.Errorf("Error setting names: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("zone", zone); err != nil {
+		return fmt.Errorf("Error setting zone: %s", err)
+	}
+	d.SetId(fmt.Sprintf("projects/%s/zones/%s", project, zone))
+
+	return nil
+}
+
+func flattenComputeNodeTypes(nodeTypes []interface{}) []string {
+	result := make([]string, 0, len(nodeTypes))
+	for _, raw := range nodeTypes {
+		nt, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if name, ok := nt["name"].(string); ok {
+			result = append(result, name)
+		}
+	}
+	sort.Strings(result)
+	return result
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_node_types",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeNodeTypes(),
+	}.Register()
+}

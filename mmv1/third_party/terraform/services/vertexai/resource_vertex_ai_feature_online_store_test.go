@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 )
 
 func TestAccVertexAIFeatureOnlineStore_updated(t *testing.T) {
@@ -78,6 +79,100 @@ resource google_vertex_ai_feature_online_store "feature_online_store" {
             min_node_count = 2
             max_node_count = 3
         }
+    }
+  force_destroy = true
+}
+`, context)
+}
+
+func TestAccVertexAIFeatureOnlineStore_bigtable_full(t *testing.T) {
+	t.Parallel()
+
+	bootstrapped := kms.BootstrapKMSKeyInLocation(t, "us-central1")
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":  bootstrapped.CryptoKey.Name,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIFeatureOnlineStoreDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIFeatureOnlineStore_bigtable_full(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_feature_online_store.feature_online_store",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "etag", "region", "force_destroy", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIFeatureOnlineStore_bigtable_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource google_vertex_ai_feature_online_store "feature_online_store" {
+    name = "tf_test_feature_online_store%{random_suffix}"
+    region = "us-central1"
+
+    bigtable {
+        auto_scaling {
+            min_node_count = 1
+            max_node_count = 2
+        }
+        enable_direct_bigtable_access = true
+        zone = "us-central1-a"
+    }
+    encryption_spec {
+        kms_key_name = "%{kms_key_name}"
+    }
+    force_destroy = true
+}
+`, context)
+}
+
+func TestAccVertexAIFeatureOnlineStore_bigtable_with_zone(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIFeatureOnlineStoreDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIFeatureOnlineStore_bigtable_with_zone(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_feature_online_store.feature_online_store",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "etag", "region", "force_destroy", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIFeatureOnlineStore_bigtable_with_zone(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource google_vertex_ai_feature_online_store "feature_online_store" {
+    name = "tf_test_feature_online_store%{random_suffix}"
+    region = "us-central1"
+
+    bigtable {
+        auto_scaling {
+            min_node_count = 1
+            max_node_count = 2
+            cpu_utilization_target = 60
+        }
+        zone = "us-central1-a"
     }
   force_destroy = true
 }

@@ -150,6 +150,12 @@ properties:
     enum_values:
       - 'EXTERNAL'
       - 'INTERNAL'
+  - name: 'enableEnhancedIpv4Allocation'
+    type: Boolean
+    description: |
+      Whether this PublicDelegatedPrefix supports enhanced IPv4 allocations.
+      Applicable for IPv4 PDPs only.
+    output: true
   - name: 'publicDelegatedSubPrefixs'
     type: Array
     output: true
@@ -216,6 +222,12 @@ properties:
           enum_values:
             - 'EXTERNAL'
             - 'INTERNAL'
+        - name: 'enableEnhancedIpv4Allocation'
+          type: Boolean
+          description: |
+            Whether this PublicDelegatedSubPrefix supports enhanced IPv4 allocations.
+            Applicable for IPv4 sub-PDPs only.
+          output: true
         - name: 'delegateeProject'
           type: String
           description: |

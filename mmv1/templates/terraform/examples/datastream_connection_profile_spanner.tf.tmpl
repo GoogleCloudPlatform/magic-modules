@@ -1,0 +1,12 @@
+resource "google_datastream_connection_profile" "default" {
+    display_name          = "Spanner Source"
+    location              = "us-central1"
+    connection_profile_id = "{{index $.Vars "source_connection_profile_id"}}"
+    create_without_validation = true
+    provider = google-beta
+
+    spanner_profile {
+        database = "projects/example-project/instances/example-instance/databases/example-database"
+        host = "https://spanner.example-region.rep.googleapis.com"
+    }
+}

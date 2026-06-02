@@ -1,0 +1,8 @@
+m := d.Get("datastore_mount_config")
+mountsToAdd := m.([]interface{})
+if  mountsToAdd != nil {
+    // mount operations
+    if err := mountDatastores(mountsToAdd, d, config); err != nil {
+        return err
+    }
+}

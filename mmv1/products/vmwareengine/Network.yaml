@@ -27,8 +27,7 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}'
-include_in_tgc_next_DO_NOT_USE: true
-tgc_include_handwritten_tests: true
+include_in_tgc_next: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -45,6 +44,7 @@ custom_code:
 collection_url_key: "vmwareEngineNetworks"
 sweeper:
   dependencies:
+    - "google_vmwareengine_private_cloud"
     - "google_vmwareengine_network_policy"
   url_substitutions:
     - region: 'global'
@@ -64,7 +64,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
- # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
+    # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
     exclude_test: true
 parameters:
   - name: 'location'

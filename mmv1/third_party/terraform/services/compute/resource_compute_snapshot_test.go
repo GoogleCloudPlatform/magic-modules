@@ -6,6 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccComputeSnapshot_encryption(t *testing.T) {
@@ -39,7 +42,7 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 
 	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	kmsKeyName := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-compute-snapshot-key1").CryptoKey.Name
+	kmsKeyName := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-compute-snapshot-key1").CryptoKey.Name
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -133,4 +136,73 @@ resource "google_compute_snapshot" "foobar" {
   }
 }
 `, diskName, kmsKeyName, diskName, kmsKeyName, snapshotName, kmsKeyName)
+}
+
+func TestAccComputeSnapshot_snapshotType(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+	context1 := map[string]interface{}{
+		"random_suffix": randomSuffix,
+		"snapshot_type": "ARCHIVE",
+	}
+
+	context2 := map[string]interface{}{
+		"random_suffix": randomSuffix,
+		"snapshot_type": "STANDARD",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSnapshot_snapshotType(context1),
+			},
+			{
+				ResourceName:            "google_compute_snapshot.snapshot",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "snapshot_encryption_key.0.raw_key", "snapshot_encryption_key.0.rsa_encrypted_key", "source_disk", "source_disk_encryption_key", "terraform_labels", "zone"},
+			},
+			{
+				Config: testAccComputeSnapshot_snapshotType(context2),
+			},
+			{
+				ResourceName:            "google_compute_snapshot.snapshot",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "snapshot_encryption_key.0.raw_key", "snapshot_encryption_key.0.rsa_encrypted_key", "source_disk", "source_disk_encryption_key", "terraform_labels", "zone"},
+			},
+		},
+	})
+}
+
+func testAccComputeSnapshot_snapshotType(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_snapshot" "snapshot" {
+  name        = "tf-test-my-snapshot%{random_suffix}"
+  source_disk = google_compute_disk.persistent.id
+  zone        = "us-central1-a"
+  labels = {
+    my_label = "value"
+  }
+  storage_locations = ["us-central1"]
+  snapshot_type     = "%{snapshot_type}"
+}
+
+data "google_compute_image" "debian" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "persistent" {
+  name  = "tf-test-debian-disk%{random_suffix}"
+  image = data.google_compute_image.debian.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+`, context)
 }

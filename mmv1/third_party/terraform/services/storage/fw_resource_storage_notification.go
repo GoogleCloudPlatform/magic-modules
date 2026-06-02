@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -24,6 +25,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 	"github.com/hashicorp/terraform-provider-google/google/fwvalidators"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/services/pubsub"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -34,6 +36,14 @@ var (
 	_ resource.ResourceWithImportState  = &storageNotificationResource{}
 	_ resource.ResourceWithUpgradeState = &storageNotificationResource{}
 )
+
+func init() {
+	registry.FrameworkResource{
+		Name:        "google_storage_notification",
+		ProductName: "storage",
+		Func:        NewStorageNotificationResource,
+	}.Register()
+}
 
 func NewStorageNotificationResource() resource.Resource {
 	return &storageNotificationResource{}
@@ -191,7 +201,7 @@ func (r *storageNotificationResource) Create(ctx context.Context, req resource.C
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.config.UserAgent)
 	bucket := plan.Bucket.ValueString()
 
-	res, err := r.config.NewStorageClient(userAgent).Notifications.Insert(bucket, storageNotification).Do()
+	res, err := NewClient(r.config, userAgent).Notifications.Insert(bucket, storageNotification).Do()
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Error creating notification config for bucket %s", bucket), err.Error())
 		return
@@ -258,7 +268,7 @@ func (r *storageNotificationResource) Delete(ctx context.Context, req resource.D
 
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.config.UserAgent)
 
-	err = r.config.NewStorageClient(userAgent).Notifications.Delete(bucket, notificationID).Do()
+	err = NewClient(r.config, userAgent).Notifications.Delete(bucket, notificationID).Do()
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
 			// Resource is gone. This is a successful deletion.
@@ -282,7 +292,7 @@ func (r *storageNotificationResource) refresh(ctx context.Context, model *storag
 
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.config.UserAgent)
 
-	res, err := r.config.NewStorageClient(userAgent).Notifications.Get(bucket, notificationID).Do()
+	res, err := NewClient(r.config, userAgent).Notifications.Get(bucket, notificationID).Do()
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
 			return false
@@ -308,9 +318,22 @@ func (r *storageNotificationResource) refresh(ctx context.Context, model *storag
 	model.EventTypes, eventTypesDiags = types.SetValueFrom(ctx, types.StringType, res.EventTypes)
 	diags.Append(eventTypesDiags...)
 
-	var customAttrsDiags diag.Diagnostics
-	model.CustomAttributes, customAttrsDiags = types.MapValueFrom(ctx, types.StringType, res.CustomAttributes)
-	diags.Append(customAttrsDiags...)
+	// Fix for "Inconsistent result after apply" regarding empty maps
+	if res.CustomAttributes == nil {
+		// If the API returns nil but the user has an empty map {} configured,
+		// we keep it as an empty map to avoid the provider inconsistency error.
+		if !model.CustomAttributes.IsNull() && !model.CustomAttributes.IsUnknown() {
+			emptyMap, _ := types.MapValue(types.StringType, map[string]attr.Value{})
+			model.CustomAttributes = emptyMap
+		} else {
+			model.CustomAttributes = types.MapNull(types.StringType)
+		}
+	} else {
+		// API returned actual values, so we map them normally
+		var customAttrsDiags diag.Diagnostics
+		model.CustomAttributes, customAttrsDiags = types.MapValueFrom(ctx, types.StringType, res.CustomAttributes)
+		diags.Append(customAttrsDiags...)
+	}
 
 	return !diags.HasError()
 }

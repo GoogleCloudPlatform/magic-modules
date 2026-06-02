@@ -67,6 +67,12 @@ type CustomCode struct {
 	// exported (e.g. "fooBarValidationRegex").
 	Constants string `yaml:"constants,omitempty"`
 
+	// TestConstants go above everything else in the test file, and include
+	// things like methods that will be referred to by name elsewhere
+	// (e.g. "fooBarDiffSuppress") and regexes that are necessarily
+	// exported (e.g. "fooBarValidationRegex").
+	TestConstants string `yaml:"test_constants,omitempty"`
+
 	// This code is run before the Create call happens.  It's placed
 	// in the Create function, just before the Create call is made.
 	PreCreate string `yaml:"pre_create,omitempty"`
@@ -128,6 +134,10 @@ type CustomCode struct {
 	// inserts that for you - do not include it in your custom code.
 	CustomImport string `yaml:"custom_import,omitempty"`
 
+	// This code replaces the entire identity schema method.  Since the identity schema method's function header can't be changed, the template
+	// inserts that for you - do not include it in your custom code.
+	CustomIdentity []string `yaml:"custom_identity,omitempty"`
+
 	// This code is run just after the import method succeeds - it
 	// is useful for parsing attributes that are necessary for
 	// the Read() method to succeed.
@@ -146,4 +156,10 @@ type CustomCode struct {
 	TgcEncoder string `yaml:"tgc_encoder,omitempty"`
 
 	TgcDecoder string `yaml:"tgc_decoder,omitempty"`
+
+	// If true, the Terraform custom encoder is not applied during tfplan2cai
+	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
+
+	// If true, the Terraform custom decoder is not applied during cai2hcl
+	TGCIgnoreTerraformDecoder bool `yaml:"tgc_ignore_terraform_decoder,omitempty"`
 }

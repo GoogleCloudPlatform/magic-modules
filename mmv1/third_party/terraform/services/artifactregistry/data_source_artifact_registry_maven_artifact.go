@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -93,7 +94,7 @@ func DataSourceArtifactRegistryMavenArtifactRead(d *schema.ResourceData, meta in
 		// fetch package by version
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.mavenArtifacts/get
 		packageUrlSafe := url.QueryEscape(packageName)
-		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/mavenArtifacts/%s:%s", packageUrlSafe, version))
+		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/mavenArtifacts/%s:%s", packageUrlSafe, version))
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -112,7 +113,7 @@ func DataSourceArtifactRegistryMavenArtifactRead(d *schema.ResourceData, meta in
 	} else {
 		// fetch the list of packages, ordered by update time
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.mavenArtifacts/list
-		urlRequest, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/mavenArtifacts")
+		urlRequest, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/mavenArtifacts")
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -279,4 +280,13 @@ func convertMavenArtifactResponseToStruct(res map[string]interface{}) MavenArtif
 	}
 
 	return mavenArtifact
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_artifact_registry_maven_artifact",
+		ProductName: "artifactregistry",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryMavenArtifact(),
+	}.Register()
 }

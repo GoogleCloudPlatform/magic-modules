@@ -1505,6 +1505,146 @@ func TestComputeSchemaDiff(t *testing.T) {
 				},
 			},
 		},
+		"iam-condition-fields": {
+			newResourceMap: map[string]*schema.Resource{
+				"google_service_resource_iam_binding": {
+					Schema: map[string]*schema.Schema{
+						"condition": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							ForceNew: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"expression": {
+										Type:     schema.TypeString,
+										Required: true,
+										ForceNew: true,
+									},
+									"title": {
+										Type:     schema.TypeString,
+										Required: true,
+										ForceNew: true,
+									},
+									"description": {
+										Type:     schema.TypeString,
+										Optional: true,
+										ForceNew: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedSchemaDiff: SchemaDiff{
+				"google_service_resource_iam_binding": ResourceDiff{
+					ResourceConfig: ResourceConfigDiff{
+						Old: nil,
+						New: &schema.Resource{},
+					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: nil,
+						New: map[string]*schema.Schema{
+							"condition": {
+								Type:     schema.TypeList,
+								Optional: true,
+								MaxItems: 1,
+								ForceNew: true,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"expression": {
+											Type:     schema.TypeString,
+											Required: true,
+											ForceNew: true,
+										},
+										"title": {
+											Type:     schema.TypeString,
+											Required: true,
+											ForceNew: true,
+										},
+										"description": {
+											Type:     schema.TypeString,
+											Optional: true,
+											ForceNew: true,
+										},
+									},
+								},
+							},
+							"condition.expression": {
+								Type:     schema.TypeString,
+								Required: true,
+								ForceNew: true,
+							},
+							"condition.title": {
+								Type:     schema.TypeString,
+								Required: true,
+								ForceNew: true,
+							},
+							"condition.description": {
+								Type:     schema.TypeString,
+								Optional: true,
+								ForceNew: true,
+							},
+						},
+					},
+					Fields: map[string]FieldDiff{
+						"condition": FieldDiff{
+							Old: nil,
+							New: &schema.Schema{
+								Type:     schema.TypeList,
+								Optional: true,
+								MaxItems: 1,
+								ForceNew: true,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"expression": {
+											Type:     schema.TypeString,
+											Required: true,
+											ForceNew: true,
+										},
+										"title": {
+											Type:     schema.TypeString,
+											Required: true,
+											ForceNew: true,
+										},
+										"description": {
+											Type:     schema.TypeString,
+											Optional: true,
+											ForceNew: true,
+										},
+									},
+								},
+							},
+						},
+						"condition.expression": {
+							Old: nil,
+							New: &schema.Schema{
+								Type:     schema.TypeString,
+								Required: true,
+								ForceNew: true,
+							},
+						},
+						"condition.title": {
+							Old: nil,
+							New: &schema.Schema{
+								Type:     schema.TypeString,
+								Required: true,
+								ForceNew: true,
+							},
+						},
+						"condition.description": {
+							Old: nil,
+							New: &schema.Schema{
+								Type:     schema.TypeString,
+								Optional: true,
+								ForceNew: true,
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 	for tn, tc := range cases {
 		tc := tc

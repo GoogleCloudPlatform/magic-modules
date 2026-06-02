@@ -1,0 +1,142 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RouterNamedSet'
+api_resource_type_kind: Router
+min_version: beta
+description: |
+  A Named Set is a collection of IP addresses or ranges (for PREFIX type) or
+  BGP communities (for COMMUNITY type) that can be used in route policies.
+references:
+  guides:
+    'Google Cloud Router': 'https://cloud.google.com/router/docs/'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/routers'
+docs:
+id_format: '{{project}}/{{region}}/{{router}}/namedSets/{{name}}'
+base_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
+self_link: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/getNamedSet?namedSet={{name}}'
+create_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/updateNamedSet'
+update_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/updateNamedSet'
+update_verb: 'POST'
+update_mask: true
+delete_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/deleteNamedSet?namedSet={{name}}'
+delete_verb: 'POST'
+import_format:
+  - '{{project}}/{{region}}/{{router}}/namedSets/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+nested_query:
+  keys:
+    - resource
+examples:
+  - name: 'router_named_set_route_policy'
+    primary_resource_id: 'my_prefix_set'
+    vars:
+      router_name: 'my-router'
+      network_name: 'my-network'
+      named_set_name: 'prefix-set-name'
+      route_policy_name: 'policy-name'
+  - name: 'router_named_set_prefix'
+    primary_resource_id: 'prefix_set'
+    vars:
+      network_name: 'my-network'
+      router_name: 'my-router'
+      named_set_name: 'my-prefix-set'
+  - name: 'router_named_set_community'
+    primary_resource_id: 'community_set'
+    vars:
+      network_name: 'my-network'
+      router_name: 'my-router'
+      named_set_name: 'my-community-set'
+parameters:
+  - name: 'router'
+    type: ResourceRef
+    description: |
+      The name of the Cloud Router in which this Named Set will be configured.
+    url_param_only: true
+    required: true
+    immutable: true
+    resource: 'Router'
+    imports: 'name'
+  - name: 'region'
+    type: ResourceRef
+    description: Region where the router resides.
+    url_param_only: true
+    required: false
+    immutable: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    resource: 'Region'
+    imports: 'name'
+  - name: 'name'
+    type: String
+    description: |
+      The name of the Named Set, which must be a resource ID segment and unique
+      within all named sets owned by the Router.
+    required: true
+    immutable: true
+properties:
+  - name: 'type'
+    type: Enum
+    description: |
+      The type of the Named Set.
+    enum_values:
+      - 'NAMED_SET_TYPE_PREFIX'
+      - 'NAMED_SET_TYPE_COMMUNITY'
+    required: true
+  - name: 'elements'
+    type: Array
+    description: |
+      CEL expressions that are comparable to constructs of this set's type.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'expression'
+          type: String
+          description:
+            Textual representation of an expression in Common Expression
+            Language syntax.
+          required: true
+        - name: 'title'
+          type: String
+          description:
+            Title for the expression, i.e. a short string describing its
+            purpose.
+        - name: 'description'
+          type: String
+          description: Description of the expression.
+        - name: 'location'
+          type: String
+          description:
+            String indicating the location of the expression for error
+            reporting, e.g. a file name and a position in the file.
+  - name: 'description'
+    type: String
+    description: An optional description of the Named Set.
+  - name: 'fingerprint'
+    type: Fingerprint
+    description: |
+      The fingerprint used for optimistic locking of this resource. Used
+      internally during updates.
+    output: true
+---

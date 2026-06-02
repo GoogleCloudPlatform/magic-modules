@@ -1,6 +1,7 @@
 package composer_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -11,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
@@ -23,7 +26,7 @@ const testComposerBucketPrefix = "tf-test-composer-bucket"
 const testComposerNetworkAttachmentPrefix = "tf-test-composer-nta"
 
 func bootstrapComposerServiceAgents(t *testing.T) {
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@cloudcomposer-accounts.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -93,7 +96,7 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	kms := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-composer2-key1")
+	bootstrapped := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-composer2-key1")
 	pid := envvar.GetTestProjectFromEnv()
 	bootstrapComposerServiceAgents(t)
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
@@ -107,7 +110,7 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComposerEnvironment_encryptionCfg(pid, "2", "2", envName, kms.CryptoKey.Name, network, subnetwork, serviceAccount),
+				Config: testAccComposerEnvironment_encryptionCfg(pid, "2", "2", envName, bootstrapped.CryptoKey.Name, network, subnetwork, serviceAccount),
 			},
 			{
 				ResourceName:      "google_composer_environment.test",
@@ -120,7 +123,7 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 			{
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:             testAccComposerEnvironment_encryptionCfg(pid, "2", "2", envName, kms.CryptoKey.Name, network, subnetwork, serviceAccount),
+				Config:             testAccComposerEnvironment_encryptionCfg(pid, "2", "2", envName, bootstrapped.CryptoKey.Name, network, subnetwork, serviceAccount),
 				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
@@ -644,7 +647,7 @@ func testAccComposerEnvironmentDestroyProducer(t *testing.T) func(s *terraform.S
 				Environment: idTokens[5],
 			}
 
-			_, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.Get(envName.ResourceName()).Do()
+			_, err := composer.NewClient(config, config.UserAgent).Projects.Locations.Environments.Get(envName.ResourceName()).Do()
 			if err == nil {
 				return fmt.Errorf("environment %s still exists", envName.ResourceName())
 			}
@@ -1270,7 +1273,7 @@ resource "google_composer_environment" "test" {
       image_version  = "composer-2-airflow-2"
     }
     private_environment_config {
-      connection_type = "VPC_PEERING"
+      connection_type = "PRIVATE_SERVICE_CONNECT"
       enable_private_endpoint = true
       enable_privately_used_public_ips = true
     }
@@ -1644,7 +1647,7 @@ resource "google_composer_environment" "test" {
     }
 
     software_config {
-      image_version = "composer-2.10.0-airflow-2.10.2"
+      image_version = "composer-2.13.0-airflow-2.10.5"
     }
   }
   depends_on = [google_project_iam_member.composer-worker]
@@ -1693,7 +1696,7 @@ resource "google_composer_environment" "test" {
     }
 
     software_config {
-      image_version = "composer-2.10.1-airflow-2.10.2"
+      image_version = "composer-2.16.11-airflow-2.11.1"
     }
   }
   depends_on = [google_project_iam_member.composer-worker]
@@ -2953,14 +2956,14 @@ func testAccCheckClearComposerEnvironmentFirewalls(t *testing.T, networkName str
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 		config.Project = envvar.GetTestProjectFromEnv()
-		network, err := config.NewComputeClient(config.UserAgent).Networks.Get(envvar.GetTestProjectFromEnv(), networkName).Do()
+		network, err := tpgcompute.NewClient(config, config.UserAgent).Networks.Get(envvar.GetTestProjectFromEnv(), networkName).Do()
 		if err != nil {
 			return err
 		}
 
-		foundFirewalls, err := config.NewComputeClient(config.UserAgent).Firewalls.List(config.Project).Do()
+		foundFirewalls, err := tpgcompute.NewClient(config, config.UserAgent).Firewalls.List(config.Project).Do()
 		if err != nil {
-			return fmt.Errorf("Unable to list firewalls for network %q: %s", network.Name, err)
+			return fmt.Errorf("unable to list firewalls for network %q: %s", network.Name, err)
 		}
 
 		var allErrors error
@@ -2969,18 +2972,16 @@ func testAccCheckClearComposerEnvironmentFirewalls(t *testing.T, networkName str
 				continue
 			}
 			log.Printf("[DEBUG] Deleting firewall %q for test-resource network %q", firewall.Name, network.Name)
-			op, err := config.NewComputeClient(config.UserAgent).Firewalls.Delete(config.Project, firewall.Name).Do()
+			op, err := tpgcompute.NewClient(config, config.UserAgent).Firewalls.Delete(config.Project, firewall.Name).Do()
 			if err != nil {
-				allErrors = multierror.Append(allErrors,
-					fmt.Errorf("Unable to delete firewalls for network %q: %s", network.Name, err))
+				allErrors = errors.Join(allErrors, fmt.Errorf("unable to delete firewalls for network %q: %s", network.Name, err))
 				continue
 			}
 
 			waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project,
 				"Sweeping test composer environment firewalls", config.UserAgent, 10)
 			if waitErr != nil {
-				allErrors = multierror.Append(allErrors,
-					fmt.Errorf("Error while waiting to delete firewall %q: %s", firewall.Name, waitErr))
+				allErrors = errors.Join(allErrors, fmt.Errorf("error while waiting to delete firewall %q: %s", firewall.Name, waitErr))
 			}
 		}
 		return allErrors

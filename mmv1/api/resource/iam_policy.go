@@ -14,7 +14,7 @@
 package resource
 
 import (
-	"log"
+	"fmt"
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
@@ -46,6 +46,13 @@ type IamPolicy struct {
 	// if it is not the same as the IAM resource. The IAP product needs these
 	// as its IAM policies refer to compute resources.
 	ParentResourceType string `yaml:"parent_resource_type,omitempty"`
+
+	// By default, the parent resource id is stored as the resource name format
+	// ie. project/{{project}}/resource/{{resource}}. Setting this to true will
+	// instead use the resource id ie. {{resource}}. The IAP product needs
+	// these for IAM policies that behave as singletons (their parent is often
+	// a project or location).
+	ParentIsResourceId bool `yaml:"parent_is_resource_id,omitempty"`
 
 	// Some resources allow retrieving the IAM policy with GET requests,
 	// others expect POST requests
@@ -84,6 +91,9 @@ type IamPolicy struct {
 	// CompareSelfLinkOrResourceName
 	CustomDiffSuppress *string `yaml:"custom_diff_suppress,omitempty"`
 
+	// ImportStateIDFuncs may use a custom template if default funcs don't work.
+	CustomImportStateIDFuncs string `yaml:"custom_import_state_id_funcs"`
+
 	// Some resources (IAP) use fields named differently from the parent resource.
 	// We need to use the parent's attributes to create an IAM policy, but they may not be
 	// named as the IAM resource expects.
@@ -95,6 +105,10 @@ type IamPolicy struct {
 
 	// How the API supports IAM conditions
 	IamConditionsRequestType string `yaml:"iam_conditions_request_type,omitempty"`
+
+	// [Optional] Whether to include an updateMask in the setIamPolicy request.
+	// Mandatory for older APIs like DNS to support IAM conditions.
+	UpdateMask bool `yaml:"update_mask,omitempty"`
 
 	// Allows us to override the base_url of the resource. This is required for Cloud Run as the
 	// IAM resources use an entirely different base URL from the actual resource
@@ -173,19 +187,21 @@ func (p *IamPolicy) MarshalYAML() (interface{}, error) {
 	return (*iamPolicyAlias)(clone.(*IamPolicy)), nil
 }
 
-func (p *IamPolicy) Validate(rName string) {
+func (p *IamPolicy) Validate(rName string) (es []error) {
 	allowed := []string{"GET", "POST"}
 	if !slices.Contains(allowed, p.FetchIamPolicyVerb) {
-		log.Fatalf("Value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName))
 	}
 
 	allowed = []string{"POST", "PUT"}
 	if !slices.Contains(allowed, p.SetIamPolicyVerb) {
-		log.Fatalf("Value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName))
 	}
 
 	allowed = []string{"REQUEST_BODY", "QUERY_PARAM", "QUERY_PARAM_NESTED"}
 	if p.IamConditionsRequestType != "" && !slices.Contains(allowed, p.IamConditionsRequestType) {
-		log.Fatalf("Value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName))
 	}
+
+	return es
 }

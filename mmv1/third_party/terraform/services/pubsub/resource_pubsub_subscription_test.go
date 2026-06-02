@@ -8,7 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
 	"github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -240,8 +244,10 @@ func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
 	table := fmt.Sprintf("tf-test-table-%s", acctest.RandString(t, 10))
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+	serviceAccount := fmt.Sprintf("bq-test-sa-%s", acctest.RandString(t, 10))
+	serviceAccount2 := fmt.Sprintf("bq-test-sa2-%s", acctest.RandString(t, 10))
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
 			Role:   "roles/bigquery.dataEditor",
@@ -261,7 +267,7 @@ func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, false, "bq-test-sa"),
+				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, false, serviceAccount),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -279,7 +285,7 @@ func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, true, "bq-test-sa2"),
+				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, true, serviceAccount2),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -390,6 +396,8 @@ func TestAccPubsubSubscriptionCloudStorage_serviceAccount(t *testing.T) {
 	bucket := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+	serviceAccount := fmt.Sprintf("gcs-test-sa-%s", acctest.RandString(t, 10))
+	serviceAccount2 := fmt.Sprintf("gcs-test-sa2-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -397,7 +405,7 @@ func TestAccPubsubSubscriptionCloudStorage_serviceAccount(t *testing.T) {
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "", "", "", 0, "", 0, "gcs-test-sa", "text"),
+				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "", "", "", 0, "", 0, serviceAccount, "text"),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -415,7 +423,7 @@ func TestAccPubsubSubscriptionCloudStorage_serviceAccount(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "", "", "", 0, "", 0, "gcs-test-sa2", "avro"),
+				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "", "", "", 0, "", 0, serviceAccount2, "avro"),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -615,13 +623,13 @@ func TestAccPubsubSubscription_tags(t *testing.T) {
 	t.Parallel()
 
 	subscription := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "pubsub-subscription-tagkey", nil)
+	tagKey := tags.BootstrapSharedTestOrganizationTagKey(t, "pubsub-subscription-tagkey", nil)
 	context := map[string]interface{}{
 		"topic":        fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10)),
 		"subscription": subscription,
 		"org":          envvar.GetTestOrgFromEnv(t),
 		"tagKey":       tagKey,
-		"tagValue":     acctest.BootstrapSharedTestOrganizationTagValue(t, "pubsub-subscription-tagvalue", tagKey),
+		"tagValue":     tags.BootstrapSharedTestOrganizationTagValue(t, "pubsub-subscription-tagvalue", tagKey),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1065,7 +1073,7 @@ resource "google_pubsub_subscription" "foo" {
 func testAccCheckPubsubSubscriptionCache404(t *testing.T, subName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		url := fmt.Sprintf("%sprojects/%s/subscriptions/%s", config.PubsubBasePath, envvar.GetTestProjectFromEnv(), subName)
+		url := fmt.Sprintf("%sprojects/%s/subscriptions/%s", transport_tpg.BaseUrl(pubsub.Product, config), envvar.GetTestProjectFromEnv(), subName)
 		resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",

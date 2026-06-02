@@ -148,6 +148,13 @@ The following arguments are supported:
 
 * `logging_config` - (Optional) Logging configuration. Structure [documented below](#nested_logging_config).
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+
 <a name="nested_transfer_spec"></a>The `transfer_spec` block supports:
 
 * `source_agent_pool_name` - (Optional) Specifies the agent pool name associated with the posix data source. When unspecified, the default name is used.
@@ -320,9 +327,9 @@ The `aws_access_key` block supports:
 
 * `path` - (Required) Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.
 
-* `credentials_secret` - (Optional, (https://terraform.io/docs/providers/google/guides/provider_versions.html)) Full Resource name of a secret in Secret Manager containing [SAS Credentials in JSON form](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#azureblobstoragedata:~:text=begin%20with%20a%20%27/%27.-,credentialsSecret,-string). Service Agent for Storage Transfer must have permissions to access secret. If credentials_secret is specified, do not specify azure_credentials.`,
+* `credentials_secret` - (Optional, (../guides/provider_versions.html.markdown)) Full Resource name of a secret in Secret Manager containing [SAS Credentials in JSON form](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#azureblobstoragedata:~:text=begin%20with%20a%20%27/%27.-,credentialsSecret,-string). Service Agent for Storage Transfer must have permissions to access secret. If credentials_secret is specified, do not specify azure_credentials.`,
 
-* `azure_credentials` - (Optional, (https://terraform.io/docs/providers/google/guides/provider_versions.html)) Credentials used to authenticate API requests to Azure block.
+* `azure_credentials` - (Optional, (../guides/provider_versions.html.markdown)) Credentials used to authenticate API requests to Azure block.
 
 * `federated_identity_config` - (Optional) Federated identity config of a user registered Azure application. Structure [documented below](#nested_federated_identity_config).
 

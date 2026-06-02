@@ -24,6 +24,10 @@ if !plan.EnableRbac.Equal(state.EnableRbac) {
 	updateMask = append(updateMask, "enableRbac")
 }
 
+if !plan.MaintenancePolicy.Equal(state.MaintenancePolicy) {
+	updateMask = append(updateMask, "maintenancePolicy")
+}
+
 
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it

@@ -17,7 +17,7 @@ Four different resources help you manage your IAM policy for a project. Each of 
 
 ~> **Note:** `google_project_iam_binding` resources **can be** used in conjunction with `google_project_iam_member` resources **only if** they do not grant privilege to the same role.
 
-~> **Note:** The underlying API method `projects.setIamPolicy` has a lot of constraints which are documented [here](https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy). In addition to these constraints, 
+~> **Note:** The underlying API method `projects.setIamPolicy` has a lot of constraints which are documented [here](https://docs.cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy). In addition to these constraints, 
    IAM Conditions cannot be used with Basic Roles such as Owner. Violating these constraints will result in the API returning 400 error code so please review these if you encounter errors with this resource.
 
 ## google_project_iam_policy
@@ -239,6 +239,28 @@ The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/c
 $ terraform import google_project_iam_member.default "{{project_id}} roles/viewer user:foo@example.com"
 ```
 
+#### Import via resource identity
+
+`google_project_iam_member` also supports plannable import via [resource identity](https://developer.hashicorp.com/terraform/language/block/import#identity) (Terraform 1.12+):
+
+```tf
+import {
+  to = google_project_iam_member.default
+  identity = {
+    project = "your-project-id"
+    role    = "roles/viewer"
+    member  = "user:foo@example.com"
+  }
+}
+```
+
+Identity attributes:
+
+* `project` - (Optional) The project id. May be omitted if a default project is configured on the provider.
+* `role` - (Required) The IAM role being granted.
+* `member` - (Required) The identity that the role is granted to.
+* `condition_title` - (Optional) Title of the IAM condition, when importing a conditional binding.
+
 ### Importing IAM bindings
 
 IAM binding imports use space-delimited identifiers that contain the `org_id` and role, e.g.
@@ -260,6 +282,26 @@ The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/c
 terraform import google_project_iam_binding.default "{{project_id}} roles/viewer"
 ```
 
+#### Import via resource identity
+
+`google_project_iam_binding` also supports plannable import via [resource identity](https://developer.hashicorp.com/terraform/language/block/import#identity) (Terraform 1.12+):
+
+```tf
+import {
+  to = google_project_iam_binding.default
+  identity = {
+    project = "your-project-id"
+    role    = "roles/viewer"
+  }
+}
+```
+
+Identity attributes:
+
+* `project` - (Optional) The project id. May be omitted if a default project is configured on the provider.
+* `role` - (Required) The IAM role being granted.
+* `condition_title` - (Optional) Title of the IAM condition, when importing a conditional binding.
+
 ### Importing IAM policies
 
 IAM policy imports use the identifier of the Project only. For example:
@@ -280,6 +322,23 @@ The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/c
 ```
 $ terraform import google_project_iam_policy.default {{project_id}}
 ```
+
+#### Import via resource identity
+
+`google_project_iam_policy` also supports plannable import via [resource identity](https://developer.hashicorp.com/terraform/language/block/import#identity) (Terraform 1.12+):
+
+```tf
+import {
+  to = google_project_iam_policy.default
+  identity = {
+    project = "your-project-id"
+  }
+}
+```
+
+Identity attributes:
+
+* `project` - (Optional) The project id. May be omitted if a default project is configured on the provider.
 
 ### Importing Audit Configs
 

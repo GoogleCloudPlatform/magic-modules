@@ -39,28 +39,42 @@ custom_code:
   encoder: 'templates/terraform/encoders/cloudbuildv2_repository.go.tmpl'
 exclude_tgc: true
 legacy_long_form_project: true
-include_in_tgc_next_DO_NOT_USE: true
-tgc_include_handwritten_tests: true
+include_in_tgc_next: true
 examples:
-# These tests depend on secrets stored in a separate project, so we prefer not
-# to show them in the docs.
+  # These tests depend on secrets stored in a separate project, so we prefer not
+  # to show them in the docs.
   - name: 'cloudbuildv2_repository_ghe'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
+    test_vars_overrides:
+      # for backward compatible
+      connection_name: '"connection" + randomSuffix'
+      # for backward compatible
+      repository_name: '"repository" + randomSuffix'
     exclude_docs: true
   - name: 'cloudbuildv2_repository_github'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
+    test_vars_overrides:
+      # for backward compatible
+      connection_name: '"connection" + randomSuffix'
+      # for backward compatible
+      repository_name: '"repository" + randomSuffix'
     exclude_docs: true
   - name: 'cloudbuildv2_repository_gle'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
+    test_vars_overrides:
+      # for backward compatible
+      connection_name: '"connection" + randomSuffix'
+      # for backward compatible
+      repository_name: '"repository" + randomSuffix'
     exclude_docs: true
   - name: 'cloudbuildv2_repository_ghe_doc'
     exclude_test: true
@@ -72,7 +86,7 @@ parameters:
     description: The location for the resource
     url_param_only: true
     immutable: true
- # EXTRACT_FROM_FIELD_IF_EMPTY
+    # EXTRACT_FROM_FIELD_IF_EMPTY
     default_from_api: true
   - name: 'parent_connection'
     type: ResourceRef

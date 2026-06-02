@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 package storage
 
 import (
@@ -11,11 +10,12 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"crypto/sha256"
 	"encoding/base64"
@@ -28,11 +28,15 @@ import (
 
 func ResourceStorageBucketObject() *schema.Resource {
 	return &schema.Resource{
-		Create:        resourceStorageBucketObjectCreate,
-		Read:          resourceStorageBucketObjectRead,
-		Update:        resourceStorageBucketObjectUpdate,
-		Delete:        resourceStorageBucketObjectDelete,
-		CustomizeDiff: resourceStorageBucketObjectCustomizeDiff,
+		Create: resourceStorageBucketObjectCreate,
+		Read:   resourceStorageBucketObjectRead,
+		Update: resourceStorageBucketObjectUpdate,
+		Delete: resourceStorageBucketObjectDelete,
+		CustomizeDiff: customdiff.All(
+			resourceStorageBucketObjectCustomizeDiff,
+			validateContexts,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(4 * time.Minute),
@@ -107,6 +111,46 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Sensitive:    true,
 				Computed:     true,
 				Description:  `Data as string to be uploaded. Must be defined if source is not. Note: The content field is marked as sensitive. To view the raw contents of the object, please define an output.`,
+			},
+
+			"contexts": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Contexts attached to an object, in key-value pairs.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"custom": {
+							Type:        schema.TypeList,
+							Required:    true,
+							Description: "A list of custom context key-value pairs.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "An individual object context. Context keys and their corresponding values must start with an alphanumeric character.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The value associated with this context. This field holds the primary information for the given context key.",
+									},
+									"create_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The time when context was first added to the storage#object in RFC 3339 format.",
+									},
+									"update_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The time when context was last updated in RFC 3339 format.",
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 
 			"generation": {
@@ -308,12 +352,9 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description: `A url reference to download this object.`,
 			},
 
-			"deletion_policy": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  `The deletion policy for the object. Setting ABANDON allows the resource to be abandoned rather than deleted when removed from your Terraform configuration.`,
-				ValidateFunc: validation.StringInSlice([]string{"ABANDON"}, false),
-			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -346,7 +387,7 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error, either \"content\" or \"source\" must be specified")
 	}
 
-	objectsService := storage.NewObjectsService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutCreate)))
+	objectsService := storage.NewObjectsService(NewClientWithTimeoutOverride(config, userAgent, d.Timeout(schema.TimeoutCreate)))
 	object := &storage.Object{Bucket: bucket}
 
 	if v, ok := d.GetOk("cache_control"); ok {
@@ -393,6 +434,10 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 		object.TemporaryHold = v.(bool)
 	}
 
+	if v, ok := d.GetOk("contexts"); ok {
+		object.Contexts = expandCustomObjectContexts(v.([]interface{}))
+	}
+
 	insertCall := objectsService.Insert(bucket, object)
 	insertCall.Name(name)
 	if v, ok := d.GetOk("force_empty_content_type"); ok && v.(bool) {
@@ -417,6 +462,11 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceStorageBucketObject) {
+		return ResourceStorageBucketObject().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -433,7 +483,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 		return resourceStorageBucketObjectCreate(d, meta)
 	} else {
 
-		objectsService := storage.NewObjectsService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutUpdate)))
+		objectsService := storage.NewObjectsService(NewClientWithTimeoutOverride(config, userAgent, d.Timeout(schema.TimeoutUpdate)))
 		getCall := objectsService.Get(bucket, name)
 
 		res, err := getCall.Do()
@@ -461,6 +511,11 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 			res.TemporaryHold = v.(bool)
 		}
 
+		if d.HasChange("contexts") {
+			v := d.Get("contexts")
+			res.Contexts = expandCustomObjectContexts(v.([]interface{}))
+		}
+
 		updateCall := objectsService.Update(bucket, name, res)
 		if hasRetentionChanges {
 			updateCall.OverrideUnlockedRetention(true)
@@ -471,7 +526,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 			return fmt.Errorf("Error updating object %s: %s", name, err)
 		}
 
-		return nil
+		return resourceStorageBucketObjectRead(d, meta)
 	}
 }
 
@@ -485,7 +540,7 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	objectsService := storage.NewObjectsService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutRead)))
+	objectsService := storage.NewObjectsService(NewClientWithTimeoutOverride(config, userAgent, d.Timeout(schema.TimeoutRead)))
 	getCall := objectsService.Get(bucket, name)
 
 	if v, ok := d.GetOk("customer_encryption"); ok {
@@ -565,6 +620,13 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("temporary_hold", res.TemporaryHold); err != nil {
 		return fmt.Errorf("Error setting temporary_hold: %s", err)
 	}
+	if err := d.Set("contexts", flattenContexts(d, res.Contexts)); err != nil {
+		return fmt.Errorf("Error reading Contexts: %s", err)
+	}
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
 
 	d.SetId(objectGetID(res))
 
@@ -572,6 +634,13 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -587,7 +656,7 @@ func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{})
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	objectsService := storage.NewObjectsService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutDelete)))
+	objectsService := storage.NewObjectsService(NewClientWithTimeoutOverride(config, userAgent, d.Timeout(schema.TimeoutDelete)))
 
 	DeleteCall := objectsService.Delete(bucket, name)
 	err = DeleteCall.Do()
@@ -651,6 +720,35 @@ func expandObjectRetention(configured interface{}) *storage.ObjectRetention {
 	return objectRetention
 }
 
+func expandCustomObjectContexts(objectContexts []interface{}) *storage.ObjectContexts {
+	if len(objectContexts) == 0 {
+		return nil
+	}
+
+	contextsObj := objectContexts[0].(map[string]interface{})
+
+	customList := contextsObj["custom"]
+
+	tfCustomList := customList.([]interface{})
+
+	objContextPayload := make(map[string]storage.ObjectCustomContextPayload)
+	for _, item := range tfCustomList {
+		itemMap := item.(map[string]interface{})
+
+		key := itemMap["key"].(string)
+		value := itemMap["value"].(string)
+
+		objContextPayload[key] = storage.ObjectCustomContextPayload{
+			Value: value,
+		}
+	}
+
+	contexts := &storage.ObjectContexts{
+		Custom: objContextPayload,
+	}
+	return contexts
+}
+
 func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[string]interface{} {
 	retentions := make([]map[string]interface{}, 0, 1)
 
@@ -665,6 +763,51 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 
 	retentions = append(retentions, retention)
 	return retentions
+}
+
+func flattenContexts(d *schema.ResourceData, contexts *storage.ObjectContexts) interface{} {
+	if contexts == nil || contexts.Custom == nil || len(contexts.Custom) == 0 {
+		return nil
+	}
+	c, _ := d.GetOk("contexts")
+	contextsList := c.([]interface{})
+	if len(contextsList) == 0 {
+		return nil
+	}
+
+	contextsObj := contextsList[0].(map[string]interface{})
+
+	customObjectList := contextsObj["custom"]
+
+	customkeyValueList := customObjectList.([]interface{})
+
+	flattenKeyValueList := make([]interface{}, 0, len(contexts.Custom))
+	for _, customKv := range customkeyValueList {
+		customKvItem := customKv.(map[string]interface{})
+
+		k := customKvItem["key"].(string)
+		customItem, ok := contexts.Custom[k]
+		if !ok {
+			continue
+		} else {
+			itemMap := make(map[string]interface{})
+
+			itemMap["key"] = k
+			itemMap["value"] = customItem.Value
+			itemMap["create_time"] = customItem.CreateTime
+			itemMap["update_time"] = customItem.UpdateTime
+
+			flattenKeyValueList = append(flattenKeyValueList, itemMap)
+		}
+	}
+
+	customList := map[string]interface{}{
+		"custom": flattenKeyValueList,
+	}
+
+	contextList := []interface{}{customList}
+
+	return contextList
 }
 
 func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
@@ -706,4 +849,46 @@ func showDiff(d *schema.ResourceDiff) error {
 	}
 
 	return nil
+}
+
+// validate keys for duplicates in custom object contexts
+func validateContexts(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if !d.HasChange("contexts") {
+		return nil
+	}
+
+	_, new := d.GetChange("contexts")
+
+	contextsList := new.([]interface{})
+	if len(contextsList) == 0 {
+		return nil
+	}
+
+	contextsObj := contextsList[0].(map[string]interface{})
+
+	customList := contextsObj["custom"]
+
+	keyValueList := customList.([]interface{})
+
+	keys := make(map[string]bool)
+	for _, item := range keyValueList {
+		itemMap := item.(map[string]interface{})
+
+		key := itemMap["key"].(string)
+
+		if keys[key] {
+			return fmt.Errorf("duplicate key found in 'contexts' block: %s. Each 'key' must be unique", key)
+		}
+		keys[key] = true
+	}
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_bucket_object",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceStorageBucketObject(),
+	}.Register()
 }

@@ -55,6 +55,9 @@ examples:
     vars:
       bucket_id: 'my-bucket'
       link_id: 'mylink'
+    test_vars_overrides:
+      # for backward compatible
+      link_id: '"mylink" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'logging_linked_dataset_all_params'
@@ -62,6 +65,9 @@ examples:
     vars:
       bucket_id: 'my-bucket'
       link_id: 'mylink'
+    test_vars_overrides:
+      # for backward compatible
+      link_id: '"mylink" + randomSuffix'
     test_env_vars:
       project: 'PROJECT_NAME'
 parameters:
@@ -85,7 +91,7 @@ parameters:
     url_param_only: true
     immutable: true
     default_from_api: true
- # Make this a String for now since we don't have a good way to reference multiple resources.
+  # Make this a String for now since we don't have a good way to reference multiple resources.
   - name: 'bucket'
     type: String
     description: The bucket to which the linked dataset is attached.

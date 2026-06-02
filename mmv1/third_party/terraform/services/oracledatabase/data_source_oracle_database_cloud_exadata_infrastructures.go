@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -42,7 +43,7 @@ func dataSourceOracleDatabaseCloudExadataInfrastructuresRead(d *schema.ResourceD
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{OracleDatabaseBasePath}}projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -106,4 +107,13 @@ func flattenOracleDatabaseCloudExadataInfrastructures(v interface{}, d *schema.R
 		})
 	}
 	return transformed
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_oracle_database_cloud_exadata_infrastructures",
+		ProductName: "oracledatabase",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceOracleDatabaseCloudExadataInfrastructures(),
+	}.Register()
 }

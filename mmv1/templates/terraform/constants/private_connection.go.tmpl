@@ -1,4 +1,4 @@
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 
 func extractError(d *schema.ResourceData) error {
 	// Casts are not safe since the logic that populate it is type deterministic.

@@ -120,7 +120,7 @@ The following environment variables are required:
 		if err != nil {
 			return err
 		}
-		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "ci-vcr-logs", rnr)
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "ci-vcr-logs", rnr, false)
 		if err != nil {
 			return err
 		}
@@ -255,9 +255,20 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir string, rnr ExecRu
 		}
 		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
+
+		// Expand compound tests to subtests for accurate status matching
+		expandedRecordingResult := subtestResult(recordingResult)
+		expandedReplayingAfterRecordingResult := subtestResult(replayingAfterRecordingResult)
+
+		logBasePath := fmt.Sprintf("ci-vcr-logs/%s/refs/heads/%s", provider.Private.String(), head)
+		logBaseUrl := fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
+
+		testRows := buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult, logBaseUrl)
+
 		recordReplayData := recordReplay{
-			RecordingResult:               recordingResult,
-			ReplayingAfterRecordingResult: replayingAfterRecordingResult,
+			TestRows:                      testRows,
+			RecordingResult:               expandedRecordingResult,
+			ReplayingAfterRecordingResult: expandedReplayingAfterRecordingResult,
 			RecordingErr:                  recordingErr,
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
@@ -265,7 +276,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir string, rnr ExecRu
 			Version:                       provider.Private.String(),
 			Head:                          head,
 		}
-		recordReplayComment, err := formatRecordReplay(recordReplayData)
+		recordReplayComment, err := formatRecordReplay(recordReplayData, os.Stdout)
 		if err != nil {
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
