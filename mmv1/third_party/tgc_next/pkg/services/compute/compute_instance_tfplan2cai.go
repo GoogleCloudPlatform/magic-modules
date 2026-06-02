@@ -195,7 +195,8 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		DeletionProtection:       d.Get("deletion_protection").(bool),
 		Hostname:                 d.Get("hostname").(string),
 		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
-		DisplayDevice:            expandDisplayDevice(d),
+		ShieldedInstanceConfig:   expandShieldedVmConfigs(d),
+		DisplayDevice:            expandDisplayDeviceTgcNext(d),
 		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:      reservationAffinity,
 		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
@@ -334,8 +335,9 @@ func expandParams(d tpgresource.TerraformResourceData) (*compute.InstanceParams,
 
 func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.Config, project string) (*compute.AttachedDisk, error) {
 	disk := &compute.AttachedDisk{
-		AutoDelete: d.Get("boot_disk.0.auto_delete").(bool),
-		Boot:       true,
+		AutoDelete:      d.Get("boot_disk.0.auto_delete").(bool),
+		Boot:            true,
+		ForceSendFields: []string{"AutoDelete"},
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.device_name"); ok {
@@ -558,6 +560,10 @@ func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *tra
 			Ipv6AccessConfigs:        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
 			Ipv6Address:              data["ipv6_address"].(string),
 			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
+			NetworkAttachment:        data["network_attachment"].(string),
+			ParentNicName:            data["parent_nic_name"].(string),
+			IgmpQuery:                data["igmp_query"].(string),
+			Vlan:                     int64(data["vlan"].(int)),
 		}
 	}
 	return ifaces, nil
@@ -653,7 +659,7 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 	}
 
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
-		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
+		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeoutTgc(v)
 		if err != nil {
 			return nil, err
 		}
@@ -692,3 +698,34 @@ func expandReservationAffinityTgc(d tpgresource.TerraformResourceData) (*compute
 
 	return affinity, nil
 }
+
+func expandComputeLocalSsdRecoveryTimeoutTgc(v interface{}) (*compute.Duration, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	duration := &compute.Duration{}
+
+	if val, ok := original["nanos"]; ok && val != nil {
+		duration.Nanos = int64(val.(int))
+		duration.ForceSendFields = append(duration.ForceSendFields, "Nanos")
+	}
+
+	if val, ok := original["seconds"]; ok && val != nil {
+		duration.Seconds = int64(val.(int))
+		duration.ForceSendFields = append(duration.ForceSendFields, "Seconds")
+	}
+	return duration, nil
+}
+
+func expandDisplayDeviceTgcNext(d tpgresource.TerraformResourceData) *compute.DisplayDevice {
+	if _, ok := d.GetOkExists("enable_display"); !ok {
+		return nil
+	}
+	return &compute.DisplayDevice{
+		EnableDisplay:   d.Get("enable_display").(bool),
+		ForceSendFields: []string{"EnableDisplay"},
+	}
+}
+
