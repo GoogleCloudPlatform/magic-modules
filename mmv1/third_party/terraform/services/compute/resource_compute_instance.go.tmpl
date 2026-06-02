@@ -635,6 +635,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
 						},
 
+{{- if ne $.TargetVersionName "ga" }}
 						"service_class_id": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -642,6 +643,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Description: `Producer Service's Service class Id for the region of this network interface. Can only be used with network_attachment.
 It is not possible to use on its own; however, network_attachment can be used without service_class_id.`,
 						},
+{{- end }}
 
 						"parent_nic_name": {
 							Type:        schema.TypeString,

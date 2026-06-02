@@ -5216,6 +5216,7 @@ func TestAccComputeInstance_NetworkAttachmentUpdate(t *testing.T) {
 	})
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeInstance_ServiceClassNetworkAttachment(t *testing.T) {
 	t.Parallel()
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
@@ -5254,6 +5255,7 @@ func TestAccComputeInstance_ServiceClassNetworkAttachment(t *testing.T) {
 		},
 	})
 }
+{{- end }}
 
 func TestAccComputeInstance_NicStackTypeUpdate(t *testing.T) {
 	t.Parallel()
@@ -12727,6 +12729,7 @@ resource "google_compute_instance" "foobar" {
 `, suffix, suffix, suffix, region, suffix, region, suffix, region, suffix, region, suffix, region, networkAttachment)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func testAccComputeInstance_serviceClassNetworkAttachment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "accepted_producer_project1" {
@@ -12812,6 +12815,7 @@ data "google_compute_image" "my_image" {
 }
 `, context)
 }
+{{- end }}
 
 func testAccComputeInstance_nicStackTypeUpdate(suffix, region, stack_type, instance string) string {
 	return fmt.Sprintf(`

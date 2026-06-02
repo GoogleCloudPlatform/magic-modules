@@ -545,6 +545,7 @@ properties:
           resource: 'networkAttachment'
           imports: 'selfLink'
         - name: 'serviceClassId'
+          min_version: 'beta'
           type: String
           description: |
             Producer Service's Service class Id for the region of this network interface.
