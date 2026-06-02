@@ -1141,7 +1141,6 @@ resource "google_bigtable_table" "table" {
 }
 
 func testAccBigtableTable_automated_backups_locations_create(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family string) string {
-
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -1164,16 +1163,16 @@ resource "google_bigtable_table" "table" {
   name          = "%s"
   instance_name = google_bigtable_instance.instance.name
   automated_backup_policy {
-retention_period = "%s"
-frequency = "%s"
-locations = ["projects/${data.google_project.project.project_id}/locations/us-central1-b"]
+	retention_period = "%s"
+	frequency = "%s"
+	locations = ["projects/${data.google_project.project.project_id}/locations/us-central1-b"]
   }
   column_family {
     family = "%s"
   }
   deletion_protection = "UNPROTECTED"
 }
-`, instanceName, instanceName, instanceName, tableName, retentionPeriod, frequency, locs, family)
+`, instanceName, instanceName, instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family)
 }
 
 func testAccBigtableTable_automated_backups_locations_update(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family string) string {
@@ -1199,16 +1198,16 @@ resource "google_bigtable_table" "table" {
   name          = "%s"
   instance_name = google_bigtable_instance.instance.name
   automated_backup_policy {
-retention_period = "%s"
-frequency = "%s"
-locations = ["projects/${data.google_project.project.project_id}/locations/us-central1-b", "projects/${data.google_project.project.project_id}/locations/us-central1-c"]
+	retention_period = "%s"
+	frequency = "%s"
+	locations = ["projects/${data.google_project.project.project_id}/locations/us-central1-b", "projects/${data.google_project.project.project_id}/locations/us-central1-c"]
   }
   column_family {
     family = "%s"
   }
   deletion_protection = "UNPROTECTED"
 }
-`, instanceName, instanceName, instanceName, tableName, retentionPeriod, frequency, locs, family)
+`, instanceName, instanceName, instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family)
 }
 
 func testAccBigtableTable_automated_backups_locations_clear(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family string) string {
@@ -1243,7 +1242,7 @@ resource "google_bigtable_table" "table" {
   }
   deletion_protection = "UNPROTECTED"
 }
-`, instanceName, instanceName, instanceName, tableName, retentionPeriod, frequency, locs, family)
+`, instanceName, instanceName, instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family)
 }
 
 func testAccBigtableTable_automated_backups_locations_invalid(instanceName, tableName, family string) string {
