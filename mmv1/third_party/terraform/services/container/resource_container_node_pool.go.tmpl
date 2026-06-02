@@ -686,13 +686,11 @@ var schemaNodePool = map[string]*schema.Schema{
 				"grace_termination_duration": {
 					Type:         schema.TypeString,
 					Optional:     true,
-					Computed:     true,
 					Description:  `The duration of the grace termination period for node drain.`,
 				},
 				"pdb_timeout_duration": {
 					Type:         schema.TypeString,
 					Optional:     true,
-					Computed:     true,
 					Description:  `The duration of the PDB timeout period for node drain.`,
 				},
 				"respect_pdb_during_node_pool_deletion": {
