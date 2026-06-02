@@ -14,13 +14,13 @@
 ---
 name: Artifact
 description: Instance of an Artifact on Vertex AI.
-base_url: projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/artifacts
-self_link: projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/artifacts/{{artifact_id}}
-create_url: projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/artifacts?artifactId={{artifact_id}}
+base_url: projects/{{project}}/locations/{{location}}/metadataStores/{{metadatastore}}/artifacts
+self_link: projects/{{project}}/locations/{{location}}/metadataStores/{{metadatastore}}/artifacts/{{artifact_id}}
+create_url: projects/{{project}}/locations/{{location}}/metadataStores/{{metadatastore}}/artifacts?artifactId={{artifact_id}}
 update_mask: true
 update_verb: PATCH
 import_format:
-  - projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/artifacts/{{artifact_id}}
+  - projects/{{project}}/locations/{{location}}/metadataStores/{{metadatastore}}/artifacts/{{artifact_id}}
 async:
   operation:
     base_url: '{{op_id}}'
@@ -44,12 +44,13 @@ samples:
           description: "An updated artifact description"
           display_name: "Updated Display Name"
 parameters:
-  - name: region
+  - name: location
     type: String
-    description: The region of the Artifact.
+    description: The location of the Artifact.
     immutable: true
     url_param_only: true
     default_from_api: true
+    required: true
   - name: metadatastore
     type: String
     required: true

@@ -7,9 +7,11 @@ resource "google_vertex_ai_metadata_store" "store" {
 resource "google_vertex_ai_artifact" "{{$.PrimaryResourceId}}" {
   artifact_id    = "{{index $.ResourceIdVars "artifactId"}}"
   metadatastore  = google_vertex_ai_metadata_store.store.name
+  location       = "us-central1"
   schema_title   = "system.Dataset"
   schema_version = "0.0.1"
   uri            = "https://example.com/dataset"
+  state          = "PENDING"
   
   metadata = {
     key = "value"
