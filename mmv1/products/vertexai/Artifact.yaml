@@ -49,7 +49,6 @@ parameters:
     description: The location of the Artifact.
     immutable: true
     url_param_only: true
-    default_from_api: true
     required: true
   - name: metadatastore
     type: String
