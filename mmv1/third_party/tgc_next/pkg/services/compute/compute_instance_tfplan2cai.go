@@ -154,7 +154,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
 	}
 
-	reservationAffinity, err := expandReservationAffinity(d)
+	reservationAffinity, err := expandReservationAffinityTgc(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating reservation affinity: %s", err)
 	}
@@ -641,4 +641,31 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		scheduling.TerminationTime = v.(string)
 	}
 	return scheduling, nil
+}
+
+func expandReservationAffinityTgc(d tpgresource.TerraformResourceData) (*compute.ReservationAffinity, error) {
+	_, ok := d.GetOk("reservation_affinity")
+	if !ok {
+		return nil, nil
+	}
+
+	prefix := "reservation_affinity.0"
+	reservationAffinityType := d.Get(prefix + ".type").(string)
+
+	affinity := &compute.ReservationAffinity{
+		ConsumeReservationType: reservationAffinityType,
+	}
+
+	_, hasSpecificReservation := d.GetOk(prefix + ".specific_reservation")
+	if (reservationAffinityType == "SPECIFIC_RESERVATION") != hasSpecificReservation {
+		return nil, fmt.Errorf("specific_reservation must be set when reservation_affinity is SPECIFIC_RESERVATION, and not set otherwise")
+	}
+
+	if hasSpecificReservation {
+		prefix = prefix + ".specific_reservation.0"
+		affinity.Key = d.Get(prefix + ".key").(string)
+		affinity.Values = tpgresource.ConvertStringArr(d.Get(prefix + ".values").([]interface{}))
+	}
+
+	return affinity, nil
 }
