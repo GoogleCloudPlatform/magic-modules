@@ -3,19 +3,17 @@
 
 default: build
 
-
-
 # mm setup
 ifneq ($(PRODUCT),)
-	mmv1_args=--product $(PRODUCT)
+  mmv1_args=--product $(PRODUCT)
 endif
 
 ifneq ($(RESOURCE),)
-	mmv1_args += --resource $(RESOURCE)
+  mmv1_args += --resource $(RESOURCE)
 endif
 
 ifneq ($(OVERRIDES),)
-	mmv1_args += --overrides $(OVERRIDES)
+  mmv1_args += --overrides $(OVERRIDES)
 endif
 
 UNAME := $(shell uname)
@@ -29,26 +27,14 @@ endif
 
 SHOULD_SKIP_CLEAN := false # Default: do not skip
 ifneq ($(SKIP_CLEAN),)
-	ifneq ($(SKIP_CLEAN),false)
-		SHOULD_SKIP_CLEAN := true
-	endif
-endif
-
-# Default to bazel if available (and not on GHA)
-ifeq ($(GITHUB_ACTIONS),true)
-	_ := $(shell printf "\e[1;32mINFO:\e[0m Running in GitHub actions; not using bazel\n" 1>&2)
-	USE_BAZEL=0
-else ifneq ($(shell which bazel),)
-	ifneq ($(USE_BAZEL), 0)
-		_ := $(shell printf "\e[1;32mINFO:\e[0m bazel detected; set USE_BAZEL=0 to disable bazel usage\n" 1>&2)
-		USE_BAZEL=1
-	endif
+  ifneq ($(SKIP_CLEAN),false)
+    SHOULD_SKIP_CLEAN := true
+  endif
 endif
 
 ifeq ($(USE_BAZEL), 1)
 	MM_BINARY=../bazel-bin/mmv1/mmv1_/mmv1
 else
-	_ := $(shell printf "\e[1;33mWARNING:\e[0m magic-modules will start requiring installation of bazel for builds in the near future. You can opt in now by installing bazel (recommended: use bazelisk): https://bazel.build/install\n" 1>&2)
 	MM_BINARY=../bin/mmv1
 endif
 
@@ -57,17 +43,9 @@ terraform build provider: validate_environment clean-provider mmv1
 
 mm_binary:
 	@echo "Building mmv1 binary";
-	@if [ "$(USE_BAZEL)" != "1" ]; then \
+	if [ "$(USE_BAZEL)" != "1" ]; then \
 		cd mmv1 && go build -o $(MM_BINARY) .; \
 	else \
-		bazel --version 2>&1 > /dev/null; \
-		correctVersion=$$?; \
-		required="$$(cat .bazelversion)"; \
-		if [ $${correctVersion} -eq 1 ]; then \
-			printf "\e[1;33mWARNING:\e[0m bazel $${required} is required and not found. See https://bazel.build/install for information on installing it. (Recommended: Use Bazelisk.)\n"; \
-			printf " Set USE_BAZEL=0 to disable bazel usage.\n"; \
-			exit 1; \
-		fi; \
 		bazel build //mmv1;\
 	fi
 
