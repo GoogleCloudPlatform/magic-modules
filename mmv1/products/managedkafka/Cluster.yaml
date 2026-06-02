@@ -63,6 +63,10 @@ examples:
     test_vars_overrides:
       key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     external_providers: ["time"]
+  - name: 'managedkafka_cluster_public'
+    primary_resource_id: 'example'
+    vars:
+      cluster_id: 'my-cluster'
 parameters:
   - name: 'location'
     type: String
@@ -111,6 +115,16 @@ properties:
                     The name of the subnet must be in the format `projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET`."
                   required: true
                   diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+          - name: 'publicClusterConfig'
+            type: NestedObject
+            description: "Public connection configuration for the Kafka cluster."
+            properties:
+              - name: 'allowedSourceIpRanges'
+                type: Array
+                description: "A list of IPv4 addresses or CIDR ranges that are allowed to connect to the cluster."
+                required: true
+                item_type:
+                  type: String
       - name: 'kmsKey'
         type: String
         description: "The Cloud KMS Key name to use for encryption.
