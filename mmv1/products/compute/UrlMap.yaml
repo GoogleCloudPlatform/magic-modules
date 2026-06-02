@@ -374,6 +374,19 @@ samples:
         test_vars_overrides:
           # for backward compatible
           url_map_name: '"urlmap" + randomSuffix'
+  - name: 'url_map_image_optimization_policy'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    steps:
+      - name: 'url_map_image_optimization_policy'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'example'
+          http_health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
 parameters:
 properties:
   - name: 'creationTimestamp'
