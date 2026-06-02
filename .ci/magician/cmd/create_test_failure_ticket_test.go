@@ -233,10 +233,11 @@ func TestShouldCreateTicket(t *testing.T) {
 	}
 }
 
-func TestGetTicketLabels(t *testing.T) {
+func TestComputeTicketRouting(t *testing.T) {
 	cases := map[string]struct {
-		tf           testFailure
-		expectLabels []string
+		tf             testFailure
+		expectLabels   []string
+		expectAssignee bool
 	}{
 		"Team owned error": {
 			tf: testFailure{
@@ -247,7 +248,8 @@ func TestGetTicketLabels(t *testing.T) {
 					provider.GA: testFailure10,
 				},
 			},
-			expectLabels: []string{"size/xs", "test-failure", "test-failure-10", "service/terraform"},
+			expectLabels:   []string{"size/xs", "test-failure", "test-failure-10", "service/terraform"},
+			expectAssignee: true,
 		},
 		"Crash error": {
 			tf: testFailure{
@@ -258,7 +260,8 @@ func TestGetTicketLabels(t *testing.T) {
 					provider.GA: testFailure100,
 				},
 			},
-			expectLabels: []string{"size/xs", "test-failure", "test-failure-100", "service/compute-instances", "crash"},
+			expectLabels:   []string{"size/xs", "test-failure", "test-failure-100", "service/compute-instances", "crash"},
+			expectAssignee: false,
 		},
 		"Non-Team owned - has service label": {
 			tf: testFailure{
@@ -269,7 +272,8 @@ func TestGetTicketLabels(t *testing.T) {
 					provider.GA: testFailure50,
 				},
 			},
-			expectLabels: []string{"size/xs", "test-failure", "test-failure-50", "service/compute-instances"},
+			expectLabels:   []string{"size/xs", "test-failure", "test-failure-50", "service/compute-instances"},
+			expectAssignee: false,
 		},
 		"Non-Team owned - fallback label": {
 			tf: testFailure{
@@ -280,15 +284,16 @@ func TestGetTicketLabels(t *testing.T) {
 					provider.GA: testFailure100,
 				},
 			},
-			expectLabels: []string{"size/xs", "test-failure", "test-failure-100", "service/terraform"},
+			expectLabels:   []string{"size/xs", "test-failure", "test-failure-100", "service/terraform", "test/review"},
+			expectAssignee: true,
 		},
 	}
-
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			labels, err := computeTicketLabels(&tc.tf)
+			labels, shouldAssign, err := computeTicketRouting(&tc.tf)
 			assert.NoError(t, err)
 			assert.ElementsMatch(t, tc.expectLabels, labels)
+			assert.Equal(t, tc.expectAssignee, shouldAssign)
 		})
 	}
 }

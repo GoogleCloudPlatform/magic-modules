@@ -67,12 +67,17 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 		"{{$n}}": envvar.GetTestRegionFromEnv(),
 		{{- else if eq $n "zone" }}
 		"zone": envvar.GetTestZoneFromEnv(),
+		{{- else if eq $n "project" }}
+		{{- if not (index $step.TestEnvVars "project") }}
+		"project": envvar.GetTestProjectFromEnv(),
+		{{- end }}
 		{{- end }}
 	{{- end }}
 		"random_suffix": randomSuffix,
 	}
 
 	var listDisplayName acctest.ListDisplayName
+	var listScope acctest.ListScopeCapture
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
@@ -105,11 +110,20 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 						{{- end }}
 						},
 					),
+					listScope.Capture(map[string]string{
+					{{- range $scope := $.ListScopeProperties }}
+						{{- if $scope.Required }}
+							{{- $n := underscore $scope.Name }}
+						"{{ $n }}": "{{ $sample.ResourceType $.TerraformName }}.{{ $sample.PrimaryResourceId }}",
+						{{- end }}
+					{{- end }}
+					}),
 				),
 			},
 			{
 				Query:  true,
 				Config: testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
+				ConfigVariables: listScope.AsConfigVariables(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("{{ $sample.ResourceType $.TerraformName }}.list_query", 1),
 					querycheck.ExpectResourceDisplayName(
@@ -125,11 +139,20 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 
 func testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+{{- range $scope := $.ListScopeProperties }}
+	{{- if $scope.Required }}
+		{{- $n := underscore $scope.Name }}
+variable "{{ $n }}" { type = string }
+	{{- end }}
+{{- end }}
 list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
     provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
     config {
 {{- range $scope := $.ListScopeProperties }}
-        {{ underscore $scope.Name }} = "%{{"{"}}{{ underscore $scope.Name }}{{"}"}}"
+        {{- if $scope.Required }}
+            {{- $n := underscore $scope.Name }}
+        {{ $n }} = var.{{ $n }}
+        {{- end }}
 {{- end }}
     }
 }

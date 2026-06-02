@@ -16,7 +16,6 @@ name: 'OrganizationSettings'
 api_resource_type_kind: AccessApprovalSettings
 api_variant_patterns:
   - 'organizations/{organization}/accessApprovalSettings'
-legacy_name: 'google_organization_access_approval_settings'
 description: |
   Access Approval enables you to require your explicit approval whenever Google support and engineering need to access your customer content.
 references:
@@ -25,15 +24,19 @@ references:
 docs:
 base_url: 'organizations/{{organization_id}}/accessApprovalSettings'
 self_link: 'organizations/{{organization_id}}/accessApprovalSettings'
+update_mask: true
 create_verb: 'PATCH'
 update_verb: 'PATCH'
-update_mask: true
+legacy_name: 'google_organization_access_approval_settings'
 import_format:
   - 'organizations/{{organization_id}}/accessApprovalSettings'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccAccessApprovalSettings/organization'
 custom_code:
   pre_create: 'templates/terraform/update_mask.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/clear_organization_access_approval_settings.go.tmpl'

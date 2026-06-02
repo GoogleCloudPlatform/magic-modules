@@ -54,12 +54,19 @@ properties:
       The resource name of the underlying Google Cloud Storage bucket.
     min_version: "beta"
     output: true
+    custom_flatten: 'templates/terraform/custom_flatten/firebasestorage_bucket.go.tmpl'
     properties:
       - name: "name"
         type: String
         description: |
           The resource name of the bucket in the format
           projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID
+        min_version: "beta"
+        output: true
+      - name: "bucketId"
+        type: String
+        description: |
+          The last segment of bucket.name.
         min_version: "beta"
         output: true
   - name: "location"

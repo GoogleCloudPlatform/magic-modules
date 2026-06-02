@@ -134,6 +134,10 @@ var (
 					startDate: newDate(2026, 05, 14),
 					endDate:   newDate(2026, 05, 25),
 				},
+				{
+					startDate: newDate(2026, 06, 01),
+					endDate:   newDate(2026, 06, 12),
+				},
 			},
 		},
 		"roaks3": {
@@ -165,6 +169,10 @@ var (
 				{
 					startDate: newDate(2026, 4, 8),
 					endDate:   newDate(2026, 4, 15),
+				},
+				{
+					startDate: newDate(2026, 06, 01),
+					endDate:   newDate(2026, 06, 12),
 				},
 			},
 		},
