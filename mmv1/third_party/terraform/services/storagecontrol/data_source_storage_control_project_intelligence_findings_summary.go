@@ -2,7 +2,6 @@ package storagecontrol
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -218,19 +217,8 @@ func flattenStorageControlFloat(v interface{}) float64 {
 	if v == nil {
 		return 0.0
 	}
-	switch val := v.(type) {
-	case float64:
-		return val
-	case float32:
-		return float64(val)
-	case int:
-		return float64(val)
-	case int64:
-		return float64(val)
-	case string:
-		if f, err := strconv.ParseFloat(val, 64); err == nil {
-			return f
-		}
+	if f, ok := v.(float64); ok {
+		return f
 	}
 	return 0.0
 }
@@ -239,17 +227,11 @@ func flattenStorageControlInt(v interface{}) int {
 	if v == nil {
 		return 0
 	}
-	switch val := v.(type) {
-	case int:
-		return val
-	case int64:
-		return int(val)
-	case float64:
-		return int(val)
-	case string:
-		if i, err := strconv.Atoi(val); err == nil {
-			return i
-		}
+	if i, ok := v.(int); ok {
+		return i
+	}
+	if f, ok := v.(float64); ok {
+		return int(f)
 	}
 	return 0
 }
