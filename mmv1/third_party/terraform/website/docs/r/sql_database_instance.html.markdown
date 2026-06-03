@@ -506,8 +506,7 @@ The optional `settings.database_flags` sublist supports:
 
 The optional `settings.active_directory_config` subblock supports:
 
-* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
-    Can only be used with SQL Server.
+* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com). Can only be used with SQL Server.
 
 * `mode` - (Optional) The mode of the Active Directory configuration. Can be `MANAGED_ACTIVE_DIRECTORY` or `CUSTOMER_MANAGED_ACTIVE_DIRECTORY`.
 
