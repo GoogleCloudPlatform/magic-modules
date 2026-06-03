@@ -19,19 +19,19 @@ references:
   guides:
   api: 'https://cloud.google.com/intrusion-detection-system/docs/configuring-ids'
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/endpoints'
 self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: 'PATCH'
+id_format: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+exclude_sweeper: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -39,8 +39,9 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+autogen_async: true
+include_in_tgc_next: true
 custom_code:
-exclude_sweeper: true
 examples:
   - name: 'cloudids_endpoint'
     primary_resource_id: 'example-endpoint'

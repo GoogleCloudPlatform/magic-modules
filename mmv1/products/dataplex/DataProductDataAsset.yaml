@@ -19,7 +19,6 @@ references:
   guides:
     'Official Documentation': 'https://docs.cloud.google.com/dataplex/docs/manage-data-products'
   api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts.dataAssets'
-min_version: beta
 
 base_url: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets'
 self_link: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets/{{data_asset_id}}'

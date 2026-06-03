@@ -348,25 +348,9 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	}
 }
 
-func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resource) {
-	for _, example := range object.Examples {
-		if example.ExcludeTest {
-			continue
-		}
-		if object.ProductMetadata.VersionObjOrClosest(tgc.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
-			continue
-		}
-		object.TGCTests = append(object.TGCTests, resource.TGCTest{
-			Name: "TestAcc" + example.TestSlug(object.ProductMetadata.Name, object.Name),
-			Skip: example.TGCSkipTest,
-		})
-	}
-}
-
 func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resource) {
 	if object.Examples != nil {
-		tgc.addTestsFromExamples(object)
-		return
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 	for _, sample := range object.Samples {
 		if sample.ExcludeTest {
@@ -465,7 +449,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 		if errors.Is(err, os.ErrNotExist) {
 			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
 				log.Printf("no handwritten test file found at %s", handwrittenTestFilePath)
-				return nil
+				return tgc.addTestsByTestNameMatch(object)
 			}
 			handwrittenTestFilePath += ".tmpl"
 			data, err = fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)
