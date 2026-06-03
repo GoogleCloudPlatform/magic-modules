@@ -6,8 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"reflect"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -17,7 +15,6 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl"
 	cai2hclconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai"
 	tfplan2caiconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
@@ -29,7 +26,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/tfplan"
+	tfjson "github.com/hashicorp/terraform-json"
 )
 
 var (
@@ -181,8 +179,33 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		writeJSONFile(assetFile, assets)
 	}
 
-	// Step 1: Use cai2hcl to convert export assets into a Terraform configuration (export config).
-	// Compare all of the fields in raw config are in export config.
+	// Step 1: Generate plan JSON for both raw and export config, and compare resource changes.
+	rawTfDir := filepath.Join(tfDir, "raw")
+	if err := os.MkdirAll(rawTfDir, 0755); err != nil {
+		return fmt.Errorf("error creating raw tf directory: %w", err)
+	}
+	rawTfFile := filepath.Join(rawTfDir, "main.tf")
+	if err := os.WriteFile(rawTfFile, []byte(testData.RawConfig), 0644); err != nil {
+		return fmt.Errorf("error writing raw tf file: %w", err)
+	}
+	if err := appendProviderOverride(rawTfFile); err != nil {
+		return err
+	}
+
+	ancestryCache, defaultProject := getAncestryCache(assets)
+
+	if err := terraformWorkflow(rawTfDir, "raw", defaultProject); err != nil {
+		return fmt.Errorf("error running terraform on raw config: %w", err)
+	}
+	rawPlanPath := filepath.Join(rawTfDir, "raw.tfplan.json")
+	rawPlanData, err := os.ReadFile(rawPlanPath)
+	if err != nil {
+		return fmt.Errorf("error reading raw plan JSON: %w", err)
+	}
+	rawChanges, err := tfplan.ReadResourceChanges(rawPlanData)
+	if err != nil {
+		return fmt.Errorf("error reading raw resource changes: %w", err)
+	}
 
 	exportConfigData, err := cai2hcl.Convert(assets, &cai2hcl.Options{
 		ErrorLogger: logger,
@@ -199,24 +222,42 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		}
 	}
 
-	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, strings.ReplaceAll(testName, "/", "_"))
-	defer os.Remove(exportTfFilePath)
-	err = os.WriteFile(exportTfFilePath, exportConfigData, 0644)
-	if err != nil {
-		return fmt.Errorf("error when writing the file %s", exportTfFilePath)
+	exportTfFilePath := filepath.Join(tfDir, "main.tf")
+	if err := os.WriteFile(exportTfFilePath, exportConfigData, 0644); err != nil {
+		return fmt.Errorf("error writing export tf file: %w", err)
 	}
-
-	exportResources, err := parseResourceConfigs(exportTfFilePath)
-	if err != nil {
+	if err := appendProviderOverride(exportTfFilePath); err != nil {
 		return err
 	}
 
-	if len(exportResources) == 0 {
-		return fmt.Errorf("missing hcl after cai2hcl conversion for resource %s", testData.ResourceType)
+	if err := terraformWorkflow(tfDir, "export", defaultProject); err != nil {
+		return fmt.Errorf("error running terraform on export config: %w", err)
+	}
+	exportPlanPath := filepath.Join(tfDir, "export.tfplan.json")
+	exportPlanData, err := os.ReadFile(exportPlanPath)
+	if err != nil {
+		return fmt.Errorf("error reading export plan JSON: %w", err)
+	}
+	exportChanges, err := tfplan.ReadResourceChanges(exportPlanData)
+	if err != nil {
+		return fmt.Errorf("error reading export resource changes: %w", err)
 	}
 
-	if os.Getenv("WRITE_FILES") != "" {
-		writeJSONFile(fmt.Sprintf("%s_export_attrs", strings.ReplaceAll(testName, "/", "_")), exportResources)
+	var rawConfig any
+	for _, rc := range rawChanges {
+		if rc.Address == testData.ResourceAddress && (tfplan.IsCreate(rc) || tfplan.IsUpdate(rc) || tfplan.IsDeleteCreate(rc)) {
+			rawConfig = rc.Change.After
+			break
+		}
+	}
+
+	if rawConfig == nil {
+		return fmt.Errorf("target resource address %s is missing in raw config plan changes", testData.ResourceAddress)
+	}
+
+	exportConfig, err := findExportConfig(rawConfig.(map[string]any), resourceType, exportChanges)
+	if err != nil {
+		return fmt.Errorf("target resource type %s: error finding export config: %w", resourceType, err)
 	}
 
 	ignoredFieldSet := make(map[string]any, 0)
@@ -224,18 +265,8 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		ignoredFieldSet[f] = struct{}{}
 	}
 
-	parsedExportConfig := exportResources[0].Attributes
+	missingKeys := findMissingKeys(rawConfig.(map[string]any), exportConfig.(map[string]any), "", ignoredFieldSet)
 
-	// Get the resource schema to check for default values
-	provider := provider.Provider()
-	var resourceSchema *schema.Resource
-	if res, ok := provider.ResourcesMap[resourceType]; ok {
-		resourceSchema = res
-	}
-
-	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet, resourceSchema)
-
-	// Sometimes, the reason for missing fields could be CAI asset data issue.
 	if len(missingKeys) > 0 {
 		log.Printf("%s: missing fields in resource %s after cai2hcl conversion:\n%s", testName, testData.ResourceAddress, missingKeys)
 		return retry.RetryableError(fmt.Errorf("missing fields: %v", missingKeys))
@@ -249,7 +280,6 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	// Compare roundtrip_config with export_config to ensure they are identical.
 
 	// Convert the export config to roundtrip assets and then convert the roundtrip assets back to roundtrip config
-	ancestryCache, defaultProject := getAncestryCache(assets)
 	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, defaultProject, logger)
 	if err != nil {
 		return retry.RetryableError(fmt.Errorf("error when converting the round-trip config: %v", err))
@@ -345,172 +375,51 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 	return ancestryCache, resolvedProject
 }
 
-// Compares HCL and finds all of the keys in map1 that are not in map2
-func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *schema.Resource) []string {
+// findMissingKeys recursively finds all of the keys in map1 that are not in map2
+func findMissingKeys(map1, map2 map[string]any, path string, ignoredFields map[string]any) []string {
 	var missingKeys []string
-	for key, val := range map1 {
-		if isIgnored(key, ignoredFields) {
+	for key, value1 := range map1 {
+		if value1 == nil {
 			continue
 		}
-
-		rVal := reflect.ValueOf(val)
-		if !rVal.IsValid() {
+		currentPath := key
+		if path != "" {
+			currentPath = path + "." + key
+		}
+		if isIgnoredPath(currentPath, ignoredFields) {
 			continue
 		}
-
-		isRequired := false
-		if resourceSchema != nil {
-			isRequired = getSchemaRequired(resourceSchema, key)
-		}
-
-		if !isRequired && rVal.IsZero() {
+		value2, ok := map2[key]
+		if !ok || value2 == nil {
+			missingKeys = append(missingKeys, currentPath)
 			continue
 		}
-
-		if sVal, ok := val.(string); ok {
-			// TODO: convert to correct type when parsing HCL to fix the edge case where the field type is String and the only values are "false", "00", etc.
-			if !isRequired {
-				if bVal, err := strconv.ParseBool(sVal); err == nil && !bVal {
-					continue
-				}
-				if iVal, err := strconv.Atoi(sVal); err == nil && iVal == 0 {
-					continue
-				}
+		switch v1 := value1.(type) {
+		case map[string]any:
+			v2, ok := value2.(map[string]any)
+			if ok {
+				missingKeys = append(missingKeys, findMissingKeys(v1, v2, currentPath, ignoredFields)...)
 			}
-		}
-
-		if vMap, ok := val.(map[string]any); ok && len(vMap) == 0 {
-			if !isRequired {
-				continue
-			}
-		}
-
-		if _, ok := map2[key]; !ok {
-			// Check if the missing key has a default value in schema and the value in map1 matches it
-			if resourceSchema != nil {
-				defaultValue := getSchemaDefault(resourceSchema, key)
-				// If default value is found, compare it with val
-				if defaultValue != nil {
-					// Handle type conversion for comparison
-					if reflect.DeepEqual(val, defaultValue) {
-						continue
-					}
-				}
-
-				if isDiffSuppressed(key, val, resourceSchema) {
-					continue
-				}
-			}
-
-			missingKeys = append(missingKeys, key)
-		}
-	}
-	sort.Strings(missingKeys)
-	return missingKeys
-}
-
-// isDiffSuppressed traverses the resource schema using the given key (e.g., "foo.0.bar")
-// to determine if the field or any of its parent containers has a DiffSuppressFunc
-// that evaluates to true for the given value.
-func isDiffSuppressed(key string, val any, resourceSchema *schema.Resource) bool {
-	// Traverse the schema to find the field
-	parts := strings.Split(key, ".")
-	var currentSchema *schema.Schema
-	var currentResource *schema.Resource = resourceSchema
-
-	for i, part := range parts {
-		// Check DiffSuppressFunc on the container schema (Map/List/Set) before diving into it
-		if currentSchema != nil && currentSchema.DiffSuppressFunc != nil {
-			if callDiffSuppress(currentSchema, key, val) {
-				return true
-			}
-		}
-
-		if currentSchema != nil {
-			// We are inside a schema (List/Set/Map)
-			if currentSchema.Type == schema.TypeMap {
-				// Any part is a key. Elem is Schema.
-				if elemSchema, ok := currentSchema.Elem.(*schema.Schema); ok {
-					currentSchema = elemSchema
-					continue
-				}
-				return false // Should not happen for valid TF schema
-			} else if currentSchema.Type == schema.TypeList || currentSchema.Type == schema.TypeSet {
-				if _, err := strconv.Atoi(part); err == nil {
-					if elemRes, ok := currentSchema.Elem.(*schema.Resource); ok {
-						currentResource = elemRes
-						currentSchema = nil
-						continue
-					} else if elemSchema, ok := currentSchema.Elem.(*schema.Schema); ok {
-						currentSchema = elemSchema
-						continue
-					}
-				} else {
-					// Handle implicit index 0 for single blocks which might be flattened without index
-					if elemRes, ok := currentSchema.Elem.(*schema.Resource); ok {
-						if s, ok := elemRes.Schema[part]; ok {
-							currentResource = elemRes
-							currentSchema = s
-							continue
+		case []any:
+			v2, ok := value2.([]any)
+			if ok {
+				for i := 0; i < len(v1); i++ {
+					if i < len(v2) {
+						nMap1, ok1 := v1[i].(map[string]any)
+						nMap2, ok2 := v2[i].(map[string]any)
+						if ok1 && ok2 {
+							missingKeys = append(missingKeys, findMissingKeys(nMap1, nMap2, fmt.Sprintf("%s.%d", currentPath, i), ignoredFields)...)
 						}
 					}
 				}
 			}
-
-			return false // Invalid path traversal
-		}
-
-		// Lookup in currentResource
-		if currentResource == nil {
-			return false
-		}
-
-		s, ok := currentResource.Schema[part]
-		if !ok {
-			return false
-		}
-		currentSchema = s
-
-		// If this is the last part, we will check DiffSuppressFunc after the loop
-		_ = i
-	}
-
-	if currentSchema == nil {
-		return false
-	}
-
-	// Check DiffSuppressFunc on the leaf schema
-	if currentSchema.DiffSuppressFunc != nil {
-		if callDiffSuppress(currentSchema, key, val) {
-			return true
 		}
 	}
-
-	return false
+	return missingKeys
 }
 
-// callDiffSuppress safely executes the DiffSuppressFunc for a given schema field.
-// It passes nil for the *schema.ResourceData argument, and uses a deferred recover()
-// to catch any panics that might occur if the custom DiffSuppressFunc attempts to access it.
-func callDiffSuppress(s *schema.Schema, key string, val any) bool {
-	// We populate basic ResourceData. Using nil might be risky if function uses it.
-	// But creating a full valid ResourceData is hard.
-	// We handle panic in case the function assumes 'd' is valid.
-	defer func() {
-		if r := recover(); r != nil {
-			// Ignore panic, return false
-		}
-	}()
-
-	valString := fmt.Sprintf("%v", val)
-	// 'valString' is the value from Config (new).
-	// 'old' is empty string because the field is missing in map2 (Export/State).
-	// The signature is func(k, old, new string, d *ResourceData) bool
-	return s.DiffSuppressFunc(key, "", valString, nil)
-}
-
-// Returns true if the given key should be ignored according to the given set of ignored fields.
-func isIgnored(key string, ignoredFields map[string]any) bool {
+// isIgnoredPath returns true if the given key path is ignored.
+func isIgnoredPath(key string, ignoredFields map[string]any) bool {
 	// Global ignores for write-only fields
 	if strings.HasSuffix(key, "_wo") || strings.HasSuffix(key, "_wo_version") {
 		return true
@@ -680,3 +589,82 @@ func compareCaiAssets(assets1, assets2 []caiasset.Asset, ignoredFieldSet map[str
 	}
 	return nil
 }
+
+func findExportConfig(rawConfig map[string]any, resourceType string, exportChanges []*tfjson.ResourceChange) (any, error) {
+	var candidateChanges []*tfjson.ResourceChange
+	for _, ec := range exportChanges {
+		if ec.Type == resourceType && (tfplan.IsCreate(ec) || tfplan.IsUpdate(ec) || tfplan.IsDeleteCreate(ec)) {
+			candidateChanges = append(candidateChanges, ec)
+		}
+	}
+
+	if len(candidateChanges) == 0 {
+		return nil, fmt.Errorf("no export plan changes found for resource type %s", resourceType)
+	}
+
+	if len(candidateChanges) == 1 {
+		return candidateChanges[0].Change.After, nil
+	}
+
+	for _, ec := range candidateChanges {
+		parts := strings.Split(ec.Address, ".")
+		if len(parts) < 2 {
+			continue
+		}
+		resName := parts[len(parts)-1]
+
+		if isValueInMap(rawConfig, resName) {
+			return ec.Change.After, nil
+		}
+	}
+
+	return candidateChanges[0].Change.After, nil
+}
+
+func isValueInMap(m map[string]any, target string) bool {
+	for _, val := range m {
+		if s, ok := val.(string); ok && s == target {
+			return true
+		}
+		if subMap, ok := val.(map[string]any); ok {
+			if isValueInMap(subMap, target) {
+				return true
+			}
+		}
+		if list, ok := val.([]any); ok {
+			for _, item := range list {
+				if subMap, ok := item.(map[string]any); ok {
+					if isValueInMap(subMap, target) {
+						return true
+					}
+				}
+				if s, ok := item.(string); ok && s == target {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func appendProviderOverride(filePath string) error {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("error reading file %s for provider override: %w", filePath, err)
+	}
+	override := `
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google-beta"
+    }
+  }
+}
+`
+	if err := os.WriteFile(filePath, append(content, []byte(override)...), 0644); err != nil {
+		return fmt.Errorf("error writing provider override to %s: %w", filePath, err)
+	}
+	return nil
+}
+
+
