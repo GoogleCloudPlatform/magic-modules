@@ -1,28 +1,21 @@
 package compute_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func TestAccComputeImage_withLicense(t *testing.T) {
@@ -37,9 +30,9 @@ func TestAccComputeImage_withLicense(t *testing.T) {
 				Config: testAccComputeImage_license("image-test-" + acctest.RandString(t, 10)),
 			},
 			{
-				ResourceName:      "google_compute_image.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_image.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
@@ -49,7 +42,7 @@ func TestAccComputeImage_withLicense(t *testing.T) {
 func TestAccComputeImage_update(t *testing.T) {
 	t.Parallel()
 
-	var image compute.Image
+	var image map[string]interface{}
 
 	context := map[string]interface{}{
 		"name":            "image-test-" + acctest.RandString(t, 10),
@@ -95,7 +88,7 @@ func TestAccComputeImage_update(t *testing.T) {
 func TestAccComputeImage_basedondisk(t *testing.T) {
 	t.Parallel()
 
-	var image compute.Image
+	var image map[string]interface{}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -122,7 +115,7 @@ func TestAccComputeImage_basedondisk(t *testing.T) {
 func TestAccComputeImage_shieldedInstance_InitialState(t *testing.T) {
 	t.Parallel()
 
-	var image compute.Image
+	var image map[string]interface{}
 	imageName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -150,7 +143,7 @@ func TestAccComputeImage_shieldedInstance_InitialState(t *testing.T) {
 func TestAccComputeImage_shieldedInstance_UpdatedState(t *testing.T) {
 	t.Parallel()
 
-	var image compute.Image
+	var image map[string]interface{}
 	imageName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -191,7 +184,7 @@ func TestAccComputeImage_shieldedInstance_UpdatedState(t *testing.T) {
 func TestAccComputeImage_sourceImage(t *testing.T) {
 	t.Parallel()
 
-	var image compute.Image
+	var image map[string]interface{}
 	imageName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -219,7 +212,7 @@ func TestAccComputeImage_sourceImage(t *testing.T) {
 func TestAccComputeImage_sourceSnapshot(t *testing.T) {
 	t.Parallel()
 
-	var image compute.Image
+	var image map[string]interface{}
 
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -247,7 +240,7 @@ func TestAccComputeImage_sourceSnapshot(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeImageExists(t *testing.T, n string, image *compute.Image) resource.TestCheckFunc {
+func testAccCheckComputeImageExists(t *testing.T, n string, image *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -272,20 +265,11 @@ func testAccCheckComputeImageExists(t *testing.T, n string, image *compute.Image
 			return err
 		}
 
-		var found compute.Image
-		resBytes, err := json.Marshal(res)
-		if err != nil {
-			return err
-		}
-		if err := json.Unmarshal(resBytes, &found); err != nil {
-			return err
-		}
-
-		if found.Name != rs.Primary.Attributes["name"] {
+		if res["name"] != rs.Primary.Attributes["name"] {
 			return fmt.Errorf("Image not found")
 		}
 
-		*image = found
+		*image = res
 
 		return nil
 	}
@@ -294,15 +278,15 @@ func testAccCheckComputeImageExists(t *testing.T, n string, image *compute.Image
 func TestAccComputeImage_resolveImage(t *testing.T) {
 	t.Parallel()
 
-	var image compute.Image
+	var image map[string]interface{}
 	rand := acctest.RandString(t, 10)
 	name := fmt.Sprintf("test-image-%s", rand)
 	fam := fmt.Sprintf("test-image-family-%s", rand)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeImage_resolving(name, fam),
@@ -324,17 +308,17 @@ func TestAccComputeImage_imageEncryptionKey(t *testing.T) {
 	kmsRingName := tpgresource.GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeImage_imageEncryptionKey(kmsRingName, kmsKeyName, acctest.RandString(t, 10)),
 			},
 			{
-				ResourceName:            "google_compute_image.image",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_compute_image.image",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -405,7 +389,6 @@ func TestAccComputeImage_sourceDiskEncryptionKey(t *testing.T) {
 		},
 	})
 }
-
 
 func testAccCheckComputeImageResolution(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -478,9 +461,10 @@ func testAccCheckComputeImageResolution(t *testing.T, n string) resource.TestChe
 	}
 }
 
-func testAccCheckComputeImageContainsLabel(image *compute.Image, key string, value string) resource.TestCheckFunc {
+func testAccCheckComputeImageContainsLabel(image *map[string]interface{}, key string, value string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		v, ok := image.Labels[key]
+		labels, _ := (*image)["labels"].(map[string]interface{})
+		v, ok := labels[key]
 		if !ok {
 			return fmt.Errorf("Expected label with key '%s' not found", key)
 		}
@@ -491,9 +475,10 @@ func testAccCheckComputeImageContainsLabel(image *compute.Image, key string, val
 	}
 }
 
-func testAccCheckComputeImageDoesNotContainLabel(image *compute.Image, key string) resource.TestCheckFunc {
+func testAccCheckComputeImageDoesNotContainLabel(image *map[string]interface{}, key string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if v, ok := image.Labels[key]; ok {
+		labels, _ := (*image)["labels"].(map[string]interface{})
+		if v, ok := labels[key]; ok {
 			return fmt.Errorf("Expected no label for key '%s' but found one with value '%s'", key, v)
 		}
 
@@ -501,90 +486,106 @@ func testAccCheckComputeImageDoesNotContainLabel(image *compute.Image, key strin
 	}
 }
 
-func testAccCheckComputeImageHasShieldedInstanceInitialState(image *compute.Image) resource.TestCheckFunc {
+func testAccCheckComputeImageHasShieldedInstanceInitialState(image *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if image.ShieldedInstanceInitialState == nil {
+		state, ok := (*image)["shieldedInstanceInitialState"].(map[string]interface{})
+		if !ok {
 			return fmt.Errorf("Expected ShieldedInstanceInitialState to be present")
 		}
 
 		// Check PK values
-		if image.ShieldedInstanceInitialState.Pk == nil {
+		pk, ok := state["pk"].(map[string]interface{})
+		if !ok {
 			return fmt.Errorf("Expected PK to be present")
 		}
-		if image.ShieldedInstanceInitialState.Pk.FileType != "X509" {
-			return fmt.Errorf("Expected PK FileType to be X509, got %s", image.ShieldedInstanceInitialState.Pk.FileType)
+		if pk["fileType"] != "X509" {
+			return fmt.Errorf("Expected PK FileType to be X509, got %s", pk["fileType"])
 		}
 
 		// Check KEK values
-		if len(image.ShieldedInstanceInitialState.Keks) != 1 {
-			return fmt.Errorf("Expected 1 KEK entry, got %d", len(image.ShieldedInstanceInitialState.Keks))
+		keks, _ := state["keks"].([]interface{})
+		if len(keks) != 1 {
+			return fmt.Errorf("Expected 1 KEK entry, got %d", len(keks))
 		}
-		if image.ShieldedInstanceInitialState.Keks[0].FileType != "X509" {
-			return fmt.Errorf("Expected KEK FileType to be X509, got %s", image.ShieldedInstanceInitialState.Keks[0].FileType)
+		kek, _ := keks[0].(map[string]interface{})
+		if kek["fileType"] != "X509" {
+			return fmt.Errorf("Expected KEK FileType to be X509, got %s", kek["fileType"])
 		}
 
 		// Check DB values
-		if len(image.ShieldedInstanceInitialState.Dbs) != 1 {
-			return fmt.Errorf("Expected 1 DB entry, got %d", len(image.ShieldedInstanceInitialState.Dbs))
+		dbs, _ := state["dbs"].([]interface{})
+		if len(dbs) != 1 {
+			return fmt.Errorf("Expected 1 DB entry, got %d", len(dbs))
 		}
-		if image.ShieldedInstanceInitialState.Dbs[0].FileType != "X509" {
-			return fmt.Errorf("Expected DB FileType to be X509, got %s", image.ShieldedInstanceInitialState.Dbs[0].FileType)
+		db, _ := dbs[0].(map[string]interface{})
+		if db["fileType"] != "X509" {
+			return fmt.Errorf("Expected DB FileType to be X509, got %s", db["fileType"])
 		}
 
 		// Check DBX values
-		if len(image.ShieldedInstanceInitialState.Dbxs) != 1 {
-			return fmt.Errorf("Expected 1 DBX entry, got %d", len(image.ShieldedInstanceInitialState.Dbxs))
+		dbxs, _ := state["dbxs"].([]interface{})
+		if len(dbxs) != 1 {
+			return fmt.Errorf("Expected 1 DBX entry, got %d", len(dbxs))
 		}
-		if image.ShieldedInstanceInitialState.Dbxs[0].FileType != "X509" {
-			return fmt.Errorf("Expected DBX FileType to be X509, got %s", image.ShieldedInstanceInitialState.Dbxs[0].FileType)
+		dbx, _ := dbxs[0].(map[string]interface{})
+		if dbx["fileType"] != "X509" {
+			return fmt.Errorf("Expected DBX FileType to be X509, got %s", dbx["fileType"])
 		}
 
 		return nil
 	}
 }
 
-func testAccCheckComputeImageHasShieldedInstanceUpdatedState(image *compute.Image) resource.TestCheckFunc {
+func testAccCheckComputeImageHasShieldedInstanceUpdatedState(image *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if image.ShieldedInstanceInitialState == nil {
+		state, ok := (*image)["shieldedInstanceInitialState"].(map[string]interface{})
+		if !ok {
 			return fmt.Errorf("Expected ShieldedInstanceInitialState to be present")
 		}
 
 		// Check PK values - now BIN
-		if image.ShieldedInstanceInitialState.Pk == nil {
+		pk, ok := state["pk"].(map[string]interface{})
+		if !ok {
 			return fmt.Errorf("Expected PK to be present")
 		}
-		if image.ShieldedInstanceInitialState.Pk.FileType != "BIN" {
-			return fmt.Errorf("Expected PK FileType to be BIN, got %s", image.ShieldedInstanceInitialState.Pk.FileType)
+		if pk["fileType"] != "BIN" {
+			return fmt.Errorf("Expected PK FileType to be BIN, got %s", pk["fileType"])
 		}
 
 		// Check KEK values - now BIN
-		if len(image.ShieldedInstanceInitialState.Keks) != 1 {
-			return fmt.Errorf("Expected 1 KEK entry, got %d", len(image.ShieldedInstanceInitialState.Keks))
+		keks, _ := state["keks"].([]interface{})
+		if len(keks) != 1 {
+			return fmt.Errorf("Expected 1 KEK entry, got %d", len(keks))
 		}
-		if image.ShieldedInstanceInitialState.Keks[0].FileType != "BIN" {
-			return fmt.Errorf("Expected KEK FileType to be BIN, got %s", image.ShieldedInstanceInitialState.Keks[0].FileType)
+		kek, _ := keks[0].(map[string]interface{})
+		if kek["fileType"] != "BIN" {
+			return fmt.Errorf("Expected KEK FileType to be BIN, got %s", kek["fileType"])
 		}
 
 		// Check DB values - now BIN
-		if len(image.ShieldedInstanceInitialState.Dbs) != 1 {
-			return fmt.Errorf("Expected 1 DB entry, got %d", len(image.ShieldedInstanceInitialState.Dbs))
+		dbs, _ := state["dbs"].([]interface{})
+		if len(dbs) != 1 {
+			return fmt.Errorf("Expected 1 DB entry, got %d", len(dbs))
 		}
-		if image.ShieldedInstanceInitialState.Dbs[0].FileType != "BIN" {
-			return fmt.Errorf("Expected DB FileType to be BIN, got %s", image.ShieldedInstanceInitialState.Dbs[0].FileType)
+		db, _ := dbs[0].(map[string]interface{})
+		if db["fileType"] != "BIN" {
+			return fmt.Errorf("Expected DB FileType to be BIN, got %s", db["fileType"])
 		}
 
 		// Check DBX values - now missing
-		if len(image.ShieldedInstanceInitialState.Dbxs) != 0 {
-			return fmt.Errorf("Expected no DBX entry, got %d", len(image.ShieldedInstanceInitialState.Dbxs))
+		dbxs, _ := state["dbxs"].([]interface{})
+		if len(dbxs) != 0 {
+			return fmt.Errorf("Expected no DBX entry, got %d", len(dbxs))
 		}
 
 		return nil
 	}
 }
 
-func testAccCheckComputeImageHasSourceType(image *compute.Image) resource.TestCheckFunc {
+func testAccCheckComputeImageHasSourceType(image *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if image.SourceType == "" {
+		st, _ := (*image)["sourceType"].(string)
+		if st == "" {
 			return fmt.Errorf("No source disk")
 		}
 		return nil
