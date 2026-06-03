@@ -2856,7 +2856,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				if err != nil {
 					return errwrap.Wrapf("Error getting subnetwork value: {{"{{"}}err{{"}}"}}", err)
 				}
-				networkSelfLink, _ := subnetRes["network"].(string)
+				networkSelfLink := subnetRes["network"].(string)
 				nf, err := tpgresource.ParseNetworkFieldValue(networkSelfLink, d, config)
 				if err != nil {
 					return fmt.Errorf("Cannot determine self_link for network %q: %s", networkSelfLink, err)
@@ -4598,7 +4598,7 @@ func CheckForCommonAliasIp(old, new map[string]interface{}) []interface{} {
 			if !ok {
 				continue
 			}
-			cidr, _ := ipRange["ipCidrRange"].(string)
+			cidr := ipRange["ipCidrRange"].(string)
 			newAliasIpMap[cidr] = true
 		}
 	}
@@ -4610,7 +4610,7 @@ func CheckForCommonAliasIp(old, new map[string]interface{}) []interface{} {
 			if !ok {
 				continue
 			}
-			cidr, _ := ipRange["ipCidrRange"].(string)
+			cidr := ipRange["ipCidrRange"].(string)
 			if newAliasIpMap[cidr] {
 				resultAliasIpRanges = append(resultAliasIpRanges, ipRange)
 			}
