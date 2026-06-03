@@ -19382,8 +19382,9 @@ func TestAccContainerCluster_desiredEmulatedVersion(t *testing.T) {
 	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	// We utilize standard, valid GKE staging versions for E2E minor upgrade transitions
-	fromVersion := "1.34.8-gke.1211000"
-	targetVersion := "1.35.5-gke.1117000"
+	fromVersion := "1.34.8-gke.1000000"
+	targetVersion := "1.35.5-gke.1000000"
+	targetEmulatedVersion := "1.35"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -19415,7 +19416,7 @@ func TestAccContainerCluster_desiredEmulatedVersion(t *testing.T) {
 			},
 			// Step 3 (Declarative Complete): Set desired_emulated_version to 1.35 to complete the upgrade while soaking
 			{
-				Config: testAccContainerCluster_desiredEmulatedVersionComplete(clusterName, networkName, subnetworkName, fromVersion, targetVersion),
+				Config: testAccContainerCluster_desiredEmulatedVersionComplete(clusterName, networkName, subnetworkName, fromVersion, targetVersion, targetEmulatedVersion),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerClusterEmulatedVersion(t, "google_container_cluster.primary"),
 				),
@@ -19490,9 +19491,7 @@ resource "google_container_cluster" "primary" {
   network    = "%s"
   subnetwork = "%s"
 
-  desired_rollback_safe_upgrade {
-    control_plane_soak_duration = "90000s"
-  }
+
 
   node_config {
     machine_type = "e2-standard-2"
@@ -19501,7 +19500,7 @@ resource "google_container_cluster" "primary" {
 `, clusterName, targetVersion, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_desiredEmulatedVersionComplete(clusterName, networkName, subnetworkName, fromVersion, targetVersion string) string {
+func testAccContainerCluster_desiredEmulatedVersionComplete(clusterName, networkName, subnetworkName, fromVersion, targetVersion, targetEmulatedVersion string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
@@ -19512,9 +19511,7 @@ resource "google_container_cluster" "primary" {
   network    = "%s"
   subnetwork = "%s"
 
-  desired_rollback_safe_upgrade {
-    control_plane_soak_duration = "90000s"
-  }
+
 
   desired_emulated_version = "%s"
 
@@ -19522,5 +19519,111 @@ resource "google_container_cluster" "primary" {
     machine_type = "e2-standard-2"
   }
 }
-`, clusterName, targetVersion, networkName, subnetworkName, targetVersion)
+`, clusterName, targetVersion, networkName, subnetworkName, targetEmulatedVersion)
 }
+
+func TestAccContainerCluster_desiredEmulatedVersionAutopilot(t *testing.T) {
+	t.Parallel()
+	clusterName := fmt.Sprintf("tf-test-cluster-auto-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	// Staging regional GKE versions verified in us-central1 sandbox
+	fromVersion := "1.34.8-gke.1000000"
+	targetVersion := "1.35.5-gke.1000000"
+	targetEmulatedVersion := "1.35"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Step 1 (Create): Spin up a regional GKE Autopilot cluster at baseline version (1.34)
+			{
+				Config: testAccContainerCluster_desiredEmulatedVersionAutopilotBase(clusterName, networkName, subnetworkName, fromVersion),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			// Step 2 (Soak Upgrade): Upgrade regional master to target version (1.35) with soak active
+			{
+				Config: testAccContainerCluster_desiredEmulatedVersionAutopilotSoak(clusterName, networkName, subnetworkName, fromVersion, targetVersion),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "min_master_version", targetVersion),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			// Step 3 (Declarative Complete): Set desired_emulated_version to 1.35 to complete the upgrade
+			{
+				Config: testAccContainerCluster_desiredEmulatedVersionAutopilotComplete(clusterName, networkName, subnetworkName, fromVersion, targetVersion, targetEmulatedVersion),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "desired_emulated_version", targetEmulatedVersion),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_desiredEmulatedVersionAutopilotBase(clusterName, networkName, subnetworkName, version string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1"
+  enable_autopilot   = true
+  min_master_version = "%s"
+  deletion_protection = false
+  network    = "%s"
+  subnetwork = "%s"
+}
+`, clusterName, version, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_desiredEmulatedVersionAutopilotSoak(clusterName, networkName, subnetworkName, fromVersion, targetVersion string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1"
+  enable_autopilot   = true
+  min_master_version = "%s"
+  deletion_protection = false
+  network    = "%s"
+  subnetwork = "%s"
+
+
+}
+`, clusterName, targetVersion, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_desiredEmulatedVersionAutopilotComplete(clusterName, networkName, subnetworkName, fromVersion, targetVersion, targetEmulatedVersion string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1"
+  enable_autopilot   = true
+  min_master_version = "%s"
+  deletion_protection = false
+  network    = "%s"
+  subnetwork = "%s"
+
+
+
+  desired_emulated_version = "%s"
+}
+`, clusterName, targetVersion, networkName, subnetworkName, targetEmulatedVersion)
+}
+
+
