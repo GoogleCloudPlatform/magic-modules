@@ -66,15 +66,17 @@ samples:
         test_vars_overrides:
           # for backward compatible
           description: '"example listing multiregion subscription" + randomSuffix'
-  - name: 'bigquery_analyticshub_listing_subscription_pubsub'
-    primary_resource_id: 'subscription'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      pubsub_topic_name: 'my_pubsub_topic'
-      pubsub_subscription_name: 'my_pubsub_subscription'
-      description: 'example pubsub listing subscription'
+  - name: bigquery_analyticshub_listing_subscription_pubsub
+    primary_resource_id: subscription
+    region_override: US
+    steps:
+      - name: bigquery_analyticshub_listing_subscription_pubsub
+        resource_id_vars:
+          data_exchange_id: my_data_exchange
+          listing_id: my_listing
+          pubsub_topic_name: my_pubsub_topic
+          pubsub_subscription_name: my_pubsub_subscription
+          description: 'example pubsub listing subscription'
 parameters:
   - name: dataExchangeId
     type: String
