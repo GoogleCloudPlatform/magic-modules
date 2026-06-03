@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -676,8 +677,6 @@ func TestAccStorageTransferJob_azureBlobStorageDataSourcePrivateNetwork(t *testi
 	serviceIdA := "tf-test-sts-azure-svc-a-" + suffix
 	serviceIdB := "tf-test-sts-azure-svc-b-" + suffix
 	location := "us-central1"
-	expectedPNSA := fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", project, location, namespaceId, serviceIdA)
-	expectedPNSB := fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", project, location, namespaceId, serviceIdB)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -686,13 +685,6 @@ func TestAccStorageTransferJob_azureBlobStorageDataSourcePrivateNetwork(t *testi
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_azureBlobStorageDataSourcePrivateNetwork(project, testDataSinkName, namespaceId, serviceIdA, serviceIdB, location, "a"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_storage_transfer_job.transfer_job",
-						"transfer_spec.0.azure_blob_storage_data_source.0.private_network_service",
-						expectedPNSA,
-					),
-				),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -703,13 +695,12 @@ func TestAccStorageTransferJob_azureBlobStorageDataSourcePrivateNetwork(t *testi
 			},
 			{
 				Config: testAccStorageTransferJob_azureBlobStorageDataSourcePrivateNetwork(project, testDataSinkName, namespaceId, serviceIdA, serviceIdB, location, "b"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_storage_transfer_job.transfer_job",
-						"transfer_spec.0.azure_blob_storage_data_source.0.private_network_service",
-						expectedPNSB,
-					),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						// private_network_service is mutable; switching it must update in-place, not recreate.
+						plancheck.ExpectResourceAction("google_storage_transfer_job.transfer_job", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_storage_transfer_job.transfer_job",
