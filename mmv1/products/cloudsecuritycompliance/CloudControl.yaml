@@ -48,7 +48,7 @@ examples:
 autogen_status: Q2xvdWRDb250cm9s
 custom_code:
   custom_identity:
-      - parent
+    - parent
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_cloudcontrol.go.tmpl"
   pre_create: "templates/terraform/pre_create/cloudsecuritycompliance_pre_create.go.tmpl"
   pre_read: "templates/terraform/pre_read/cloudsecuritycompliance_pre_read.go.tmpl"
