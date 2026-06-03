@@ -18,7 +18,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/zclconf/go-cty v1.17.0
 	go.uber.org/zap v1.27.0
-	google.golang.org/api v0.275.0
+	google.golang.org/api v0.283.0
 )
 
 require (
