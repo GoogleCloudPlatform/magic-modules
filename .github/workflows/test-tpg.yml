@@ -3,7 +3,7 @@ name: Provider Build and Unit Test
 permissions: read-all
 
 env:
-  status_suffix: "-build-and-unit-tests"
+  status_suffix: "-build-and-unit-tests (full)"
 
 on:
   workflow_dispatch:
