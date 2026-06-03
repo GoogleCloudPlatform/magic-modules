@@ -1,0 +1,84 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CustomList
+description: >
+  The custom list is a list of objects, that can be saved as a shared resource, and can be used by playbooks.
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.customLists'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists/{{custom_list_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists/{{custom_list_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists/{{custom_list_id}}
+
+autogen_status: Q3VzdG9tTGlzdA==
+
+samples:
+  - name: chronicle_customlist_update
+    primary_resource_id: sample
+    min_version: beta
+    steps:
+      - name: "chronicle_customlist_basic"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+      - name: "chronicle_customlist_full"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: customListId
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Id of the Custom List record.
+properties:
+  - name: category
+    type: String
+    required: true
+    description: |-
+      The value of the custom list.
+      Maximum length: 1024 characters
+  - name: entityIdentifier
+    type: String
+    required: true
+    description: |-
+      The key of the custom list.
+      Maximum length: 2048 characters
+  - name: environments
+    type: String
+    required: true
+    description: The environments to which the custom list is associated.
+  - name: name
+    type: String
+    description: Identifier. The resource name of the custom list.
+    output: true

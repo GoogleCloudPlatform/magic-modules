@@ -1,0 +1,11 @@
+resource "google_chronicle_custom_list" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  entity_identifier = "filename.bin"
+  category = "Approved Files"
+  environments = jsonencode([
+    "Default Environment"
+  ])
+}
