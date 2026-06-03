@@ -183,6 +183,39 @@ resource "google_compute_security_policy" "policy" {
 }
 ```
 
+## Example Usage - With request body expression
+
+```hcl
+resource "google_compute_security_policy" "policy" {
+  provider    = google-beta
+  name        = "my-policy"
+  description = "Policy with Request Body inspection"
+
+  rule {
+    action   = "deny(403)"
+    priority = 1000
+    match {
+      expr {
+        expression = "request.body.contains('my-match-string')"
+      }
+    }
+    description = "Deny requests containing specific body string"
+  }
+
+  rule {
+    action   = "allow"
+    priority = 2147483647
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
