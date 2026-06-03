@@ -252,6 +252,8 @@ Structure is [documented below](#nested_master_auth).
 to the datasource. A region can have a different set of supported versions than its corresponding zones, and not all zones in a
 region are guaranteed to support the same version.
 
+* `desired_emulated_version` - (Optional) The desired emulated version for the cluster.
+
 * `monitoring_config` - (Optional) Monitoring configuration for the cluster.
     Structure is [documented below](#nested_monitoring_config).
 
