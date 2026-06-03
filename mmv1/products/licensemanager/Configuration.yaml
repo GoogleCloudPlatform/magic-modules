@@ -82,7 +82,7 @@ properties:
     required: true
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    description: Name of the product for which you are setting the license configuration. For supported products see https://docs.cloud.google.com/compute/docs/instances/windows/license-manager#supported-license-products. Available values: Office2021ProfessionalPlus
+    description: Name of the product for which you are setting the license configuration. For supported products see https://docs.cloud.google.com/compute/docs/instances/windows/license-manager#supported-license-products. Available values include Office2021ProfessionalPlus
   # ignore_read is set because the count is returned nested inside currentBillingInfo
   # (userCountBilling/packCountBilling). Populated via post_read custom code.
   - name: licenseCount
