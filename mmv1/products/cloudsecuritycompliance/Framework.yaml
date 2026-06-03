@@ -24,6 +24,8 @@ update_verb: PATCH
 id_format: '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
 import_format:
   - "{{%parent}}/locations/{{location}}/frameworks/{{framework_id}}"
+  - 'organizations/{{%organization}}/locations/{{location}}/frameworks/{{framework_id}}'
+exclude_identity_generation: true
 examples:
   - name: "cloudsecuritycompliance_framework_org_basic"
     primary_resource_id: "example"
@@ -51,6 +53,7 @@ custom_code:
   pre_update: "templates/terraform/pre_update/cloudsecuritycompliance_pre_update.go.tmpl"
   pre_delete: "templates/terraform/pre_delete/cloudsecuritycompliance_pre_delete.go.tmpl"
   post_import: "templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl"
+  custom_import: "templates/terraform/custom_import/cloudsecuritycompliance_framework.go.tmpl"
 parameters:
   - name: parent
     type: String

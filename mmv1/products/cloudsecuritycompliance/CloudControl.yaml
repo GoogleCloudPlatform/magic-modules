@@ -27,6 +27,8 @@ update_verb: PATCH
 id_format: '{{parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}'
 import_format:
   - "{{%parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}"
+  - "organizations/{{%organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}"
+exclude_identity_generation: true
 examples:
   - name: "cloudsecuritycompliance_cloudcontrol_org_basic"
     primary_resource_id: "example"
@@ -52,6 +54,7 @@ custom_code:
   pre_update: "templates/terraform/pre_update/cloudsecuritycompliance_pre_update.go.tmpl"
   pre_delete: "templates/terraform/pre_delete/cloudsecuritycompliance_pre_delete.go.tmpl"
   post_import: "templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl"
+  custom_import: "templates/terraform/custom_import/cloudsecuritycompliance_cloudcontrol.go.tmpl"
 parameters:
   - name: parent
     type: String
@@ -63,6 +66,7 @@ parameters:
     immutable: true
     default_from_api: true
     url_param_only: true
+    ignore_read: true
     exactly_one_of:
       - parent
       - organization
@@ -73,6 +77,7 @@ parameters:
     immutable: true
     url_param_only: true
     default_from_api: true
+    ignore_read: true
     deprecation_message: "Use `parent` instead."
     exactly_one_of:
       - parent
