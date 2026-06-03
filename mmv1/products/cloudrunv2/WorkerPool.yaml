@@ -163,7 +163,7 @@ properties:
     type: String
     description: |
       Name of the WorkerPool.
-    url_param_only: true
+    ignore_read: true
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
