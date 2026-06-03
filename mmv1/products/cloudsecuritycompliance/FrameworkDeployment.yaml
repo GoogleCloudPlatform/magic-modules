@@ -22,9 +22,9 @@ self_link: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_d
 create_url: '{{parent}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}'
 id_format: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
 import_format:
-  - "{{%parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}"
   - 'organizations/{{%organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
-exclude_identity_generation: true
+  - "{{%parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}"
+
 examples:
   - name: "cloudsecuritycompliance_framework_deployment_org_basic"
     primary_resource_id: "example"
@@ -93,6 +93,8 @@ async:
   include_project: false
 autogen_status: RnJhbWV3b3JrRGVwbG95bWVudA==
 custom_code:
+  custom_identity:
+      - parent
   pre_create: "templates/terraform/pre_create/cloudsecuritycompliance_pre_create.go.tmpl"
   pre_read: "templates/terraform/pre_read/cloudsecuritycompliance_pre_read.go.tmpl"
   pre_update: "templates/terraform/pre_update/cloudsecuritycompliance_pre_update.go.tmpl"
