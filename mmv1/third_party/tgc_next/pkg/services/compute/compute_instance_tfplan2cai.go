@@ -175,34 +175,40 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	}
 
 	// Create the instance information
-	return &compute.Instance{
-		CanIpForward:               d.Get("can_ip_forward").(bool),
-		Description:                d.Get("description").(string),
-		Disks:                      disks,
-		MachineType:                machineTypeUrl,
-		Metadata:                   metadata,
-		Name:                       d.Get("name").(string),
-		Zone:                       d.Get("zone").(string),
-		NetworkInterfaces:          networkInterfaces,
-		NetworkPerformanceConfig:   networkPerformanceConfig,
-		Tags:                       resourceInstanceTags(d),
-		Params:                     params,
-		Labels:                     tpgresource.ExpandLabels(d),
-		ServiceAccounts:            expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
-		GuestAccelerators:          accels,
-		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
-		Scheduling:                 scheduling,
-		DeletionProtection:         d.Get("deletion_protection").(bool),
-		Hostname:                   d.Get("hostname").(string),
-		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
-		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
-		DisplayDevice:              expandDisplayDevice(d),
-		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
-		ReservationAffinity:        reservationAffinity,
-		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
-		InstanceEncryptionKey:      instanceEncryptionKey,
-	}, nil
+	instance := &compute.Instance{
+		CanIpForward:             d.Get("can_ip_forward").(bool),
+		Description:              d.Get("description").(string),
+		Disks:                    disks,
+		MachineType:              machineTypeUrl,
+		Metadata:                 metadata,
+		Name:                     d.Get("name").(string),
+		Zone:                     d.Get("zone").(string),
+		NetworkInterfaces:        networkInterfaces,
+		NetworkPerformanceConfig: networkPerformanceConfig,
+		Tags:                     resourceInstanceTags(d),
+		Params:                   params,
+		Labels:                   tpgresource.ExpandLabels(d),
+		ServiceAccounts:          expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
+		GuestAccelerators:        accels,
+		MinCpuPlatform:           d.Get("min_cpu_platform").(string),
+		Scheduling:               scheduling,
+		DeletionProtection:       d.Get("deletion_protection").(bool),
+		Hostname:                 d.Get("hostname").(string),
+		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
+		ShieldedInstanceConfig:   expandShieldedVmConfigs(d),
+		DisplayDevice:            expandDisplayDevice(d),
+		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
+		ReservationAffinity:      reservationAffinity,
+		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
+		InstanceEncryptionKey:    instanceEncryptionKey,
+	}
+	if cic := expandConfidentialInstanceConfig(d); cic != nil {
+		instance.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{
+			EnableConfidentialCompute: cic["enableConfidentialCompute"].(bool),
+			ConfidentialInstanceType:  cic["confidentialInstanceType"].(string),
+		}
+	}
+	return instance, nil
 }
 
 func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
