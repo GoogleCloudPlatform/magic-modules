@@ -47,13 +47,13 @@ parameters:
   - name: location
     type: String
     required: true
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: The region where the configuration should be created. This region must be the same where the licensed software will run.
     immutable: true
     url_param_only: true
   - name: configurationId
     type: String
     required: true
-    description: Id of the requesting object
+    description: Id of the object.
     immutable: true
     url_param_only: true
 properties:
@@ -82,7 +82,7 @@ properties:
     required: true
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    description: Name field (with URL) of the Product offered for SPLA.
+    description: Name of the product for which you are setting the license configuration. For supported products see https://docs.cloud.google.com/compute/docs/instances/windows/license-manager#supported-license-products. Available values: Office2021ProfessionalPlus
   # ignore_read is set because the count is returned nested inside currentBillingInfo
   # (userCountBilling/packCountBilling). Populated via post_read custom code.
   - name: licenseCount
@@ -92,11 +92,11 @@ properties:
     update_mask_fields:
       - 'currentBillingInfo'
       - 'nextBillingInfo'
-    description: Number of units to bill for.
+    description: Number of units to bill for. When licensing a product that is billed per-user, this means number of users. When licensing a product that is billed per-pack (e.g. SQL Server), this means the number of packs.
   # ignore_read is set because active is a virtual boolean attribute derived from the API's
   # 'state' field (STATE_ACTIVE vs STATE_SUSPENDED). Populated via post_read custom code.
   - name: active
     type: Boolean
     default_value: true
     ignore_read: true
-    description: Whether the configuration is active.
+    description: Whether the configuration is active. We suggest you deactivate a configuration instead of deleting it, and allow License Manager to manage deletion of the configuration.
