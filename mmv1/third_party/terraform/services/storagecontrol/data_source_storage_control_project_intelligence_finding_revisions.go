@@ -298,3 +298,391 @@ func init() {
 		Schema:      DataSourceGoogleStorageControlProjectIntelligenceFindingRevisions(),
 	}.Register()
 }
+
+func storageControlColdlineSpikeSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"total_operations_count": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: `The total count of operations across the project.`,
+		},
+		"percentage_increase": {
+			Type:        schema.TypeFloat,
+			Computed:    true,
+			Description: `The percentage increase in operations across the project compared to the historical baseline.`,
+		},
+		"top_buckets": storageControlTopBucketsSchema(),
+	}
+}
+
+func storageControlThrottledRequestsSpikeSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"throttled_requests": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: `The count of throttled requests for the object prefix.`,
+		},
+		"percentage_increase": {
+			Type:        schema.TypeFloat,
+			Computed:    true,
+			Description: `The percentage increase in throttled requests for the object prefix.`,
+		},
+		"top_buckets": storageControlTopBucketsSchema(),
+	}
+}
+
+func storageControlCrossRegionEgressSpikeSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"total_egress_bytes": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: `The total cross-region egress volume in bytes across the project.`,
+		},
+		"percentage_increase": {
+			Type:        schema.TypeFloat,
+			Computed:    true,
+			Description: `The percentage increase in cross-region egress across the project.`,
+		},
+		"top_buckets": storageControlTopBucketsSchema(),
+	}
+}
+
+func storageControlStorageGrowthSpikeSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"total_storage_growth_bytes": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: `The total storage growth in bytes.`,
+		},
+		"percentage_increase": {
+			Type:        schema.TypeFloat,
+			Computed:    true,
+			Description: `The percentage increase in storage growth.`,
+		},
+		"top_buckets": storageControlTopBucketsSchema(),
+	}
+}
+
+func storageControlTopBucketsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: `A list of the top buckets driving the increase in operations.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"bucket": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `The name of the bucket.`,
+				},
+				"percentage_increase": {
+					Type:        schema.TypeFloat,
+					Computed:    true,
+					Description: `The percentage increase in storage growth for the bucket.`,
+				},
+				"total_operations_count": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `The total count of operations across the project.`,
+				},
+				"total_egress_bytes": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `The total cross-region egress volume in bytes across the project.`,
+				},
+				"total_storage_growth_bytes": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `The total storage growth in bytes.`,
+				},
+				"throttled_requests": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `The count of throttled requests across the project.`,
+				},
+				"contribution": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: `The details about the contribution of the bucket.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"top_prefixes": {
+								Type:        schema.TypeList,
+								Computed:    true,
+								Description: `A list of top object prefixes driving the increase in throttled requests.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"prefix": {
+											Type:        schema.TypeString,
+											Computed:    true,
+											Description: `The object prefix. For example, a/b/c or a/b/d.`,
+										},
+										"percentage_increase": {
+											Type:        schema.TypeFloat,
+											Computed:    true,
+											Description: `The percentage increase in throttled requests for the object prefix.`,
+										},
+										"total_operations_count": {
+											Type:        schema.TypeString,
+											Computed:    true,
+											Description: `The total count of operations for the object prefix.`,
+										},
+										"total_egress_bytes": {
+											Type:        schema.TypeString,
+											Computed:    true,
+											Description: `The total cross-region egress volume in bytes from the object prefix.`,
+										},
+										"throttled_requests": {
+											Type:        schema.TypeString,
+											Computed:    true,
+											Description: `The count of throttled requests for the object prefix.`,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"error": {
+					Type:     schema.TypeList,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"code": {
+								Type:        schema.TypeInt,
+								Computed:    true,
+								Description: `The status code, which should be an enum value of google.rpc.Code.`,
+							},
+							"message": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: `A developer-facing error message, which should be in English. `,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func flattenStorageControlStringList(v interface{}) []string {
+	if v == nil {
+		return nil
+	}
+	if ls, ok := v.([]interface{}); ok {
+		strs := make([]string, 0, len(ls))
+		for _, s := range ls {
+			if str, ok := s.(string); ok {
+				strs = append(strs, str)
+			}
+		}
+		return strs
+	}
+	return nil
+}
+
+func flattenStorageControlObservationPeriod(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	o, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"start_time": o["startTime"],
+			"end_time":   o["endTime"],
+		},
+	}
+}
+
+func flattenStorageControlColdlineSpike(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	o, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	res := map[string]interface{}{
+		"total_operations_count": o["totalOperationsCount"],
+		"percentage_increase":    flattenStorageControlFloat(o["percentageIncrease"]),
+		"top_buckets":            flattenStorageControlTopBuckets(o["topBuckets"]),
+	}
+	return []map[string]interface{}{res}
+}
+
+func flattenStorageControlThrottledRequestsSpike(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	o, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	res := map[string]interface{}{
+		"throttled_requests":  o["throttledRequests"],
+		"percentage_increase": flattenStorageControlFloat(o["percentageIncrease"]),
+		"top_buckets":         flattenStorageControlTopBuckets(o["topBuckets"]),
+	}
+	return []map[string]interface{}{res}
+}
+
+func flattenStorageControlCrossRegionEgressSpike(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	o, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	res := map[string]interface{}{
+		"total_egress_bytes":  o["totalEgressBytes"],
+		"percentage_increase": flattenStorageControlFloat(o["percentageIncrease"]),
+		"top_buckets":         flattenStorageControlTopBuckets(o["topBuckets"]),
+	}
+	return []map[string]interface{}{res}
+}
+
+func flattenStorageControlStorageGrowthSpike(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	o, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	res := map[string]interface{}{
+		"total_storage_growth_bytes": o["totalStorageGrowthBytes"],
+		"percentage_increase":        flattenStorageControlFloat(o["percentageIncrease"]),
+		"top_buckets":                flattenStorageControlTopBuckets(o["topBuckets"]),
+	}
+	return []map[string]interface{}{res}
+}
+
+func flattenStorageControlTopBuckets(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	ls, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	buckets := make([]map[string]interface{}, 0, len(ls))
+	for _, raw := range ls {
+		o, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		bucket := map[string]interface{}{
+			"bucket":                     o["bucket"],
+			"percentage_increase":        flattenStorageControlFloat(o["percentageIncrease"]),
+			"total_operations_count":     o["totalOperationsCount"],
+			"total_egress_bytes":         o["totalEgressBytes"],
+			"total_storage_growth_bytes": o["totalStorageGrowthBytes"],
+			"throttled_requests":         o["throttledRequests"],
+			"contribution":               flattenStorageControlContribution(o["contribution"]),
+			"error":                      flattenStorageControlError(o["error"]),
+		}
+		buckets = append(buckets, bucket)
+	}
+	return buckets
+}
+
+func flattenStorageControlContribution(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	o, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	res := map[string]interface{}{
+		"top_prefixes": flattenStorageControlTopPrefixes(o["topPrefixes"]),
+	}
+	return []map[string]interface{}{res}
+}
+
+func flattenStorageControlTopPrefixes(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	ls, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	prefixes := make([]map[string]interface{}, 0, len(ls))
+	for _, raw := range ls {
+		o, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		prefix := map[string]interface{}{
+			"prefix":                 o["prefix"],
+			"percentage_increase":    flattenStorageControlFloat(o["percentageIncrease"]),
+			"total_operations_count": o["totalOperationsCount"],
+			"total_egress_bytes":     o["totalEgressBytes"],
+			"throttled_requests":     o["throttledRequests"],
+		}
+		prefixes = append(prefixes, prefix)
+	}
+	return prefixes
+}
+
+func flattenStorageControlError(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	o, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	res := map[string]interface{}{
+		"code":    flattenStorageControlInt(o["code"]),
+		"message": o["message"],
+	}
+	return []map[string]interface{}{res}
+}
+
+func flattenStorageControlFloat(v interface{}) float64 {
+	if v == nil {
+		return 0.0
+	}
+	switch val := v.(type) {
+	case float64:
+		return val
+	case float32:
+		return float64(val)
+	case int:
+		return float64(val)
+	case int64:
+		return float64(val)
+	case string:
+		if f, err := strconv.ParseFloat(val, 64); err == nil {
+			return f
+		}
+	}
+	return 0.0
+}
+
+func flattenStorageControlInt(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case int:
+		return val
+	case int64:
+		return int(val)
+	case float64:
+		return int(val)
+	case string:
+		if i, err := strconv.Atoi(val); err == nil {
+			return i
+		}
+	}
+	return 0
+}
