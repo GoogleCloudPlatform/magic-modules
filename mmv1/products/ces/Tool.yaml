@@ -770,13 +770,17 @@ properties:
               See:
               https://cloud.google.com/generative-ai-app-builder/docs/filter-search-metadata
       - name: filterParameterBehavior
-        type: String
+        type: Enum
         description: |-
           Optional. The filter parameter behavior.
           Possible values:
           FILTER_PARAMETER_BEHAVIOR_UNSPECIFIED
           ALWAYS_INCLUDE
           NEVER_INCLUDE
+        enum_values:
+          - 'FILTER_PARAMETER_BEHAVIOR_UNSPECIFIED'
+          - 'ALWAYS_INCLUDE'
+          - 'NEVER_INCLUDE'
       - name: maxResults
         type: Integer
         description: |-
@@ -902,13 +906,17 @@ properties:
       app/agent developer.
     properties:
       - name: corpusType
-        type: String
+        type: Enum
         description: |-
           Optional. The type of the corpus. Default is FULLY_MANAGED.
           Possible values:
           CORPUS_TYPE_UNSPECIFIED
           USER_OWNED
           FULLY_MANAGED
+        enum_values:
+          - 'CORPUS_TYPE_UNSPECIFIED'
+          - 'USER_OWNED'
+          - 'FULLY_MANAGED'
       - name: name
         type: String
         description: Required. The tool name.
@@ -1540,7 +1548,7 @@ properties:
         type: String
         description: Optional. The description of the widget tool.
       - name: widgetType
-        type: String
+        type: Enum
         description: |-
           Optional. The type of the widget tool. If not specified, the default type will be CUSTOMIZED.
           Possible values:
@@ -1557,6 +1565,20 @@ properties:
           APPOINTMENT_DETAILS
           APPOINTMENT_SCHEDULER
           CONTACT_FORM
+        enum_values:
+          - 'WIDGET_TYPE_UNSPECIFIED'
+          - 'CUSTOM'
+          - 'PRODUCT_CAROUSEL'
+          - 'PRODUCT_DETAILS'
+          - 'QUICK_ACTIONS'
+          - 'PRODUCT_COMPARISON'
+          - 'ADVANCED_PRODUCT_DETAILS'
+          - 'SHORT_FORM'
+          - 'OVERALL_SATISFACTION'
+          - 'ORDER_SUMMARY'
+          - 'APPOINTMENT_DETAILS'
+          - 'APPOINTMENT_SCHEDULER'
+          - 'CONTACT_FORM'
       - name: uiConfig
         type: String
         description: Optional. Configuration for rendering the widget. Represents a JSON object.
@@ -1603,19 +1625,23 @@ properties:
                   docstring.
                 output: true
           - name: mode
-            type: String
+            type: Enum
             description: |-
               Optional. The mode of the data mapping.
               Possible values:
               MODE_UNSPECIFIED
               FIELD_MAPPING
               PYTHON_SCRIPT
+            enum_values:
+              - 'MODE_UNSPECIFIED'
+              - 'FIELD_MAPPING'
+              - 'PYTHON_SCRIPT'
       - name: textResponseConfig
         type: NestedObject
         description: Optional. Configuration for always-included text responses.
         properties:
           - name: type
-            type: String
+            type: Enum
             description: |-
               Optional. The strategy for providing the text response.
               Possible values:
@@ -1623,6 +1649,11 @@ properties:
               NONE
               LLM_GENERATED
               STATIC
+            enum_values:
+              - 'TYPE_UNSPECIFIED'
+              - 'NONE'
+              - 'LLM_GENERATED'
+              - 'STATIC'
           - name: staticText
             type: String
             description: Optional. The static text response to return when type is STATIC.
