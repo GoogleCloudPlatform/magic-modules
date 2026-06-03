@@ -38,7 +38,6 @@ timeouts:
   # to applying a new resource, we need to add this PollAsync to GET the
   # resource until it exists and the negative cached result goes away.
   # Context: hashicorp/terraform-provider-google#4993
-generate_list_resource: true
 async:
   type: 'PollAsync'
   check_response_func_existence: 'transport_tpg.PollCheckForExistence'
