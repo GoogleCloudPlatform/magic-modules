@@ -259,4 +259,3 @@ func TestConvert_GkeCustomNodeInit(t *testing.T) {
 
 	assert.Equal(t, "gs://my-bucket/init.sh", initScript["gcsUri"])
 }
-
