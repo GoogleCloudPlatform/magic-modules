@@ -34,7 +34,10 @@ var _ list.ListResourceWithConfigure = &IamMemberListResource{}
 
 // IamMemberListCallConfig holds resource-specific pieces for transport.ListCall.
 type IamMemberListCallConfig struct {
-	ListPagesOptions    transport_tpg.ListPagesOptions
+	ListPagesOptions transport_tpg.ListPagesOptions
+	// ListURLFunc is optional. When provided, it discovers multiple policy target
+	// resources (e.g., all compute disks in a zone) by calling the resource's list API.
+	// For single-parent resources like projects, leave nil to use ParentResourceField only.
 	ListURLFunc         func(rd *schema.ResourceData, config *transport_tpg.Config) (string, error)
 	ParentResourceField string
 	EnableRoleFilter    bool
@@ -82,16 +85,23 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 		})
 	}
 
+	iamResourceSchema := make(map[string]*schema.Schema)
+	for key, schemaField := range memberResource.Schema {
+		// Include all fields from memberResource - these are the parent-identifying fields
+		iamResourceSchema[key] = schemaField
+	}
+
 	return &IamMemberListResource{
 		ListResourceMetadata: tpgresource.ListResourceMetadata{
 			TypeName:         typeName,
 			SDKv2Resource:    memberResource,
 			ListConfigFields: listConfigFields,
 		},
-		typeName:       typeName,
-		memberResource: memberResource,
-		listCallConfig: listCallConfig,
-		newUpdater:     newUpdater,
+		typeName:          typeName,
+		memberResource:    memberResource,
+		iamResourceSchema: iamResourceSchema,
+		listCallConfig:    listCallConfig,
+		newUpdater:        newUpdater,
 	}
 }
 

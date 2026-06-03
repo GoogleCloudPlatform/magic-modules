@@ -144,12 +144,6 @@ func getProjectIamPolicyMutexKey(pid string) string {
 	return fmt.Sprintf("iam-project-%s", pid)
 }
 
-func flattenProjectIamListTarget(item map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
-	if v, ok := item["projectID"]; ok {
-		return d.Set("project", v)
-	}
-	return nil
-}
 
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 
