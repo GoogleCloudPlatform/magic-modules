@@ -64,7 +64,7 @@ examples:
       alloydb_user_pass: 'user_secret'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
       # for backward compatible
       alloydb_user_name: '"user1" + randomSuffix'
     ignore_read_extra:
@@ -91,7 +91,7 @@ examples:
       alloydb_user_name: 'user2@foo.com'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
       # for backward compatible
       alloydb_user_name: '"user2@foo.com" + randomSuffix'
     exclude_docs: true

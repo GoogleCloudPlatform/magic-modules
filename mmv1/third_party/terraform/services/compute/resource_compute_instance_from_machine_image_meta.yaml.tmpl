@@ -151,6 +151,12 @@ fields:
     field: 'network_interface.alias_ip_range.ip_cidr_range'
   - api_field: 'networkInterfaces.aliasIpRanges.subnetworkRangeName'
     field: 'network_interface.alias_ip_range.subnetwork_range_name'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'networkInterfaces.aliasIpv6Ranges.ipCidrRange'
+    field: 'network_interface.alias_ipv6_range.ip_cidr_range'
+  - api_field: 'networkInterfaces.aliasIpv6Ranges.subnetworkRangeName'
+    field: 'network_interface.alias_ipv6_range.subnetwork_range_name'
+{{- end }}
   - api_field: 'networkInterfaces.internalIpv6PrefixLength'
     field: 'network_interface.internal_ipv6_prefix_length'
   - api_field: 'networkInterfaces.ipv6AccessConfigs.externalIpv6'
@@ -264,4 +270,6 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'eraseWindowsVssSignature'
 {{- end }}
+  - field: 'deletion_policy'
+    provider_only: true
 {{ end }}

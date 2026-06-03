@@ -52,6 +52,7 @@ sweeper:
   url_substitutions:
     - region: "us-central1"
 include_in_tgc_next: true
+cai_resource_kind: InstantSnapshot
 examples:
   - name: 'region_instant_snapshot_basic'
     primary_resource_id: 'default'

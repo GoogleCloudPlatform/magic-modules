@@ -1,8 +1,0 @@
-- type: CUSTOMIZE_DIFF
-  details:
-    functions: 
-    - tpgresource.DefaultProviderProject
-- type: COMPLEX_MAP_KEY_NAME
-  field: associated_entities
-  details:
-    keyname: entity_id

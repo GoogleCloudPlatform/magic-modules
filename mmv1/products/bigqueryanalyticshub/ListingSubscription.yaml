@@ -12,48 +12,60 @@
 # limitations under the License.
 
 ---
-name: 'ListingSubscription'
+name: ListingSubscription
 api_resource_type_kind: Subscription
 description: A Bigquery Analytics Hub listing subscription
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
-  api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.subscriptions'
+    Official Documentation: https://cloud.google.com/bigquery/docs/analytics-hub-introduction
+  api: https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.subscriptions
 docs:
   note: |-
     When importing the resource with `terraform import`, provide the destination project and location
     in the format projects/{{destination_project}}/locations/{{destination_location}}/subscriptions/{{subscription_id}}
-base_url: 'projects/{{project}}/locations/{{location}}/subscriptions'
-self_link: 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}:subscribe'
+base_url: projects/{{project}}/locations/{{location}}/subscriptions
 immutable: true
+self_link: projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}
+create_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}:subscribe
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
-custom_code:
-  constants: templates/terraform/constants/bigqueryanalyticshub_listing_subscription.go.tmpl
-  decoder: 'templates/terraform/decoders/bigqueryanalyticshub_listing_subscription.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl'
-  post_read: 'templates/terraform/post_read/bigqueryanalyticshub_listing_subscription.go.tmpl'
-  pre_delete: 'templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl'
-  post_import: templates/terraform/post_import/analytics_hub_subscription.go.tmpl
+  - projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}
 sweeper:
   url_substitutions:
-    - region: "US"
-examples:
-  - name: 'bigquery_analyticshub_listing_subscription_basic'
-    primary_resource_id: 'subscription'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      destination_dataset_id: 'destination_dataset'
-      description: 'example data exchange'
-    test_vars_overrides:
-      # for backward compatible
-      description: '"example data exchange" + randomSuffix'
-  - name: 'bigquery_analyticshub_listing_subscription_multiregion'
-    primary_resource_id: 'subscription'
+    - region: US
+custom_code:
+  decoder: templates/terraform/decoders/bigqueryanalyticshub_listing_subscription.go.tmpl
+  constants: templates/terraform/constants/bigqueryanalyticshub_listing_subscription.go.tmpl
+  pre_read: templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl
+  post_read: templates/terraform/post_read/bigqueryanalyticshub_listing_subscription.go.tmpl
+  pre_delete: templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl
+  post_import: templates/terraform/post_import/analytics_hub_subscription.go.tmpl
+samples:
+  - name: bigquery_analyticshub_listing_subscription_basic
+    primary_resource_id: subscription
+    region_override: US
+    steps:
+      - name: bigquery_analyticshub_listing_subscription_basic
+        resource_id_vars:
+          data_exchange_id: my_data_exchange
+          listing_id: my_listing
+          destination_dataset_id: destination_dataset
+          description: example data exchange
+        test_vars_overrides:
+          # for backward compatible
+          description: '"example data exchange" + randomSuffix'
+  - name: bigquery_analyticshub_listing_subscription_multiregion
+    primary_resource_id: subscription
     exclude_test: true
+    steps:
+      - name: bigquery_analyticshub_listing_subscription_multiregion
+        resource_id_vars:
+          data_exchange_id: my_data_exchange
+          listing_id: my_listing
+          destination_dataset_id: destination_dataset
+          description: example listing multiregion subscription
+        test_vars_overrides:
+          # for backward compatible
+          description: '"example listing multiregion subscription" + randomSuffix'
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
@@ -72,77 +84,75 @@ examples:
       pubsub_subscription_name: 'my_pubsub_subscription'
       description: 'example pubsub listing subscription'
 parameters:
-  - name: 'dataExchangeId'
+  - name: dataExchangeId
     type: String
-    description: |-
-      The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
+    description: The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     url_param_only: true
     required: true
-  - name: 'listingId'
+  - name: listingId
     type: String
-    description: |-
-      The ID of the listing. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
+    description: The ID of the listing. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     url_param_only: true
     required: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The name of the location of the data exchange. Distinct from the location of the destination data set.
     url_param_only: true
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
-    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+    custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl
+    diff_suppress_func: tpgresource.CaseDiffSuppress
 properties:
-  - name: 'destinationDataset'
+  - name: destinationDataset
     type: NestedObject
-    description:
-      The destination dataset for this subscription.
     exactly_one_of:
       - 'destination_dataset'
       - 'destination_pubsub_subscription'
+    required: true
+    description: The destination dataset for this subscription.
     properties:
-      - name: 'location'
+      - name: location
         type: String
         description: |
           The geographic location where the dataset should reside.
           See https://cloud.google.com/bigquery/docs/locations for supported locations.
         required: true
-        custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
-        diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-      - name: 'datasetReference'
+        custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl
+        diff_suppress_func: tpgresource.CaseDiffSuppress
+      - name: datasetReference
         type: NestedObject
         required: true
         description: A reference that identifies the destination dataset.
         properties:
-          - name: 'datasetId'
+          - name: datasetId
             type: String
             description: A unique ID for this dataset, without the project name. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum length is 1,024 characters.
             required: true
-          - name: 'projectId'
+          - name: projectId
             type: String
             description: The ID of the project containing this dataset.
             required: true
-      - name: 'friendlyName'
+      - name: friendlyName
         type: String
         description: A descriptive name for the dataset.
-      - name: 'description'
+      - name: description
         type: String
         description: A user-friendly description of the dataset.
-      - name: 'labels'
+      - name: labels
         type: KeyValuePairs
         description: |
           The labels associated with this dataset. You can use these to
           organize and group your datasets.
-      - name: 'replicaLocations'
+      - name: replicaLocations
         is_set: true
         type: Array
-        set_hash_func: 'tpgresource.CaseInsensitiveHash'
+        set_hash_func: tpgresource.CaseInsensitiveHash
         description: |
           List of regions where the subscriber wants dataset replicas.
         item_type:
           type: String
-        diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-  - name: 'destinationPubsubSubscription'
+        diff_suppress_func: tpgresource.CaseDiffSuppress
+  - name: destinationPubsubSubscription
     type: NestedObject
     description: |
       Destination Pub/Sub subscription to create for the subscriber.
@@ -151,7 +161,7 @@ properties:
       - 'destination_dataset'
       - 'destination_pubsub_subscription'
     properties:
-      - name: 'pubsubSubscription'
+      - name: pubsubSubscription
         type: NestedObject
         required: true
         description: Destination Pub/Sub subscription resource.
@@ -161,16 +171,16 @@ properties:
             required: true
             description: |
               Name of the subscription. Format is `projects/{project}/subscriptions/{sub}`.
-          - name: 'pushConfig'
+          - name: pushConfig
             type: NestedObject
             description: If push delivery is used with this subscription, this field is used to configure it.
             properties:
-              - name: 'pushEndpoint'
+              - name: pushEndpoint
                 type: String
                 description: |
                   A URL locating the endpoint to which messages should be pushed.
                   For example, a Webhook endpoint might use `https://example.com/push`.
-              - name: 'attributes'
+              - name: attributes
                 type: KeyValuePairs
                 description: |
                   Endpoint configuration attributes that can be used to control different aspects of the message delivery.
@@ -182,18 +192,18 @@ properties:
                   will always return a valid version, even if the subscription was created without this attribute.
                   The only supported values for the `x-goog-version` attribute are: `v1beta1`: uses the push format
                   defined in the v1beta1 Pub/Sub API. `v1` or `v1beta2`: uses the push format defined in the v1 Pub/Sub API.
-              - name: 'oidcToken'
+              - name: oidcToken
                 type: NestedObject
                 description: |
                   If specified, Pub/Sub will generate and attach an OIDC JWT token as an
                   Authorization header in the HTTP request for every pushed message.
                 properties:
-                  - name: 'serviceAccountEmail'
+                  - name: serviceAccountEmail
                     type: String
                     description: |
                       Service account email used for generating the OIDC token. For more information
                       on setting up authentication, see Push subscriptions.
-                  - name: 'audience'
+                  - name: audience
                     type: String
                     description: |
                       Audience to be used when generating OIDC token. The audience claim identifies the recipients
@@ -201,7 +211,7 @@ properties:
                       multiple values (array) for the audience field is not supported. More info about the OIDC JWT
                       token audience here: https://tools.ietf.org/html/rfc7519#section-4.1.3 Note: if not specified,
                       the Push endpoint URL will be used.
-              - name: 'noWrapper'
+              - name: noWrapper
                 type: NestedObject
                 description: When set, the payload to the push endpoint is not wrapped.
                 properties:
@@ -210,113 +220,113 @@ properties:
                     description: |
                       When true, writes the Pub/Sub message metadata to `x-goog-pubsub-<KEY>:<VAL>` headers of the
                       HTTP request. Writes the Pub/Sub message attributes to `<KEY>:<VAL>` headers of the HTTP request.
-          - name: 'bigqueryConfig'
+          - name: bigqueryConfig
             type: NestedObject
             description: If delivery to BigQuery is used with this subscription, this field is used to configure it.
             properties:
-              - name: 'table'
+              - name: table
                 type: String
                 description: |
                   The name of the table to which to write data, of the form
                   {projectId}.{datasetId}.{tableId}
-              - name: 'useTopicSchema'
+              - name: useTopicSchema
                 type: Boolean
                 description: |
                   When true, use the topic's schema as the columns to write to in BigQuery,
                   if it exists. `useTopicSchema` and `useTableSchema` cannot be enabled at the same time.
-              - name: 'writeMetadata'
+              - name: writeMetadata
                 type: Boolean
                 description: |
                   When true, write the subscription name, message_id, publish_time, attributes, and ordering_key
                   to additional columns in the table. The subscription name, message_id, and publish_time fields
                   are put in their own columns while all other message properties (other than data) are written
                   to a JSON object in the attributes column.
-              - name: 'dropUnknownFields'
+              - name: dropUnknownFields
                 type: Boolean
                 description: |
                   When true and `useTopicSchema` is true, any fields that are a part of the topic schema that are
                   not part of the BigQuery table schema are dropped when writing to BigQuery. Otherwise, the schemas
                   must be kept in sync and any messages with extra fields are not written and remain in the
                   subscription's backlog.
-              - name: 'useTableSchema'
+              - name: useTableSchema
                 type: Boolean
                 description: |
                   When true, use the BigQuery table's schema as the columns to write to in BigQuery.
                   `useTableSchema` and `useTopicSchema` cannot be enabled at the same time.
-              - name: 'serviceAccountEmail'
+              - name: serviceAccountEmail
                 type: String
                 description: |
                   The service account to use to write to BigQuery. The subscription creator or updater that
                   specifies this field must have `iam.serviceAccounts.actAs` permission on the service account.
                   If not specified, the Pub/Sub service agent,
                   service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com, is used.
-          - name: 'cloudStorageConfig'
+          - name: cloudStorageConfig
             type: NestedObject
             description: If delivery to Google Cloud Storage is used with this subscription, this field is used to configure it.
             properties:
-              - name: 'bucket'
+              - name: bucket
                 type: String
                 description: |
                   User-provided name for the Cloud Storage bucket. The bucket must be created by the user.
                   The bucket name must be without any prefix like "gs://". See the
                   [bucket naming requirements](https://cloud.google.com/storage/docs/buckets#naming).
-              - name: 'filenamePrefix'
+              - name: filenamePrefix
                 type: String
                 description: |
                   User-provided prefix for Cloud Storage filename. See the
                   [object naming requirements](https://cloud.google.com/storage/docs/objects#naming).
-              - name: 'filenameSuffix'
+              - name: filenameSuffix
                 type: String
                 description: |
                   User-provided suffix for Cloud Storage filename. See the
                   [object naming requirements](https://cloud.google.com/storage/docs/objects#naming).
                   Must not end in "/".
-              - name: 'filenameDatetimeFormat'
+              - name: filenameDatetimeFormat
                 type: String
                 description: |
                   User-provided format string specifying how to represent datetimes in Cloud Storage filenames.
                   See the [datetime format guidance](https://cloud.google.com/pubsub/docs/create-cloudstorage-subscription#file_names).
-              - name: 'maxDuration'
+              - name: maxDuration
                 type: String
                 description: |
                   The maximum duration that can elapse before a new Cloud Storage file is created.
                   Min 1 minute, max 10 minutes, default 5 minutes. May not exceed the subscription's
                   acknowledgement deadline.
-              - name: 'maxBytes'
+              - name: maxBytes
                 type: String
                 description: |
                   The maximum bytes that can be written to a Cloud Storage file before a new file is created.
                   Min 1 KB, max 10 GiB. The maxBytes limit may be exceeded in cases where messages are larger
                   than the limit.
-              - name: 'maxMessages'
+              - name: maxMessages
                 type: String
                 description: |
                   The maximum number of messages that can be written to a Cloud Storage file before a new file
                   is created. Min 1000 messages.
-              - name: 'serviceAccountEmail'
+              - name: serviceAccountEmail
                 type: String
                 description: |
                   The service account to use to write to Cloud Storage. The subscription creator or updater that
                   specifies this field must have `iam.serviceAccounts.actAs` permission on the service account.
                   If not specified, the Pub/Sub service agent,
                   service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com, is used.
-              - name: 'avroConfig'
+              - name: avroConfig
                 type: NestedObject
                 description: If set, message data will be written to Cloud Storage in Avro format.
                 properties:
-                  - name: 'writeMetadata'
+                  - name: writeMetadata
                     type: Boolean
                     description: |
                       When true, write the subscription name, message_id, publish_time, attributes, and ordering_key
                       as additional fields in the output. The subscription name, message_id, and publish_time fields
                       are put in their own fields while all other message properties other than data (for example,
                       an ordering_key, if present) are added as entries in the attributes map.
-                  - name: 'useTopicSchema'
+                  - name: useTopicSchema
                     type: Boolean
                     description: |
                       When true, the output Cloud Storage file will be serialized using
                       the topic schema, if it exists.
-          - name: 'ackDeadlineSeconds'
+          - name: ackDeadlineSeconds
             type: Integer
             description: |
               The approximate amount of time (on a best-effort basis) Pub/Sub waits for the subscriber to
@@ -331,31 +341,31 @@ properties:
               delivery, this value is also used to set the request timeout for the call to the push endpoint.
               If the subscriber never acknowledges the message, the Pub/Sub system will eventually redeliver
               the message.
-          - name: 'retainAckedMessages'
+          - name: retainAckedMessages
             type: Boolean
             description: |
               Indicates whether to retain acknowledged messages. If true, then messages are not expunged from
               the subscription's backlog, even if they are acknowledged, until they fall out of the
               `messageRetentionDuration` window. This must be true if you would like to Seek to a timestamp
               in the past to replay previously-acknowledged messages.
-          - name: 'messageRetentionDuration'
+          - name: messageRetentionDuration
             type: String
             description: |
               How long to retain unacknowledged messages in the subscription's backlog, from the moment a
               message is published. If `retainAckedMessages` is true, then this also configures the retention
               of acknowledged messages, and thus configures how far back in time a Seek can be done. Defaults
               to 7 days. Cannot be more than 31 days or less than 10 minutes.
-          - name: 'labels'
+          - name: labels
             type: KeyValuePairs
             description: |
               See [Creating and managing labels](https://cloud.google.com/pubsub/docs/labels).
-          - name: 'enableMessageOrdering'
+          - name: enableMessageOrdering
             type: Boolean
             description: |
               If true, messages published with the same `ordering_key` in `PubsubMessage`
               will be delivered to the subscribers in the order in which they are received
               by the Pub/Sub system. Otherwise, they may be delivered in any order.
-          - name: 'expirationPolicy'
+          - name: expirationPolicy
             type: NestedObject
             description: |
               A policy that specifies the conditions for this subscription's expiration. A subscription is
@@ -365,14 +375,14 @@ properties:
               `expirationPolicy.ttl` is 1 day. If `expirationPolicy` is set, but `expirationPolicy.ttl`
               is not set, the subscription never expires.
             properties:
-              - name: 'ttl'
+              - name: ttl
                 type: String
                 description: |
                   Specifies the "time-to-live" duration for an associated resource. The resource expires if it
                   is not active for a period of `ttl`. The definition of "activity" depends on the type of the
                   associated resource. The minimum and maximum allowed values for `ttl` depend on the type of
                   the associated resource, as well. If `ttl` is not set, the associated resource never expires.
-          - name: 'deadLetterPolicy'
+          - name: deadLetterPolicy
             type: NestedObject
             description: |
               A policy that specifies the conditions for dead lettering messages in this subscription. If
@@ -381,7 +391,7 @@ properties:
               service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com) must have permission to
               Acknowledge() messages on this subscription.
             properties:
-              - name: 'deadLetterTopic'
+              - name: deadLetterTopic
                 type: String
                 description: |
                   The name of the topic to which dead letter messages should be published. Format is
@@ -390,7 +400,7 @@ properties:
                   must have permission to Publish() to this topic. The operation will fail if the topic does not exist.
                   Users should ensure that there is a subscription attached to this topic since messages published to
                   a topic with no subscriptions are lost.
-              - name: 'maxDeliveryAttempts'
+              - name: maxDeliveryAttempts
                 type: Integer
                 description: |
                   The maximum number of delivery attempts for any message. The value must be between 5 and 100.
@@ -399,7 +409,7 @@ properties:
                   ModifyAckDeadline with a 0 deadline. Note that client libraries may automatically extend
                   ack_deadlines. This field will be honored on a best effort basis. If this parameter is 0, a
                   default value of 5 is used.
-          - name: 'retryPolicy'
+          - name: retryPolicy
             type: NestedObject
             description: |
               A policy that specifies how Pub/Sub retries message delivery for this subscription. If not set,
@@ -407,23 +417,23 @@ properties:
               as possible for healthy subscribers. RetryPolicy will be triggered on NACKs or acknowledgement
               deadline exceeded events for a given message.
             properties:
-              - name: 'minimumBackoff'
+              - name: minimumBackoff
                 type: String
                 description: |
                   The minimum delay between consecutive deliveries of a given message.
                   Value should be between 0 and 600 seconds. Defaults to 10 seconds.
-              - name: 'maximumBackoff'
+              - name: maximumBackoff
                 type: String
                 description: |
                   The maximum delay between consecutive deliveries of a given message.
                   Value should be between 0 and 600 seconds. Defaults to 600 seconds.
-          - name: 'filter'
+          - name: filter
             type: String
             description: |
               An expression written in the Pub/Sub filter language. If non-empty, then only `PubsubMessage`s
               whose `attributes` field matches the filter are delivered on this subscription. If empty, then
               no messages are filtered out.
-          - name: 'enableExactlyOnceDelivery'
+          - name: enableExactlyOnceDelivery
             type: Boolean
             description: |
               If true, Pub/Sub provides the following guarantees for the delivery of a message with a given
@@ -433,60 +443,51 @@ properties:
               message when `enableExactlyOnceDelivery` is true if the message was published multiple times by
               a publisher client. These copies are considered distinct by Pub/Sub and have distinct `message_id`
               values.
-          - name: 'detached'
+          - name: detached
             type: Boolean
             description: |
               Indicates whether the subscription is detached from its topic. Detached subscriptions don't
               receive messages from their topic and don't retain any backlog. `Pull` and `StreamingPull`
               requests will return FAILED_PRECONDITION. If the subscription is a push subscription, pushes
               to the endpoint will not be made.
-  - name: 'name'
+  - name: name
     type: String
-    description: |-
-      The resource name of the subscription. e.g. "projects/myproject/locations/US/subscriptions/123"
+    description: The resource name of the subscription. e.g. "projects/myproject/locations/US/subscriptions/123"
     output: true
-  - name: 'subscriptionId'
+  - name: subscriptionId
     type: String
-    description: |-
-      The subscription id used to reference the subscription.
+    description: The subscription id used to reference the subscription.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-  - name: 'creationTime'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
+  - name: creationTime
     type: Time
-    description: |-
-      Timestamp when the subscription was created.
+    description: Timestamp when the subscription was created.
     output: true
-  - name: 'lastModifyTime'
+  - name: lastModifyTime
     type: Time
-    description: |-
-      Timestamp when the subscription was last modified.
+    description: Timestamp when the subscription was last modified.
     output: true
-  - name: 'organizationId'
+  - name: organizationId
     type: String
-    description: |-
-      Organization of the project this subscription belongs to.
+    description: Organization of the project this subscription belongs to.
     output: true
-  - name: 'organizationDisplayName'
+  - name: organizationDisplayName
     type: String
-    description: |-
-      Display name of the project of this subscription.
+    description: Display name of the project of this subscription.
     output: true
-  - name: 'state'
+  - name: state
     type: String
-    description: |-
-      Current state of the subscription.
+    description: Current state of the subscription.
     output: true
-  - name: 'subscriberContact'
+  - name: subscriberContact
     type: String
-    description: |-
-      Email of the subscriber.
+    description: Email of the subscriber.
     output: true
-  - name: 'resourceType'
+  - name: resourceType
     type: String
-    description: |-
-      Listing shared asset type.
+    description: Listing shared asset type.
     output: true
-  - name: 'linkedDatasetMap'
+  - name: linkedDatasetMap
     output: true
     type: Map
     description: |-
@@ -528,22 +529,22 @@ properties:
           type: String
           description: Output only. Name of the Pub/Sub subscription, e.g. projects/subscriberproject/subscriptions/sub_id
           output: true
-  - name: 'logLinkedDatasetQueryUserEmail'
+  - name: logLinkedDatasetQueryUserEmail
     type: Boolean
-    description: 'Output only. By default, false. If true, the Subscriber agreed to the email sharing mandate that is enabled for Listing.'
+    description: Output only. By default, false. If true, the Subscriber agreed to the email sharing mandate that is enabled for Listing.
     output: true
-  - name: 'commercialInfo'
+  - name: commercialInfo
     type: NestedObject
     description: |
       Commercial info metadata for this subscription. This is set if this is a commercial subscription i.e. if this subscription was created from subscribing to a commercial listing.
     output: true
     properties:
-      - name: 'cloudMarketplace'
+      - name: cloudMarketplace
         type: NestedObject
         description: Cloud Marketplace commercial metadata for this subscription.
         output: true
         properties:
-          - name: 'order'
+          - name: order
             type: String
             description: |
               Resource name of the Marketplace Order.

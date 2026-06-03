@@ -11,6 +11,9 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/apigee"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -116,7 +119,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
   target                = google_compute_service_attachment.psc_ilb_service_attachment.id
   load_balancing_scheme = "" # need to override EXTERNAL default when target is a service attachment
   network               = "default"
-  ip_address            = google_compute_address.psc_ilb_consumer_address.address
+  ip_address            = google_compute_address.psc_ilb_consumer_address.id
 
   project = google_project.project.project_id
 }
@@ -180,7 +183,7 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
 
   network       = google_compute_network.psc_ilb_network.id
   purpose       =  "PRIVATE_SERVICE_CONNECT"
-  ip_cidr_range = "10.0.1.0/24"
+  ip_cidr_range = "10.0.2.0/24"
 
   project = google_project.project.project_id
 }

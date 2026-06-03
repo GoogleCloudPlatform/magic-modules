@@ -203,8 +203,6 @@ func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
-
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
@@ -222,8 +220,6 @@ func TestConfigLoadAndValidate_accountFileJSON(t *testing.T) {
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
-
 	err = config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
@@ -236,8 +232,6 @@ func TestConfigLoadAndValidate_accountFileJSONInvalid(t *testing.T) {
 		Project:     "my-gce-project",
 		Region:      "us-central1",
 	}
-
-	transport_tpg.ConfigureBasePaths(config)
 
 	if config.LoadAndValidate(context.Background()) == nil {
 		t.Fatalf("expected error, but got nil")
@@ -258,8 +252,6 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 		Project:     proj,
 		Region:      "us-central1",
 	}
-
-	transport_tpg.ConfigureBasePaths(config)
 
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
@@ -288,8 +280,6 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 		Project:                   proj,
 		Region:                    "us-central1",
 	}
-
-	transport_tpg.ConfigureBasePaths(config)
 
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
@@ -329,8 +319,6 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 		Region:                    "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
-
 	err = config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
@@ -367,8 +355,6 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
-
 	err = config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
@@ -387,8 +373,6 @@ func TestConfigLoadAndValidate_customScopes(t *testing.T) {
 		Region:      "us-central1",
 		Scopes:      []string{"https://www.googleapis.com/auth/compute"},
 	}
-
-	transport_tpg.ConfigureBasePaths(config)
 
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {

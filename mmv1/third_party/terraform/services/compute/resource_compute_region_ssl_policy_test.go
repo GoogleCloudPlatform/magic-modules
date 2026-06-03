@@ -7,13 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeRegionSslPolicy_regionInherit(t *testing.T) {
 	t.Parallel()
 
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -44,7 +45,7 @@ func TestAccComputeRegionSslPolicy_update(t *testing.T) {
 	t.Parallel()
 
 	var sslPolicy map[string]interface{}
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -123,7 +124,7 @@ func TestAccComputeRegionSslPolicy_update_to_custom(t *testing.T) {
 	t.Parallel()
 
 	var sslPolicy map[string]interface{}
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -170,7 +171,7 @@ func TestAccComputeRegionSslPolicy_update_from_custom(t *testing.T) {
 	t.Parallel()
 
 	var sslPolicy map[string]interface{}
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", acctest.RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -213,6 +214,81 @@ func TestAccComputeRegionSslPolicy_update_from_custom(t *testing.T) {
 	})
 }
 
+func TestAccComputeRegionSslPolicy_postQuantumKeyExchange(t *testing.T) {
+	t.Parallel()
+
+	var sslPolicy map[string]interface{}
+	sslPolicyName := fmt.Sprintf("tf-test-ssl-policy-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSslPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "profile", "MODERN"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "min_tls_version", "TLS_1_2"),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", ""),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "ENABLED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "ENABLED"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "DEFERRED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "DEFERRED"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSslPostQuantum(sslPolicyName, "DEFAULT"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionSslPolicyExists(
+						t, "google_compute_region_ssl_policy.post_quantum_key_exchange", &sslPolicy),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_ssl_policy.post_quantum_key_exchange", "post_quantum_key_exchange", "DEFAULT"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_ssl_policy.post_quantum_key_exchange",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckComputeRegionSslPolicyExists(t *testing.T, n string, sslPolicy *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -233,7 +309,7 @@ func testAccCheckComputeRegionSslPolicyExists(t *testing.T, n string, sslPolicy 
 
 		name := rs.Primary.Attributes["name"]
 
-		url := fmt.Sprintf("%sprojects/%s/regions/us-central1/sslPolicies/%s", config.ComputeBasePath, project, name)
+		url := fmt.Sprintf("%sprojects/%s/regions/us-central1/sslPolicies/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), project, name)
 		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
@@ -336,4 +412,16 @@ resource "google_compute_region_ssl_policy" "foobar" {
   profile         = "MODERN"
 }
 `, resourceName)
+}
+
+func testAccComputeRegionSslPostQuantum(resourceName string, pqke string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_ssl_policy" "post_quantum_key_exchange" {
+  name                         = "%s"
+  profile                      = "MODERN"
+  min_tls_version              = "TLS_1_2"
+  region                       = "us-central1"
+  post_quantum_key_exchange    = "%s"
+}
+`, resourceName, pqke)
 }

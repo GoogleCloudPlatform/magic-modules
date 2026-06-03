@@ -1,0 +1,6 @@
+resource "google_compute_ssl_policy" "post-quantum-ssl-policy" {
+  name                         = "{{index $.Vars "post_quantum_ssl_policy_name"}}"
+  profile                      = "MODERN"
+  min_tls_version              = "TLS_1_2"
+  post_quantum_key_exchange    = "ENABLED"
+}

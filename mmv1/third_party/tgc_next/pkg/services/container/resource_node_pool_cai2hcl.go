@@ -119,16 +119,29 @@ func flattenNodePoolUpgradeSettings(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+	if len(us) == 0 {
+		return nil
+	}
 	upgradeSettings := make(map[string]interface{})
 
-	upgradeSettings["blue_green_settings"] = flattenNodePoolBlueGreenSettings(us["blueGreenSettings"])
-	upgradeSettings["max_surge"] = us["maxSurge"]
-	upgradeSettings["max_unavailable"] = us["maxUnavailable"]
+	if v := flattenNodePoolBlueGreenSettings(us["blueGreenSettings"]); v != nil {
+		upgradeSettings["blue_green_settings"] = v
+	}
+	if v := us["maxSurge"]; v != nil {
+		upgradeSettings["max_surge"] = v
+	}
+	if v := us["maxUnavailable"]; v != nil {
+		upgradeSettings["max_unavailable"] = v
+	}
 
 	// "SHORT_LIVED" strategy is not supported by the Terraform provider yet.
 	// Suppress Default Value "SURGE"
 	if strategy, ok := us["strategy"].(string); ok && strategy != "SHORT_LIVED" && strategy != "SURGE" {
 		upgradeSettings["strategy"] = strategy
+	}
+
+	if len(upgradeSettings) == 0 {
+		return nil
 	}
 
 	return []map[string]interface{}{upgradeSettings}
