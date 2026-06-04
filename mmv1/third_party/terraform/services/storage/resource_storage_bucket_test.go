@@ -2457,6 +2457,7 @@ resource "google_storage_bucket" "bucket" {
     condition {
       matches_storage_class = ["COLDLINE"]
       age                   = 2
+			size_above_bytes      = 100
     }
   }
   lifecycle_rule {
@@ -2465,7 +2466,8 @@ resource "google_storage_bucket" "bucket" {
     }
     condition {
       matches_storage_class = []
-      age = 10
+      age                   = 10
+			size_below_bytes      = 500
     }
   }
   lifecycle_rule {
@@ -2556,6 +2558,7 @@ resource "google_storage_bucket" "bucket" {
     condition {
       matches_storage_class = ["COLDLINE"]
       age                   = 2
+			size_above_bytes      = 200
     }
   }
   lifecycle_rule {
