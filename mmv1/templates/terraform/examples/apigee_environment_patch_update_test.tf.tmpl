@@ -102,6 +102,14 @@ resource "google_project_service_identity" "apigee_sa" {
   depends_on = [time_sleep.wait_for_services]
 }
 
+# The Apigee service identity email is returned before the service account has
+# fully propagated. Wait before granting it IAM so the KMS binding does not fail
+# with "Service account ... does not exist".
+resource "time_sleep" "wait_for_sa" {
+  create_duration = "60s"
+  depends_on      = [google_project_service_identity.apigee_sa]
+}
+
 resource "google_kms_crypto_key_iam_member" "apigee_sa_keyuser" {
   provider = google-beta
 
@@ -109,6 +117,8 @@ resource "google_kms_crypto_key_iam_member" "apigee_sa_keyuser" {
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   member = "serviceAccount:${google_project_service_identity.apigee_sa.email}"
+
+  depends_on = [time_sleep.wait_for_sa]
 }
 
 resource "time_sleep" "wait_for_iam" {
