@@ -34,11 +34,7 @@ var _ list.ListResourceWithConfigure = &IamMemberListResource{}
 
 // IamMemberListCallConfig holds resource-specific pieces for transport.ListCall.
 type IamMemberListCallConfig struct {
-	ListPagesOptions transport_tpg.ListPagesOptions
-	// ListURLFunc is optional. When provided, it discovers multiple policy target
-	// resources (e.g., all compute disks in a zone) by calling the resource's list API.
-	// For single-parent resources like projects, leave nil to use ParentResourceField only.
-	ListURLFunc         func(rd *schema.ResourceData, config *transport_tpg.Config) (string, error)
+	ListPagesOptions    transport_tpg.ListPagesOptions
 	ParentResourceField string
 	EnableRoleFilter    bool
 	EnableMemberFilter  bool
@@ -152,9 +148,7 @@ func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req l
 		}
 	}
 
-	var targets []*schema.ResourceData
-
-	if r.listCallConfig.ListURLFunc == nil {
+	if r.listCallConfig.ListPagesOptions.Callback == nil {
 		return []*schema.ResourceData{baseRd}, nil
 	}
 
@@ -162,15 +156,12 @@ func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req l
 		return nil, fmt.Errorf("provider client nil")
 	}
 
-	listUrl, err := r.listCallConfig.ListURLFunc(baseRd, r.Client)
-	if err != nil {
-		return nil, fmt.Errorf("building list URL: %w", err)
-	}
+	var targets []*schema.ResourceData
+
 	listOpts := r.listCallConfig.ListPagesOptions
 	listOpts.Config = r.Client
 	listOpts.TempData = baseRd
 	listOpts.Resource = r.memberResource
-	listOpts.ListURL = listUrl
 	listOpts.UserAgent = r.Client.UserAgent
 
 	if listOpts.ItemName == "" {
@@ -179,7 +170,6 @@ func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req l
 
 	listOpts.Callback = func(rd *schema.ResourceData) error {
 		targetRd := r.memberResource.TestResourceData()
-
 		targets = append(targets, targetRd)
 		return nil
 	}
