@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -18,6 +19,14 @@ var (
 	_ datasource.DataSource              = &GoogleClientOpenIDUserinfoDataSource{}
 	_ datasource.DataSourceWithConfigure = &GoogleClientOpenIDUserinfoDataSource{}
 )
+
+func init() {
+	registry.FrameworkDataSource{
+		Name:        "google_client_openid_userinfo",
+		ProductName: "resourcemanager",
+		Func:        NewGoogleClientOpenIDUserinfoDataSource,
+	}.Register()
+}
 
 func NewGoogleClientOpenIDUserinfoDataSource() datasource.DataSource {
 	return &GoogleClientOpenIDUserinfoDataSource{}

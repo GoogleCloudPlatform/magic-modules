@@ -1,0 +1,50 @@
+package storage
+
+import (
+	"log"
+	"net/http"
+	"time"
+
+	"google.golang.org/api/option"
+	"google.golang.org/api/storage/v1"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func NewClient(c *transport_tpg.Config, userAgent string) *storage.Service {
+	storageClientBasePath := transport_tpg.BaseUrl(Product, c)
+	log.Printf("[INFO] Instantiating Google Storage client for path %s", storageClientBasePath)
+	clientStorage, err := storage.NewService(c.Context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client storage: %s", err)
+		return nil
+	}
+	clientStorage.UserAgent = userAgent
+	clientStorage.BasePath = storageClientBasePath
+
+	return clientStorage
+}
+
+// For object uploads, we need to override the specific timeout because they are long, synchronous operations.
+func NewClientWithTimeoutOverride(c *transport_tpg.Config, userAgent string, timeout time.Duration) *storage.Service {
+	storageClientBasePath := transport_tpg.BaseUrl(Product, c)
+	log.Printf("[INFO] Instantiating Google Storage client for path %s", storageClientBasePath)
+	// Copy the existing HTTP client (which has no unexported fields [as of Oct 2021 at least], so this is safe).
+	// We have to do this because otherwise we will accidentally change the timeout for all other
+	// synchronous operations, which would not be desirable.
+	httpClient := &http.Client{
+		Transport:     c.Client.Transport,
+		CheckRedirect: c.Client.CheckRedirect,
+		Jar:           c.Client.Jar,
+		Timeout:       timeout,
+	}
+	clientStorage, err := storage.NewService(c.Context, option.WithHTTPClient(httpClient))
+	if err != nil {
+		log.Printf("[WARN] Error creating client storage: %s", err)
+		return nil
+	}
+	clientStorage.UserAgent = userAgent
+	clientStorage.BasePath = storageClientBasePath
+
+	return clientStorage
+}

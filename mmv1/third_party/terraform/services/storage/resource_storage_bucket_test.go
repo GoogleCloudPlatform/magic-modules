@@ -13,9 +13,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	storage_tpg "github.com/hashicorp/terraform-provider-google/google/services/storage"
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
@@ -60,6 +65,39 @@ func TestAccStorageBucket_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_importBlockWithResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	project := envvar.GetTestProjectFromEnv()
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basic(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "project", project),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "name", bucketName),
+				),
+			},
+			{
+				ResourceName:       "google_storage_bucket.bucket",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
@@ -1720,20 +1758,20 @@ func testAccCheckStorageBucketPutFolderItem(t *testing.T, bucketName string) res
 			Name:   emptyfolderName,
 		}
 
-		if res, err := config.NewStorageClient(config.UserAgent).Folders.Insert(bucketName, &folder).Recursive(true).Do(); err == nil {
+		if res, err := storage_tpg.NewClient(config, config.UserAgent).Folders.Insert(bucketName, &folder).Recursive(true).Do(); err == nil {
 			log.Printf("[INFO] Created folder %v at location %v\n\n", res.Name, res.SelfLink)
 		} else {
 			return fmt.Errorf("Folders.Insert failed: %v", err)
 		}
 
 		// This needs to use Media(io.Reader) call, otherwise it does not go to /upload API and fails
-		if res, err := config.NewStorageClient(config.UserAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
+		if res, err := storage_tpg.NewClient(config, config.UserAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
 			log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
 		} else {
 			return fmt.Errorf("Objects.Insert failed: %v", err)
 		}
 
-		if res, err := config.NewStorageClient(config.UserAgent).Folders.Insert(bucketName, &emptyFolder).Recursive(true).Do(); err == nil {
+		if res, err := storage_tpg.NewClient(config, config.UserAgent).Folders.Insert(bucketName, &emptyFolder).Recursive(true).Do(); err == nil {
 			log.Printf("[INFO] Created folder %v at location %v\n\n", res.Name, res.SelfLink)
 		} else {
 			return fmt.Errorf("Folders.Insert failed: %v", err)
@@ -1783,7 +1821,7 @@ func testAccCheckStorageBucketExists(t *testing.T, n string, bucketName string, 
 
 		config := acctest.GoogleProviderConfig(t)
 
-		found, err := config.NewStorageClient(config.UserAgent).Buckets.Get(rs.Primary.ID).Do()
+		found, err := storage_tpg.NewClient(config, config.UserAgent).Buckets.Get(rs.Primary.ID).Do()
 		if err != nil {
 			return err
 		}
@@ -1828,7 +1866,7 @@ func testAccCheckStorageBucketPutItem(t *testing.T, bucketName string) resource.
 		object := &storage.Object{Name: "bucketDestroyTestFile"}
 
 		// This needs to use Media(io.Reader) call, otherwise it does not go to /upload API and fails
-		if res, err := config.NewStorageClient(config.UserAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
+		if res, err := storage_tpg.NewClient(config, config.UserAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
 			log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
 		} else {
 			return fmt.Errorf("Objects.Insert failed: %v", err)
@@ -1847,21 +1885,21 @@ func testAccCheckStorageBucketRetentionPolicy(t *testing.T, bucketName string) r
 		object := &storage.Object{Name: "bucketDestroyTestFile"}
 
 		// This needs to use Media(io.Reader) call, otherwise it does not go to /upload API and fails
-		if res, err := config.NewStorageClient(config.UserAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
+		if res, err := storage_tpg.NewClient(config, config.UserAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
 			log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
 		} else {
 			return fmt.Errorf("Objects.Insert failed: %v", err)
 		}
 
 		// Test deleting immediately, this should fail because of the 10 second retention
-		if err := config.NewStorageClient(config.UserAgent).Objects.Delete(bucketName, objectName).Do(); err == nil {
+		if err := storage_tpg.NewClient(config, config.UserAgent).Objects.Delete(bucketName, objectName).Do(); err == nil {
 			log.Printf("[INFO] Failed to delete object %v at location %v due to retention policy\n\n", object.Name, object.SelfLink)
 		}
 
 		// Wait 10 seconds and delete again
 		time.Sleep(10000 * time.Millisecond)
 
-		if err := config.NewStorageClient(config.UserAgent).Objects.Delete(bucketName, object.Name).Do(); err == nil {
+		if err := storage_tpg.NewClient(config, config.UserAgent).Objects.Delete(bucketName, object.Name).Do(); err == nil {
 			log.Printf("[INFO] Deleted object %v at location %v\n\n", object.Name, object.SelfLink)
 		} else {
 			return fmt.Errorf("Objects.Delete failed: %v", err)
@@ -1875,7 +1913,7 @@ func testAccCheckStorageBucketMissing(t *testing.T, bucketName string) resource.
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		_, err := config.NewStorageClient(config.UserAgent).Buckets.Get(bucketName).Do()
+		_, err := storage_tpg.NewClient(config, config.UserAgent).Buckets.Get(bucketName).Do()
 		if err == nil {
 			return fmt.Errorf("Found %s", bucketName)
 		}
@@ -1935,7 +1973,7 @@ func testAccStorageBucketDestroyProducer(t *testing.T) func(s *terraform.State) 
 				continue
 			}
 
-			_, err := config.NewStorageClient(config.UserAgent).Buckets.Get(rs.Primary.ID).Do()
+			_, err := storage_tpg.NewClient(config, config.UserAgent).Buckets.Get(rs.Primary.ID).Do()
 			if err == nil {
 				return fmt.Errorf("Bucket still exists")
 			}
@@ -3115,7 +3153,7 @@ func TestAccStorageBucket_forceDestroy_largeObjectCount(t *testing.T) {
 func testAccCheckStorageBucketPutManyItems(t *testing.T, bucketName string, count int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		storageClient := config.NewStorageClient(config.UserAgent)
+		storageClient := storage_tpg.NewClient(config, config.UserAgent)
 
 		var wg sync.WaitGroup
 		errChan := make(chan error, count)
@@ -3161,7 +3199,7 @@ func TestAccStorageBucket_encryptionCmek(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"kms_key":    acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+		"kms_key":    kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
 		"random_int": acctest.RandInt(t),
 	}
 

@@ -256,6 +256,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Compute",
         "path" to "./google-beta/services/compute"
     ),
+    "config" to mapOf(
+        "name" to "config",
+        "displayName" to "Config",
+        "path" to "./google-beta/services/config"
+    ),
     "contactcenterinsights" to mapOf(
         "name" to "contactcenterinsights",
         "displayName" to "Contact Center AI Insights",
@@ -565,6 +570,11 @@ var ServicesListBeta = mapOf(
         "name" to "kms",
         "displayName" to "Kms",
         "path" to "./google-beta/services/kms"
+    ),
+    "licensemanager" to mapOf(
+        "name" to "licensemanager",
+        "displayName" to "License Manager",
+        "path" to "./google/services/licensemanager"
     ),
     "logging" to mapOf(
         "name" to "logging",

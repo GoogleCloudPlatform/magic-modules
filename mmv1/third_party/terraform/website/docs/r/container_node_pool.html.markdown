@@ -175,6 +175,13 @@ cluster.
 * `queued_provisioning` - (Optional) Specifies node pool-level settings of queued provisioning.
     Structure is [documented below](#nested_queued_provisioning).
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+
 <a name="nested_autoscaling"></a>The `autoscaling` block supports (either total or per zone limits are required):
 
 * `min_node_count` - (Optional) Minimum number of nodes per zone in the NodePool.
@@ -225,7 +232,7 @@ cluster.
 
 * `subnetwork` - (Optional) The subnetwork path for the node pool. Format: `projects/{project}/regions/{region}/subnetworks/{subnetwork}`. If the cluster is associated with multiple subnetworks, the subnetwork for the node pool is picked based on the IP utilization during node pool creation and is immutable
 
-* `accelerator_network_profile` (Optional, [Beta](../guides/provider_versions.html.markdown)) - Specifies the accelerator network profile for nodes in this node pool. Setting to `"auto"` enables GKE to automatically configure high-performance networking settings for nodes with accelerators (like GPUs). GKE manages the underlying resources (like VPCs and subnets) for this configuration.
+* `accelerator_network_profile` (Optional, (../guides/provider_versions.html.markdown)) - Specifies the accelerator network profile for nodes in this node pool. Setting to `"auto"` enables GKE to automatically configure high-performance networking settings for nodes with accelerators (like GPUs). GKE manages the underlying resources (like VPCs and subnets) for this configuration.
 
 <a name="nested_additional_node_network_configs"></a>The `additional_node_network_configs` block supports:
 
@@ -250,6 +257,10 @@ cluster.
 * `disabled` (Required) - Whether pod cidr overprovision is disabled.
 
 <a name="nested_node_drain_config"></a>The `node_drain_config` block supports:
+
+* `grace_termination_duration` - (Optional) The duration of the grace termination period for node drain.
+
+* `pdb_timeout_duration` - (Optional) The duration of the PDB timeout period for node drain.
 
 * `respect_pdb_during_node_pool_deletion` - (Optional) Whether to respect PodDisruptionBudget policy during node pool deletion.
 

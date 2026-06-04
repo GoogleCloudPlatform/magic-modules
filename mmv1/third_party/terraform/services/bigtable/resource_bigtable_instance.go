@@ -54,6 +54,7 @@ func ResourceBigtableInstance() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			resourceBigtableInstanceClusterReorderTypeList,
 			resourceBigtableInstanceUniqueClusterID,
@@ -224,13 +225,22 @@ func ResourceBigtableInstance() *schema.Resource {
 				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
-
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 			"tags": {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				ForceNew:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `A map of Resource Manager Tags. Keys can be either the numeric tag key ID (tagKeys/123) or the namespaced name (project/tag-key). Values can be the numeric tag value ID (tagValues/456) or the namespaced value (project/tag-key/tag-value). The field is ignored when empty.`,
+			},
+			"edition": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "ENTERPRISE",
+				ValidateFunc: validation.StringInSlice([]string{"ENTERPRISE", "ENTERPRISE_PLUS"}, false),
+				Description:  `The edition of the instance. One of "ENTERPRISE" or "ENTERPRISE_PLUS". Defaults to "ENTERPRISE".`,
 			},
 		},
 		UseJSONNumber: true,
@@ -276,12 +286,21 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		conf.InstanceType = bigtable.PRODUCTION
 	}
 
+	if v, ok := d.GetOk("edition"); ok {
+		switch v.(string) {
+		case "ENTERPRISE":
+			conf.Edition = bigtable.Enterprise
+		case "ENTERPRISE_PLUS":
+			conf.Edition = bigtable.EnterprisePlus
+		}
+	}
+
 	conf.Clusters, err = expandBigtableClusters(d.Get("cluster").([]interface{}), conf.InstanceID, config)
 	if err != nil {
 		return err
 	}
 
-	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
+	c, err := NewClientFactory(config, userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -316,7 +335,7 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
+	c, err := NewClientFactory(config, userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -386,6 +405,19 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	// Don't set instance_type: we don't want to detect drift on it because it can
 	// change under-the-hood.
 
+	var edition string
+	switch instance.Edition {
+	case bigtable.Enterprise:
+		edition = "ENTERPRISE"
+	case bigtable.EnterprisePlus:
+		edition = "ENTERPRISE_PLUS"
+	default:
+		edition = "ENTERPRISE"
+	}
+	if err := d.Set("edition", edition); err != nil {
+		return fmt.Errorf("Error setting edition: %s", err)
+	}
+
 	// Explicitly set virtual fields to default values if unset
 	if _, ok := d.GetOkExists("force_destroy"); !ok {
 		if err := d.Set("force_destroy", false); err != nil {
@@ -393,10 +425,19 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		}
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceBigtableInstance) {
+		return ResourceBigtableInstance().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -409,7 +450,7 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
+	c, err := NewClientFactory(config, userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -434,6 +475,15 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		conf.InstanceType = bigtable.DEVELOPMENT
 	case "PRODUCTION":
 		conf.InstanceType = bigtable.PRODUCTION
+	}
+
+	if d.HasChange("edition") {
+		switch d.Get("edition").(string) {
+		case "ENTERPRISE":
+			conf.Edition = bigtable.Enterprise
+		case "ENTERPRISE_PLUS":
+			conf.Edition = bigtable.EnterprisePlus
+		}
 	}
 
 	conf.Clusters, err = expandBigtableClusters(d.Get("cluster").([]interface{}), conf.InstanceID, config)
@@ -464,6 +514,13 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Deleting BigTable instance %q", d.Id())
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
 	}
@@ -480,7 +537,7 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
+	c, err := NewClientFactory(config, userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -491,7 +548,7 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 
 	// If force_destroy is set, delete all backups and unblock deletion of the instance
 	if d.Get("force_destroy").(bool) {
-		adminClient, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, name)
+		adminClient, err := NewClientFactory(config, userAgent).NewAdminClient(project, name)
 		if err != nil {
 			return fmt.Errorf("error starting admin client. %s", err)
 		}

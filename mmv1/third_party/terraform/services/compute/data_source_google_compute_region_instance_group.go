@@ -1,0 +1,200 @@
+package compute
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+func DataSourceGoogleComputeRegionInstanceGroup() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourceComputeRegionInstanceGroupRead,
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
+			"instances": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"instance": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+
+						"status": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+
+						"named_ports": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"port": {
+										Type:     schema.TypeInt,
+										Required: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
+			"project": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
+			"self_link": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
+			"size": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+		},
+	}
+}
+
+func dataSourceComputeRegionInstanceGroupRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	project, region, name, err := tpgresource.GetRegionalResourcePropertiesFromSelfLinkOrSchema(d, config)
+	if err != nil {
+		return err
+	}
+	id := fmt.Sprintf("projects/%s/regions/%s/instanceGroups/%s", project, region, name)
+
+	instanceGroupUrl := fmt.Sprintf("%sprojects/%s/regions/%s/instanceGroups/%s", transport_tpg.BaseUrl(Product, config), project, region, name)
+	instanceGroup, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    instanceGroupUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Region Instance Group %q", name), id)
+	}
+
+	listInstancesUrl := fmt.Sprintf("%sprojects/%s/regions/%s/instanceGroups/%s/listInstances", transport_tpg.BaseUrl(Product, config), project, region, name)
+	members, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    listInstancesUrl,
+		UserAgent: userAgent,
+		Body:      map[string]any{"instanceState": "ALL"},
+	})
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			// The resource doesn't have any instances, which is okay.
+			if err := d.Set("instances", nil); err != nil {
+				return fmt.Errorf("Error setting instances: %s", err)
+			}
+		} else {
+			return fmt.Errorf("Error reading RegionInstanceGroup Members: %s", err)
+		}
+	} else {
+		if err := d.Set("instances", flattenRegionInstanceGroupInstances(members["items"])); err != nil {
+			return fmt.Errorf("Error setting instances: %s", err)
+		}
+	}
+	d.SetId(id)
+	if err := d.Set("self_link", instanceGroup["selfLink"]); err != nil {
+		return fmt.Errorf("Error setting self_link: %s", err)
+	}
+	if err := d.Set("name", name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("region", region); err != nil {
+		return fmt.Errorf("Error setting region: %s", err)
+	}
+	return nil
+}
+
+func flattenRegionInstanceGroupInstances(insts interface{}) []map[string]interface{} {
+	rawInsts, ok := insts.([]interface{})
+	if !ok {
+		return nil
+	}
+	result := make([]map[string]interface{}, 0, len(rawInsts))
+	log.Printf("There were %d instances.\n", len(rawInsts))
+	for _, rawInst := range rawInsts {
+		inst, ok := rawInst.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		result = append(result, map[string]interface{}{
+			"instance":    inst["instance"],
+			"named_ports": flattenRegionInstanceGroupNamedPorts(inst["namedPorts"]),
+			"status":      inst["status"],
+		})
+	}
+	return result
+}
+
+func flattenRegionInstanceGroupNamedPorts(namedPorts interface{}) []map[string]interface{} {
+	rawPorts, ok := namedPorts.([]interface{})
+	if !ok {
+		return nil
+	}
+	result := make([]map[string]interface{}, 0, len(rawPorts))
+	for _, rawPort := range rawPorts {
+		namedPort, ok := rawPort.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		result = append(result, map[string]interface{}{
+			"name": namedPort["name"],
+			"port": namedPort["port"],
+		})
+	}
+	return result
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_region_instance_group",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeRegionInstanceGroup(),
+	}.Register()
+}

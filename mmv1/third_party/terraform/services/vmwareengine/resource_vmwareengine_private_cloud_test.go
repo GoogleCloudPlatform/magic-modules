@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/vmwareengine"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -434,7 +435,7 @@ func testAccCheckVmwareenginePrivateCloudDestroyProducer(t *testing.T) func(s *t
 				continue
 			}
 			config := acctest.GoogleProviderConfig(t)
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{VmwareengineBasePath}}projects/{{project}}/locations/{{location}}/privateClouds/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(vmwareengine.Product, config)+"projects/{{project}}/locations/{{location}}/privateClouds/{{name}}")
 			if err != nil {
 				return err
 			}

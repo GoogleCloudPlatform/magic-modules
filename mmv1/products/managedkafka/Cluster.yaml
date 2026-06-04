@@ -61,7 +61,7 @@ examples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-managedkafka.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     external_providers: ["time"]
 parameters:
   - name: 'location'

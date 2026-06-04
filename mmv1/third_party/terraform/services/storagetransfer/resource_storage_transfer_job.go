@@ -122,6 +122,7 @@ func ResourceStorageTransferJob() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -442,6 +443,9 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Computed:    true,
 				Description: `When the Transfer Job was deleted.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1021,7 +1025,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			createCall := config.NewStorageTransferClient(userAgent).TransferJobs.Create(transferJob)
+			createCall := NewClient(config, userAgent).TransferJobs.Create(transferJob)
 			if config.UserProjectOverride {
 				createCall.Header().Add("X-Goog-User-Project", billingProject)
 			}
@@ -1064,7 +1068,7 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 	}
 
 	name := d.Get("name").(string)
-	readCall := config.NewStorageTransferClient(userAgent).TransferJobs.Get(name, project)
+	readCall := NewClient(config, userAgent).TransferJobs.Get(name, project)
 	if config.UserProjectOverride {
 		readCall.Header().Add("X-Goog-User-Project", billingProject)
 	}
@@ -1131,10 +1135,19 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceStorageTransferJob) {
+		return ResourceStorageTransferJob().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1233,7 +1246,7 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 		billingProject = bp
 	}
 
-	updateCall := config.NewStorageTransferClient(userAgent).TransferJobs.Patch(d.Get("name").(string), updateRequest)
+	updateCall := NewClient(config, userAgent).TransferJobs.Patch(d.Get("name").(string), updateRequest)
 	if config.UserProjectOverride {
 		updateCall.Header().Add("X-Goog-User-Project", billingProject)
 	}
@@ -1248,6 +1261,13 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1284,7 +1304,7 @@ func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) 
 	// Update transfer job with status set to DELETE
 	log.Printf("[DEBUG] Setting status to DELETE for: %v\n\n", transferJobName)
 	err = retry.Retry(1*time.Minute, func() *retry.RetryError {
-		deleteCall := config.NewStorageTransferClient(userAgent).TransferJobs.Patch(transferJobName, updateRequest)
+		deleteCall := NewClient(config, userAgent).TransferJobs.Patch(transferJobName, updateRequest)
 		if config.UserProjectOverride {
 			deleteCall.Header().Add("X-Goog-User-Project", billingProject)
 		}

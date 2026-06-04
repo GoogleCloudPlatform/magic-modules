@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	iamcredentials_tpg "github.com/hashicorp/terraform-provider-google/google/services/iamcredentials"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -92,7 +93,7 @@ func dataSourceGoogleServiceAccountJwtRead(d *schema.ResourceData, meta interfac
 		Delegates: tpgresource.ConvertStringSet(d.Get("delegates").(*schema.Set)),
 	}
 
-	service := config.NewIamCredentialsClient(userAgent)
+	service := iamcredentials_tpg.NewClient(config, userAgent)
 
 	jwtResponse, err := service.Projects.ServiceAccounts.SignJwt(name, jwtRequest).Do()
 

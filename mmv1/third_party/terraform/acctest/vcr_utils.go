@@ -24,9 +24,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/fwprovider"
 	tpgprovider "github.com/hashicorp/terraform-provider-google/google/provider"
-	"github.com/hashicorp/terraform-provider-google/google/services/compute"
-	"github.com/hashicorp/terraform-provider-google/google/services/pubsublite"
-	"github.com/hashicorp/terraform-provider-google/google/services/sql"
+
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -175,6 +173,11 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		if IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING" {
 			re := regexp.MustCompile(`create_duration = "\d+[sm]"`)
 			s.Config = re.ReplaceAllString(s.Config, `create_duration = "1s"`)
+		}
+		// deletion_policy is a universal virtual attribute for managing the behavior of resources when a delete is attempted
+		// in Terraform. Because it is a virtual attribute, it needs to be excluded from these ImportStateVerifys.
+		if s.ImportStateVerify && !slices.Contains(s.ImportStateVerifyIgnore, "deletion_policy") {
+			s.ImportStateVerifyIgnore = append(s.ImportStateVerifyIgnore, "deletion_policy")
 		}
 		steps = append(steps, s)
 	}
@@ -371,13 +374,13 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 func (p *frameworkTestProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	ds := p.FrameworkProvider.DataSources(ctx)
 	ds = append(ds, fwprovider.NewGoogleProviderConfigPluginFrameworkDataSource) // google_provider_config_plugin_framework
-	ds = append(ds, compute.NewComputeNetworkFWDataSource)                       // google_fw_compute_network
+
 	return ds
 }
 
 func (p *frameworkTestProvider) Resources(ctx context.Context) []func() fwResource.Resource {
 	r := p.FrameworkProvider.Resources(ctx)
-	r = append(r, pubsublite.NewGooglePubsubLiteReservationFWResource, sql.NewSQLUserFWResource) // google_fwprovider_pubsub_lite_reservation
+
 	return r
 }
 

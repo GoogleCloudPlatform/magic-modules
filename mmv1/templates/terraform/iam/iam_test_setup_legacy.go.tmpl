@@ -1,6 +1,6 @@
 {{- define "IamTestSetup" }}
 {{- if $.FirstTestExample.BootstrapIam }}
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 {{- range $iam := $.FirstTestExample.BootstrapIam }}
 		{
 			Member: "{{$iam.Member}}",

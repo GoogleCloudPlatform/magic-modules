@@ -35,6 +35,7 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
+include_in_tgc_next: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20

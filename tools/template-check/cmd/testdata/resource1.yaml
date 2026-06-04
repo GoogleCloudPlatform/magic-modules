@@ -58,3 +58,10 @@ properties:
     type: String
     description: Service id of the App Engine application
     required: true
+
+samples:
+  - name: "sample1"
+    steps:
+      - name: "step1"
+      - name: "step2"
+        config_path: "custom/path/to/step2.tf.tmpl"

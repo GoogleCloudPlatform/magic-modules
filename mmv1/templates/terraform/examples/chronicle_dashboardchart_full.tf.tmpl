@@ -1,6 +1,5 @@
 # A Native Dashboard is required to create a Dashboard Chart.
 resource "google_chronicle_native_dashboard" "my_dashboard" {
-  provider     = google-beta
   location     = "us" # Example region, adjust as necessary
   instance     = "{{index $.TestEnvVars "chronicle_id"}}"
   display_name = "{{index $.Vars "dashboard_name"}}"
@@ -27,7 +26,6 @@ resource "google_chronicle_native_dashboard" "my_dashboard" {
 }
 
 resource "google_chronicle_dashboard_chart" "my_chart" {
-  provider         = google-beta
   location         = google_chronicle_native_dashboard.my_dashboard.location
   instance         = google_chronicle_native_dashboard.my_dashboard.instance
   native_dashboard = google_chronicle_native_dashboard.my_dashboard.name
@@ -128,7 +126,6 @@ resource "google_chronicle_dashboard_chart" "my_chart" {
 }
 
 resource "google_chronicle_dashboard_chart" "button_tile" {
-  provider         = google-beta
   location         = google_chronicle_native_dashboard.my_dashboard.location
   instance         = google_chronicle_native_dashboard.my_dashboard.instance
   native_dashboard = google_chronicle_native_dashboard.my_dashboard.name
@@ -160,7 +157,6 @@ resource "google_chronicle_dashboard_chart" "button_tile" {
 }
 
 resource "google_chronicle_dashboard_chart" "markdown_tile" {
-  provider         = google-beta
   location         = google_chronicle_native_dashboard.my_dashboard.location
   instance         = google_chronicle_native_dashboard.my_dashboard.instance
   native_dashboard = google_chronicle_native_dashboard.my_dashboard.name

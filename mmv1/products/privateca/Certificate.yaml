@@ -120,7 +120,7 @@ properties:
       "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
       fractional digits, terminated by 's'. Example: "3.5s".
     immutable: true
- # 10 years
+    # 10 years
     default_value: "315360000s"
   - name: 'revocationDetails'
     type: NestedObject
