@@ -4,7 +4,18 @@ data "google_filestore_instance" "test_instance" {
   location = "{{index $.TestEnvVars "zone"}}"
 }
 
-# Create a VmwareEngine Datastore, referencing the filestore instance
+# Create a VmwareEngine Datastore, referencing the filestore instance.
+# Note: To mount this datastore on a vSphere cluster, configure the `datastore_mount_config`
+# block within the `google_vmwareengine_cluster` resource. For example:
+#
+#  datastore_mount_config {
+#    datastore        = google_vmwareengine_datastore.example_filestore.id
+#    datastore_network {
+#      subnet           = google_vmwareengine_subnet.example_subnet.id
+#      connection_count = 4
+#      mtu              = 1500
+#    }
+#  }
 resource "google_vmwareengine_datastore" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.Vars "resource_name"}}"
   location    = "{{index $.TestEnvVars "zone"}}"

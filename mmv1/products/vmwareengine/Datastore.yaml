@@ -13,7 +13,24 @@
 
 ---
 name: Datastore
-description: A datastore resource that can be mounted on a privatecloud cluster
+description: |
+  A datastore resource that can be mounted on a VMware Engine cluster.
+
+  ~> **Note:** To mount a datastore on a VMware Engine cluster, configure the
+  `datastore_mount_config` block within the `google_vmwareengine_cluster` resource.
+  A datastore cannot be mounted directly using the `google_vmwareengine_datastore` resource.
+
+  If you are mounting a datastore that was already created outside of Terraform (or in a
+  separate Terraform configuration), reference it directly by its full resource URI in the
+  `datastore_mount_config.datastore` field inside the cluster resource:
+  ```terraform
+  datastore_mount_config {
+    datastore = "projects/PROJECT_ID/locations/LOCATION/datastores/DATASTORE_ID"
+    datastore_network {
+      # ...
+    }
+  }
+  ```
 base_url: projects/{{project}}/locations/{{location}}/datastores
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/datastores/{{name}}
