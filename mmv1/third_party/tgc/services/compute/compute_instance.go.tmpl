@@ -145,7 +145,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	}
 
 	// Create the instance information
-	return &compute.Instance{
+	inst := &compute.Instance{
 		CanIpForward:            d.Get("can_ip_forward").(bool),
 		Description:             d.Get("description").(string),
 		Disks:                   disks,
@@ -163,10 +163,18 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		DeletionProtection:      d.Get("deletion_protection").(bool),
 		Hostname:                d.Get("hostname").(string),
 		ForceSendFields:         []string{"CanIpForward", "DeletionProtection"},
-		ShieldedInstanceConfig:  expandShieldedVmConfigs(d),
 		DisplayDevice:           expandDisplayDevice(d),
 		AdvancedMachineFeatures: expandAdvancedMachineFeatures(d),
-	}, nil
+	}
+	if sicMap := expandShieldedVmConfigs(d); sicMap != nil {
+		inst.ShieldedInstanceConfig = &compute.ShieldedInstanceConfig{
+			EnableSecureBoot:          sicMap["enableSecureBoot"].(bool),
+			EnableVtpm:                sicMap["enableVtpm"].(bool),
+			EnableIntegrityMonitoring: sicMap["enableIntegrityMonitoring"].(bool),
+			ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
+		}
+	}
+	return inst, nil
 }
 
 func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
