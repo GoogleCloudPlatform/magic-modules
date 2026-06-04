@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -21,6 +22,14 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+// apigeeSharedflowNormalizeOrgId strips the "organizations/" prefix from org_id
+// if present. This allows users to pass either google_apigee_organization.id
+// (which returns "organizations/<project-id>") or a bare project ID without
+// producing a doubled "organizations/organizations/..." in the API URL.
+func apigeeSharedflowNormalizeOrgId(v interface{}) string {
+	return strings.TrimPrefix(v.(string), "organizations/")
+}
 
 func ResourceApigeeSharedFlow() *schema.Resource {
 	return &schema.Resource{
@@ -64,6 +73,11 @@ func ResourceApigeeSharedFlow() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: `The Apigee Organization name associated with the Apigee instance.`,
+				// Normalize org_id by stripping the "organizations/" prefix so users
+				// may pass google_apigee_organization.id ("organizations/<project-id>")
+				// or a bare project ID. StateFunc stores the normalized value, so a
+				// config using either form matches state with no diff.
+				StateFunc: apigeeSharedflowNormalizeOrgId,
 			},
 			"latest_revision_id": {
 				Type:        schema.TypeString,
