@@ -1,7 +1,6 @@
 resource "google_project" "psc_other_project" {
   project_id      = "tf-test-psc-%{random_suffix}"
   name            = "tf-test-psc-%{random_suffix}"
-  # These vars are typically available in the test environment
   org_id          = "{{index $.TestEnvVars "org_id"}}"
   deletion_policy = "DELETE"
 }
