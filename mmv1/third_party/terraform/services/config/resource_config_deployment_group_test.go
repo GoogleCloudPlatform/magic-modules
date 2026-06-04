@@ -3,12 +3,12 @@
 package config_test
 
 import (
-"fmt"
-"strings"
-"testing"
+	"fmt"
+	"strings"
+	"testing"
 
-"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -19,42 +19,42 @@ import (
 )
 
 func TestAccConfigDeploymentGroup_basic(t *testing.T) {
-t.Parallel()
+	t.Parallel()
 
-context := map[string]interface{}{
-"project":       envvar.GetTestProjectFromEnv(),
-"random_suffix": acctest.RandString(t, 10),
-}
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-acctest.VcrTest(t, resource.TestCase{
-PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-CheckDestroy:             testAccCheckConfigDeploymentGroupDestroyProducer(t),
-Steps: []resource.TestStep{
-{
-Config: testAccConfigDeploymentGroup_basic(context),
-},
-{
-ResourceName:            "google_config_deployment_group.basic",
-ImportState:             true,
-ImportStateVerify:       true,
-ImportStateVerifyIgnore: []string{"location", "labels", "annotations"},
-},
-{
-Config: testAccConfigDeploymentGroup_update(context),
-},
-{
-ResourceName:            "google_config_deployment_group.basic",
-ImportState:             true,
-ImportStateVerify:       true,
-ImportStateVerifyIgnore: []string{"location", "labels", "annotations"},
-},
-},
-})
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckConfigDeploymentGroupDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfigDeploymentGroup_basic(context),
+			},
+			{
+				ResourceName:            "google_config_deployment_group.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "labels", "annotations"},
+			},
+			{
+				Config: testAccConfigDeploymentGroup_update(context),
+			},
+			{
+				ResourceName:            "google_config_deployment_group.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "labels", "annotations"},
+			},
+		},
+	})
 }
 
 func testAccConfigDeploymentGroup_basic(context map[string]interface{}) string {
-return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_config_deployment_group" "basic" {
   name     = "tf-test-dg-%{random_suffix}"
   location = "us-central1"
@@ -67,7 +67,7 @@ resource "google_config_deployment_group" "basic" {
 }
 
 func testAccConfigDeploymentGroup_update(context map[string]interface{}) string {
-return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_config_deployment_group" "basic" {
   name     = "tf-test-dg-%{random_suffix}"
   location = "us-central1"
@@ -84,48 +84,48 @@ resource "google_config_deployment_group" "basic" {
 }
 
 func testAccCheckConfigDeploymentGroupDestroyProducer(t *testing.T) resource.TestCheckFunc {
-return func(s *terraform.State) error {
-config := acctest.GoogleProviderConfig(t)
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
 
-for _, rs := range s.RootModule().Resources {
-if rs.Type != "google_config_deployment_group" {
-continue
-}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_config_deployment_group" {
+				continue
+			}
 
-if rs.Primary.ID == "" {
-return fmt.Errorf("Unable to verify delete of deployment group ID is empty")
-}
+			if rs.Primary.ID == "" {
+				return fmt.Errorf("Unable to verify delete of deployment group ID is empty")
+			}
 
-project, err := acctest.GetTestProject(rs.Primary, config)
-if err != nil {
-return err
-}
+			project, err := acctest.GetTestProject(rs.Primary, config)
+			if err != nil {
+				return err
+			}
 
-parts := strings.Split(rs.Primary.ID, "/")
-deployment_group_id := parts[len(parts)-1]
-location := rs.Primary.Attributes["location"]
+			parts := strings.Split(rs.Primary.ID, "/")
+			deployment_group_id := parts[len(parts)-1]
+			location := rs.Primary.Attributes["location"]
 
-url := fmt.Sprintf("https://config.googleapis.com/v1/projects/%s/locations/%s/deploymentGroups/%s", project, location, deployment_group_id)
-_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-Config:    config,
-Method:    "GET",
-Project:   project,
-RawURL:    url,
-UserAgent: config.UserAgent,
-})
-if err != nil {
-if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
-return nil
-} else if ok {
-return fmt.Errorf("Error making GCP platform call: http code error : %d, http message error: %s", gerr.Code, gerr.Message)
-}
-return fmt.Errorf("Error making GCP platform call: %s", err.Error())
-}
-return fmt.Errorf("Deployment group still exists")
-}
+			url := fmt.Sprintf("https://config.googleapis.com/v1/projects/%s/locations/%s/deploymentGroups/%s", project, location, deployment_group_id)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil {
+				if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+					return nil
+				} else if ok {
+					return fmt.Errorf("Error making GCP platform call: http code error : %d, http message error: %s", gerr.Code, gerr.Message)
+				}
+				return fmt.Errorf("Error making GCP platform call: %s", err.Error())
+			}
+			return fmt.Errorf("Deployment group still exists")
+		}
 
-	return nil
-}
+		return nil
+	}
 }
 
 func TestAccConfigDeploymentGroup_deploymentUnits(t *testing.T) {
@@ -359,4 +359,3 @@ resource "google_config_deployment_group" "basic" {
 }
 `, context)
 }
-

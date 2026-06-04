@@ -1,4 +1,32 @@
 resource "google_config_deployment_group" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "deployment_group_name"}}"
   location = "us-central1"
+
+  deployment_units {
+    id           = "unit-1"
+    deployment   = google_config_deployment.deployment.id
+  }
+}
+
+resource "google_config_deployment" "deployment" {
+  name            = "{{index $.Vars "deployment_name"}}"
+  location        = "us-central1"
+  service_account = "projects/{{$.Vars.project}}/serviceAccounts/{{index $.Vars "service_account_email"}}"
+
+  terraform_blueprint {
+    git_source {
+      repo      = "https://github.com/terraform-google-modules/terraform-google-network"
+      directory = "modules/vpc"
+      ref       = "main"
+    }
+
+    input_values {
+      variable_name = "project_id"
+      input_value   = "{{$.Vars.project}}"
+    }
+    input_values {
+      variable_name = "network_name"
+      input_value   = "my-network"
+    }
+  }
 }

@@ -43,6 +43,8 @@ examples:
     exclude_test: true # Acceptance tests are handwritten due to complex prerequisites (IAM, deployments).
     vars:
       deployment_group_name: 'my-deployment-group'
+      deployment_name: 'my-deployment'
+      service_account_email: 'my-service-account@my-project.iam.gserviceaccount.com'
 
 virtual_fields:
   - name: 'deployment_reference_policy'
