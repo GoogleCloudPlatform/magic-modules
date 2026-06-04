@@ -195,7 +195,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
               {{- end }}
             }
           },
-{{- if $.IdentityUpgraders (not $.IsTgcCompiler) }}
+{{- if and $.IdentityUpgraders (not $.IsTgcCompiler) }}
           IdentityUpgraders: []schema.IdentityUpgrader{
 {{- range $v := $.IdentityUpgradersCount }}
               {
