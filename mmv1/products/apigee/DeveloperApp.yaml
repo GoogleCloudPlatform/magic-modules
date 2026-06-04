@@ -30,8 +30,10 @@ update_verb: "PUT"
 import_format:
   - "{{org_id}}/developers/{{developer_email}}/apps/{{name}}"
 custom_code:
+  constants: "templates/terraform/constants/apigee_developer_app.go.tmpl"
   decoder: "templates/terraform/decoders/apigee_developer_app.go.tmpl"
   custom_import: "templates/terraform/custom_import/apigee_developer_app.go.tmpl"
+  post_create: "templates/terraform/post_create/apigee_developer_app.go.tmpl"
 examples:
   - name: "apigee_developer_app_basic"
     primary_resource_id: "apigee_developer_app"
