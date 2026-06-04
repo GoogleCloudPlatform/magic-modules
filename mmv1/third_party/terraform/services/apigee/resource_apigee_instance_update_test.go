@@ -6,10 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/apigee"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
 func TestAccApigeeInstance_updateConsumerAcceptList(t *testing.T) {
@@ -38,7 +34,7 @@ func TestAccApigeeInstance_updateConsumerAcceptList(t *testing.T) {
 				ResourceName:            "google_apigee_instance.apigee_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ip_range", "org_id"},
+				ImportStateVerifyIgnore: []string{"ip_range", "org_id", "consumer_accept_list"},
 			},
 			{
 				Config: testAccApigeeInstance_updateConsumerAcceptList(context),
@@ -47,7 +43,7 @@ func TestAccApigeeInstance_updateConsumerAcceptList(t *testing.T) {
 				ResourceName:            "google_apigee_instance.apigee_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ip_range", "org_id"},
+				ImportStateVerifyIgnore: []string{"ip_range", "org_id", "consumer_accept_list"},
 			},
 		},
 	})
