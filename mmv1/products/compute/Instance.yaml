@@ -43,6 +43,10 @@ examples:
     primary_resource_id: 'default'
     vars:
       instance_name: 'my-instance'
+virtual_fields:
+  - name: 'allowStoppingForUpdate'
+    type: Boolean
+    description: 'allow stopping for update'
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -771,3 +775,19 @@ properties:
     min_version: 'beta'
     ignore_read: true
     default_value: false
+  - name: 'desiredStatus'
+    type: String
+    is_missing_in_cai: true
+    description: 'desired status'
+  - name: 'bootDisk'
+    type: NestedObject
+    description: 'boot disk'
+    properties:
+      - name: 'initializeParams'
+        type: NestedObject
+        description: 'initialize params'
+        properties:
+          - name: 'image'
+            type: String
+            is_missing_in_cai: true
+            description: 'image'
