@@ -16,7 +16,6 @@ name: 'UllMirroringEngine'
 description: |-
   A Mirroring Engine is a logical representation of the underlying infrastructure
   that is used to manage and monitor the ULL Mirroring setup.
-min_version: 'beta'
 id_format: 'projects/{{project}}/locations/{{location}}/ullMirroringEngines/{{ull_mirroring_engine_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/ullMirroringEngines'
 self_link: 'projects/{{project}}/locations/{{location}}/ullMirroringEngines/{{ull_mirroring_engine_id}}'
