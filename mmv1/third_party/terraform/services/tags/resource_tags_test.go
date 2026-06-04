@@ -1248,6 +1248,20 @@ func testAccTagsLocationTagBinding_locationTagBindingBasicExample(context map[st
 data "google_project" "project" {
 }
 
+resource "google_compute_instance" "vm" {
+  name         = "tagbinding-repro"
+  machine_type = "e2-small"
+  zone         = "us-east4-a"
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-12"
+    }
+  }
+  network_interface {
+    network = "default"
+  }
+}
+
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/${data.google_project.project.org_id}"
 	short_name = "keyname%{random_suffix}"
@@ -1265,27 +1279,9 @@ resource "google_tags_tag_value" "value" {
 	short_name  = "foo%{random_suffix}"
 	description = "For foo%{random_suffix} resources."
 }
-
-resource "google_cloud_run_service" "default" {
-	name     = "tf-test-cloudrun-srv%{random_suffix}"
-	location = "us-central1"
-  
-	template {
-	  spec {
-		containers {
-		  image = "us-docker.pkg.dev/cloudrun/container/hello"
-		}
-	  }
-	}
-  
-	traffic {
-	  percent         = 100
-	  latest_revision = true
-	}
-}
   
 resource "google_tags_location_tag_binding" "binding" {
-	parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
+	parent    = "//compute.googleapis.com/projects/${data.google_project.project.number}/zones/us-east4-a/instances/${google_compute_instance.vm.instance_id}"
 	tag_value = google_tags_tag_value.value.id
 	location  = "us-central1"
 }
