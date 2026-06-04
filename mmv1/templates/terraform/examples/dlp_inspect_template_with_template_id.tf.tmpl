@@ -1,6 +1,6 @@
 resource "google_data_loss_prevention_inspect_template" "{{$.PrimaryResourceId}}" {
   parent = "projects/{{index $.TestEnvVars "project"}}"
-  template_id = "{{index $.ResourceIdVars "name"}}"
+  template_id = "{{index $.Vars "name"}}"
 
   inspect_config {
     info_types {

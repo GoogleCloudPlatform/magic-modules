@@ -1,6 +1,6 @@
 resource "google_discovery_engine_data_connector" "jira-with-actions" {
   location                     = "global"
-  collection_id                = "{{index $.ResourceIdVars "collection_id"}}"
+  collection_id                = "{{index $.Vars "collection_id"}}"
   collection_display_name      = "Jira Federated"
   data_source                  = "jira"
   data_source_version          = 3

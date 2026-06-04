@@ -12,77 +12,67 @@
 # limitations under the License.
 
 ---
-name: InspectTemplate
+name: 'InspectTemplate'
 description: |
   An inspect job template.
 references:
   guides:
-    Official Documentation: https://cloud.google.com/dlp/docs/creating-templates-inspect
-  api: https://cloud.google.com/dlp/docs/reference/rest/v2/projects.inspectTemplates
+    'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-templates-inspect'
+  api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.inspectTemplates'
 docs:
+id_format: '{{parent}}/inspectTemplates/{{name}}'
 base_url: '{{parent}}/inspectTemplates'
 self_link: '{{parent}}/inspectTemplates/{{name}}'
 create_url: '{{parent}}/inspectTemplates'
+update_verb: 'PATCH'
 update_mask: true
-update_verb: PATCH
-id_format: '{{parent}}/inspectTemplates/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/wrap_object_with_template_id.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/wrap_object.go.tmpl'
+  decoder: 'templates/terraform/decoders/dlp_template_id.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/dlp_import.go.tmpl'
 # Skip sweeper due to non-standard URL
 exclude_sweeper: true
-custom_code:
-  encoder: templates/terraform/encoders/wrap_object_with_template_id.go.tmpl
-  update_encoder: templates/terraform/encoders/wrap_object.go.tmpl
-  decoder: templates/terraform/decoders/dlp_template_id.go.tmpl
-  custom_import: templates/terraform/custom_import/dlp_import.go.tmpl
-samples:
-  - name: dlp_inspect_template_basic
-    primary_resource_id: basic
-    steps:
-      - name: dlp_inspect_template_basic
-        resource_id_vars:
-          template: temp
-        test_vars_overrides:
-          # for backward compatible
-          template: '"temp" + randomSuffix'
-        test_env_vars:
-          project: PROJECT_NAME
-  - name: dlp_inspect_template_custom_type
-    primary_resource_id: custom
-    steps:
-      - name: dlp_inspect_template_custom_type
-        resource_id_vars:
-          template: temp
-        test_vars_overrides:
-          # for backward compatible
-          template: '"temp" + randomSuffix'
-        test_env_vars:
-          project: PROJECT_NAME
-  - name: dlp_inspect_template_custom_type_surrogate
-    primary_resource_id: custom_type_surrogate
-    steps:
-      - name: dlp_inspect_template_custom_type_surrogate
-        test_env_vars:
-          project: PROJECT_NAME
-  - name: dlp_inspect_template_with_template_id
-    primary_resource_id: with_template_id
-    exclude_basic_doc: true
-    steps:
-      - name: dlp_inspect_template_with_template_id
-        resource_id_vars:
-          name: my-template
-        test_env_vars:
-          project: PROJECT_NAME
-  - name: dlp_inspect_template_max_infotype_per_finding_default
-    primary_resource_id: max_infotype_per_finding_default
-    steps:
-      - name: dlp_inspect_template_max_infotype_per_finding_default
-        test_env_vars:
-          project: PROJECT_NAME
+examples:
+  - name: 'dlp_inspect_template_basic'
+    primary_resource_id: 'basic'
+    vars:
+      template: 'temp'
+    test_vars_overrides:
+      # for backward compatible
+      template: '"temp" + randomSuffix'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'dlp_inspect_template_custom_type'
+    primary_resource_id: 'custom'
+    vars:
+      template: 'temp'
+    test_vars_overrides:
+      # for backward compatible
+      template: '"temp" + randomSuffix'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'dlp_inspect_template_custom_type_surrogate'
+    primary_resource_id: 'custom_type_surrogate'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'dlp_inspect_template_with_template_id'
+    primary_resource_id: 'with_template_id'
+    vars:
+      name: 'my-template'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    exclude_docs: true
+  - name: 'dlp_inspect_template_max_infotype_per_finding_default'
+    primary_resource_id: 'max_infotype_per_finding_default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 parameters:
-  - name: parent
+  - name: 'parent'
     type: String
     description: |
       The parent of the inspect template in any of the following formats:
@@ -95,21 +85,21 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: name
+  - name: 'name'
     type: String
     description: |
       The resource name of the inspect template. Set by the server.
     output: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
-  - name: description
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'description'
     type: String
     description: |
       A description of the inspect template.
-  - name: displayName
+  - name: 'displayName'
     type: String
     description: |
       User set display name of the inspect template.
-  - name: templateId
+  - name: 'templateId'
     type: String
     description: |
       The template id can contain uppercase and lowercase letters, numbers, and hyphens;
@@ -118,82 +108,88 @@ properties:
     url_param_only: true
     immutable: true
     default_from_api: true
-  - name: inspectConfig
+  - name: 'inspectConfig'
     type: NestedObject
     description: The core content of the template.
     properties:
-      - name: excludeInfoTypes
+      - name: 'excludeInfoTypes'
         type: Boolean
         description: When true, excludes type information of the findings.
-      - name: includeQuote
+      - name: 'includeQuote'
         type: Boolean
-        description: When true, a contextual quote from the data that triggered a finding is included in the response.
-      - name: minLikelihood
+        description:
+          When true, a contextual quote from the data that triggered a finding
+          is included in the response.
+      - name: 'minLikelihood'
         type: Enum
         description: |
           Only returns findings equal or above this threshold. See https://cloud.google.com/dlp/docs/likelihood for more info
-        default_value: POSSIBLE
+        default_value: "POSSIBLE"
         enum_values:
-          - VERY_UNLIKELY
-          - UNLIKELY
-          - POSSIBLE
-          - LIKELY
-          - VERY_LIKELY
-      - name: limits
+          - 'VERY_UNLIKELY'
+          - 'UNLIKELY'
+          - 'POSSIBLE'
+          - 'LIKELY'
+          - 'VERY_LIKELY'
+      - name: 'limits'
         type: NestedObject
         description: Configuration to control the number of findings returned.
         properties:
-          - name: maxFindingsPerItem
+          - name: 'maxFindingsPerItem'
             type: Integer
-            description: Max number of findings that will be returned for each item scanned. The maximum returned is 2000.
+            description:
+              Max number of findings that will be returned for each item
+              scanned. The maximum returned is 2000.
             required: true
-          - name: maxFindingsPerRequest
+          - name: 'maxFindingsPerRequest'
             type: Integer
-            description: Max number of findings that will be returned per request/job. The maximum returned is 2000.
+            description:
+              Max number of findings that will be returned per request/job. The
+              maximum returned is 2000.
             required: true
-          - name: maxFindingsPerInfoType
+          - name: 'maxFindingsPerInfoType'
             type: Array
             description: |
               Configuration of findings limit given for specified infoTypes.
             item_type:
               type: NestedObject
               properties:
-                - name: infoType
+                - name: 'infoType'
                   type: NestedObject
                   description: |
                     Type of information the findings limit applies to. Only one limit per infoType should be provided. If InfoTypeLimit does
                     not have an infoType, the DLP API applies the limit against all infoTypes that are found but not
                     specified in another InfoTypeLimit.
                   properties:
-                    - name: name
+                    - name: 'name'
                       type: String
                       description: |
                         Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                         at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
                       required: true
-                    - name: version
+                    - name: 'version'
                       type: String
                       description: |
                         Version name for this InfoType.
-                    - name: sensitivityScore
+                    - name: 'sensitivityScore'
                       type: NestedObject
                       description: |
                         Optional custom sensitivity for this InfoType. This only applies to data profiling.
                       properties:
-                        - name: score
+                        - name: 'score'
                           type: Enum
                           description: |
                             The sensitivity score applied to the resource.
                           required: true
                           enum_values:
-                            - SENSITIVITY_LOW
-                            - SENSITIVITY_MODERATE
-                            - SENSITIVITY_HIGH
-                - name: maxFindings
+                            - 'SENSITIVITY_LOW'
+                            - 'SENSITIVITY_MODERATE'
+                            - 'SENSITIVITY_HIGH'
+                - name: 'maxFindings'
                   type: Integer
                   description: Max findings limit for the given infoType.
                   required: true
-      - name: infoTypes
+      - name: 'infoTypes'
         type: Array
         description: |
           Restricts what infoTypes to look for. The values must correspond to InfoType values returned by infoTypes.list
@@ -204,31 +200,31 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: name
+            - name: 'name'
               type: String
               description: |
                 Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                 at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
               required: true
-            - name: version
+            - name: 'version'
               type: String
               description: |
                 Version of the information type to use. By default, the version is set to stable
-            - name: sensitivityScore
+            - name: 'sensitivityScore'
               type: NestedObject
               description: |
                 Optional custom sensitivity for this InfoType. This only applies to data profiling.
               properties:
-                - name: score
+                - name: 'score'
                   type: Enum
                   description: |
                     The sensitivity score applied to the resource.
                   required: true
                   enum_values:
-                    - SENSITIVITY_LOW
-                    - SENSITIVITY_MODERATE
-                    - SENSITIVITY_HIGH
-      - name: contentOptions
+                    - 'SENSITIVITY_LOW'
+                    - 'SENSITIVITY_MODERATE'
+                    - 'SENSITIVITY_HIGH'
+      - name: 'contentOptions'
         type: Array
         description: |
           List of options defining data content to scan. If empty, text, images, and other content will be included.
@@ -238,9 +234,9 @@ properties:
             This field only has a name and description because of MM
             limitations. It should not appear in downstreams.
           enum_values:
-            - CONTENT_TEXT
-            - CONTENT_IMAGE
-      - name: ruleSet
+            - 'CONTENT_TEXT'
+            - 'CONTENT_IMAGE'
+      - name: 'ruleSet'
         type: Array
         description: |
           Set of rules to apply to the findings for this InspectConfig. Exclusion rules, contained in the set are executed in the end,
@@ -248,7 +244,7 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: infoTypes
+            - name: 'infoTypes'
               type: Array
               description: |
                 List of infoTypes this rule set is applied to.
@@ -256,31 +252,31 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
-                  - name: name
+                  - name: 'name'
                     type: String
                     description: |
                       Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                       at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
                     required: true
-                  - name: version
+                  - name: 'version'
                     type: String
                     description: |
                       Version name for this InfoType.
-                  - name: sensitivityScore
+                  - name: 'sensitivityScore'
                     type: NestedObject
                     description: |
                       Optional custom sensitivity for this InfoType. This only applies to data profiling.
                     properties:
-                      - name: score
+                      - name: 'score'
                         type: Enum
                         description: |
                           The sensitivity score applied to the resource.
                         required: true
                         enum_values:
-                          - SENSITIVITY_LOW
-                          - SENSITIVITY_MODERATE
-                          - SENSITIVITY_HIGH
-            - name: rules
+                          - 'SENSITIVITY_LOW'
+                          - 'SENSITIVITY_MODERATE'
+                          - 'SENSITIVITY_HIGH'
+            - name: 'rules'
               type: Array
               description: |
                 Set of rules to be applied to infoTypes. The rules are applied in order.
@@ -288,29 +284,31 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
-                  - name: hotwordRule
+                  - name: 'hotwordRule'
                     type: NestedObject
                     description: Hotword-based detection rule.
                     properties:
-                      - name: hotwordRegex
+                      - name: 'hotwordRegex'
                         type: NestedObject
-                        description: Regular expression pattern defining what qualifies as a hotword.
+                        description:
+                          Regular expression pattern defining what qualifies as
+                          a hotword.
                         required: true
                         properties:
-                          - name: pattern
+                          - name: 'pattern'
                             type: String
                             description: |
                               Pattern defining the regular expression. Its syntax
                               (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
                             required: true
-                          - name: groupIndexes
+                          - name: 'groupIndexes'
                             type: Array
                             description: |
                               The index of the submatch to extract as findings. When not specified,
                               the entire match is returned. No more than 3 may be included.
                             item_type:
                               type: Integer
-                      - name: proximity
+                      - name: 'proximity'
                         type: NestedObject
                         description: |
                           Proximity of the finding within which the entire hotword must reside. The total length of the window cannot
@@ -320,31 +318,31 @@ properties:
                           office using the hotword regex `(xxx)`, where `xxx` is the area code in question.
                         required: true
                         properties:
-                          - name: windowBefore
+                          - name: 'windowBefore'
                             type: Integer
                             description: |
                               Number of characters before the finding to consider. Either this or window_after must be specified
-                          - name: windowAfter
+                          - name: 'windowAfter'
                             type: Integer
                             description: |
                               Number of characters after the finding to consider. Either this or window_before must be specified
-                      - name: likelihoodAdjustment
+                      - name: 'likelihoodAdjustment'
                         type: NestedObject
                         description: |
                           Likelihood adjustment to apply to all matching findings.
                         required: true
                         properties:
-                          - name: fixedLikelihood
+                          - name: 'fixedLikelihood'
                             type: Enum
                             description: |
                               Set the likelihood of a finding to a fixed value. Either this or relative_likelihood can be set.
                             enum_values:
-                              - VERY_UNLIKELY
-                              - UNLIKELY
-                              - POSSIBLE
-                              - LIKELY
-                              - VERY_LIKELY
-                          - name: relativeLikelihood
+                              - 'VERY_UNLIKELY'
+                              - 'UNLIKELY'
+                              - 'POSSIBLE'
+                              - 'LIKELY'
+                              - 'VERY_LIKELY'
+                          - name: 'relativeLikelihood'
                             type: Integer
                             description: |
                               Increase or decrease the likelihood by the specified number of levels. For example,
@@ -353,28 +351,31 @@ properties:
                               Likelihood may never drop below VERY_UNLIKELY or exceed VERY_LIKELY, so applying an
                               adjustment of 1 followed by an adjustment of -1 when base likelihood is VERY_LIKELY
                               will result in a final likelihood of LIKELY. Either this or fixed_likelihood can be set.
-                  - name: exclusionRule
+                  - name: 'exclusionRule'
                     type: NestedObject
-                    description: The rule that specifies conditions when findings of infoTypes specified in InspectionRuleSet are removed from results.
+                    description:
+                      The rule that specifies conditions when findings of
+                      infoTypes specified in InspectionRuleSet are removed from
+                      results.
                     properties:
-                      - name: matchingType
+                      - name: 'matchingType'
                         type: Enum
                         description: |
                           How the rule is applied. See the documentation for more information: https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#MatchingType
                         required: true
                         enum_values:
-                          - MATCHING_TYPE_FULL_MATCH
-                          - MATCHING_TYPE_PARTIAL_MATCH
-                          - MATCHING_TYPE_INVERSE_MATCH
-                      - name: dictionary
+                          - 'MATCHING_TYPE_FULL_MATCH'
+                          - 'MATCHING_TYPE_PARTIAL_MATCH'
+                          - 'MATCHING_TYPE_INVERSE_MATCH'
+                      - name: 'dictionary'
                         type: NestedObject
                         description: Dictionary which defines the rule.
                         properties:
-                          - name: wordList
+                          - name: 'wordList'
                             type: NestedObject
                             description: List of words or phrases to search for.
                             properties:
-                              - name: words
+                              - name: 'words'
                                 type: Array
                                 description: |
                                   Words or phrases defining the dictionary. The dictionary must contain at least one
@@ -382,36 +383,40 @@ properties:
                                 required: true
                                 item_type:
                                   type: String
-                          - name: cloudStoragePath
+                          - name: 'cloudStoragePath'
                             type: NestedObject
-                            description: Newline-delimited file of words in Cloud Storage. Only a single file is accepted.
+                            description:
+                              Newline-delimited file of words in Cloud Storage.
+                              Only a single file is accepted.
                             properties:
-                              - name: path
+                              - name: 'path'
                                 type: String
                                 description: |
                                   A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
                                 required: true
-                      - name: regex
+                      - name: 'regex'
                         type: NestedObject
                         description: Regular expression which defines the rule.
                         properties:
-                          - name: pattern
+                          - name: 'pattern'
                             type: String
                             description: |
                               Pattern defining the regular expression.
                               Its syntax (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
                             required: true
-                          - name: groupIndexes
+                          - name: 'groupIndexes'
                             type: Array
                             description: |
                               The index of the submatch to extract as findings. When not specified, the entire match is returned. No more than 3 may be included.
                             item_type:
                               type: Integer
-                      - name: excludeInfoTypes
+                      - name: 'excludeInfoTypes'
                         type: NestedObject
-                        description: Set of infoTypes for which findings would affect this rule.
+                        description:
+                          Set of infoTypes for which findings would affect this
+                          rule.
                         properties:
-                          - name: infoTypes
+                          - name: 'infoTypes'
                             type: Array
                             description: |
                               If a finding is matched by any of the infoType detectors listed here, the finding will be excluded from the scan results.
@@ -419,55 +424,57 @@ properties:
                             item_type:
                               type: NestedObject
                               properties:
-                                - name: name
+                                - name: 'name'
                                   type: String
                                   description: |
                                     Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                                     at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
                                   required: true
-                                - name: version
+                                - name: 'version'
                                   type: String
                                   description: |
                                     Version name for this InfoType.
-                                - name: sensitivityScore
+                                - name: 'sensitivityScore'
                                   type: NestedObject
                                   description: |
                                     Optional custom sensitivity for this InfoType. This only applies to data profiling.
                                   properties:
-                                    - name: score
+                                    - name: 'score'
                                       type: Enum
                                       description: |
                                         The sensitivity score applied to the resource.
                                       required: true
                                       enum_values:
-                                        - SENSITIVITY_LOW
-                                        - SENSITIVITY_MODERATE
-                                        - SENSITIVITY_HIGH
-                      - name: excludeByHotword
+                                        - 'SENSITIVITY_LOW'
+                                        - 'SENSITIVITY_MODERATE'
+                                        - 'SENSITIVITY_HIGH'
+                      - name: 'excludeByHotword'
                         type: NestedObject
                         description: |
                           Drop if the hotword rule is contained in the proximate context.
                           For tabular data, the context includes the column name.
                         properties:
-                          - name: hotwordRegex
+                          - name: 'hotwordRegex'
                             type: NestedObject
-                            description: Regular expression pattern defining what qualifies as a hotword.
+                            description:
+                              Regular expression pattern defining what qualifies
+                              as a hotword.
                             required: true
                             properties:
-                              - name: pattern
+                              - name: 'pattern'
                                 type: String
                                 description: |
                                   Pattern defining the regular expression. Its syntax
                                   (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
                                 required: true
-                              - name: groupIndexes
+                              - name: 'groupIndexes'
                                 type: Array
                                 description: |
                                   The index of the submatch to extract as findings. When not specified,
                                   the entire match is returned. No more than 3 may be included.
                                 item_type:
                                   type: Integer
-                          - name: proximity
+                          - name: 'proximity'
                             type: NestedObject
                             description: |
                               Proximity of the finding within which the entire hotword must reside. The total length of the window cannot
@@ -477,22 +484,22 @@ properties:
                               office using the hotword regex `(xxx)`, where `xxx` is the area code in question.
                             required: true
                             properties:
-                              - name: windowBefore
+                              - name: 'windowBefore'
                                 type: Integer
                                 description: |
                                   Number of characters before the finding to consider.
-                              - name: windowAfter
+                              - name: 'windowAfter'
                                 type: Integer
                                 description: |
                                   Number of characters after the finding to consider.
-      - name: customInfoTypes
+      - name: 'customInfoTypes'
         type: Array
         description: |
           Custom info types to be used. See https://cloud.google.com/dlp/docs/creating-custom-infotypes to learn more.
         item_type:
           type: NestedObject
           properties:
-            - name: infoType
+            - name: 'infoType'
               type: NestedObject
               description: |
                 CustomInfoType can either be a new infoType, or an extension of built-in infoType, when the name matches one of existing
@@ -501,89 +508,89 @@ properties:
                 treated as a custom info type.
               required: true
               properties:
-                - name: name
+                - name: 'name'
                   type: String
                   description: |
                     Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names
                     listed at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
                   required: true
-                - name: version
+                - name: 'version'
                   type: String
                   description: |
                     Version name for this InfoType.
-                - name: sensitivityScore
+                - name: 'sensitivityScore'
                   type: NestedObject
                   description: |
                     Optional custom sensitivity for this InfoType. This only applies to data profiling.
                   properties:
-                    - name: score
+                    - name: 'score'
                       type: Enum
                       description: |
                         The sensitivity score applied to the resource.
                       required: true
                       enum_values:
-                        - SENSITIVITY_LOW
-                        - SENSITIVITY_MODERATE
-                        - SENSITIVITY_HIGH
-            - name: likelihood
+                        - 'SENSITIVITY_LOW'
+                        - 'SENSITIVITY_MODERATE'
+                        - 'SENSITIVITY_HIGH'
+            - name: 'likelihood'
               type: Enum
               description: |
                 Likelihood to return for this CustomInfoType. This base value can be altered by a detection rule if the finding meets the criteria
                 specified by the rule.
-              default_value: VERY_LIKELY
+              default_value: "VERY_LIKELY"
               enum_values:
-                - VERY_UNLIKELY
-                - UNLIKELY
-                - POSSIBLE
-                - LIKELY
-                - VERY_LIKELY
-            - name: exclusionType
+                - 'VERY_UNLIKELY'
+                - 'UNLIKELY'
+                - 'POSSIBLE'
+                - 'LIKELY'
+                - 'VERY_LIKELY'
+            - name: 'exclusionType'
               type: Enum
               description: |
                 If set to EXCLUSION_TYPE_EXCLUDE this infoType will not cause a finding to be returned. It still can be used for rules matching.
               enum_values:
-                - EXCLUSION_TYPE_EXCLUDE
-            - name: sensitivityScore
+                - 'EXCLUSION_TYPE_EXCLUDE'
+            - name: 'sensitivityScore'
               type: NestedObject
               description: |
                 Optional custom sensitivity for this InfoType. This only applies to data profiling.
               properties:
-                - name: score
+                - name: 'score'
                   type: Enum
                   description: |
                     The sensitivity score applied to the resource.
                   required: true
                   enum_values:
-                    - SENSITIVITY_LOW
-                    - SENSITIVITY_MODERATE
-                    - SENSITIVITY_HIGH
-            - name: regex
+                    - 'SENSITIVITY_LOW'
+                    - 'SENSITIVITY_MODERATE'
+                    - 'SENSITIVITY_HIGH'
+            - name: 'regex'
               type: NestedObject
               description: Regular expression which defines the rule.
               immutable: true
               properties:
-                - name: pattern
+                - name: 'pattern'
                   type: String
                   description: |
                     Pattern defining the regular expression.
                     Its syntax (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
                   required: true
-                - name: groupIndexes
+                - name: 'groupIndexes'
                   type: Array
                   description: |
                     The index of the submatch to extract as findings. When not specified, the entire match is returned. No more than 3 may be included.
                   item_type:
                     type: Integer
-            - name: dictionary
+            - name: 'dictionary'
               type: NestedObject
               description: Dictionary which defines the rule.
               immutable: true
               properties:
-                - name: wordList
+                - name: 'wordList'
                   type: NestedObject
                   description: List of words or phrases to search for.
                   properties:
-                    - name: words
+                    - name: 'words'
                       type: Array
                       description: |
                         Words or phrases defining the dictionary. The dictionary must contain at least one
@@ -591,29 +598,32 @@ properties:
                       required: true
                       item_type:
                         type: String
-                - name: cloudStoragePath
+                - name: 'cloudStoragePath'
                   type: NestedObject
-                  description: Newline-delimited file of words in Cloud Storage. Only a single file is accepted.
+                  description:
+                    Newline-delimited file of words in Cloud Storage. Only a
+                    single file is accepted.
                   properties:
-                    - name: path
+                    - name: 'path'
                       type: String
                       description: |
                         A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
                       required: true
-            - name: surrogateType
+            - name: 'surrogateType'
               type: NestedObject
               description: |
                 Message for detecting output from deidentification transformations that support reversing.
               immutable: true
               send_empty_value: true
               allow_empty_object: true
-              properties: []
-            - name: storedType
+              properties:
+                []
+            - name: 'storedType'
               type: NestedObject
               description: A reference to a StoredInfoType to use with scanning.
               immutable: true
               properties:
-                - name: name
+                - name: 'name'
                   type: String
                   description: |
                     Resource name of the requested StoredInfoType, for example `organizations/433245324/storedInfoTypes/432452342`

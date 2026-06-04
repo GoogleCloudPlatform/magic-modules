@@ -1,6 +1,6 @@
 resource "google_discovery_engine_data_connector" "servicenow-basic" {
   location                     = "global"
-  collection_id                = "{{index $.ResourceIdVars "collection_id"}}"
+  collection_id                = "{{index $.Vars "collection_id"}}"
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
   params = {
