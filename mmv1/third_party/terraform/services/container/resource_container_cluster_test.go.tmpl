@@ -3149,6 +3149,37 @@ func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testin
 	})
 }
 
+func TestAccContainerCluster_withNodeConfigNodeImageConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withNodeConfigNodeImageConfig(clusterName, networkName, subnetworkName, "gke-1360-gke2677000-ubuntu-2404-1-36-amd64-v20260414-c-pre", "bluecwang-gke-dev"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_node_image_config",
+						"node_config.0.node_image_config.0.image", "gke-1360-gke2677000-ubuntu-2404-1-36-amd64-v20260414-c-pre"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_node_image_config",
+						"node_config.0.node_image_config.0.image_project", "bluecwang-gke-dev"),
+				),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_node_image_config",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	t.Parallel()
 
@@ -10319,6 +10350,33 @@ resource "google_container_cluster" "with_node_config" {
   depends_on          = [google_project_service.container]
 }
 `, reservation, clusterName, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withNodeConfigNodeImageConfig(clusterName, networkName, subnetworkName, imageName, imageProject string) string {
+	return fmt.Sprintf(`
+
+resource "google_container_cluster" "with_node_image_config" {
+  name               = "%s"
+  location           = "us-central1-f"
+  initial_node_count = 1
+
+  node_config {
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+    node_image_config {
+      image = "%s"
+      image_project = "%s"
+    }
+    image_type = "CUSTOM_CONTAINERD"
+  }
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
+}
+`, clusterName, imageName, imageProject, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withWorkloadMetadataConfig(clusterName, workloadMetadataConfigMode, networkName, subnetworkName string) string {
