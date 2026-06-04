@@ -501,6 +501,7 @@ func testAccDialogflowConversationProfile_dialogflowRegional(context map[string]
 `, context)
 }
 
+{{if ne $.TargetVersionName "ga" }}
 func TestAccDialogflowConversationProfile_sipConfig(t *testing.T) {
 	t.Parallel()
 
@@ -597,3 +598,4 @@ resource "google_dialogflow_conversation_profile" "profile" {
 }
 `, context)
 }
+{{- end }}
