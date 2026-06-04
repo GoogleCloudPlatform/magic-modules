@@ -34,7 +34,7 @@ base_url: 'projects/{{project}}/global/snapshotRecycleBinPolicy'
 update_url: 'projects/{{project}}/global/snapshotRecycleBinPolicy'
 immutable: false
 import_format:
-  - 'projects/{{project}}/global/snapshotRecycleBinPolicy/'
+  - 'projects/{{project}}/global/snapshotRecycleBinPolicy'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -95,11 +95,11 @@ properties:
         - name: 'standardSnapshots'
           type: NestedObject
           description: The rule config for standard snapshots.
-          send_empty_value: true
+          output: true
           properties:
             - name: 'retentionDurationDays'
               type: Integer
-              send_empty_value: true
+              output: true
               description: |
                 The retention duration for snapshots in the recycle bin after which the
                 snapshots are automatically deleted from recycle bin.
