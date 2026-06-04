@@ -1283,7 +1283,7 @@ resource "google_tags_tag_value" "value" {
 resource "google_tags_location_tag_binding" "binding" {
 	parent    = "//compute.googleapis.com/projects/${data.google_project.project.number}/zones/us-east4-a/instances/${google_compute_instance.vm.instance_id}"
 	tag_value = google_tags_tag_value.value.id
-	location  = "us-central1"
+	location  = "us-east4-a"
 }
 `, context)
 }
