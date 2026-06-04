@@ -364,17 +364,20 @@ func schemaNodeConfig() *schema.Schema {
 				"node_image_config": {
 					Type:     schema.TypeList,
 					Optional: true,
+					Computed:    true,
 					Description: `The node image configuration to use for this node pool.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"image": {
 								Type:         schema.TypeString,
 								Optional:     true,
+								Computed:     true,
 								Description:  `The name of the image to use for this node.`,
 							},
 							"image_project": {
 								Type:         schema.TypeString,
 								Optional:     true,
+								Computed:     true,
 								Description:  `The project containing the image to use for this node.`,
               },
 						},
@@ -4368,7 +4371,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			log.Printf("[INFO] Updated windows_node_config for node pool %s", name)
 		}
 		if d.HasChange(prefix + "node_config.0.node_image_config") {
-			imageConfig := expandNodeImageConfig(d.Get(prefix + "node_config.0.windows_node_config"))
+			imageConfig := expandNodeImageConfig(d.Get(prefix + "node_config.0.node_image_config"))
 			req := &container.UpdateNodePoolRequest{
 				Name: name,
 				Image: imageConfig.Image,
