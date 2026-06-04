@@ -2184,6 +2184,7 @@ func (r Resource) CaiAssetType() string {
 	return fmt.Sprintf("%s/%s", r.ProductMetadata.ServiceName(), r.CaiResourceName())
 }
 
+
 // DefineAssetTypeForResourceInProduct marks the AssetType constant for this resource as defined.
 // It returns true if this is the first time it's been called for this resource,
 // and false otherwise, preventing duplicate definitions.
