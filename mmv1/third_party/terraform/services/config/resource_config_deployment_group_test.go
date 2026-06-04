@@ -4,6 +4,7 @@ package config_test
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -356,6 +357,97 @@ resource "google_config_deployment_group" "basic" {
   }
 
   force_destroy = true
+}
+`, context)
+}
+
+func TestAccConfigDeploymentGroup_policyError(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckConfigDeploymentGroupDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfigDeploymentGroup_policyError(context, "FAIL_IF_ANY_REFERENCES_EXIST"),
+			},
+			{
+				Config:      testAccConfigDeploymentGroup_policyError(context, "FAIL_IF_ANY_REFERENCES_EXIST"),
+				Destroy:     true,
+				ExpectError: regexp.MustCompile(".*"),
+			},
+			{
+				Config: testAccConfigDeploymentGroup_policyError(context, "IGNORE_DEPLOYMENT_REFERENCES"),
+			},
+		},
+	})
+}
+
+func testAccConfigDeploymentGroup_policyError(context map[string]interface{}, policy string) string {
+	return acctest.Nprintf(`
+resource "google_service_account" "sa" {
+  account_id   = "tf-test-dg-sa-%{random_suffix}"
+  display_name = "Infra Manager Test SA for DG"
+}
+
+resource "google_project_iam_member" "binding" {
+  project = "%{project}"
+  role    = "roles/config.agent"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_project_iam_member" "network_admin" {
+  project = "%{project}"
+  role    = "roles/compute.networkAdmin"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_config_deployment" "dep" {
+  name            = "tf-test-dg-dep-%{random_suffix}"
+  location        = "us-central1"
+  service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
+  force_destroy   = true
+
+  terraform_blueprint {
+    git_source {
+      repo      = "https://github.com/terraform-google-modules/terraform-google-network"
+      directory = "modules/vpc"
+      ref       = "main"
+    }
+    
+    input_values {
+      variable_name = "project_id"
+      input_value   = jsonencode("%{project}")
+    }
+    input_values {
+      variable_name = "network_name"
+      input_value   = jsonencode("tf-test-dg-net-%{random_suffix}")
+    }
+  }
+
+  depends_on = [
+    google_project_iam_member.binding,
+    google_project_iam_member.network_admin
+  ]
+}
+
+resource "google_config_deployment_group" "basic" {
+  name     = "tf-test-dg-%{random_suffix}"
+  location = "us-central1"
+
+  deployment_units {
+    id           = "unit-1"
+    deployment   = google_config_deployment.dep.id
+    dependencies = []
+  }
+
+  deployment_reference_policy = "`+policy+`"
 }
 `, context)
 }
