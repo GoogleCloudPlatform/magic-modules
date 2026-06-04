@@ -3797,7 +3797,7 @@ func TestAccComputeInstance_queueCount(t *testing.T) {
 func TestAccComputeInstance_flexStart(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -3844,7 +3844,7 @@ func TestAccComputeInstance_reservationBound(t *testing.T) {
 func TestAccComputeInstance_provisioningModelEmptyString(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

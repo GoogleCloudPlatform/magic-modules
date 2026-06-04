@@ -1208,7 +1208,7 @@ func TestAccComputeRegionInstanceTemplate_managedEnvoy(t *testing.T) {
 func TestAccComputeRegionInstanceTemplate_flexStart(t *testing.T) {
 	t.Parallel()
 
-	var instanceTemplate compute.InstanceTemplate
+	var instanceTemplate map[string]interface{}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories:    acctest.ProtoV5ProviderFactories(t),
@@ -1237,7 +1237,7 @@ func TestAccComputeRegionInstanceTemplate_flexStart(t *testing.T) {
 func TestAccComputeRegionInstanceTemplate_reservationBound(t *testing.T) {
 	t.Parallel()
 
-	var instanceTemplate compute.InstanceTemplate
+	var instanceTemplate map[string]interface{}
 	suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"suffix":           suffix,
@@ -1272,7 +1272,7 @@ func TestAccComputeRegionInstanceTemplate_reservationBound(t *testing.T) {
 func TestAccComputeRegionInstanceTemplate_provisioningModelEmptyString(t *testing.T) {
 	t.Parallel()
 
-	var instanceTemplate compute.InstanceTemplate
+	var instanceTemplate map[string]interface{}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories:    acctest.ProtoV5ProviderFactories(t),
