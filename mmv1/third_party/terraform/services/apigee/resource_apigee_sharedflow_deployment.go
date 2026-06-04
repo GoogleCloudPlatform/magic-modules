@@ -46,6 +46,15 @@ func ResourceApigeeSharedFlowDeployment() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: `The Apigee Organization associated with the Apigee instance`,
+				// Normalize org_id by stripping the "organizations/" prefix. Users may
+				// pass google_apigee_organization.id ("organizations/<project-id>");
+				// after import the captured org_id has no prefix, so without
+				// normalization the config/state mismatch triggers a spurious
+				// ForceNew (destroy/recreate). StateFunc stores the normalized value
+				// so both forms match with no diff.
+				StateFunc: func(v interface{}) string {
+					return strings.TrimPrefix(v.(string), "organizations/")
+				},
 			},
 			"revision": {
 				Type:        schema.TypeString,
