@@ -44,6 +44,8 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
+identity_schema_version: 2
+identity_upgraders: true
 autogen_status: RnJhbWV3b3Jr
 custom_code:
   custom_identity:

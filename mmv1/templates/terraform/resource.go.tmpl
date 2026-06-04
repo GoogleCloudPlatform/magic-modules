@@ -46,7 +46,9 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
+    {{- if $.IdentityUpgraders }}
+	    "github.com/hashicorp/terraform-plugin-go/tftypes"
+    {{- end }}
     "{{ $.ImportPath }}/registry"
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
@@ -1458,7 +1460,7 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 {{- end }}
 
 {{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
-    {{ $.CustomTemplate $.IdentityUpgraderFile false -}}
+    {{ customTemplate $ $.IdentityUpgraderFile false -}}
 {{- end }}
 
 {{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}

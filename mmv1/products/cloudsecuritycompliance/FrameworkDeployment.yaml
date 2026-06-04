@@ -90,6 +90,8 @@ async:
   result:
     resource_inside_response: true
   include_project: false
+identity_schema_version: 2
+identity_upgraders: true
 autogen_status: RnJhbWV3b3JrRGVwbG95bWVudA==
 custom_code:
   custom_identity:
