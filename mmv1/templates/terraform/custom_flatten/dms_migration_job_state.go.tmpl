@@ -6,9 +6,13 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	switch v.(string) {
 	case "DRAFT", "NOT_STARTED":
 		return "NOT_STARTED"
+	case "FAILED":
+		if phase, ok := d.Get("phase").(string); ok && phase == "PROMOTE_IN_PROGRESS" {
+			return "RUNNING"
+		}
+		return "NOT_STARTED"
 	default:
-		// Map all other active states and phases to RUNNING
-		// This ensures stability in Terraform while accurately reflecting that the resource exists and has moved past DRAFT.
+		// Map all other active states (RUNNING, COMPLETED, STOPPED, etc.) to RUNNING
 		return "RUNNING"
 	}
 }

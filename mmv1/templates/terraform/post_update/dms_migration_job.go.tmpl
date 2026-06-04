@@ -24,6 +24,21 @@ unpackLroError := func(res map[string]interface{}, project string, userAgent str
 	if !ok {
 		return nil
 	}
+
+	// If available, get more detailed error info from the migration job resource itself.
+	if jobUrl, jobUrlErr := tpgresource.ReplaceVars(d, config, "{{"{{"}}DatabaseMigrationServiceBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/migrationJobs/{{"{{"}}migration_job_id{{"}}"}}"); jobUrlErr == nil {
+		if jobRes, fetchJobErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    jobUrl,
+			UserAgent: userAgent,
+			Timeout:   d.Timeout(schema.TimeoutUpdate),
+		}); fetchJobErr == nil {
+			if jobErrObj, ok := jobRes["error"].(map[string]interface{}); ok {
+				errObj = jobErrObj
+			}
+		}
+	}
 	
 	var errMsgs []string
 	var stopOnWarnings = d.Get("stop_on_warnings").(bool)
@@ -96,8 +111,8 @@ if err != nil {
 
 isTransitionToRunning := false
 isTransitionToNotStarted := false
-if d.HasChange("state") {
-	oldRaw, newRaw := d.GetChange("state")
+if d.HasChange("desired_state") {
+	oldRaw, newRaw := d.GetChange("desired_state")
 	if (oldRaw.(string) == "NOT_STARTED" || oldRaw.(string) == "") && newRaw.(string) == "RUNNING" {
 		isTransitionToRunning = true
 	}
