@@ -1,0 +1,11 @@
+resource "google_chronicle_parser" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  logtype  = "BRO_DHCP"
+  validation_skipped = true
+  cbn = "ZHVtbXkgcGFyc2VyIGNvbmZpZw==" # Base64 encoded "dummy parser config"
+
+  version_info {
+    auto_upgrade_disabled = true
+  }
+}
