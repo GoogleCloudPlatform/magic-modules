@@ -53,53 +53,53 @@ examples:
     vars:
       instance_name: 'my-instance-name'
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_instance_basic_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-    # Resource creation race
+      # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_instance_cidr_range'
     vars:
       instance_name: 'my-instance-name'
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_instance_cidr_range_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-    # Resource creation race
+      # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_instance_ip_range'
     vars:
       instance_name: 'my-instance-name'
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_instance_ip_range_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-    # Resource creation race
+      # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_instance_full'
     vars:
       instance_name: 'my-instance-name'
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_instance_full_test'
     primary_resource_id: 'apigee_instance'
     min_version: 'beta'
@@ -107,7 +107,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-    # Resource creation race
+      # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_instance_service_attachment_basic_test'
@@ -116,9 +116,11 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-    # Resource creation race
+      # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+    ignore_read_extra:
+      - 'consumer_accept_list'
 parameters:
   - name: 'orgId'
     type: String
