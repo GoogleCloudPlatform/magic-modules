@@ -47,7 +47,7 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
     {{- if and $.IdentityUpgraders (not $.IsTgcCompiler) }}
-	    "github.com/hashicorp/terraform-plugin-go/tftypes"
+    "github.com/hashicorp/terraform-plugin-go/tftypes"
     {{- end }}
     "{{ $.ImportPath }}/registry"
     "{{ $.ImportPath }}/tpgresource"
@@ -195,7 +195,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
               {{- end }}
             }
           },
-{{- if and $.IdentityUpgraders (not $.IsTgcCompiler) }}
+{{- if $.IdentityUpgraders }}
           IdentityUpgraders: []schema.IdentityUpgrader{
 {{- range $v := $.IdentityUpgradersCount }}
               {
@@ -1459,7 +1459,7 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
     {{ customTemplate $ $.StateMigrationFile false -}}
 {{- end }}
 
-{{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) (not $.IsTgcCompiler) }}
+{{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
     {{ customTemplate $ $.IdentityUpgraderFile false -}}
 {{- end }}
 
