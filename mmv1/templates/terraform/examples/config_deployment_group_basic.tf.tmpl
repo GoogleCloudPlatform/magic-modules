@@ -1,0 +1,4 @@
+resource "google_config_deployment_group" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "deployment_group_name"}}"
+  location = "us-central1"
+}
