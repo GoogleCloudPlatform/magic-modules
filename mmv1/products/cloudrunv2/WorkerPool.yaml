@@ -47,6 +47,8 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/workerPools/{{name}}'
     - '{{name}}'
 custom_code:
+  encoder: 'templates/terraform/encoders/cloudrunv2_worker_pool.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/cloudrunv2_worker_pool.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_worker_pool_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
 examples:
