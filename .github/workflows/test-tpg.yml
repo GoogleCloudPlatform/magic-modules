@@ -3,7 +3,7 @@ name: Provider Build and Unit Test
 permissions: read-all
 
 env:
-  status_suffix: "-build-and-unit-tests"
+  status_suffix: "-build-and-unit-tests (full)"
 
 on:
   workflow_dispatch:
@@ -85,7 +85,7 @@ jobs:
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        make testnolint
+        make testnolint TEST="$(go list -e ./... | grep -v /scripts | tr '\n' ' ')"
     - name: Lint Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
