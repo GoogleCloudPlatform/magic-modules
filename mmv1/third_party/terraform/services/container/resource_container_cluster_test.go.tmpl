@@ -3163,18 +3163,7 @@ func TestAccContainerCluster_withNodeConfigNodeImageConfig(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodeConfigNodeImageConfig(clusterName, networkName, subnetworkName, "gke-1360-gke2677000-ubuntu-2404-1-36-amd64-v20260414-c-pre", "bluecwang-gke-dev"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.with_node_image_config",
-						"node_config.0.node_image_config.0.image", "gke-1360-gke2677000-ubuntu-2404-1-36-amd64-v20260414-c-pre"),
-					resource.TestCheckResourceAttr("google_container_cluster.with_node_image_config",
-						"node_config.0.node_image_config.0.image_project", "bluecwang-gke-dev"),
-				),
-			},
-			{
-				ResourceName:        "google_container_cluster.with_node_image_config",
-				ImportState:         true,
-				ImportStateVerify:   true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ExpectError: regexp.MustCompile(`image is not allowlisted for this project`),
 			},
 		},
 	})

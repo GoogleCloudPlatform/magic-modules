@@ -364,7 +364,6 @@ func schemaNodeConfig() *schema.Schema {
 				"node_image_config": {
 					Type:     schema.TypeList,
 					Optional: true,
-					Computed: true,
 					Description: `The node image configuration to use for this node pool.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
