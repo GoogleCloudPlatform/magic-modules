@@ -12,32 +12,34 @@
 # limitations under the License.
 
 ---
-name: 'Assistant'
+name: Assistant
 description: |
   Assistant
 references:
-  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.discoveryengine.v1#assistantservice'
-base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants'
-self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants/{{assistant_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants?assistantId={{assistant_id}}'
-update_verb: 'PATCH'
+  api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.discoveryengine.v1#assistantservice
+base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants
+self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants/{{assistant_id}}
+create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants?assistantId={{assistant_id}}
+delete_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants/{{assistant_id}}
 update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants/{{assistant_id}}'
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants/{{assistant_id}}'
+  - projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants/{{assistant_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-examples:
-  - name: 'discoveryengine_assistant_basic'
-    primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'example-data-store-id'
-      engine_id: 'example-engine-id'
-      template_id: 'example-template-id'
+samples:
+  - name: discoveryengine_assistant_basic
+    primary_resource_id: basic
+    steps:
+      - name: discoveryengine_assistant_basic
+        resource_id_vars:
+          data_store_id: example-data-store-id
+          engine_id: example-engine-id
+          template_id: example-template-id
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The geographic location where the data store should reside. The value can
@@ -45,21 +47,21 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'collectionId'
+  - name: collectionId
     type: String
     description: |
       The unique id of the collection.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'engineId'
+  - name: engineId
     type: String
     description: |
       The unique id of the engine.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'assistantId'
+  - name: assistantId
     type: String
     description: |
       The unique id of the assistant.
@@ -67,7 +69,7 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Resource name of the assistant.
@@ -76,72 +78,72 @@ properties:
 
       It must be a UTF-8 encoded string with a length limit of 1024 characters.
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     required: true
     description: |
       The assistant display name.
 
       It must be a UTF-8 encoded string with a length limit of 128 characters.
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description for additional information. Expected to be shown on the
       configuration UI, not to the users of the assistant.
-  - name: 'generationConfig'
+  - name: generationConfig
     type: NestedObject
     description: |
       Configuration for the generation of the assistant response.
     properties:
-      - name: 'systemInstruction'
+      - name: systemInstruction
         type: NestedObject
         description: |
           System instruction, also known as the prompt preamble for LLM calls.
           See also https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/system-instructions
         properties:
-          - name: 'additionalSystemInstruction'
+          - name: additionalSystemInstruction
             type: String
             description: |
               Additional system instruction that will be added to the default system instruction.
-      - name: 'defaultLanguage'
+      - name: defaultLanguage
         type: String
         description: |
           The default language to use for the generation of the assistant response.
           Use an ISO 639-1 language code such as `en`.
           If not specified, the language will be automatically detected.
-  - name: 'customerPolicy'
+  - name: customerPolicy
     type: NestedObject
     description: |
       Customer policy for the assistant.
     properties:
-      - name: 'bannedPhrases'
+      - name: bannedPhrases
         type: Array
         description: |
           List of banned phrases.
         item_type:
           type: NestedObject
           properties:
-            - name: 'phrase'
+            - name: phrase
               type: String
               required: true
               description: |
                 The raw string content to be banned.
-            - name: 'matchType'
+            - name: matchType
               type: String
               description: |
                 Match type for the banned phrase.
                 The supported values: 'SIMPLE_STRING_MATCH', 'WORD_BOUNDARY_STRING_MATCH'.
-            - name: 'ignoreDiacritics'
+            - name: ignoreDiacritics
               type: Boolean
               description: |
                 If true, diacritical marks (e.g., accents, umlauts) are ignored when
                 matching banned phrases. For example, "cafe" would match "café".
-      - name: 'modelArmorConfig'
+      - name: modelArmorConfig
         type: NestedObject
         description: |
           Model Armor configuration to be used for sanitizing user prompts and assistant responses.
         properties:
-          - name: 'userPromptTemplate'
+          - name: userPromptTemplate
             type: String
             required: true
             description: |
@@ -150,7 +152,7 @@ properties:
               `projects/{project}/locations/{location}/templates/{template_id}`
 
               If not specified, no sanitization will be applied to the user prompt.
-          - name: 'responseTemplate'
+          - name: responseTemplate
             type: String
             required: true
             description: |
@@ -160,12 +162,12 @@ properties:
 
               If not specified, no sanitization will be applied to the assistant
               response.
-          - name: 'failureMode'
+          - name: failureMode
             type: String
             description: |
               Defines the failure mode for Model Armor sanitization.
               The supported values: 'FAIL_OPEN', 'FAIL_CLOSED'.
-  - name: 'webGroundingType'
+  - name: webGroundingType
     type: String
     description: |
       The type of web grounding to use.

@@ -12,48 +12,60 @@
 # limitations under the License.
 
 ---
-name: 'EncryptionSpec'
+name: EncryptionSpec
 description: |
   Initializes a location-level encryption key specification.
 references:
   guides:
-    'Official ES Documentation': 'https://cloud.google.com/dialogflow/es/docs'
-    'Official CX Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
-  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.encryptionSpec'
-
-base_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec'
-
-create_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec:initialize'
-
-exclude_read: true
-exclude_delete: true
+    Official ES Documentation: https://cloud.google.com/dialogflow/es/docs
+    Official CX Documentation: https://cloud.google.com/dialogflow/cx/docs
+  api: https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.encryptionSpec
+base_url: projects/{{project}}/locations/{{location}}/encryptionSpec
+immutable: true
+create_url: projects/{{project}}/locations/{{location}}/encryptionSpec:initialize
 exclude_import: true
 exclude_sweeper: true
-
-immutable: true
-
-custom_code:
-  pre_create: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
-
 async:
-  actions: ['create']
   operation:
     base_url: '{{op_id}}'
-
+  actions: [create]
+exclude_delete: true
+exclude_read: true
+custom_code:
+  pre_create: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+samples:
+  - name: dialogflow_encryption_spec_basic
+    primary_resource_id: my-encryption-spec
+    min_version: beta
+    # The test resulted in an increasing number of CMEK DBs
+    # which we don't have ways to handle db deletion for deleted cmek projects.
+    exclude_test: true
+    external_providers:
+      - time
+    steps:
+      - name: dialogflow_encryption_spec_basic
+        min_version: beta
+        exclude_import_test: true
+        resource_id_vars:
+          project_id: my-proj
+          kms_keyring: my-keyring
+          kms_key: my-key
+        test_env_vars:
+          org_id: ORG_ID
+          billing_acct: BILLING_ACCT
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     ignore_read: true
     description: |
       The location in which the encryptionSpec is to be initialized.
-
 properties:
-  - name: 'encryptionSpec'
+  - name: encryptionSpec
     type: NestedObject
     required: true
     properties:
-      - name: 'kmsKey'
+      - name: kmsKey
         type: String
         required: true
         description: |
@@ -61,21 +73,3 @@ properties:
           If empty, the resource is secured by the default Google encryption key.
           Only the key in the same location as this resource is allowed to be used for encryption.
           Format: projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{key}
-
-examples:
-  - name: "dialogflow_encryption_spec_basic"
-    primary_resource_id: "my-encryption-spec"
-    min_version: "beta"
-    exclude_import_test: true
-    # The test resulted in an increasing number of CMEK DBs
-    # which we don't have ways to handle db deletion for deleted cmek projects.
-    exclude_test: true
-    vars:
-      project_id: 'my-proj'
-      kms_keyring: 'my-keyring'
-      kms_key: 'my-key'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_acct: 'BILLING_ACCT'
-    external_providers:
-      - "time"
