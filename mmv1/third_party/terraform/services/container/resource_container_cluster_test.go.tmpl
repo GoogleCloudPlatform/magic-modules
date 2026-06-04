@@ -3162,8 +3162,8 @@ func TestAccContainerCluster_withNodeConfigNodeImageConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withNodeConfigNodeImageConfig(clusterName, networkName, subnetworkName, "gke-1360-gke2677000-ubuntu-2404-1-36-amd64-v20260414-c-pre", "bluecwang-gke-dev"),
-				ExpectError: regexp.MustCompile(`image is not allowlisted for this project`),
+				Config: testAccContainerCluster_withNodeConfigNodeImageConfig(clusterName, networkName, subnetworkName, "test-cos-image", "test-image-project"),
+				ExpectError: regexp.MustCompile(`image 'test-cos-image' is not available in project 'test-image-project'`),
 			},
 		},
 	})

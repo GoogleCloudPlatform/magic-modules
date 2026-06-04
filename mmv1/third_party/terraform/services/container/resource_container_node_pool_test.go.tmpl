@@ -1188,8 +1188,8 @@ func TestAccContainerNodePool_withNodeImageConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withNodeImageConfig(cluster, np, "gke-1360-gke2677000-ubuntu-2404-1-36-amd64-v20260414-c-pre", "bluecwang-gke-dev"),
-				ExpectError: regexp.MustCompile(`image is not allowlisted for this project`),
+				Config: testAccContainerNodePool_withNodeImageConfig(cluster, np, "test-cos-images", "test-image-project"),
+				ExpectError: regexp.MustCompile(`image 'test-cos-images' is not available in project 'test-image-project'`),
 			},
 		},
 	})
