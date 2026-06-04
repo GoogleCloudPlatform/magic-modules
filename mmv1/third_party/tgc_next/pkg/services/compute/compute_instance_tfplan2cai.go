@@ -25,13 +25,7 @@ func ComputeInstanceTfplan2caiConverter() cai.Tfplan2caiConverter {
 
 func GetComputeInstanceAndDisksCaiObjects(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
 	if instanceAsset, err := GetComputeInstanceCaiObject(d, config); err == nil {
-		assets := []caiasset.Asset{instanceAsset}
-		if diskAsset, err := GetComputeInstanceDiskCaiObject(d, config); err == nil {
-			assets = append(assets, diskAsset)
-			return assets, nil
-		} else {
-			return []caiasset.Asset{}, err
-		}
+		return []caiasset.Asset{instanceAsset}, nil
 	} else {
 		return []caiasset.Asset{}, err
 	}
@@ -195,7 +189,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		DeletionProtection:       d.Get("deletion_protection").(bool),
 		Hostname:                 d.Get("hostname").(string),
 		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
-		ShieldedInstanceConfig:   expandShieldedVmConfigs(d),
 		DisplayDevice:            expandDisplayDeviceTgcNext(d),
 		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:      reservationAffinity,
@@ -456,89 +449,6 @@ func expandStoragePool(v interface{}, d tpgresource.TerraformResourceData, confi
 	return nil, nil
 }
 
-func GetComputeInstanceDiskCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (caiasset.Asset, error) {
-	name, err := cai.AssetName(d, config, "//compute.googleapis.com/projects/{{project}}/zones/{{zone}}/disks/{{name}}")
-	if err != nil {
-		return caiasset.Asset{}, err
-	}
-	if data, err := GetComputeDiskData(d, config); err == nil {
-		location, _ := tpgresource.GetLocation(d, config)
-		return caiasset.Asset{
-			Name: name,
-			Type: ComputeDiskAssetType,
-			Resource: &caiasset.AssetResource{
-				Version:              "v1",
-				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
-				DiscoveryName:        "Disk",
-				Data:                 data,
-				Location:             location,
-			},
-		}, nil
-	} else {
-		return caiasset.Asset{}, err
-	}
-}
-
-func GetComputeDiskData(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	diskApiObj, err := expandBootDisk(d, config, project)
-	if err != nil {
-		return nil, err
-	}
-
-	diskDetails, err := cai.JsonMap(diskApiObj)
-	if err != nil {
-		return nil, err
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.type"); ok {
-		diskTypeName := v.(string)
-		diskType, err := readDiskType(config, d, diskTypeName)
-		if err != nil {
-			return nil, fmt.Errorf("Error loading disk type '%s': %s", diskTypeName, err)
-		}
-		diskDetails["DiskType"] = diskType.RelativeLink()
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.image"); ok {
-		diskDetails["SourceImage"] = v.(string)
-	}
-
-	if _, ok := d.GetOk("boot_disk.0.initialize_params.0.labels"); ok {
-		diskDetails["Labels"] = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.labels")
-	}
-
-	if _, ok := d.GetOk("boot_disk.0.initialize_params.0.resource_policies"); ok {
-		diskDetails["ResourcePolicies"] = tpgresource.ConvertStringArr(d.Get("boot_disk.0.initialize_params.0.resource_policies").([]interface{}))
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.provisioned_iops"); ok {
-		diskDetails["ProvisionedIops"] = int64(v.(int))
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.provisioned_throughput"); ok {
-		diskDetails["ProvisionedThroughput"] = int64(v.(int))
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.enable_confidential_compute"); ok {
-		diskDetails["EnableConfidentialCompute"] = v.(bool)
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.storage_pool"); ok {
-		storagePoolUrl, err := expandStoragePool(v, d, config)
-		if err != nil {
-			return nil, fmt.Errorf("Error resolving storage pool name '%s': '%s'", v.(string), err)
-		}
-		diskDetails["StoragePool"] = storagePoolUrl.(string)
-	}
-
-	return diskDetails, nil
-}
-
 func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.NetworkInterface, error) {
 	configs := d.Get("network_interface").([]interface{})
 	ifaces := make([]*compute.NetworkInterface, len(configs))
@@ -728,4 +638,3 @@ func expandDisplayDeviceTgcNext(d tpgresource.TerraformResourceData) *compute.Di
 		ForceSendFields: []string{"EnableDisplay"},
 	}
 }
-

@@ -269,25 +269,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		}
 	}
 
-	roundtripResources, err := parseResourceConfigs(roundtripTfFilePath)
-	if err != nil {
-		return fmt.Errorf("error parsing roundtrip resource configs: %v", err)
-	}
-
-	var filteredExportResources []Resource
-	for _, r := range exportResources {
-		if r.Type == resourceType {
-			filteredExportResources = append(filteredExportResources, r)
-		}
-	}
-	var filteredRoundtripResources []Resource
-	for _, r := range roundtripResources {
-		if r.Type == resourceType {
-			filteredRoundtripResources = append(filteredRoundtripResources, r)
-		}
-	}
-
-	if diff := cmp.Diff(filteredRoundtripResources, filteredExportResources); diff != "" {
+	if diff := cmp.Diff(string(roundtripConfigData), string(exportConfigData)); diff != "" {
 		tfFileName := fmt.Sprintf("%s_roundtrip", strings.ReplaceAll(testName, "/", "_"))
 		jsonFileName := fmt.Sprintf("%s_reexport.json", strings.ReplaceAll(testName, "/", "_"))
 
