@@ -223,6 +223,7 @@ func findTmpls(yamlFiles []string) (map[string]bool, error) {
 
 		var resName string
 		hasStateUpgraders := false
+		hasIdentityUpgraders := false
 
 		for k, v := range m {
 			if keyStr, ok := k.(string); ok {
@@ -236,6 +237,11 @@ func findTmpls(yamlFiles []string) (map[string]bool, error) {
 						hasStateUpgraders = true
 					}
 				}
+				if keyStr == "identity_upgraders" {
+					if iu, ok := v.(bool); ok && iu {
+						hasIdentityUpgraders = true
+					}
+				}
 			}
 		}
 
@@ -245,6 +251,15 @@ func findTmpls(yamlFiles []string) (map[string]bool, error) {
 				productName = filepath.Base(filepath.Dir(yamlFile))
 			}
 			tmplName := fmt.Sprintf("templates/terraform/state_migrations/%s_%s.go.tmpl", underscore(productName), underscore(resName))
+			allTmpls[tmplName] = true
+		}
+
+		if hasIdentityUpgraders && resName != "" {
+			productName := productNames[filepath.Dir(yamlFile)]
+			if productName == "" {
+				productName = filepath.Base(filepath.Dir(yamlFile))
+			}
+			tmplName := fmt.Sprintf("templates/terraform/identity_upgraders/%s_%s.go.tmpl", underscore(productName), underscore(resName))
 			allTmpls[tmplName] = true
 		}
 
