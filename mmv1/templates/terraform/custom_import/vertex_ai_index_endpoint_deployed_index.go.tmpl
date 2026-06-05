@@ -7,6 +7,17 @@ if err := tpgresource.ParseImportId([]string{
 	return nil, err
 }
 
+// The Read URL is templated on '{{"{{"}}region{{"}}"}}' (https://{{"{{"}}region{{"}}"}}-aiplatform.googleapis.com/...),
+// so extract region (and project) from the index_endpoint path. Otherwise an
+// import that doesn't set provider-level region/zone fails with
+// "Cannot determine region".
+indexEndpointRe := regexp.MustCompile(`^projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/indexEndpoints/[^/]+$`)
+if m := indexEndpointRe.FindStringSubmatch(d.Get("index_endpoint").(string)); m != nil {
+	if err := d.Set("region", m[2]); err != nil {
+		return nil, fmt.Errorf("Error setting region: %s", err)
+	}
+}
+
 // Replace import id for the resource id
 id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}index_endpoint{{"}}"}}/deployedIndex/{{"{{"}}deployed_index_id{{"}}"}}")
 if err != nil {

@@ -3,7 +3,18 @@ data "google_compute_network" "default" {
   name      = "default"
 }
 
-# create a thirdparty datastore
+# Create a thirdparty datastore.
+# Note: To mount this datastore on a vSphere cluster, configure the `datastore_mount_config`
+# block within the `google_vmwareengine_cluster` resource. For example:
+#
+#  datastore_mount_config {
+#    datastore        = google_vmwareengine_datastore.example_thirdparty.id
+#    datastore_network {
+#      subnet           = google_vmwareengine_subnet.example_subnet.id
+#      connection_count = 4
+#      mtu              = 1500
+#    }
+#  }
 resource "google_vmwareengine_datastore" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.Vars "resource_name"}}"
   location    = "{{index $.TestEnvVars "region"}}-a"

@@ -89,6 +89,8 @@ examples:
       - 'update_time'
       - 'deletion_policy'
     exclude_docs: true
+    test_env_vars:
+      org_id: 'ORG_ID'
   - name: 'secure_source_manager_instance_private'
     primary_resource_id: 'default'
     vars:
@@ -305,6 +307,13 @@ properties:
         description: |
           Service Attachment for SSH, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
         output: true
+      - name: 'pscAllowedProjects'
+        type: Array
+        description: |
+          Optional. Additional allowed projects for setting up PSC connections.
+          Instance host project is automatically allowed and does not need to be included in this list.
+        item_type:
+          type: String
   - name: 'workforceIdentityFederationConfig'
     type: NestedObject
     description: |

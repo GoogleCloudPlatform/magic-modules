@@ -630,7 +630,27 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		field.Immutable = true
 	}
 
+	if field.Output {
+		makeOutputOnly(&field)
+	}
+
 	return field
+}
+
+func makeOutputOnly(t *api.Type) {
+	if t == nil {
+		return
+	}
+	t.Output = true
+	for _, p := range t.Properties {
+		makeOutputOnly(p)
+	}
+	if t.ItemType != nil {
+		makeOutputOnly(t.ItemType)
+	}
+	if t.ValueType != nil {
+		makeOutputOnly(t.ValueType)
+	}
 }
 
 func buildProperties(props openapi3.Schemas, required []string, seenRefs map[string]bool, seenPointers map[*openapi3.Schema]bool) []*api.Type {
