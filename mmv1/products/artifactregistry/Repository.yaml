@@ -761,27 +761,23 @@ properties:
         type: NestedObject
         description: |-
           The credentials used to access the remote repository.
-        immutable: true
         is_missing_in_cai: true
         properties:
           - name: 'usernamePasswordCredentials'
             type: NestedObject
             description: |-
               Use username and password to access the remote repository.
-            immutable: true
             properties:
               - name: 'username'
                 type: String
                 description: |-
                   The username to access the remote repository.
-                immutable: true
               - name: 'passwordSecretVersion'
                 type: String
                 description: |-
                   The Secret Manager key version that holds the password to access the
                   remote repository. Must be in the format of
                   `projects/{project}/secrets/{secret}/versions/{version}`.
-                immutable: true
       - name: 'disableUpstreamValidation'
         type: Boolean
         description: |-
