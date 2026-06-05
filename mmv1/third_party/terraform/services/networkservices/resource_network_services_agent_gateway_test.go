@@ -1,7 +1,5 @@
 package networkservices_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"testing"
 
@@ -9,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/networkservices"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networkservices"
 )
 
 func TestAccNetworkServicesAgentGateway_networkServicesAgentGatewayUpdate(t *testing.T) {
@@ -105,5 +103,3 @@ resource "google_network_services_agent_gateway" "default" {
 }
 `, context)
 }
-
-{{ end }}
