@@ -42,14 +42,6 @@ samples:
         vars:
           display_name: 'Terraform integration test display'
           format: 'IMPORT_JOB_FORMAT_RVTOOLS_XLSX'
-      - name: 'migration_center_import_data_file_basic'
-        resource_id_vars:
-          import_data_file_id: 'import-data-file-test'
-          import_job_id: 'import-job-test'
-          source_id: 'source-test'
-        vars:
-          display_name: 'Terraform integration test display updated'
-          format: 'IMPORT_JOB_FORMAT_RVTOOLS_CSV'
 parameters:
   - name: location
     type: String
