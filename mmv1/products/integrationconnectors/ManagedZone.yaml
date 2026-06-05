@@ -12,88 +12,89 @@
 # limitations under the License.
 
 ---
-name: 'ManagedZone'
+name: ManagedZone
 description: |
   An Integration connectors Managed Zone.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/integration-connectors/docs'
-  api: 'https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.global.managedZones'
+    Official Documentation: https://cloud.google.com/integration-connectors/docs
+  api: https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.global.managedZones
 docs:
-base_url: 'projects/{{project}}/locations/global/managedZones'
-self_link: 'projects/{{project}}/locations/global/managedZones/{{name}}'
-create_url: 'projects/{{project}}/locations/global/managedZones?managedZoneId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/global/managedZones
+self_link: projects/{{project}}/locations/global/managedZones/{{name}}
+create_url: projects/{{project}}/locations/global/managedZones?managedZoneId={{name}}
 update_mask: true
+update_verb: PATCH
 timeouts:
   insert_minutes: 5
   update_minutes: 5
   delete_minutes: 5
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
-    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 5
       update_minutes: 5
       delete_minutes: 5
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
+autogen_async: true
 custom_code:
-examples:
-  - name: 'integration_connectors_managed_zone'
-    primary_resource_id: 'testmanagedzone'
-    vars:
-      managed_zone_name: 'test'
-    test_vars_overrides:
-      # for backward compatible
-      managed_zone_name: '"test" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-      # Resource creation race
+samples:
+  - name: integration_connectors_managed_zone
+    primary_resource_id: testmanagedzone
     skip_vcr: true
+    steps:
+      - name: integration_connectors_managed_zone
+        resource_id_vars:
+          managed_zone_name: test
+        test_vars_overrides:
+          # for backward compatible
+          managed_zone_name: '"test" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+          # Resource creation race
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of Managed Zone needs to be created.
-
     url_param_only: true
     required: true
     immutable: true
 properties:
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Time the Namespace was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the Namespace was updated in UTC.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description of the resource.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Resource labels to represent user provided metadata.
-  - name: 'dns'
+  - name: dns
     type: String
     description: |
       DNS Name of the resource.
     required: true
-  - name: 'targetProject'
+  - name: targetProject
     type: String
     description: |
       The name of the Target Project.
     required: true
-  - name: 'targetVpc'
+  - name: targetVpc
     type: String
     description: |
       The name of the Target Project VPC Network.
