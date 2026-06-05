@@ -13,64 +13,70 @@
 
 ---
 name: Config
-min_version: beta
 description: Configuration for Firebase AI Logic.
-base_url: projects/{{project}}/locations/{{location}}/config
 references:
   guides:
-    'Official Documentation': 'https://firebase.google.com/docs/ai-logic'
-  api: 'https://firebase.google.com/docs/reference/ai-logic/rest'
-update_mask: true
+    Official Documentation: https://firebase.google.com/docs/ai-logic
+  api: https://firebase.google.com/docs/reference/ai-logic/rest
+base_url: projects/{{project}}/locations/{{location}}/config
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/config
-id_format: projects/{{project}}/locations/{{location}}/config
 create_url: projects/{{project}}/locations/{{location}}/config?update_mask=*
 delete_url: projects/{{project}}/locations/{{location}}/config?update_mask=*
-update_verb: PATCH
+update_mask: true
 create_verb: PATCH
+update_verb: PATCH
 delete_verb: PATCH
-# Singleton, can't be deleted
-exclude_sweeper: true
+id_format: projects/{{project}}/locations/{{location}}/config
 import_format:
   - projects/{{project}}/locations/{{location}}/config
   - '{{project}}/{{location}}'
+# Singleton, can't be deleted
+exclude_sweeper: true
+autogen_status: Q29uZmln
 custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-examples:
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl
+samples:
   - name: firebaseailogic_config_basic
     min_version: beta
     primary_resource_id: default
-    vars:
-      project_id: 'basic'
-    test_vars_overrides:
-      # for backward compatible
-      project_id: '"basic" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
     # Need the time_sleep resource
-    external_providers: ["time"]
+    external_providers: [time]
+    steps:
+      - name: firebaseailogic_config_basic
+        min_version: beta
+        resource_id_vars:
+          project_id: basic
+        test_vars_overrides:
+          # for backward compatible
+          project_id: '"basic" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
   - name: firebaseailogic_config_full
     min_version: beta
     primary_resource_id: default
-    vars:
-      project_id: 'full'
-      api_key_id: "gemini-api-key"
-    test_vars_overrides:
-      # for backward compatible
-      project_id: '"full" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
     # Need the time_sleep resource
-    external_providers: ["time"]
-autogen_status: Q29uZmln
+    external_providers: [time]
+    steps:
+      - name: firebaseailogic_config_full
+        min_version: beta
+        resource_id_vars:
+          project_id: full
+          api_key_id: gemini-api-key
+        test_vars_overrides:
+          # for backward compatible
+          project_id: '"full" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
 parameters:
   - name: location
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    default_value: 'global'
+    default_value: global
 properties:
   - name: generativeLanguageConfig
     type: NestedObject
@@ -108,7 +114,7 @@ properties:
     properties:
       - name: mode
         type: String
-        default_value: 'NONE'
+        default_value: NONE
         description: |-
           The current monitoring mode used for this project.
           Possible values:

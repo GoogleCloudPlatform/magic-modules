@@ -12,36 +12,38 @@
 # limitations under the License.
 
 ---
-name: 'ProcessorDefaultVersion'
+name: ProcessorDefaultVersion
 api_resource_type_kind: Processor
 description: |
   The default version for the processor. Deleting this resource is a no-op, and does not unset the default version.
 docs:
 base_url: '{{processor}}'
+immutable: true
 self_link: '{{processor}}'
 create_url: '{{processor}}:setDefaultProcessorVersion'
-exclude_delete: true
-immutable: true
+identity:
+  - processor
 import_format:
   - '{{%processor}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-identity:
-  - processor
+exclude_delete: true
 custom_code:
-  pre_create: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
-  pre_read: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
-  pre_delete: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
-examples:
-  - name: 'documentai_default_version'
-    primary_resource_id: 'processor'
-    vars:
-      processor_name: 'test-processor'
+  pre_create: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl
+  pre_read: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl
+  pre_update: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl
+  pre_delete: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl
+samples:
+  - name: documentai_default_version
+    primary_resource_id: processor
+    steps:
+      - name: documentai_default_version
+        resource_id_vars:
+          processor_name: test-processor
 parameters:
-  - name: 'processor'
+  - name: processor
     type: String
     description: |
       The processor to set the version on.
@@ -49,7 +51,7 @@ parameters:
     immutable: true
     ignore_read: true
 properties:
-  - name: 'version'
+  - name: version
     type: String
     description: |
       The version to set. Using `stable` or `rc` will cause the API to return the latest version in that release channel.
@@ -57,4 +59,4 @@ properties:
     api_name: defaultProcessorVersion
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
