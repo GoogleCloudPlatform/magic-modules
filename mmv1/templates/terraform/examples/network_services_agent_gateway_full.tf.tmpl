@@ -1,5 +1,5 @@
 resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
-  name     = "{{index $.ResourceIdVars "name"}}"
+  name     = "{{index $.Vars "name"}}"
   location = "us-central1"
   description = "A full configuration for Agent Gateway"
   labels = {
