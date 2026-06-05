@@ -13,12 +13,11 @@
 
 ---
 name: 'AgentGateway'
-min_version: beta
 description: |
   AgentGateway represents the agent gateway resource.
 references:
   guides:
-  api: 'https://cloud.google.com/network-services/docs/reference/network-services/rest/v1beta1/projects.locations.agentGateways'
+  api: 'https://cloud.google.com/network-services/docs/reference/network-services/rest/v1/projects.locations.agentGateways'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/agentGateways'
 self_link: 'projects/{{project}}/locations/{{location}}/agentGateways/{{name}}'
