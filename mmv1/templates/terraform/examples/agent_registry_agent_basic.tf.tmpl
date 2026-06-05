@@ -1,0 +1,19 @@
+resource "google_agent_registry_agent" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+  agent_id     = "{{index $.Vars "agent_id"}}"
+  location     = "global"
+  display_name = "My Agent"
+  description  = "An agent registered in Agent Registry"
+
+  interfaces {
+    url              = "https://myagent.com"
+    protocol_binding = "HTTP_JSON"
+  }
+
+  agent_spec {
+    type = "NO_SPEC"
+    content = {
+      description = "Spec content"
+    }
+  }
+}

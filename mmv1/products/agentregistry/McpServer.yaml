@@ -1,0 +1,117 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: McpServer
+description: Represents a registered MCP (Model Context Protocol) Server in the Agent Registry.
+base_url: projects/{{project}}/locations/{{location}}/services
+self_link: projects/{{project}}/locations/{{location}}/services/{{mcp_server_id}}
+create_url: projects/{{project}}/locations/{{location}}/services?serviceId={{mcp_server_id}}
+update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/services/{{mcp_server_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/services/{{mcp_server_id}}
+min_version: beta
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  result:
+    resource_inside_response: true
+  include_project: false
+examples:
+  - name: agent_registry_mcp_server_basic
+    primary_resource_id: example
+    min_version: beta
+    vars:
+      mcp_server_id: default-mcp-server
+parameters:
+  - name: location
+    type: String
+    description: The location of the Agent Registry service.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: mcpServerId
+    type: String
+    description: The ID to use for the MCP Server service.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: Output only. The resource name of the MCP Server.
+    output: true
+  - name: displayName
+    type: String
+    description: User-defined display name for the MCP Server.
+  - name: description
+    type: String
+    description: User-defined description of the MCP Server.
+  - name: registryResource
+    type: String
+    description: Output only. The resource name of the resulting MCP Server.
+    output: true
+  - name: createTime
+    type: String
+    description: Output only. The creation timestamp.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. The update timestamp.
+    output: true
+  - name: interfaces
+    type: Array
+    description: The connection details for the MCP Server.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: url
+          type: String
+          required: true
+          description: The destination URL.
+        - name: protocolBinding
+          type: Enum
+          required: true
+          description: The transport protocol binding.
+          enum_values:
+            - PROTOCOL_BINDING_UNSPECIFIED
+            - JSONRPC
+            - GRPC
+            - HTTP_JSON
+  - name: mcpServerSpec
+    type: NestedObject
+    required: true
+    description: The specification of the MCP Server.
+    properties:
+      - name: type
+        type: Enum
+        required: true
+        description: The type of the MCP Server spec content.
+        enum_values:
+          - TYPE_UNSPECIFIED
+          - NO_SPEC
+          - TOOL_SPEC
+      - name: content
+        type: KeyValuePairs
+        description: Optional. The content of the MCP Server spec.
