@@ -25,6 +25,16 @@ resource "google_apigee_organization" "{{$.PrimaryResourceId}}" {
   analytics_region    = "us-central1"
   project_id          = google_project.project.project_id
   disable_vpc_peering = true
+
+  addons_config {
+    integration_config {
+      enabled = true
+    }
+    api_security_config {
+      enabled = true
+    }
+  }
+
   depends_on          = [
     time_sleep.wait_300_seconds,
     time_sleep.wait_after_destroy,
