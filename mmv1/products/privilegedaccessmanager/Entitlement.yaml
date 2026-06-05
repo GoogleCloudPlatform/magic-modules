@@ -12,59 +12,61 @@
 # limitations under the License.
 
 ---
-name: 'Entitlement'
+name: Entitlement
 api_variant_patterns:
-  - 'folders/{folder}/locations/{location}/entitlements/{entitlement}'
-  - 'organizations/{organization}/locations/{location}/entitlements/{entitlement}'
-  - 'projects/{project}/locations/{location}/entitlements/{entitlement}'
+  - folders/{folder}/locations/{location}/entitlements/{entitlement}
+  - organizations/{organization}/locations/{location}/entitlements/{entitlement}
+  - projects/{project}/locations/{location}/entitlements/{entitlement}
 description: |
   An Entitlement defines the eligibility of a set of users to obtain a predefined access for some time possibly after going through an approval workflow.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/iam/docs/pam-overview'
-    'How to create an Entitlement': 'https://cloud.google.com/iam/docs/pam-create-entitlements'
-  api: 'https://cloud.google.com/iam/docs/reference/pam/rest'
+    Official Documentation: https://cloud.google.com/iam/docs/pam-overview
+    How to create an Entitlement: https://cloud.google.com/iam/docs/pam-create-entitlements
+  api: https://cloud.google.com/iam/docs/reference/pam/rest
 docs:
-id_format: '{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}'
 base_url: '{{parent}}/locations/{{location}}/entitlements'
 self_link: '{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}'
 create_url: '{{parent}}/locations/{{location}}/entitlements?entitlementId={{entitlement_id}}'
-update_verb: 'PATCH'
-update_mask: true
 delete_url: '{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}?force=true'
+update_mask: true
+update_verb: PATCH
+id_format: '{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}'
 import_format:
   - '{{%parent}}/locations/{{location}}/entitlements/{{entitlement_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
+autogen_async: true
 custom_code:
-  constants: 'templates/terraform/constants/privileged_access_manager_entitlement.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/privileged_access_manager_entitlement.go.tmpl'
-examples:
-  - name: 'privileged_access_manager_entitlement_basic'
-    primary_resource_id: 'tfentitlement'
-    vars:
-      entitlement_id: 'example-entitlement'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+  constants: templates/terraform/constants/privileged_access_manager_entitlement.go.tmpl
+  pre_update: templates/terraform/pre_update/privileged_access_manager_entitlement.go.tmpl
+samples:
+  - name: privileged_access_manager_entitlement_basic
+    primary_resource_id: tfentitlement
+    steps:
+      - name: privileged_access_manager_entitlement_basic
+        resource_id_vars:
+          entitlement_id: example-entitlement
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The region of the Entitlement resource.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'entitlementId'
+  - name: entitlementId
     type: String
     description: |
       The ID to use for this Entitlement. This will become the last part of the resource name.
@@ -74,8 +76,8 @@ parameters:
     required: true
     immutable: true
     validation:
-      function: 'validateEntitlementId'
-  - name: 'parent'
+      function: validateEntitlementId
+  - name: parent
     type: String
     description: |
       Format: projects/{project-id|project-number} or organizations/{organization-number} or folders/{folder-number}
@@ -83,25 +85,25 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Output Only. The entitlement's name follows a hierarchical structure, comprising the organization, folder, or project, alongside the region and a unique entitlement ID.
       Formats: organizations/{organization-number}/locations/{region}/entitlements/{entitlement-id}, folders/{folder-number}/locations/{region}/entitlements/{entitlement-id}, and projects/{project-id|project-number}/locations/{region}/entitlements/{entitlement-id}.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       Output only. Create time stamp. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z"
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       Output only. Update time stamp. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - name: 'eligibleUsers'
+  - name: eligibleUsers
     type: Array
     description: |
       Who can create Grants using Entitlement. This list should contain at most one entry
@@ -109,7 +111,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'principals'
+        - name: principals
           type: Array
           description: |
             Users who are being allowed for the operation. Each entry should be a valid v1 IAM Principal Identifier. Format for these is documented at "https://cloud.google.com/iam/docs/principal-identifiers#v1"
@@ -118,15 +120,15 @@ properties:
           item_type:
             type: String
           item_validation:
-            function: 'validateDeletedPrincipals'
-  - name: 'approvalWorkflow'
+            function: validateDeletedPrincipals
+  - name: approvalWorkflow
     type: NestedObject
     description: |
       The approvals needed before access will be granted to a requester.
       No approvals will be needed if this field is null. Different types of approval workflows that can be used to gate privileged access granting.
     immutable: true
     properties:
-      - name: 'manualApprovals'
+      - name: manualApprovals
         type: NestedObject
         description: |
           A manual approval workflow where users who are designated as approvers need to call the ApproveGrant/DenyGrant APIs for an Grant.
@@ -138,11 +140,11 @@ properties:
           A single user might be part of `approvers` ACL for multiple steps in this workflow but they can only approve once and that approval will only be considered to satisfy the approval step at which it was granted.
         required: true
         properties:
-          - name: 'requireApproverJustification'
+          - name: requireApproverJustification
             type: Boolean
             description: |
               Optional. Do the approvers need to provide a justification for their actions?
-          - name: 'steps'
+          - name: steps
             type: Array
             description: |
               List of approval steps in this workflow. These steps would be followed in the specified order sequentially.
@@ -150,7 +152,7 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'approvers'
+                - name: approvers
                   type: Array
                   description: |
                     The potential set of approvers in this step. This list should contain at only one entry.
@@ -158,7 +160,7 @@ properties:
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'principals'
+                      - name: principals
                         type: Array
                         description: |
                           Users who are being allowed for the operation. Each entry should be a valid v1 IAM Principal Identifier. Format for these is documented at: https://cloud.google.com/iam/docs/principal-identifiers#v1
@@ -168,52 +170,52 @@ properties:
                           type: String
                         min_size: 1
                         item_validation:
-                          function: 'validateDeletedPrincipals'
+                          function: validateDeletedPrincipals
                   min_size: 1
                   max_size: 1
-                - name: 'approvalsNeeded'
+                - name: approvalsNeeded
                   type: Integer
                   description: |
                     How many users from the above list need to approve.
                     If there are not enough distinct users in the list above then the workflow
                     will indefinitely block. Should always be greater than 0. Currently 1 is the only
                     supported value.
-                - name: 'approverEmailRecipients'
+                - name: approverEmailRecipients
                   type: Array
                   description: |
                     Optional. Additional email addresses to be notified when a grant is pending approval.
                   is_set: true
                   item_type:
                     type: String
-                - name: 'id'
+                - name: id
                   type: String
                   description: |
                     Output Only. The ID of the approval step.
                   min_version: beta
                   output: true
-  - name: 'privilegedAccess'
+  - name: privilegedAccess
     type: NestedObject
     description: |
       Privileged access that this service can be used to gate.
     required: true
     properties:
-      - name: 'gcpIamAccess'
+      - name: gcpIamAccess
         type: NestedObject
         description: |
           GcpIamAccess represents IAM based access control on a GCP resource. Refer to https://cloud.google.com/iam/docs to understand more about IAM.
         required: true
         properties:
-          - name: 'resourceType'
+          - name: resourceType
             type: String
             description: |
               The type of this resource.
             required: true
-          - name: 'resource'
+          - name: resource
             type: String
             description: |
               Name of the resource.
             required: true
-          - name: 'roleBindings'
+          - name: roleBindings
             type: Array
             description: |
               Role bindings to be created on successful grant.
@@ -221,39 +223,39 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'role'
+                - name: role
                   type: String
                   description: |
                     IAM role to be granted. https://cloud.google.com/iam/docs/roles-overview.
                   required: true
-                - name: 'conditionExpression'
+                - name: conditionExpression
                   type: String
                   description: |
                     The expression field of the IAM condition to be associated with the role. If specified, a user with an active grant for this entitlement would be able to access the resource only if this condition evaluates to true for their request.
                     https://cloud.google.com/iam/docs/conditions-overview#attributes.
-                - name: 'id'
+                - name: id
                   type: String
                   description: |
                     Output Only. The ID corresponding to this role binding in the policy binding. This will be unique within an entitlement across time. Gets re-generated each time the entitlement is updated.
                   min_version: beta
                   output: true
-  - name: 'maxRequestDuration'
+  - name: maxRequestDuration
     type: String
     description: |
       The maximum amount of time for which access would be granted for a request.
       A requester can choose to ask for access for less than this duration but never more.
       Format: calculate the time in seconds and concatenate it with 's' i.e. 2 hours = "7200s", 45 minutes = "2700s"
     required: true
-  - name: 'state'
+  - name: state
     type: String
     description: Output only. The current state of the Entitlement.
     output: true
-  - name: 'etag'
+  - name: etag
     type: Fingerprint
     description: |
       For Resource freshness validation (https://google.aip.dev/154)
     output: true
-  - name: 'requesterJustificationConfig'
+  - name: requesterJustificationConfig
     type: NestedObject
     description: |
       Defines the ways in which a requester should provide the justification while requesting for access.
@@ -261,7 +263,7 @@ properties:
     send_empty_value: true
     allow_empty_object: true
     properties:
-      - name: 'notMandatory'
+      - name: notMandatory
         type: NestedObject
         description: |
           The justification is not mandatory but can be provided in any of the supported formats.
@@ -269,9 +271,8 @@ properties:
         allow_empty_object: true
         conflicts:
           - unstructured
-        properties:
-          []
-      - name: 'unstructured'
+        properties: []
+      - name: unstructured
         type: NestedObject
         description: |
           The requester has to provide a justification in the form of free flowing text.
@@ -279,16 +280,15 @@ properties:
         allow_empty_object: true
         conflicts:
           - not_mandatory
-        properties:
-          []
-  - name: 'additionalNotificationTargets'
+        properties: []
+  - name: additionalNotificationTargets
     type: NestedObject
     description: |
       AdditionalNotificationTargets includes email addresses to be notified.
     send_empty_value: true
     allow_empty_object: true
     properties:
-      - name: 'adminEmailRecipients'
+      - name: adminEmailRecipients
         type: Array
         description: |
           Optional. Additional email addresses to be notified when a principal(requester) is granted access.
@@ -296,7 +296,7 @@ properties:
         allow_empty_object: true
         item_type:
           type: String
-      - name: 'requesterEmailRecipients'
+      - name: requesterEmailRecipients
         type: Array
         description: |
           Optional. Additional email address to be notified about an eligible entitlement.

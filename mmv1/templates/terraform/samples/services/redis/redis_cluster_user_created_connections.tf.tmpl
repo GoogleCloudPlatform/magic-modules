@@ -1,5 +1,5 @@
 resource "google_redis_cluster_user_created_connections" "{{$.PrimaryResourceId}}" {
-  name = "{{index $.Vars "cluster_name"}}"
+  name = "{{index $.ResourceIdVars "cluster_name"}}"
   region = "us-central1"
   cluster_endpoints {
     connections {
@@ -45,7 +45,7 @@ resource "google_redis_cluster_user_created_connections" "{{$.PrimaryResourceId}
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rule1_network1" {
-  name                   = "{{index $.Vars "forwarding_rule1_network1_name"}}"
+  name                   = "{{index $.ResourceIdVars "forwarding_rule1_network1_name"}}"
   region                 = "us-central1"
   ip_address             = google_compute_address.ip1_network1.id
   load_balancing_scheme  = ""
@@ -54,7 +54,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule1_network1" {
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rule2_network1" {
-  name                   = "{{index $.Vars "forwarding_rule2_network1_name"}}"
+  name                   = "{{index $.ResourceIdVars "forwarding_rule2_network1_name"}}"
   region                 = "us-central1"
   ip_address             = google_compute_address.ip2_network1.id
   load_balancing_scheme  = ""
@@ -63,7 +63,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule2_network1" {
 }
 
 resource "google_compute_address" "ip1_network1" {
-  name         = "{{index $.Vars "ip1_network1_name"}}"
+  name         = "{{index $.ResourceIdVars "ip1_network1_name"}}"
   region       = "us-central1"
   subnetwork   = google_compute_subnetwork.subnet_network1.id
   address_type = "INTERNAL"
@@ -71,7 +71,7 @@ resource "google_compute_address" "ip1_network1" {
 }
 
 resource "google_compute_address" "ip2_network1" {
-  name         = "{{index $.Vars "ip2_network1_name"}}"
+  name         = "{{index $.ResourceIdVars "ip2_network1_name"}}"
   region       = "us-central1"
   subnetwork   = google_compute_subnetwork.subnet_network1.id
   address_type = "INTERNAL"
@@ -79,19 +79,19 @@ resource "google_compute_address" "ip2_network1" {
 }
 
 resource "google_compute_subnetwork" "subnet_network1" {
-  name          = "{{index $.Vars "subnet_network1_name"}}"
+  name          = "{{index $.ResourceIdVars "subnet_network1_name"}}"
   ip_cidr_range = "10.0.0.248/29"
   region        = "us-central1"
   network       = google_compute_network.network1.id
 }
 
 resource "google_compute_network" "network1" {
-  name                    = "{{index $.Vars "network1_name"}}"
+  name                    = "{{index $.ResourceIdVars "network1_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rule1_network2" {
-  name                   = "{{index $.Vars "forwarding_rule1_network2_name"}}"
+  name                   = "{{index $.ResourceIdVars "forwarding_rule1_network2_name"}}"
   region                 = "us-central1"
   ip_address             = google_compute_address.ip1_network2.id
   load_balancing_scheme  = ""
@@ -100,7 +100,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule1_network2" {
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rule2_network2" {
-  name                   = "{{index $.Vars "forwarding_rule2_network2_name"}}"
+  name                   = "{{index $.ResourceIdVars "forwarding_rule2_network2_name"}}"
   region                 = "us-central1"
   ip_address             = google_compute_address.ip2_network2.id
   load_balancing_scheme  = ""
@@ -109,7 +109,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule2_network2" {
 }
 
 resource "google_compute_address" "ip1_network2" {
-  name         = "{{index $.Vars "ip1_network2_name"}}"
+  name         = "{{index $.ResourceIdVars "ip1_network2_name"}}"
   region       = "us-central1"
   subnetwork   = google_compute_subnetwork.subnet_network2.id
   address_type = "INTERNAL"
@@ -117,7 +117,7 @@ resource "google_compute_address" "ip1_network2" {
 }
 
 resource "google_compute_address" "ip2_network2" {
-  name         = "{{index $.Vars "ip2_network2_name"}}"
+  name         = "{{index $.ResourceIdVars "ip2_network2_name"}}"
   region       = "us-central1"
   subnetwork   = google_compute_subnetwork.subnet_network2.id
   address_type = "INTERNAL"
@@ -125,20 +125,20 @@ resource "google_compute_address" "ip2_network2" {
 }
 
 resource "google_compute_subnetwork" "subnet_network2" {
-  name          = "{{index $.Vars "subnet_network2_name"}}"
+  name          = "{{index $.ResourceIdVars "subnet_network2_name"}}"
   ip_cidr_range = "10.0.0.248/29"
   region        = "us-central1"
   network       = google_compute_network.network2.id
 }
 
 resource "google_compute_network" "network2" {
-  name                    = "{{index $.Vars "network2_name"}}"
+  name                    = "{{index $.ResourceIdVars "network2_name"}}"
   auto_create_subnetworks = false
 }
 
 // redis cluster without endpoint
 resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
-  name           = "{{index $.Vars "cluster_name"}}"
+  name           = "{{index $.ResourceIdVars "cluster_name"}}"
   shard_count    = 3
   region = "us-central1"
   replica_count = 0

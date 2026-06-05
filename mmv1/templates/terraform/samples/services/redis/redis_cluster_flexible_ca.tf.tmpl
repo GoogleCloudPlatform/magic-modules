@@ -1,5 +1,5 @@
 resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
-  name           = "{{index $.Vars "cluster_name"}}"
+  name           = "{{index $.ResourceIdVars "cluster_name"}}"
   shard_count    = 3
   region         = "us-central1"
   
@@ -12,7 +12,7 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   server_ca_mode          = "SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA"
   server_ca_pool          = google_privateca_ca_pool.default.id
 
-  deletion_protection_enabled = {{index $.Vars "deletion_protection_enabled"}}
+  deletion_protection_enabled = {{index $.ResourceIdVars "deletion_protection_enabled"}}
 
   depends_on = [
     google_network_connectivity_service_connection_policy.default,
@@ -21,14 +21,14 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_privateca_ca_pool" "default" {
-  name     = "{{index $.Vars "ca_pool_name"}}"
+  name     = "{{index $.ResourceIdVars "ca_pool_name"}}"
   location = "us-central1"
   tier     = "ENTERPRISE"
 }
 
 resource "google_privateca_certificate_authority" "default" {
   pool                     = google_privateca_ca_pool.default.name
-  certificate_authority_id = "{{index $.Vars "ca_auth_id"}}"
+  certificate_authority_id = "{{index $.ResourceIdVars "ca_auth_id"}}"
   location                 = "us-central1"
   config {
     subject_config {
@@ -63,7 +63,7 @@ resource "google_privateca_certificate_authority" "default" {
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {
-  name           = "{{index $.Vars "policy_name"}}"
+  name           = "{{index $.ResourceIdVars "policy_name"}}"
   location       = "us-central1"
   service_class  = "gcp-memorystore-redis"
   network        = google_compute_network.consumer_net.id
@@ -73,13 +73,13 @@ resource "google_network_connectivity_service_connection_policy" "default" {
 }
 
 resource "google_compute_subnetwork" "consumer_subnet" {
-  name          = "{{index $.Vars "subnet_name"}}"
+  name          = "{{index $.ResourceIdVars "subnet_name"}}"
   ip_cidr_range = "10.0.0.248/29"
   region        = "us-central1"
   network       = google_compute_network.consumer_net.id
 }
 
 resource "google_compute_network" "consumer_net" {
-  name                    = "{{index $.Vars "network_name"}}"
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
   auto_create_subnetworks = false
 }
