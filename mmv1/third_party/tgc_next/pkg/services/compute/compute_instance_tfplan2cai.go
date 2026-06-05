@@ -175,34 +175,48 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	}
 
 	// Create the instance information
-	return &compute.Instance{
-		CanIpForward:               d.Get("can_ip_forward").(bool),
-		Description:                d.Get("description").(string),
-		Disks:                      disks,
-		MachineType:                machineTypeUrl,
-		Metadata:                   metadata,
-		Name:                       d.Get("name").(string),
-		Zone:                       d.Get("zone").(string),
-		NetworkInterfaces:          networkInterfaces,
-		NetworkPerformanceConfig:   networkPerformanceConfig,
-		Tags:                       resourceInstanceTags(d),
-		Params:                     params,
-		Labels:                     tpgresource.ExpandLabels(d),
-		ServiceAccounts:            expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
-		GuestAccelerators:          accels,
-		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
-		Scheduling:                 scheduling,
-		DeletionProtection:         d.Get("deletion_protection").(bool),
-		Hostname:                   d.Get("hostname").(string),
-		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
-		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
-		DisplayDevice:              expandDisplayDevice(d),
-		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
-		ReservationAffinity:        reservationAffinity,
-		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
-		InstanceEncryptionKey:      instanceEncryptionKey,
-	}, nil
+	instance := &compute.Instance{
+		CanIpForward:             d.Get("can_ip_forward").(bool),
+		Description:              d.Get("description").(string),
+		Disks:                    disks,
+		MachineType:              machineTypeUrl,
+		Metadata:                 metadata,
+		Name:                     d.Get("name").(string),
+		Zone:                     d.Get("zone").(string),
+		NetworkInterfaces:        networkInterfaces,
+		NetworkPerformanceConfig: networkPerformanceConfig,
+		Tags:                     resourceInstanceTags(d),
+		Params:                   params,
+		Labels:                   tpgresource.ExpandLabels(d),
+		ServiceAccounts:          expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
+		GuestAccelerators:        accels,
+		MinCpuPlatform:           d.Get("min_cpu_platform").(string),
+		Scheduling:               scheduling,
+		DeletionProtection:       d.Get("deletion_protection").(bool),
+		Hostname:                 d.Get("hostname").(string),
+		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
+		DisplayDevice:            expandDisplayDevice(d),
+		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
+		ReservationAffinity:      reservationAffinity,
+		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
+		InstanceEncryptionKey:    instanceEncryptionKey,
+	}
+	if cic := expandConfidentialInstanceConfig(d); cic != nil {
+		instance.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{
+			EnableConfidentialCompute: cic["enableConfidentialCompute"].(bool),
+			ConfidentialInstanceType:  cic["confidentialInstanceType"].(string),
+		}
+	}
+	if sicMap := expandShieldedVmConfigs(d); sicMap != nil {
+		instance.ShieldedInstanceConfig = &compute.ShieldedInstanceConfig{
+			EnableSecureBoot:          sicMap["enableSecureBoot"].(bool),
+			EnableVtpm:                sicMap["enableVtpm"].(bool),
+			EnableIntegrityMonitoring: sicMap["enableIntegrityMonitoring"].(bool),
+			ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
+		}
+	}
+
+	return instance, nil
 }
 
 func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
@@ -333,7 +347,16 @@ func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.C
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.guest_os_features"); ok {
-		disk.GuestOsFeatures = expandComputeInstanceGuestOsFeatures(v)
+		guestOsFeaturesSlice := expandComputeInstanceGuestOsFeatures(v)
+		disk.GuestOsFeatures = make([]*compute.GuestOsFeature, len(guestOsFeaturesSlice))
+		for i, raw := range guestOsFeaturesSlice {
+			disk.GuestOsFeatures[i] = &compute.GuestOsFeature{}
+			if m, ok := raw.(map[string]interface{}); ok && m != nil {
+				if t, ok := m["type"].(string); ok {
+					disk.GuestOsFeatures[i].Type = t
+				}
+			}
+		}
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
