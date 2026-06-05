@@ -68,11 +68,12 @@ func exeCconvertResourceTemplate(basePath, targetFile, cachePath string) error {
 			if err != nil {
 				if errors.Is(err, os.ErrNotExist) {
 					fmt.Println("Cache file not found, creating")
+				} else {
+					return fmt.Errorf("failed to read touched files cache: %w", err)
 				}
-				return fmt.Errorf("failed to read touched files cache: %w", err)
 			}
 		}
-		if touchedFiles == nil {
+		if len(touchedFiles) == 0 {
 			fmt.Println("Fetching open PRs updated in the last 2 months from GitHub...")
 			var err error
 			touchedFiles, err = github.GetFilesTouchedByOpenPRs()
