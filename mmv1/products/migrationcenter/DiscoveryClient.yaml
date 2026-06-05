@@ -30,7 +30,7 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: RGlzY292ZXJ5Q2xpZW50
+autogen_status: RGlzY292ZXJ5Q2xpZW50QXV0b2dlblYyQWdlbnQ=
 autogen_async: true
 samples:
   - name: 'migration_center_discovery_client_basic'
