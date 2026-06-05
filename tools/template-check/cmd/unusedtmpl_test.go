@@ -125,6 +125,6 @@ func TestFindCodeReferencedTmpls(t *testing.T) {
 		t.Errorf("findCodeReferencedTmpls() expected to find templates/terraform/resource.go.tmpl")
 	}
 	if !got["templates/terraform/samples/base_configs/test_file.go.tmpl"] {
-		t.Errorf("findCodeReferencedTmpls() expected to find templates/terraform/examples/base_configs/test_file.go.tmpl")
+		t.Errorf("findCodeReferencedTmpls() expected to find templates/terraform/samples/base_configs/test_file.go.tmpl")
 	}
 }
