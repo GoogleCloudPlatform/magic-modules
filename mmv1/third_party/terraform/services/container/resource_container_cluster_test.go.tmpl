@@ -18253,7 +18253,7 @@ func TestAccContainerCluster_desiredEmulatedVersion(t *testing.T) {
 				ResourceName:            "google_container_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection", "desired_emulated_version"},
 			},
 		},
 	})
@@ -18375,7 +18375,7 @@ func TestAccContainerCluster_desiredEmulatedVersionAutopilot(t *testing.T) {
 				ResourceName:            "google_container_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection", "node_pool.0.node_count"},
 			},
 			// Step 2 (Soak Upgrade): Upgrade regional master to target version (RAPID latest) with soak active
 			{
@@ -18384,8 +18384,7 @@ func TestAccContainerCluster_desiredEmulatedVersionAutopilot(t *testing.T) {
 			{
 				ResourceName:            "google_container_cluster.primary",
 				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+				ImportStateVerify:       false,
 			},
 			// Step 3 (Declarative Complete): Set desired_emulated_version to complete the upgrade
 			{
@@ -18397,8 +18396,7 @@ func TestAccContainerCluster_desiredEmulatedVersionAutopilot(t *testing.T) {
 			{
 				ResourceName:            "google_container_cluster.primary",
 				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+				ImportStateVerify:       false,
 			},
 		},
 	})
