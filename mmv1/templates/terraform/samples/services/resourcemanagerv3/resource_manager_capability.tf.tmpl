@@ -1,5 +1,5 @@
 resource "google_folder" "folder" {
-  display_name     = "{{index $.Vars "display_name"}}"
+  display_name     = "{{index $.ResourceIdVars "display_name"}}"
   parent           = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
 }

@@ -1,5 +1,5 @@
 resource "google_privileged_access_manager_entitlement" "{{$.PrimaryResourceId}}" {
-    entitlement_id = "{{index $.Vars "entitlement_id"}}"
+    entitlement_id = "{{index $.ResourceIdVars "entitlement_id"}}"
     location = "global"
     max_request_duration = "43200s"
     parent = "projects/{{index $.TestEnvVars "project"}}"
