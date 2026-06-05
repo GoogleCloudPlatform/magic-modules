@@ -34,6 +34,7 @@ self_link: 'projects/{{project}}/hmacKeys/{{access_id}}'
 create_url: 'projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}'
 # technically updatable, but implemented as custom update for new fingerprint support
 immutable: true
+generate_list_resource: true
 import_format:
   - 'projects/{{project}}/hmacKeys/{{access_id}}'
 timeouts:

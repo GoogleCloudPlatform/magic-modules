@@ -1,0 +1,25 @@
+resource "google_oracle_database_goldengate_connection" "{{$.PrimaryResourceId}}" {
+  goldengate_connection_id = "{{index $.Vars "goldengate_connection_id"}}"
+  location                 = "us-east4"
+  project                  = "{{index $.Vars "project"}}"
+  odb_network              = "{{index $.Vars "odb_network"}}"
+  odb_subnet               = "{{index $.Vars "odb_subnet"}}"
+  gcp_oracle_zone          = "us-east4-b-r1"
+  labels = {
+    "label-one" = "value-one"
+  }
+
+  properties {
+    display_name    = "{{index $.Vars "goldengate_connection_id"}} display name"
+    connection_type = "ORACLE"
+    routing_method  = "DEDICATED_ENDPOINT"
+    oracle_connection_properties {
+      technology_type        = "ORACLE_AUTONOMOUS_DATABASE_AT_GOOGLE_CLOUD"
+      username               = "admin"
+      password               = "GenerateWallet@123"
+      session_mode           = "DIRECT"
+      gcp_oracle_database_id = "projects/{{index $.Vars "project"}}/locations/us-east4/autonomousDatabases/{{index $.Vars "autonomous_database_id"}}"
+    }
+  }
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+}

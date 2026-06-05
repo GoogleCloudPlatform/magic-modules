@@ -44,6 +44,7 @@ references:
 base_url: projects/{{project}}/regions/{{region}}/subnetworks
 immutable: true
 has_self_link: true
+generate_list_resource: true
 bypass_clientside_update_check: true
 collection_url_key: items
 iam_policy:
@@ -590,6 +591,7 @@ properties:
     description: |
       'Configures subnet mask resolution for this subnetwork.'
     immutable: true
+    is_missing_in_cai: true
     enum_values:
       - ARP_ALL_RANGES
       - ARP_PRIMARY_RANGE

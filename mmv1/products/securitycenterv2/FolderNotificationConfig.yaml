@@ -36,6 +36,8 @@ timeouts:
   delete_minutes: 20
 custom_code:
   post_import: 'templates/terraform/post_import/scc_v2_folder_notification_config.go.tmpl'
+include_in_tgc_next: true
+cai_asset_name_format: 'folders/{{folder}}/locations/{{location}}/notificationConfigs/{{config_id}}'
 examples:
   - name: 'scc_v2_folder_notification_config_basic'
     primary_resource_id: 'custom_notification_config'

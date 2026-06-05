@@ -885,7 +885,7 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "static", "None", "best-effort", "pod", "100ms", networkName, subnetworkName, "TRUE", "100Mi", "1m", "10m", true, true, 2048, 10, 10, 85),
+				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "static", "None", "best-effort", "pod", "100ms", networkName, subnetworkName, "TRUE", "100Mi", "1m", "10m", true, true, 2048, 10, 10, 85, "100s"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						acctest.ExpectNoDelete(),
@@ -920,6 +920,8 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 						                       "node_config.0.kubelet_config.0.topology_manager.0.scope", "pod"),							   
 					// resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
 					//      "node_config.0.kubelet_config.0.allowed_unsafe_sysctls.0", "kernel.shm*"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
+            "node_config.0.kubelet_config.0.crash_loop_back_off.0.max_container_restart_period", "100s"),
 				),
 			},
 			{
@@ -928,7 +930,7 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "", "Static", "single-numa-node", "container", "", networkName, subnetworkName, "FALSE", "200Mi", "30s", "", false, true, 1024, 5, 50, 80),
+				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "", "Static", "single-numa-node", "container", "", networkName, subnetworkName, "FALSE", "200Mi", "30s", "", false, true, 1024, 5, 50, 80, "60s"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						acctest.ExpectNoDelete(),
@@ -945,7 +947,9 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 						"node_config.0.kubelet_config.0.topology_manager.0.policy", "single-numa-node"),
 					resource.TestCheckResourceAttr(
 						"google_container_node_pool.with_kubelet_config",
-						"node_config.0.kubelet_config.0.topology_manager.0.scope", "container"),		
+						"node_config.0.kubelet_config.0.topology_manager.0.scope", "container"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
+						"node_config.0.kubelet_config.0.crash_loop_back_off.0.max_container_restart_period", "60s"),
 				),
 			},
 			{
@@ -973,7 +977,7 @@ func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccContainerNodePool_withKubeletConfig(cluster, np, "dontexist", "", "", "", "100us", networkName, subnetworkName,"TRUE", "", "", "", false, true, 1024, 2, 70, 75),
+				Config:      testAccContainerNodePool_withKubeletConfig(cluster, np, "dontexist", "", "", "", "100us", networkName, subnetworkName,"TRUE", "", "", "", false, true, 1024, 2, 70, 75, "300s"),
 				ExpectError: regexp.MustCompile(`.*to be one of \["?static"? "?none"? "?"?\].*`),
 			},
 		},
@@ -1549,6 +1553,31 @@ func TestAccContainerNodePool_withGPU(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_withRDMA(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withRDMA(cluster, np, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np_with_gpudirect",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccContainerNodePool_withManagement(t *testing.T) {
 	t.Parallel()
 
@@ -1627,6 +1656,14 @@ func TestAccContainerNodePool_withNodeDrainConfig(t *testing.T) {
 				ResourceName:      "google_container_node_pool.np_with_node_drain_config",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_withPrivateNodeDrainConfig(cluster, nodePool, networkName, subnetworkName,  "pdb_timeout_duration", "300s"),
+        ExpectError: regexp.MustCompile(`node drain timeout is not enabled for this project`),
+			},
+			{
+				Config: testAccContainerNodePool_withPrivateNodeDrainConfig(cluster, nodePool, networkName, subnetworkName,  "grace_termination_duration", "300s"),
+        ExpectError: regexp.MustCompile(`node drain timeout is not enabled for this project`),
 			},
 		},
 	})
@@ -4044,7 +4081,7 @@ resource "google_container_node_pool" "with_sandbox_config" {
 `, cluster, networkName, subnetworkName, np)
 }
 
-func testAccContainerNodePool_withKubeletConfig(cluster, np, policy, memoryManagerPolicy, topologyManagerPolicy, topologyManagerScope, period, networkName, subnetworkName, insecureKubeletReadonlyPortEnabled, containerLogMaxSize, imageMinimumGcAge, imageMaximumGcAge string, quota, singleProcessOomKill bool, podPidsLimit, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent int) string {
+func testAccContainerNodePool_withKubeletConfig(cluster, np, policy, memoryManagerPolicy, topologyManagerPolicy, topologyManagerScope, period, networkName, subnetworkName, insecureKubeletReadonlyPortEnabled, containerLogMaxSize, imageMinimumGcAge, imageMaximumGcAge string, quota, singleProcessOomKill bool, podPidsLimit, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent int, maxContainerRestart string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
@@ -4072,13 +4109,13 @@ resource "google_container_node_pool" "with_kubelet_config" {
     image_type = "COS_CONTAINERD"
     kubelet_config {
       cpu_manager_policy                     = %q
-	  memory_manager  {
-	    policy = %q
-	  }
-	  topology_manager {
-	    policy = %q
-	    scope = %q
-	  }
+      memory_manager  {
+        policy = %q
+      }
+      topology_manager {
+        policy = %q
+        scope = %q
+      }
       cpu_cfs_quota                          = %v
       cpu_cfs_quota_period                   = %q
       insecure_kubelet_readonly_port_enabled = "%s"
@@ -4095,7 +4132,7 @@ resource "google_container_node_pool" "with_kubelet_config" {
       eviction_max_pod_grace_period_seconds  = 200
       eviction_soft {
         memory_available = "100Mi"
-	nodefs_available = "50%%"
+        nodefs_available = "50%%"
         nodefs_inodes_free = "40%%"
         imagefs_available = "30%%"
         imagefs_inodes_free = "20%%"
@@ -4103,7 +4140,7 @@ resource "google_container_node_pool" "with_kubelet_config" {
       }
       eviction_soft_grace_period {
         memory_available = "5m"
-	nodefs_available = "4m30s"
+        nodefs_available = "4m30s"
         nodefs_inodes_free = "3.6m"
         imagefs_available = "100s"
         imagefs_inodes_free = "2m"
@@ -4117,6 +4154,9 @@ resource "google_container_node_pool" "with_kubelet_config" {
         imagefs_inodes_free = "9%%"
         pid_available = "5%%"
       }
+			crash_loop_back_off {
+				max_container_restart_period = "%s"
+			}
     }
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
@@ -4125,7 +4165,7 @@ resource "google_container_node_pool" "with_kubelet_config" {
     logging_variant = "DEFAULT"
   }
 }
-`, cluster, networkName, subnetworkName, np, policy, memoryManagerPolicy, topologyManagerPolicy, topologyManagerScope, quota, period, insecureKubeletReadonlyPortEnabled, podPidsLimit, containerLogMaxSize, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent, imageMinimumGcAge, imageMaximumGcAge, singleProcessOomKill)
+`, cluster, networkName, subnetworkName, np, policy, memoryManagerPolicy, topologyManagerPolicy, topologyManagerScope, quota, period, insecureKubeletReadonlyPortEnabled, podPidsLimit, containerLogMaxSize, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent, imageMinimumGcAge, imageMaximumGcAge, singleProcessOomKill, maxContainerRestart)
 }
 
 func testAccContainerNodePool_withLinuxNodeConfig(cluster, np, tcpMem, networkName, subnetworkName string) string {
@@ -4656,6 +4696,51 @@ resource "google_container_node_pool" "with_upgrade_settings" {
 `, clusterName, networkName, subnetworkName, nodePoolName, upgradeSettings)
 }
 
+func testAccContainerNodePool_withRDMA(cluster, np, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1b" {
+  location = "us-central1-b"
+}
+
+resource "google_container_cluster" "cluster" {
+  name                = "%s"
+  location            = "us-central1-b"
+  min_master_version  = data.google_container_engine_versions.central1b.latest_master_version
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+  enable_multi_networking = true
+  datapath_provider       = "ADVANCED_DATAPATH"
+
+  initial_node_count       = 1
+  remove_default_node_pool = true
+}
+
+resource "google_container_node_pool" "np_with_gpudirect" {
+  name     = "%s"
+  location = "us-central1-b"
+  cluster  = google_container_cluster.cluster.name
+  network_config { accelerator_network_profile = "auto" }
+
+  node_config {
+    machine_type = "a3-ultragpu-8g"
+
+    guest_accelerator {
+		type  = "nvidia-h200-141gb"
+		count = 8
+   }
+
+   gpudirect_strategy = "RDMA"
+
+   ephemeral_storage_local_ssd_config {
+     local_ssd_count = 32
+     data_cache_count = 0
+   }
+  }
+}
+`, cluster, networkName, subnetworkName, np)
+}
+
 func testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1c" {
@@ -4764,6 +4849,34 @@ resource "google_container_node_pool" "np_with_node_drain_config" {
   }
 }
 `, cluster, networkName, subnetworkName, np)
+}
+
+func testAccContainerNodePool_withPrivateNodeDrainConfig(cluster, np, networkName, subnetworkName, privateName, privateVal string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+
+resource "google_container_node_pool" "np_with_node_drain_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_drain_config {
+    %s = "%s"
+  }
+}
+`, cluster, networkName, subnetworkName, np, privateName, privateVal)
 }
 
 func testAccContainerNodePool_withAccurateTimeConfig(cluster, np, networkName, subnetworkName string, enablePTP bool) string {

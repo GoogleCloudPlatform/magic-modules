@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// Writes the data into a JSON file test
+// Writes the data into a JSON file
 func writeJSONFile(filename string, data interface{}) error {
 	jsonData, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {

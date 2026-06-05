@@ -36,6 +36,7 @@ base_url: 'projects/{{project}}/global/snapshots'
 has_self_link: true
 create_url: 'projects/{{project}}/global/snapshots'
 immutable: true
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -112,6 +113,7 @@ parameters:
       If you do not provide an encryption key when creating the snapshot,
       then the snapshot will be encrypted using an automatically generated
       key and you do not need to provide a key to use the snapshot later.
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -153,6 +155,7 @@ parameters:
       if the source snapshot is protected by a customer-supplied encryption
       key.
     ignore_read: true
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String

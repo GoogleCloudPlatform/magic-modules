@@ -389,7 +389,7 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 
 	// Convert Examples to Samples in memory after overrides are applied
 	if len(resource.Examples) > 0 {
-
+		var convertedSamples []*apiresource.Sample
 		for _, e := range resource.Examples {
 			// Create an in-memory custom wrapper over the fs for legacy template files
 			if e.ConfigPath == "" {
@@ -425,8 +425,9 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 				TGCSkipTest:         e.TGCSkipTest,
 				Steps:               steps,
 			}
-			resource.Samples = append(resource.Samples, sample)
+			convertedSamples = append(convertedSamples, sample)
 		}
+		resource.Samples = append(convertedSamples, resource.Samples...)
 		resource.Examples = nil
 	}
 
