@@ -1,5 +1,0 @@
-resource "google_ml_engine_model" "{{$.PrimaryResourceId}}" {
-  name        = "{{index $.Vars "model_name"}}"
-  description = "My model"
-  regions     = ["us-central1"]
-}
