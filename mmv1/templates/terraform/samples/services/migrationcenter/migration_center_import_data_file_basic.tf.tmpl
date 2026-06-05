@@ -1,19 +1,19 @@
 resource "google_migration_center_source" "default" {
   location  = "us-central1"
-  source_id = "{{index $.Vars "source_id"}}"
+  source_id = "{{index $.ResourceIdVars "source_id"}}"
   type      = "SOURCE_TYPE_CUSTOM"
 }
 
 resource "google_migration_center_import_job" "default" {
   location      = "us-central1"
-  import_job_id = "{{index $.Vars "import_job_id"}}"
+  import_job_id = "{{index $.ResourceIdVars "import_job_id"}}"
   asset_source  = google_migration_center_source.default.id
 }
 
 resource "google_migration_center_import_data_file" "default" {
   location            = "us-central1"
   import_job          = google_migration_center_import_job.default.import_job_id
-  import_data_file_id = "{{index $.Vars "import_data_file_id"}}"
-  display_name        = "Terraform integration test display"
-  format              = "IMPORT_JOB_FORMAT_RVTOOLS_XLSX"
+  import_data_file_id = "{{index $.ResourceIdVars "import_data_file_id"}}"
+  display_name        = "{{index $.Vars "display_name"}}"
+  format              = "{{index $.Vars "format"}}"
 }
