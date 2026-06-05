@@ -1,7 +1,7 @@
 resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
-  name           = "{{index $.Vars "instance_name"}}"
+  name           = "{{index $.ResourceIdVars "instance_name"}}"
   tier           = "STANDARD_HA"
-  memory_size_gb = 1
+  memory_size_gb = 5
 
   location_id             = "us-central1-a"
   alternative_location_id = "us-central1-f"
@@ -10,26 +10,17 @@ resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
 
   redis_version     = "REDIS_7_2"
   display_name      = "Terraform Test Instance"
+  replica_count     = 5
+  read_replicas_mode = "READ_REPLICAS_ENABLED"
 
   labels = {
     my_key    = "my_val"
     other_key = "other_val"
   }
-  customer_managed_key = google_kms_crypto_key.redis_key.id
 
   lifecycle {
-    prevent_destroy = {{index $.Vars "prevent_destroy"}}
+    prevent_destroy = {{index $.ResourceIdVars "prevent_destroy"}}
   }
-}
-
-resource "google_kms_key_ring" "redis_keyring" {
-  name     = "redis-keyring"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "redis_key" {
-  name            = "redis-key"
-  key_ring        = google_kms_key_ring.redis_keyring.id
 }
 
 // This example assumes this network already exists.
@@ -41,5 +32,5 @@ resource "google_kms_crypto_key" "redis_key" {
 // config, add an additional network resource or change
 // this from "data"to "resource"
 data "google_compute_network" "redis-network" {
-  name = "{{index $.Vars "network_name"}}"
+  name = "{{index $.ResourceIdVars "network_name"}}"
 }

@@ -1,6 +1,6 @@
 // Primary cluster
 resource "google_redis_cluster" "primary_cluster" {
-  name          = "{{index $.Vars "primary_cluster_name"}}"
+  name          = "{{index $.ResourceIdVars "primary_cluster_name"}}"
   region        = "us-east1"
   psc_configs {
     network = google_compute_network.consumer_net.id
@@ -41,7 +41,7 @@ resource "google_redis_cluster" "primary_cluster" {
       }
     }
   }
-  deletion_protection_enabled = {{index $.Vars "primary_cluster_deletion_protection_enabled"}}
+  deletion_protection_enabled = {{index $.ResourceIdVars "primary_cluster_deletion_protection_enabled"}}
 
   depends_on = [
     google_network_connectivity_service_connection_policy.primary_cluster_region_scp
@@ -51,7 +51,7 @@ resource "google_redis_cluster" "primary_cluster" {
 
 // Secondary cluster
 resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
-  name          = "{{index $.Vars "secondary_cluster_name"}}"
+  name          = "{{index $.ResourceIdVars "secondary_cluster_name"}}"
   region        = "europe-west1"
   psc_configs {
     network = google_compute_network.consumer_net.id
@@ -92,7 +92,7 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
       }
     }
   }
-  deletion_protection_enabled = {{index $.Vars "secondary_cluster_deletion_protection_enabled"}}
+  deletion_protection_enabled = {{index $.ResourceIdVars "secondary_cluster_deletion_protection_enabled"}}
 
   // Cross cluster replication config
   cross_cluster_replication_config {
@@ -109,7 +109,7 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
 
 
 resource "google_network_connectivity_service_connection_policy" "primary_cluster_region_scp" {
-  name = "{{index $.Vars "primary_cluster_policy_name"}}"
+  name = "{{index $.ResourceIdVars "primary_cluster_policy_name"}}"
   location = "us-east1"
   service_class = "gcp-memorystore-redis"
   description   = "Primary cluster service connection policy"
@@ -120,7 +120,7 @@ resource "google_network_connectivity_service_connection_policy" "primary_cluste
 }
 
 resource "google_compute_subnetwork" "primary_cluster_consumer_subnet" {
-  name          = "{{index $.Vars "primary_cluster_subnet_name"}}"
+  name          = "{{index $.ResourceIdVars "primary_cluster_subnet_name"}}"
   ip_cidr_range = "10.0.1.0/29"
   region        = "us-east1"
   network       = google_compute_network.consumer_net.id
@@ -128,7 +128,7 @@ resource "google_compute_subnetwork" "primary_cluster_consumer_subnet" {
 
 
 resource "google_network_connectivity_service_connection_policy" "secondary_cluster_region_scp" {
-  name = "{{index $.Vars "secondary_cluster_policy_name"}}"
+  name = "{{index $.ResourceIdVars "secondary_cluster_policy_name"}}"
   location = "europe-west1"
   service_class = "gcp-memorystore-redis"
   description   = "Secondary cluster service connection policy"
@@ -139,13 +139,13 @@ resource "google_network_connectivity_service_connection_policy" "secondary_clus
 }
 
 resource "google_compute_subnetwork" "secondary_cluster_consumer_subnet" {
-  name          = "{{index $.Vars "secondary_cluster_subnet_name"}}"
+  name          = "{{index $.ResourceIdVars "secondary_cluster_subnet_name"}}"
   ip_cidr_range = "10.0.2.0/29"
   region        = "europe-west1"
   network       = google_compute_network.consumer_net.id
 }
 
 resource "google_compute_network" "consumer_net" {
-  name                    = "{{index $.Vars "network_name"}}"
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
   auto_create_subnetworks = false
 }
