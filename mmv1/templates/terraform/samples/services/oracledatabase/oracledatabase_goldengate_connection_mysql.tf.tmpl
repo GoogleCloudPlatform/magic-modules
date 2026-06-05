@@ -1,0 +1,29 @@
+resource "google_oracle_database_goldengate_connection" "{{$.PrimaryResourceId}}" {
+  goldengate_connection_id = "{{index $.ResourceIdVars "goldengate_connection_id"}}"
+  location                 = "us-east4"
+  project                  = "{{index $.ResourceIdVars "project"}}"
+  gcp_oracle_zone          = "us-east4-b-r1"
+
+  properties {
+    display_name    = "{{index $.ResourceIdVars "goldengate_connection_id"}} display name"
+    connection_type = "MYSQL"
+    mysql_connection_properties {
+      technology_type   = "MYSQL_SERVER"
+      username          = "mysql_user"
+      password          = "mysql_password"
+      host              = "mysql.example.com"
+      port              = 3306
+      database          = "mydb"
+      security_protocol = "MTLS"
+      ssl_mode          = "PREFERRED"
+      ssl_cert_file     = "YmFzZTY0LWNsaWVudC1jZXJ0LWZpbGUtY29udGVudC1kZW1vLWdnb25u"
+      ssl_key_file      = "YmFzZTY0LWNsaWVudC1rZXktZmlsZS1jb250ZW50LWRlbW8tZ2dvbm4="
+
+      additional_attributes {
+        key   = "attr1"
+        value = "value1"
+      }
+    }
+  }
+  deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
+}
