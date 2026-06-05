@@ -13,7 +13,7 @@ func ReadCache(cachePath string) (map[string][]int, error) {
 	}
 
 	var touchedFiles map[string][]int
-	err = yaml.Unmarshal(b, touchedFiles)
+	err = yaml.Unmarshal(b, &touchedFiles)
 	return touchedFiles, err
 }
 
