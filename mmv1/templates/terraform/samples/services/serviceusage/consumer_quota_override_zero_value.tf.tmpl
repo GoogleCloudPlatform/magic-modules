@@ -1,7 +1,7 @@
 resource "google_project" "my_project" {
   provider   = google-beta
   name       = "tf-test-project"
-  project_id = "{{index $.Vars "project_id"}}"
+  project_id = "{{index $.ResourceIdVars "project_id"}}"
   org_id     = "{{index $.TestEnvVars "org_id"}}"
   deletion_policy = "DELETE"
 }

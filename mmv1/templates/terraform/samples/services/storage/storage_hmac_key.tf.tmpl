@@ -1,6 +1,6 @@
 # Create a new service account
 resource "google_service_account" "service_account" {
-  account_id = "{{index $.Vars "account_id"}}"
+  account_id = "{{index $.ResourceIdVars "account_id"}}"
 }
 
 #Create the HMAC key for the associated service account 
