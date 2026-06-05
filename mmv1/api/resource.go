@@ -666,13 +666,14 @@ func (r Resource) ServiceVersion() string {
 
 func extractVersionFromBaseUrl(baseUrl string) string {
 	parts := strings.Split(baseUrl, "/")
-	// starts with v...
-	if parts[0] != "" && parts[0][0] == 'v' {
-		return parts[0]
-	}
-	// starts with /v...
-	if parts[0] == "" && parts[1][0] == 'v' {
-		return parts[1]
+	// Do not check more than 3 parts
+	// This supports just enough for a prefix before the version
+	maxParts := min(3, len(parts))
+	for i := 0; i < maxParts-1; i++ {
+		part := parts[i]
+		if versionRegexp.MatchString(part) {
+			return part
+		}
 	}
 	return ""
 }
