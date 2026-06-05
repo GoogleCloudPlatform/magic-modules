@@ -102,7 +102,7 @@ resource "google_folder" "test" {
 
 list "google_folder_iam_member" "test" {
 	provider = google
-	include_resources =. true
+	include_resource = true
 	config {
 		folder = google_folder.test.name
 	}
@@ -121,7 +121,7 @@ resource "google_folder" "test" {
 
 list "google_folder_iam_member" "test" {
 	provider = google
-	include_resources =. true
+	include_resource = true
 	config {
 		folder = google_folder.test.name
 		role = "%s"
