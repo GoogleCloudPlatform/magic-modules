@@ -5362,6 +5362,43 @@ func TestAccComputeInstance_NetworkAttachmentUpdate(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_NetworkAttachmentVpcScopedDns(t *testing.T) {
+	t.Parallel()
+	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
+	envRegion := envvar.GetTestRegionFromEnv()
+	var instance compute.Instance
+
+	providerVersion := "v1"
+
+	testNetworkAttachmentName := fmt.Sprintf("tf-test-network-attachment-%s", suffix)
+
+	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{testNetworkAttachmentName}
+	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envRegion, testNetworkAttachmentName)
+
+	context := map[string]interface{}{
+		"suffix":                  (acctest.RandString(t, 10)),
+		"network_attachment_name": testNetworkAttachmentName,
+		"region":                  envRegion,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders:        map[string]resource.ExternalProvider{"time": {}},
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_networkAttachmentVpcScopedDns(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasNetworkAttachment(&instance, fmt.Sprintf("https://www.googleapis.com/compute/%s/%s", providerVersion, fullFormNetworkAttachmentName)),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstance_NicStackTypeUpdate(t *testing.T) {
 	t.Parallel()
 	suffix := acctest.RandString(t, 10)
@@ -13209,6 +13246,63 @@ resource "google_compute_instance" "foobar" {
 	}
 }
 `, suffix, suffix, suffix, region, suffix, region, suffix, region, suffix, region, suffix, region, networkAttachment)
+}
+
+func testAccComputeInstance_networkAttachmentVpcScopedDns(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_network" "consumer_vpc" {
+	name = "tf-test-consumer-network-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "consumer_subnet" {
+	name          = "tf-test-consumer-subnet-%{suffix}"
+	ip_cidr_range = "10.0.0.0/16"
+	region        = "us-central1"
+	network       = google_compute_network.consumer_vpc.id
+}
+
+resource "google_compute_network_attachment" "test_network_attachment" {
+	name = "%{network_attachment_name}"
+  region = "us-central1"
+  description = "network attachment 1 description"
+  connection_preference = "ACCEPT_AUTOMATIC"
+
+  subnetworks = [
+    google_compute_subnetwork.consumer_subnet.self_link
+  ]
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "tf-test-instance-%{suffix}"
+	machine_type = "e2-medium"
+	zone         = "us-central1-a"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.id
+		}
+	}
+
+	network_interface {
+		network = "default"
+	}
+
+	network_interface {
+		network_attachment = google_compute_network_attachment.test_network_attachment.self_link
+		enable_vpc_scoped_dns = true
+	}
+
+	metadata = {
+		foo = "bar"
+	}
+}
+`, context)
 }
 
 func testAccComputeInstance_nicStackTypeUpdate(suffix, region, stack_type, instance string) string {
