@@ -46,7 +46,7 @@ samples:
         resource_id_vars:
           app_connector_name: my-app-connector
           account_id: my-account
-    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/27729         
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/27729
   - name: beyondcorp_app_connector_full
     primary_resource_id: app_connector
     steps:
