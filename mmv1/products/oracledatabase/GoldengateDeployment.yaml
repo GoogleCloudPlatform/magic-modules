@@ -26,6 +26,7 @@ timeouts:
   update_minutes: 60
   delete_minutes: 60
 async:
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   actions:
@@ -33,10 +34,44 @@ async:
     - delete
   result:
     resource_inside_response: true
-  type: OpAsync
-deletion_policy_default: "PREVENT"
+deletion_policy_default: PREVENT
 autogen_status: R29sZGVuZ2F0ZURlcGxveW1lbnQ=
 autogen_async: true
+samples:
+  - name: oracledatabase_goldengate_deployment_basic
+    primary_resource_id: deployment
+    steps:
+      - name: oracledatabase_goldengate_deployment_basic
+        resource_id_vars:
+          project: my-project
+          goldengate_deployment_id: my-deployment
+          odb_subnet: projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet
+          deletion_policy: PREVENT
+        ignore_read_extra:
+          - deletion_policy
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_policy: '"DELETE"'
+          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-basic-%s", acctest.RandString(t, 10))
+          odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+  - name: oracledatabase_goldengate_deployment_full
+    primary_resource_id: deployment
+    steps:
+      - name: oracledatabase_goldengate_deployment_full
+        resource_id_vars:
+          project: my-project
+          goldengate_deployment_id: my-deployment
+          odb_subnet: projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet
+          odb_network: projects/my-project/locations/us-east4/odbNetworks/my-network
+          deletion_policy: PREVENT
+        ignore_read_extra:
+          - deletion_policy
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_policy: '"DELETE"'
+          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-full-%s", acctest.RandString(t, 10))
+          odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
 parameters:
   - name: location
     type: String
@@ -536,35 +571,3 @@ properties:
         type: String
         description: The time upgrade required of the GoldengateDeployment.
         output: true
-
-examples:
-  - name: 'oracledatabase_goldengate_deployment_basic'
-    primary_resource_id: 'deployment'
-    vars:
-      project: 'my-project'
-      goldengate_deployment_id: 'my-deployment'
-      odb_subnet: 'projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet'
-      deletion_policy: 'PREVENT'
-    ignore_read_extra:
-      - "deletion_policy"
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_policy: '"DELETE"'
-      goldengate_deployment_id: 'fmt.Sprintf("tf-ggdep-basic-%s", acctest.RandString(t, 10))'
-      odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
-  - name: 'oracledatabase_goldengate_deployment_full'
-    primary_resource_id: 'deployment'
-    vars:
-      project: 'my-project'
-      goldengate_deployment_id: 'my-deployment'
-      odb_subnet: 'projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet'
-      odb_network: 'projects/my-project/locations/us-east4/odbNetworks/my-network'
-      deletion_policy: 'PREVENT'
-    ignore_read_extra:
-      - "deletion_policy"
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_policy: '"DELETE"'
-      goldengate_deployment_id: 'fmt.Sprintf("tf-ggdep-full-%s", acctest.RandString(t, 10))'
-      odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
-      odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
