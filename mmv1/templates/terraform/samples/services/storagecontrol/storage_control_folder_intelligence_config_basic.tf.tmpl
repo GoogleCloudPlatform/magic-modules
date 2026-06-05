@@ -1,5 +1,5 @@
 resource "google_storage_control_folder_intelligence_config" "{{$.PrimaryResourceId}}" {
-  name = "{{index $.Vars "folder_id"}}"
+  name = "{{index $.ResourceIdVars "folder_id"}}"
   edition_config = "STANDARD"
   filter {
     included_cloud_storage_buckets{
