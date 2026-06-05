@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
-  name                        = "{{index $.Vars "name"}}"
+  name                        = "{{index $.ResourceIdVars "name"}}"
   location                    = "US"
   uniform_bucket_level_access = true
 }

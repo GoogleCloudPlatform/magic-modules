@@ -1,5 +1,5 @@
 resource "google_storage_control_organization_intelligence_config" "{{$.PrimaryResourceId}}" {
-  name = "{{index $.Vars "org_id"}}"
+  name = "{{index $.ResourceIdVars "org_id"}}"
   edition_config = "STANDARD"
   filter {
     excluded_cloud_storage_buckets{

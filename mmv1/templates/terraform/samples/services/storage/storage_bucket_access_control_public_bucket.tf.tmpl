@@ -5,6 +5,6 @@ resource "google_storage_bucket_access_control" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "{{index $.Vars "bucket_name"}}"
+  name     = "{{index $.ResourceIdVars "bucket_name"}}"
   location = "US"
 }
