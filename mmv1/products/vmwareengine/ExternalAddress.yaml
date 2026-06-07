@@ -47,6 +47,8 @@ async:
 custom_code:
 collection_url_key: "externalAddresses"
 sweeper:
+  dependencies:
+    - "VmwareengineExternalAccessRule"
   parent:
     resource_type: "google_vmwareengine_private_cloud"
     parent_field: "name"
