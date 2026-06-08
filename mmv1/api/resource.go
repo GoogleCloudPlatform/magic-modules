@@ -13,6 +13,7 @@
 package api
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/fs"
 	"log"
@@ -666,13 +667,14 @@ func (r Resource) ServiceVersion() string {
 
 func extractVersionFromBaseUrl(baseUrl string) string {
 	parts := strings.Split(baseUrl, "/")
-	// starts with v...
-	if parts[0] != "" && parts[0][0] == 'v' {
-		return parts[0]
-	}
-	// starts with /v...
-	if parts[0] == "" && parts[1][0] == 'v' {
-		return parts[1]
+	// Do not check more than 3 parts
+	// This supports just enough for a prefix before the version
+	maxParts := min(3, len(parts))
+	for i := 0; i < maxParts-1; i++ {
+		part := parts[i]
+		if versionRegexp.MatchString(part) {
+			return part
+		}
 	}
 	return ""
 }
@@ -1387,6 +1389,21 @@ func (r Resource) TerraformName() string {
 		return r.LegacyName
 	}
 	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
+}
+
+func (r Resource) AutogenVersion() int {
+	if r.AutogenStatus == "" {
+		return 0
+	}
+	decodedBytes, err := base64.StdEncoding.DecodeString(r.AutogenStatus)
+	if err != nil {
+		return 1
+	}
+	decoded := string(decodedBytes)
+	if strings.HasSuffix(decoded, "AutogenV2Agent") {
+		return 2
+	}
+	return 1
 }
 
 func (r Resource) ImportIdFormatsFromResource() []string {

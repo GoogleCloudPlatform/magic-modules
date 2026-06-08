@@ -30,7 +30,7 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: SW1wb3J0Sm9i
+autogen_status: SW1wb3J0Sm9iQXV0b2dlblYyQWdlbnQ=
 autogen_async: true
 samples:
   - name: 'migration_center_import_job_basic'
