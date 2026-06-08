@@ -2457,7 +2457,6 @@ resource "google_storage_bucket" "bucket" {
     condition {
       matches_storage_class = ["COLDLINE"]
       age                   = 2
-	  size_above_bytes      = 100
     }
   }
   lifecycle_rule {
@@ -2467,7 +2466,6 @@ resource "google_storage_bucket" "bucket" {
     condition {
       matches_storage_class = []
       age                   = 10
-	  size_below_bytes      = 500
     }
   }
   lifecycle_rule {
@@ -2540,6 +2538,16 @@ resource "google_storage_bucket" "bucket" {
       age = 1
     }
   }
+	lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      size_above_bytes = 100
+		  size_below_bytes = 500
+    }
+  }
 }
 `, bucketName)
 }
@@ -2558,7 +2566,6 @@ resource "google_storage_bucket" "bucket" {
     condition {
       matches_storage_class = ["COLDLINE"]
       age                   = 2
-	  size_above_bytes      = 200
     }
   }
   lifecycle_rule {
@@ -2630,6 +2637,16 @@ resource "google_storage_bucket" "bucket" {
     condition {
       matches_suffix = ["test"]
       age            = 2
+    }
+  }
+	lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      size_above_bytes = 200
+		  size_below_bytes = 1000
     }
   }
 }
