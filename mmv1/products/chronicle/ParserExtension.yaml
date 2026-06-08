@@ -20,33 +20,48 @@ references:
   guides:
     'Custom parsers overview': 'https://cloud.google.com/chronicle/docs/detection/custom-parsers-overview'
   api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.logTypes.parserExtensions'
-base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parserExtensions
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{log_type}}/parserExtensions
 immutable: true
-self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parserExtensions/{{parserextension}}
-create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parserExtensions
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{log_type}}/parserExtensions/{{parserextension}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{log_type}}/parserExtensions
 import_format:
-  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parserExtensions/{{parserextension}}
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{log_type}}/parserExtensions/{{parserextension}}
 autogen_status: UGFyc2VyRXh0ZW5zaW9u
 autogen_async: false
-examples:
+samples:
   - name: 'chronicle_parserextension_basic'
-    primary_resource_id: example
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    ignore_read_extra:
-      - 'state'
-      - 'state_last_changed_time'
-      - 'validation_report'
-      - 'extension_validation_report'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'chronicle_parserextension_basic'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'state'
+          - 'state_last_changed_time'
+          - 'validation_report'
+          - 'extension_validation_report'
   - name: 'chronicle_parserextension_full'
-    primary_resource_id: example
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    ignore_read_extra:
-      - 'state'
-      - 'state_last_changed_time'
-      - 'validation_report'
-      - 'extension_validation_report'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'chronicle_parserextension_full'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'state'
+          - 'state_last_changed_time'
+          - 'validation_report'
+          - 'extension_validation_report'
+  - name: 'chronicle_parserextension_dynamic'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'chronicle_parserextension_dynamic'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'state'
+          - 'state_last_changed_time'
+          - 'validation_report'
+          - 'extension_validation_report'
 parameters:
   - name: location
     type: String
@@ -60,7 +75,7 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-  - name: logtype
+  - name: log_type
     type: String
     required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
@@ -74,6 +89,10 @@ parameters:
 properties:
   - name: cbnSnippet
     type: String
+    exactly_one_of:
+      - 'cbn_snippet'
+      - 'field_extractors'
+      - 'dynamic_parsing'
     description: Parser config could be a cbn snippet.
   - name: createTime
     type: String
@@ -209,6 +228,7 @@ properties:
     output: true
   - name: validationSkipped
     type: Boolean
+    ignore_read: true
     description: |-
       Flag to bypass parser extension validation.
       If enabled, the parser extension won't be rejected during the validation
