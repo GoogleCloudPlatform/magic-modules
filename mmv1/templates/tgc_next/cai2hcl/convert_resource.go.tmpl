@@ -67,5 +67,5 @@ func ConvertResource(asset caiasset.Asset, options *models.Options) ([]*models.T
 	if converter == nil {
 		return nil, nil
 	}
-	return converter.Convert(asset)
+	return converter.Convert(asset, options)
 }

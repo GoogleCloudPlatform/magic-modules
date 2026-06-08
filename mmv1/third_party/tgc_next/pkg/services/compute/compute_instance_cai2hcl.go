@@ -30,7 +30,7 @@ func NewComputeInstanceCai2hclConverter(provider *schema.Provider) models.Cai2hc
 }
 
 // Convert converts asset to HCL resource blocks.
-func (c *ComputeInstanceCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ComputeInstanceCai2hclConverter) Convert(asset caiasset.Asset, options *models.Options) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {

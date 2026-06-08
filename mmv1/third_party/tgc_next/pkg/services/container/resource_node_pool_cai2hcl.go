@@ -28,7 +28,7 @@ func NewContainerNodePoolCai2hclConverter(provider *schema.Provider) models.Cai2
 }
 
 // Convert converts asset resource data.
-func (c *ContainerNodePoolCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ContainerNodePoolCai2hclConverter) Convert(asset caiasset.Asset, options *models.Options) ([]*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}

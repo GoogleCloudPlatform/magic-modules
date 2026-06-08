@@ -26,7 +26,7 @@ func NewContainerClusterCai2hclConverter(provider *schema.Provider) models.Cai2h
 	}
 }
 
-func (c *ContainerClusterCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ContainerClusterCai2hclConverter) Convert(asset caiasset.Asset, options *models.Options) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {
