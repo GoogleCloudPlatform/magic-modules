@@ -559,7 +559,6 @@ properties:
                         type: NestedObject
                         properties:
                           - name: 'port'
-                            required: true
                             description: |-
                               Required. The header field name
                             type: Integer
@@ -641,7 +640,6 @@ properties:
                         type: NestedObject
                         properties:
                           - name: 'port'
-                            required: true
                             description: |-
                               Required. The header field name
                             type: Integer
