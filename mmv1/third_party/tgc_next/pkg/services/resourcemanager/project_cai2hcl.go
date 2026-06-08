@@ -29,13 +29,15 @@ func NewProjectCai2hclConverter(provider *tfschema.Provider) models.Cai2hclConve
 }
 
 // Convert converts asset resource data.
-func (c *ProjectCai2hclConverter) Convert(asset caiasset.Asset, options *models.Options) ([]*models.TerraformResourceBlock, error) {
+func (c *ProjectCai2hclConverter) Convert(assets []caiasset.Asset, options *models.Options) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(asset)
-	if err != nil {
-		return nil, err
+	for _, asset := range assets {
+		block, err := c.convertResourceData(asset)
+		if err != nil {
+			return nil, err
+		}
+		blocks = append(blocks, block)
 	}
-	blocks = append(blocks, block)
 	return blocks, nil
 }
 

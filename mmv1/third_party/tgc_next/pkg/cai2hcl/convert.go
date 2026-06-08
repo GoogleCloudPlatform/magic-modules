@@ -1,6 +1,7 @@
 package cai2hcl
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters"
@@ -23,19 +24,10 @@ func Convert(assets []caiasset.Asset, options *Options) ([]byte, error) {
 
 	// TODO: add resolvers to resolve the assets into single resource assets
 
-	allBlocks := []*models.TerraformResourceBlock{}
-	for _, asset := range assets {
-		newBlocks, err := converters.ConvertResource(asset, &models.Options{})
-		if err != nil {
-			return nil, err
-		}
-
-		if newBlocks != nil {
-			allBlocks = append(allBlocks, newBlocks...)
-		}
+	allResourceBytes, err := converters.ConvertResource(assets, &models.Options{})
+	if err != nil {
+		return nil, err
 	}
 
-	t, err := models.HclWriteBlocks(allBlocks)
-
-	return t, err
+	return bytes.Join(allResourceBytes, []byte("\n")), nil
 }

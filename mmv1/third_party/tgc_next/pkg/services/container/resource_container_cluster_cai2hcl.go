@@ -26,13 +26,15 @@ func NewContainerClusterCai2hclConverter(provider *schema.Provider) models.Cai2h
 	}
 }
 
-func (c *ContainerClusterCai2hclConverter) Convert(asset caiasset.Asset, options *models.Options) ([]*models.TerraformResourceBlock, error) {
+func (c *ContainerClusterCai2hclConverter) Convert(assets []caiasset.Asset, options *models.Options) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(asset)
-	if err != nil {
-		return nil, err
+	for _, asset := range assets {
+		block, err := c.convertResourceData(asset)
+		if err != nil {
+			return nil, err
+		}
+		blocks = append(blocks, block)
 	}
-	blocks = append(blocks, block)
 	return blocks, nil
 }
 
