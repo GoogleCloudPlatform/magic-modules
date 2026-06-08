@@ -14,7 +14,7 @@
 ---
 name: 'BiglakeHive'
 legacy_name: 'biglake'
-display_name: 'Biglake'
+display_name: 'BigLake Hive Metastore'
 versions:
   - name: 'ga'
     base_url: 'https://biglake.googleapis.com/'
