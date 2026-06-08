@@ -19,8 +19,8 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
 	"{{ $.ImportPath }}/tpgresource"
-{{- range $service, $alias := ($.FirstTestConfig.Step.TestServiceDependencies $.Runtime.ResourcePrefixServiceMap) }}
-	{{ $alias }} "{{ $.ImportPath  }}/services/{{ $service }}"
+{{- range $pkg, $alias := ($.FirstTestConfig.Step.TestDependencies $.Runtime.ResourcePrefixPkgMap) }}
+	{{ $alias }} "{{ $.ImportPath  }}/{{ $pkg }}"
 {{- end }}
 )
 

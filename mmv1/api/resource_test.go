@@ -757,7 +757,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	})
 }
 
-func TestSample_TestServiceDependencies(t *testing.T) {
+func TestResource_TestDependencies(t *testing.T) {
 	cases := []struct {
 		name     string
 		resource api.Resource
@@ -778,7 +778,7 @@ func TestSample_TestServiceDependencies(t *testing.T) {
 					},
 				},
 				Runtime: api.Runtime{
-					ResourcePrefixServiceMap: map[string]string{},
+					ResourcePrefixPkgMap: map[string]string{},
 				},
 			},
 			want: map[string]string{},
@@ -810,11 +810,11 @@ func TestSample_TestServiceDependencies(t *testing.T) {
 					},
 				},
 				Runtime: api.Runtime{
-					ResourcePrefixServiceMap: map[string]string{},
+					ResourcePrefixPkgMap: map[string]string{},
 				},
 			},
 			want: map[string]string{
-				"compute": "",
+				"services/compute": "",
 			},
 		},
 		{
@@ -842,13 +842,13 @@ func TestSample_TestServiceDependencies(t *testing.T) {
 					},
 				},
 				Runtime: api.Runtime{
-					ResourcePrefixServiceMap: map[string]string{
-						"google_compute_": "compute",
+					ResourcePrefixPkgMap: map[string]string{
+						"google_compute_": "services/compute",
 					},
 				},
 			},
 			want: map[string]string{
-				"compute": "",
+				"services/compute": "",
 			},
 		},
 		{
@@ -868,7 +868,7 @@ func TestSample_TestServiceDependencies(t *testing.T) {
 					},
 				},
 				Runtime: api.Runtime{
-					ResourcePrefixServiceMap: map[string]string{},
+					ResourcePrefixPkgMap: map[string]string{},
 				},
 			},
 			want: map[string]string{},
@@ -877,9 +877,9 @@ func TestSample_TestServiceDependencies(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			got := tc.resource.TestServiceDependencies()
+			got := tc.resource.TestDependencies()
 			if diff := cmp.Diff(tc.want, got); diff != "" {
-				t.Errorf("TestServiceDependencies() mismatch (-want +got:\n%s", diff)
+				t.Errorf("TestDependencies() mismatch (-want +got:\n%s", diff)
 			}
 		})
 	}

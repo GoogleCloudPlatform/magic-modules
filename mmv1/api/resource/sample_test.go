@@ -8,7 +8,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 )
 
-func TestSample_TestServiceDependencies(t *testing.T) {
+func TestSample_TestDependencies(t *testing.T) {
 	cases := []struct {
 		name                     string
 		sample                   resource.Sample
@@ -40,7 +40,7 @@ func TestSample_TestServiceDependencies(t *testing.T) {
 			},
 			resourcePrefixServiceMap: map[string]string{},
 			want: map[string]string{
-				"resourcemanager": "",
+				"services/resourcemanager": "",
 			},
 		},
 		{
@@ -63,7 +63,7 @@ func TestSample_TestServiceDependencies(t *testing.T) {
 			},
 			resourcePrefixServiceMap: map[string]string{},
 			want: map[string]string{
-				"compute": "",
+				"services/compute": "",
 			},
 		},
 		{
@@ -83,10 +83,10 @@ func TestSample_TestServiceDependencies(t *testing.T) {
 				},
 			},
 			resourcePrefixServiceMap: map[string]string{
-				"google_compute_": "compute",
+				"google_compute_": "services/compute",
 			},
 			want: map[string]string{
-				"compute": "",
+				"services/compute": "",
 			},
 		},
 		{
@@ -106,19 +106,19 @@ func TestSample_TestServiceDependencies(t *testing.T) {
 				},
 			},
 			resourcePrefixServiceMap: map[string]string{
-				"google_project": "resourcemanager",
+				"google_project": "services/resourcemanager",
 			},
 			want: map[string]string{
-				"resourcemanager": "",
+				"services/resourcemanager": "",
 			},
 		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			got := tc.sample.TestServiceDependencies(tc.resourcePrefixServiceMap)
+			got := tc.sample.TestDependencies(tc.resourcePrefixServiceMap)
 			if diff := cmp.Diff(tc.want, got); diff != "" {
-				t.Errorf("TestServiceDependencies() mismatch (-want +got:\n%s", diff)
+				t.Errorf("TestDependencies() mismatch (-want +got:\n%s", diff)
 			}
 		})
 	}

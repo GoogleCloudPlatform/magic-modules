@@ -15,7 +15,7 @@ package api
 
 // Runtime holds metadata about the current generation runtime.
 type Runtime struct {
-	// ResourcePrefixServiceMap contains entries mapping product resource prefixes (like google_compute_) to
+	// ResourcePrefixPkgMap contains entries mapping product resource prefixes (like google_compute_) to
 	// the service package that the resource is in.
-	ResourcePrefixServiceMap map[string]string
+	ResourcePrefixPkgMap map[string]string
 }
