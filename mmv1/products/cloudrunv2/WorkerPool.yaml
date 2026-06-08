@@ -339,6 +339,14 @@ properties:
           All system annotations in v1 now have a corresponding field in v2 WorkerPoolRevisionTemplate.
 
           This field follows Kubernetes annotations' namespacing, limits, and rules.
+      - name: 'client'
+        type: String
+        description: |
+          Arbitrary identifier for the API client.
+      - name: 'clientVersion'
+        type: String
+        description: |
+          Arbitrary version identifier for the API client.
       - name: 'vpcAccess'
         type: NestedObject
         description: |-
