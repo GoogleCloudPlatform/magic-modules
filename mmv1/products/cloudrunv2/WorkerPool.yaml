@@ -564,7 +564,6 @@ properties:
                             type: Integer
                             deprecation_message: '`port` field is not suppprted in API and was added by mistake.'
                           - name: 'name'
-                            required: true
                             description: |-
                               Required. The header field name
                             type: Integer
@@ -645,7 +644,6 @@ properties:
                             type: Integer
                             deprecation_message: '`port` field is not suppprted in API and was added by mistake.'
                           - name: 'name'
-                            required: true
                             description: |-
                               Required. The header field name
                             type: Integer
