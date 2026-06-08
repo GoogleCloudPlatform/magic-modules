@@ -22,23 +22,161 @@ id_format: projects/{{project}}/locations/{{location}}/goldengateConnections/{{g
 import_format:
   - projects/{{project}}/locations/{{location}}/goldengateConnections/{{goldengate_connection_id}}
 async:
+  type: OpAsync
   operation:
-    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 30
-      delete_minutes: 30
       update_minutes: 30
+      delete_minutes: 30
+    base_url: '{{op_id}}'
   actions:
     - create
     - delete
-  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
-custom_code:
-  pre_delete: "templates/terraform/pre_delete/oracledatabase_goldengate_connection.go.tmpl"
 autogen_status: R29sZGVuZ2F0ZUNvbm5lY3Rpb24=
 autogen_async: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/oracledatabase_goldengate_connection.go.tmpl
+samples:
+  - name: oracledatabase_goldengate_connection_basic
+    primary_resource_id: connection
+    steps:
+      - name: oracledatabase_goldengate_connection_basic
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_id: my-connection
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_protection: false
+          goldengate_connection_id: fmt.Sprintf("tf-conn-basic-%s", acctest.RandString(t, 10))
+  - name: oracledatabase_goldengate_connection_full
+    primary_resource_id: connection
+    steps:
+      - name: oracledatabase_goldengate_connection_full
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_id: my-connection
+          odb_network: projects/my-project/locations/us-east4/odbNetworks/my-network
+          odb_subnet: projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet
+          autonomous_database_id: my-autonomous-database
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          deletion_protection: false
+          project: '"oci-terraform-testing-prod"'
+          goldengate_connection_id: fmt.Sprintf("tf-conn-full-%s", acctest.RandString(t, 10))
+          odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          autonomous_database_id: '"do-not-delete-tf-adb"'
+  - name: oracledatabase_goldengate_connection_mysql
+    primary_resource_id: connection
+    steps:
+      - name: oracledatabase_goldengate_connection_mysql
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_id: my-connection
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_protection: false
+          goldengate_connection_id: fmt.Sprintf("tf-conn-mysql-%s", acctest.RandString(t, 10))
+  - name: oracledatabase_goldengate_connection_postgresql
+    primary_resource_id: connection
+    steps:
+      - name: oracledatabase_goldengate_connection_postgresql
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_id: my-connection
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_protection: false
+          goldengate_connection_id: fmt.Sprintf("tf-conn-pg-%s", acctest.RandString(t, 10))
+  - name: oracledatabase_goldengate_connection_redis
+    primary_resource_id: connection
+    steps:
+      - name: oracledatabase_goldengate_connection_redis
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_id: my-connection
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_protection: false
+          goldengate_connection_id: fmt.Sprintf("tf-conn-redis-%s", acctest.RandString(t, 10))
+  - name: oracledatabase_goldengate_connection_kafka
+    primary_resource_id: connection
+    steps:
+      - name: oracledatabase_goldengate_connection_kafka
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_id: my-connection
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_protection: false
+          goldengate_connection_id: fmt.Sprintf("tf-conn-kafka-%s", acctest.RandString(t, 10))
+  - name: oracledatabase_goldengate_connection_iceberg
+    primary_resource_id: connection
+    steps:
+      - name: oracledatabase_goldengate_connection_iceberg
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_id: my-connection
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_protection: false
+          goldengate_connection_id: fmt.Sprintf("tf-conn-iceberg-%s", acctest.RandString(t, 10))
+  - name: oracledatabase_goldengate_connection_snowflake
+    primary_resource_id: connection
+    steps:
+      - name: oracledatabase_goldengate_connection_snowflake
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_id: my-connection
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_protection: false
+          goldengate_connection_id: fmt.Sprintf("tf-conn-snowflake-%s", acctest.RandString(t, 10))
+  - name: oracledatabase_goldengate_connection_jms
+    primary_resource_id: connection
+    steps:
+      - name: oracledatabase_goldengate_connection_jms
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_id: my-connection
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_protection: false
+          goldengate_connection_id: fmt.Sprintf("tf-conn-jms-%s", acctest.RandString(t, 10))
+virtual_fields:
+  - name: deletion_protection
+    type: Boolean
+    default_value: true
+    description: Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.
 parameters:
   - name: location
     type: String
@@ -1659,123 +1797,3 @@ properties:
         type: String
         description: The time the resource was last updated.
         output: true
-virtual_fields:
-  - name: "deletion_protection"
-    type: Boolean
-    default_value: true
-    description: "Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail."
-examples:
-  - name: 'oracledatabase_goldengate_connection_basic'
-    primary_resource_id: 'connection'
-    vars:
-      project: 'my-project'
-      goldengate_connection_id: 'my-connection'
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_protection: false
-      goldengate_connection_id: 'fmt.Sprintf("tf-conn-basic-%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_goldengate_connection_full'
-    primary_resource_id: 'connection'
-    vars:
-      project: 'my-project'
-      goldengate_connection_id: 'my-connection'
-      odb_network: 'projects/my-project/locations/us-east4/odbNetworks/my-network'
-      odb_subnet: 'projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet'
-      autonomous_database_id: 'my-autonomous-database'
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      deletion_protection: false
-      project: '"oci-terraform-testing-prod"'
-      goldengate_connection_id: 'fmt.Sprintf("tf-conn-full-%s", acctest.RandString(t, 10))'
-      odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
-      odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
-      autonomous_database_id: '"do-not-delete-tf-adb"'
-  - name: 'oracledatabase_goldengate_connection_mysql'
-    primary_resource_id: 'connection'
-    vars:
-      project: 'my-project'
-      goldengate_connection_id: 'my-connection'
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_protection: false
-      goldengate_connection_id: 'fmt.Sprintf("tf-conn-mysql-%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_goldengate_connection_postgresql'
-    primary_resource_id: 'connection'
-    vars:
-      project: 'my-project'
-      goldengate_connection_id: 'my-connection'
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_protection: false
-      goldengate_connection_id: 'fmt.Sprintf("tf-conn-pg-%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_goldengate_connection_redis'
-    primary_resource_id: 'connection'
-    vars:
-      project: 'my-project'
-      goldengate_connection_id: 'my-connection'
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_protection: false
-      goldengate_connection_id: 'fmt.Sprintf("tf-conn-redis-%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_goldengate_connection_kafka'
-    primary_resource_id: 'connection'
-    vars:
-      project: 'my-project'
-      goldengate_connection_id: 'my-connection'
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_protection: false
-      goldengate_connection_id: 'fmt.Sprintf("tf-conn-kafka-%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_goldengate_connection_iceberg'
-    primary_resource_id: 'connection'
-    vars:
-      project: 'my-project'
-      goldengate_connection_id: 'my-connection'
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_protection: false
-      goldengate_connection_id: 'fmt.Sprintf("tf-conn-iceberg-%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_goldengate_connection_snowflake'
-    primary_resource_id: 'connection'
-    vars:
-      project: 'my-project'
-      goldengate_connection_id: 'my-connection'
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_protection: false
-      goldengate_connection_id: 'fmt.Sprintf("tf-conn-snowflake-%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_goldengate_connection_jms'
-    primary_resource_id: 'connection'
-    vars:
-      project: 'my-project'
-      goldengate_connection_id: 'my-connection'
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_protection: false
-      goldengate_connection_id: 'fmt.Sprintf("tf-conn-jms-%s", acctest.RandString(t, 10))'

@@ -16,12 +16,12 @@ name: Instance
 description: A Managed Lustre instance
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/managed-lustre/docs/create-instance'
-  api: 'https://cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances'
+    Official Documentation: https://cloud.google.com/managed-lustre/docs/create-instance
+  api: https://cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances
 base_url: projects/{{project}}/locations/{{location}}/instances
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{instance_id}}
+update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 import_format:
@@ -32,21 +32,10 @@ timeouts:
   delete_minutes: 60
 sweeper:
   url_substitutions:
-    - location: "us-central1-a"
-    - location: "us-central1-c"
-custom_code:
-examples:
-  - name: lustre_instance_basic
-    primary_resource_id: 'instance'
-    vars:
-      name: 'my-instance'
-      address_name: 'my-ip-address-name'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork'
-    test_vars_overrides:
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "default-vpc")'
-autogen_async: true
+    - location: us-central1-a
+    - location: us-central1-c
 async:
+  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 120
@@ -57,12 +46,25 @@ async:
     - create
     - delete
     - update
-  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: SW5zdGFuY2U=
+autogen_async: true
 include_in_tgc_next: true
+custom_code:
+samples:
+  - name: lustre_instance_basic
+    primary_resource_id: instance
+    steps:
+      - name: lustre_instance_basic
+        resource_id_vars:
+          name: my-instance
+          address_name: my-ip-address-name
+          network_name: my-network
+          subnetwork_name: my-subnetwork
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "default-vpc")
 parameters:
   - name: location
     type: String
