@@ -42,8 +42,8 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
 	"{{ $.ImportPath  }}/services/{{ lower $.Res.ProductMetadata.Name }}"
-{{- range $service, $alias := $.Res.TestServiceDependencies }}
-	{{ $alias }} "{{ $.ImportPath  }}/services/{{ $service }}"
+{{- range $pkg, $alias := $.Res.TestDependencies }}
+	{{ $alias }} "{{ $.ImportPath  }}/{{ $pkg }}"
 {{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
