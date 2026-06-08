@@ -12,9 +12,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/container/v1"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
 )
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_cluster",
+		ProductName: "container",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceContainerCluster(),
+	}.Register()
+}
 
 // ContainerClusterAssetType is the CAI asset type name for container cluster.
 const ContainerClusterAssetType string = "container.googleapis.com/Cluster"
@@ -96,6 +106,7 @@ var (
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
 		"addons_config.0.slice_controller_config",
+		"addons_config.0.pod_snapshot_config",
 	}
 
 	privateClusterConfigKeys = []string{
@@ -522,6 +533,23 @@ func ResourceContainerCluster() *schema.Resource {
 									"enabled": {
 										Type:     schema.TypeBool,
 										Required: true,
+									},
+								},
+							},
+						},
+						"pod_snapshot_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `Configuration for the Pod Snapshot feature.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether the Pod Snapshot feature is enabled for this cluster.`,
 									},
 								},
 							},

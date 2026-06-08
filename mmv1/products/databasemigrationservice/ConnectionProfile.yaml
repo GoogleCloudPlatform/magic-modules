@@ -37,94 +37,112 @@ async:
       delete_minutes: 60
     base_url: '{{op_id}}'
 autogen_async: true
-custom_code:
-  tgc_decoder: 'templates/tgc_next/decoders/databasemigrationservice_connection_profile.go.tmpl'
 include_in_tgc_next: true
-examples:
+custom_code:
+  tgc_decoder: templates/tgc_next/decoders/databasemigrationservice_connection_profile.go.tmpl
+samples:
   - name: database_migration_service_connection_profile_cloudsql
     primary_resource_id: cloudsqlprofile
-    ignore_read_extra:
-      - mysql.0.password
-      - mysql.0.ssl.0.ca_certificate
-      - mysql.0.ssl.0.client_certificate
-      - mysql.0.ssl.0.client_key
-    vars:
-      from_profile: my-fromprofileid
-      sqldb: my-database
-      sqldb_cert: my-cert
-      sqldb_pass: my-password
-      sqldb_user: my-username
-      to_profile: my-toprofileid
+    steps:
+      - name: database_migration_service_connection_profile_cloudsql
+        ignore_read_extra:
+          - mysql.0.password
+          - mysql.0.ssl.0.ca_certificate
+          - mysql.0.ssl.0.client_certificate
+          - mysql.0.ssl.0.client_key
+        resource_id_vars:
+          from_profile: my-fromprofileid
+          sqldb: my-database
+          sqldb_cert: my-cert
+          sqldb_pass: my-password
+          sqldb_user: my-username
+          to_profile: my-toprofileid
   - name: database_migration_service_connection_profile_postgres
     primary_resource_id: postgresprofile
-    ignore_read_extra:
-      - postgresql.0.password
-      - postgresql.0.ssl.0.ca_certificate
-      - postgresql.0.ssl.0.client_certificate
-      - postgresql.0.ssl.0.client_key
-    vars:
-      profile: my-profileid
-      sqldb: my-database
-      sqldb_cert: my-cert
-      sqldb_pass: my-password
-      sqldb_user: my-username
+    steps:
+      - name: database_migration_service_connection_profile_postgres
+        ignore_read_extra:
+          - postgresql.0.password
+          - postgresql.0.ssl.0.ca_certificate
+          - postgresql.0.ssl.0.client_certificate
+          - postgresql.0.ssl.0.client_key
+        resource_id_vars:
+          profile: my-profileid
+          sqldb: my-database
+          sqldb_cert: my-cert
+          sqldb_pass: my-password
+          sqldb_user: my-username
   - name: database_migration_service_connection_profile_postgres_no_ssl
     primary_resource_id: postgresprofile
-    ignore_read_extra:
-      - postgresql.0.password
-      - postgresql.0.ssl.0.ca_certificate
-      - postgresql.0.ssl.0.client_certificate
-      - postgresql.0.ssl.0.client_key
-    vars:
-      profile: my-profileid
-      sqldb: my-database
-      sqldb_cert: my-cert
-      sqldb_pass: my-password
-      sqldb_user: my-username
+    steps:
+      - name: database_migration_service_connection_profile_postgres_no_ssl
+        ignore_read_extra:
+          - postgresql.0.password
+          - postgresql.0.ssl.0.ca_certificate
+          - postgresql.0.ssl.0.client_certificate
+          - postgresql.0.ssl.0.client_key
+        resource_id_vars:
+          profile: my-profileid
+          sqldb: my-database
+          sqldb_cert: my-cert
+          sqldb_pass: my-password
+          sqldb_user: my-username
   - name: database_migration_service_connection_profile_postgres_required_ssl
     primary_resource_id: postgresprofile
-    ignore_read_extra:
-      - postgresql.0.password
-      - postgresql.0.ssl.0.ca_certificate
-      - postgresql.0.ssl.0.client_certificate
-      - postgresql.0.ssl.0.client_key
-    vars:
-      profile: my-profileid
-      sqldb: my-database
-      sqldb_cert: my-cert
-      sqldb_pass: my-password
-      sqldb_user: my-username
+    steps:
+      - name: database_migration_service_connection_profile_postgres_required_ssl
+        ignore_read_extra:
+          - postgresql.0.password
+          - postgresql.0.ssl.0.ca_certificate
+          - postgresql.0.ssl.0.client_certificate
+          - postgresql.0.ssl.0.client_key
+        resource_id_vars:
+          profile: my-profileid
+          sqldb: my-database
+          sqldb_cert: my-cert
+          sqldb_pass: my-password
+          sqldb_user: my-username
   - name: database_migration_service_connection_profile_oracle
     primary_resource_id: oracleprofile
-    ignore_read_extra:
-      - oracle.0.password
     exclude_test: true
-    vars:
-      profile: my-profileid
+    steps:
+      - name: database_migration_service_connection_profile_oracle
+        ignore_read_extra:
+          - oracle.0.password
+        resource_id_vars:
+          profile: my-profileid
   - name: database_migration_service_connection_profile_alloydb
     primary_resource_id: alloydbprofile
-    ignore_read_extra:
-      - alloydb.0.settings.0.initial_user.0.password
     exclude_test: true
-    vars:
-      global_address_name: private-ip-alloc
-      network_name: vpc-network
-      profile: my-profileid
+    steps:
+      - name: database_migration_service_connection_profile_alloydb
+        ignore_read_extra:
+          - alloydb.0.settings.0.initial_user.0.password
+        resource_id_vars:
+          global_address_name: private-ip-alloc
+          network_name: vpc-network
+          profile: my-profileid
   - name: database_migration_service_connection_profile_existing_mysql
     primary_resource_id: existing-mysql
-    vars:
-      destination_cp: destination-cp
-      destination_csql: destination-csql
+    steps:
+      - name: database_migration_service_connection_profile_existing_mysql
+        resource_id_vars:
+          destination_cp: destination-cp
+          destination_csql: destination-csql
   - name: database_migration_service_connection_profile_existing_postgres
     primary_resource_id: existing-psql
-    vars:
-      destination_cp: destination-cp
-      destination_csql: destination-csql
+    steps:
+      - name: database_migration_service_connection_profile_existing_postgres
+        resource_id_vars:
+          destination_cp: destination-cp
+          destination_csql: destination-csql
   - name: database_migration_service_connection_profile_existing_alloydb
     primary_resource_id: existing-alloydb
-    vars:
-      destination_alloydb: destination-alloydb
-      destination_cp: destination-cp
+    steps:
+      - name: database_migration_service_connection_profile_existing_alloydb
+        resource_id_vars:
+          destination_alloydb: destination-alloydb
+          destination_cp: destination-cp
 parameters:
   - name: connectionProfileId
     type: String
@@ -201,6 +219,14 @@ properties:
       - RDS
       - AURORA
       - ALLOYDB
+  - name: role
+    type: Enum
+    description: |
+      The connection profile role.
+    default_from_api: true
+    enum_values:
+      - SOURCE
+      - DESTINATION
   - name: mysql
     type: NestedObject
     description: |
@@ -287,7 +313,7 @@ properties:
       - name: cloudSqlId
         type: String
         description: |
-          If the source is a Cloud SQL database, use this field to provide the Cloud SQL instance ID of the source.
+          If the connection profile is a Cloud SQL database, use this field to provide the Cloud SQL instance ID.
   - name: postgresql
     type: NestedObject
     description: |
@@ -305,23 +331,17 @@ properties:
           The IP or hostname of the source MySQL database.
         required_with:
           - postgresql.0.port
-          - postgresql.0.username
-          - postgresql.0.password
       - name: port
         type: Integer
         description: |
           The network port of the source MySQL database.
         required_with:
           - postgresql.0.host
-          - postgresql.0.username
-          - postgresql.0.password
       - name: username
         type: String
         description: |
           The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
         required_with:
-          - postgresql.0.host
-          - postgresql.0.port
           - postgresql.0.password
       - name: password
         type: String
@@ -329,17 +349,20 @@ properties:
           Input only. The password for the user that Database Migration Service will be using to connect to the database.
           This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
         immutable: true
-        required_with:
-          - postgresql.0.host
-          - postgresql.0.port
-          - postgresql.0.username
         sensitive: true
         custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_password.go.tmpl
+        required_with:
+          - postgresql.0.username
       - name: passwordSet
         type: Boolean
         description: |
           Output only. Indicates If this connection profile password is stored.
         output: true
+      - name: database
+        type: String
+        description: |
+          The name of the specific database within the host.
+        default_from_api: true
       - name: ssl
         type: NestedObject
         description: |
@@ -385,11 +408,11 @@ properties:
       - name: cloudSqlId
         type: String
         description: |
-          If the source is a Cloud SQL database, use this field to provide the Cloud SQL instance ID of the source.
+          If the connection profile is a Cloud SQL database, use this field to provide the Cloud SQL instance ID.
       - name: alloydbClusterId
         type: String
         description: |
-          If the connected database is an AlloyDB instance, use this field to provide the AlloyDB cluster ID.
+          If the connection profile is an AlloyDB instance, use this field to provide the AlloyDB cluster ID.
       - name: networkArchitecture
         type: Enum
         description: |
@@ -398,6 +421,16 @@ properties:
         enum_values:
           - NETWORK_ARCHITECTURE_OLD_CSQL_PRODUCER
           - NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER
+      - name: privateConnectivity
+        type: NestedObject
+        description: |
+          Private connectivity.
+        properties:
+          - name: privateConnection
+            type: String
+            required: true
+            description: |
+              Required. The resource name (URI) of the private connection.
   - name: oracle
     type: NestedObject
     description: |

@@ -1,0 +1,6 @@
+{
+  "name": "qa-test-runner",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

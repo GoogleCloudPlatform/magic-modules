@@ -13,47 +13,52 @@
 
 ---
 name: Channel
-legacy_long_form_project: true
-base_url: projects/{{project}}/locations/{{location}}/channels
-create_url: projects/{{project}}/locations/{{location}}/channels?channelId={{name}}
-self_link: projects/{{project}}/locations/{{location}}/channels/{{name}}
-update_verb: PATCH
-update_mask: true
+description: |
+  The Eventarc Channel resource
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/eventarc/standard/docs/third-parties/create-channels'
+    Official Documentation: https://cloud.google.com/eventarc/standard/docs/third-parties/create-channels
   api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.channels
+base_url: projects/{{project}}/locations/{{location}}/channels
+self_link: projects/{{project}}/locations/{{location}}/channels/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/channels?channelId={{name}}
+update_mask: true
+update_verb: PATCH
 async:
-  actions: ['create', 'update', 'delete']
   type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, update, delete]
   result:
     resource_inside_response: true
-autogen_async: true
-description: |
- The Eventarc Channel resource
 error_retry_predicates:
   - transport_tpg.EventarcChannel403Retry
-examples:
+legacy_long_form_project: true
+autogen_async: true
+custom_code:
+samples:
   - name: eventarc_channel_with_cmek
     primary_resource_id: primary
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      channel_name: some-channel
-      key_name: some-key
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      project_number: 'PROJECT_NUMBER'
-    test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-channel-key").CryptoKey.Name'
+      - member: serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com
+        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    steps:
+      - name: eventarc_channel_with_cmek
+        resource_id_vars:
+          channel_name: some-channel
+          key_name: some-key
+        test_env_vars:
+          project: PROJECT_NAME
+          project_number: PROJECT_NUMBER
+        test_vars_overrides:
+          key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-channel-key").CryptoKey.Name
   - name: eventarc_channel
     primary_resource_id: primary
-    vars:
-      channel_name: some-channel
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: eventarc_channel
+        resource_id_vars:
+          channel_name: some-channel
 parameters:
   - name: location
     type: String
@@ -70,9 +75,9 @@ properties:
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     custom_expand: templates/terraform/custom_expand/eventarc_channel_name.go.tmpl
     custom_flatten: templates/terraform/custom_flatten/eventarc_channel_name.go.tmpl
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: 'User-defined labels for the channel.'
+    description: User-defined labels for the channel.
   - name: uid
     type: String
     description: Server assigned unique identifier for the channel. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.

@@ -16,7 +16,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"crypto/sha256"
 	"encoding/base64"
@@ -36,6 +35,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			resourceStorageBucketObjectCustomizeDiff,
 			validateContexts,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -352,12 +352,9 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description: `A url reference to download this object.`,
 			},
 
-			"deletion_policy": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  `The deletion policy for the object. Setting ABANDON allows the resource to be abandoned rather than deleted when removed from your Terraform configuration.`,
-				ValidateFunc: validation.StringInSlice([]string{"ABANDON"}, false),
-			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -390,7 +387,7 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error, either \"content\" or \"source\" must be specified")
 	}
 
-	objectsService := storage.NewObjectsService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutCreate)))
+	objectsService := storage.NewObjectsService(NewClientWithTimeoutOverride(config, userAgent, d.Timeout(schema.TimeoutCreate)))
 	object := &storage.Object{Bucket: bucket}
 
 	if v, ok := d.GetOk("cache_control"); ok {
@@ -465,6 +462,11 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceStorageBucketObject) {
+		return ResourceStorageBucketObject().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -481,7 +483,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 		return resourceStorageBucketObjectCreate(d, meta)
 	} else {
 
-		objectsService := storage.NewObjectsService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutUpdate)))
+		objectsService := storage.NewObjectsService(NewClientWithTimeoutOverride(config, userAgent, d.Timeout(schema.TimeoutUpdate)))
 		getCall := objectsService.Get(bucket, name)
 
 		res, err := getCall.Do()
@@ -538,7 +540,7 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	objectsService := storage.NewObjectsService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutRead)))
+	objectsService := storage.NewObjectsService(NewClientWithTimeoutOverride(config, userAgent, d.Timeout(schema.TimeoutRead)))
 	getCall := objectsService.Get(bucket, name)
 
 	if v, ok := d.GetOk("customer_encryption"); ok {
@@ -622,12 +624,23 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error reading Contexts: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	d.SetId(objectGetID(res))
 
 	return nil
 }
 
 func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -643,7 +656,7 @@ func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{})
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	objectsService := storage.NewObjectsService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutDelete)))
+	objectsService := storage.NewObjectsService(NewClientWithTimeoutOverride(config, userAgent, d.Timeout(schema.TimeoutDelete)))
 
 	DeleteCall := objectsService.Delete(bucket, name)
 	err = DeleteCall.Do()

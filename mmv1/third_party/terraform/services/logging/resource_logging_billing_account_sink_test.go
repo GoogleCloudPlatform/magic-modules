@@ -8,6 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	logging_tpg "github.com/hashicorp/terraform-provider-google/google/services/logging"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	"google.golang.org/api/logging/v2"
 )
@@ -204,7 +207,7 @@ func testAccCheckLoggingBillingAccountSinkDestroyProducer(t *testing.T) func(s *
 
 			attributes := rs.Primary.Attributes
 
-			_, err := config.NewLoggingClient(config.UserAgent).BillingAccounts.Sinks.Get(attributes["id"]).Do()
+			_, err := logging_tpg.NewClient(config, config.UserAgent).BillingAccounts.Sinks.Get(attributes["id"]).Do()
 			if err == nil {
 				return fmt.Errorf("billing sink still exists")
 			}
@@ -222,7 +225,7 @@ func testAccCheckLoggingBillingAccountSinkExists(t *testing.T, n string, sink *l
 		}
 		config := acctest.GoogleProviderConfig(t)
 
-		si, err := config.NewLoggingClient(config.UserAgent).BillingAccounts.Sinks.Get(attributes["id"]).Do()
+		si, err := logging_tpg.NewClient(config, config.UserAgent).BillingAccounts.Sinks.Get(attributes["id"]).Do()
 		if err != nil {
 			return err
 		}

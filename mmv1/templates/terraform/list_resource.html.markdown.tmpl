@@ -1,0 +1,54 @@
+{{- /* Copyright 2024 Google LLC. All Rights Reserved.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License. */ -}}
+---
+{{$.MarkdownHeader TemplatePath}}
+subcategory: "{{$.ProductMetadata.DisplayName}}"
+description: |-
+  List {{$.ProductMetadata.DisplayName}} {{lower $.Name}} resources in a project for use with terraform query
+  and .tfquery.hcl files.
+---
+
+# {{$.TerraformName}} (list)
+
+Lists [`{{$.TerraformName}}`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{$.TerraformName}}) resources for use with [`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query) and **`.tfquery.hcl`** files.
+
+For how list resources work in this provider, file layout, Terraform version requirements, and shared `list` block arguments, refer to the guide [Use list resources with terraform query (Google Cloud provider)](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/using_list_resources_with_terraform_query).
+
+## Example
+
+```hcl
+list "{{$.TerraformName}}" "all" {
+  provider = {{ if eq $.MinVersion "beta" }}google-beta{{ else }}google{{ end }}
+
+  config {
+{{- range $scope := $.ListScopeProperties }}
+    {{ underscore $scope.Name }} = {{ if $scope.Required }}"..."{{ else }}"..." # Optional{{ end }}
+{{- end }}
+  }
+}
+```
+
+Run `terraform query` from the directory that contains the `.tfquery.hcl` file.
+
+## Configuration (`config` block)
+
+{{- range $scope := $.ListScopeProperties }}
+* `{{ underscore $scope.Name }}` - ({{ if $scope.Required }}Required{{ else }}Optional{{ end }}){{ if $scope.Description }} {{ $scope.Description }}{{ end }}
+{{- end }}
+
+## Results
+
+By default each result includes **resource identity** for [`{{$.TerraformName}}`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{$.TerraformName}}) (see [Resource identity](https://developer.hashicorp.com/terraform/language/block/import#identity)).
+
+With `include_resource = true` on the `list` block, results also include the full resource-style attributes documented for the managed [`{{$.TerraformName}}` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{$.TerraformName}}#attributes-reference).

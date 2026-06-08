@@ -122,8 +122,6 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 			hclData["node_locations"] = locations
 		}
 	}
-	hclData["min_master_version"] = asset.Resource.Data["currentNodeVersion"]
-	hclData["node_version"] = asset.Resource.Data["currentNodeVersion"]
 	hclData["logging_service"] = asset.Resource.Data["loggingService"]
 	hclData["monitoring_service"] = asset.Resource.Data["monitoringService"]
 	hclData["node_config"] = flattenNodeConfig(asset.Resource.Data["nodeConfig"], nil)
@@ -211,6 +209,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	hclData["master_authorized_networks_config"] = flattenMasterAuthorizedNetworksConfig(asset.Resource.Data["masterAuthorizedNetworksConfig"])
 	hclData["pod_autoscaling"] = flattenPodAutoscaling(asset.Resource.Data["podAutoscaling"])
 	hclData["secret_manager_config"] = flattenSecretManagerConfig(asset.Resource.Data["secretManagerConfig"])
+	hclData["secret_sync_config"] = flattenSecretSyncConfig(asset.Resource.Data["secretSyncConfig"])
 	hclData["resource_usage_export_config"] = flattenResourceUsageExportConfig(asset.Resource.Data["resourceUsageExportConfig"])
 	hclData["mesh_certificates"] = flattenMeshCertificates(asset.Resource.Data["meshCertificates"])
 	hclData["cost_management_config"] = flattenManagementConfig(asset.Resource.Data["costManagementConfig"])
@@ -623,6 +622,19 @@ func flattenClusterAddonsConfig(v interface{}, enableAutopilot bool) []map[strin
 		}
 	}
 
+	if val, ok := c["podSnapshotConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
+		result["pod_snapshot_config"] = []map[string]interface{}{
+			{
+				"enabled": enabled,
+			},
+		}
+	}
+
 	return []map[string]interface{}{result}
 }
 
@@ -707,6 +719,7 @@ func flattenPrivateClusterConfig(cpec, pcc, nc interface{}) []map[string]interfa
 	if cpec != nil {
 		if c, ok := cpec.(map[string]interface{}); ok {
 			// Note the change in semantics from private to public endpoint.
+			r["enable_private_endpoint"] = true
 			if ipEndpointsConfig, ok := c["ipEndpointsConfig"].(map[string]interface{}); ok {
 				if v, ok := ipEndpointsConfig["enablePublicEndpoint"].(bool); ok {
 					r["enable_private_endpoint"] = !v
@@ -1177,11 +1190,11 @@ func flattenClusterAutoscaling(v interface{}, enableAutopilot bool) []map[string
 		if !enableAutopilot {
 			transformed["enabled"] = true
 		}
-	} else if !enableAutopilot {
-		transformed["enabled"] = false
+		transformed["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a["autoprovisioningNodePoolDefaults"])
 	}
-	transformed["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a["autoprovisioningNodePoolDefaults"])
-	transformed["auto_provisioning_locations"] = a["autoprovisioningLocations"]
+	if v := a["autoprovisioningLocations"]; v != nil {
+		transformed["auto_provisioning_locations"] = v
+	}
 	if v := a["autoscalingProfile"]; v != nil && v != "BALANCED" {
 		transformed["autoscaling_profile"] = v
 	}
@@ -1189,6 +1202,9 @@ func flattenClusterAutoscaling(v interface{}, enableAutopilot bool) []map[string
 		transformed["default_compute_class_enabled"] = dccc["enabled"]
 	}
 
+	if len(transformed) == 0 {
+		return nil
+	}
 	return []map[string]interface{}{transformed}
 }
 
@@ -1399,6 +1415,47 @@ func flattenPodAutoscaling(v interface{}) []map[string]interface{} {
 }
 
 func flattenSecretManagerConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return []map[string]interface{}{
+			{
+				"enabled": false,
+			},
+		}
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	result := make(map[string]interface{})
+	if val, ok := c["enabled"]; ok && val != nil {
+		result["enabled"] = val
+	} else {
+		result["enabled"] = false
+	}
+
+	rotationList := []map[string]interface{}{}
+	if rotationConfig, ok := c["rotationConfig"].(map[string]interface{}); ok && rotationConfig != nil {
+		rotationConfigMap := map[string]interface{}{}
+		if rVal, ok := rotationConfig["enabled"]; ok && rVal != nil {
+			rotationConfigMap["enabled"] = rVal
+		} else {
+			rotationConfigMap["enabled"] = false
+		}
+
+		if interval, ok := rotationConfig["rotationInterval"].(string); ok && interval != "" {
+			rotationConfigMap["rotation_interval"] = interval
+		}
+		rotationList = append(rotationList, rotationConfigMap)
+	}
+
+	if len(rotationList) > 0 {
+		result["rotation_config"] = rotationList
+	}
+	return []map[string]interface{}{result}
+}
+
+func flattenSecretSyncConfig(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return []map[string]interface{}{
 			{

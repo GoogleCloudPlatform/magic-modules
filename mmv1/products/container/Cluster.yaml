@@ -14,8 +14,15 @@
 ---
 name: Cluster
 description: Container Cluster
-include_in_tgc_next: true
 exclude_resource: true
+include_in_tgc_next: true
+tgc_tests:
+  - name: TestAccContainerCluster_withDatabaseEncryption
+    skip: Bug in the API, https://github.com/hashicorp/terraform-provider-google/issues/26882
+  - name: TestAccContainerCluster_withSandboxConfigType
+    skip: Need to fix the testing framework to handle the order of array items (map) node_config.taint
+  - name: TestAccContainerCluster_withLoggingConfig
+    skip: Need to fix the testing framework to handle logging_config.enable_components is empty array
 properties:
   - name: removeDefaultNodePool
     type: Boolean
@@ -25,77 +32,150 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'nodeCount'
-          type: 'Integer'
-          description: 'The node count for the pool.'
+        - name: nodeCount
+          type: Integer
+          description: The node count for the pool.
           # Node pools don't expose the current node count in CAI asset
           # Field node_count will not be present in converted HCL
           ignore_read: true
-        - name: 'NamePrefix'
-          type: 'String'
-          description: 'The prefix of the node pool name.'
+        - name: NamePrefix
+          type: String
+          description: The prefix of the node pool name.
           # Field "name" and "name_prefix" conflicts. Convert name_prefix during cai2hcl
           ignore_read: true
-        - name: 'nodeConfig'
-          type: 'NestedObject'
-          description: 'Configuration for the nodes in the pool.'
+        - name: nodeConfig
+          type: NestedObject
+          description: Configuration for the nodes in the pool.
           properties:
-            - name: 'guest_accelerator'
-              type: 'Array'
-              api_name: 'accelerators'
-              description: 'A list of hardware accelerators to be attached to each node.'
+            - name: guest_accelerator
+              type: Array
+              api_name: accelerators
+              description: A list of hardware accelerators to be attached to each node.
               ignore_read: true
               item_type:
-                type: 'NestedObject'
+                type: NestedObject
                 properties:
-                  - name: 'count'
-                    type: 'Integer'
-                    description: 'The number of the accelerator cards exposed to an instance.'
+                  - name: count
+                    type: Integer
+                    description: The number of the accelerator cards exposed to an instance.
                     ignore_read: true
-                  - name: 'type'
-                    type: 'String'
-                    description: 'The accelerator type resource to expose to this instance. E.g. nvidia-tesla-k80.'
+                  - name: type
+                    type: String
+                    description: The accelerator type resource to expose to this instance. E.g. nvidia-tesla-k80.
                     ignore_read: true
-                  - name: 'gpuPartitionSize'
-                    type: 'String'
-                    description: 'Size of partitions to create on the GPU. Supported values are described in the NVIDIA mig user guide.'
+                  - name: gpuPartitionSize
+                    type: String
+                    description: Size of partitions to create on the GPU. Supported values are described in the NVIDIA mig user guide.
                     ignore_read: true
-                  - name: 'gpuDriverInstallationConfig'
-                    type: 'NestedObject'
-                    description: 'Configuration for GPU driver installation.'
+                  - name: gpuDriverInstallationConfig
+                    type: NestedObject
+                    description: Configuration for GPU driver installation.
                     ignore_read: true
                     properties:
-                      - name: 'gpuDriverVersion'
-                        type: 'String'
-                        description: 'Mode for how the GPU driver is installed.'
-  - name: 'ipAllocationPolicy'
-    type: 'NestedObject'
+                      - name: gpuDriverVersion
+                        type: String
+                        description: Mode for how the GPU driver is installed.
+            - name: taint
+              type: Array
+              api_name: taints
+              description: Taints to be applied to nodes in the pool.
+              ignore_read: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: key
+                    type: String
+                    description: The key of the taint.
+                    ignore_read: true
+                  - name: value
+                    type: String
+                    description: The value of the taint.
+                    ignore_read: true
+                  - name: effect
+                    type: String
+                    description: The effect of the taint.
+                    ignore_read: true
+  - name: nodeConfig
+    type: NestedObject
+    description: Configuration for the nodes in the pool.
     properties:
-      - name: 'clusterIpv4CidrBlock'
-        type: 'String'
+      - name: guest_accelerator
+        type: Array
+        api_name: accelerators
+        description: A list of hardware accelerators to be attached to each node.
+        ignore_read: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: count
+              type: Integer
+              description: The number of the accelerator cards exposed to an instance.
+              ignore_read: true
+            - name: type
+              type: String
+              description: The accelerator type resource to expose to this instance. E.g. nvidia-tesla-k80.
+              ignore_read: true
+            - name: gpuPartitionSize
+              type: String
+              description: Size of partitions to create on the GPU. Supported values are described in the NVIDIA mig user guide.
+              ignore_read: true
+            - name: gpuDriverInstallationConfig
+              type: NestedObject
+              description: Configuration for GPU driver installation.
+              ignore_read: true
+              properties:
+                - name: gpuDriverVersion
+                  type: String
+                  description: Mode for how the GPU driver is installed.
+      - name: taint
+        type: Array
+        api_name: taints
+        description: Taints to be applied to nodes in the pool.
+        ignore_read: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: key
+              type: String
+              description: The key of the taint.
+              ignore_read: true
+            - name: value
+              type: String
+              description: The value of the taint.
+              ignore_read: true
+            - name: effect
+              type: String
+              description: The effect of the taint.
+              ignore_read: true
+  - name: ipAllocationPolicy
+    type: NestedObject
+    properties:
+      - name: clusterIpv4CidrBlock
+        type: String
         # test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset
         ignore_read: true
-      - name: 'servicesIpv4CidrBlock'
-        type: 'String'
+      - name: servicesIpv4CidrBlock
+        type: String
         # test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset
         ignore_read: true
-  - name: 'networkPolicy'
+  - name: networkPolicy
     type: Array
     is_missing_in_cai: true
     item_type:
-      type: 'NestedObject'
+      type: NestedObject
       properties:
-        - name: 'enabled'
-          type: 'Boolean'
-          description: 'Whether network policy is enabled on the cluster.'
+        - name: enabled
+          type: Boolean
+          description: Whether network policy is enabled on the cluster.
           is_missing_in_cai: true
           required: true
-        - name: 'provider'
-          type: 'String'
-          description: 'The selected network policy provider.'
+        - name: provider
+          type: String
+          description: The selected network policy provider.
           is_missing_in_cai: true
-tgc_tests:
-  - name: TestAccContainerCluster_withSandboxConfigType
-    skip: Need to fix the testing framework to handle the order of array items (map) node_config.taint
-  - name: TestAccContainerCluster_withLoggingConfig
-    skip: Need to fix the testing framework to handle logging_config.enable_components is empty array
+  - name: minMasterVersion
+    type: String
+    ignore_read: true
+  - name: nodeVersion
+    type: String
+    ignore_read: true

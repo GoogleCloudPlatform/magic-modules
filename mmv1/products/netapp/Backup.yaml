@@ -60,6 +60,7 @@ async:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 include_in_tgc_next: true
+custom_code:
 examples:
   - name: 'netapp_backup'
     primary_resource_id: 'test_backup'
@@ -70,7 +71,7 @@ examples:
       backup_name: 'test-backup'
       network_name: 'network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 parameters:
   - name: 'location'
     type: String
@@ -144,6 +145,32 @@ properties:
       Format: `projects/{{projectId}}/locations/{{location}}/volumes/{{volumename}}/snapshots/{{snapshotname}}``
     required: false
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'ontapSource'
+    type: NestedObject
+    description: |
+      Details of the ONTAP source volume and snapshot.
+    required: false
+    immutable: true
+    properties:
+      - name: 'storagePool'
+        type: String
+        description: |
+          Name of the storage pool. This must be specified for creating backups for ONTAP mode volumes.
+          Format: `projects/{{project}}/locations/{{location}}/storagePools/{{storage_pool_id}}`
+        required: true
+        immutable: true
+      - name: 'volumeUuid'
+        type: String
+        description: |
+          The UUID of the ONTAP source volume.
+        required: true
+        immutable: true
+      - name: 'snapshotUuid'
+        type: String
+        description: |
+          The UUID of the ONTAP source snapshot.
+        immutable: true
+        default_from_api: true
   - name: 'volumeRegion'
     type: String
     description: |

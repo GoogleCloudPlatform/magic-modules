@@ -44,8 +44,8 @@ examples:
     external_providers: ["time"]
   - name: "apigee_space_basic"
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
+# This is a more verbose version of the above that creates all
+# the resources needed for the acceptance test.
 parameters:
   - name: "orgId"
     type: String
