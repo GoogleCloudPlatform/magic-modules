@@ -54,6 +54,15 @@ examples:
     vars:
       engine_id: 'example-engine-id'
       data_store_id: 'example-datastore-id'
+iam_policy:
+  parent_resource_attribute: 'engine_id'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'GET'
+  allowed_iam_role: 'roles/discoveryengine.agentspaceUser'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
+    - '{{engine_id}}'
+  sample_config_body: templates/terraform/iam/example_config_body/discovery_engine_search_engine.tf.tmpl
 parameters:
   - name: 'engineId'
     type: String

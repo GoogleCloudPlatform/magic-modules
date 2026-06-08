@@ -102,6 +102,8 @@ resource "google_vmwareengine_datastore" "test_fs_datastore" {
   }
 }
 
+# Mount NFS datastore on vSphere cluster
+# This code block is required to mount the datastore on ESXi hosts
 resource "google_vmwareengine_cluster" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "name"}}"
   parent   = google_vmwareengine_private_cloud.cluster-pc.id

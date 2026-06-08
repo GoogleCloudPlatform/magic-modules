@@ -196,6 +196,7 @@ properties:
                 - 'NVIDIA_H100_MEGA_80GB'
                 - 'NVIDIA_H200_141GB'
                 - 'NVIDIA_B200'
+                - 'NVIDIA_RTX6000'
                 - 'NVIDIA_TESLA_T4_VWS'
                 - 'NVIDIA_TESLA_P100_VWS'
                 - 'NVIDIA_TESLA_P4_VWS'

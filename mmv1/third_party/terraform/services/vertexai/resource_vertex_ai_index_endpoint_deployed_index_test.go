@@ -1,51 +1,111 @@
 package vertexai_test
 
 import (
-	"testing"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/vertexai"
+  "github.com/hashicorp/terraform-provider-google/google/acctest"
+  _ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+  _ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+  "github.com/hashicorp/terraform-provider-google/google/services/vertexai"
+  transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+// Regression test for the import failure that surfaced as
+// "Cannot determine region: set in this resource, or set provider-level
+// region or zone". The custom_import must populate region from the
+// index_endpoint path so the subsequent Read can template the regional
+// aiplatform URL even when the provider has no region configured.
+func TestVertexAIIndexEndpointDeployedIndexImport_setsRegion(t *testing.T) {
+  cases := map[string]struct {
+    importID       string
+    wantRegion     string
+    wantEndpoint   string
+    wantDeployedID string
+  }{
+    "us-central1": {
+      importID:       "projects/my-proj/locations/us-central1/indexEndpoints/ie-123/deployedIndex/di-456",
+      wantRegion:     "us-central1",
+      wantEndpoint:   "projects/my-proj/locations/us-central1/indexEndpoints/ie-123",
+      wantDeployedID: "di-456",
+    },
+    "europe-west4": {
+      importID:       "projects/p2/locations/europe-west4/indexEndpoints/ie-x/deployedIndex/di-y",
+      wantRegion:     "europe-west4",
+      wantEndpoint:   "projects/p2/locations/europe-west4/indexEndpoints/ie-x",
+      wantDeployedID: "di-y",
+    },
+  }
+
+  for name, tc := range cases {
+    t.Run(name, func(t *testing.T) {
+      r := vertexai.ResourceVertexAIIndexEndpointDeployedIndex()
+      d := r.TestResourceData()
+      d.SetId(tc.importID)
+
+      // Empty Config — the case the fix targets (no provider region).
+      out, err := r.Importer.State(d, &transport_tpg.Config{})
+      if err != nil {
+        t.Fatalf("Importer.State returned error: %v", err)
+      }
+      if len(out) != 1 {
+        t.Fatalf("expected 1 ResourceData, got %d", len(out))
+      }
+      got := out[0]
+
+      if v := got.Get("region").(string); v != tc.wantRegion {
+        t.Errorf("region = %q, want %q", v, tc.wantRegion)
+      }
+      if v := got.Get("index_endpoint").(string); v != tc.wantEndpoint {
+        t.Errorf("index_endpoint = %q, want %q", v, tc.wantEndpoint)
+      }
+      if v := got.Get("deployed_index_id").(string); v != tc.wantDeployedID {
+        t.Errorf("deployed_index_id = %q, want %q", v, tc.wantDeployedID)
+      }
+      wantID := tc.wantEndpoint + "/deployedIndex/" + tc.wantDeployedID
+      if got.Id() != wantID {
+        t.Errorf("Id = %q, want %q", got.Id(), wantID)
+      }
+    })
+  }
+}
+
 func TestAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesExample_update(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_full(context),
-			},
-			{
-				ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.dedicated_resources_update",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"index_endpoint"},
-			},
-			{
-				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_update(context),
-			},
-			{
-				ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.dedicated_resources_update",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"index_endpoint"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_full(context),
+      },
+      {
+        ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.dedicated_resources_update",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"index_endpoint"},
+      },
+      {
+        Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_update(context),
+      },
+      {
+        ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.dedicated_resources_update",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"index_endpoint"},
+      },
+    },
+  })
 }
 
 func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_full(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint_deployed_index" "dedicated_resources_update" {
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
   index_endpoint = google_vertex_ai_index_endpoint.vertex_endpoint.id
@@ -119,7 +179,7 @@ data "google_project" "project" {}
 }
 
 func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint_deployed_index" "dedicated_resources_update" {
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
   index_endpoint = google_vertex_ai_index_endpoint.vertex_endpoint.id
@@ -193,40 +253,40 @@ data "google_project" "project" {}
 }
 
 func TestAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointAutomaticResourcesExample_update(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexAutomaticResourcesBasicExample_full(context),
-			},
-			{
-				ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.automatic_resources_update",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"index_endpoint"},
-			},
-			{
-				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexAutomaticResourcesBasicExample_update(context),
-			},
-			{
-				ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.automatic_resources_update",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"index_endpoint"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexAutomaticResourcesBasicExample_full(context),
+      },
+      {
+        ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.automatic_resources_update",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"index_endpoint"},
+      },
+      {
+        Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexAutomaticResourcesBasicExample_update(context),
+      },
+      {
+        ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.automatic_resources_update",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"index_endpoint"},
+      },
+    },
+  })
 }
 
 func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexAutomaticResourcesBasicExample_full(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint_deployed_index" "automatic_resources_update" {
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
   index_endpoint = google_vertex_ai_index_endpoint.vertex_endpoint.id
@@ -234,8 +294,8 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "automatic_resources_u
   deployed_index_id = "tf_test_deployed_index_id%{random_suffix}"
   display_name = "tf-test-vertex-deployed-index%{random_suffix}"
   automatic_resources {
-	min_replica_count = 3
-	max_replica_count = 4
+  min_replica_count = 3
+  max_replica_count = 4
   }
 }
 
@@ -297,7 +357,7 @@ data "google_project" "project" {}
 }
 
 func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexAutomaticResourcesBasicExample_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint_deployed_index" "automatic_resources_update" {
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
   index_endpoint = google_vertex_ai_index_endpoint.vertex_endpoint.id
@@ -305,8 +365,8 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "automatic_resources_u
   deployed_index_id = "tf_test_deployed_index_id%{random_suffix}"
   display_name = "tf-test-vertex-deployed-index%{random_suffix}"
   automatic_resources {
-	min_replica_count = 5
-	max_replica_count = 6
+  min_replica_count = 5
+  max_replica_count = 6
   }
 }
 
