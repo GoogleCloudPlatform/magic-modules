@@ -67,6 +67,10 @@ var (
 					startDate: newDate(2025, 7, 1),
 					endDate:   newDate(2025, 7, 17),
 				},
+				{
+					startDate: newDate(2026, 6, 11),
+					endDate:   newDate(2026, 6, 14),
+				},
 			},
 		},
 		"c2thorn": {
