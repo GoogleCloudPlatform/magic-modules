@@ -20,7 +20,7 @@ func TestAccComputeRegionNetworkPolicyTrafficClassificationRule_regionNetworkPol
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionNetworkPolicyTrafficClassificationRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -48,6 +48,8 @@ func TestAccComputeRegionNetworkPolicyTrafficClassificationRule_regionNetworkPol
 func testAccComputeRegionNetworkPolicyTrafficClassificationRule_regionNetworkPolicyTrafficClassificationRuleBasicCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_network_policy" "basic_regional_network_policy" {
+  provider     = google-beta
+
   name        = "tf-test-nw-policy%{random_suffix}"
   description = "Sample regional network firewall policy"
   project     = "%{project_name}"
@@ -55,6 +57,8 @@ resource "google_compute_region_network_policy" "basic_regional_network_policy" 
 }
 
 resource "google_compute_region_network_policy_traffic_classification_rule" "primary" {
+  provider     = google-beta
+
   rule_name               = "test-rule"
   description             = "This is a simple rule description"
   disabled                = false
@@ -80,6 +84,8 @@ resource "google_compute_region_network_policy_traffic_classification_rule" "pri
 func testAccComputeRegionNetworkPolicyTrafficClassificationRule_regionNetworkPolicyTrafficClassificationRuleBasicUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_network_policy" "basic_regional_network_policy" {
+  provider     = google-beta
+
   name        = "tf-test-nw-policy%{random_suffix}"
   description = "Sample regional network firewall policy"
   project     = "%{project_name}"
@@ -87,6 +93,8 @@ resource "google_compute_region_network_policy" "basic_regional_network_policy" 
 }
 
 resource "google_compute_region_network_policy_traffic_classification_rule" "primary" {
+  provider     = google-beta
+
   rule_name               = "test-rule"
   description             = "This is a simple rule description"
   disabled                = false

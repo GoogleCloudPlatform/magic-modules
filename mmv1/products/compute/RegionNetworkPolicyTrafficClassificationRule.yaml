@@ -21,6 +21,7 @@ references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkPolicies/addTrafficClassificationRule'
 docs:
+min_version: beta
 id_format: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{network_policy}}/{{priority}}'
 base_url: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{network_policy}}'
 self_link: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{network_policy}}/getTrafficClassificationRule?priority={{priority}}'
@@ -51,6 +52,7 @@ custom_diff:
 examples:
   - name: 'region_network_policy_traffic_classification_rule_basic'
     primary_resource_id: 'primary'
+    min_version: beta
     vars:
       nw_policy: 'nw-policy'
     test_env_vars:

@@ -1,4 +1,6 @@
 resource "google_compute_region_network_policy" "basic_regional_network_policy" {
+  provider     = google-beta
+
   name        = "{{index $.Vars "nw_policy"}}"
   description = "Sample regional network firewall policy"
   project     = "{{index $.TestEnvVars "project_name"}}"
@@ -6,6 +8,8 @@ resource "google_compute_region_network_policy" "basic_regional_network_policy" 
 }
 
 resource "google_compute_region_network_policy_traffic_classification_rule" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+
   rule_name               = "test-rule"
   description             = "This is a simple rule description"
   disabled                = false
