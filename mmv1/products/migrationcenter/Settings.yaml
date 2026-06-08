@@ -32,7 +32,7 @@ async:
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/clear_migration_center_settings.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-autogen_status: U2V0dGluZ3M=
+autogen_status: U2V0dGluZ3NBdXRvZ2VuVjJBZ2VudA==
 autogen_async: true
 examples:
   - name: 'migration_center_settings_basic'

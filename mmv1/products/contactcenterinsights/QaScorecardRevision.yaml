@@ -21,7 +21,7 @@ create_url: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorec
 exclude_delete: true
 import_format:
   - projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard}}/revisions/{{qa_scorecard_revision_id}}
-autogen_status: UWFTY29yZWNhcmRSZXZpc2lvbg==
+autogen_status: UWFTY29yZWNhcmRSZXZpc2lvbkF1dG9nZW5WMkFnZW50
 examples:
   - name: contact_center_insights_qa_scorecard_revision_basic
     primary_resource_id: default

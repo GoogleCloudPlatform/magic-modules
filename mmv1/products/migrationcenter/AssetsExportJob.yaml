@@ -28,7 +28,7 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: QXNzZXRzRXhwb3J0Sm9i
+autogen_status: QXNzZXRzRXhwb3J0Sm9iQXV0b2dlblYyQWdlbnQ=
 autogen_async: true
 samples:
   - name: migration_center_assets_export_job_basic

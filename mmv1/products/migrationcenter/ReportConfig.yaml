@@ -28,7 +28,7 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: UmVwb3J0Q29uZmln
+autogen_status: UmVwb3J0Q29uZmlnQXV0b2dlblYyQWdlbnQ=
 autogen_async: true
 examples:
   - name: 'migration_center_report_config_basic'
