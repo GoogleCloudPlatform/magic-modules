@@ -16,6 +16,7 @@ name: 'RegionNetworkPolicy'
 api_resource_type_kind: NetworkPolicy
 description: "The Compute NetworkFirewallPolicy resource"
 docs:
+min_version: beta
 base_url: 'projects/{{project}}/regions/{{region}}/networkPolicies'
 self_link: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{name}}'
 create_url: 'projects/{{project}}/regions/{{region}}/networkPolicies'
@@ -35,6 +36,7 @@ custom_code:
 legacy_long_form_project: true
 examples:
   - name: 'region_network_policy_full'
+    min_version: beta
     primary_resource_id: 'policy'
     vars:
       policy_name: 'tf-test-policy'

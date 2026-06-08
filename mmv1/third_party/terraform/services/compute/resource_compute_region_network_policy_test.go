@@ -17,7 +17,7 @@ func TestAccComputeRegionNetworkPolicy_regionNetworkPolicyUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionNetworkPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -36,6 +36,8 @@ func TestAccComputeRegionNetworkPolicy_regionNetworkPolicyUpdate(t *testing.T) {
 func testAccComputeRegionNetworkPolicy_regionNetworkPolicyCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_network_policy" "policy" {
+  provider     = google-beta
+
   name = "tf-test-tf-test-policy%{random_suffix}"
   description = "Terraform test"
 }
@@ -45,6 +47,8 @@ resource "google_compute_region_network_policy" "policy" {
 func testAccComputeRegionNetworkPolicy_regionNetworkPolicyUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_region_network_policy" "policy" {
+  provider     = google-beta
+
   name = "tf-test-tf-test-policy%{random_suffix}"
   description = "Terraform test update"
 }
