@@ -16,5 +16,10 @@ resource "google_datastream_connection_profile" "default" {
         password    = "mongoPassword"
 
         standard_connection_format {}
+
+        additional_options = {
+          readPreference     = "secondary"
+          readPreferenceTags = "nodeType:ANALYTICS"
+        }
     }
 }
