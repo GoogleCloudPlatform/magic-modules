@@ -332,8 +332,8 @@ func testAccCheckGoogleSqlUserExists(t *testing.T, n string) resource.TestCheckF
 		for _, user := range users.Items {
 			username := name
 			if user.Type == "CLOUD_IAM_GROUP" && strings.Contains(databaseInstance.DatabaseVersion, "MYSQL") {
-				splitName := strings.Split(name, "@")
-				if len(splitName) >= 2 {
+				splitName := strings.SplitN(name, "@", 2)
+				if len(splitName) == 2 {
 					groupUsername := splitName[0]
 					groupHostname := splitName[1]
 					username = groupUsername + "@" + strings.ToLower(groupHostname)

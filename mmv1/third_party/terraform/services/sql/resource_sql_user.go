@@ -31,8 +31,8 @@ func diffSuppressIamUserName(_, old, new string, d *schema.ResourceData) bool {
 	// Only MySQL has "%" populated for empty hostnames so we can use
 	// that to identify MySQL Cloud IAM Groups.
 	if strings.Contains(userType, "CLOUD_IAM_GROUP") && d.Get("host") == "%" {
-		splitName := strings.Split(new, "@")
-		if len(splitName) >= 2 {
+		splitName := strings.SplitN(new, "@", 2)
+		if len(splitName) == 2 {
 			groupUsername := splitName[0]
 			groupHostname := splitName[1]
 			groupName := groupUsername + "@" + strings.ToLower(groupHostname)
@@ -409,8 +409,8 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		if !(strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") || currentUser.Type == "CLOUD_IAM_GROUP") {
 			username = strings.Split(name, "@")[0]
 		} else if strings.Contains(databaseInstance.DatabaseVersion, "MYSQL") && currentUser.Type == "CLOUD_IAM_GROUP" {
-			splitName := strings.Split(name, "@")
-			if len(splitName) >= 2 {
+			splitName := strings.SplitN(name, "@", 2)
+			if len(splitName) == 2 {
 				groupUsername := splitName[0]
 				groupHostname := splitName[1]
 				username = groupUsername + "@" + strings.ToLower(groupHostname)
