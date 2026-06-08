@@ -1,0 +1,30 @@
+resource "google_oracle_database_goldengate_connection" "{{$.PrimaryResourceId}}" {
+  goldengate_connection_id = "{{index $.Vars "goldengate_connection_id"}}"
+  location                 = "us-east4"
+  project                  = "{{index $.Vars "project"}}"
+  gcp_oracle_zone          = "us-east4-b-r1"
+
+  properties {
+    display_name    = "{{index $.Vars "goldengate_connection_id"}} display name"
+    connection_type = "JAVA_MESSAGE_SERVICE"
+    java_message_service_connection_properties {
+      technology_type                    = "ORACLE_WEBLOGIC_JMS"
+      use_jndi                           = true
+      jndi_connection_factory            = "ConnectionFactory"
+      jndi_provider_url                  = "tcp://jms.example.com:61616?jms.prefetchPolicy.all=1000"
+      jndi_initial_context_factory       = "org.apache.activemq.jndi.ActiveMQInitialContextFactory"
+      jndi_security_principal            = "jms_user"
+      jndi_security_credentials_secret   = "jms_credentials"
+      username                           = "jms_user"
+      password                           = "jms_password"
+      security_protocol                  = "MTLS"
+      authentication_type                = "BASIC"
+      trust_store_file                   = "YmFzZTY0LXRydXN0c3RvcmUtZmlsZS1jb250ZW50LWRlbW8tZ2dvbm4="
+      trust_store_password               = "truststore_pass"
+      key_store_file                     = "YmFzZTY0LWtleXN0b3JlLWZpbGUtY29udGVudC1kZW1vLWdnb25u"
+      key_store_password                 = "keystore_pass"
+      ssl_key_password                   = "ssl_key_pass"
+    }
+  }
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+}

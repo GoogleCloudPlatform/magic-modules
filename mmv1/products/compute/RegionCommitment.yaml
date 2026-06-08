@@ -57,6 +57,9 @@ examples:
     primary_resource_id: 'foobar'
     vars:
       region_commitment_name: 'my-full-commitment'
+      tag_key: 'tagkey'
+      tag_value: 'tagvalue'
+      org_id: 'ORG_ID'
     # Creating a resource means signing a contract
     # Spanning years that cannot be deleted
     exclude_test: true
@@ -203,3 +206,18 @@ properties:
     description: |
       Specifies the already existing reservations to attach to the Commitment.
     default_from_api: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the commitment. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true

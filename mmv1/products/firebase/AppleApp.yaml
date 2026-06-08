@@ -72,7 +72,7 @@ examples:
       display_name: 'Display Name Full'
       bundle_id: 'apple.app.12345'
       app_store_id: '12345'
- # Has to be a 10-digit number.
+      # Has to be a 10-digit number.
       team_id: '9987654321'
       api_key_name: 'api-key'
     test_env_vars:
@@ -86,14 +86,6 @@ examples:
     ignore_read_extra:
       - 'project'
       - 'deletion_policy'
-virtual_fields:
-  - name: 'deletion_policy'
-    description: |
-      (Optional) Set to `ABANDON` to allow the Apple to be untracked from terraform state
-      rather than deleted upon `terraform destroy`. This is useful because the Apple may be
-      serving traffic. Set to `DELETE` to delete the Apple. Defaults to `DELETE`.
-    type: String
-    default_value: "DELETE"
 parameters:
 properties:
   - name: 'name'

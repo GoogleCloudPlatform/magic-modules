@@ -34,6 +34,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+include_in_tgc_next: true
+cai_asset_name_format: 'organizations/{{organization}}/locations/{{location}}/notificationConfigs/{{config_id}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/scc_v2_source_self_link_as_name_set_organization.go.tmpl'
 examples:

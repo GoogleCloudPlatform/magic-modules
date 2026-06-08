@@ -88,7 +88,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -102,7 +102,7 @@ examples:
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
       network_name: 'alloydb-secondary-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -308,6 +308,12 @@ properties:
       - name: 'trackActiveQueries'
         type: Boolean
         description: 'Track actively running queries. If not set, default value is "off".'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        send_empty_value: true
+        default_from_api: true
+      - name: 'trackClientAddress'
+        type: Boolean
+        description: 'Track client address for an instance. If not set, default value is "off".'
         include_empty_value_in_cai: true  # Default value is false in CAI asset
         send_empty_value: true
         default_from_api: true

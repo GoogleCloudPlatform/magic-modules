@@ -32,7 +32,6 @@ import_format:
 custom_code:
   decoder: "templates/terraform/decoders/apigee_developer_app.go.tmpl"
   custom_import: "templates/terraform/custom_import/apigee_developer_app.go.tmpl"
-  post_create: "templates/terraform/post_create/apigee_developer_app_credentials.go.tmpl"
 examples:
   - name: "apigee_developer_app_basic"
     primary_resource_id: "apigee_developer_app"
@@ -171,23 +170,6 @@ properties:
     description: |
       Time at which the developer was last modified in milliseconds since epoch.
     output: true
-  - name: "consumerKey"
-    type: String
-    description: |
-      Optionally specify a static consumer key. If not set, the API auto-generates a key.
-      The consumer key must be unique across all developer apps in an organization.
-      ForceNew: changing this field requires recreating the resource.
-    immutable: true
-    ignore_read: true
-  - name: "consumerSecret"
-    type: String
-    description: |
-      Optionally specify a static consumer secret. If not set, the API auto-generates a secret.
-      Required if `consumer_key` is specified.
-      ForceNew: changing this field requires recreating the resource.
-    sensitive: true
-    immutable: true
-    ignore_read: true
   - name: "credentials"
     type: Array
     description: |

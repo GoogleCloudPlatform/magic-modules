@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccPubsubSubscriptionIamBinding(t *testing.T) {
@@ -118,7 +119,7 @@ func TestAccPubsubSubscriptionIamPolicy(t *testing.T) {
 func testAccCheckPubsubSubscriptionIam(t *testing.T, subscription, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		p, err := config.NewPubsubClient(config.UserAgent).Projects.Subscriptions.GetIamPolicy(pubsub.GetComputedSubscriptionName(envvar.GetTestProjectFromEnv(), subscription)).Do()
+		p, err := pubsub.NewClient(config, config.UserAgent).Projects.Subscriptions.GetIamPolicy(pubsub.GetComputedSubscriptionName(envvar.GetTestProjectFromEnv(), subscription)).Do()
 		if err != nil {
 			return err
 		}

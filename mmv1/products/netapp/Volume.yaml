@@ -51,6 +51,8 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/netapp_volume_force_delete.go.tmpl'
   pre_update: 'templates/terraform/pre_update/netapp_volume_update.go.tmpl'
   constants: 'templates/terraform/constants/netapp_volume.go.tmpl'
+deletion_policy_default: "DEFAULT"
+deletion_policy_custom_docs: true
 examples:
   - name: 'netapp_volume_basic'
     primary_resource_id: 'test_volume'
@@ -59,7 +61,7 @@ examples:
       pool_name: 'test-pool'
       network_name: 'test-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
     ignore_read_extra:
       - 'deletion_policy'
 virtual_fields:
@@ -68,9 +70,16 @@ virtual_fields:
       Policy to determine if the volume should be deleted forcefully.
       Volumes may have nested snapshot resources. Deleting such a volume will fail.
       Setting this parameter to FORCE will delete volumes including nested snapshots.
-      Possible values: DEFAULT, FORCE.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+      When set to "DELETE", the command will behave as if set to "DEFAULT".
+
+      Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE.
     type: String
-    default_value: "DEFAULT"
+    exclude: true
 parameters:
   - name: 'location'
     type: String
@@ -760,4 +769,3 @@ properties:
         description: |
           The number of internal constituents (e.g., FlexVols) for this large volume.
           The minimum number of constituents is 2.
-    min_version: beta

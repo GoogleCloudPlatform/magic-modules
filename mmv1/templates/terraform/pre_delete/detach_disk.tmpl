@@ -53,7 +53,7 @@ if d.Get("create_snapshot_before_destroy").(bool) {
 		snapshotObj["snapshotEncryptionKey"] = snapshotEncryptionKey
 	}
 
-	snapshotUrl := fmt.Sprintf("%sprojects/%s/global/snapshots", config.ComputeBasePath, project)
+	snapshotUrl := fmt.Sprintf("%sprojects/%s/global/snapshots", transport_tpg.BaseUrl(Product, config), project)
 	
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
@@ -89,7 +89,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 		}
 
 		// Get instance details using REST API
-		instanceUrl, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, instanceProject, instanceZone, instanceName))
+		instanceUrl, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(Product, config), instanceProject, instanceZone, instanceName))
 		if err != nil {
 			return err
 		}
@@ -127,7 +127,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 
 	for _, call := range detachCalls {
 		detachUrl := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/detachDisk?deviceName=%s", 
-			config.ComputeBasePath, call.project, call.zone, call.instance, call.deviceName)
+			transport_tpg.BaseUrl(Product, config), call.project, call.zone, call.instance, call.deviceName)
 		
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
@@ -148,9 +148,13 @@ if v, ok := readRes["users"].([]interface{}); ok {
 			userAgent, d.Timeout(schema.TimeoutDelete))
 		if err != nil {
 			var opErr ComputeOperationError
-			if errors.As(err, &opErr) && len(opErr.Errors) == 1 && opErr.Errors[0].Code == "RESOURCE_NOT_FOUND" {
-				log.Printf("[WARN] instance %q was deleted while awaiting detach", call.instance)
-				continue
+			if errors.As(err, &opErr) {
+				if rawErrors, _ := opErr["errors"].([]interface{}); len(rawErrors) == 1 {
+					if errMap, _ := rawErrors[0].(map[string]interface{}); errMap["code"] == "RESOURCE_NOT_FOUND" {
+						log.Printf("[WARN] instance %q was deleted while awaiting detach", call.instance)
+						continue
+					}
+				}
 			}
 			return err
 		}

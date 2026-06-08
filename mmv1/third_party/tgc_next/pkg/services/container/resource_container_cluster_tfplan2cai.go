@@ -83,6 +83,20 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		}
 	}
 
+	var autopilotClusterPolicyConfig *container.ClusterPolicyConfig
+	if v, ok := d.GetOk("autopilot_cluster_policy_config"); ok {
+		l := v.([]interface{})
+		if len(l) > 0 && l[0] != nil {
+			pc := l[0].(map[string]interface{})
+			autopilotClusterPolicyConfig = &container.ClusterPolicyConfig{
+				NoSystemMutation:      pc["no_system_mutation"].(bool),
+				NoSystemImpersonation: pc["no_system_impersonation"].(bool),
+				NoUnsafeWebhooks:      pc["no_unsafe_webhooks"].(bool),
+				NoStandardNodePools:   pc["no_standard_node_pools"].(bool),
+			}
+		}
+	}
+
 	cluster := &container.Cluster{
 		Name:                        clusterName,
 		Location:                    location,
@@ -111,6 +125,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 			Enabled:                   d.Get("enable_autopilot").(bool),
 			WorkloadPolicyConfig:      workloadPolicyConfig,
 			PrivilegedAdmissionConfig: expandPrivilegedAdmissionConfig(d.Get("autopilot_privileged_admission")),
+			ClusterPolicyConfig:       autopilotClusterPolicyConfig,
 			ForceSendFields:           []string{"Enabled"},
 		},
 		ReleaseChannel:       expandReleaseChannel(d.Get("release_channel")),
@@ -140,6 +155,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		NodePoolAutoConfig:   expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
 		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
 		EnableK8sBetaApis:    expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil),
+		SecretSyncConfig:     expandSecretSyncConfig(d.Get("secret_sync_config")),
 	}
 
 	v := d.Get("enable_shielded_nodes")
@@ -467,6 +483,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
+	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
 	return ac
 }
 
@@ -605,7 +629,7 @@ func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transp
 	if err != nil {
 		return nil
 	}
-	clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(name)
+	clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
 	if config.UserProjectOverride {
 		clusterGetCall.Header().Add("X-Goog-User-Project", project)
 	}
@@ -1288,6 +1312,39 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 					}
 				} else {
 					sc.RotationConfig = &container.RotationConfig{
+						Enabled:         autoRotationConfig["enabled"].(bool),
+						ForceSendFields: []string{"Enabled"},
+					}
+				}
+			}
+		}
+	}
+	return sc
+}
+
+func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	sc := &container.SecretSyncConfig{
+		Enabled:         config["enabled"].(bool),
+		ForceSendFields: []string{"Enabled"},
+	}
+	if autoRotation, ok := config["rotation_config"]; ok {
+		if autoRotationList, ok := autoRotation.([]interface{}); ok {
+			if len(autoRotationList) > 0 {
+				autoRotationConfig := autoRotationList[0].(map[string]interface{})
+				if rotationInterval, ok := autoRotationConfig["rotation_interval"].(string); ok && rotationInterval != "" {
+					sc.RotationConfig = &container.SyncRotationConfig{
+						Enabled:          autoRotationConfig["enabled"].(bool),
+						RotationInterval: rotationInterval,
+						ForceSendFields:  []string{"Enabled"},
+					}
+				} else {
+					sc.RotationConfig = &container.SyncRotationConfig{
 						Enabled:         autoRotationConfig["enabled"].(bool),
 						ForceSendFields: []string{"Enabled"},
 					}

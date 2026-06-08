@@ -106,6 +106,7 @@ fields:
   - field: 'cluster_config.staging_bucket'
   - field: 'cluster_config.temp_bucket'
   - field: 'cluster_config.cluster_tier'
+  - field: 'cluster_config.engine'
   - field: 'cluster_config.cluster_type' 
   - field: 'cluster_config.worker_config.accelerators.accelerator_count'
   - field: 'cluster_config.worker_config.accelerators.accelerator_type'
@@ -151,3 +152,5 @@ fields:
   - api_field: 'virtualClusterConfig.kubernetesClusterConfig.kubernetesSoftwareConfig.componentVersion'
   - api_field: 'virtualClusterConfig.kubernetesClusterConfig.kubernetesSoftwareConfig.properties'
   - api_field: 'virtualClusterConfig.stagingBucket'
+  - field: 'deletion_policy'
+    provider_only: true

@@ -71,6 +71,7 @@ func ResourceComputeInstanceTemplate() *schema.Resource {
 		},
 		SchemaVersion: 1,
 		CustomizeDiff: customdiff.All(
+            tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			resourceComputeInstanceTemplateSourceImageCustomizeDiff,
 			resourceComputeInstanceTemplateScratchDiskCustomizeDiff,
@@ -566,8 +567,8 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET", "MRDMA", "IRDMA"}, false),
-							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET, MRDMA, and IRDMA`,
+							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET", "MRDMA", "IRDMA", "IDPF"}, false),
+							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET, MRDMA, IRDMA and IDPF`,
 						},
 						"access_config": {
 							Type:        schema.TypeList,
@@ -624,6 +625,32 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 								},
 							},
 						},
+
+						{{ if ne $.TargetVersionName `ga` -}}
+						"alias_ipv6_range": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `An array of alias IPv6 ranges for this network interface. Can only be specified for network interfaces on subnet-mode networks.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ip_cidr_range": {
+										Type:             schema.TypeString,
+										Required:         true,
+										ForceNew:         true,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
+										Description:      `The IP CIDR range represented by this alias IPv6 range. This IP CIDR range must belong to the specified subnetwork and cannot contain IP addresses reserved by system or used by other network interfaces. At the time of writing only a netmask (e.g. /96) may be supplied, with a CIDR format resulting in an API error.`,
+									},
+									"subnetwork_range_name": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: `The subnetwork secondary range name specifying the secondary range from which to allocate the IP CIDR range for this alias IPv6 range. If left unspecified, the primary range of the subnetwork will be used.`,
+									},
+								},
+							},
+						},
+						{{- end }}
 
 						"stack_type": {
 							Type:         schema.TypeString,
@@ -1637,7 +1664,11 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 	{{- if ne $.TargetVersionName "ga" }}
-	PartnerMetadata, err := resourceInstancePartnerMetadata(d)
+	partnerMetadataMap, err := resourceInstancePartnerMetadata(d)
+	if err != nil {
+		return err
+	}
+	PartnerMetadata, err := convertPartnerMetadataToCompute(partnerMetadataMap)
 	if err != nil {
 		return err
 	}
@@ -1652,13 +1683,27 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
-	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
+	npcMap, err := expandNetworkPerformanceConfig(d, config)
 	if err != nil {
 		return nil
 	}
-	reservationAffinity, err := expandReservationAffinity(d)
+	var networkPerformanceConfig *compute.NetworkPerformanceConfig
+	if npcMap != nil {
+		networkPerformanceConfig = &compute.NetworkPerformanceConfig{}
+		if err := tpgresource.Convert(npcMap, networkPerformanceConfig); err != nil {
+			return fmt.Errorf("Error converting networkPerformanceConfig: %s", err)
+		}
+	}
+	reservationAffinityMap, err := expandReservationAffinity(d)
 	if err != nil {
 		return err
+	}
+	var reservationAffinity *compute.ReservationAffinity
+	if reservationAffinityMap != nil {
+		reservationAffinity = &compute.ReservationAffinity{}
+		if err := tpgresource.Convert(reservationAffinityMap, reservationAffinity); err != nil {
+			return fmt.Errorf("Error converting reservationAffinity: %s", err)
+		}
 	}
 	resourcePolicies := expandInstanceTemplateResourcePolicies(d, "resource_policies")
 
@@ -1676,7 +1721,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		NetworkInterfaces:          networks,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Scheduling:                 scheduling,
-		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
+		ServiceAccounts:            expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
 		Tags:                       resourceInstanceTags(d),
 		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
 		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
@@ -1716,7 +1761,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		Name:        itName,
 	}
 
-	op, err := config.NewComputeClient(userAgent).InstanceTemplates.Insert(project, instanceTemplate).Do()
+	op, err := NewClient(config, userAgent).InstanceTemplates.Insert(project, instanceTemplate).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating instance template: %s", err)
 	}
@@ -2007,9 +2052,9 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 
 	splits := strings.Split(idStr, "/")
 	{{- if eq $.TargetVersionName "ga" }}
-	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).Do()
+	instanceTemplate, err := NewClient(config, userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).Do()
 	{{- else }}
-	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).View("FULL").Do()
+	instanceTemplate, err := NewClient(config, userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).View("FULL").Do()
 	{{- end }}
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
@@ -2043,7 +2088,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 
 	{{ if ne $.TargetVersionName `ga` -}}
 	if instanceTemplate.Properties.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(instanceTemplate.Properties.PartnerMetadata)
+		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instanceTemplate.Properties.PartnerMetadata))
 		if err != nil {
 			return fmt.Errorf("Error parsing partner metadata: %s", err)
 		}
@@ -2118,7 +2163,15 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	if err = d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(instanceTemplate.Properties.NetworkPerformanceConfig)); err != nil {
+	var npcMap map[string]interface{}
+	if instanceTemplate.Properties.NetworkPerformanceConfig != nil {
+		var err error
+		npcMap, err = tpgresource.ConvertToMap(instanceTemplate.Properties.NetworkPerformanceConfig)
+		if err != nil {
+			return fmt.Errorf("Error converting network_performance_config: %s", err)
+		}
+	}
+	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(npcMap)); err != nil {
 		return err
 	}
 	if instanceTemplate.Properties.NetworkInterfaces != nil {
@@ -2164,7 +2217,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 	if instanceTemplate.Properties.ServiceAccounts != nil {
-		if err = d.Set("service_account", flattenServiceAccounts(instanceTemplate.Properties.ServiceAccounts)); err != nil {
+		if err = d.Set("service_account", flattenServiceAccounts(serviceAccountsToInterface(instanceTemplate.Properties.ServiceAccounts))); err != nil {
 			return fmt.Errorf("Error setting service_account: %s", err)
 		}
 	}
@@ -2204,7 +2257,11 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	}
 
 	if reservationAffinity := instanceTemplate.Properties.ReservationAffinity; reservationAffinity != nil {
-		if err = d.Set("reservation_affinity", flattenReservationAffinity(reservationAffinity)); err != nil {
+		reservationAffinityMap, err := tpgresource.ConvertToMap(reservationAffinity)
+		if err != nil {
+			return fmt.Errorf("Error converting reservation_affinity: %s", err)
+		}
+		if err = d.Set("reservation_affinity", flattenReservationAffinity(reservationAffinityMap)); err != nil {
 			return fmt.Errorf("Error setting reservation_affinity: %s", err)
 		}
 	}
@@ -2225,7 +2282,7 @@ func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interfac
 	}
 
 	splits := strings.Split(d.Id(), "/")
-	op, err := config.NewComputeClient(userAgent).InstanceTemplates.Delete(
+	op, err := NewClient(config, userAgent).InstanceTemplates.Delete(
 		project, splits[len(splits)-1]).Do()
 	if err != nil {
 		return fmt.Errorf("Error deleting instance template: %s", err)

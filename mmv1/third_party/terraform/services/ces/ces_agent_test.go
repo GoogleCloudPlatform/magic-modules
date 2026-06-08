@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/ces"
 )
 
 func TestAccCESAgent_cesAgentBasicExample_update(t *testing.T) {
@@ -122,7 +123,7 @@ resource "google_ces_agent" "ces_child_agent" {
   instruction = "You are a helpful assistant for this example."
 
   model_settings {
-    model       = "gemini-2.5-flash-001"
+    model       = "gemini-3.0-flash-001"
     temperature = 0.5
   }
 

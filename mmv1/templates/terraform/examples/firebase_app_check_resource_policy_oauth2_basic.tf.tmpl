@@ -1,0 +1,13 @@
+resource "google_project_service" "firebaseappcheck" {
+  project = "{{index $.TestEnvVars "project_id"}}"
+  service = "firebaseappcheck.googleapis.com"
+}
+
+resource "google_firebase_app_check_resource_policy" "default" {
+  project = "{{index $.TestEnvVars "project_id"}}"
+  service_id = "oauth2.googleapis.com"
+  target_resource = "//oauth2.googleapis.com/projects/{{index $.TestEnvVars "project_id"}}/oauthClients/{{index $.Vars "oauth_client_id"}}"
+  enforcement_mode = "UNENFORCED"
+
+  depends_on = [google_project_service.firebaseappcheck]
+}

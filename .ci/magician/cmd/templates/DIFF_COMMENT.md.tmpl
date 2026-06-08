@@ -1,13 +1,15 @@
-Hi there, I'm the Modular magician. I've detected the following information about your changes:
+Hi there, I'm the Modular magician. I've detected the following information about your changes for commit {{.CommitSHA}}:
 
 ## Diff report
 {{ $diffsLength := len .Diffs }}{{if eq $diffsLength 0 }}
 Your PR hasn't generated any diffs, but I'll let you know if a future commit does.
 {{else}}
-Your PR generated some diffs in downstreams - here they are.
+Your PR generated the following diffs in downstream repositories:
 
+| Repository | Diff Link | Changes |
+| :--- | :--- | :--- |
 {{range .Diffs -}}
-{{.Title}}: [Diff](https://github.com/modular-magician/{{.Repo}}/compare/{{.OldCommitSHA}}..{{.CommitSHA}}) ({{.ShortStat}})
+| {{.Title}} | [View Diff](https://github.com/modular-magician/{{.Repo}}/compare/{{.OldCommitSHA}}..{{.CommitSHA}}) | {{.ShortStat}} |
 {{end -}}
 {{end -}}
 

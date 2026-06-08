@@ -1,3 +1,8 @@
+resource "google_service_account" "test_sa" {
+  account_id   = "tf-test-sa-%{random_suffix}"
+  display_name = "Test Service Account"
+}
+
 resource "google_dataplex_data_product" "{{$.PrimaryResourceId}}" {
   project         = "{{index $.TestEnvVars "project_name"}}"
   location        = "us-central1"
@@ -8,6 +13,10 @@ resource "google_dataplex_data_product" "{{$.PrimaryResourceId}}" {
   description     = "Updated with emojis 🚀 and brackets {test}"
 
   owner_emails = ["gterraformtestuser@gmail.com"]
+
+  access_approval_config {
+    approver_emails = ["gterraformtestuser@gmail.com"]
+  }
 
   labels = {
     env = "manual-test"
@@ -28,9 +37,8 @@ resource "google_dataplex_data_product" "{{$.PrimaryResourceId}}" {
     group_id     = "scientist"
     display_name = "Data Scientist"
     principal {
-      google_group = "tf-test-scientists-%{random_suffix}@example.com"
+      service_account = google_service_account.test_sa.email
     }
   }
 
-  provider = google-beta
 }

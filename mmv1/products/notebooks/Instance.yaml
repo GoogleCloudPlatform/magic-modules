@@ -102,7 +102,7 @@ examples:
     test_env_vars:
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
+      'key_name': 'kms.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
     ignore_read_extra:
       - 'update_time'
 virtual_fields:

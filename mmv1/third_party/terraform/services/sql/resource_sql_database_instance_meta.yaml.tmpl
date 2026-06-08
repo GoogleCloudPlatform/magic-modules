@@ -130,12 +130,8 @@ fields:
     field: 'settings.disk_autoresize_limit'
   - api_field: 'settings.dataDiskSizeGb'
     field: 'settings.disk_size'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'settings.dataDiskProvisionedIops'
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'settings.dataDiskProvisionedThroughput'
-{{- end }}
   - api_field: 'settings.dataDiskType'
     field: 'settings.disk_type'
   - api_field: 'settings.edition'
@@ -149,6 +145,8 @@ fields:
   - api_field: 'settings.insightsConfig.recordApplicationTags'
   - api_field: 'settings.insightsConfig.recordClientAddress'
   - api_field: 'settings.insightsConfig.enhancedQueryInsightsEnabled'
+  - api_field: 'settings.entraidConfig.applicationId'
+  - api_field: 'settings.entraidConfig.tenantId'
   - api_field: 'settings.ipConfiguration.allocatedIpRange'
   - field: 'settings.ip_configuration.authorized_networks.expiration_time'
   - field: 'settings.ip_configuration.authorized_networks.name'
@@ -200,3 +198,5 @@ fields:
   - api_field: 'settings.userLabels'
   - api_field: 'settings.settingsVersion'
     field: 'settings.version'
+  - field: 'deletion_policy'
+    provider_only: true

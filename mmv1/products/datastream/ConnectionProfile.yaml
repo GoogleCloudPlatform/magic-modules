@@ -74,9 +74,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       connection_profile_id: 'my-profile'
-      # Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410
-    ignore_read_extra:
-      - 'forward_ssh_connectivity.0.password'
   - name: 'datastream_connection_profile_postgres'
     primary_resource_id: 'default'
     vars:
