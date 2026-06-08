@@ -3722,6 +3722,14 @@ func TestAccContainerCluster_withNodePoolNodeDrainConfig(t *testing.T) {
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
+			{
+				Config: testAccContainerCluster_withPrivateNodePoolNodeDrainConfig(cluster, np, networkName, subnetworkName, "pdb_timeout_duration", "300s"),
+				ExpectError: regexp.MustCompile(`node drain timeout is not enabled for this project`),
+			},
+			{
+				Config: testAccContainerCluster_withPrivateNodePoolNodeDrainConfig(cluster, np, networkName, subnetworkName, "grace_termination_duration", "300s"),
+				ExpectError: regexp.MustCompile(`node drain timeout is not enabled for this project`),
+			},
 		},
 	})
 }
@@ -11507,6 +11515,31 @@ resource "google_container_cluster" "with_node_pool_node_drain_config" {
 `, cluster, np, networkName, subnetworkName)
 }
 
+func testAccContainerCluster_withPrivateNodePoolNodeDrainConfig(cluster, np, networkName, subnetworkName, privateName, privateVal string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "with_node_pool_node_drain_config" {
+  name     = "%s"
+  location = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  node_pool {
+    name       = "%s"
+    initial_node_count = 1
+    node_drain_config {
+      %s = "%s"
+    }
+  }
+
+  network    = "%s"
+  subnetwork = "%s"
+  deletion_protection = false
+}
+`, cluster, np, privateName, privateVal, networkName, subnetworkName)
+}
+
 func testAccContainerCluster_withClusterDisruptionBudget(clusterName, interval, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_cluster_disruption_budget" {
@@ -18207,6 +18240,46 @@ func testAccContainerCluster_custom_subnet(clusterName string, networkName strin
 	`, clusterName, networkName, sri[0].SubnetName, additionalIpRangesStr, firstSubnet, firstSubnet)	
 }
 
+func TestAccContainerCluster_withNodeCreationConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withNodeCreationConfig(clusterName, networkName, subnetworkName, "VIA_CONTROL_PLANE"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_creation_config.0.node_creation_mode", "VIA_CONTROL_PLANE"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withNodeCreationConfig(clusterName, networkName, subnetworkName, "VIA_KUBELET"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_creation_config.0.node_creation_mode", "VIA_KUBELET"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withCustomNodeInitGcs(t *testing.T) {
 	t.Parallel()
 
@@ -18235,6 +18308,89 @@ func TestAccContainerCluster_withCustomNodeInitGcs(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccContainerCluster_withCustomNodeInitSecret(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	secretId := fmt.Sprintf("tf-test-secret-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withCustomNodeInitSecret(cluster, secretId, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_config.0.linux_node_config.0.custom_node_init.0.init_script.0.gcp_secret_manager_secret_uri"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_withCustomNodeInitInline(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	bucketName := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
+	secretId := fmt.Sprintf("tf-test-secret-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withCustomNodeInitInline(cluster, bucketName, secretId, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.0.node_config.0.linux_node_config.0.custom_node_init.0.init_script.0.gcs_uri", fmt.Sprintf("gs://%s/script.sh", bucketName)),
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_pool.0.node_config.0.linux_node_config.0.custom_node_init.0.init_script.0.gcs_generation"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_pool.1.node_config.0.linux_node_config.0.custom_node_init.0.init_script.0.gcp_secret_manager_secret_uri"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "remove_default_node_pool", "min_master_version"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_withNodeCreationConfig(name, networkName, subnetworkName string, mode string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  network             = "%s"
+  subnetwork          = "%s"
+  initial_node_count  = 1
+  deletion_protection = false
+
+  node_creation_config {
+    node_creation_mode = "%s"
+  }
+}
+ `, name, networkName, subnetworkName, mode)
 }
 
 func testAccContainerCluster_withCustomNodeInitGcs(cluster, bucket, networkName, subnetworkName string) string {
@@ -18277,38 +18433,6 @@ resource "google_container_cluster" "primary" {
   }
 }
 `, bucket, cluster, networkName, subnetworkName)
-}
-
-func TestAccContainerCluster_withCustomNodeInitSecret(t *testing.T) {
-	t.Parallel()
-
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	secretId := fmt.Sprintf("tf-test-secret-%s", acctest.RandString(t, 10))
-	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
-		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withCustomNodeInitSecret(cluster, secretId, networkName, subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_config.0.linux_node_config.0.custom_node_init.0.init_script.0.gcp_secret_manager_secret_uri"),
-				),
-			},
-			{
-				ResourceName:      "google_container_cluster.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
-			},
-		},
-	})
 }
 
 func testAccContainerCluster_withCustomNodeInitSecret(cluster, secretId, networkName, subnetworkName string) string {
@@ -18369,41 +18493,6 @@ resource "google_container_cluster" "primary" {
   ]
 }
 `, secretId, cluster, networkName, subnetworkName)
-}
-
-func TestAccContainerCluster_withCustomNodeInitInline(t *testing.T) {
-	t.Parallel()
-
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
-	secretId := fmt.Sprintf("tf-test-secret-%s", acctest.RandString(t, 10))
-	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
-		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withCustomNodeInitInline(cluster, bucketName, secretId, networkName, subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.0.node_config.0.linux_node_config.0.custom_node_init.0.init_script.0.gcs_uri", fmt.Sprintf("gs://%s/script.sh", bucketName)),
-					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_pool.0.node_config.0.linux_node_config.0.custom_node_init.0.init_script.0.gcs_generation"),
-					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_pool.1.node_config.0.linux_node_config.0.custom_node_init.0.init_script.0.gcp_secret_manager_secret_uri"),
-				),
-			},
-			{
-				ResourceName:      "google_container_cluster.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "remove_default_node_pool", "min_master_version"},
-			},
-		},
-	})
 }
 
 func testAccContainerCluster_withCustomNodeInitInline(cluster, bucket, secretId, networkName, subnetworkName string) string {
@@ -18498,4 +18587,5 @@ resource "google_container_cluster" "primary" {
   ]
 }
 `, bucket, secretId, cluster, networkName, subnetworkName)
+}
 }

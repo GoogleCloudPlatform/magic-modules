@@ -46,6 +46,7 @@ samples:
         resource_id_vars:
           app_connector_name: my-app-connector
           account_id: my-account
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/27729
   - name: beyondcorp_app_connector_full
     primary_resource_id: app_connector
     steps:
@@ -57,6 +58,7 @@ samples:
         test_vars_overrides:
           # for backward compatible
           display_name: '"some display name" + randomSuffix'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/27729
 parameters:
 properties:
   - name: name
