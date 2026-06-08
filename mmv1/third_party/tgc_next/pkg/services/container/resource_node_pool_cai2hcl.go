@@ -28,19 +28,17 @@ func NewContainerNodePoolCai2hclConverter(provider *schema.Provider) models.Cai2
 }
 
 // Convert converts assets resource data.
-func (c *ContainerNodePoolCai2hclConverter) Convert(assets []caiasset.Asset, options *models.Options) ([]*models.TerraformResourceBlock, error) {
-	var blocks []*models.TerraformResourceBlock
-	for _, asset := range assets {
-		if asset.Resource == nil || asset.Resource.Data == nil {
-			return nil, fmt.Errorf("asset resource data is nil")
-		}
-
-		block, err := c.convertResourceData(asset)
-		if err != nil {
-			return nil, err
-		}
-		blocks = append(blocks, block)
+func (c *ContainerNodePoolCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
 	}
+
+	var blocks []*models.TerraformResourceBlock
+	block, err := c.convertResourceData(assets[0])
+	if err != nil {
+		return nil, err
+	}
+	blocks = append(blocks, block)
 	return blocks, nil
 }
 

@@ -14,6 +14,7 @@
 
 package models
 
-type Options struct {
-	ResourceName string
+type ResourceConverterOptions struct {
+	ResourceName    string
+	AreNewResources bool
 }

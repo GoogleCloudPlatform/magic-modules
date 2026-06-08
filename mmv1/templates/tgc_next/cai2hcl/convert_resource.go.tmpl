@@ -21,79 +21,73 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 )
 
-func ConvertResource(assets []caiasset.Asset, options *models.Options) ([][]byte, error) {
-	assetsByKey := make(map[string][]caiasset.Asset)
-	converterByKey := make(map[string]models.Cai2hclConverter)
+func ConvertResource(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]byte, error) {
+	if len(assets) == 0 {
+		return nil, nil
+	}
 
-	for _, asset := range assets {
-		converters, ok := ConverterMap[asset.Type]
-		if !ok || len(converters) == 0 {
-			continue
-		}
+	if len(assets) > 1 {
+		// TODO: special handling is needed
+	}
 
-		var converter models.Cai2hclConverter
-		var alias string
-		// Normally, one asset type has only one converter.
-		if len(converters) == 1 {
-			alias = "Default"
-			converter = converters[alias]
-		} else {
-			// Edge cases
-			// Handle the edge case that multiple Terraform resources share the same CAI asset type
-			switch asset.Type {
+	asset := assets[0]
+	converters, ok := ConverterMap[asset.Type]
+	if !ok || len(converters) == 0 {
+		return nil, nil
+	}
+
+	var converter models.Cai2hclConverter
+	// Normally, one asset type has only one converter.
+	if len(converters) == 1 {
+		converter = converters["Default"]
+	} else {
+		// Edge cases
+		// Handle the edge case that multiple Terraform resources share the same CAI asset type
+		switch asset.Type {
 {{- range $resourceType, $resources := $.ResourcesByCaiResourceType}}
 	{{- if gt (len $resources) 1 }}
-			case "{{ $resourceType }}":
+		case "{{ $resourceType }}":
 		{{- if eq $resourceType "compute.googleapis.com/SslCertificate" }}
-				if strings.Contains(asset.Name, "regions") {
-					alias = "ComputeRegionSslCertificate"
-				} else if typeVal, ok := asset.Resource.Data["type"]; ok && typeVal == "MANAGED" {
-					alias = "ComputeManagedSslCertificate"
-				} else {
-					alias = "ComputeSslCertificate"
-				}
+			if strings.Contains(asset.Name, "regions") {
+				converter = ConverterMap[asset.Type]["ComputeRegionSslCertificate"]
+			} else if typeVal, ok := asset.Resource.Data["type"]; ok && typeVal == "MANAGED" {
+				converter = ConverterMap[asset.Type]["ComputeManagedSslCertificate"]
+			} else {
+				converter = ConverterMap[asset.Type]["ComputeSslCertificate"]
+			}
 		{{- else }}
 		{{- range $i, $object := $resources }}
 			{{- if eq $i 0 }}
-				if true {{- range $param := $object.IdentityParams }} && strings.Contains(asset.Name, "{{$param}}"){{- end }} {
-					alias = "{{ $object.AliasName }}"
+			if true {{- range $param := $object.IdentityParams }} && strings.Contains(asset.Name, "{{$param}}"){{- end }} {
 			{{- else }}
-				} else if true {{- range $param := $object.IdentityParams }} && strings.Contains(asset.Name, "{{$param}}"){{- end }} {
-					alias = "{{ $object.AliasName }}"
+			} else if true {{- range $param := $object.IdentityParams }} && strings.Contains(asset.Name, "{{$param}}"){{- end }} {
 			{{- end }}
+				converter = ConverterMap[asset.Type]["{{ $object.AliasName }}"]
 			{{- if eq $i (sub (len $resources) 1)}}
-				}
+			}
 			{{- end }}
 		{{- end }}
 		{{- end }}
-				converter = converters[alias]
 	{{- end }}
 {{- end }}
-			}
-		}
-
-		if converter != nil {
-			key := asset.Type + "/" + alias
-			assetsByKey[key] = append(assetsByKey[key], asset)
-			converterByKey[key] = converter
 		}
 	}
 
-	var allResourceBytes [][]byte
-	for key, groupAssets := range assetsByKey {
-		converter := converterByKey[key]
-		newBlocks, err := converter.Convert(groupAssets, options)
+	if converter == nil {
+		return nil, nil
+	}
+
+	newBlocks, err := converter.Convert(assets, options)
+	if err != nil {
+		return nil, err
+	}
+	if len(newBlocks) > 0 {
+		resBytes, err := models.HclWriteBlocks(newBlocks)
 		if err != nil {
 			return nil, err
 		}
-		if len(newBlocks) > 0 {
-			resBytes, err := models.HclWriteBlocks(newBlocks)
-			if err != nil {
-				return nil, err
-			}
-			allResourceBytes = append(allResourceBytes, resBytes)
-		}
+		return resBytes, nil
 	}
 
-	return allResourceBytes, nil
+	return nil, nil
 }

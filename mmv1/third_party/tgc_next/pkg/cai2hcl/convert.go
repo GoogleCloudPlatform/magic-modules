@@ -13,7 +13,8 @@ import (
 // Struct for options so that adding new options does not
 // require updating function signatures all along the pipe.
 type Options struct {
-	ErrorLogger *zap.Logger
+	ErrorLogger     *zap.Logger
+	AreNewResources bool
 }
 
 // Converts CAI Assets into HCL string.
@@ -22,11 +23,21 @@ func Convert(assets []caiasset.Asset, options *Options) ([]byte, error) {
 		return nil, fmt.Errorf("logger is not initialized")
 	}
 
-	// TODO: add resolvers to resolve the assets into single resource assets
+	converterOptions := &models.ResourceConverterOptions{
+		AreNewResources: options.AreNewResources,
+	}
 
-	allResourceBytes, err := converters.ConvertResource(assets, &models.Options{})
-	if err != nil {
-		return nil, err
+	var allResourceBytes [][]byte
+	// TODO: add resolvers to resolve the assets into single resource assets
+	for _, asset := range assets {
+		resourceBytes, err := converters.ConvertResource([]caiasset.Asset{asset}, converterOptions)
+		if err != nil {
+			return nil, err
+		}
+
+		if resourceBytes != nil {
+			allResourceBytes = append(allResourceBytes, resourceBytes)
+		}
 	}
 
 	return bytes.Join(allResourceBytes, []byte("\n")), nil
