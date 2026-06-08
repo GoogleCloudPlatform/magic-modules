@@ -18455,16 +18455,16 @@ resource "google_secret_manager_secret_version" "version" {
   secret_data = "#!/bin/bash\necho 'Hello World' > /tmp/hello.txt"
 }
 
-resource "google_project_iam_member" "secret_accessor" {
-  project = data.google_project.project.project_id
-  role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+resource "google_secret_manager_secret_iam_member" "secret_accessor" {
+  secret_id = google_secret_manager_secret.secret.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }
 
 resource "time_sleep" "wait_60_seconds" {
   create_duration = "60s"
   depends_on = [
-    google_project_iam_member.secret_accessor
+    google_secret_manager_secret_iam_member.secret_accessor
   ]
 }
 
@@ -18527,16 +18527,16 @@ resource "google_secret_manager_secret_version" "version" {
   secret_data = "#!/bin/bash\necho 'Hello World' > /tmp/hello.txt"
 }
 
-resource "google_project_iam_member" "secret_accessor" {
-  project = data.google_project.project.project_id
-  role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+resource "google_secret_manager_secret_iam_member" "secret_accessor" {
+  secret_id = google_secret_manager_secret.secret.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }
 
 resource "time_sleep" "wait_60_seconds" {
   create_duration = "60s"
   depends_on = [
-    google_project_iam_member.secret_accessor
+    google_secret_manager_secret_iam_member.secret_accessor
   ]
 }
 
