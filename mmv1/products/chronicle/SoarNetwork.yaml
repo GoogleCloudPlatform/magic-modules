@@ -1,0 +1,88 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: SoarNetwork
+description: >
+  Manage networks in the platform using the Classless Inter-Domain Routing (CIDR) format.
+  The system identifies network subnets to help Google Security Operations recognize internal assets and consider network sensitivity during playbook execution.
+min_version: 'beta'
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.soarNetworks'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks/{{soar_network_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks/{{soar_network_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks/{{soar_network_id}}
+
+autogen_status: U29hck5ldHdvcms=
+
+samples:
+  - name: chronicle_soarnetwork_update
+    primary_resource_id: sample
+    min_version: beta
+    steps:
+      - name: "chronicle_soarnetwork_basic"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+      - name: "chronicle_soarnetwork_full"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: soarNetworkId
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Id of the soarNetwork record.
+properties:
+  - name: address
+    type: String
+    required: true
+    description: Subnet in CIDR format.
+  - name: displayName
+    type: String
+    required: true
+    description: SoarNetwork name, limited to 4096 characters.
+  - name: environmentsJson
+    type: String
+    required: true
+    description: SoarNetwork associated logical environments.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the SoarNetwork.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/soarNetworks/{soar_network}
+    output: true
+  - name: priority
+    type: Integer
+    description: SoarNetwork priority.
