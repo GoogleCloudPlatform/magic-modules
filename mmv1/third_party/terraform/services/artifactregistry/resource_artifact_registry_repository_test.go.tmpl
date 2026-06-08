@@ -343,9 +343,9 @@ func TestAccArtifactRegistryRepository_remoteWithAuthUpdate(t *testing.T) {
 	t.Parallel()
 
 
-	context_1 := map[string]interface{}{
-		"username_1":           "tf-test-username" + randomSuffix,
-		"username_2":           "tf-test-username-new" + randomSuffix,
+	context := map[string]interface{}{
+		"username_1":           "tf-test-username",
+		"username_2":           "tf-test-username-new",
 		"random_suffix":         acctest.RandString(t, 10),
 	}
 
