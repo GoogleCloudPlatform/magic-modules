@@ -2683,6 +2683,26 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"node_creation_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `NodeCreationConfig defines the settings of node creation mode.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"node_creation_mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"VIA_KUBELET", "VIA_CONTROL_PLANE"}, false),
+							Description: `NodeCreationMode defines the settings of node creation mode.
+ Accepted values are:
+* VIA_KUBELET: Kubelet registers itself.
+* VIA_CONTROL_PLANE: gcp-controller-manager automatically creates the node object after CSR approval.`,
+						},
+					},
+				},
+			},
 			"rbac_binding_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
