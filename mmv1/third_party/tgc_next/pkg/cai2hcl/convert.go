@@ -25,7 +25,7 @@ func Convert(assets []caiasset.Asset, options *Options) ([]byte, error) {
 
 	allBlocks := []*models.TerraformResourceBlock{}
 	for _, asset := range assets {
-		newBlocks, err := converters.ConvertResource(asset)
+		newBlocks, err := converters.ConvertResource(asset, &models.Options{})
 		if err != nil {
 			return nil, err
 		}

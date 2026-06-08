@@ -21,7 +21,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 )
 
-func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func ConvertResource(asset caiasset.Asset, options *models.Options) ([]*models.TerraformResourceBlock, error) {
 	converters, ok := ConverterMap[asset.Type]
 	if !ok || len(converters) == 0 {
 		return nil, nil
