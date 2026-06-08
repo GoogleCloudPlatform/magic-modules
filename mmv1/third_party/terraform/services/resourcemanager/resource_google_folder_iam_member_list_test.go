@@ -2,6 +2,8 @@ package resourcemanager_test
 
 import (
 	"fmt"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -9,15 +11,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccFolderIamMemberList_basic(t *testing.T) {
 	t.Parallel()
 
-	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
-	org := envvar.GetTestOrgFromEnv(t)
-	parent := "organizations/" + org
+	folder := os.Getenv("GOOGLE_FOLDER")
+	if folder == "" {
+		t.Skip("GOOGLE_FOLDER must be set for this test")
+	}
+
+	if !strings.HasPrefix(folder, "folders/") {
+		folder = "folders/" + folder
+	}
 	role := "roles/compute.instanceAdmin"
 	member := "user:admin@hashicorptest.com"
 
@@ -29,12 +35,12 @@ func TestAccFolderIamMemberList_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFolderIamMemberCreate(folderDisplayName, parent, role, member),
+				Config: testAccFolderIamMemberCreate(folder, role, member),
 			},
 
 			{
 				Query:  true,
-				Config: testAccFolderIamMemberListQuery(folderDisplayName, parent),
+				Config: testAccFolderIamMemberListQuery(folder),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("google_folder_iam_member.test", 1),
 				},
@@ -47,9 +53,14 @@ func TestAccFolderIamMemberList_basic(t *testing.T) {
 func TestAccFolderIamMemberList_filter(t *testing.T) {
 	t.Parallel()
 
-	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
-	org := envvar.GetTestOrgFromEnv(t)
-	parent := "organizations/" + org
+	folder := os.Getenv("GOOGLE_FOLDER")
+	if folder == "" {
+		t.Skip("GOOGLE_FOLDER must be set for this test")
+	}
+
+	if !strings.HasPrefix(folder, "folders/") {
+		folder = "folders/" + folder
+	}
 	role := "roles/compute.instanceAdmin"
 	member := "user:admin@hashicorptest.com"
 
@@ -61,12 +72,12 @@ func TestAccFolderIamMemberList_filter(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFolderIamMemberCreate(folderDisplayName, parent, role, member),
+				Config: testAccFolderIamMemberCreate(folder, role, member),
 			},
 
 			{
 				Query:  true,
-				Config: testAccFolderIamMemberListQueryWithFilters(folderDisplayName, parent, role, member),
+				Config: testAccFolderIamMemberListQueryWithFilters(folder, role, member),
 
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("google_folder_iam_member.test", 1),
@@ -76,58 +87,42 @@ func TestAccFolderIamMemberList_filter(t *testing.T) {
 	})
 }
 
-func testAccFolderIamMemberCreate(folderDisplayName, parent, role, member string) string {
+func testAccFolderIamMemberCreate(folder, role, member string) string {
 	return fmt.Sprintf(`
-resource "google_folder" "test" {
-  display_name = "%s"
-  parent  = "%s"
-  deletion_protection  = false
-}
-
 resource "google_folder_iam_member" "test" {
-	folder = google_folder.test.name
+	folder = "%s"
 	role = "%s"
 	member = "%s"
 }
-`, folderDisplayName, parent, role, member)
+`, folder, role, member)
 }
 
-func testAccFolderIamMemberListQuery(folderDisplayName, parent string) string {
+func testAccFolderIamMemberListQuery(folder string) string {
 	return fmt.Sprintf(`
-resource "google_folder" "test" {
-  display_name = "%s"
-  parent  = "%s"
-  deletion_protection  = false
-}
 
 list "google_folder_iam_member" "test" {
 	provider = google
 	include_resource = true
 	config {
-		folder = google_folder.test.name
+		folder = "%s"
 	}
 
 }
-`, folderDisplayName, parent)
+`, folder)
 }
 
-func testAccFolderIamMemberListQueryWithFilters(folderDisplayName, parent, role, member string) string {
+func testAccFolderIamMemberListQueryWithFilters(folder, role, member string) string {
 	return fmt.Sprintf(`
-resource "google_folder" "test" {
-  display_name = "%s"
-  parent  = "%s"
-  deletion_protection  = false
-}
 
 list "google_folder_iam_member" "test" {
 	provider = google
 	include_resource = true
 	config {
-		folder = google_folder.test.name
+		folder = "%s"
 		role = "%s"
 		member = "%s"
 	}
 
 }
-`, folderDisplayName, parent, role, member)
+`, folder, role, member)
 }
