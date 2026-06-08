@@ -38,7 +38,6 @@ import_format:
 supports_indirect_user_project_override: true
 custom_code:
   update_encoder: templates/terraform/encoders/biglake_iceberg_namespace.go.tmpl
-  constants: templates/terraform/constants/biglake_iceberg_namespace.go.tmpl
 samples:
   - name: biglake_iceberg_namespace
     primary_resource_id: my_iceberg_namespace
@@ -73,4 +72,3 @@ properties:
       User-defined properties for the namespace.
     required: false
     default_from_api: true
-    diff_suppress_func: icebergNamespacePropertiesDiffSuppress
