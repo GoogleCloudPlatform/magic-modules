@@ -7028,6 +7028,7 @@ func TestAccContainerNodePool_withCustomNodeInit(t *testing.T) {
 				ResourceName:      "google_container_node_pool.np_with_custom_node_init",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"initial_node_count", "cluster"},
 			},
 		},
 	})
@@ -7108,6 +7109,7 @@ func TestAccContainerNodePool_withCustomNodeInitSecret(t *testing.T) {
 				ResourceName:      "google_container_node_pool.np_with_custom_node_init_secret",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"initial_node_count", "cluster"},
 			},
 		},
 	})

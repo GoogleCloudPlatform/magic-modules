@@ -18371,7 +18371,7 @@ func TestAccContainerCluster_withCustomNodeInitInline(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "remove_default_node_pool", "min_master_version"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
 			},
 		},
 	})
@@ -18543,13 +18543,10 @@ resource "time_sleep" "wait_60_seconds" {
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 1
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
-  
-  remove_default_node_pool = true
 
   node_pool {
     name = "gcs-pool"
