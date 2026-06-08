@@ -62,6 +62,10 @@ examples:
     primary_resource_id: 'jira-eua'
     vars:
       collection_id: 'collection-id'
+  - name: 'discoveryengine_dataconnector_jira_eua_json_auth'
+    primary_resource_id: 'jira-eua-json-auth'
+    vars:
+      collection_id: 'collection-id'
 parameters:
   - name: 'location'
     type: String
