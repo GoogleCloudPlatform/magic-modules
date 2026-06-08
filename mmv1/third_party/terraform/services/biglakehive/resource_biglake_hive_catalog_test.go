@@ -1,3 +1,6 @@
+//go:build beta
+// +build beta
+
 package biglakehive_test
 
 import (
