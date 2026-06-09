@@ -10,9 +10,6 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-    if v == nil {
-        return v
-    }
-	return tpgresource.GetResourceNameFromSelfLink(v.(string))
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return fmt.Sprintf("projects/%s/locations/%s/authzExtensions/%s", d.Get("project"), d.Get("location"), v), nil
 }
