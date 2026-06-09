@@ -1,5 +1,6 @@
 package compute_test
 
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"testing"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
+{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionNetworkPolicyTrafficClassificationRule_regionNetworkPolicyTrafficClassificationRuleBasicUpdate(t *testing.T) {
