@@ -634,4 +634,3 @@ func expandComputeLocalSsdRecoveryTimeoutTgc(v interface{}) (*compute.Duration, 
 	}
 	return duration, nil
 }
-
