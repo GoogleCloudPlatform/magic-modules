@@ -1,0 +1,10 @@
+	// The Iceberg SortOrder sent as "write-order" requires an "order-id". It is
+	// server-assigned on read (and reassigned if needed), but the create request
+	// is rejected without it. Inject the initial sort order id (1; 0 is reserved
+	// for the unsorted order) when the user configured a sort order.
+	if wo, ok := obj["write-order"].(map[string]interface{}); ok {
+		if _, hasId := wo["order-id"]; !hasId {
+			wo["order-id"] = 1
+		}
+	}
+	return obj, nil

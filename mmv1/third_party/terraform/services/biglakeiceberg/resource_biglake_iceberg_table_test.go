@@ -82,6 +82,14 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
       required = true
     }
   }
+  sort_order {
+    fields {
+      source_id  = 1
+      transform  = "identity"
+      direction  = "asc"
+      null_order = "nulls-first"
+    }
+  }
 
   properties = {
     key = "initial"
@@ -120,6 +128,14 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
       name     = "id"
       type     = "long"
       required = true
+    }
+  }
+  sort_order {
+    fields {
+      source_id  = 1
+      transform  = "identity"
+      direction  = "desc"
+      null_order = "nulls-last"
     }
   }
 
