@@ -1,0 +1,54 @@
+data "google_project" "test_project" {}
+
+resource "google_service_account" "connector_sa" {
+  account_id   = "{{index $.Vars "account_id"}}"
+  display_name = "Service Account for Connector"
+}
+
+resource "google_integration_connectors_connection" "connector_toolset_connection" {
+  name     = "{{index $.Vars "connection_name"}}"
+  location = "us-central1"
+  connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/gcp/connectors/pubsub/versions/1"
+  description       = "Pub/Sub connector"
+  service_account   = google_service_account.connector_sa.email
+  
+  config_variable {
+      key = "project_id"
+      string_value = data.google_project.test_project.project_id
+  }
+  config_variable {
+      key = "topic_id"
+      string_value = "test-topic"
+  }
+}
+
+resource "google_ces_app" "ces_app_for_toolset" {
+  app_id = "{{index $.Vars "app_id"}}"
+  location = "us"
+  description = "App used as parent for CES Toolset example"
+  display_name = "{{index $.Vars "app_display_name"}}"
+
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_toolset" "ces_toolset_connector_toolset" {
+  toolset_id = "{{index $.Vars "toolset_id"}}"
+  location = "us"
+  app      = google_ces_app.ces_app_for_toolset.app_id
+  display_name = "Basic toolset display name"
+
+  connector_toolset {
+    connection = google_integration_connectors_connection.connector_toolset_connection.id
+    connector_actions {
+      connection_action_id = "publishMessage"
+    }
+  }
+}
