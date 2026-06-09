@@ -19,7 +19,7 @@ resource "google_compute_region_network_policy_traffic_classification_rule" "{{$
 
   action {
     traffic_class = "TC1"
-		dscp_mode = "AUTO"
+    dscp_mode = "AUTO"
   }
   match {
     src_ip_ranges            = ["10.100.0.1/32"]
