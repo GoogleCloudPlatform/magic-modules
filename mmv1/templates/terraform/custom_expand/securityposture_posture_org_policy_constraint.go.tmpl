@@ -36,7 +36,11 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 
 	// Determine, per policy_rules entry, whether `enforce` was explicitly set in config.
 	// d.GetRawConfig() preserves null (unset) vs. false (explicitly set to false).
-	enforceIsSet := securitypostureGetEnforceIsSetForOrgPolicyConstraint(d, cannedConstraintId)
+	// Identify the owning policy by policy_id (the stable, unique key) rather than
+	// canned_constraint_id alone, so that postures reusing the same constraint in
+	// multiple policies are handled correctly.
+	policyId := securitypostureGetPolicyIdForCannedConstraint(d, cannedConstraintId)
+	enforceIsSet := securitypostureGetEnforceIsSetForOrgPolicyConstraint(d, policyId, cannedConstraintId)
 
 	policyRulesRaw, _ := original["policy_rules"].([]interface{})
 	policyRules := make([]interface{}, 0, len(policyRulesRaw))
@@ -109,11 +113,66 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	return transformed, nil
 }
 
+// securitypostureGetPolicyIdForCannedConstraint scans the raw cty config and returns
+// the policy_id of the first policy whose org_policy_constraint has the given
+// canned_constraint_id. Returns "" when no match is found.
+// This is used to resolve the stable, unique policy_id key before calling
+// securitypostureGetEnforceIsSetForOrgPolicyConstraint, so that postures which
+// reuse the same canned_constraint_id across multiple policies are handled correctly.
+func securitypostureGetPolicyIdForCannedConstraint(d tpgresource.TerraformResourceData, cannedConstraintId string) string {
+	rawCfg := d.GetRawConfig()
+	if rawCfg.IsNull() || !rawCfg.IsKnown() {
+		return ""
+	}
+	policySets := rawCfg.GetAttr("policy_sets")
+	if policySets.IsNull() || !policySets.IsKnown() {
+		return ""
+	}
+	for psIt := policySets.ElementIterator(); psIt.Next(); {
+		_, psVal := psIt.Element()
+		policies := psVal.GetAttr("policies")
+		if policies.IsNull() || !policies.IsKnown() {
+			continue
+		}
+		for pIt := policies.ElementIterator(); pIt.Next(); {
+			_, pVal := pIt.Element()
+			pidAttr := pVal.GetAttr("policy_id")
+			if pidAttr.IsNull() || !pidAttr.IsKnown() {
+				continue
+			}
+			constraint := pVal.GetAttr("constraint")
+			if constraint.IsNull() || !constraint.IsKnown() {
+				continue
+			}
+			for cIt := constraint.ElementIterator(); cIt.Next(); {
+				_, cVal := cIt.Element()
+				orgPolicyConstraint := cVal.GetAttr("org_policy_constraint")
+				if orgPolicyConstraint.IsNull() || !orgPolicyConstraint.IsKnown() {
+					continue
+				}
+				for opcIt := orgPolicyConstraint.ElementIterator(); opcIt.Next(); {
+					_, opcVal := opcIt.Element()
+					idVal := opcVal.GetAttr("canned_constraint_id")
+					if idVal.IsNull() || !idVal.IsKnown() {
+						continue
+					}
+					if idVal.AsString() == cannedConstraintId {
+						return pidAttr.AsString()
+					}
+				}
+			}
+		}
+	}
+	return ""
+}
+
 // securitypostureGetEnforceIsSetForOrgPolicyConstraint traverses the raw cty config to find
 // which policy_rules[i].enforce values were explicitly set (non-null) for the constraint
-// identified by cannedConstraintId. It returns a slice where result[i] == true means the
-// i-th rule had enforce explicitly set by the user.
-func securitypostureGetEnforceIsSetForOrgPolicyConstraint(d tpgresource.TerraformResourceData, cannedConstraintId string) []bool {
+// identified by the composite (policyId, cannedConstraintId) key. When policyId is empty
+// (could not be resolved), it falls back to matching by cannedConstraintId alone.
+// It returns a slice where result[i] == true means the i-th rule had enforce explicitly
+// set by the user.
+func securitypostureGetEnforceIsSetForOrgPolicyConstraint(d tpgresource.TerraformResourceData, policyId, cannedConstraintId string) []bool {
 	rawCfg := d.GetRawConfig()
 	if rawCfg.IsNull() || !rawCfg.IsKnown() {
 		return nil
@@ -132,6 +191,14 @@ func securitypostureGetEnforceIsSetForOrgPolicyConstraint(d tpgresource.Terrafor
 		}
 		for pIt := policies.ElementIterator(); pIt.Next(); {
 			_, pVal := pIt.Element()
+			// Filter by policy_id when available — this correctly disambiguates postures
+			// that reuse the same canned_constraint_id across multiple policies.
+			if policyId != "" {
+				pidAttr := pVal.GetAttr("policy_id")
+				if pidAttr.IsNull() || !pidAttr.IsKnown() || pidAttr.AsString() != policyId {
+					continue
+				}
+			}
 			constraint := pVal.GetAttr("constraint")
 			if constraint.IsNull() || !constraint.IsKnown() {
 				continue

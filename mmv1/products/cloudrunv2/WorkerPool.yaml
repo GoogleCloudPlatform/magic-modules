@@ -47,6 +47,8 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/workerPools/{{name}}'
     - '{{name}}'
 custom_code:
+  encoder: 'templates/terraform/encoders/cloudrunv2_worker_pool.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/cloudrunv2_worker_pool.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_worker_pool_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
 examples:
@@ -114,6 +116,15 @@ examples:
       - 'deletion_protection'
     # Currently failing
     skip_vcr: true
+  - name: 'cloudrunv2_worker_pool_emptydir_disk'
+    primary_resource_id: 'default'
+    vars:
+      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_mount_nfs'
     primary_resource_id: 'default'
     vars:
@@ -154,7 +165,7 @@ properties:
     type: String
     description: |
       Name of the WorkerPool.
-    url_param_only: true
+    ignore_read: true
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
@@ -726,6 +737,7 @@ properties:
                   default_value: "MEMORY"
                   enum_values:
                     - 'MEMORY'
+                    - 'DISK'
                 - name: 'sizeLimit'
                   type: String
                   description: |-

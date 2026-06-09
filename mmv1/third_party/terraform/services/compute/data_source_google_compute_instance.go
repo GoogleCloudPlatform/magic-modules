@@ -36,7 +36,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 
 	id := fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, name)
 
-	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, name).Do()
+	instance, err := NewClient(config, userAgent).Instances.Get(project, zone, name).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Instance %s", name), id)
 	}
@@ -143,7 +143,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	err = d.Set("service_account", flattenServiceAccounts(instance.ServiceAccounts))
+	err = d.Set("service_account", flattenServiceAccounts(serviceAccountsToInterface(instance.ServiceAccounts)))
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,15 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instance.ShieldedInstanceConfig))
+	var shieldedVmConfigMap map[string]interface{}
+	if sic := instance.ShieldedInstanceConfig; sic != nil {
+		shieldedVmConfigMap = map[string]interface{}{
+			"enableSecureBoot":          sic.EnableSecureBoot,
+			"enableVtpm":                sic.EnableVtpm,
+			"enableIntegrityMonitoring": sic.EnableIntegrityMonitoring,
+		}
+	}
+	err = d.Set("shielded_instance_config", flattenShieldedVmConfig(shieldedVmConfigMap))
 	if err != nil {
 		return err
 	}

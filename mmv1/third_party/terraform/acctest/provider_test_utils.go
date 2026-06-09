@@ -61,19 +61,19 @@ func AccTestPreCheck(t *testing.T) {
 		os.Setenv("GOOGLE_CREDENTIALS", string(creds))
 	}
 
-	if v := transport_tpg.MultiEnvSearch(envvar.CredsEnvVars); v == "" {
+	if v := envvar.MultiEnvSearch(envvar.CredsEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(envvar.CredsEnvVars, ", "))
 	}
 
-	if v := transport_tpg.MultiEnvSearch(envvar.ProjectEnvVars); v == "" {
+	if v := envvar.MultiEnvSearch(envvar.ProjectEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(envvar.ProjectEnvVars, ", "))
 	}
 
-	if v := transport_tpg.MultiEnvSearch(envvar.RegionEnvVars); v == "" {
+	if v := envvar.MultiEnvSearch(envvar.RegionEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(envvar.RegionEnvVars, ", "))
 	}
 
-	if v := transport_tpg.MultiEnvSearch(envvar.ZoneEnvVars); v == "" {
+	if v := envvar.MultiEnvSearch(envvar.ZoneEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(envvar.ZoneEnvVars, ", "))
 	}
 }
@@ -85,7 +85,7 @@ func AccTestPreCheck_AdcCredentialsOnly(t *testing.T) {
 	}
 
 	// Fail on set creds
-	if v := transport_tpg.MultiEnvSearch(envvar.CredsEnvVarsExcludingAdcs()); v != "" {
+	if v := envvar.MultiEnvSearch(envvar.CredsEnvVarsExcludingAdcs()); v != "" {
 		t.Fatalf("This acceptance test only uses ADCs, so all of %s must be unset", strings.Join(envvar.CredsEnvVarsExcludingAdcs(), ", "))
 	}
 
@@ -94,15 +94,15 @@ func AccTestPreCheck_AdcCredentialsOnly(t *testing.T) {
 		t.Fatalf("GOOGLE_APPLICATION_CREDENTIALS must be set for acceptance tests that are dependent on ADCs")
 	}
 
-	if v := transport_tpg.MultiEnvSearch(envvar.ProjectEnvVars); v == "" {
+	if v := envvar.MultiEnvSearch(envvar.ProjectEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(envvar.ProjectEnvVars, ", "))
 	}
 
-	if v := transport_tpg.MultiEnvSearch(envvar.RegionEnvVars); v == "" {
+	if v := envvar.MultiEnvSearch(envvar.RegionEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(envvar.RegionEnvVars, ", "))
 	}
 
-	if v := transport_tpg.MultiEnvSearch(envvar.ZoneEnvVars); v == "" {
+	if v := envvar.MultiEnvSearch(envvar.ZoneEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(envvar.ZoneEnvVars, ", "))
 	}
 }

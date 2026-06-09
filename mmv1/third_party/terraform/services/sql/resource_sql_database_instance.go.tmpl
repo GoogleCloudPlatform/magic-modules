@@ -234,6 +234,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			pitrSupportDbCustomizeDiff,
 			nodeCountCustomDiff,
 			autoUpgradeEnabledCustomizeDiff,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -544,7 +545,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							DiffSuppressFunc: caseDiffDashSuppress,
 							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HYPERDISK_BALANCED.`,
 						},
-{{- if ne $.TargetVersionName "ga" }}
 						"data_disk_provisioned_iops": {
 							Type:        schema.TypeInt,
 							Optional:    true,
@@ -557,7 +557,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Computed:    true,
 							Description: `Provisioned throughput measured in MiB per second for the data disk. This field is only used for HYPERDISK_BALANCED disk types.`,
 						},
-{{- end }}
 						"connection_pool_config": {
 							Type:     schema.TypeSet,
 							Optional: true,
@@ -1493,6 +1492,9 @@ API (for read pools, effective_availability_type may differ from availability_ty
 					},
 				},
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1675,12 +1677,12 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 					cloneContext.DestinationNetwork = network
 				}
 				clodeReq := sqladmin.InstancesCloneRequest{CloneContext: cloneContext}
-				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(cloneSourceProject, cloneSourceInstance, &clodeReq).Do()
+				op, operr = NewClient(config, userAgent).Instances.Clone(cloneSourceProject, cloneSourceInstance, &clodeReq).Do()
 			} else if pointInTimeRestoreContext != nil {
 				parent := fmt.Sprintf("projects/%s", project)
-				op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreContext).Do()
+				op, operr = NewClient(config, userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreContext).Do()
 			} else {
-				op, operr = config.NewSqlAdminClient(userAgent).Instances.Insert(project, instance).Do()
+				op, operr = NewClient(config, userAgent).Instances.Insert(project, instance).Do()
 			}
 			return operr
 		},
@@ -1712,7 +1714,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		var users *sqladmin.UsersListResponse
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance.Name).Do()
+				users, err = NewClient(config, userAgent).Users.List(project, instance.Name).Do()
 				return err
 			},
 			Timeout:              d.Timeout(schema.TimeoutRead),
@@ -1725,7 +1727,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 			if u.Name == "root" && u.Host == "%" {
 				err = transport_tpg.Retry(transport_tpg.RetryOptions{
 					RetryFunc: func() error {
-						op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance.Name).Host(u.Host).Name(u.Name).Do()
+						op, err = NewClient(config, userAgent).Users.Delete(project, instance.Name).Host(u.Host).Name(u.Name).Do()
 						if err == nil {
 							err = SqlAdminOperationWaitTime(config, op, project, "Delete default root User", userAgent, d.Timeout(schema.TimeoutCreate))
 						}
@@ -1743,7 +1745,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if patchData != nil {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, instance.Name, patchData).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, instance.Name, patchData).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -1775,7 +1777,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		var op *sqladmin.Operation
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, name, instanceUpdate).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Update(project, name, instanceUpdate).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -1842,10 +1844,8 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		DataApiAccess:                 _settings["data_api_access"].(string),
 		DataDiskSizeGb:                int64(_settings["disk_size"].(int)),
 		DataDiskType:                  _settings["disk_type"].(string),
-{{- if ne $.TargetVersionName "ga" }}
 		DataDiskProvisionedIops:       int64(_settings["data_disk_provisioned_iops"].(int)),
 		DataDiskProvisionedThroughput: int64(_settings["data_disk_provisioned_throughput"].(int)),
-{{- end }}
 		PricingPlan:                   _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled:     _settings["deletion_protection_enabled"].(bool),
 		EnableGoogleMlIntegration:     _settings["enable_google_ml_integration"].(bool),
@@ -2303,7 +2303,7 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	var instance *sqladmin.DatabaseInstance
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			instance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, d.Get("name").(string)).Do()
+			instance, rerr = NewClient(config, userAgent).Instances.Get(project, d.Get("name").(string)).Do()
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutRead),
@@ -2417,6 +2417,11 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
                 return fmt.Errorf("Error setting dns_names: %s", err)
         }
 	d.SetId(instance.Name)
+	
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	
 
 	return nil
 }
@@ -2430,6 +2435,11 @@ const (
 )
 
 func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceSqlDatabaseInstance) {
+	    return ResourceSqlDatabaseInstance().Read(d, meta)
+	}
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -2473,7 +2483,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{ActivationPolicy: "ALWAYS"}}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2498,7 +2508,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{DatabaseVersion: databaseVersion}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2562,7 +2572,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
-			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
+			op, err = NewClient(config, userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
 			return err
 		}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -2593,7 +2603,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{MaintenanceVersion: maintenance_version}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2617,12 +2627,12 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		switch replicaDRKind {
 		case replicaDRByPromote:
 			retryFunc = func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.PromoteReplica(project, d.Get("name").(string)).Do()
+				op, rerr = NewClient(config, userAgent).Instances.PromoteReplica(project, d.Get("name").(string)).Do()
 				return rerr
 			}
 		case replicaDRBySwitchover:
 			retryFunc = func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Switchover(project, d.Get("name").(string)).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Switchover(project, d.Get("name").(string)).Do()
 				return rerr
 			}
 		default:
@@ -2656,7 +2666,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{Edition: edition, Tier: tier, DataCacheConfig: dataCacheConfig}}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2688,7 +2698,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
     	err = transport_tpg.Retry(transport_tpg.RetryOptions{
         	RetryFunc: func() (rerr error) {
-            	op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+            	op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
             	return rerr
         	},
         	Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2784,7 +2794,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
+			op, rerr = NewClient(config, userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2822,7 +2832,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
           instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{TimeZone: timezone}}
           err = transport_tpg.Retry(transport_tpg.RetryOptions{
             RetryFunc: func() (rerr error) {
-            op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+            op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
             return err
           },
           Timeout: d.Timeout(schema.TimeoutUpdate),
@@ -2923,6 +2933,13 @@ func serverCertificateRotationModeDiffSuppress(_, oldMode, newMode string, _ *sc
 }
 
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+	
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
+	}
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -2954,7 +2971,7 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	}
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).FinalBackupDescription(finalBackupDescription).Do()
+			op, rerr = NewClient(config, userAgent).Instances.Delete(project, d.Get("name").(string)).FinalBackupDescription(finalBackupDescription).Do()
 			if rerr != nil {
 				return rerr
 			}
@@ -3013,10 +3030,8 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		"data_api_access":                  settings.DataApiAccess,
 		"disk_type":                        settings.DataDiskType,
 		"disk_size":                        settings.DataDiskSizeGb,
-{{- if ne $.TargetVersionName "ga" }}
 		"data_disk_provisioned_iops":       settings.DataDiskProvisionedIops,
 		"data_disk_provisioned_throughput": settings.DataDiskProvisionedThroughput,
-{{- end }}
 		"pricing_plan":                     settings.PricingPlan,
 		"user_labels":                      settings.UserLabels,
 		"password_validation_policy":       settings.PasswordValidationPolicy,
@@ -3066,7 +3081,10 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		data["database_flags"] = flattenDatabaseFlags(settings.DatabaseFlags)
 	}
 
-	if settings.ConnectionPoolConfig != nil {
+	// When connection_pooling_enabled=false the API returns nil for ConnectionPoolConfig.
+	// We still need to flatten if the user has configured the block to avoid a permadiff.
+	poolConfigSet, _ := d.Get("settings.0.connection_pool_config").(*schema.Set)
+	if settings.ConnectionPoolConfig != nil || (poolConfigSet != nil && poolConfigSet.Len() > 0) {
 		data["connection_pool_config"] = flattenConnectionPoolConfig(settings.ConnectionPoolConfig)
 	}
 
@@ -3572,7 +3590,7 @@ func sqlDatabaseInstanceServiceNetworkPrecheck(d *schema.ResourceData, config *t
 		return err
 	}
 
-	response, err := config.NewServiceNetworkingClient(userAgent).Services.Connections.List("services/servicenetworking.googleapis.com").Network(serviceNetworkingNetworkName).Do()
+	response, err := servicenetworking.NewClient(config, userAgent).Services.Connections.List("services/servicenetworking.googleapis.com").Network(serviceNetworkingNetworkName).Do()
 	if err != nil {
 		// It is possible that the actor creating the SQL Instance might not have permissions to call servicenetworking.services.connections.list
 		log.Printf("[WARNING] Failed to list Service Networking of the project. Skipped Service Networking precheck.")
@@ -3614,7 +3632,7 @@ func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *transp
 	var op *sqladmin.Operation
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
-			op, operr = config.NewSqlAdminClient(userAgent).Instances.RestoreBackup(project, instanceId, backupRequest).Do()
+			op, operr = NewClient(config, userAgent).Instances.RestoreBackup(project, instanceId, backupRequest).Do()
 			return operr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -3656,7 +3674,7 @@ func sqlDatabaseInstancePointInTimeRestore(d *schema.ResourceData, config *trans
 	var op *sqladmin.Operation
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
-			op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, expandPointInTimeRestoreContext(pointInTimeRestoreContext)).Do()
+			op, operr = NewClient(config, userAgent).Instances.PointInTimeRestore(parent, expandPointInTimeRestoreContext(pointInTimeRestoreContext)).Do()
 			return operr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),

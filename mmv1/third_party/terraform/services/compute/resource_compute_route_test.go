@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccComputeRoute_defaultInternetGateway(t *testing.T) {
@@ -55,9 +57,9 @@ func TestAccComputeRoute_resourceManagerTags(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
 	routeName := fmt.Sprintf("tf-test-route-resource-manager-tags-%s", acctest.RandString(t, 10))
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-nroute-tagkey", "organizations/"+org, make(map[string]interface{}))
+	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "crm-nroute-tagkey", "organizations/"+org, make(map[string]interface{}))
 	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-route-tagvalue", sharedTagkey, org)
+	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "crm-route-tagvalue", sharedTagkey, org)
 	context := map[string]interface{}{
 		"route_name":   routeName,
 		"tag_key_id":   tagKeyResult["name"],
@@ -102,7 +104,7 @@ resource "google_compute_route" "acc_route_with_resource_manager_tags" {
 func testAccComputeRoute_defaultInternetGateway(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_route" "foobar" {
-  name             = "route-test-%s"
+  name             = "tf-test-route-test-%s"
   dest_range       = "0.0.0.0/0"
   network          = "default"
   next_hop_gateway = "default-internet-gateway"
@@ -135,7 +137,7 @@ resource "google_compute_instance" "foo" {
 }
 
 resource "google_compute_route" "foobar" {
-  name                   = "route-test-%s"
+  name                   = "tf-test-route-test-%s"
   dest_range             = "0.0.0.0/0"
   network                = "default"
   next_hop_instance      = google_compute_instance.foo.name

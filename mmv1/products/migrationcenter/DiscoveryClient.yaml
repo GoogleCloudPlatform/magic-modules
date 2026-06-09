@@ -1,0 +1,184 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: DiscoveryClient
+description: DiscoveryClient represents an on-premise discovery agent that scans infrastructure and uploads discovery data to Migration Center.
+base_url: projects/{{project}}/locations/{{location}}/discoveryClients
+self_link: projects/{{project}}/locations/{{location}}/discoveryClients/{{discovery_client_id}}
+create_url: projects/{{project}}/locations/{{location}}/discoveryClients?discoveryClientId={{discovery_client_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/discoveryClients/{{discovery_client_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: RGlzY292ZXJ5Q2xpZW50
+autogen_async: true
+samples:
+  - name: migration_center_discovery_client_basic
+    primary_resource_id: default
+    steps:
+      - name: migration_center_discovery_client_basic
+        resource_id_vars:
+          discovery_client_id: discovery-client-test
+          source_id: source-test
+          sa_id: sa-test
+          sa_id_2: sa-test-two
+        vars:
+          service_account: google_service_account.default.email
+          display_name: Terraform integration test display
+          description: Terraform integration test description
+          ttl: 86400s
+          label_value: value
+      - name: migration_center_discovery_client_update
+        resource_id_vars:
+          discovery_client_id: discovery-client-test
+          source_id: source-test
+          sa_id: sa-test
+          sa_id_2: sa-test-two
+        vars:
+          service_account: google_service_account.default_2.email
+          display_name: Terraform integration test display updated
+          description: Terraform integration test description updated
+          expire_time: "2030-01-02T00:00:00Z"
+          label_value: value_updated
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: discoveryClientId
+    type: String
+    required: true
+    description: |-
+      User specified ID for the discovery client. It will become the last
+      component of the discovery client name. The ID must be unique within the
+      project, is restricted to lower-cased letters and has a maximum length of
+      63 characters. The ID must match the regular expression:
+      `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: Time when the discovery client was first created.
+    output: true
+  - name: description
+    type: String
+    description: |-
+      Free text description.
+      Maximum length is 1000 characters.
+  - name: displayName
+    type: String
+    description: |-
+      Free text display name.
+      Maximum length is 63 characters.
+  - name: errors
+    type: Array
+    description: Errors affecting client functionality.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: code
+          output: true
+          type: Integer
+          description: The status code, which should be an enum value of google.rpc.Code.
+        - name: details
+          output: true
+          type: Array
+          description: |-
+            A list of messages that carry the error details.  There is a common set of
+            message types for APIs to use.
+          item_type:
+            type: NestedObject
+            properties: []
+        - name: message
+          output: true
+          type: String
+          description: |-
+            A developer-facing error message, which should be in English. Any
+            user-facing error message should be localized and sent in the
+            google.rpc.Status.details field, or localized by the client.
+  - name: expireTime
+    type: String
+    default_from_api: true
+    description: |-
+      Client expiration time in UTC. If specified, the backend will not accept
+      new frames after this time.
+  - name: heartbeatTime
+    type: String
+    description: |-
+      Last heartbeat time.
+      Healthy clients are expected to send heartbeats regularly (normally every
+      few minutes).
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs.
+  - name: name
+    type: String
+    description: Identifier. Full name of this discovery client.
+    output: true
+  - name: serviceAccount
+    type: String
+    required: true
+    description: Service account used by the discovery client for various operation.
+  - name: signalsEndpoint
+    type: String
+    description: This field is intended for internal use.
+    output: true
+  - name: source
+    type: String
+    required: true
+    description: Full name of the source object associated with this discovery client.
+    immutable: true
+  - name: state
+    type: String
+    description: |-
+      Current state of the discovery client.
+      Possible values:
+      ACTIVE
+      OFFLINE
+      DEGRADED
+      EXPIRED
+    output: true
+  - name: ttl
+    type: String
+    ignore_read: true
+    description: |-
+      Input only. Client time-to-live. If specified, the backend will not accept new
+      frames after this time.
+      This field is input only. The derived expiration time is provided as
+      output through the `expire_time` field.
+  - name: updateTime
+    type: String
+    description: |-
+      Time when the discovery client was last updated. This value is not updated
+      by heartbeats, to view the last heartbeat time please refer to the
+      `heartbeat_time` field.
+    output: true
+  - name: version
+    type: String
+    description: Client version, as reported in recent heartbeat.
+    output: true
