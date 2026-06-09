@@ -15,6 +15,7 @@
 package converters
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
@@ -28,6 +29,7 @@ func ConvertResource(assets []caiasset.Asset, options *models.ResourceConverterO
 
 	if len(assets) > 1 {
 		// TODO: special handling is needed
+		return nil, fmt.Errorf("multiple assets are not supported yet.")
 	}
 
 	asset := assets[0]
