@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionNetworkPolicy_regionNetworkPolicyUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -54,3 +55,4 @@ resource "google_compute_region_network_policy" "policy" {
 }
 `, context)
 }
+{{- end }}
