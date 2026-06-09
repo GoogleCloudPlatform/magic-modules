@@ -165,7 +165,7 @@ func (c *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map
 	}
 
 	event := gh.CreateWorkflowDispatchEventRequest{
-		Ref:    "main",
+		Ref:    "test_17888",
 		Inputs: stringInputs,
 	}
 
