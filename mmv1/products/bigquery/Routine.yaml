@@ -30,6 +30,16 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_type: 'google_bigquery_routine'
+  fetch_iam_policy_verb: 'POST'
+  allowed_iam_role: 'roles/bigquery.dataOwner'
+  parent_resource_attribute: 'routine_id'
+  iam_policy_version: '1'
+  import_format:
+    - 'projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}'
+    - '{{routine_id}}'
 custom_code:
 examples:
   - name: 'bigquery_routine_basic'

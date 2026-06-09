@@ -1,0 +1,12 @@
+resource "google_chronicle_soar_network" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name = "Internal2"
+  address = "192.168.2.0/24"
+  environments_json = jsonencode([
+    "Default Environment"
+  ])
+  priority = 2
+}
