@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/developerconnect"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/gemini"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
