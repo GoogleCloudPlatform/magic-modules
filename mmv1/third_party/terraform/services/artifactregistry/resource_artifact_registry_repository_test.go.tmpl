@@ -381,7 +381,7 @@ func testAccArtifactRegistryRepository_remoteWithAuthUpdate(context map[string]i
 data "google_project" "project" {}
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "tf-test-example-secret"
+  secret_id = "tf-test-example-secret-%{random_suffix}"
   replication {
     auto {}
   }
@@ -425,7 +425,7 @@ func testAccArtifactRegistryRepository_remoteWithAuthUpdate2(context map[string]
 data "google_project" "project" {}
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "tf-test-example-secret"
+  secret_id = "tf-test-example-secret-%{random_suffix}"
   replication {
     auto {}
   }
