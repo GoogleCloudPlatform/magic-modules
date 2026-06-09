@@ -1,5 +1,5 @@
 resource "google_bigquery_reservation" "basic" {
-  name  = "{{index $.ResourceIdVars "reservation_name"}}"
+  name  = "{{index $.Vars "reservation_name"}}"
   project = "{{index $.TestEnvVars "project"}}"
   location = "us-central1"
   slot_capacity = 0
