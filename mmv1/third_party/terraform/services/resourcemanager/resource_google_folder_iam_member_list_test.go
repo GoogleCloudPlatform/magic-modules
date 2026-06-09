@@ -2,8 +2,6 @@ package resourcemanager_test
 
 import (
 	"fmt"
-	"os"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -11,19 +9,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccFolderIamMemberList_basic(t *testing.T) {
 	t.Parallel()
 
-	folder := os.Getenv("GOOGLE_FOLDER")
-	if folder == "" {
-		t.Skip("GOOGLE_FOLDER must be set for this test")
-	}
-
-	if !strings.HasPrefix(folder, "folders/") {
-		folder = "folders/" + folder
-	}
+	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
+	org := envvar.GetTestOrgFromEnv(t)
+	parent := "organizations/" + org
 	role := "roles/compute.instanceAdmin"
 	member := "user:admin@hashicorptest.com"
 
@@ -35,12 +29,12 @@ func TestAccFolderIamMemberList_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFolderIamMemberCreate(folder, role, member),
+				Config: testAccFolderIamMemberCreate(folderDisplayName, parent, role, member),
 			},
 
 			{
 				Query:  true,
-				Config: testAccFolderIamMemberListQuery(folder),
+				Config: testAccFolderIamMemberListQuery(parent, folderDisplayName),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("google_folder_iam_member.test", 1),
 				},
@@ -53,14 +47,9 @@ func TestAccFolderIamMemberList_basic(t *testing.T) {
 func TestAccFolderIamMemberList_filter(t *testing.T) {
 	t.Parallel()
 
-	folder := os.Getenv("GOOGLE_FOLDER")
-	if folder == "" {
-		t.Skip("GOOGLE_FOLDER must be set for this test")
-	}
-
-	if !strings.HasPrefix(folder, "folders/") {
-		folder = "folders/" + folder
-	}
+	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
+	org := envvar.GetTestOrgFromEnv(t)
+	parent := "organizations/" + org
 	role := "roles/compute.instanceAdmin"
 	member := "user:admin@hashicorptest.com"
 
@@ -72,12 +61,12 @@ func TestAccFolderIamMemberList_filter(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFolderIamMemberCreate(folder, role, member),
+				Config: testAccFolderIamMemberCreate(folderDisplayName, parent, role, member),
 			},
 
 			{
 				Query:  true,
-				Config: testAccFolderIamMemberListQueryWithFilters(folder, role, member),
+				Config: testAccFolderIamMemberListQueryWithFilters(parent, folderDisplayName, role, member),
 
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("google_folder_iam_member.test", 1),
@@ -87,42 +76,68 @@ func TestAccFolderIamMemberList_filter(t *testing.T) {
 	})
 }
 
-func testAccFolderIamMemberCreate(folder, role, member string) string {
+func testAccFolderIamMemberCreate(folderDisplayName, parent, role, member string) string {
 	return fmt.Sprintf(`
+resource "google_folder" "test" {
+  display_name = "%s"
+  parent  = "%s"
+  deletion_protection  = false
+}
+
 resource "google_folder_iam_member" "test" {
-	folder = "%s"
+	folder = google_folder.test.name
 	role = "%s"
 	member = "%s"
 }
-`, folder, role, member)
+`, folderDisplayName, parent, role, member)
 }
 
-func testAccFolderIamMemberListQuery(folder string) string {
+func testAccFolderIamMemberListQuery(parent, folderDisplayName string) string {
 	return fmt.Sprintf(`
+data "google_folders" "under_parent"{
+	parent_id = "%s"
+}
+
+locals {
+	folder_name = one([
+		for f in data.google_folders.under_parent.folders :
+		f.name if f.display_name == "%s"
+	])
+}
 
 list "google_folder_iam_member" "test" {
 	provider = google
-	include_resource = true
+	include_resources = true
 	config {
-		folder = "%s"
+		folder = local.folder_name
 	}
 
 }
-`, folder)
+`, parent, folderDisplayName)
 }
 
-func testAccFolderIamMemberListQueryWithFilters(folder, role, member string) string {
+func testAccFolderIamMemberListQueryWithFilters(parent, folderDisplayName, role, member string) string {
 	return fmt.Sprintf(`
+data "google_folders" "under_parent"{
+	parent_id = "%s"
+}
+
+locals {
+	folder_name = one([
+		for f in data.google_folders.under_parent.folders :
+		f.name if f.display_name == "%s"
+	])
+}
 
 list "google_folder_iam_member" "test" {
 	provider = google
-	include_resource = true
+	include_resources = true
 	config {
-		folder = "%s"
+		folder = google_folder.test.name
 		role = "%s"
 		member = "%s"
 	}
 
 }
-`, folder, role, member)
+`, parent, folderDisplayName, role, member)
 }
