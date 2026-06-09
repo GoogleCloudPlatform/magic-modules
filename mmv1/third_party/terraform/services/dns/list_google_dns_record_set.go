@@ -188,15 +188,6 @@ func flattenGoogleDNSRecordSetListItem(
 	return nil
 }
 
-var recordSetSchemaCache *schema.Resource
-
-func getRecordSetSchema() *schema.Resource {
-	if recordSetSchemaCache == nil {
-		recordSetSchemaCache = ResourceDnsRecordSet()
-	}
-	return recordSetSchemaCache
-}
-
 func ListDnsRecordSets(
 	config *transport_tpg.Config,
 	project string,
@@ -214,8 +205,8 @@ func ListDnsRecordSets(
 		return fmt.Errorf("managed_zone is required for listing DNS record sets")
 	}
 
-	schema := getRecordSetSchema()
-	tempData := schema.Data(&terraform.InstanceState{})
+	recordSetSchema := ResourceDnsRecordSet()
+	tempData := recordSetSchema.Data(&terraform.InstanceState{})
 	if project != "" {
 		if err := tempData.Set("project", project); err != nil {
 			return fmt.Errorf("error setting project on temporary resource data: %w", err)
@@ -230,27 +221,54 @@ func ListDnsRecordSets(
 		return err
 	}
 
-	req := NewClient(config, userAgent).ResourceRecordSets.List(project, managedZone)
-
-	if recordName != "" {
-		req = req.Name(recordName)
-		if recordType != "" {
-			req = req.Type(recordType)
-		}
+	url, err := tpgresource.ReplaceVars(tempData, config, "{{DNSBasePath}}projects/{{project}}/managedZones/{{managed_zone}}/rrsets")
+	if err != nil {
+		return err
 	}
+	queryParams := make(map[string]string)
+	if recordName != "" {
+		queryParams["name"] = recordName
+	}
+	if recordType != "" {
+		queryParams["type"] = recordType
+	}
+	for {
+		reqURL, err := transport_tpg.AddQueryParams(url, queryParams)
+		if err != nil {
+			return err
+		}
 
-	return req.Pages(context.Background(), func(resp *googledns.ResourceRecordSetsListResponse) error {
-		for _, rrset := range resp.Rrsets {
-			rd := schema.Data(&terraform.InstanceState{})
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    reqURL,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return err
+		}
 
+		var listResp googledns.ResourceRecordSetsListResponse
+		if err := tpgresource.Convert(res, &listResp); err != nil {
+			return fmt.Errorf("error parsing DNS record set list response: %w", err)
+		}
+
+		for _, rrset := range listResp.Rrsets {
+			rd := recordSetSchema.Data(&terraform.InstanceState{})
 			if err := flattenGoogleDNSRecordSetListItem(rrset, rd, project, managedZone); err != nil {
 				return err
 			}
-
 			if err := callback(rd); err != nil {
 				return err
 			}
 		}
-		return nil
-	})
+
+		if listResp.NextPageToken == "" {
+			break
+		}
+
+		queryParams["pageToken"] = listResp.NextPageToken
+	}
+	return nil
 }
