@@ -25,17 +25,17 @@ type rawConfigMock struct {
 	cfg cty.Value
 }
 
-func (m *rawConfigMock) GetRawConfig() cty.Value                          { return m.cfg }
-func (m *rawConfigMock) HasChange(string) bool                            { return false }
-func (m *rawConfigMock) GetOkExists(string) (interface{}, bool)           { return nil, false }
-func (m *rawConfigMock) GetOk(string) (interface{}, bool)                 { return nil, false }
-func (m *rawConfigMock) Get(string) interface{}                           { return nil }
-func (m *rawConfigMock) Set(string, interface{}) error                    { return nil }
-func (m *rawConfigMock) SetId(string)                                     {}
-func (m *rawConfigMock) Id() string                                       { return "" }
-func (m *rawConfigMock) Identity() (*schema.IdentityData, error)          { return nil, nil }
-func (m *rawConfigMock) GetProviderMeta(interface{}) error                { return nil }
-func (m *rawConfigMock) Timeout(string) time.Duration                     { return 0 }
+func (m *rawConfigMock) GetRawConfig() cty.Value                 { return m.cfg }
+func (m *rawConfigMock) HasChange(string) bool                   { return false }
+func (m *rawConfigMock) GetOkExists(string) (interface{}, bool)  { return nil, false }
+func (m *rawConfigMock) GetOk(string) (interface{}, bool)        { return nil, false }
+func (m *rawConfigMock) Get(string) interface{}                  { return nil }
+func (m *rawConfigMock) Set(string, interface{}) error           { return nil }
+func (m *rawConfigMock) SetId(string)                            {}
+func (m *rawConfigMock) Id() string                              { return "" }
+func (m *rawConfigMock) Identity() (*schema.IdentityData, error) { return nil, nil }
+func (m *rawConfigMock) GetProviderMeta(interface{}) error       { return nil }
+func (m *rawConfigMock) Timeout(string) time.Duration            { return 0 }
 
 var _ tpgresource.TerraformResourceData = (*rawConfigMock)(nil)
 
