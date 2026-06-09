@@ -85,6 +85,7 @@ func TestAccApigeeSecurityAction_update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "description", "Apigee Security Action"),
 					resource.TestCheckResourceAttr(resourceName, "state", "ENABLED"),
+					resource.TestCheckResourceAttr(resourceName, "api_proxies.#", "1"),
 				),
 			},
 			{
@@ -102,6 +103,7 @@ func TestAccApigeeSecurityAction_update(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "description", "Apigee Security Action updated"),
 					resource.TestCheckResourceAttr(resourceName, "state", "DISABLED"),
 					resource.TestCheckResourceAttr(resourceName, "deny.0.response_code", "429"),
+					resource.TestCheckResourceAttr(resourceName, "api_proxies.#", "1"),
 				),
 			},
 			{
@@ -121,6 +123,7 @@ resource "google_apigee_security_action" "default" {
     env_id             = google_apigee_environment.env.name
     description        = "Apigee Security Action"
     state              = "ENABLED"
+    api_proxies        = [google_apigee_api.proxy.name]
 
     condition_config {
         ip_address_ranges = [
@@ -149,6 +152,7 @@ resource "google_apigee_security_action" "default" {
     env_id             = google_apigee_environment.env.name
     description        = "Apigee Security Action updated"
     state              = "DISABLED"
+    api_proxies        = [google_apigee_api.proxy.name]
 
     condition_config {
         ip_address_ranges = [
@@ -372,6 +376,12 @@ resource "google_apigee_addons_config" "apigee_org_security_addons_config" {
             enabled = true
         }
     }
+}
+
+resource "google_apigee_api" "proxy" {
+    name          = "tf-test-proxy-%{random_suffix}"
+    org_id        = google_apigee_organization.apigee_org.name
+    config_bundle = "./test-fixtures/apigee_api_bundle.zip"
 }
 `, context)
 }
