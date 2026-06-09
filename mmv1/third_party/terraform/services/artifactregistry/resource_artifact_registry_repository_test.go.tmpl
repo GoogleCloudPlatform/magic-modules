@@ -442,7 +442,7 @@ resource "google_secret_manager_secret_version" "secret_version_updated" {
 }
 
 resource "google_secret_manager_secret_iam_member" "secret-access" {
-  secret_id = google_secret_manager_secret.%{secret_resource_id}.id
+  secret_id = google_secret_manager_secret.secret.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
 }
