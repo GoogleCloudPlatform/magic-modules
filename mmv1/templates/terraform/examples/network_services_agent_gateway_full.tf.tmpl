@@ -18,7 +18,26 @@ resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
 
   network_config {
     egress {
-      network_attachment = "projects/{{index $.TestEnvVars "project"}}/regions/us-central1/networkAttachments/my-network-attachment"
+      network_attachment = google_compute_network_attachment.default.id
     }
   }
+}
+
+resource "google_compute_network" "default" {
+  name                    = "net-{{index $.Vars "name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "subnet-{{index $.Vars "name"}}"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+  ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_compute_network_attachment" "default" {
+  name                  = "na-{{index $.Vars "name"}}"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_AUTOMATIC"
+  subnetworks           = [google_compute_subnetwork.default.self_link]
 }

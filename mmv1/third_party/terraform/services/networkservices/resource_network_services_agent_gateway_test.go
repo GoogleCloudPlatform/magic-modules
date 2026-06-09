@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccNetworkServicesAgentGateway_networkServicesAgentGatewayUpdate(t *testing.T) {
-	t.Skip("b/484137930")
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
@@ -38,7 +37,7 @@ func TestAccNetworkServicesAgentGateway_networkServicesAgentGatewayUpdate(t *tes
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels"},
 			},
 			{
-				Config: testAccNetworkServicesAgentGateway_networkServicesAgentGatewayFullExample(context),
+				Config: testAccNetworkServicesAgentGateway_networkServicesAgentGatewayUpdateStep3(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction(
@@ -97,9 +96,61 @@ resource "google_network_services_agent_gateway" "default" {
 
   network_config {
     egress {
-      network_attachment = "projects/%{project}/regions/us-central1/networkAttachments/oh-my-network-attachment"
+      network_attachment = google_compute_network_attachment.default.id
     }
   }
 }
+`, context) + testAccNetworkServicesAgentGateway_sharedNetworkResources(context)
+}
+
+func testAccNetworkServicesAgentGateway_sharedNetworkResources(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "default" {
+  name                    = "net-%{name}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "subnet-%{name}"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+  ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_compute_network_attachment" "default" {
+  name                  = "na-%{name}"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_AUTOMATIC"
+  subnetworks           = [google_compute_subnetwork.default.self_link]
+}
 `, context)
+}
+
+func testAccNetworkServicesAgentGateway_networkServicesAgentGatewayUpdateStep3(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_services_agent_gateway" "default" {
+  name     = "%{name}"
+  location = "us-central1"
+  description = "A full configuration for Agent Gateway"
+  labels = {
+    env = "prod"
+    tier = "silver"
+  }
+
+  protocols = ["MCP"]
+  google_managed {
+    governed_access_path = "AGENT_TO_ANYWHERE"
+  }
+
+  registries = [
+    "//agentregistry.googleapis.com/projects/%{project}/locations/us-central1"
+  ]
+
+  network_config {
+    egress {
+      network_attachment = google_compute_network_attachment.default.id
+    }
+  }
+}
+`, context) + testAccNetworkServicesAgentGateway_sharedNetworkResources(context)
 }
