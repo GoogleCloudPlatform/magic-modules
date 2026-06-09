@@ -1,0 +1,155 @@
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "{{index $.Vars "network_name"}}"
+  project                 = "{{index $.TestEnvVars "project"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider                = google-beta
+  name          = "{{index $.Vars "subnet_name"}}"
+  project       = "{{index $.TestEnvVars "project"}}"
+  region        = "us-east4"
+  ip_cidr_range = "10.1.2.0/24"
+  network       = google_compute_network.default.id
+}
+
+resource "google_compute_subnetwork" "proxy_only" {
+  provider                = google-beta
+  name          = "{{index $.Vars "proxy_subnet_name"}}"
+  project       = "{{index $.TestEnvVars "project"}}"
+  region        = "us-east4"
+  ip_cidr_range = "10.129.0.0/23"
+
+  purpose = "REGIONAL_MANAGED_PROXY"
+  role    = "ACTIVE"
+
+  network = google_compute_network.default.id
+}
+
+resource "google_network_security_gateway_security_policy" "default" {
+  provider                = google-beta
+  name     =  "{{index $.Vars "swp_policy"}}"
+  project  = "{{index $.TestEnvVars "project"}}"
+  location = "us-east4"
+}
+
+resource "google_compute_address" "swp_ip" {
+  provider                = google-beta
+  name         = "{{index $.Vars "gateway_name"}}"
+  project      = "{{index $.TestEnvVars "project"}}"
+  region       = "us-east4"
+
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+}
+
+resource "google_network_services_gateway" "swp_gateway" {
+  provider                = google-beta
+  name     = "{{index $.Vars "gateway_name"}}"
+  project  = "{{index $.TestEnvVars "project"}}"
+  location = "us-east4"
+
+  type = "SECURE_WEB_GATEWAY"
+
+  addresses = [google_compute_address.swp_ip.address]
+  ports     = [443]
+  delete_swg_autogen_router_on_destroy = true
+  scope      = "swp-scope"
+  network    = google_compute_network.default.id
+  subnetwork = google_compute_subnetwork.default.id
+
+  gateway_security_policy = google_network_security_gateway_security_policy.default.id
+
+  depends_on = [
+    google_compute_subnetwork.proxy_only
+  ]
+}
+
+resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name           = "{{index $.Vars "resource_name"}}"
+  project        = "{{index $.TestEnvVars "project"}}"
+  location       = "us-east4"
+  description    = "SWP authorization policy corrigida para aceitacao"
+  policy_profile = "REQUEST_AUTHZ"
+
+  target {
+    load_balancing_scheme = "INTERNAL_MANAGED"
+    resources             = [google_network_services_gateway.swp_gateway.id]
+  }
+
+  action = "ALLOW"
+
+  network_rules {
+    from {
+      not_sources {
+        principals {
+          principal_selector = "CLIENT_CERT_URI_SAN"
+          principal {
+            exact = "spiffe://example.com/ns/default/sa/ignored"
+          }
+        }
+
+        principals {
+          principal_selector = "CLIENT_CERT_URI_SAN"
+          principal {
+            exact = "spiffe://example.com/ns/default/sa/alternative"
+          }
+        }
+
+        resources {
+          iam_service_account {
+            exact = "ignored-sa@{{index $.TestEnvVars "project"}}.iam.gserviceaccount.com"
+          }
+          tag_value_id_set {
+            ids = ["1234567890"]
+          }
+        }
+        resources {
+          iam_service_account {
+            prefix = "ignored-sa"
+          }
+        }
+      }
+
+      sources {
+        ip_blocks {
+          length = 24
+          prefix = "10.1.5.0"
+        }
+
+        principals {
+          principal_selector = "CLIENT_CERT_URI_SAN"
+          principal {
+            exact = "spiffe://example.com/ns/prod/sa/good-app"
+          }
+        }
+        principals {
+          principal_selector = "CLIENT_CERT_URI_SAN"
+          principal {
+            exact = "spiffe://example.com/ns/prod/sa/another-good-app"
+          }
+        }
+
+        resources {
+          iam_service_account {
+            contains = "allowed-app"
+          }
+          tag_value_id_set {
+            ids = ["9876543210"]
+          }
+        }
+      }
+    }
+  }
+
+  labels = {
+    environment = "test"
+    managed_by  = "terraform"
+  }
+
+  lifecycle {
+    create_before_destroy = false
+  }
+}

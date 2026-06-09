@@ -87,6 +87,18 @@ examples:
       swp_policy: 'swp-policy'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'network_security_authz_policy_all_fields'
+    primary_resource_id: 'default'
+    min_version: beta
+    vars:
+      resource_name: 'authz-policy-full'
+      gateway_name: 'swp-gateway-full'
+      network_name: 'lb-network-full'
+      subnet_name: 'backend-subnet-full'
+      proxy_subnet_name: 'proxy-only-subnet-full'
+      swp_policy: 'swp-policy-full'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 parameters:
   - name: 'name'
     type: String
