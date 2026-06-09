@@ -112,5 +112,10 @@ properties:
           - TYPE_UNSPECIFIED
           - NO_SPEC
       - name: content
-        type: KeyValuePairs
+        type: String
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        validation:
+          function: 'validation.StringIsJSON'
         description: Optional. The content of the Endpoint spec.
