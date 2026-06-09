@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/biglakeiceberg"
@@ -63,9 +65,20 @@ func TestAccBiglakeIcebergIcebergNamespace_location(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBiglakeIcebergIcebergNamespaceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// Set location explicitly on create and verify it is persisted.
+			// Set location explicitly on create. Verify it shows up in the plan
+			// (i.e. it is not suppressed/dropped when the user sets it) and that
+			// it is persisted after apply.
 			{
 				Config: testAccBiglakeIcebergIcebergNamespace_location(context, "initial"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectKnownValue(
+							"google_biglake_iceberg_namespace.my_iceberg_namespace",
+							tfjsonpath.New("properties").AtMapKey("location"),
+							knownvalue.StringExact(fmt.Sprintf("gs://my-bucket-%s/custom-location", context["bucket_suffix"])),
+						),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_biglake_iceberg_namespace.my_iceberg_namespace", "properties.location", fmt.Sprintf("gs://my-bucket-%s/custom-location", context["bucket_suffix"])),
 				),
