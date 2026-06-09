@@ -12,8 +12,5 @@ resource "google_agent_registry_endpoint" "{{$.PrimaryResourceId}}" {
 
   endpoint_spec {
     type    = "NO_SPEC"
-    content = jsonencode({
-      description = "Spec content"
-    })
   }
 }

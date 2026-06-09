@@ -12,8 +12,5 @@ resource "google_agent_registry_mcp_server" "{{$.PrimaryResourceId}}" {
 
   mcp_server_spec {
     type    = "NO_SPEC"
-    content = jsonencode({
-      description = "Spec content"
-    })
   }
 }
