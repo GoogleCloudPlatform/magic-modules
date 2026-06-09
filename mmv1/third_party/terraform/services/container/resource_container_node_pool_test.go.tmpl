@@ -7069,6 +7069,9 @@ resource "google_container_node_pool" "np_with_custom_node_init" {
   initial_node_count = 1
   node_config {
     image_type = "COS_CONTAINERD"
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+    ]
     linux_node_config {
       custom_node_init {
         init_script {
@@ -7165,6 +7168,9 @@ resource "google_container_node_pool" "np_with_custom_node_init_secret" {
   initial_node_count = 1
   node_config {
     image_type = "COS_CONTAINERD"
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+    ]
     linux_node_config {
       custom_node_init {
         init_script {
