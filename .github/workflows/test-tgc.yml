@@ -92,12 +92,7 @@ jobs:
     - name: Build Terraform Google Conversion
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-<<<<<<< HEAD
-        go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/${GITHUB_EVENT_INPUTS_OWNER}/terraform-provider-google-beta@${GITHUB_EVENT_INPUTS_TPGB_BRANCH}
-        go mod download github.com/${GITHUB_EVENT_INPUTS_OWNER}/terraform-provider-google-beta@${GITHUB_EVENT_INPUTS_TPGB_BRANCH}
-=======
         go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=./tpgb
->>>>>>> fba4bdc820 (fix test-tgc)
         go mod tidy
         make build
     - name: Run Unit Tests
