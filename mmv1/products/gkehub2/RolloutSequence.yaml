@@ -166,7 +166,7 @@ samples:
     primary_resource_id: 'rollout_sequence'
     min_version: beta
     steps:
-      - name: 'gke_hub_rollout_sequence_basic'
+      - name: 'gke_hub_rollout_sequence_create'
         resource_id_vars:
           rollout_sequence_id: 'rs-basic'
         test_env_vars:
