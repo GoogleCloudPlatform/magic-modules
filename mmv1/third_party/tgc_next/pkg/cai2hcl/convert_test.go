@@ -11,8 +11,8 @@ import (
 func TestConvertWithResourceName(t *testing.T) {
 	assets := []caiasset.Asset{
 		{
-			Name:      "//cloudresourcemanager.googleapis.com/projects/example-project",
-			Type:      "cloudresourcemanager.googleapis.com/Project",
+			Name: "//cloudresourcemanager.googleapis.com/projects/example-project",
+			Type: "cloudresourcemanager.googleapis.com/Project",
 			Resource: &caiasset.AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
