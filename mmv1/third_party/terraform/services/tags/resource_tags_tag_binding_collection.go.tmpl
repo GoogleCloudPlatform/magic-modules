@@ -393,11 +393,19 @@ func patchTagBindingCollection(config *transport_tpg.Config, userAgent string, d
 		Headers:   headers,
 	})
 	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 412) || transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+			resourceName := d.Get("full_resource_name").(string)
+			return diag.Errorf("Concurrent modification detected for TagBindingCollection %q. The live resource was modified out of band or by another process during this update.\n\nTo prevent accidental clobbering, the update was aborted. Please re-run 'terraform apply' to automatically refresh the state and successfully merge your configuration.", resourceName)
+		}
 		return diag.Errorf("Error starting PATCH request for %s: %s", operationDesc, err)
 	}
 
 	err = TagsOperationWaitTime(config, initialOp, operationDesc, userAgent, timeout)
 	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 412) || transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+			resourceName := d.Get("full_resource_name").(string)
+			return diag.Errorf("Concurrent modification detected for TagBindingCollection %q. The live resource was modified out of band or by another process during this update.\n\nTo prevent accidental clobbering, the update was aborted. Please re-run 'terraform apply' to automatically refresh the state and successfully merge your configuration.", resourceName)
+		}
 		return diag.FromErr(err)
 	}
 
