@@ -96,6 +96,41 @@ func TestAccTagsTagBindingCollection_basic(t *testing.T) {
 	})
 }
 
+func TestAccTagsTagBindingCollection_locationDefault(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	context := map[string]interface{}{
+		"org_id":                         orgId,
+		"cc_key_short_name":              "tf-test-cc-" + acctest.RandString(t, 6),
+		"cc_marketing_value_short_name":  "tf-test-mkt-" + acctest.RandString(t, 6),
+		"env_key_short_name":             "tf-test-env-" + acctest.RandString(t, 6),
+		"env_prod_value_short_name":      "tf-test-prod-" + acctest.RandString(t, 6),
+		"project_id":                     "tf-test-" + acctest.RandString(t, 10),
+	}
+
+	envKeyNamespaced := fmt.Sprintf("%s/%s", orgId, context["env_key_short_name"])
+	ccKeyNamespaced := fmt.Sprintf("%s/%s", orgId, context["cc_key_short_name"])
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagBindingCollection_locationDefault(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.location_default", "location", "global"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.location_default", "tags.%", "2"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.location_default", fmt.Sprintf("tags.%s", envKeyNamespaced), context["env_prod_value_short_name"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.location_default", fmt.Sprintf("tags.%s", ccKeyNamespaced), context["cc_marketing_value_short_name"].(string)),
+					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.location_default", "id", regexp.MustCompile(fmt.Sprintf("locations/global/tagBindingCollections/.+"))),
+					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.location_default", "name", regexp.MustCompile(fmt.Sprintf("locations/global/tagBindingCollections/.+"))),
+				),
+			},
+		},
+	})
+}
+
 func TestAccTagsTagBindingCollection_destroy(t *testing.T) {
 	t.Parallel()
 
@@ -759,6 +794,55 @@ func TestResourceTagsTagBindingCollectionImport(t *testing.T) {
 			}
 		})
 	}
+}
+
+func testAccTagsTagBindingCollection_locationDefault(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  provider = google-beta 
+  project_id = "%{project_id}"
+  name       = "%{project_id}"
+  org_id     = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_tags_tag_key" "env_key" {
+  provider = google-beta 
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{env_key_short_name}"
+}
+resource "google_tags_tag_value" "env_prod_value" {
+  provider = google-beta 
+  parent      = google_tags_tag_key.env_key.id
+  short_name  = "%{env_prod_value_short_name}"
+}
+
+resource "google_tags_tag_key" "cost_center_key" {
+  provider = google-beta 
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{cc_key_short_name}"
+}
+resource "google_tags_tag_value" "cc_marketing_value" {
+  provider = google-beta 
+  parent      = google_tags_tag_key.cost_center_key.id
+  short_name  = "%{cc_marketing_value_short_name}"
+}
+
+resource "google_tags_tag_binding_collection" "location_default" {
+  provider = google-beta 
+  full_resource_name    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  # location is omitted, should default to "global"
+  tags      = {
+    "${google_tags_tag_key.env_key.namespaced_name}"        = google_tags_tag_value.env_prod_value.short_name
+    "${google_tags_tag_key.cost_center_key.namespaced_name}" = google_tags_tag_value.cc_marketing_value.short_name
+  }
+
+  depends_on = [
+    google_tags_tag_value.env_prod_value,
+    google_tags_tag_value.cc_marketing_value,
+  ]
+}
+`, context)
 }
 
 // TODO: Add more unit tests for Upsert and Delete logic, mocking API calls.

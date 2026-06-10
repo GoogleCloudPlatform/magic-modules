@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -39,7 +38,8 @@ func ResourceTagsTagBindingCollection() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"location": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Default:     "global",
 				Description: `The location of the TagBindingCollection.`,
 			},
 			"full_resource_name": {
@@ -70,9 +70,6 @@ locations/{location}/tagBindingCollections/{encoded_full_resource_name}`,
 			},
 		},
 
-		CustomizeDiff: customdiff.All(
-			resourceTagsTagBindingCollectionCustomizeDiff,
-		),
 		UseJSONNumber: true,
 	}
 }
@@ -121,6 +118,26 @@ func resourceTagsTagBindingCollectionRead(ctx context.Context, d *schema.Resourc
 	apiTags := flattenTagsTagBindingCollectionTags(res["tags"], d, config)
 	if err := d.Set("active_tags", apiTags); err != nil {
 		return diag.Errorf("error setting active_tags: %s", err)
+	}
+
+	// Sync "tags" to detect drift for configured keys
+	if apiTags != nil {
+		apiTagsMap, err := convertToStringMap(apiTags.(map[string]interface{}))
+		if err != nil {
+			return diag.Errorf("error converting API tags: %s", err)
+		}
+
+		transformedTags := make(map[string]interface{})
+		if v, ok := d.GetOk("tags"); ok {
+			for k := range v.(map[string]interface{}) {
+				if val, exists := apiTagsMap[k]; exists {
+					transformedTags[k] = val
+				}
+			}
+		}
+		if err := d.Set("tags", transformedTags); err != nil {
+			return diag.Errorf("error setting tags: %s", err)
+		}
 	}
 
 	return nil
