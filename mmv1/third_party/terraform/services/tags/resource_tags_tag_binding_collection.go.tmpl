@@ -49,7 +49,7 @@ func ResourceTagsTagBindingCollection() *schema.Resource {
 			},
 			"tags": {
 				Type:     schema.TypeMap,
-				Optional: true,
+				Required: true,
 				Description: `A map of tag keys to values directly bound to this resource, specified in namespaced format.
 For example:
   "123/environment": "production"
