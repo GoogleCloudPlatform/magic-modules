@@ -161,3 +161,21 @@ properties:
               Current valid values are `CONTROL_PLANE_MINOR`, `CONTROL_PLANE_PATCH`, `NODE_MINOR`, and `NODE_PATCH`.
             item_type:
               type: String
+samples:
+  - name: 'gke_hub_rollout_sequence_basic'
+    primary_resource_id: 'rollout_sequence'
+    min_version: beta
+    steps:
+      - name: 'gke_hub_rollout_sequence_basic'
+        resource_id_vars:
+          rollout_sequence_id: 'rs-basic'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        ignore_read_extra:
+          - 'labels'
+          - 'rollout_sequence_id'
+      - name: 'gke_hub_rollout_sequence_update'
+        resource_id_vars:
+          rollout_sequence_id: 'rs-basic'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
