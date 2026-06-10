@@ -205,7 +205,8 @@ properties:
     type: String
     description: |
       Specifies the already existing reservations to attach to the Commitment.
-    default_from_api: true
+    # Ignore read as a temporary fix because the API only returns these in the `reservations` list
+    ignore_read: true
   - name: 'params'
     type: NestedObject
     ignore_read: true
