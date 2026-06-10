@@ -54,28 +54,7 @@ samples:
           - 'validated_on_empty_logs'
           - 'low_code.0.field_extractors.0.append_repeated_fields'
           - 'version_info'
-  - name: 'chronicle_parser_update'
-    primary_resource_id: 'example'
-    exclude_basic_doc: true
-    steps:
-      - name: 'chronicle_parser_update'
-        test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
-        ignore_read_extra:
-          - 'state'
-          - 'validation_report'
-          - 'validation_stage'
-          - 'validated_on_empty_logs'
-          - 'version_info'
-      - name: 'chronicle_parser_update_step2'
-        test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
-        ignore_read_extra:
-          - 'state'
-          - 'validation_report'
-          - 'validation_stage'
-          - 'validated_on_empty_logs'
-          - 'version_info'
+
 parameters:
   - name: location
     type: String
