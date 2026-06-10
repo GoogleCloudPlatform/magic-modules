@@ -28,6 +28,8 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/global/rolloutSequences/{{rollout_sequence_id}}'
+custom_code:
+  constants: 'templates/terraform/constants/gke_hub_rollout_sequence.go.tmpl'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -130,6 +132,8 @@ properties:
           type: String
           description: |
             Soak time after upgrading all the clusters in the stage, specified in seconds.
+          custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
+          diff_suppress_func: 'durationDiffSuppress'
   - name: 'autoUpgradeConfig'
     type: NestedObject
     description: |

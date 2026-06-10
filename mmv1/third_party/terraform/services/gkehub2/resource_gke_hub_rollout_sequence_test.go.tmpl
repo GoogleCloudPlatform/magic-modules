@@ -86,7 +86,7 @@ resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
         }
   stages {
     fleet_projects = ["projects/%{project_id}"]
-    soak_duration  = "60s"
+    soak_duration  = "1h"
   }
   auto_upgrade_config {
     rollout_creation_scope {
@@ -116,11 +116,11 @@ resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
         cluster_selector {
           label_selector = "resource.labels.canary=='true'"
         }
-        soak_duration  = "30s"
+        soak_duration  = "2h"
   }
   stages {
         fleet_projects = ["projects/%{project_id}"]
-        soak_duration  = "60s"
+        soak_duration  = "1d"
   }
   auto_upgrade_config {
     rollout_creation_scope {
