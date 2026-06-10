@@ -220,3 +220,32 @@ samples:
           rollout_sequence_id: 'rs-basic'
         test_env_vars:
           project_id: 'PROJECT_NAME'
+  - name: 'gke_hub_rollout_sequence_user_triggered'
+    primary_resource_id: 'rollout_sequence'
+    min_version: beta
+    external_providers:
+      - 'time'
+    steps:
+      - name: 'gke_hub_rollout_sequence_user_triggered'
+        resource_id_vars:
+          rollout_sequence_id: 'rs-user-triggered'
+          network_name: 'rs-network'
+          subnetwork_name: 'rs-subnet'
+          cluster_name: 'rs-cluster'
+          membership_id: 'rs-membership'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        ignore_read_extra:
+          - 'min_control_plane_version'
+      - name: 'gke_hub_rollout_sequence_user_triggered_update'
+        resource_id_vars:
+          rollout_sequence_id: 'rs-user-triggered'
+          network_name: 'rs-network'
+          subnetwork_name: 'rs-subnet'
+          cluster_name: 'rs-cluster'
+          membership_id: 'rs-membership'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        ignore_read_extra:
+          - 'min_control_plane_version'
+          - 'min_node_version'

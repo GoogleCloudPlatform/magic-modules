@@ -1,0 +1,71 @@
+
+provider "google-beta" {
+  gke_hub_custom_endpoint = "https://gkehub.googleapis.com/v1alpha/"
+  gke_hub2_custom_endpoint = "https://gkehub.googleapis.com/v1alpha/"
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+
+data "google_container_engine_versions" "versions" {
+  provider = google-beta
+  location = "us-central1-a"
+}
+
+resource "time_static" "exclusion_start" {}
+
+resource "google_container_cluster" "primary" {
+  provider           = google-beta
+  name               = "%{cluster_name}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.versions.release_channel_default_version["REGULAR"]
+  deletion_protection = false
+
+  release_channel {
+    channel = "REGULAR"
+  }
+
+  resource_labels = {
+    rs_test_cluster = "tf-test-%{random_suffix}"
+  }
+
+  maintenance_policy {
+    daily_maintenance_window {
+		  start_time = "03:00"
+	  }
+    maintenance_exclusion {
+      exclusion_name = "no-upgrades"
+      start_time     = timeadd(time_static.exclusion_start.rfc3339, "-24h")
+      end_time       = timeadd(time_static.exclusion_start.rfc3339, "24h")
+      exclusion_options {
+        scope = "NO_UPGRADES"
+      }
+    }
+  }
+
+  fleet {
+    project = data.google_project.project.number
+  }
+}
+
+resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
+  provider = google-beta
+  rollout_sequence_id = "%{rollout_sequence_id}"
+  display_name        = "User Triggered Rollout Sequence"
+
+  min_control_plane_version = data.google_container_engine_versions.versions.release_channel_latest_version["REGULAR"]
+  min_node_version          = data.google_container_engine_versions.versions.release_channel_latest_version["REGULAR"]
+
+  ignored_clusters_selector {
+    label_selector = "!(has(resource.labels.rs_test_cluster) && resource.labels.rs_test_cluster == 'tf-test-%{random_suffix}')"
+  }
+
+  stages {
+    fleet_projects = ["projects/%{project_id}"]
+    soak_duration  = "30s"
+  }
+
+  depends_on = [google_container_cluster.primary]
+}
