@@ -8,6 +8,8 @@ description: |-
 
 A TagBindingCollection represents a collection of tag bindings directly bound to a cloud resource.
 
+> **Warning:** `google_tags_tag_binding_collection` is designed to perform non-authoritative bulk management of tags. It **cannot** be used in conjunction with individual `google_tags_tag_binding` or `google_tags_location_tag_binding` resources operating on the exact same parent resource. Doing so will cause overlapping state management, double adoptions, and unpredictable infrastructure convergence.
+
 To get more information about TagBindingCollection, see:
 
 * [API documentation](https://cloud.google.com/resource-manager/reference/rest/v3/locations.tagBindingCollections)
@@ -38,24 +40,19 @@ resource "google_tags_tag_value" "value1" {
 }
 
 resource "google_tags_tag_key" "key2" {
-  parent      = "organizations/123456789"
-  short_name  = "keyname2"
-  description = "For keyname2 resources."
-}
-
-resource "google_tags_tag_value" "value2" {
-  parent      = google_tags_tag_key.key2.id
-  short_name  = "valuename2"
-  description = "For valuename2 resources."
+  parent               = "organizations/123456789"
+  short_name           = "dynamic_keyname"
+  description          = "For dynamic keyname resources."
+  allowed_values_regex = "^[a-z0-9]+$"
 }
 
 resource "google_tags_tag_binding_collection" "bindingcollection" {
-  full_resource_name    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
-  location  = "us-central1"
-  tags      = {
+  full_resource_name = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
+  location           = "us-central1"
+  tags = {
     # Format: "{TagKey.namespaced_name}" = "{TagValue.short_name}"
     "${google_tags_tag_key.key1.namespaced_name}" = google_tags_tag_value.value1.short_name
-    "${google_tags_tag_key.key2.namespaced_name}" = google_tags_tag_value.value2.short_name
+    "${google_tags_tag_key.key2.namespaced_name}" = "dynamicvalue123"
   }
 }
 ```
@@ -67,15 +64,15 @@ The following arguments are supported:
 
 * `full_resource_name` -
   (Required)
-  The full resource name of the resource to which the tags are bound. E.g. //cloudresourcemanager.googleapis.com/projects/123
+  The full resource name of the resource to which the tags are bound. E.g. `//cloudresourcemanager.googleapis.com/projects/123`
 
 * `tags` -
   (Required)
-  A map of tag keys to values directly bound to this resource, specified in namespaced name format. E.g. "123/environment": "production"
+  A map of tag keys to values directly bound to this resource, specified in namespaced name format. E.g. `"123/environment": "production"`. This field is non-authoritative. Terraform will only manage the precise tags present in this map.
 
 * `location` -
-  (Required)
-  The location of the target resource. E.g. "global", "us-central1", "us-east2-c".
+  (Optional)
+  The location of the target resource. E.g. `"global"`, `"us-central1"`, `"us-east2-c"`. Defaults to `"global"`.
 
 - - -
 
