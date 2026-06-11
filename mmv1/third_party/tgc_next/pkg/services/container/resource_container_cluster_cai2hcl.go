@@ -26,9 +26,13 @@ func NewContainerClusterCai2hclConverter(provider *schema.Provider) models.Cai2h
 	}
 }
 
-func (c *ContainerClusterCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ContainerClusterCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
+	}
+
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(asset)
+	block, err := c.convertResourceData(assets[0])
 	if err != nil {
 		return nil, err
 	}
@@ -129,6 +133,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	hclData["security_posture_config"] = flattenSecurityPostureConfig(asset.Resource.Data["securityPostureConfig"])
 	hclData["enterprise_config"] = flattenEnterpriseConfig(asset.Resource.Data["enterpriseConfig"])
 	hclData["anonymous_authentication_config"] = flattenAnonymousAuthenticationConfig(asset.Resource.Data["anonymousAuthenticationConfig"])
+	hclData["node_creation_config"] = flattenNodeCreationConfig(asset.Resource.Data["nodeCreationConfig"])
 	hclData["notification_config"] = flattenNotificationConfig(asset.Resource.Data["notificationConfig"])
 	hclData["binary_authorization"] = flattenBinaryAuthorization(asset.Resource.Data["binaryAuthorization"])
 	if !enableAutopilot {
@@ -1922,5 +1927,19 @@ func flattenRBACBindingConfig(v interface{}) []map[string]interface{} {
 		"enable_insecure_binding_system_unauthenticated": c["enableInsecureBindingSystemUnauthenticated"],
 	}
 
+	return []map[string]interface{}{transformed}
+}
+
+func flattenNodeCreationConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	ncc, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"node_creation_mode": ncc["nodeCreationMode"],
+	}
 	return []map[string]interface{}{transformed}
 }

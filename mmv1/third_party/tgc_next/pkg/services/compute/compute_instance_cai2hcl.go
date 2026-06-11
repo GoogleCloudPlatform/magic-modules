@@ -30,9 +30,17 @@ func NewComputeInstanceCai2hclConverter(provider *schema.Provider) models.Cai2hc
 }
 
 // Convert converts asset to HCL resource blocks.
-func (c *ComputeInstanceCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ComputeInstanceCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) == 0 {
+		return nil, nil
+	}
+
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
+	}
+
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(asset)
+	block, err := c.convertResourceData(assets[0])
 	if err != nil {
 		return nil, err
 	}
@@ -71,9 +79,12 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 		}
 	}
 
-	if labels, ok := data["labels"].(map[string]interface{}); ok && labels != nil {
-		hclData["labels"] = tgcresource.RemoveTerraformAttributionLabel(labels)
+	md := flattenMetadataBetaTgcNext(data["metadata"])
+	if startupScript, ok := md["startup-script"].(string); ok && startupScript != "" {
+		hclData["metadata_startup_script"] = startupScript
+		delete(md, "startup-script")
 	}
+
 	hclData["service_account"] = flattenServiceAccountsTgcNext(data["serviceAccounts"])
 	hclData["resource_policies"] = data["resourcePolicies"]
 
@@ -92,6 +103,10 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 	// Only convert the field when its value is not default false
 	if deletionProtection, ok := data["deletionProtection"].(bool); ok && deletionProtection {
 		hclData["deletion_protection"] = true
+	}
+
+	if project != "" {
+		hclData["project"] = project
 	}
 	if zone, ok := data["zone"].(string); ok && zone != "" {
 		hclData["zone"] = tpgresource.GetResourceNameFromSelfLink(zone)
@@ -157,9 +172,17 @@ func flattenNetworkInterfacesTgcNext(v interface{}, project string) ([]map[strin
 			"alias_ip_range":              flattenAliasIpRangeTgcNext(iface["aliasIpRanges"]),
 			"nic_type":                    iface["nicType"],
 			"stack_type":                  iface["stackType"],
+			"igmp_query":                  iface["igmpQuery"],
 			"ipv6_access_config":          flattenIpv6AccessConfigsTgcNext(iface["ipv6AccessConfigs"]),
 			"ipv6_address":                iface["ipv6Address"],
 			"internal_ipv6_prefix_length": iface["internalIpv6PrefixLength"],
+		}
+
+		if vlan, ok := iface["vlan"].(float64); ok && vlan != 0 {
+			flattened[i]["vlan"] = int(vlan)
+		}
+		if networkAttachment, ok := iface["networkAttachment"].(string); ok && networkAttachment != "" {
+			flattened[i]["network_attachment"] = networkAttachment
 		}
 
 		if network, ok := iface["network"].(string); ok && network != "" {
@@ -220,14 +243,14 @@ func flattenAccessConfigsTgcNext(v interface{}) ([]map[string]interface{}, strin
 			continue
 		}
 		flattened[i] = map[string]interface{}{
-			"nat_ip":       ac["natIp"],
+			"nat_ip":       ac["natIP"],
 			"network_tier": ac["networkTier"],
 		}
 		if setPublicPtr, ok := ac["setPublicPtr"].(bool); ok && setPublicPtr {
 			flattened[i]["public_ptr_domain_name"] = ac["publicPtrDomainName"]
 		}
 		if natIP == "" {
-			if ip, ok := ac["natIp"].(string); ok {
+			if ip, ok := ac["natIP"].(string); ok {
 				natIP = ip
 			}
 		}
@@ -273,8 +296,11 @@ func flattenIpv6AccessConfigsTgcNext(v interface{}) []map[string]interface{} {
 		}
 		flattened[i] = map[string]interface{}{
 			"network_tier": ac["networkTier"],
+			"name":         ac["name"],
 		}
-		flattened[i]["public_ptr_domain_name"] = ac["publicPtrDomainName"]
+		if publicPtr, ok := ac["publicPtrDomainName"].(string); ok && publicPtr != "" {
+			flattened[i]["public_ptr_domain_name"] = publicPtr
+		}
 		flattened[i]["external_ipv6"] = ac["externalIpv6"]
 		flattened[i]["external_ipv6_prefix_length"] = ac["externalIpv6PrefixLength"]
 	}
@@ -333,7 +359,9 @@ func flattenDisksTgcNext(v interface{}, instanceName string) ([]map[string]inter
 		} else {
 			di := map[string]interface{}{
 				"device_name": disk["deviceName"],
-				"mode":        disk["mode"],
+			}
+			if mode, ok := disk["mode"].(string); ok && mode != "READ_WRITE" {
+				di["mode"] = mode
 			}
 			if source, ok := disk["source"].(string); ok && source != "" {
 				di["source"] = tpgresource.ConvertSelfLinkToV1(source)
@@ -341,15 +369,6 @@ func flattenDisksTgcNext(v interface{}, instanceName string) ([]map[string]inter
 			if key, ok := disk["diskEncryptionKey"].(map[string]interface{}); ok && key != nil {
 				if kmsKeyName, ok := key["kmsKeyName"].(string); ok && kmsKeyName != "" {
 					di["kms_key_self_link"] = strings.Split(kmsKeyName, "/cryptoKeyVersions")[0]
-				}
-				if rsaEncryptedKey, ok := key["rsaEncryptedKey"].(string); ok && rsaEncryptedKey != "" {
-					di["disk_encryption_key_rsa"] = rsaEncryptedKey
-				}
-				if rawKey, ok := key["rawKey"].(string); ok && rawKey != "" {
-					di["disk_encryption_key_raw"] = rawKey
-				}
-				if kmsKeyServiceAccount, ok := key["kmsKeyServiceAccount"].(string); ok && kmsKeyServiceAccount != "" {
-					di["disk_encryption_service_account"] = kmsKeyServiceAccount
 				}
 			}
 			attachedDisks = append(attachedDisks, di)
@@ -392,9 +411,6 @@ func flattenBootDiskTgcNext(v interface{}, instanceName string) []map[string]int
 		if kmsKeyName, ok := key["kmsKeyName"].(string); ok && kmsKeyName != "" {
 			result["kms_key_self_link"] = strings.Split(kmsKeyName, "/cryptoKeyVersions")[0]
 		}
-		if kmsKeyServiceAccount, ok := key["kmsKeyServiceAccount"].(string); ok && kmsKeyServiceAccount != "" {
-			result["disk_encryption_service_account"] = kmsKeyServiceAccount
-		}
 		if rsaEncryptedKey, ok := key["rsaEncryptedKey"].(string); ok && rsaEncryptedKey != "" {
 			result["disk_encryption_key_rsa"] = rsaEncryptedKey
 		}
@@ -403,11 +419,15 @@ func flattenBootDiskTgcNext(v interface{}, instanceName string) []map[string]int
 		}
 	}
 
-	result["interface"] = disk["interface"]
 	if source, ok := disk["source"].(string); ok && source != "" {
 		result["source"] = tpgresource.ConvertSelfLinkToV1(source)
 	}
 	result["guest_os_features"] = flattenComputeInstanceGuestOsFeaturesTgcNext(disk["guestOsFeatures"])
+
+	// The interface property was missing in boot disk mapping, leading to integration test failure for nvme/scsi interface options.
+	if diskInterface, ok := disk["interface"].(string); ok && diskInterface != "" {
+		result["interface"] = diskInterface
+	}
 
 	if len(result) == 0 {
 		return nil
@@ -445,8 +465,11 @@ func flattenScratchDiskTgcNext(v interface{}) map[string]interface{} {
 	if !ok {
 		return nil
 	}
-	result := map[string]interface{}{
-		"size": disk["diskSizeGb"],
+	result := map[string]interface{}{}
+	if size, ok := disk["diskSizeGb"].(float64); ok && int(size) != 375 {
+		result["size"] = int(size)
+	} else if size, ok := disk["diskSizeGb"].(int); ok && size != 375 {
+		result["size"] = size
 	}
 
 	if deviceName, ok := disk["deviceName"].(string); ok && !strings.Contains(deviceName, "persistent-disk-") {
@@ -468,6 +491,10 @@ func flattenSchedulingTgcNext(v interface{}) []map[string]interface{} {
 	}
 
 	schedulingMap := make(map[string]interface{}, 0)
+
+	if terminationTime, ok := resp["terminationTime"].(string); ok && terminationTime != "" {
+		schedulingMap["termination_time"] = terminationTime
+	}
 
 	if ita, ok := resp["instanceTerminationAction"].(string); ok && ita != "" {
 		schedulingMap["instance_termination_action"] = ita
@@ -518,7 +545,9 @@ func flattenSchedulingTgcNext(v interface{}) []map[string]interface{} {
 	}
 
 	if oisa, ok := resp["onInstanceStopAction"].(map[string]interface{}); ok && oisa != nil {
-		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopActionTgcNext(oisa)
+		if flattened := flattenOnInstanceStopActionTgcNext(oisa); flattened != nil {
+			schedulingMap["on_instance_stop_action"] = flattened
+		}
 	}
 
 	if lsrt, ok := resp["localSsdRecoveryTimeout"].(map[string]interface{}); ok && lsrt != nil {
@@ -573,11 +602,14 @@ func flattenOnInstanceStopActionTgcNext(v interface{}) []interface{} {
 	if !ok {
 		return nil
 	}
-	return []interface{}{
-		map[string]interface{}{
-			"discard_local_ssd": oisa["discardLocalSsd"],
-		},
+	res := make(map[string]interface{})
+	if discardLocalSsd, ok := oisa["discardLocalSsd"].(bool); ok && discardLocalSsd {
+		res["discard_local_ssd"] = true
 	}
+	if len(res) == 0 {
+		return nil
+	}
+	return []interface{}{res}
 }
 
 func flattenComputeLocalSsdRecoveryTimeoutTgcNext(v interface{}) []interface{} {
@@ -622,7 +654,7 @@ func flattenGuestAcceleratorsTgcNext(v interface{}) []map[string]interface{} {
 	return acceleratorsSchema
 }
 
-func flattenShieldedVmConfigTgcNext(v interface{}) []map[string]bool {
+func flattenShieldedVmConfigTgcNext(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -631,18 +663,21 @@ func flattenShieldedVmConfigTgcNext(v interface{}) []map[string]bool {
 		return nil
 	}
 
-	result := map[string]bool{}
-	if secureBoot, ok := shieldedVmConfig["enableSecureBoot"].(bool); ok {
-		result["enable_secure_boot"] = secureBoot
+	result := map[string]interface{}{}
+	if secureBoot, ok := shieldedVmConfig["enableSecureBoot"].(bool); ok && secureBoot {
+		result["enable_secure_boot"] = true
 	}
-	if vtpm, ok := shieldedVmConfig["enableVtpm"].(bool); ok {
-		result["enable_vtpm"] = vtpm
+	if vtpm, ok := shieldedVmConfig["enableVtpm"].(bool); ok && !vtpm {
+		result["enable_vtpm"] = false
 	}
-	if integrityMonitoring, ok := shieldedVmConfig["enableIntegrityMonitoring"].(bool); ok {
-		result["enable_integrity_monitoring"] = integrityMonitoring
+	if integrityMonitoring, ok := shieldedVmConfig["enableIntegrityMonitoring"].(bool); ok && !integrityMonitoring {
+		result["enable_integrity_monitoring"] = false
 	}
 
-	return []map[string]bool{result}
+	if len(result) == 0 {
+		return nil
+	}
+	return []map[string]interface{}{result}
 }
 
 func flattenEnableDisplayTgcNext(v interface{}) interface{} {
@@ -654,7 +689,10 @@ func flattenEnableDisplayTgcNext(v interface{}) interface{} {
 		return nil
 	}
 
-	return displayDevice["enableDisplay"]
+	if enableDisplay, ok := displayDevice["enableDisplay"].(bool); ok && enableDisplay {
+		return true
+	}
+	return nil
 }
 
 func flattenConfidentialInstanceConfigTgcNext(v interface{}) []map[string]interface{} {
@@ -685,6 +723,7 @@ func flattenAdvancedMachineFeaturesTgcNext(v interface{}) []map[string]interface
 		"visible_core_count":           resp["visibleCoreCount"],
 		"performance_monitoring_unit":  resp["performanceMonitoringUnit"],
 		"enable_uefi_networking":       resp["enableUefiNetworking"],
+		"turbo_mode":                   resp["turboMode"],
 	}}
 }
 
@@ -727,4 +766,31 @@ func flattenComputeInstanceEncryptionKeyTgcNext(v interface{}) []map[string]inte
 	return []map[string]interface{}{{
 		"kms_key_self_link": resp["kmsKeyName"],
 	}}
+}
+
+func flattenMetadataBetaTgcNext(v interface{}) map[string]interface{} {
+	metadataMap := make(map[string]interface{})
+	if v == nil {
+		return metadataMap
+	}
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return metadataMap
+	}
+	items, ok := m["items"].([]interface{})
+	if !ok {
+		return metadataMap
+	}
+	for _, rawItem := range items {
+		item, ok := rawItem.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		key, _ := item["key"].(string)
+		value, _ := item["value"].(string)
+		if key != "" {
+			metadataMap[key] = value
+		}
+	}
+	return metadataMap
 }

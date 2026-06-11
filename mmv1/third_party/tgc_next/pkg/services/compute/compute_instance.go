@@ -471,11 +471,42 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
+						"network_attachment": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
+						},
+
+						"parent_nic_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Name of the parent network interface of a dynamic network interface.`,
+						},
+
+						"vlan": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntBetween(2, 255),
+							Description:  `VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively.`,
+						},
+
 						"subnetwork_project": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
 							Description: `The project in which the subnetwork belongs.`,
+						},
+
+						"igmp_query": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.StringInSlice([]string{"IGMP_QUERY_V2", "IGMP_QUERY_DISABLED"}, false),
+							Description:  `Indicates whether igmp query is enabled on the network interface or not. If enabled, also indicates the version of IGMP supported.`,
 						},
 
 						"network_ip": {

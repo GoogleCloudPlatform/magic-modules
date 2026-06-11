@@ -444,6 +444,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `anonymous_authentication_config` - (Optional)
   Configuration for [anonymous authentication restrictions](https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict-anon-access). Structure is [documented below](#anonymous_authentication_config).
 
+* `node_creation_config` - (Optional)
+  Configuration for [node creation config](https://clouddocs.devsite.corp.google.com/kubernetes-engine/security/control-plane-node-creation). Structure is [documented below](#node_creation_config).
+
 * `rbac_binding_config` - (Optional)
   RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created. Structure is [documented below](#nested_rbac_binding_config).
 
@@ -559,6 +562,11 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    * `disable_multi_nic` When set to true, this disables multi-NIC support for the Lustre CSI driver. By default, GKE enables multi-NIC support, which allows the Lustre CSI driver to automatically detect and configure all suitable network interfaces on a node to maximize I/O performance for demanding workloads.
 
 * `pod_snapshot_config` - (Optional) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
+
+* `slurm_operator_config` - (Optional) The status of the Slurm Operator addon,
+    which creates slurm related CRDs and KCP pods to manage them.
+    Defaults to disabled for Standard clusters; set `enabled = true` to enable.
+    It can not be enabled for Autopilot clusters.
 
 This example `addons_config` disables two addons:
 
@@ -1870,6 +1878,10 @@ registry_hosts {
 <a name="anonymous_authentication_config"></a>The `anonymous_authentication_config` block supports:
 
 * `mode` - (Optional) Sets or removes authentication restrictions. Available options include `LIMITED` and `ENABLED`.
+
+<a name="node_creation_config"></a>The `node_creation_config` block supports:
+
+* `node_creation_mode` - (Required) Sets the node creation mode. Available options include `VIA_KUBELET` and `VIA_CONTROL_PLANE`.
 
 <a name="nested_rbac_binding_config"></a>The `rbac_binding_config` block supports:
 
