@@ -40,7 +40,7 @@ func (c *ComputeInstanceCai2hclConverter) Convert(assets []caiasset.Asset, optio
 	}
 
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(assets[0])
+	block, err := c.convertResourceData(assets[0], options)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *ComputeInstanceCai2hclConverter) Convert(assets []caiasset.Asset, optio
 	return blocks, nil
 }
 
-func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Asset, options *models.ResourceConverterOptions) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -126,8 +126,14 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 	if err != nil {
 		return nil, err
 	}
+	var hclBlockName string
+	if options != nil && options.ResourceName != "" {
+		hclBlockName = options.ResourceName
+	} else {
+		hclBlockName = instanceName
+	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, instanceName},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }

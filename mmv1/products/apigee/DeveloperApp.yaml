@@ -110,6 +110,7 @@ properties:
       the API key never expires. The expiration time can't be updated after it is set.
     default_value: "-1"
     immutable: true
+    ignore_read: true
   - name: "apiProducts"
     type: Array
     description: |

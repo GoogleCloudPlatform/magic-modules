@@ -1952,7 +1952,6 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		Hostname:                   d.Get("hostname").(string),
 		ForceSendFields:            []string{"CanIpForward", "DeletionProtection"},
 		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-		DisplayDevice:              expandDisplayDevice(d),
 		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
@@ -1973,6 +1972,13 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 			EnableVtpm:                sicMap["enableVtpm"].(bool),
 			EnableIntegrityMonitoring: sicMap["enableIntegrityMonitoring"].(bool),
 			ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
+		}
+	}
+	if dd := expandDisplayDevice(d); dd != nil {
+		enabled, _ := dd["enableDisplay"].(bool)
+		instance.DisplayDevice = &compute.DisplayDevice{
+			EnableDisplay:   enabled,
+			ForceSendFields: []string{"EnableDisplay"},
 		}
 	}
 	return instance, nil
@@ -2228,7 +2234,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	}
 	// Set the networks
 	// Use the first external IP found for the default connection info.
-	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, instance.NetworkInterfaces)
+	networkInterfacesRaw, err := networkInterfacesToInterface(instance.NetworkInterfaces)
+	if err != nil {
+		return err
+	}
+	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
 	if err != nil {
 		return err
 	}
@@ -2433,7 +2443,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("shielded_instance_config", flattenShieldedVmConfig(shieldedVmConfigMap)); err != nil {
 		return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 	}
-	if err := d.Set("enable_display", flattenEnableDisplay(instance.DisplayDevice)); err != nil {
+	var displayDeviceMap map[string]interface{}
+	if instance.DisplayDevice != nil {
+		displayDeviceMap = map[string]interface{}{"enableDisplay": instance.DisplayDevice.EnableDisplay}
+	}
+	if err := d.Set("enable_display", flattenEnableDisplay(displayDeviceMap)); err != nil {
 		return fmt.Errorf("Error setting enable_display: %s", err)
 	}
 	if err := d.Set("cpu_platform", instance.CpuPlatform); err != nil {
@@ -2698,7 +2712,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					return fmt.Errorf("Error retrieving partner_metadata: %s", err)
 				}
 
-				currentPM, _ := instMap["partnerMetadata"].(map[string]interface{})
+				currentPM, ok := instMap["partnerMetadata"].(map[string]interface{})
+				if !ok && instMap["partnerMetadata"] != nil {
+					log.Printf("[WARN] resourceComputeInstanceUpdate: unexpected type for partnerMetadata: %T", instMap["partnerMetadata"])
+				}
 				patchedPM := resourceInstancePatchPartnerMetadata(d, currentPM)
 				instMap["partnerMetadata"] = patchedPM
 
@@ -4370,7 +4387,10 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 		opErr := ComputeOperationWaitTime(config, res, project, "instance to delete", userAgent, d.Timeout(schema.TimeoutDelete))
 		if opErr != nil {
 			// Refresh operation status via its selfLink
-			selfLink, _ := res["selfLink"].(string)
+			selfLink, ok := res["selfLink"].(string)
+			if !ok && res["selfLink"] != nil {
+				log.Printf("[WARN] resourceComputeInstanceDelete: unexpected type for selfLink: %T", res["selfLink"])
+			}
 			if selfLink == "" {
 				return opErr
 			}
@@ -4382,7 +4402,10 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 				UserAgent: userAgent,
 			})
 			// Do not return an error if the operation actually completed
-			opStatus, _ := opCheck["status"].(string)
+			opStatus, ok := opCheck["status"].(string)
+			if !ok && opCheck["status"] != nil {
+				log.Printf("[WARN] resourceComputeInstanceDelete: unexpected type for operation status: %T", opCheck["status"])
+			}
 			if opCheck == nil || opStatus != "DONE" {
 				return opErr
 			}
