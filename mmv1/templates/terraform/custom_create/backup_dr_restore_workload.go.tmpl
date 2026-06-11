@@ -95,6 +95,9 @@ if v, ok := d.GetOkExists("compute_instance_target_environment"); ok {
         if val, ok := m["zone"]; ok {
             env["zone"] = val.(string)
         }
+        if val, ok := m["use_project_service_account"]; ok {
+            env["useProjectServiceAccount"] = val.(bool)
+        }
         if len(env) > 0 {
             obj["computeInstanceTargetEnvironment"] = env
         }
@@ -112,6 +115,9 @@ if v, ok := d.GetOkExists("disk_target_environment"); ok {
         }
         if val, ok := m["zone"]; ok {
             env["zone"] = val.(string)
+        }
+        if val, ok := m["use_project_service_account"]; ok {
+            env["useProjectServiceAccount"] = val.(bool)
         }
         if len(env) > 0 {
             obj["diskTargetEnvironment"] = env
@@ -133,6 +139,9 @@ if v, ok := d.GetOkExists("region_disk_target_environment"); ok {
         }
         if zones, ok := m["replica_zones"]; ok {
             env["replicaZones"] = zones
+        }
+        if val, ok := m["use_project_service_account"]; ok {
+            env["useProjectServiceAccount"] = val.(bool)
         }
         if len(env) > 0 {
             obj["regionDiskTargetEnvironment"] = env
