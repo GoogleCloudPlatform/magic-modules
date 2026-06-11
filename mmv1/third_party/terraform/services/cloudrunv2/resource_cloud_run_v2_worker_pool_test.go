@@ -68,6 +68,8 @@ resource "google_cloud_run_v2_worker_pool" "default" {
     annotations = {
       generated-by = "magic-modules"
     }
+    client = "template-client"
+    client_version = "template-client-version"
     containers {
       name = "container-1"
       image = "us-docker.pkg.dev/cloudrun/container/worker-pool"
@@ -126,6 +128,8 @@ resource "google_cloud_run_v2_worker_pool" "default" {
     annotations = {
       generated-by = "magic-modules"
     }
+    client = "tempplate-client-update"
+    client_version = "template-client-version-update"
     containers {
       name = "container-update"
       image = "us-docker.pkg.dev/cloudrun/container/worker-pool"

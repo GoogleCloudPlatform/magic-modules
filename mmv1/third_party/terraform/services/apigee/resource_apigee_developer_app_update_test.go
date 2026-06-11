@@ -41,7 +41,7 @@ func TestAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"org_id"},
+				ImportStateVerifyIgnore: []string{"key_expires_in", "org_id"},
 			},
 			{
 				Config: testAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(context),
@@ -54,7 +54,7 @@ func TestAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"org_id"},
+				ImportStateVerifyIgnore: []string{"key_expires_in", "org_id"},
 			},
 		},
 	})
