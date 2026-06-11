@@ -39,6 +39,7 @@ examples:
   - name: scan_config_ignore_http_status_errors
     primary_resource_id: scan-config
     min_version: beta
+    external_providers: ["time"]
     vars:
       address_name: scan-ignore-http-ip
       scan_config_name: terraform-scan-config
