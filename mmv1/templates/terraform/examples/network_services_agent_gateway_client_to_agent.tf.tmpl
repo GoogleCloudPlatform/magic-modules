@@ -9,4 +9,11 @@ resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
   registries = [
     "//agentregistry.googleapis.com/projects/{{index $.TestEnvVars "project"}}/locations/us-central1"
   ]
+
+  depends_on = [google_project_service.agent_registry]
+}
+
+resource "google_project_service" "agent_registry" {
+  service            = "agentregistry.googleapis.com"
+  disable_on_destroy = false
 }

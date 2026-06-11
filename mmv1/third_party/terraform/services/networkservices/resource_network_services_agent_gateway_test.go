@@ -99,12 +99,19 @@ resource "google_network_services_agent_gateway" "default" {
       network_attachment = google_compute_network_attachment.default.id
     }
   }
+
+  depends_on = [google_project_service.agent_registry]
 }
 `, context) + testAccNetworkServicesAgentGateway_sharedNetworkResources(context)
 }
 
 func testAccNetworkServicesAgentGateway_sharedNetworkResources(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_project_service" "agent_registry" {
+  service            = "agentregistry.googleapis.com"
+  disable_on_destroy = false
+}
+
 resource "google_compute_network" "default" {
   name                    = "net-%{name}"
   auto_create_subnetworks = false
@@ -151,6 +158,8 @@ resource "google_network_services_agent_gateway" "default" {
       network_attachment = google_compute_network_attachment.default.id
     }
   }
+
+  depends_on = [google_project_service.agent_registry]
 }
 `, context) + testAccNetworkServicesAgentGateway_sharedNetworkResources(context)
 }
