@@ -111,7 +111,7 @@ properties:
       type: Enum
       enum_values:
         - 'MCP'
-    required: true
+    deprecation_message: '`protocols` is deprecated and will be removed in a future major release.'
   - name: 'googleManaged'
     immutable: true
     exactly_one_of:
