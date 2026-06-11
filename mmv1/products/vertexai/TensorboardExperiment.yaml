@@ -28,6 +28,7 @@ async:
     - delete
   result:
     resource_inside_response: true
+autogen_status: VGVuc29yYm9hcmRFeHBlcmltZW50QXV0b2dlblYyQWdlbnQ=
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
