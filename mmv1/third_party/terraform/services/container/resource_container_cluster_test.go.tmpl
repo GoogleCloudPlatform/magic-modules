@@ -18411,8 +18411,7 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "script" {
   name   = "script.sh"
   bucket = google_storage_bucket.bucket.name
-  content = "#!/bin/bash
-echo 'Hello World' > /tmp/hello.txt"
+  content = "#!/bin/bash\necho 'Hello World' > /tmp/hello.txt"
 }
 
 resource "google_container_cluster" "primary" {
@@ -18459,8 +18458,7 @@ resource "google_secret_manager_secret" "secret" {
 
 resource "google_secret_manager_secret_version" "version" {
   secret = google_secret_manager_secret.secret.id
-  secret_data = "#!/bin/bash
-echo 'Hello World' > /tmp/hello.txt"
+  secret_data = "#!/bin/bash\necho 'Hello World' > /tmp/hello.txt"
 }
 
 resource "google_secret_manager_secret_iam_member" "secret_accessor" {
@@ -18523,8 +18521,7 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "script" {
   name   = "script.sh"
   bucket = google_storage_bucket.bucket.name
-  content = "#!/bin/bash
-echo 'Hello World' > /tmp/hello.txt"
+  content = "#!/bin/bash\necho 'Hello World' > /tmp/hello.txt"
 }
 
 resource "google_secret_manager_secret" "secret" {
@@ -18536,8 +18533,7 @@ resource "google_secret_manager_secret" "secret" {
 
 resource "google_secret_manager_secret_version" "version" {
   secret = google_secret_manager_secret.secret.id
-  secret_data = "#!/bin/bash
-echo 'Hello World' > /tmp/hello.txt"
+  secret_data = "#!/bin/bash\necho 'Hello World' > /tmp/hello.txt"
 }
 
 resource "google_secret_manager_secret_iam_member" "secret_accessor" {
