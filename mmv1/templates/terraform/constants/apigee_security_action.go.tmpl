@@ -1,0 +1,35 @@
+// securityActionEnableDisable changes the state of a SecurityAction using the
+// dedicated :enable / :disable endpoints. The Apigee API does not allow `state`
+// to be modified through the PATCH updateMask, so state transitions must go
+// through these action endpoints instead.
+func securityActionEnableDisable(config *transport_tpg.Config, d *schema.ResourceData, billingProject, userAgent, desiredState string) error {
+	var action string
+	switch desiredState {
+	case "ENABLED":
+		action = "enable"
+	case "DISABLED":
+		action = "disable"
+	default:
+		return fmt.Errorf("unsupported security action state %q (must be ENABLED or DISABLED)", desiredState)
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ApigeeBasePath{{"}}"}}organizations/{{"{{"}}org_id{{"}}"}}/environments/{{"{{"}}env_id{{"}}"}}/securityActions/{{"{{"}}security_action_id{{"}}"}}:"+action)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Setting SecurityAction %q state via :%s", d.Id(), action)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      map[string]interface{}{},
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+	})
+	if err != nil {
+		return fmt.Errorf("Error setting SecurityAction %q state to %s: %s", d.Id(), desiredState, err)
+	}
+	return nil
+}
