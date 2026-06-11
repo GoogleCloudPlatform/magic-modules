@@ -153,62 +153,77 @@ func resourceTagsTagBindingCollectionUpsert(ctx context.Context, d *schema.Resou
 
 	location, resourceName, encodedResourceName := getTagBindingCollectionInfo(d)
 
-	// Step 1: Read current state
-	currentTags, currentEtag, err := getCurrentTagBindingCollectionState(config, userAgent, location, encodedResourceName)
-	if err != nil {
-		return diag.Errorf("error reading current state for upsert: %s", err)
-	}
-
-	// Step 2: Prepare PATCH object
-	obj := make(map[string]interface{})
-	obj["full_resource_name"] = resourceName
-	if currentEtag != "" {
-		obj["etag"] = currentEtag
-	}
-
 	configuredTags, diags := getStringMapFromSchema(d, "tags")
 	if diags != nil {
 		return diags
 	}
 
-	log.Printf("[DEBUG] Current Tags %#v", currentTags)
-	log.Printf("[DEBUG] Configured Tags %#v", configuredTags)
-
-	mergedTags := make(map[string]interface{})
-	for k, v := range currentTags {
-		mergedTags[k] = v
-	}
-	for k, v := range configuredTags {
-		// This will also overwrite the a key with value as configured in terraform, nullifying any updates to the same binding outside of terraform
-		mergedTags[k] = v
-	}
-
-	// Remove tags that were in the old state but not in the new config
-	if !d.IsNewResource() {
-		oldTagsIFace, _ := d.GetChange("tags")
-		oldTags, diags := convertInterfaceToStringMap(oldTagsIFace)
-		if diags != nil {
-			return diags
-		}
-		log.Printf("[DEBUG] Old Tags %#v", oldTags)
-		for k := range oldTags {
-			if _, existsInNewConfig := configuredTags[k]; !existsInNewConfig {
-				delete(mergedTags, k)
-			}
-		}
-	}
-	log.Printf("[DEBUG] Merged Tags %#v", mergedTags)
-	obj["tags"] = mergedTags
-
-	// Step 3: Write
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	opDesc := "Updating TagBindingCollection"
 	if d.IsNewResource() {
 		timeout = d.Timeout(schema.TimeoutCreate)
 		opDesc = "Creating TagBindingCollection"
 	}
-	if diags := patchTagBindingCollection(config, userAgent, d, location, encodedResourceName, obj, timeout, opDesc); diags != nil {
-		return diags
+
+	backoff := time.Second
+	for {
+		// Step 1: Read current state
+		currentTags, currentEtag, err := getCurrentTagBindingCollectionState(config, userAgent, location, encodedResourceName)
+		if err != nil {
+			return diag.Errorf("error reading current state for upsert: %s", err)
+		}
+
+		// Step 2: Prepare PATCH object
+		obj := make(map[string]interface{})
+		obj["full_resource_name"] = resourceName
+		if currentEtag != "" {
+			obj["etag"] = currentEtag
+		}
+
+		log.Printf("[DEBUG] Current Tags %#v", currentTags)
+		log.Printf("[DEBUG] Configured Tags %#v", configuredTags)
+
+		mergedTags := make(map[string]interface{})
+		for k, v := range currentTags {
+			mergedTags[k] = v
+		}
+		for k, v := range configuredTags {
+			// This will also overwrite the a key with value as configured in terraform, nullifying any updates to the same binding outside of terraform
+			mergedTags[k] = v
+		}
+
+		// Remove tags that were in the old state but not in the new config
+		if !d.IsNewResource() {
+			oldTagsIFace, _ := d.GetChange("tags")
+			oldTags, diags := convertInterfaceToStringMap(oldTagsIFace)
+			if diags != nil {
+				return diags
+			}
+			log.Printf("[DEBUG] Old Tags %#v", oldTags)
+			for k := range oldTags {
+				if _, existsInNewConfig := configuredTags[k]; !existsInNewConfig {
+					delete(mergedTags, k)
+				}
+			}
+		}
+		log.Printf("[DEBUG] Merged Tags %#v", mergedTags)
+		obj["tags"] = mergedTags
+
+		// Step 3: Write
+		err = patchTagBindingCollection(config, userAgent, d, location, encodedResourceName, obj, timeout, opDesc)
+		if err != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(err, 412) || transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+				log.Printf("[DEBUG] Concurrent ETag collision detected during %s, restarting read-modify-write cycle after %s", opDesc, backoff)
+				time.Sleep(backoff)
+				backoff = backoff * 2
+				if backoff > 30*time.Second {
+					return diag.Errorf("Error %s: Too many concurrent ETag modifications on parent %q. Final error: %s", opDesc, resourceName, err)
+				}
+				continue
+			}
+			return diag.Errorf("Error executing PATCH request for %s: %s", opDesc, err)
+		}
+		break
 	}
 
 	if d.IsNewResource() {
@@ -227,58 +242,69 @@ func resourceTagsTagBindingCollectionDelete(ctx context.Context, d *schema.Resou
 
 	location, resourceName, encodedResourceName := getTagBindingCollectionInfo(d)
 
-	// Step 1: Read current state
-	currentTags, currentEtag, err := getCurrentTagBindingCollectionState(config, userAgent, location, encodedResourceName)
-	if err != nil {
-		return diag.FromErr(transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("TagBindingCollection %q", resourceName)))
-	}
-
-	// Step 2. Get Terraform-managed old tags from state
+	// Step 1: Get Terraform-managed old tags from state
 	oldTagsIFace, _ := d.GetChange("tags")
 	oldTags, diags := convertInterfaceToStringMap(oldTagsIFace)
 	if diags != nil {
 		return diags
 	}
 
-	// Step 3. Compute the final set of tags for the PATCH request
-	// (Start with all current tags, then remove the ones TF managed)
-	finalTags := make(map[string]interface{})
-	for k, v := range currentTags {
-		finalTags[k] = v
-	}
-
-	hasTagsToDelete := false
-	for k := range oldTags {
-		// Check if the tag managed by Terraform is actually present on the resource.
-		if _, existsInCurrent := currentTags[k]; existsInCurrent {
-			// This will delete all the bindings managed by terraform, even if such bindings were updated outside of terraform as well
-			delete(finalTags, k)
-			hasTagsToDelete = true
-		}
-	}
-
-	if !hasTagsToDelete {
-		// This case can happen if tf state has no tags to manage.
-		log.Printf("[DEBUG] No Terraform-managed tags to remove for %s.", resourceName)
-		d.SetId("")
-		return nil
-	}
-
-	// Step 4. Send PATCH request to remove the TF-managed tags
-	obj := make(map[string]interface{})
-	obj["full_resource_name"] = resourceName
-	if currentEtag != "" {
-		obj["etag"] = currentEtag
-	}
-	obj["tags"] = finalTags
-
 	timeout := d.Timeout(schema.TimeoutDelete)
 	opDesc := "Deleting Terraform-managed tags"
-	if diags := patchTagBindingCollection(config, userAgent, d, location, encodedResourceName, obj, timeout, opDesc); diags != nil {
-		return diags
+	backoff := time.Second
+
+	for {
+		// Read current state
+		currentTags, currentEtag, err := getCurrentTagBindingCollectionState(config, userAgent, location, encodedResourceName)
+		if err != nil {
+			return diag.FromErr(transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("TagBindingCollection %q", resourceName)))
+		}
+
+		// Compute the final set of tags for the PATCH request
+		// (Start with all current tags, then remove the ones TF managed)
+		finalTags := make(map[string]interface{})
+		for k, v := range currentTags {
+			finalTags[k] = v
+		}
+
+		hasTagsToDelete := false
+		for k := range oldTags {
+			if _, existsInCurrent := currentTags[k]; existsInCurrent {
+				delete(finalTags, k)
+				hasTagsToDelete = true
+			}
+		}
+
+		if !hasTagsToDelete {
+			log.Printf("[DEBUG] No Terraform-managed tags to remove for %s.", resourceName)
+			d.SetId("")
+			return nil
+		}
+
+		// Send PATCH request
+		obj := make(map[string]interface{})
+		obj["full_resource_name"] = resourceName
+		if currentEtag != "" {
+			obj["etag"] = currentEtag
+		}
+		obj["tags"] = finalTags
+
+		err = patchTagBindingCollection(config, userAgent, d, location, encodedResourceName, obj, timeout, opDesc)
+		if err != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(err, 412) || transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+				log.Printf("[DEBUG] Concurrent ETag collision detected during %s, restarting read-modify-write cycle after %s", opDesc, backoff)
+				time.Sleep(backoff)
+				backoff = backoff * 2
+				if backoff > 30*time.Second {
+					return diag.Errorf("Error %s: Too many concurrent ETag modifications on parent %q. Final error: %s", opDesc, resourceName, err)
+				}
+				continue
+			}
+			return diag.Errorf("Error executing PATCH request for %s: %s", opDesc, err)
+		}
+		break
 	}
 
-	// Step 5. Clear Terraform state ID
 	d.SetId("")
 	log.Printf("[INFO] Successfully removed Terraform-managed tags for %s", resourceName)
 	return nil
@@ -316,10 +342,6 @@ func resourceTagsTagBindingCollectionImport(ctx context.Context, d *schema.Resou
     return []*schema.ResourceData{d}, nil
 }
 
-func flattenTagsTagBindingCollectionTags(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
 func getTagBindingCollectionInfo(d *schema.ResourceData) (location, resourceName, encodedResourceName string) {
 	location = d.Get("location").(string)
 	resourceName = d.Get("full_resource_name").(string)
@@ -329,6 +351,10 @@ func getTagBindingCollectionInfo(d *schema.ResourceData) (location, resourceName
 
 func buildTagBindingCollectionUrl(config *transport_tpg.Config, location, encodedResourceName string) string {
 	return fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+}
+
+func flattenTagsTagBindingCollectionTags(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
 }
 
 // Helper to fetch the current state of the TagBindingCollection from GCP
@@ -368,11 +394,11 @@ func getCurrentTagBindingCollectionState(config *transport_tpg.Config, userAgent
 }
 
 // Helper to send a PATCH request for TagBindingCollection and wait for the operation
-func patchTagBindingCollection(config *transport_tpg.Config, userAgent string, d *schema.ResourceData, location, encodedResourceName string, patchObj map[string]interface{}, timeout time.Duration, operationDesc string) diag.Diagnostics {
+func patchTagBindingCollection(config *transport_tpg.Config, userAgent string, d *schema.ResourceData, location, encodedResourceName string, patchObj map[string]interface{}, timeout time.Duration, operationDesc string) error {
 	patchUrl := buildTagBindingCollectionUrl(config, location, encodedResourceName)
 	patchUrl, err := transport_tpg.AddQueryParams(patchUrl, map[string]string{"updateMask": "*"})
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	billingProject := ""
@@ -393,20 +419,12 @@ func patchTagBindingCollection(config *transport_tpg.Config, userAgent string, d
 		Headers:   headers,
 	})
 	if err != nil {
-		if transport_tpg.IsGoogleApiErrorWithCode(err, 412) || transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
-			resourceName := d.Get("full_resource_name").(string)
-			return diag.Errorf("Concurrent modification detected for TagBindingCollection %q. The live resource was modified out of band or by another process during this update.\n\nTo prevent accidental clobbering, the update was aborted. Please re-run 'terraform apply' to automatically refresh the state and successfully merge your configuration.", resourceName)
-		}
-		return diag.Errorf("Error starting PATCH request for %s: %s", operationDesc, err)
+		return fmt.Errorf("error starting PATCH request for %s: %w", operationDesc, err)
 	}
 
 	err = TagsOperationWaitTime(config, initialOp, operationDesc, userAgent, timeout)
 	if err != nil {
-		if transport_tpg.IsGoogleApiErrorWithCode(err, 412) || transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
-			resourceName := d.Get("full_resource_name").(string)
-			return diag.Errorf("Concurrent modification detected for TagBindingCollection %q. The live resource was modified out of band or by another process during this update.\n\nTo prevent accidental clobbering, the update was aborted. Please re-run 'terraform apply' to automatically refresh the state and successfully merge your configuration.", resourceName)
-		}
-		return diag.FromErr(err)
+		return fmt.Errorf("error waiting for PATCH operation %s: %w", operationDesc, err)
 	}
 
 	log.Printf("[INFO] Successfully completed PATCH request for %s", operationDesc)
