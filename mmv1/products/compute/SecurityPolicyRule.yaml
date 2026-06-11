@@ -86,6 +86,14 @@ examples:
       # for backward compatible
       sec_policy_name: '"policyruletest" + randomSuffix'
       backend_name: '"backendpolicy" + randomSuffix'
+  - name: 'security_policy_rule_request_body_expression'
+    primary_resource_id: 'policy_rule'
+    min_version: 'beta'
+    vars:
+      sec_policy_name: 'policyruletest'
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policyruletest" + randomSuffix'
 parameters:
   - name: 'security_policy'
     type: String
