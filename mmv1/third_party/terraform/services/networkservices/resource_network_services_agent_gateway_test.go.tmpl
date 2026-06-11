@@ -88,6 +88,7 @@ resource "google_network_services_agent_gateway" "default" {
     tier = "silver"
   }
 
+  protocols = ["MCP"]
   google_managed {
     governed_access_path = "AGENT_TO_ANYWHERE"
   }
