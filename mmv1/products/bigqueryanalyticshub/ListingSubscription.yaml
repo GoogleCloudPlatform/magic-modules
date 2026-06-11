@@ -71,7 +71,6 @@ samples:
     region_override: US
     steps:
       - name: bigquery_analyticshub_listing_subscription_pubsub
-        config_path: templates/terraform/examples/bigquery_analyticshub_listing_subscription_pubsub.tf.tmpl
         resource_id_vars:
           data_exchange_id: my_data_exchange
           listing_id: my_listing
