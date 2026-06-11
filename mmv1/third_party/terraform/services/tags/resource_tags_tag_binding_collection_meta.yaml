@@ -1,8 +1,9 @@
 resource: 'google_tags_tag_binding_collection'
 generation_type: 'handwritten'
+min_version: 'beta'
 api_service_name: 'cloudresourcemanager.googleapis.com'
 api_version: 'v3'
-api_resource_type_kind: 'TagBinding'
+api_resource_type_kind: 'TagBindingCollection'
 cai_asset_name_formats:
 - '//cloudresourcemanager.googleapis.com/{{name}}'
 fields:
