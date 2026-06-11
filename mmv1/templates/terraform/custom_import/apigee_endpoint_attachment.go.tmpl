@@ -1,8 +1,12 @@
 config := meta.(*transport_tpg.Config)
 
-// current import_formats cannot import fields with forward slashes in their value
-if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
-	return nil, err
+// The import id is the fully-qualified resource name. Set it directly on the
+// `name` attribute instead of using tpgresource.ParseImportId with a
+// "(?P<name>.+)" regex: `name` is an output-only field and is not part of the
+// resource identity schema, so routing it through ParseImportId (which now also
+// populates the resource identity) panics with "Invalid address to set: name".
+if err := d.Set("name", d.Id()); err != nil {
+	return nil, fmt.Errorf("Error setting name: %s", err)
 }
 
 nameParts := strings.Split(d.Get("name").(string), "/")
