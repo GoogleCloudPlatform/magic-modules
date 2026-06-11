@@ -208,4 +208,3 @@ func TestAttachStandardFunctionality(t *testing.T) {
 		t.Errorf("Expected step.Vars['resource_name'] to be 'test-resource', got: %q (present=%t)", val, ok)
 	}
 }
-
