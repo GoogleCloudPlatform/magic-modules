@@ -554,17 +554,23 @@ properties:
                     - name: 'httpHeaders'
                       description: |-
                         Optional. Custom headers to set in the request. HTTP allows repeated headers.
-                      type: NestedObject
-                      properties:
-                        - name: 'port'
-                          required: true
-                          description: |-
-                            Required. The header field name
-                          type: Integer
-                        - name: 'value'
-                          description: |-
-                            Optional. The header field value
-                          type: String
+                      type: Array
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'port'
+                            description: |-
+                              Required. The header field name
+                            type: Integer
+                            deprecation_message: '`port` field is deprecated and will be removed in a future major release. It was never supported by the API.'
+                          - name: 'name'
+                            description: |-
+                              Required. The header field name
+                            type: String
+                          - name: 'value'
+                            description: |-
+                              Optional. The header field value
+                            type: String
                 - name: 'tcpSocket'
                   description: |-
                     Optional. TCPSocket specifies an action involving a TCP port. Exactly one of httpGet, tcpSocket, or grpc must be specified.
@@ -628,17 +634,23 @@ properties:
                     - name: 'httpHeaders'
                       description: |-
                         Optional. Custom headers to set in the request. HTTP allows repeated headers.
-                      type: NestedObject
-                      properties:
-                        - name: 'port'
-                          required: true
-                          description: |-
-                            Required. The header field name
-                          type: Integer
-                        - name: 'value'
-                          description: |-
-                            Optional. The header field value
-                          type: String
+                      type: Array
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'port'
+                            description: |-
+                              Required. The header field name
+                            type: Integer
+                            deprecation_message: '`port` field is deprecated and will be removed in a future major release. It was never supported by the API.'
+                          - name: 'name'
+                            description: |-
+                              Required. The header field name
+                            type: String
+                          - name: 'value'
+                            description: |-
+                              Optional. The header field value
+                            type: String
                 - name: 'tcpSocket'
                   description: |-
                     Optional. TCPSocket specifies an action involving a TCP port. Exactly one of httpGet, tcpSocket, or grpc must be specified.
