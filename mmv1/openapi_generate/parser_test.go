@@ -169,3 +169,42 @@ func TestReadOnlyPropagation(t *testing.T) {
 		}
 	}
 }
+
+func TestAttachStandardFunctionality(t *testing.T) {
+	resource := api.Resource{
+		Name:     "TestResource",
+		SelfLink: "test/self/link",
+	}
+
+	result := attachStandardFunctionality(resource)
+
+	if len(result.Examples) != 0 {
+		t.Errorf("Expected result.Examples to be empty, got: %d examples", len(result.Examples))
+	}
+
+	if len(result.Samples) != 1 {
+		t.Fatalf("Expected result.Samples to have length 1, got: %d", len(result.Samples))
+	}
+
+	sample := result.Samples[0]
+	if sample.Name != "name_of_sample_file" {
+		t.Errorf("Expected sample.Name to be 'name_of_sample_file', got: %q", sample.Name)
+	}
+
+	if sample.PrimaryResourceId != "example" {
+		t.Errorf("Expected sample.PrimaryResourceId to be 'example', got: %q", sample.PrimaryResourceId)
+	}
+
+	if len(sample.Steps) != 1 {
+		t.Fatalf("Expected sample.Steps to have length 1, got: %d", len(sample.Steps))
+	}
+
+	step := sample.Steps[0]
+	if step.Name != "name_of_sample_file" {
+		t.Errorf("Expected step.Name to be 'name_of_sample_file', got: %q", step.Name)
+	}
+
+	if val, ok := step.Vars["resource_name"]; !ok || val != "test-resource" {
+		t.Errorf("Expected step.Vars['resource_name'] to be 'test-resource', got: %q (present=%t)", val, ok)
+	}
+}
