@@ -30,9 +30,17 @@ func NewComputeInstanceCai2hclConverter(provider *schema.Provider) models.Cai2hc
 }
 
 // Convert converts asset to HCL resource blocks.
-func (c *ComputeInstanceCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ComputeInstanceCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) == 0 {
+		return nil, nil
+	}
+
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
+	}
+
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(asset)
+	block, err := c.convertResourceData(assets[0], options)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +48,7 @@ func (c *ComputeInstanceCai2hclConverter) Convert(asset caiasset.Asset) ([]*mode
 	return blocks, nil
 }
 
-func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Asset, options *models.ResourceConverterOptions) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -118,8 +126,14 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 	if err != nil {
 		return nil, err
 	}
+	var hclBlockName string
+	if options != nil && options.ResourceName != "" {
+		hclBlockName = options.ResourceName
+	} else {
+		hclBlockName = instanceName
+	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, instanceName},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }
@@ -351,7 +365,9 @@ func flattenDisksTgcNext(v interface{}, instanceName string) ([]map[string]inter
 		} else {
 			di := map[string]interface{}{
 				"device_name": disk["deviceName"],
-				"mode":        disk["mode"],
+			}
+			if mode, ok := disk["mode"].(string); ok && mode != "READ_WRITE" {
+				di["mode"] = mode
 			}
 			if source, ok := disk["source"].(string); ok && source != "" {
 				di["source"] = tpgresource.ConvertSelfLinkToV1(source)
@@ -455,8 +471,11 @@ func flattenScratchDiskTgcNext(v interface{}) map[string]interface{} {
 	if !ok {
 		return nil
 	}
-	result := map[string]interface{}{
-		"size": disk["diskSizeGb"],
+	result := map[string]interface{}{}
+	if size, ok := disk["diskSizeGb"].(float64); ok && int(size) != 375 {
+		result["size"] = int(size)
+	} else if size, ok := disk["diskSizeGb"].(int); ok && size != 375 {
+		result["size"] = size
 	}
 
 	if deviceName, ok := disk["deviceName"].(string); ok && !strings.Contains(deviceName, "persistent-disk-") {
@@ -532,7 +551,9 @@ func flattenSchedulingTgcNext(v interface{}) []map[string]interface{} {
 	}
 
 	if oisa, ok := resp["onInstanceStopAction"].(map[string]interface{}); ok && oisa != nil {
-		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopActionTgcNext(oisa)
+		if flattened := flattenOnInstanceStopActionTgcNext(oisa); flattened != nil {
+			schedulingMap["on_instance_stop_action"] = flattened
+		}
 	}
 
 	if lsrt, ok := resp["localSsdRecoveryTimeout"].(map[string]interface{}); ok && lsrt != nil {
@@ -587,11 +608,14 @@ func flattenOnInstanceStopActionTgcNext(v interface{}) []interface{} {
 	if !ok {
 		return nil
 	}
-	return []interface{}{
-		map[string]interface{}{
-			"discard_local_ssd": oisa["discardLocalSsd"],
-		},
+	res := make(map[string]interface{})
+	if discardLocalSsd, ok := oisa["discardLocalSsd"].(bool); ok && discardLocalSsd {
+		res["discard_local_ssd"] = true
 	}
+	if len(res) == 0 {
+		return nil
+	}
+	return []interface{}{res}
 }
 
 func flattenComputeLocalSsdRecoveryTimeoutTgcNext(v interface{}) []interface{} {
@@ -636,7 +660,7 @@ func flattenGuestAcceleratorsTgcNext(v interface{}) []map[string]interface{} {
 	return acceleratorsSchema
 }
 
-func flattenShieldedVmConfigTgcNext(v interface{}) []map[string]bool {
+func flattenShieldedVmConfigTgcNext(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -645,18 +669,21 @@ func flattenShieldedVmConfigTgcNext(v interface{}) []map[string]bool {
 		return nil
 	}
 
-	result := map[string]bool{}
-	if secureBoot, ok := shieldedVmConfig["enableSecureBoot"].(bool); ok {
-		result["enable_secure_boot"] = secureBoot
+	result := map[string]interface{}{}
+	if secureBoot, ok := shieldedVmConfig["enableSecureBoot"].(bool); ok && secureBoot {
+		result["enable_secure_boot"] = true
 	}
-	if vtpm, ok := shieldedVmConfig["enableVtpm"].(bool); ok {
-		result["enable_vtpm"] = vtpm
+	if vtpm, ok := shieldedVmConfig["enableVtpm"].(bool); ok && !vtpm {
+		result["enable_vtpm"] = false
 	}
-	if integrityMonitoring, ok := shieldedVmConfig["enableIntegrityMonitoring"].(bool); ok {
-		result["enable_integrity_monitoring"] = integrityMonitoring
+	if integrityMonitoring, ok := shieldedVmConfig["enableIntegrityMonitoring"].(bool); ok && !integrityMonitoring {
+		result["enable_integrity_monitoring"] = false
 	}
 
-	return []map[string]bool{result}
+	if len(result) == 0 {
+		return nil
+	}
+	return []map[string]interface{}{result}
 }
 
 func flattenEnableDisplayTgcNext(v interface{}) interface{} {

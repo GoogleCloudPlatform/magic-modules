@@ -13,6 +13,7 @@
 package api
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/fs"
 	"log"
@@ -1390,6 +1391,21 @@ func (r Resource) TerraformName() string {
 	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
 }
 
+func (r Resource) AutogenVersion() int {
+	if r.AutogenStatus == "" {
+		return 0
+	}
+	decodedBytes, err := base64.StdEncoding.DecodeString(r.AutogenStatus)
+	if err != nil {
+		return 1
+	}
+	decoded := string(decodedBytes)
+	if strings.HasSuffix(decoded, "AutogenV2Agent") {
+		return 2
+	}
+	return 1
+}
+
 func (r Resource) ImportIdFormatsFromResource() []string {
 	return ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)
 }
@@ -2100,23 +2116,23 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 	}
 }
 
-// TestServiceDependencies returns a map of service names to import aliases that are required
+// TestDependencies returns a map of service names to import aliases that are required
 // by this resource's samples.
-func (r Resource) TestServiceDependencies() map[string]string {
+func (r Resource) TestDependencies() map[string]string {
 	deps := map[string]string{}
 	for _, s := range r.TestSamples() {
-		for service, alias := range s.TestServiceDependencies(r.Runtime.ResourcePrefixServiceMap) {
-			if depsAlias, ok := deps[service]; ok && alias != depsAlias {
+		for pkg, alias := range s.TestDependencies(r.Runtime.ResourcePrefixPkgMap) {
+			if depsAlias, ok := deps[pkg]; ok && alias != depsAlias {
 				if (alias == "_" && depsAlias == "") || (alias == "" && depsAlias == "_") {
-					deps[service] = ""
+					deps[pkg] = ""
 					continue
 				}
-				log.Fatalf("Conflicting aliases (%s vs %s) for service dependency %s for resource %s", depsAlias, alias, service, r.ApiName)
+				log.Fatalf("Conflicting aliases (%s vs %s) for pkg dependency %s for resource %s", depsAlias, alias, pkg, r.ApiName)
 			}
-			deps[service] = alias
+			deps[pkg] = alias
 		}
 	}
-	delete(deps, strings.ToLower(r.ProductMetadata.Name))
+	delete(deps, "services/"+strings.ToLower(r.ProductMetadata.Name))
 	return deps
 }
 

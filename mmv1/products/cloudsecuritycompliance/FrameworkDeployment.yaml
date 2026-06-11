@@ -16,15 +16,23 @@ name: FrameworkDeployment
 description: Framework deployments represent the assignment of a framework to a target resource. Supported target resources are organizations, folders, and projects.
 references:
   api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworkDeployments
-base_url: organizations/{{organization}}/locations/{{location}}/frameworkDeployments
+base_url: '{{parent}}/locations/{{location}}/frameworkDeployments'
 immutable: true
-self_link: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
-create_url: organizations/{{organization}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}
-id_format: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
+self_link: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
+create_url: '{{parent}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}'
+id_format: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
 import_format:
-  - organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
+  - 'organizations/{{%organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
+  - "{{%parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}"
 examples:
-  - name: "cloudsecuritycompliance_framework_deployment_basic"
+  - name: "cloudsecuritycompliance_framework_deployment_org_basic"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment"
+      framework_name: "example-framework"
+    test_env_vars:
+      org_id: "ORG_ID"
+  - name: "cloudsecuritycompliance_framework_deployment_project_basic"
     primary_resource_id: "example"
     vars:
       deployment_name: "example-deployment"
@@ -48,6 +56,26 @@ examples:
     test_env_vars:
       org_id: "ORG_ID"
       billing_account: "BILLING_ACCT"
+  - name: "cloudsecuritycompliance_framework_deployment_org_project_basic"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment"
+      framework_name: "example-framework"
+    test_env_vars:
+      org_id: "ORG_ID"
+  - name: "cloudsecuritycompliance_framework_deployment_project_application_basic"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment"
+      framework_name: "example-framework"
+      app_name: "example-app"
+  - name: "cloudsecuritycompliance_framework_deployment_org_basic_backward"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment"
+      framework_name: "example-framework"
+    test_env_vars:
+      org_id: "ORG_ID"
 autogen_async: true
 async:
   operation:
@@ -62,20 +90,48 @@ async:
   result:
     resource_inside_response: true
   include_project: false
+identity_schema_version: 2
+identity_upgraders: true
 autogen_status: RnJhbWV3b3JrRGVwbG95bWVudA==
+custom_code:
+  custom_identity:
+    - parent
+  pre_create: "templates/terraform/pre_create/cloudsecuritycompliance_pre_create.go.tmpl"
+  pre_read: "templates/terraform/pre_read/cloudsecuritycompliance_pre_read.go.tmpl"
+  pre_update: "templates/terraform/pre_update/cloudsecuritycompliance_pre_update.go.tmpl"
+  pre_delete: "templates/terraform/pre_delete/cloudsecuritycompliance_pre_delete.go.tmpl"
+  post_import: "templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl"
+  custom_import: "templates/terraform/custom_import/cloudsecuritycompliance_framework_deployment.go.tmpl"
 parameters:
+  - name: parent
+    type: String
+    description: |
+      The parent resource in which to create the resource.
+      Must be in one of the following formats:
+      * `projects/{{project}}`
+      * `organizations/{{organization}}`
+    immutable: true
+    default_from_api: true
+    url_param_only: true
+    exactly_one_of:
+      - parent
+      - organization
   - name: organization
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: |
+      Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
+    default_from_api: true
+    deprecation_message: "Use `parent` instead."
+    exactly_one_of:
+      - parent
+      - organization
   - name: location
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
   - name: frameworkDeploymentId
     type: String
     description: |-
@@ -111,7 +167,7 @@ properties:
           type: String
           description: |-
             The name of the CloudControlDeployment. The format is:
-            organizations/{org}/locations/{location}/cloudControlDeployments/{cloud_control_deployment_id}
+            {parent}/locations/{location}/cloudControlDeployments/{cloud_control_deployment_id}
           output: true
   - name: cloudControlMetadata
     type: Array
@@ -136,8 +192,7 @@ properties:
               type: String
               description: |-
                 The name of the CloudControl in the format:
-                “organizations/{organization}/locations/{location}/
-                cloudControls/{cloud-control}”
+                "{parent}/locations/{location}/cloudControls/{cloud-control}"
               required: true
             - name: parameters
               type: Array
@@ -260,7 +315,7 @@ properties:
         type: String
         description: |-
           In the format:
-          organizations/{org}/locations/{location}/frameworks/{framework}
+          {parent}/locations/{location}/frameworks/{framework}
         required: true
       - name: majorRevisionId
         type: String
@@ -271,7 +326,7 @@ properties:
     type: String
     description: |-
       Identifier. FrameworkDeployment name in the following format:
-      organizations/{organization}/locations/{location}/frameworkDeployments/{framework_deployment_id}
+      {parent}/locations/{location}/frameworkDeployments/{framework_deployment_id}
     output: true
   - name: targetResourceConfig
     type: NestedObject
