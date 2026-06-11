@@ -240,6 +240,87 @@ func TestAccTagsTagBindingCollection_outOfBandUpdate(t *testing.T) {
 	})
 }
 
+func TestAccTagsTagBindingCollection_curatedAndDynamicMix(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	context := map[string]interface{}{
+		"org_id":                         orgId,
+		"curated_key_short":              "tf-test-cur-" + acctest.RandString(t, 6),
+		"curated_val_short":              "tf-test-cval-" + acctest.RandString(t, 6),
+		"dynamic_key_short":              "tf-test-dyn-" + acctest.RandString(t, 6),
+		"dynamic_bind_val":               "dynamic" + acctest.RandString(t, 4),
+		"project_id":                     "tf-test-" + acctest.RandString(t, 10),
+	}
+
+	curatedKeyNamespaced := fmt.Sprintf("%s/%s", orgId, context["curated_key_short"])
+	dynamicKeyNamespaced := fmt.Sprintf("%s/%s", orgId, context["dynamic_key_short"])
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create Collection with a mix of Curated and Dynamic Tag Bindings
+			{
+				Config: testAccTagsTagBindingCollection_mixConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.mix", "tags.%", "2"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.mix", "active_tags.%", "2"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.mix", fmt.Sprintf("tags.%s", curatedKeyNamespaced), context["curated_val_short"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.mix", fmt.Sprintf("tags.%s", dynamicKeyNamespaced), context["dynamic_bind_val"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.mix", fmt.Sprintf("active_tags.%s", curatedKeyNamespaced), context["curated_val_short"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.mix", fmt.Sprintf("active_tags.%s", dynamicKeyNamespaced), context["dynamic_bind_val"].(string)),
+				),
+			},
+		},
+	})
+}
+
+func TestAccTagsTagBindingCollection_restoration(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	context := map[string]interface{}{
+		"org_id":      orgId,
+		"project_id":  "tf-test-" + acctest.RandString(t, 10),
+		"key_short":   "tf-test-rest-" + acctest.RandString(t, 6),
+		"val_short":   "tf-test-rval-" + acctest.RandString(t, 6),
+	}
+
+	keyNamespaced := fmt.Sprintf("%s/%s", orgId, context["key_short"])
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create the collection managing 1 tag
+			{
+				Config: testAccTagsTagBindingCollection_restorationConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.rest", "tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.rest", fmt.Sprintf("tags.%s", keyNamespaced), context["val_short"].(string)),
+				),
+			},
+			// Step 2: Delete the tag binding externally out of band
+			{
+				Config: testAccTagsTagBindingCollection_restorationConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBindingDeletedExternally(t, context, keyNamespaced),
+				),
+			},
+			// Step 3: Run apply again, verify Terraform fully restores the deleted tag!
+			{
+				Config: testAccTagsTagBindingCollection_restorationConfig(context),
+				PlanOnly: false,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.rest", "tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.rest", fmt.Sprintf("tags.%s", keyNamespaced), context["val_short"].(string)),
+					testAccCheckBindingValueViaAPI(t, context, keyNamespaced, context["val_short"].(string)),
+				),
+			},
+		},
+	})
+}
+
 func testAccTagsTagBindingCollection_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
@@ -659,6 +740,57 @@ func testAccCheckBindingUpdatedExternally(t *testing.T, contextMap map[string]in
 	}
 }
 
+// testAccCheckBindingDeletedExternally performs the out-of-band API call to delete the TagBinding.
+func testAccCheckBindingDeletedExternally(t *testing.T, contextMap map[string]interface{}, keyNamespacedName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		projectResource, ok := s.RootModule().Resources["google_project.project"]
+		if !ok {
+			return fmt.Errorf("Resource 'google_project.project' not found in state")
+		}
+		projectNumber := projectResource.Primary.Attributes["number"]
+
+		resourceName := fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%s", projectNumber)
+		encodedResourceName := url.PathEscape(resourceName)
+		location := "global"
+
+		// 1. Get current TagBindingCollection to find Etag
+		apiURL := fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    apiURL,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("Error fetching parent TagBindingCollection before deletion: %v", err)
+		}
+
+		currentEtag := res["etag"].(string)
+
+		body := map[string]interface{}{
+			"full_resource_name": resourceName,
+			"etag":               currentEtag,
+			"tags":               make(map[string]interface{}),
+		}
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:  config,
+			Method:  "PATCH",
+			RawURL:  apiURL + "?updateMask=*",
+			Body:    body,
+			Headers: make(http.Header),
+		})
+
+		if err != nil {
+			return fmt.Errorf("Error deleting TagBindingCollection via API: %s", err)
+		}
+		t.Logf("Successfully deleted binding for %s externally via API", keyNamespacedName)
+		return nil
+	}
+}
+
 // testAccCheckBindingValueViaAPI checks the current TagValue for a key by calling the GET API.
 func testAccCheckBindingValueViaAPI(t *testing.T, contextMap map[string]interface{}, keyNamespacedName, expectedValueShortName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -840,6 +972,86 @@ resource "google_tags_tag_binding_collection" "location_default" {
   depends_on = [
     google_tags_tag_value.env_prod_value,
     google_tags_tag_value.cc_marketing_value,
+  ]
+}
+`, context)
+}
+
+func testAccTagsTagBindingCollection_mixConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  provider = google-beta 
+  project_id = "%{project_id}"
+  name       = "%{project_id}"
+  org_id     = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_tags_tag_key" "curated_key" {
+  provider = google-beta 
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{curated_key_short}"
+}
+resource "google_tags_tag_value" "curated_val" {
+  provider = google-beta 
+  parent      = google_tags_tag_key.curated_key.id
+  short_name  = "%{curated_val_short}"
+}
+
+resource "google_tags_tag_key" "dynamic_key" {
+  provider = google-beta 
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{dynamic_key_short}"
+  allowed_values_regex = "^[a-z0-9]+$"
+}
+
+resource "google_tags_tag_binding_collection" "mix" {
+  provider = google-beta 
+  full_resource_name    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  location  = "global"
+  tags      = {
+    "${google_tags_tag_key.curated_key.namespaced_name}" = google_tags_tag_value.curated_val.short_name
+    "${google_tags_tag_key.dynamic_key.namespaced_name}" = "%{dynamic_bind_val}"
+  }
+
+  depends_on = [
+    google_tags_tag_value.curated_val,
+  ]
+}
+`, context)
+}
+
+func testAccTagsTagBindingCollection_restorationConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  provider = google-beta 
+  project_id = "%{project_id}"
+  name       = "%{project_id}"
+  org_id     = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_tags_tag_key" "key" {
+  provider = google-beta 
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{key_short}"
+}
+resource "google_tags_tag_value" "val" {
+  provider = google-beta 
+  parent      = google_tags_tag_key.key.id
+  short_name  = "%{val_short}"
+}
+
+resource "google_tags_tag_binding_collection" "rest" {
+  provider = google-beta 
+  full_resource_name    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  location  = "global"
+  tags      = {
+    "${google_tags_tag_key.key.namespaced_name}" = google_tags_tag_value.val.short_name
+  }
+
+  depends_on = [
+    google_tags_tag_value.val,
   ]
 }
 `, context)
