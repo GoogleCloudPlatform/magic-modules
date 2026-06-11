@@ -174,8 +174,10 @@ samples:
         ignore_read_extra:
           - 'labels'
           - 'rollout_sequence_id'
+        include_step_doc: true
       - name: 'gke_hub_rollout_sequence_update'
         resource_id_vars:
           rollout_sequence_id: 'rs-basic'
         test_env_vars:
           project_id: 'PROJECT_NAME'
+        include_step_doc: true
