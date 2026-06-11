@@ -562,7 +562,7 @@ properties:
                             description: |-
                               Required. The header field name
                             type: Integer
-                            deprecation_message: '`port` field is not suppprted in API and was added by mistake.'
+                            deprecation_message: '`port` field is deprecated and will be removed in a future major release. It was never supported by the API.'
                           - name: 'name'
                             description: |-
                               Required. The header field name
@@ -642,7 +642,7 @@ properties:
                             description: |-
                               Required. The header field name
                             type: Integer
-                            deprecation_message: '`port` field is not suppprted in API and was added by mistake.'
+                            deprecation_message: '`port` field is deprecated and will be removed in a future major release. It was never supported by the API.'
                           - name: 'name'
                             description: |-
                               Required. The header field name
