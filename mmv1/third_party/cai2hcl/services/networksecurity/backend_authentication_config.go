@@ -3,8 +3,9 @@ package networksecurity
 import (
 	"errors"
 	"fmt"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/cai2hcl/common"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/caiasset"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/caiasset"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 

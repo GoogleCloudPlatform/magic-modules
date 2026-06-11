@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networksecurity"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -71,6 +72,50 @@ resource "google_network_security_firewall_endpoint" "foobar" {
   parent   = "organizations/%[2]s"
   location = "us-central1-a"
   billing_project_id = "%[3]s"
+
+  labels = {
+    foo = "bar-updated"
+  }
+}
+`, randomSuffix, orgId, billingProjectId)
+}
+
+func TestAccNetworkSecurityFirewallEndpoints_enableJumboFrames(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	billingProjectId := envvar.GetTestProjectFromEnv()
+	orgId := envvar.GetTestOrgFromEnv(t)
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkSecurityFirewallEndpoints_enableJumboFrames(orgId, billingProjectId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkSecurityFirewallEndpoints_enableJumboFrames(orgId string, billingProjectId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_firewall_endpoint" "foobar" {
+  name     = "tf-test-my-firewall-endpoint%[1]s"
+  parent   = "organizations/%[2]s"
+  location = "us-central1-a"
+  billing_project_id = "%[3]s"
+  endpoint_settings {
+    jumbo_frames_enabled = true
+  }
 
   labels = {
     foo = "bar-updated"

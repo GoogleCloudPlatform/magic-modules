@@ -11,25 +11,59 @@
 	limitations under the License.
 */ -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (interface{}) {
-  var headers = v.(map[string]interface{})
+  if v == nil {
+    return nil
+  }
+  headers, ok := v.(map[string]interface{})
+  if !ok {
+    return nil
+  }
   if v, ok := headers["User-Agent"]; ok {
-    if v.(string) == "AppEngine-Google; (+http://code.google.com/appengine)" {
-      delete(headers, "User-Agent")
-    } else if v.(string) == "Google-Cloud-Scheduler" {
-      delete(headers, "User-Agent")
-    } else {
-      headers["User-Agent"] = strings.TrimSpace(strings.Replace(v.(string), "AppEngine-Google; (+http://code.google.com/appengine)","", -1))
+    if userAgent, ok := v.(string); ok {
+      if userAgent == "AppEngine-Google; (+http://code.google.com/appengine)" {
+        delete(headers, "User-Agent")
+      } else if userAgent == "Google-Cloud-Scheduler" {
+        delete(headers, "User-Agent")
+      } else {
+        headers["User-Agent"] = strings.TrimSpace(strings.Replace(userAgent, "AppEngine-Google; (+http://code.google.com/appengine)","", -1))
+      }
     }
   }
   if v, ok := headers["Content-Type"]; ok {
-    if v.(string) == "application/octet-stream" {
-      delete(headers, "Content-Type")
+    if contentType, ok := v.(string); ok {
+      if contentType == "application/octet-stream" {
+        delete(headers, "Content-Type")
+      }
     }
   }
   r := regexp.MustCompile(`(X-Google-|X-AppEngine-|Content-Length).*`)
-  for key := range headers { 
+  for key := range headers {
     if r.MatchString(key) {
       delete(headers, key)
+    }
+  }
+  // The Cloud Scheduler API injects an `Authorization` header on read whenever
+  // `oidc_token` or `oauth_token` is configured on the http_target, even though
+  // it is not part of the user-supplied `headers` map. Leaving it in state
+  // causes perpetual drift against the configuration. Strip it only when one
+  // of the token blocks is set, so users who legitimately send a literal
+  // `Authorization` header (without token auth) are not affected.
+  //
+  // Note: this template is also used for `app_engine_http_target.headers`,
+  // which has no `oidc_token` / `oauth_token` siblings — the d.Get() lookups
+  // below return zero-valued counts in that case, so the Authorization key is
+  // preserved as-is for App Engine targets.
+  if d != nil {
+    oidcSet := false
+    oauthSet := false
+    if v, ok := d.Get("http_target.0.oidc_token.#").(int); ok && v > 0 {
+      oidcSet = true
+    }
+    if v, ok := d.Get("http_target.0.oauth_token.#").(int); ok && v > 0 {
+      oauthSet = true
+    }
+    if oidcSet || oauthSet {
+      delete(headers, "Authorization")
     }
   }
 	return headers

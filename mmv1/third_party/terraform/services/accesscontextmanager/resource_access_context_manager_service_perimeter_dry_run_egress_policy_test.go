@@ -2,22 +2,89 @@ package accesscontextmanager_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/accesscontextmanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
+
+var SharedServicePerimeterProjectPrefix = "tf-bootstrap-sp-"
+
+func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*cloudresourcemanager.Project {
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return nil
+	}
+
+	org := envvar.GetTestOrgFromEnv(t)
+
+	// The filter endpoint works differently if you provide both the parent id and parent type, and
+	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
+	// that API behavior changes.
+	prefixFilter := fmt.Sprintf("id:%s* parent.id:%s", SharedServicePerimeterProjectPrefix, org)
+	res, err := rmClient.NewClient(config, config.UserAgent).Projects.List().Filter(prefixFilter).Do()
+	if err != nil {
+		t.Fatalf("Error getting shared test projects: %s", err)
+	}
+
+	projects := res.Projects
+	for len(projects) < desiredProjects {
+		pid := SharedServicePerimeterProjectPrefix + acctest.RandString(t, 10)
+		project := &cloudresourcemanager.Project{
+			ProjectId: pid,
+			Name:      "TF Service Perimeter Test",
+			Parent: &cloudresourcemanager.ResourceId{
+				Type: "organization",
+				Id:   org,
+			},
+		}
+		op, err := rmClient.NewClient(config, config.UserAgent).Projects.Create(project).Do()
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		opAsMap, err := tpgresource.ConvertToMap(op)
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		err = resourcemanager.ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 4)
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		p, err := rmClient.NewClient(config, config.UserAgent).Projects.Get(pid).Do()
+		if err != nil {
+			t.Fatalf("Error getting shared test project: %s", err)
+		}
+		projects = append(projects, p)
+	}
+
+	return projects
+}
 
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
 func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basicTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
-	//projects := acctest.BootstrapServicePerimeterProjects(t, 1)
+	//projects := BootstrapServicePerimeterProjects(t, 1)
+
+	// Bootstrap a service account to use as egress from identity
+	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
+	serviceAccount := iambeta.BootstrapServiceAccount(t, "acm-egress-1", initialServiceAccount)
+
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "perimeter"
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
@@ -27,7 +94,7 @@ func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basicTest(t *
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basic(org, policyTitle, perimeterTitle, projectNumber),
+				Config: testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basic(org, policyTitle, perimeterTitle, projectNumber, serviceAccount),
 			},
 			{
 				Config: testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitle),
@@ -46,7 +113,7 @@ func testAccCheckAccessContextManagerServicePerimeterDryRunEgressPolicyDestroyPr
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{perimeter}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(accesscontextmanager.Product, config)+"{{perimeter}}")
 			if err != nil {
 				return err
 			}
@@ -84,7 +151,7 @@ func testAccCheckAccessContextManagerServicePerimeterDryRunEgressPolicyDestroyPr
 	}
 }
 
-func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basic(org, policyTitle, perimeterTitleName, projectNumber string) string {
+func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basic(org, policyTitle, perimeterTitleName, projectNumber, serviceAccount string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -131,7 +198,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 		resources = ["*"]
 		roles = ["roles/bigquery.admin"]
 	}
-  	depends_on = [google_access_context_manager_service_perimeter_dry_run_egress_policy.test-access1]
+	depends_on = [google_access_context_manager_service_perimeter_dry_run_egress_policy.test-access1]
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "test-access3" {
@@ -142,9 +209,27 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 		}
 		source_restriction = "SOURCE_RESTRICTION_ENABLED"
 	}
+	depends_on = [google_access_context_manager_service_perimeter_dry_run_egress_policy.test-access2]
 }
 
-`, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber)
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "test-identity1" {
+  perimeter = google_access_context_manager_service_perimeter.test-access.name
+	egress_from {
+		identities = ["serviceAccount:%s"]
+	}
+	egress_to {
+	  operations {
+			service_name = "storage.googleapis.com"
+			method_selectors {
+				method = "*"
+			}
+		}
+	}
+	depends_on = [google_access_context_manager_service_perimeter_dry_run_egress_policy.test-access3]
+}
+
+`, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber, strings.ToUpper(serviceAccount))
+	// Using an uppercase service account to test normalization of IAM principal casing
 }
 
 func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {

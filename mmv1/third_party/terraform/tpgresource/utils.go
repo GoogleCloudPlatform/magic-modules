@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/url"
 	"reflect"
 	"regexp"
@@ -16,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
@@ -40,9 +42,11 @@ type TerraformResourceData interface {
 	GetOkExists(string) (interface{}, bool)
 	GetOk(string) (interface{}, bool)
 	Get(string) interface{}
+	GetRawConfig() cty.Value
 	Set(string, interface{}) error
 	SetId(string)
 	Id() string
+	Identity() (*schema.IdentityData, error)
 	GetProviderMeta(interface{}) error
 	Timeout(key string) time.Duration
 }
@@ -55,6 +59,8 @@ type TerraformResourceDiff interface {
 	Clear(string) error
 	ForceNew(string) error
 	SetNew(string, interface{}) error
+	GetChangedKeysPrefix(string) []string
+	GetRawConfig() cty.Value
 }
 
 // Contains functions that don't really belong anywhere else.
@@ -150,6 +156,88 @@ func GetZoneFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (stri
 	return "", fmt.Errorf("%s: required field is not set", "zone")
 }
 
+// getDeletionPolicyFromDiff reads the "deletion_policy" field from the given diff and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetDeletionPolicyFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config, resourceDefault string) (string, error) {
+	//if IsNull() value, then the value has not been manually configured
+	if d.GetRawConfig().GetAttr("deletion_policy").IsNull() {
+		if config.DeletionPolicy != "" {
+			log.Printf("[DEBUG] `deletion_policy` detected as not set within resource configuration. Falling back to configured provider default, %s", config.DeletionPolicy)
+			return config.DeletionPolicy, nil
+		}
+		//return the provided resource default as the final backup
+		log.Printf("[DEBUG] `deletion_policy` detected as not set within resource or provider configuration. Falling back to resource default, %s", resourceDefault)
+		return resourceDefault, nil
+	}
+	//if not null, then use/maintain usage of manually configured value
+	//
+	//this has to happen after a check for the null is made,
+	//as "GetOk" will always return a value once the resource is set, preventing changes
+	res, ok := d.GetOk("deletion_policy")
+	if ok {
+		return res.(string), nil
+	}
+	return "", fmt.Errorf("An error has occured during %s configuration. Please report this issue to the provider developers.", "`deletion_policy`")
+}
+
+func DeletionPolicySchemaEntry(resourceDefault string) *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+		Description: fmt.Sprintf(`Whether Terraform will be prevented from destroying the instance. Defaults to "%s".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`, resourceDefault),
+	}
+}
+
+func DeletionPolicyReadDefault(d *schema.ResourceData, config *transport_tpg.Config, resourceDefault string) error {
+	if _, ok := d.GetOkExists("deletion_policy"); !ok {
+		//prioritize config's value if present
+		if config.DeletionPolicy != "" {
+			if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
+				return fmt.Errorf("Error setting deletion_policy: %s", err)
+			}
+		} else {
+			if err := d.Set("deletion_policy", resourceDefault); err != nil {
+				return fmt.Errorf("Error setting deletion_policy: %s", err)
+			}
+		}
+	}
+	return nil
+}
+
+func DeletionPolicyPreUpdate(d *schema.ResourceData, resourceSchema func() *schema.Resource) bool {
+	clientSideFields := map[string]bool{"deletion_policy": true}
+	clientSideOnly := true
+	for field := range resourceSchema().Schema {
+		if d.HasChange(field) && !clientSideFields[field] {
+			return false
+		}
+	}
+	if clientSideOnly {
+		log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
+		return true
+	}
+	return false
+}
+
+func DeletionPolicyPreDelete(d *schema.ResourceData) (bool, error) {
+	if d.Get("deletion_policy").(string) == "PREVENT" {
+		return true, fmt.Errorf("cannot destroy %q without setting deletion_policy=\"DELETE\" and running `terraform apply`", d.Id())
+	}
+	if d.Get("deletion_policy").(string) == "ABANDON" {
+		log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing %q from Terraform state without deletion", d.Id())
+		return true, nil
+	}
+	return false, nil
+}
+
 func GetRouterLockName(region string, router string) string {
 	return fmt.Sprintf("router/%s/%s", region, router)
 }
@@ -193,6 +281,11 @@ func IsConflictError(err error) bool {
 	} else if !ok && errwrap.ContainsType(err, &googleapi.Error{}) {
 		e := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
 		if e.Code == 409 || e.Code == 412 {
+			return true
+		}
+	} else if gErr := (*googleapi.Error)(nil); errors.As(err, &gErr) {
+		// For cases where the error is not wrapped by errwrap such in 409 IAM concurrency errors.
+		if gErr.Code == 409 || gErr.Code == 412 {
 			return true
 		}
 	}
@@ -519,19 +612,6 @@ func PaginatedListRequest(project, baseUrl, userAgent string, config *transport_
 	return ls, nil
 }
 
-func GetInterconnectAttachmentLink(config *transport_tpg.Config, project, region, ic, userAgent string) (string, error) {
-	if !strings.Contains(ic, "/") {
-		icData, err := config.NewComputeClient(userAgent).InterconnectAttachments.Get(
-			project, region, ic).Do()
-		if err != nil {
-			return "", fmt.Errorf("Error reading interconnect attachment: %s", err)
-		}
-		ic = icData.SelfLink
-	}
-
-	return ic, nil
-}
-
 // Given two sets of references (with "from" values in self link form),
 // determine which need to be added or removed // during an update using
 // addX/removeX APIs.
@@ -814,7 +894,12 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 
 		// terraform-google-conversion doesn't provide a provider config in tests.
 		if config != nil {
-			// Attempt to draw values from the provider config if it's present.
+			// Draw base path values from the provider config. For other config fields, fall back to reflection.
+			if pName, found := strings.CutSuffix(m, "BasePath"); found {
+				// the field will look like ComputeBasePath, but the product name will be like compute (just lowercase, no underscores)
+				p := registry.GetProduct(strings.ToLower(pName))
+				return transport_tpg.BaseUrl(p, config)
+			}
 			if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
 				return f.String()
 			}
@@ -900,6 +985,20 @@ func DefaultProviderZone(_ context.Context, diff *schema.ResourceDiff, meta inte
 	return nil
 }
 
+func DefaultProviderDeletionPolicy(resourceDefault string) schema.CustomizeDiffFunc {
+	return func(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+		config := meta.(*transport_tpg.Config)
+		if dpolicy := diff.Get("deletion_policy"); dpolicy != nil {
+			dpolicy, err := GetDeletionPolicyFromDiff(diff, config, resourceDefault)
+			err = diff.SetNew("deletion_policy", dpolicy)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+}
+
 // id.UniqueId() returns a timestamp + incremental hash
 // This function truncates the timestamp to provide a prefix + 9 using
 // YYmmdd + last 3 digits of the incremental hash
@@ -911,4 +1010,120 @@ func ReducedPrefixedUniqueId(prefix string) string {
 	// YYmmdd of date
 	date := uniqueId[2:8]
 	return prefix + date + counter
+}
+
+// GetRawConfigAttributeAsString retrieves an attribute directly from the raw config
+// This is useful for retrieving values that are not directly accessible via the
+// standard schema.ResourceData.Get method, such as write-only attributes.
+func GetRawConfigAttributeAsString(d *schema.ResourceData, key string) string {
+	// see https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments#retrieving-write-only-values
+	parts := strings.Split(key, ".")
+
+	var path cty.Path
+	if len(parts) > 0 {
+		path = cty.GetAttrPath(parts[0])
+	}
+
+	for i := 1; i < len(parts); i++ {
+		part := parts[i]
+
+		if index, err := strconv.Atoi(part); err == nil {
+			path = path.IndexInt(index)
+		} else {
+			path = path.GetAttr(part)
+		}
+	}
+
+	woCty, diags := d.GetRawConfigAt(path)
+	if len(diags) == 0 && !woCty.IsNull() && woCty.Type().Equals(cty.String) {
+		return woCty.AsString()
+	}
+
+	return ""
+}
+
+// IamPrincipalIsCaseSensitive returns true if the type of the IAM Principal is case sensitive
+func IamPrincipalIsCaseSensitive(principal string) bool {
+	// allAuthenticatedUsers and allUsers are special identifiers that are case sensitive. See:
+	// https://cloud.google.com/iam/docs/overview#all-authenticated-users
+	return strings.Contains(principal, "allAuthenticatedUsers") || strings.Contains(principal, "allUsers") ||
+		strings.HasPrefix(principal, "principalSet:") || strings.HasPrefix(principal, "principal:") ||
+		strings.HasPrefix(principal, "principalHierarchy:")
+}
+
+// NormalizeIamPrincipalCasing returns the case adjusted value of an IAM Principal
+// this is important as APIs will ignore casing unless it is one of the following
+// member types: principalSet, principal, principalHierarchy
+// members are in <type>:<value> format
+// <type> is case sensitive
+// <value> isn't in most cases
+// so lowercase the value unless IamPrincipalIsCaseSensitive and leave the type alone
+// since Dec '19 members can be prefixed with "deleted:" to indicate the principal
+// has been deleted
+func NormalizeIamPrincipalCasing(principal string) string {
+	var pieces []string
+	if strings.HasPrefix(principal, "deleted:") {
+		pieces = strings.SplitN(principal, ":", 3)
+		if len(pieces) > 2 && !IamPrincipalIsCaseSensitive(strings.TrimPrefix(principal, "deleted:")) {
+			pieces[2] = strings.ToLower(pieces[2])
+		}
+	} else if strings.HasPrefix(principal, "iamMember:") {
+		pieces = strings.SplitN(principal, ":", 3)
+		if len(pieces) > 2 && !IamPrincipalIsCaseSensitive(strings.TrimPrefix(principal, "iamMember:")) {
+			pieces[2] = strings.ToLower(pieces[2])
+		}
+	} else if !IamPrincipalIsCaseSensitive(principal) {
+		pieces = strings.SplitN(principal, ":", 2)
+		if len(pieces) > 1 {
+			pieces[1] = strings.ToLower(pieces[1])
+		}
+	}
+
+	if len(pieces) > 0 {
+		principal = strings.Join(pieces, ":")
+	}
+	return principal
+}
+
+// hash based normalized IP addresses in CIDR notation
+func IpAddrSetHashFunc(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+
+	m := v.(string)
+	log.Printf("[DEBUG] hashing %v", m)
+	_, ipnet, err := net.ParseCIDR(m)
+	if err != nil {
+		//if invalid cidr, hash based on the direct value without standardizing.
+		return Hashcode(m)
+	}
+	log.Printf("[DEBUG] computed hash value of %v from %v", Hashcode(ipnet.String()), ipnet.String())
+	return Hashcode(ipnet.String())
+}
+
+func LocationFromId(id string) string {
+	re := regexp.MustCompile(`/locations/([^/]+)/`)
+
+	match := re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+	re = regexp.MustCompile(`/regions/([^/]+)/`)
+
+	match = re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+
+	re = regexp.MustCompile(`/zones/([^/]+)/`)
+
+	match = re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return GetRegionFromZone(match[1])
+	}
+	return ""
 }

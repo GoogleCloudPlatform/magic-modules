@@ -76,10 +76,7 @@ properties:
       Note that there are add-members and remove-members methods in gcloud.
       The size of this map is limited by an "Attachments per group" quota.
     key_name: 'name'
-    key_description: |
-      Resource name
     value_type:
-      name: mapObjectName
       type: NestedObject
       properties:
         - name: 'attachment'
@@ -172,6 +169,16 @@ properties:
                                   Interconnects.
                                 output: true
                               - name: 'attachment'
+                                type: Array
+                                description: |
+                                  URLs of Attachments in the given zone, to the given
+                                  region, on Interconnects in the given facility and metro. Every
+                                  Attachment in the AG has such an entry.
+                                output: true
+                                deprecation_message: '`attachment` is deprecated and will be removed in a future major release. Use `attachments` instead.'
+                                item_type:
+                                  type: String
+                              - name: 'attachments'
                                 type: Array
                                 description: |
                                   URLs of Attachments in the given zone, to the given

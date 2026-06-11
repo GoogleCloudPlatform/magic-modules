@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storageinsights"
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -220,6 +221,7 @@ resource "google_storage_insights_dataset_config" "config" {
   location = "us-central1"
   dataset_config_id = "tf_test_my_config%{random_suffix}"
   retention_period_days = 1
+  activity_data_retention_period_days = 2
   source_folders {
     folder_numbers = ["123", "456"]
   }
@@ -236,6 +238,7 @@ resource "google_storage_insights_dataset_config" "config" {
   location = "us-central1"
   dataset_config_id = "tf_test_my_config%{random_suffix}"
   retention_period_days = 1
+  activity_data_retention_period_days = 0
   organization_scope = true
   identity {
     type = "IDENTITY_TYPE_PER_CONFIG"

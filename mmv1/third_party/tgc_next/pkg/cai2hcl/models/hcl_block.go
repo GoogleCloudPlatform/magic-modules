@@ -19,9 +19,6 @@ func HclWriteBlocks(blocks []*TerraformResourceBlock) ([]byte, error) {
 
 	for _, resourceBlock := range blocks {
 		hclBlock := rootBody.AppendNewBlock("resource", resourceBlock.Labels)
-		resourceBody := hclBlock.Body()
-		resourceBody.SetAttributeRaw("provider", hclwrite.TokensForIdentifier("google-beta"))
-
 		if err := hclWriteBlock(resourceBlock.Value, hclBlock.Body()); err != nil {
 			return nil, err
 		}
@@ -51,9 +48,6 @@ func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
 				return err
 			}
 		case objValType.IsCollectionType():
-			if objVal.LengthInt() == 0 && !objValType.IsSetType() {
-				continue
-			}
 			// Presumes map should not contain object type.
 			if !objValType.IsMapType() && objValType.ElementType().IsObjectType() {
 				listIterator := objVal.ElementIterator()
@@ -68,9 +62,6 @@ func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
 			}
 			fallthrough
 		default:
-			if objValType.FriendlyName() == "string" && objVal.AsString() == "" {
-				continue
-			}
 			body.SetAttributeValue(objKey.AsString(), objVal)
 		}
 	}

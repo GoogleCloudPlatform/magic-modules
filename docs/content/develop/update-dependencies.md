@@ -1,6 +1,8 @@
 ---
 title: "Update dependencies"
 weight: 90
+params:
+  bookToC: true
 aliases:
   - /docs/update-dependencies
 ---
@@ -12,9 +14,9 @@ The Magic Modules repository does not contain a complete Go module, preventing t
 Below are the steps you can follow to make the change:
 
 1. Navigate to the local `google` provider directory:
-```bash
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-``` 
+   ```bash
+   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+   ``` 
 2. Open the [`go.mod`](https://github.com/hashicorp/terraform-provider-google/blob/main/go.mod) file and add the new entries or modify the versions of existing entries as needed
 3. Update dependencies using either of the following methods
    * run the following commands to update all dependencies: 
@@ -27,7 +29,7 @@ cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
    go get google.golang.org/api@v0.105.0 
    go mod tidy
    ```
-4. Copy the contents of the updated `go.mod` and `go.sum` file into [`mmv1/third_party/terraform/go.mod`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.mod.erb) and [`mmv1/third_party/terraform/go.sum`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.sum) in the `magic-modules` respectively.
+4. Copy the contents of the updated `go.mod` and `go.sum` file into [`mmv1/third_party/terraform/go.mod`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.mod) and [`mmv1/third_party/terraform/go.sum`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.sum) in the `magic-modules` respectively.
 5. Create a pull request containing _only_ the dependency changes.
 6. Resolve any errors caused by the dependency upgrade.
 7. After the dependency pull request is merged, continue with a separate pull request for any additional changes that were blocked by the upgrade.

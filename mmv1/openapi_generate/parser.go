@@ -16,6 +16,7 @@
 package openapi_generate
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -25,6 +26,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 
 	"log"
@@ -34,8 +36,13 @@ import (
 	r "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/getkin/kin-openapi/openapi3"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
+
+	_ "embed"
 )
+
+//go:embed header.txt
+var header []byte
 
 type Parser struct {
 	Folder string
@@ -45,7 +52,7 @@ type Parser struct {
 func NewOpenapiParser(folder, output string) Parser {
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 	}
 
 	parser := Parser{
@@ -59,13 +66,13 @@ func NewOpenapiParser(folder, output string) Parser {
 func (parser Parser) Run() {
 	f, err := os.Open(parser.Folder)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 		return
 	}
 	defer f.Close()
 	files, err := f.Readdirnames(0)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 	}
 
 	// check if folder is empty
@@ -86,65 +93,122 @@ func (parser Parser) WriteYaml(filePath string) {
 	doc, _ := loader.LoadFromFile(filePath)
 	_ = doc.Validate(ctx)
 
-	header, err := os.ReadFile("openapi_generate/header.txt")
-	if err != nil {
-		log.Fatalf("error reading header %v", err)
-	}
-
-	resourcePaths := findResources(doc)
+	resources := findResources(doc)
 	productPath := buildProduct(filePath, parser.Output, doc, header)
 
-	// Disables line wrap for long strings
-	yaml.FutureLineWrap()
 	log.Printf("Generated product %+v/product.yaml", productPath)
-	for _, pathArray := range resourcePaths {
-		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
+	for name, resource := range resources {
+		if resource.create == nil {
+			if resource.update == nil {
+				continue
+			}
+			singleton := buildSingleton(name, resource, doc)
 
-		// marshal method
-		resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s.yaml", resource.Name))
-		bytes, err := yaml.Marshal(resource)
-		if err != nil {
-			log.Fatalf("error marshalling yaml %v: %v", resourceOutPathMarshal, err)
-		}
+			parser.writeResource(singleton, productPath)
+		} else {
+			resource := buildResource(name, resource, doc)
 
-		f, err := os.Create(resourceOutPathMarshal)
-		if err != nil {
-			log.Fatalf("error creating resource file %v", err)
+			parser.writeResource(resource, productPath)
 		}
-		_, err = f.Write(header)
-		if err != nil {
-			log.Fatalf("error writing resource file header %v", err)
-		}
-		_, err = f.Write(bytes)
-		if err != nil {
-			log.Fatalf("error writing resource file %v", err)
-		}
-		err = f.Close()
-		if err != nil {
-			log.Fatalf("error closing resource file %v", err)
-		}
-		log.Printf("Generated resource %s", resourceOutPathMarshal)
 	}
 }
 
-func findResources(doc *openapi3.T) [][]string {
-	var resourcePaths [][]string
+func (parser Parser) writeResource(resource api.Resource, productPath string) {
+	// marshal method
+	var yamlContent bytes.Buffer
+	resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s.yaml", resource.Name))
+	encoder := yaml.NewEncoder(&yamlContent)
+	encoder.SetIndent(2)
 
-	pathMap := doc.Paths.Map()
-	for key, pathValue := range pathMap {
-		if pathValue.Post == nil {
-			continue
+	err := encoder.Encode(&resource)
+	if err != nil {
+		log.Fatalf("Failed to encode: %v", err)
+	}
+
+	f, err := os.Create(resourceOutPathMarshal)
+	if err != nil {
+		log.Fatalf("error creating resource file %v", err)
+	}
+	_, err = f.Write(header)
+	if err != nil {
+		log.Fatalf("error writing resource file header %v", err)
+	}
+	_, err = f.Write(yamlContent.Bytes())
+	if err != nil {
+		log.Fatalf("error writing resource file %v", err)
+	}
+	err = f.Close()
+	if err != nil {
+		log.Fatalf("error closing resource file %v", err)
+	}
+	log.Printf("Generated resource %s", resourceOutPathMarshal)
+}
+
+type resourceOp struct {
+	path  string
+	async bool
+}
+
+type resource struct {
+	// nil if not defined
+	create, update, delete *resourceOp
+}
+
+func anyToBool(a any) bool {
+	switch v := a.(type) {
+	case bool:
+		return v
+	case string:
+		if b, err := strconv.ParseBool(v); err == nil {
+			return b
 		}
+		panic(fmt.Sprintf("cannot parse expected boolean value, found string: %q", v))
+	default:
+		panic(fmt.Sprintf("unexpected type: %T", v))
+	}
+}
 
-		// Not very clever way of identifying create resource methods
-		if strings.HasPrefix(pathValue.Post.OperationID, "Create") {
-			resourcePath := key
-			resourceName := strings.Replace(pathValue.Post.OperationID, "Create", "", 1)
-			resourcePaths = append(resourcePaths, []string{resourcePath, resourceName})
+func buildOperation(resourcePath string, op *openapi3.Operation, prefix string) (string, *resourceOp) {
+	if op == nil {
+		return "", nil
+	}
+	if strings.HasPrefix(op.OperationID, prefix) {
+		resourceName := strings.Replace(op.OperationID, prefix, "", 1)
+		async := false
+		if a, ok := op.Extensions["x-google-lro"]; ok {
+			async = anyToBool(a)
+		}
+		return resourceName, &resourceOp{path: resourcePath, async: async}
+	}
+	return "", nil
+}
+
+func findResources(doc *openapi3.T) map[string]*resource {
+	resources := make(map[string]*resource)
+	getDefault := func(n string) *resource {
+		r, ok := resources[n]
+		if !ok {
+			r = &resource{}
+			resources[n] = r
+		}
+		return r
+	}
+
+	for key, pathValue := range doc.Paths.Map() {
+		if name, op := buildOperation(key, pathValue.Post, "Create"); op != nil {
+			getDefault(name).create = op
+		}
+		if name, op := buildOperation(key, pathValue.Delete, "Delete"); op != nil {
+			getDefault(name).delete = op
+		}
+		if name, op := buildOperation(key, pathValue.Patch, "Update"); op != nil {
+			getDefault(name).update = op
+		} else if name, op := buildOperation(key, pathValue.Put, "Update"); op != nil {
+			getDefault(name).update = op
 		}
 	}
 
-	return resourcePaths
+	return resources
 }
 
 func buildProduct(filePath, output string, root *openapi3.T, header []byte) string {
@@ -226,10 +290,59 @@ func stripVersion(path string) string {
 	return re.ReplaceAllString(path, "")
 }
 
-func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T) api.Resource {
+func buildSingleton(resourceName string, in *resource, root *openapi3.T) api.Resource {
 	resource := api.Resource{}
+	resourcePath := in.update.path
 
-	parsedObjects := parseOpenApi(resourcePath, resourceName, root)
+	op := root.Paths.Find(resourcePath).Patch
+	verb := "PATCH"
+	if op == nil {
+		op = root.Paths.Find(resourcePath).Put
+		verb = "PUT"
+	}
+	parsedObjects := parseOpenApi(resourcePath, resourceName, op)
+
+	parameters := parsedObjects[0].([]*api.Type)
+	properties := parsedObjects[1].([]*api.Type)
+
+	baseUrl := baseUrl(resourcePath)
+	selfLink := baseUrl
+
+	resource.Name = resourceName
+	resource.BaseUrl = baseUrl
+	resource.Parameters = parameters
+	resource.Properties = properties
+	resource.SelfLink = selfLink
+	resource.CreateUrl = fmt.Sprintf("%s=?updateMask=*", baseUrl)
+
+	resource.CreateVerb = verb
+
+	resource.UpdateVerb = verb
+	resource.UpdateMask = true
+	if in.update.async {
+		resource.AutogenAsync = true
+		async := api.NewAsync()
+		async.Operation.BaseUrl = "{{op_id}}"
+		async.Result.ResourceInsideResponse = true
+		// Clear the default, we will attach the right values below
+		async.Actions = nil
+		resource.Async = async
+		resource.Async.Actions = append(resource.Async.Actions, "update")
+	}
+
+	resource.ExcludeDelete = true
+
+	resource = attachStandardFunctionality(resource)
+
+	return resource
+}
+
+func buildResource(resourceName string, in *resource, root *openapi3.T) api.Resource {
+	resource := api.Resource{}
+	resourcePath := in.create.path
+
+	op := root.Paths.Find(resourcePath).Post
+	parsedObjects := parseOpenApi(resourcePath, resourceName, op)
 
 	parameters := parsedObjects[0].([]*api.Type)
 	properties := parsedObjects[1].([]*api.Type)
@@ -243,32 +356,52 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	resource.Parameters = parameters
 	resource.Properties = properties
 	resource.SelfLink = selfLink
-	resource.IdFormat = selfLink
-	resource.ImportFormat = []string{selfLink}
 	resource.CreateUrl = fmt.Sprintf("%s?%s={{%s}}", baseUrl, queryParam, google.Underscore(queryParam))
-	resource.Description = "Description"
 
 	resource.AutogenAsync = true
 	async := api.NewAsync()
 	async.Operation.BaseUrl = "{{op_id}}"
 	async.Result.ResourceInsideResponse = true
+	// Clear the default, we will attach the right values below
+	async.Actions = nil
 	resource.Async = async
+	if in.create.async {
+		resource.Async.Actions = append(resource.Async.Actions, "create")
+	}
 
-	if hasUpdate(resourceName, root) {
+	if in.update != nil {
 		resource.UpdateVerb = "PATCH"
 		resource.UpdateMask = true
+		if in.update.async {
+			resource.Async.Actions = append(resource.Async.Actions, "update")
+		}
 	} else {
 		resource.Immutable = true
 	}
+	if in.delete != nil && in.delete.async {
+		resource.Async.Actions = append(resource.Async.Actions, "delete")
+	}
+
+	resource = attachStandardFunctionality(resource)
+
+	return resource
+}
+
+// Standard functionality between regular and singleton resources
+func attachStandardFunctionality(resource api.Resource) api.Resource {
+	resource.Description = "Description"
+
+	resource.IdFormat = resource.SelfLink
+	resource.ImportFormat = []string{resource.SelfLink}
 
 	example := r.Examples{}
 	example.Name = "name_of_example_file"
 	example.PrimaryResourceId = "example"
 	example.Vars = map[string]string{"resource_name": "test-resource"}
 
-	resource.Examples = []r.Examples{example}
+	resource.Examples = []*r.Examples{&example}
 
-	resourceNameBytes := []byte(resourceName)
+	resourceNameBytes := []byte(resource.Name)
 	// Write the status as an encoded string to flag when a YAML file has been
 	// copy and pasted without actually using this tool
 	resource.AutogenStatus = base64.StdEncoding.EncodeToString(resourceNameBytes)
@@ -276,38 +409,29 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	return resource
 }
 
-func hasUpdate(resourceName string, root *openapi3.T) bool {
-	// Create and Update have different paths in the OpenAPI spec, so look
-	// through all paths to find one that matches the expected operation name
-	for _, pathValue := range root.Paths.Map() {
-		if pathValue.Patch == nil {
-			continue
-		}
-		if pathValue.Patch.OperationID == fmt.Sprintf("Update%s", resourceName) {
-			return true
-		}
+func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []any {
+	if op == nil {
+		log.Fatalf("error parsing nil OpenAPI operation for resource: %v", resourceName)
 	}
-	return false
-}
-
-func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 	returnArray := []any{}
-	path := root.Paths.Find(resourcePath)
+
+	seenRefs := make(map[string]bool)
+	seenPointers := make(map[*openapi3.Schema]bool)
 
 	parameters := []*api.Type{}
 	var idParam string
-	for _, param := range path.Post.Parameters {
+	for _, param := range op.Parameters {
 		if strings.Contains(strings.ToLower(param.Value.Name), strings.ToLower(resourceName)) {
 			idParam = param.Value.Name
 		}
-		paramObj := writeObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true)
+		paramObj := WriteObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true, seenRefs, seenPointers)
 		description := param.Value.Description
 		if strings.TrimSpace(description) == "" {
 			description = "No description"
 		}
 		paramObj.Description = trimDescription(description)
 
-		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" {
+		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" || paramObj.Name == "updateMask" {
 			continue
 		}
 
@@ -316,7 +440,12 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		parameters = append(parameters, &paramObj)
 	}
 
-	properties := buildProperties(path.Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties, path.Post.RequestBody.Value.Content["application/json"].Schema.Value.Required)
+	var properties []*api.Type
+	if op.RequestBody != nil && op.RequestBody.Value != nil && op.RequestBody.Value.Content != nil {
+		if mediaType, ok := op.RequestBody.Value.Content["application/json"]; ok && mediaType != nil && mediaType.Schema != nil && mediaType.Schema.Value != nil {
+			properties = buildProperties(mediaType.Schema.Value.Properties, mediaType.Schema.Value.Required, seenRefs, seenPointers)
+		}
+	}
 
 	returnArray = append(returnArray, parameters)
 	returnArray = append(returnArray, properties)
@@ -326,14 +455,25 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 }
 
 func propType(prop *openapi3.SchemaRef) openapi3.Types {
-	if len(prop.Value.AllOf) > 0 {
-		return *prop.Value.AllOf[0].Value.Type
-	} else {
-		return *prop.Value.Type
+	if prop.Value == nil {
+		return openapi3.Types{"object"}
 	}
+	if len(prop.Value.AllOf) > 0 && prop.Value.AllOf[0].Value != nil && prop.Value.AllOf[0].Value.Type != nil {
+		return *prop.Value.AllOf[0].Value.Type
+	}
+	if prop.Value.Type == nil {
+		if len(prop.Value.Properties) > 0 {
+			return openapi3.Types{"object"}
+		}
+		if prop.Value.Items != nil {
+			return openapi3.Types{"array"}
+		}
+		return openapi3.Types{"object"}
+	}
+	return *prop.Value.Type
 }
 
-func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool) api.Type {
+func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool, seenRefs map[string]bool, seenPointers map[*openapi3.Schema]bool) api.Type {
 	var field api.Type
 
 	switch name {
@@ -345,6 +485,44 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		name = "location"
 	}
 	additionalDescription := ""
+
+	if obj.Ref != "" {
+		if seenRefs[obj.Ref] {
+			var field api.Type
+			field.Name = name
+			field.Type = "String"
+			field.CustomExpand = "templates/terraform/custom_expand/json_schema.tmpl"
+			field.CustomFlatten = "templates/terraform/custom_flatten/json_schema.tmpl"
+			field.Description = "Recursive field represented as JSON"
+			return field
+		}
+		// Copy map to isolate branches
+		newSeenRefs := make(map[string]bool)
+		for k, v := range seenRefs {
+			newSeenRefs[k] = v
+		}
+		newSeenRefs[obj.Ref] = true
+		seenRefs = newSeenRefs
+	}
+
+	if obj.Value != nil {
+		if seenPointers[obj.Value] {
+			var field api.Type
+			field.Name = name
+			field.Type = "String"
+			field.CustomExpand = "templates/terraform/custom_expand/json_schema.tmpl"
+			field.CustomFlatten = "templates/terraform/custom_flatten/json_schema.tmpl"
+			field.Description = "Recursive field represented as JSON"
+			return field
+		}
+		// Copy map to isolate branches
+		newSeenPointers := make(map[*openapi3.Schema]bool)
+		for k, v := range seenPointers {
+			newSeenPointers[k] = v
+		}
+		newSeenPointers[obj.Value] = true
+		seenPointers = newSeenPointers
+	}
 
 	if len(obj.Value.AllOf) > 0 {
 		obj = obj.Value.AllOf[0]
@@ -378,6 +556,12 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			break
 		}
 
+		if field.Name == "annotations" {
+			// Standard annotations implementation
+			field.Type = "KeyValueAnnotations"
+			break
+		}
+
 		if obj.Value.AdditionalProperties.Schema != nil && obj.Value.AdditionalProperties.Schema.Value.Type.Is("string") {
 			// AdditionalProperties with type string is a string -> string map
 			field.Type = "KeyValuePairs"
@@ -385,12 +569,20 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		}
 
 		field.Type = "NestedObject"
-
-		field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+		if obj.Value.AdditionalProperties.Schema != nil {
+			field.Type = "Map"
+			field.KeyName = "TODO: CHANGEME"
+			var valueType api.Type
+			valueType.Type = "NestedObject"
+			valueType.Properties = buildProperties(obj.Value.AdditionalProperties.Schema.Value.Properties, obj.Value.AdditionalProperties.Schema.Value.Required, seenRefs, seenPointers)
+			field.ValueType = &valueType
+		} else {
+			field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required, seenRefs, seenPointers)
+		}
 	case "array":
 		field.Type = "Array"
 		var subField api.Type
-		typ := *obj.Value.Items.Value.Type
+		typ := propType(obj.Value.Items)
 		switch typ[0] {
 		case "string":
 			subField.Type = "String"
@@ -402,7 +594,7 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			subField.Type = "Boolean"
 		case "object":
 			subField.Type = "NestedObject"
-			subField.Properties = buildProperties(obj.Value.Items.Value.Properties, obj.Value.Items.Value.Required)
+			subField.Properties = buildProperties(obj.Value.Items.Value.Properties, obj.Value.Items.Value.Required, seenRefs, seenPointers)
 		}
 		field.ItemType = &subField
 	default:
@@ -438,14 +630,34 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		field.Immutable = true
 	}
 
+	if field.Output {
+		makeOutputOnly(&field)
+	}
+
 	return field
 }
 
-func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
+func makeOutputOnly(t *api.Type) {
+	if t == nil {
+		return
+	}
+	t.Output = true
+	for _, p := range t.Properties {
+		makeOutputOnly(p)
+	}
+	if t.ItemType != nil {
+		makeOutputOnly(t.ItemType)
+	}
+	if t.ValueType != nil {
+		makeOutputOnly(t.ValueType)
+	}
+}
+
+func buildProperties(props openapi3.Schemas, required []string, seenRefs map[string]bool, seenPointers map[*openapi3.Schema]bool) []*api.Type {
 	properties := []*api.Type{}
 	for _, k := range slices.Sorted(maps.Keys(props)) {
 		prop := props[k]
-		propObj := writeObject(k, prop, propType(prop), false)
+		propObj := WriteObject(k, prop, propType(prop), false, seenRefs, seenPointers)
 		if slices.Contains(required, k) {
 			propObj.Required = true
 		}

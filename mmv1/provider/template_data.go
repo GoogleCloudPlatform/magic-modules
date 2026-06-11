@@ -15,25 +15,24 @@ package provider
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"go/format"
-	"log"
+	"io/fs"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
-	"sync"
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/metadata"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
+	"gopkg.in/yaml.v3"
 )
 
 type TemplateData struct {
 	OutputFolder string
 	VersionName  string
+	templateFS   fs.FS
 
 	// TODO rewrite: is this needed?
 	//     # Information about the local environment
@@ -46,10 +45,8 @@ var BETA_VERSION = "beta"
 var ALPHA_VERSION = "alpha"
 var PRIVATE_VERSION = "private"
 
-var goimportFiles sync.Map
-
-func NewTemplateData(outputFolder string, versionName string) *TemplateData {
-	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName}
+func NewTemplateData(outputFolder string, versionName string, templateFS fs.FS) *TemplateData {
+	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName, templateFS: templateFS}
 	return &td
 }
 
@@ -80,11 +77,15 @@ func (td *TemplateData) GenerateFWResourceFile(filePath string, resource api.Res
 }
 
 func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/metadata.yaml.tmpl"
-	templates := []string{
-		templatePath,
+	metadata := metadata.FromResource(resource)
+	bytes, err := yaml.Marshal(metadata)
+	if err != nil {
+		glog.Exit("error marshalling yaml %v: %v", filePath)
 	}
-	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+	err = os.WriteFile(filePath, bytes, 0644)
+	if err != nil {
+		glog.Exit(err)
+	}
 }
 
 func (td *TemplateData) GenerateDataSourceFile(filePath string, resource api.Resource) {
@@ -121,8 +122,26 @@ func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
+func (td *TemplateData) GenerateListResourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/list_resource.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func (td *TemplateData) GenerateDataSourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/datasource.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/property_documentation.html.markdown.tmpl",
+		"templates/terraform/nested_property_documentation.html.markdown.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
 func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/examples/base_configs/test_file.go.tmpl"
+	templatePath := "templates/terraform/samples/base_configs/test_file.go.tmpl"
 	templates := []string{
 		"templates/terraform/env_var_context.go.tmpl",
 		templatePath,
@@ -151,7 +170,7 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 }
 
 func (td *TemplateData) GenerateDataSourceTestFile(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/examples/base_configs/datasource_test_file.go.tmpl"
+	templatePath := "templates/terraform/samples/base_configs/datasource_test_file.go.tmpl"
 	templates := []string{
 		"templates/terraform/env_var_context.go.tmpl",
 		templatePath,
@@ -204,11 +223,21 @@ func (td *TemplateData) GenerateIamDatasourceDocumentationFile(filePath string, 
 }
 
 func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/examples/base_configs/iam_test_file.go.tmpl"
+	templatePath := "templates/terraform/samples/base_configs/iam_test_file.go.tmpl"
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
 		"templates/terraform/iam/iam_test_setup.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+// GenerateQueryTestFile emits a Terraform query-mode acceptance test for list resources (generate_list_resource).
+func (td *TemplateData) GenerateQueryTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/samples/base_configs/query_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -254,15 +283,18 @@ func (td *TemplateData) GenerateTGCNextTestFile(filePath string, resource api.Re
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	templateFileName := filepath.Base(templatePath)
+	if templatePath == "templates/terraform/examples/base_configs/iam_test_file.go.tmpl" {
+		templatePath = "templates/terraform/samples/base_configs/iam_test_file.go.tmpl"
+	}
 
 	funcMap := template.FuncMap{
 		"TemplatePath": func() string { return templatePath },
 	}
-	for k, v := range google.TemplateFunctions {
+	for k, v := range google.TemplateFunctions(td.templateFS) {
 		funcMap[k] = v
 	}
 
-	tmpl, err := template.New(templateFileName).Funcs(funcMap).ParseFiles(templates...)
+	tmpl, err := template.New(templateFileName).Funcs(funcMap).ParseFS(td.templateFS, templates...)
 	if err != nil {
 		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
 	}
@@ -284,52 +316,11 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 		} else {
 			sourceByte = formattedByte
 		}
-		if !strings.Contains(templatePath, "third_party/terraform") {
-			goimportFiles.Store(filePath, struct{}{})
-		}
 	}
 
 	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
 		glog.Exit(err)
-	}
-}
-
-func FixImports(outputPath string, dumpDiffs bool) {
-	log.Printf("Fixing go import paths")
-
-	baseArgs := []string{"-w"}
-	if dumpDiffs {
-		baseArgs = []string{"-d", "-w"}
-	}
-
-	// -w and -d are mutually exclusive; if dumpDiffs is requested we need to run twice.
-	for _, base := range baseArgs {
-		hasFiles := false
-		args := []string{base}
-		goimportFiles.Range(func(filePath, _ any) bool {
-			p, err := filepath.Rel(outputPath, filePath.(string))
-			if err != nil {
-				log.Fatal(err)
-			}
-			args = append(args, p)
-			hasFiles = true
-			return true
-		})
-
-		if hasFiles {
-			cmd := exec.Command("goimports", args...)
-			cmd.Dir = outputPath
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			if err := cmd.Run(); err != nil {
-				var exitErr *exec.ExitError
-				if errors.As(err, &exitErr) && len(exitErr.Stderr) > 0 {
-					glog.Error(string(exitErr.Stderr))
-				}
-				log.Fatal(err)
-			}
-		}
 	}
 }
 

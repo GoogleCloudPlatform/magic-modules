@@ -44,8 +44,7 @@ aliases:
 
 ## Run automated tests
 
-{{< tabs "version" >}}
-
+{{% tabs "version" %}}
 {{< tab "GA Provider" >}}
 
 1. Run unit tests and linters
@@ -63,7 +62,7 @@ aliases:
     make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
     ```
 
-    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+    To run all tests matching, for example, `TestAccContainerNodePool*`, omit the trailing `$$`:
 
     ```bash
     make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
@@ -85,7 +84,6 @@ aliases:
     ```
 
 {{< /tab >}}
-
 {{< tab "Beta Provider" >}}
 
 1. Run unit tests and linters
@@ -99,10 +97,10 @@ aliases:
 1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
-    make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
+    make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
     ```
 
-    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+    To run all tests matching, for example, `TestAccContainerNodePool*`, omit the trailing `$$`:
 
     ```bash
     make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
@@ -124,8 +122,7 @@ aliases:
     ```
 
 {{< /tab >}}
-
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## Troubleshooting acceptance tests {#troubleshooting}
 
@@ -174,7 +171,7 @@ Tests require all of the providers they use (except the one actually being teste
       ```
   - GA+beta test: This indicates that one of the `google_*` resources in the test has `provider = google-beta` set. `provider = google-beta` can't be set unless the test is beta-only.
 - If the error mentions some other provider: The test relies on an external provider, such as `time`, and that is not explicitly declared
-  - For MMv1 example-based tests, use [`examples.external_providers`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#examples).
+  - For MMv1 sample-based tests, use [`samples.external_providers`]({{< ref "/reference/sample/#sample-attributes-top-level" >}}).
   - For Handwritten tests, use TestCase.ExternalProviders:
     ```go
     acctest.VcrTest(t, resource.TestCase{
@@ -209,8 +206,7 @@ For manual testing, you can build the provider from source and run `terraform ap
 
 Configure Terraform to use locally-built binaries for `google` and `google-beta` instead of downloading the latest versions.
 
-{{< tabs "built-provider" >}}
-
+{{% tabs "built-provider" %}}
 {{< tab "Developer overrides (Mac / Linux)" >}}
 
 1. Find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
@@ -258,7 +254,6 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
 1. Save the file.
 
 {{< /tab >}}
-
 {{< tab "Developer overrides (Windows)" >}}
 
 1. Find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
@@ -303,8 +298,7 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
 1. Save the file.
 
 {{< /tab >}}
-
-{{< /tabs >}}
+{{% /tabs %}}
 
 ### Run manual tests
 

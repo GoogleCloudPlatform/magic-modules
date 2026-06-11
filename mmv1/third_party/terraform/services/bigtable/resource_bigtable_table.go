@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -53,6 +54,7 @@ func ResourceBigtableTable() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			abpDiffFunc,
 		),
@@ -152,6 +154,15 @@ func ResourceBigtableTable() *schema.Resource {
 							ValidateFunc: verify.ValidateDuration(),
 							Description:  `How frequently automated backups should occur.`,
 						},
+						"locations": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: `A list of Cloud Bigtable zones where automated backups are allowed to be created. If empty, automated backups will be created in all zones of the instance. Locations are in the format projects/{project}/locations/{zone}. This field can only be set for tables in Enterprise Plus instances.`,
+						},
 					},
 				},
 				Description: `Defines an automated backup policy for a table, specified by Retention Period and Frequency. To _create_ a table with automated backup disabled, either omit the automated_backup_policy argument, or set both Retention Period and Frequency properties to "0". To disable automated backup on an _existing_ table that has automated backup enabled, set _both_ Retention Period and Frequency properties to "0". When updating an existing table, to modify the Retention Period or Frequency properties of the resource's automated backup policy, set the respective property to a non-zero value. If the automated_backup_policy argument is not provided in the configuration on update, the resource's automated backup policy will _not_ be modified.`,
@@ -167,6 +178,9 @@ func ResourceBigtableTable() *schema.Resource {
 					The schema must be a valid JSON encoded string representing a Type's struct protobuf message. Note that for bytes sequence (like delimited_bytes.delimiter)
 					the delimiter must be base64 encoded. For example, if you want to set a delimiter to a single byte character "#", it should be set to "Iw==", which is the base64 encoding of the byte sequence "#".`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -230,7 +244,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -282,9 +296,14 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 				return fmt.Errorf("Error parsing automated backup policy frequency: %s", err)
 			}
 			if abpFrequency != 0 && abpRetentionPeriod != 0 { // if fields are zero this indicates disable-on-create
+				var locations []string
+				if v, ok := automatedBackupPolicy["locations"]; ok {
+					locations = tpgresource.ConvertStringArr(v.([]interface{}))
+				}
 				tblConf.AutomatedBackupConfig = &bigtable.TableAutomatedBackupPolicy{
 					RetentionPeriod: abpRetentionPeriod,
 					Frequency:       abpFrequency,
+					Locations:       locations,
 				}
 			}
 		}
@@ -360,7 +379,7 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -415,10 +434,16 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 			var tableAbp bigtable.TableAutomatedBackupPolicy = *automatedBackupConfig
 			abpRetentionPeriod := tableAbp.RetentionPeriod.(time.Duration).String()
 			abpFrequency := tableAbp.Frequency.(time.Duration).String()
+			// Normalize nil locations to empty list for consistent state representation
+			locations := tableAbp.Locations
+			if locations == nil {
+				locations = []string{}
+			}
 			abp := []interface{}{
 				map[string]interface{}{
 					"retention_period": abpRetentionPeriod,
 					"frequency":        abpFrequency,
+					"locations":        locations,
 				},
 			}
 			if err := d.Set("automated_backup_policy", abp); err != nil {
@@ -438,6 +463,10 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		// String value is default to empty string, so need to set it to nil to specify that the row key schema is not set.
 		d.Set("row_key_schema", nil)
+	}
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
 
 	return nil
@@ -486,6 +515,11 @@ func familyMapDiffValueTypes(a, b map[string]bigtable.Family) map[string]bigtabl
 }
 
 func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceBigtableTable) {
+		return ResourceBigtableTable().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -499,7 +533,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -596,6 +630,14 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 				abp.Frequency = abpFrequency
 			}
 
+			if v, ok := automatedBackupPolicy["locations"]; ok && v != nil {
+				if len(v.([]interface{})) == 0 {
+					abp.Locations = []string{} // Force non-nil empty slice to trigger clearing in mask
+				} else {
+					abp.Locations = tpgresource.ConvertStringArr(v.([]interface{}))
+				}
+			}
+
 			if abp.RetentionPeriod != nil && abp.RetentionPeriod.(time.Duration) == 0 && abp.Frequency != nil && abp.Frequency.(time.Duration) == 0 {
 				// Disable Automated Backups
 				if err := c.UpdateTableDisableAutomatedBackupPolicy(ctxWithTimeout, name); err != nil {
@@ -631,6 +673,13 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -645,7 +694,7 @@ func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
+	c, err := NewClientFactory(config, userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -748,4 +797,13 @@ func getRowKeySchema(input interface{}) (*bigtable.StructType, error) {
 		return nil, fmt.Errorf("only struct type is accepted as row key schema")
 	}
 	return &structRks, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_bigtable_table",
+		ProductName: "bigtable",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceBigtableTable(),
+	}.Register()
 }

@@ -3,6 +3,7 @@ package orgpolicy_test
 import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/orgpolicy"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -12,7 +13,7 @@ func TestAccOrgPolicyCustomConstraint_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

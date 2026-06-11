@@ -14,39 +14,99 @@
 */}}
 {{- define "SchemaFieldsFW"}}
 {{- if .FlattenObject -}}
-	{{- range $prop := .ResourceMetadata.OrderProperties .UserProperties -}}
+  {{- range $prop := .ResourceMetadata.OrderProperties .UserProperties -}}
     {{ template "SchemaFieldsFW" $prop }}
-	{{ end -}}
+  {{ end -}}
 {{- else -}}
-"{{underscore .Name -}}": schema.{{.GetFWType}}Attribute{
-{{ if .DefaultFromApi -}}
-	Optional: true,
-	Computed: true,
-{{ else if .Required -}}
-  Required: true,
-{{ else if .Output -}}
-  Computed: true,
-{{ else -}}
-  Optional: true,
-{{ end -}}
-{{ if .DeprecationMessage -}}
-  DeprecationMessage: "{{ .DeprecationMessage }}",
-{{ end -}}
-{{ if .Sensitive -}}
-  Sensitive: true,
-{{ end -}}
-{{ if or .IsForceNew .DefaultFromApi -}}
-    PlanModifiers: []planmodifier.{{.GetFWType}}{
-
-  {{ if .IsForceNew -}}
-      {{lower .GetFWType}}planmodifier.RequiresReplace(),
-  {{ end -}}
-
-  {{ if .DefaultFromApi -}}
-     {{lower .GetFWType}}planmodifier.UseStateForUnknown(),
-  {{ end -}}
+  {{- if eq .Type "NestedObject" -}}
+"{{underscore .Name -}}": schema.SingleNestedAttribute{
+  Attributes: map[string]schema.Attribute{
+    {{- range $prop := .ResourceMetadata.OrderProperties $.UserProperties }}
+    {{ template "SchemaFieldsFW" $prop -}}
+    {{- end }}
+  },
+  {{- else if eq .Type "Array" -}}
+    {{- if eq .ItemType.Type "NestedObject" -}}
+      {{- if .IsSet -}}
+"{{underscore .Name -}}": schema.SetNestedAttribute{
+  NestedObject: schema.NestedAttributeObject{
+    Attributes: map[string]schema.Attribute{
+      {{- range $prop := .ResourceMetadata.OrderProperties $.ItemType.UserProperties }}
+      {{ template "SchemaFieldsFW" $prop -}}
+      {{- end }}
     },
-{{ end -}}
+  },
+      {{- else -}}
+"{{underscore .Name -}}": schema.ListNestedAttribute{
+  NestedObject: schema.NestedAttributeObject{
+    Attributes: map[string]schema.Attribute{
+      {{- range $prop := .ResourceMetadata.OrderProperties $.ItemType.UserProperties }}
+      {{ template "SchemaFieldsFW" $prop -}}
+      {{- end }}
+    },
+  },
+      {{- end -}}
+    {{- else -}}
+      {{- if .IsSet -}}
+"{{underscore .Name -}}": schema.SetAttribute{
+  ElementType: {{ if or (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") }}types.StringType{{ else }}types.{{ .ItemType.GetFWType }}Type{{ end }},
+      {{- else -}}
+"{{underscore .Name -}}": schema.ListAttribute{
+  ElementType: {{ if or (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") }}types.StringType{{ else }}types.{{ .ItemType.GetFWType }}Type{{ end }},
+      {{- end -}}
+    {{- end -}}
+  {{- else if hasPrefix .Type "KeyValue" -}}
+"{{underscore .Name -}}": schema.MapAttribute{
+  ElementType: types.StringType,
+  {{- else if eq .Type "Map" -}}
+    {{- if eq .ValueType.Type "NestedObject" -}}
+"{{underscore .Name -}}": schema.MapNestedAttribute{
+  NestedObject: schema.NestedAttributeObject{
+    Attributes: map[string]schema.Attribute{
+      {{- range $prop := .ResourceMetadata.OrderProperties $.ValueType.UserProperties }}
+      {{ template "SchemaFieldsFW" $prop -}}
+      {{- end }}
+    },
+  },
+    {{- else -}}
+"{{underscore .Name -}}": schema.MapAttribute{
+  ElementType: {{ if or (eq .ValueType.Type "Enum") (eq .ValueType.Type "ResourceRef") }}types.StringType{{ else }}types.{{ .ValueType.GetFWType }}Type{{ end }},
+    {{- end -}}
+  {{- else -}}
+"{{underscore .Name -}}": schema.{{.GetFWType}}Attribute{
+    {{- if eq .GetFWType "List" -}}
+  ElementType: {{ if or (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") }}types.StringType{{ else }}types.{{ .ItemType.GetFWType }}Type{{ end }},
+    {{- else if eq .GetFWType "Set" -}}
+  ElementType: {{ if or (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") }}types.StringType{{ else }}types.{{ .ItemType.GetFWType }}Type{{ end }},
+    {{- end }}
+  {{- end }}
+
+  {{- if .DefaultFromApi }}
+  Optional: true,
+  Computed: true,
+  {{- else if .Required }}
+  Required: true,
+  {{- else if .Output }}
+  Computed: true,
+  {{- else }}
+  Optional: true,
+  {{- end }}
+  {{- if .DeprecationMessage }}
+  DeprecationMessage: "{{ .DeprecationMessage }}",
+  {{- end }}
+  {{- if .Sensitive }}
+  Sensitive: true,
+  {{- end }}
+  {{- if or .IsForceNew .DefaultFromApi }}
+  PlanModifiers: []planmodifier.{{.GetFWType}}{
+    {{- if .IsForceNew }}
+    {{lower .GetFWType}}planmodifier.RequiresReplace(),
+    {{- end }}
+    {{- if .DefaultFromApi }}
+    {{lower .GetFWType}}planmodifier.UseStateForUnknown(),
+    {{- end }}
+  },
+  {{- end }}
 },
 {{- end -}}
 {{- end -}}

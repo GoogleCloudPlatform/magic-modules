@@ -10,6 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	logging_tpg "github.com/hashicorp/terraform-provider-google/google/services/logging"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	"google.golang.org/api/logging/v2"
 )
@@ -59,18 +62,27 @@ func TestAccLoggingOrganizationSink_update(t *testing.T) {
 		CheckDestroy:             testAccCheckLoggingOrganizationSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingOrganizationSink_update(sinkName, bucketName, org),
+				Config: testAccLoggingOrganizationSink_update(sinkName, bucketName, org, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoggingOrganizationSinkExists(t, "google_logging_organization_sink.update", &sinkBefore),
 					testAccCheckLoggingOrganizationSink(&sinkBefore, "google_logging_organization_sink.update"),
 				),
-			}, {
-				Config: testAccLoggingOrganizationSink_update(sinkName, updatedBucketName, org),
+			},
+			{
+				Config: testAccLoggingOrganizationSink_update(sinkName, updatedBucketName, org, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoggingOrganizationSinkExists(t, "google_logging_organization_sink.update", &sinkAfter),
 					testAccCheckLoggingOrganizationSink(&sinkAfter, "google_logging_organization_sink.update"),
 				),
-			}, {
+			},
+			{
+				Config: testAccLoggingOrganizationSink_update(sinkName, bucketName, org, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLoggingOrganizationSinkExists(t, "google_logging_organization_sink.update", &sinkBefore),
+					testAccCheckLoggingOrganizationSink(&sinkBefore, "google_logging_organization_sink.update"),
+				),
+			},
+			{
 				ResourceName:      "google_logging_organization_sink.update",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -206,7 +218,7 @@ func testAccCheckLoggingOrganizationSinkDestroyProducer(t *testing.T) func(s *te
 
 			attributes := rs.Primary.Attributes
 
-			_, err := config.NewLoggingClient(config.UserAgent).Organizations.Sinks.Get(attributes["id"]).Do()
+			_, err := logging_tpg.NewClient(config, config.UserAgent).Organizations.Sinks.Get(attributes["id"]).Do()
 			if err == nil {
 				return fmt.Errorf("organization sink still exists")
 			}
@@ -224,7 +236,7 @@ func testAccCheckLoggingOrganizationSinkExists(t *testing.T, n string, sink *log
 		}
 		config := acctest.GoogleProviderConfig(t)
 
-		si, err := config.NewLoggingClient(config.UserAgent).Organizations.Sinks.Get(attributes["id"]).Do()
+		si, err := logging_tpg.NewClient(config, config.UserAgent).Organizations.Sinks.Get(attributes["id"]).Do()
 		if err != nil {
 			return err
 		}
@@ -327,21 +339,21 @@ resource "google_storage_bucket" "log-bucket" {
 `, sinkName, orgId, envvar.GetTestProjectFromEnv(), bucketName)
 }
 
-func testAccLoggingOrganizationSink_update(sinkName, bucketName, orgId string) string {
+func testAccLoggingOrganizationSink_update(sinkName, bucketName, orgId, includeChildren string) string {
 	return fmt.Sprintf(`
 resource "google_logging_organization_sink" "update" {
   name             = "%s"
   org_id           = "%s"
   destination      = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
-  include_children = false
+  include_children = %s
 }
 
 resource "google_storage_bucket" "log-bucket" {
   name     = "%s"
   location = "US"
 }
-`, sinkName, orgId, envvar.GetTestProjectFromEnv(), bucketName)
+`, sinkName, orgId, envvar.GetTestProjectFromEnv(), includeChildren, bucketName)
 }
 
 func testAccLoggingOrganizationSink_described(sinkName, bucketName, orgId string) string {

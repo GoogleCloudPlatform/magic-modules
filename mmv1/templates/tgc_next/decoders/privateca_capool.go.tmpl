@@ -1,0 +1,20 @@
+	if ip, ok := res["issuancePolicy"]; ok && ip != nil {
+		if ipMap, ok := ip.(map[string]interface{}); ok {
+			if bv, ok := ipMap["baselineValues"]; ok && bv != nil {
+				if bvMap, ok := bv.(map[string]interface{}); ok {
+					if ae, ok := bvMap["additionalExtensions"]; ok && ae != nil {
+						if aeList, ok := ae.([]interface{}); ok {
+							for _, item := range aeList {
+								if itemMap, ok := item.(map[string]interface{}); ok {
+									if _, ok := itemMap["critical"]; !ok {
+										itemMap["critical"] = false
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return res, hclData, nil

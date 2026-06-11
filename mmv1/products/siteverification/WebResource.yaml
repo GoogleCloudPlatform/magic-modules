@@ -52,6 +52,13 @@ examples:
       managed_zone: 'example.com'
       domain: 'www.example.com'
       dns_name: 'www.example.com.'
+    test_vars_overrides:
+      # for backward compatible
+      managed_zone: '"example.com" + randomSuffix'
+      # for backward compatible
+      domain: '"www.example.com" + randomSuffix'
+      # for backward compatible
+      dns_name: '"www.example.com." + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'verification_method'

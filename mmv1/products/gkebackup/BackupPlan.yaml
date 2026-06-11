@@ -12,154 +12,185 @@
 # limitations under the License.
 
 ---
-name: 'BackupPlan'
+name: BackupPlan
 description: |
   Represents a Backup Plan instance.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke'
-  api: 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.backupPlans'
+    Official Documentation: https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke
+  api: https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.backupPlans
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/backupPlans'
-create_url: 'projects/{{project}}/locations/{{location}}/backupPlans?backupPlanId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/backupPlans
+create_url: projects/{{project}}/locations/{{location}}/backupPlans?backupPlanId={{name}}
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: name
+  base_url: projects/{{project}}/locations/{{location}}/backupPlans/{{name}}
+  import_format:
+    - projects/{{project}}/locations/{{location}}/backupPlans/{{name}}
+    - '{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
-iam_policy:
-  method_name_separator: ':'
-  parent_resource_attribute: 'name'
-  base_url: 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
-    - '{{name}}'
+autogen_async: true
+include_in_tgc_next: true
 custom_code:
-examples:
-  - name: 'gkebackup_backupplan_basic'
-    primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-basic-plan%s", context["random_suffix"])'
-    vars:
-      name: 'basic-plan'
-      cluster_name: 'basic-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_autopilot'
-    primary_resource_id: 'autopilot'
-    vars:
-      name: 'autopilot-plan'
-      cluster_name: 'autopilot-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_cmek'
-    primary_resource_id: 'cmek'
-    vars:
-      name: 'cmek-plan'
-      cluster_name: 'cmek-cluster'
-      key_name: 'backup-key'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_full'
-    primary_resource_id: 'full'
-    vars:
-      name: 'full-plan'
-      cluster_name: 'full-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_permissive'
-    primary_resource_id: 'permissive'
-    vars:
-      name: 'permissive-plan'
-      cluster_name: 'permissive-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_rpo_daily_window'
-    primary_resource_id: 'rpo_daily_window'
-    vars:
-      name: 'rpo-daily-window'
-      cluster_name: 'rpo-daily-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_rpo_weekly_window'
-    primary_resource_id: 'rpo_weekly_window'
-    vars:
-      name: 'rpo-weekly-window'
-      cluster_name: 'rpo-weekly-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
+samples:
+  - name: gkebackup_backupplan_basic
+    primary_resource_id: basic
+    steps:
+      - name: gkebackup_backupplan_basic
+        resource_id_vars:
+          name: basic-plan
+          cluster_name: basic-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: gkebackup_backupplan_autopilot
+    primary_resource_id: autopilot
+    steps:
+      - name: gkebackup_backupplan_autopilot
+        resource_id_vars:
+          name: autopilot-plan
+          cluster_name: autopilot-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: gkebackup_backupplan_cmek
+    primary_resource_id: cmek
+    steps:
+      - name: gkebackup_backupplan_cmek
+        resource_id_vars:
+          name: cmek-plan
+          cluster_name: cmek-cluster
+          key_name: backup-key
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: gkebackup_backupplan_nslabels
+    primary_resource_id: nslabels
+    steps:
+      - name: gkebackup_backupplan_nslabels
+        resource_id_vars:
+          name: nslabels-plan
+          cluster_name: nslabels-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: gkebackup_backupplan_full
+    primary_resource_id: full
+    steps:
+      - name: gkebackup_backupplan_full
+        resource_id_vars:
+          name: full-plan
+          cluster_name: full-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: gkebackup_backupplan_permissive
+    primary_resource_id: permissive
+    steps:
+      - name: gkebackup_backupplan_permissive
+        resource_id_vars:
+          name: permissive-plan
+          cluster_name: permissive-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: gkebackup_backupplan_rpo_daily_window
+    primary_resource_id: rpo_daily_window
+    steps:
+      - name: gkebackup_backupplan_rpo_daily_window
+        resource_id_vars:
+          name: rpo-daily-window
+          cluster_name: rpo-daily-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: gkebackup_backupplan_rpo_weekly_window
+    primary_resource_id: rpo_weekly_window
+    steps:
+      - name: gkebackup_backupplan_rpo_weekly_window
+        resource_id_vars:
+          name: rpo-weekly-window
+          cluster_name: rpo-weekly-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+        oics_vars_overrides:
+          deletion_protection: "false"
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The region of the Backup Plan.
@@ -167,35 +198,34 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The full name of the BackupPlan Resource.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
-  - name: 'uid'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/shortname_to_url.go.tmpl
+  - name: uid
     type: String
     description: |
       Server generated, unique identifier of UUID format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       User specified descriptive string for this BackupPlan.
-  - name: 'cluster'
+  - name: cluster
     type: String
     description: |
       The source cluster from which Backups will be created via this BackupPlan.
     required: true
     immutable: true
-  - name: 'retentionPolicy'
+  - name: retentionPolicy
     type: NestedObject
-    description:
-      RetentionPolicy governs lifecycle of Backups created under this plan.
+    description: RetentionPolicy governs lifecycle of Backups created under this plan.
     properties:
-      - name: 'backupDeleteLockDays'
+      - name: backupDeleteLockDays
         type: Integer
         description: |
           Minimum age for a Backup created via this BackupPlan (in days).
@@ -205,7 +235,7 @@ properties:
           Updating this field of a BackupPlan does not affect existing Backups.
           Backups created after a successful update will inherit this new value.
         default_from_api: true
-      - name: 'backupRetainDays'
+      - name: backupRetainDays
         type: Integer
         description: |
           The default maximum age of a Backup created via this BackupPlan.
@@ -221,25 +251,24 @@ properties:
           If rpo_config is defined, then this must be
           <= 360 * targetRpoMinutes/(1440minutes/day)
         default_from_api: true
-      - name: 'locked'
+      - name: locked
         type: Boolean
         description: |
           This flag denotes whether the retention policy of this BackupPlan is locked.
           If set to True, no further update is allowed on this policy, including
           the locked field itself.
         default_from_api: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Description: A set of custom labels supplied by the user.
       A list of key->value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-  - name: 'backupSchedule'
+  - name: backupSchedule
     type: NestedObject
-    description:
-      Defines a schedule for automatic Backup creation via this BackupPlan.
+    description: Defines a schedule for automatic Backup creation via this BackupPlan.
     properties:
-      - name: 'cronSchedule'
+      - name: cronSchedule
         type: String
         description: |
           A standard cron string that defines a repeating schedule for
@@ -247,26 +276,26 @@ properties:
           This is mutually exclusive with the rpoConfig field since at most one
           schedule can be defined for a BackupPlan.
           If this is defined, then backupRetainDays must also be defined.
-      - name: 'paused'
+      - name: paused
         type: Boolean
         description: |
           This flag denotes whether automatic Backup creation is paused for this BackupPlan.
         default_from_api: true
-      - name: 'rpoConfig'
+      - name: rpoConfig
         type: NestedObject
         description: |
           Defines the RPO schedule configuration for this BackupPlan. This is mutually
           exclusive with the cronSchedule field since at most one schedule can be defined
           for a BackupPLan. If this is defined, then backupRetainDays must also be defined.
         properties:
-          - name: 'targetRpoMinutes'
+          - name: targetRpoMinutes
             type: Integer
             description: |
               Defines the target RPO for the BackupPlan in minutes, which means the target
               maximum data loss in time that is acceptable for this BackupPlan. This must be
               at least 60, i.e., 1 hour, and at most 86400, i.e., 60 days.
             required: true
-          - name: 'exclusionWindows'
+          - name: exclusionWindows
             type: Array
             description: |
               User specified time windows during which backup can NOT happen for this BackupPlan.
@@ -280,29 +309,29 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'startTime'
+                - name: startTime
                   type: NestedObject
                   description: |
                     Specifies the start time of the window using time of the day in UTC.
                   required: true
                   properties:
-                    - name: 'hours'
+                    - name: hours
                       type: Integer
                       description: |
                         Hours of day in 24 hour format.
-                    - name: 'minutes'
+                    - name: minutes
                       type: Integer
                       description: |
                         Minutes of hour of day.
-                    - name: 'seconds'
+                    - name: seconds
                       type: Integer
                       description: |
                         Seconds of minutes of the time.
-                    - name: 'nanos'
+                    - name: nanos
                       type: Integer
                       description: |
                         Fractions of seconds in nanoseconds.
-                - name: 'duration'
+                - name: duration
                   type: String
                   description: |
                     Specifies duration of the window in seconds with up to nine fractional digits,
@@ -315,41 +344,41 @@ properties:
                         - all other weekly window: duration < 168 hours (i.e., 24 * 7 hours)
                   required: true
                   validation:
-                    function: 'verify.ValidateDuration()'
-                - name: 'singleOccurrenceDate'
+                    function: verify.ValidateDuration()
+                - name: singleOccurrenceDate
                   type: NestedObject
                   # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   description: |
                     No recurrence. The exclusion window occurs only once and on this date in UTC.
                     Only one of singleOccurrenceDate, daily and daysOfWeek may be set.
                   properties:
-                    - name: 'year'
+                    - name: year
                       type: Integer
                       description: |
                         Year of the date.
-                    - name: 'month'
+                    - name: month
                       type: Integer
                       description: |
                         Month of a year.
-                    - name: 'day'
+                    - name: day
                       type: Integer
                       description: |
                         Day of a month.
-                - name: 'daily'
+                - name: daily
                   type: Boolean
                   # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   description: |
                     The exclusion window occurs every day if set to "True".
                     Specifying this field to "False" is an error.
                     Only one of singleOccurrenceDate, daily and daysOfWeek may be set.
-                - name: 'daysOfWeek'
+                - name: daysOfWeek
                   type: NestedObject
                   # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   description: |
                     The exclusion window occurs on these days of each week in UTC.
                     Only one of singleOccurrenceDate, daily and daysOfWeek may be set.
                   properties:
-                    - name: 'daysOfWeek'
+                    - name: daysOfWeek
                       type: Array
                       description: |
                         A list of days of week.
@@ -358,15 +387,15 @@ properties:
                         description: |
                           The day of the week.
                         enum_values:
-                          - 'MONDAY'
-                          - 'TUESDAY'
-                          - 'WEDNESDAY'
-                          - 'THURSDAY'
-                          - 'FRIDAY'
-                          - 'SATURDAY'
-                          - 'SUNDAY'
-            # Exclusion Window Object - End
-  - name: 'etag'
+                          - MONDAY
+                          - TUESDAY
+                          - WEDNESDAY
+                          - THURSDAY
+                          - FRIDAY
+                          - SATURDAY
+                          - SUNDAY
+  # Exclusion Window Object - End
+  - name: etag
     type: String
     description: |
       etag is used for optimistic concurrency control as a way to help prevent simultaneous
@@ -376,7 +405,7 @@ properties:
       and systems are expected to put that etag in the request to backupPlans.patch or
       backupPlans.delete to ensure that their change will be applied to the same version of the resource.
     output: true
-  - name: 'deactivated'
+  - name: deactivated
     type: Boolean
     description: |
       This flag indicates whether this BackupPlan has been deactivated.
@@ -384,68 +413,71 @@ properties:
       (except deletes), including the deactivated field itself. It also prevents any new Backups
       from being created via this BackupPlan (including scheduled Backups).
     default_from_api: true
-  - name: 'backupConfig'
+  - name: backupConfig
     type: NestedObject
     description: |
       Defines the configuration of Backups created via this BackupPlan.
     properties:
-      - name: 'includeVolumeData'
+      - name: includeVolumeData
         type: Boolean
         description: |
           This flag specifies whether volume data should be backed up when PVCs are
           included in the scope of a Backup.
         default_from_api: true
-      - name: 'includeSecrets'
+      - name: includeSecrets
         type: Boolean
         description: |
           This flag specifies whether Kubernetes Secret resources should be included
           when they fall into the scope of Backups.
         default_from_api: true
-      - name: 'encryptionKey'
+      - name: encryptionKey
         type: NestedObject
         description: |
           This defines a customer managed encryption key that will be used to encrypt the "config"
           portion (the Kubernetes resources) of Backups created via this plan.
         properties:
-          - name: 'gcpKmsEncryptionKey'
+          - name: gcpKmsEncryptionKey
             type: String
             description: |
               Google Cloud KMS encryption key. Format: projects/*/locations/*/keyRings/*/cryptoKeys/*
             required: true
-      - name: 'allNamespaces'
+      - name: allNamespaces
         type: Boolean
         description: |
           If True, include all namespaced resources.
         exactly_one_of:
-          - 'backupConfig.0.allNamespaces'
-          - 'backupConfig.0.selectedNamespaces'
-          - 'backupConfig.0.selectedApplications'
-      - name: 'selectedNamespaces'
+          - backupConfig.0.allNamespaces
+          - backupConfig.0.selectedNamespaces
+          - backupConfig.0.selectedApplications
+          - backupConfig.0.selectedNamespaceLabels
+      - name: selectedNamespaces
         type: NestedObject
         description: |
           If set, include just the resources in the listed namespaces.
         exactly_one_of:
-          - 'backupConfig.0.allNamespaces'
-          - 'backupConfig.0.selectedNamespaces'
-          - 'backupConfig.0.selectedApplications'
+          - backupConfig.0.allNamespaces
+          - backupConfig.0.selectedNamespaces
+          - backupConfig.0.selectedApplications
+          - backupConfig.0.selectedNamespaceLabels
         properties:
-          - name: 'namespaces'
+          - name: namespaces
             type: Array
             description: |
               A list of Kubernetes Namespaces.
             required: true
             item_type:
               type: String
-      - name: 'selectedApplications'
+      - name: selectedApplications
         type: NestedObject
         description: |
           A list of namespaced Kubernetes Resources.
         exactly_one_of:
-          - 'backupConfig.0.allNamespaces'
-          - 'backupConfig.0.selectedNamespaces'
-          - 'backupConfig.0.selectedApplications'
+          - backupConfig.0.allNamespaces
+          - backupConfig.0.selectedNamespaces
+          - backupConfig.0.selectedApplications
+          - backupConfig.0.selectedNamespaceLabels
         properties:
-          - name: 'namespacedNames'
+          - name: namespacedNames
             type: Array
             description: |
               A list of namespaced Kubernetes resources.
@@ -453,33 +485,66 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'namespace'
+                - name: namespace
                   type: String
                   description: |
                     The namespace of a Kubernetes Resource.
                   required: true
-                - name: 'name'
+                - name: name
                   type: String
                   description: |
                     The name of a Kubernetes Resource.
                   required: true
-      - name: 'permissiveMode'
+      - name: selectedNamespaceLabels
+        type: NestedObject
+        description: |
+          If set, include just the resources in the listed namespace Labels.
+        exactly_one_of:
+          - backupConfig.0.allNamespaces
+          - backupConfig.0.selectedNamespaces
+          - backupConfig.0.selectedApplications
+          - backupConfig.0.selectedNamespaceLabels
+        properties:
+          - name: resourceLabels
+            type: Array
+            description: |
+              A list of Kubernetes Namespace labels.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: key
+                  type: String
+                  description: |
+                    The key of the kubernetes label.
+                  required: true
+                - name: value
+                  type: String
+                  description: |
+                    The value of the Label.
+                  required: true
+      - name: permissiveMode
         type: Boolean
         description: |
           This flag specifies whether Backups will not fail when
           Backup for GKE detects Kubernetes configuration that is
           non-standard or requires additional setup to restore.
-  - name: 'protectedPodCount'
+  - name: protectedPodCount
     type: Integer
     description: |
       The number of Kubernetes Pods backed up in the last successful Backup created via this BackupPlan.
     output: true
-  - name: 'state'
+  - name: protectedNamespaceCount
+    type: Integer
+    description: |
+      The number of Kubernetes Namespaces backed up in the last successful Backup created via this BackupPlan.
+    output: true
+  - name: state
     type: String
     description: |
       The State of the BackupPlan.
     output: true
-  - name: 'stateReason'
+  - name: stateReason
     type: String
     description: |
       Detailed description of why BackupPlan is in its current state.

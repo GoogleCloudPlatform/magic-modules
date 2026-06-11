@@ -12,51 +12,46 @@
 # limitations under the License.
 
 ---
-name: 'DatasetConfig'
+name: DatasetConfig
 description: |
-    Represents a Storage Insights DatasetConfig.
+  Represents a Storage Insights DatasetConfig.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/storage/docs/insights/datasets'
-  api: 'https://cloud.google.com/storage/docs/insights/reference/rest/v1/projects.locations.datasetConfigs'
-
-
-base_url: 'projects/{{project}}/locations/{{location}}/datasetConfigs'
-self_link: 'projects/{{project}}/locations/{{location}}/datasetConfigs/{{dataset_config_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/datasetConfigs?datasetConfigId={{dataset_config_id}}'
-
-custom_code:
-  post_create: templates/terraform/post_create/storage_insights_dataset_config.go.tmpl
-  pre_update: templates/terraform/pre_update/storage_insights_dataset_config.go.tmpl
-
-update_verb: 'PATCH'
-
+    Official Documentation: https://cloud.google.com/storage/docs/insights/datasets
+  api: https://cloud.google.com/storage/docs/insights/reference/rest/v1/projects.locations.datasetConfigs
+base_url: projects/{{project}}/locations/{{location}}/datasetConfigs
+self_link: projects/{{project}}/locations/{{location}}/datasetConfigs/{{dataset_config_id}}
+create_url: projects/{{project}}/locations/{{location}}/datasetConfigs?datasetConfigId={{dataset_config_id}}
 # Constructing updateMask in pre_update due to API exceptions.
 update_mask: false
-
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/datasetConfigs/{{dataset_config_id}}
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
 # If true, code for handling long-running operations is generated along with
 # the resource. If false, that code is not generated.
 # write operations of dataset config is an LRO.
 autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    base_url: '{{op_id}}'
-
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/datasetConfigs/{{dataset_config_id}}'
-
-examples:
-  - name: 'storage_insights_dataset_config_includes'
-    primary_resource_id: 'config_includes'
-    vars:
-      dataset_config_id: 'my_config_includes'
-  - name: 'storage_insights_dataset_config_excludes'
-    primary_resource_id: 'config_excludes'
-    vars:
-      dataset_config_id: 'my_config_excludes'
-
+custom_code:
+  post_create: templates/terraform/post_create/storage_insights_dataset_config.go.tmpl
+  pre_update: templates/terraform/pre_update/storage_insights_dataset_config.go.tmpl
+samples:
+  - name: storage_insights_dataset_config_includes
+    primary_resource_id: config_includes
+    steps:
+      - name: storage_insights_dataset_config_includes
+        resource_id_vars:
+          dataset_config_id: my_config_includes
+  - name: storage_insights_dataset_config_excludes
+    primary_resource_id: config_excludes
+    steps:
+      - name: storage_insights_dataset_config_excludes
+        resource_id_vars:
+          dataset_config_id: my_config_excludes
 virtual_fields:
-  - name: 'link_dataset'
+  - name: link_dataset
     type: Boolean
     default_value: false
     description: |
@@ -65,150 +60,153 @@ virtual_fields:
       Setting this field to true while creation will automatically link the created dataset as an additional functionality.
       -> **Note** A dataset config resource can only be destroyed once it is unlinked,
       so users must set this field to false to unlink the dataset and destroy the dataset config resource.
-
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The location of the DatasetConfig.
-  - name: 'datasetConfigId'
+  - name: datasetConfigId
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The user-defined ID of the DatasetConfig
-
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The full canonical resource name of the DatasetConfig (e.g., projects/P/locations/L/datasetConfigs/ID).
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The UTC time at which the DatasetConfig was created. This is auto-populated.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The UTC time at which the DatasetConfig was updated. This is auto-populated.
     output: true
-  - name: 'uid'
+  - name: uid
     type: String
     description: |
       System generated unique identifier for the resource.
     output: true
-  - name: 'organizationNumber'
+  - name: organizationNumber
     type: String
     description: |
       Organization resource ID that the source projects should belong to.
       Projects that do not belong to the provided organization are not considered when creating the dataset.
     default_from_api: true
     immutable: true
-  - name: 'includeNewlyCreatedBuckets'
+  - name: includeNewlyCreatedBuckets
     type: Boolean
     description: |
       If set to true, the request includes all the newly created buckets in the dataset that meet the inclusion and exclusion rules.
-  - name: 'retentionPeriodDays'
+  - name: retentionPeriodDays
     type: Integer
     description: |
       Number of days of history that must be retained.
     required: true
-  - name: 'link'
+  - name: activityDataRetentionPeriodDays
+    type: Integer
+    default_from_api: true
+    description: |
+      Number of days of activity data that must be retained. If not specified, retentionPeriodDays will be used. Set to 0 to turn off the activity data.
+  - name: link
     type: NestedObject
     description: |
       Details of the linked DatasetConfig.
     output: true
     properties:
-      - name: 'dataset'
+      - name: dataset
         type: String
         output: true
         description: |
           Dataset name for the linked DatasetConfig.
-      - name: 'linked'
+      - name: linked
         type: Boolean
         output: true
         description: |
           State of the linked DatasetConfig.
-  - name: 'identity'
+  - name: identity
     type: NestedObject
     description: |
       Identity used by DatasetConfig.
     immutable: true
     required: true
     properties:
-      - name: 'name'
+      - name: name
         type: String
         output: true
         description: |
           Name of the identity.
-      - name: 'type'
+      - name: type
         type: Enum
         required: true
         description: |
           Type of identity to use for the DatasetConfig.
         enum_values:
-          - 'IDENTITY_TYPE_PER_CONFIG'
-          - 'IDENTITY_TYPE_PER_PROJECT'
-  - name: 'datasetConfigState'
+          - IDENTITY_TYPE_PER_CONFIG
+          - IDENTITY_TYPE_PER_PROJECT
+  - name: datasetConfigState
     type: Enum
     description: |
       State of the DatasetConfig.
     output: true
     enum_values:
-      - 'CONFIG_STATE_UNSPECIFIED'
-      - 'CONFIG_STATE_ACTIVE'
-      - 'CONFIG_STATE_VERIFICATION_IN_PROGRESS'
-      - 'CONFIG_STATE_CREATED'
-      - 'CONFIG_STATE_PROCESSING'
-  - name: 'description'
+      - CONFIG_STATE_UNSPECIFIED
+      - CONFIG_STATE_ACTIVE
+      - CONFIG_STATE_VERIFICATION_IN_PROGRESS
+      - CONFIG_STATE_CREATED
+      - CONFIG_STATE_PROCESSING
+  - name: description
     type: String
     description: |
       An optional user-provided description for the dataset configuration with a maximum length of 256 characters.
-  - name: 'sourceProjects'
+  - name: sourceProjects
     type: NestedObject
     description: |
       Defines the options for providing source projects for the DatasetConfig.
     properties:
-      - name: 'projectNumbers'
+      - name: projectNumbers
         type: Array
         description: |
           The list of project numbers to include in the DatasetConfig.
         item_type:
           type: String
     exactly_one_of:
-      - 'source_projects'
-      - 'source_folders'
-      - 'organization_scope'
-  - name: 'sourceFolders'
+      - source_projects
+      - source_folders
+      - organization_scope
+  - name: sourceFolders
     type: NestedObject
     description: |
       Defines the options for providing source folders for the DatasetConfig.
     properties:
-      - name: 'folderNumbers'
+      - name: folderNumbers
         type: Array
         description: |
           The list of folder numbers to include in the DatasetConfig.
         item_type:
           type: String
     exactly_one_of:
-      - 'source_projects'
-      - 'source_folders'
-      - 'organization_scope'
-  - name: 'organizationScope'
+      - source_projects
+      - source_folders
+      - organization_scope
+  - name: organizationScope
     type: Boolean
     description: |
       Defines the options for providing a source organization for the DatasetConfig.
     exactly_one_of:
-      - 'source_projects'
-      - 'source_folders'
-      - 'organization_scope'
-  - name: 'includeCloudStorageLocations'
+      - source_projects
+      - source_folders
+      - organization_scope
+  - name: includeCloudStorageLocations
     type: NestedObject
     description: |
       Defines the options for including cloud storage locations for the DatasetConfig.
@@ -221,8 +219,8 @@ properties:
         item_type:
           type: String
     conflicts:
-      - 'exclude_cloud_storage_locations'
-  - name: 'excludeCloudStorageLocations'
+      - exclude_cloud_storage_locations
+  - name: excludeCloudStorageLocations
     type: NestedObject
     description: |
       Defines the options for excluding cloud storage locations for the DatasetConfig.
@@ -235,8 +233,8 @@ properties:
         item_type:
           type: String
     conflicts:
-      - 'include_cloud_storage_locations'
-  - name: 'includeCloudStorageBuckets'
+      - include_cloud_storage_locations
+  - name: includeCloudStorageBuckets
     type: NestedObject
     description: |
       Defines the options for including cloud storage buckets for the DatasetConfig.
@@ -261,8 +259,8 @@ properties:
                 Regex should follow the syntax specified in google/re2 on GitHub.
                 Exactly one of the bucket_name and bucket_prefix_regex should be specified.
     conflicts:
-      - 'exclude_cloud_storage_buckets'
-  - name: 'excludeCloudStorageBuckets'
+      - exclude_cloud_storage_buckets
+  - name: excludeCloudStorageBuckets
     type: NestedObject
     description: |
       Defined the options for excluding cloud storage buckets for the DatasetConfig.
@@ -287,4 +285,4 @@ properties:
                 Regex should follow the syntax specified in google/re2 on GitHub.
                 Exactly one of the bucket_name and bucket_prefix_regex should be specified.
     conflicts:
-      - 'include_cloud_storage_buckets'
+      - include_cloud_storage_buckets

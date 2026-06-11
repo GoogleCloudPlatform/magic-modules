@@ -16,6 +16,7 @@ name: 'Queue'
 description: |
   A named resource to which messages are sent by publishers.
 docs:
+include_in_tgc_next: true
 id_format: 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/queues'
 update_verb: 'PATCH'
@@ -28,7 +29,6 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
     - '{{name}}'
@@ -39,7 +39,6 @@ custom_code:
 examples:
   - name: 'queue_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloud-tasks-queue-test%s", context["random_suffix"])'
     vars:
       name: 'cloud-tasks-queue-test'
   - name: 'cloud_tasks_queue_advanced'
@@ -91,6 +90,7 @@ properties:
       Overrides for task-level appEngineRouting. These settings apply only
       to App Engine tasks in this queue
     custom_flatten: 'templates/terraform/custom_flatten/cloudtasks_queue_appenginerouting.go.tmpl'
+    tgc_ignore_terraform_custom_flatten: true
     properties:
       - name: 'service'
         type: String
@@ -304,6 +304,7 @@ properties:
               URI query.
 
               When specified, replaces the query part of the task URI. Setting the query value to an empty string clears the URI query segment.
+            diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
             properties:
               - name: 'queryParams'
                 type: String
@@ -359,6 +360,7 @@ properties:
           Note that both the service account email and the scope MUST be specified when using the queue-level authorization override.
         conflicts:
           - oidcToken
+        is_missing_in_cai: true
         properties:
           - name: 'serviceAccountEmail'
             type: String

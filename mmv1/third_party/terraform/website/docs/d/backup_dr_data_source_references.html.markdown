@@ -8,19 +8,15 @@ description: |-
 
 A list of Backup and DR data source references.
 
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
-
 ## Example Usage
 
 ```hcl
-data "google_backup_dr_data_source_references" "my_sql_references" {
+data "google_backup_dr_data_source_references" "data_source_reference" {
   location      = "us-central1"
-  resource_type = "sqladmin.googleapis.com/Instance"
 }
 
-output "first_sql_reference_name" {
-  name = data.google_backup_dr_data_source_references.my_sql_references.data_source_references[0].name
+output "all_data_source_references" {
+  allReferences = data.google_backup_dr_data_source_references.my_references.data_source_references
 }
 ```
 
@@ -29,8 +25,7 @@ output "first_sql_reference_name" {
 The following arguments are supported:
 
 *   `location `- (Required) The location of the data source references.
-    
-*   `resource_type` - (Required) The resource type to get the data source references for. Examples include, "sqladmin.googleapis.com/Instance" , "compute.googleapis.com/Instance" (right now this service not available for compute Instances , it will be added soon )
+*   `resource_type` - (Optional, Deprecated) The resource type to get the data source references for. Examples include, "sqladmin.googleapis.com/Instance" , "compute.googleapis.com/Instance". `resource_type` is deprecated and will be removed in a future major release.
     
 *   `project` - (Optional) The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
     
@@ -39,22 +34,22 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following attributes are exported:
 
-*  data\_source\_references - A list of the data source references found. Each element of this list has the following attributes:
+* data\_source\_references - A list of the data source references found. Each element of this list has the following attributes:
     
-    1.   `name`- The full name of the data source reference.
+  1.   `name`- The full name of the data source reference.
         
-    2.   `data_source`- The underlying data source resource.
+  2.   `data_source`- The underlying data source resource.
         
-    3.   `backup_config_state`- The state of the backup config for the data source.
+  3.   `backup_config_state`- The state of the backup config for the data source.
         
-    4.   `backup_count`- The number of backups for the data source.
+  4.   `backup_count`- The number of backups for the data source.
         
-    5.   `last_backup_state`- The state of the last backup.
+  5.   `last_backup_state`- The state of the last backup.
         
-    6.   `last_successful_backup_time`- The last time a successful backup was made.
+  6.   `last_successful_backup_time`- The last time a successful backup was made.
         
-    7.  `gcp_resource_name`- The GCP resource name for the data source.
+  7.  `gcp_resource_name`- The GCP resource name for the data source.
         
-    8.   `resource_type`- The type of the referenced resource.
+  8.   `resource_type`- The type of the referenced resource.
 
 See [google_backup_dr_data_source_references](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/backup_dr_data_source_references) resource for details of the available attributes.

@@ -30,6 +30,7 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}'
+include_in_tgc_next: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -51,34 +52,35 @@ iam_policy:
     - '{{workload_identity_pool_id}}'
   allowed_iam_role: 'roles/iam.workloadIdentityPoolViewer'
   iam_conditions_request_type: 'REQUEST_BODY'
-  min_version: beta
 custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  post_create: 'templates/terraform/post_create/iam_workload_identity_pool.go.tmpl'
+  post_read: 'templates/terraform/post_read/iam_workload_identity_pool.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/iam_workload_identity_pool.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/iam_workload_identity_pool.go.tmpl'
 examples:
   - name: 'iam_workload_identity_pool_basic'
     primary_resource_id: 'example'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
     vars:
       workload_identity_pool_id: 'example-pool'
   - name: 'iam_workload_identity_pool_full_federation_only_mode'
     primary_resource_id: 'example'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
     vars:
       workload_identity_pool_id: 'example-pool'
-    min_version: beta
-    external_providers:
-      - 'random'
   - name: 'iam_workload_identity_pool_full_trust_domain_mode'
     primary_resource_id: 'example'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
     vars:
       workload_identity_pool_id: 'example-pool'
-    min_version: beta
+    test_env_vars:
+      project: 'PROJECT_NUMBER'
+  - name: 'iam_workload_identity_pool_full_trust_domain_mode_with_default_shared_ca'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+    test_env_vars:
+      project: 'PROJECT_NUMBER'
 parameters:
 properties:
   - name: 'workloadIdentityPoolId'
@@ -149,20 +151,30 @@ properties:
       format: `ns/<namespace>/sa/<workload_identifier>`.
       `google_iam_workload_identity_pool_provider`s cannot be created within `TRUST_DOMAIN`
       mode pools.
-    min_version: beta
+      * `SYSTEM_TRUST_DOMAIN`: Pools are managed by Google Cloud services. Neither
+      `google_iam_workload_identity_pool_namespace`s nor `google_iam_workload_identity_pool_provider`s
+      can be created within `SYSTEM_TRUST_DOMAIN` mode pools. All identities within a
+      `SYSTEM_TRUST_DOMAIN` mode pool are in one of the following formats:
+
+          * `spiffe://<trust-domain>/ns/<kubernetes-namespace>/sa/<kubernetes-service-account>`
+          * `spiffe://<trust-domain>/resources/<resource-scope>/<resource-name>`
+    default_from_api: true
     enum_values:
       - 'FEDERATION_ONLY'
       - 'TRUST_DOMAIN'
+      - 'SYSTEM_TRUST_DOMAIN'
   - name: 'inlineCertificateIssuanceConfig'
     type: NestedObject
     description: |
       Represents configuration for generating mutual TLS (mTLS) certificates for the identities
       within this pool. Defines the Certificate Authority (CA) pool resources and configurations
       required for issuance and rotation of mTLS workload certificates.
-    min_version: beta
     properties:
       - name: 'caPools'
         type: KeyValuePairs
+        exactly_one_of:
+          - 'inlineCertificateIssuanceConfig.0.ca_pools'
+          - 'inlineCertificateIssuanceConfig.0.use_default_shared_ca'
         description: |
           A required mapping of a cloud region to the CA pool resource located in that region used
           for certificate issuance, adhering to these constraints:
@@ -173,7 +185,20 @@ properties:
           `projects/{project}/locations/{location}/caPools/{ca_pool}`
           * **Region Matching:** Workloads are ONLY issued certificates from CA pools within the
           same region. Also the CA pool region (in value) must match the workload's region (key).
-        required: true
+      - name: 'useDefaultSharedCa'
+        type: Boolean
+        exactly_one_of:
+          - 'inlineCertificateIssuanceConfig.0.ca_pools'
+          - 'inlineCertificateIssuanceConfig.0.use_default_shared_ca'
+        description: |
+          If set to true, the trust domain will utilize the GCP-provisioned default CA. A default
+          CA in the same region as the workload will be selected to issue the certificate. Enabling
+          this will clear any existing `ca_pools` configuration to provision the certificates.
+
+
+          ~> **Note** This field is mutually exclusive with `ca_pools`. If this flag is enabled,
+          certificates will be automatically provisioned from the default shared CAs. This flag should
+          not be set if you want to use your own CA pools to provision the certificates.
       - name: 'lifetime'
         type: String
         description: |
@@ -215,7 +240,6 @@ properties:
       domain will recognize and accept certificates issued by entities within the trusted domains.
       Note that a trust domain automatically trusts itself, eliminating the need for explicit
       configuration.
-    min_version: beta
     properties:
       - name: 'additionalTrustBundles'
         type: Map
@@ -229,11 +253,7 @@ properties:
           `additional_trust_bundles` map, those trust anchors will be *appended to* the Trust Bundle
           automatically derived from your `InlineCertificateIssuanceConfig`'s `ca_pools`.
         key_name: trust_domain
-        key_description: |
-          The trusted trust domains (e.g., "example.com") to be extended trust to additional trust
-          domains to.
         value_type:
-          name: trustStore
           type: NestedObject
           description: |
             Trust store that contains trust anchors and optional intermediate CAs used in PKI to
@@ -257,3 +277,31 @@ properties:
                       PEM certificate of the PKI used for validation. Must only contain one ca
                       certificate(either root or intermediate cert).
                     required: true
+            - name: 'trustDefaultSharedCa'
+              type: Boolean
+              description: |
+                If set to True, the trust bundle will include the private ca managed identity regional root
+                public certificates.
+
+
+                ~> **Note** `trust_default_shared_ca` is only supported for managed identity trust domain
+                resource.
+  - name: 'attestationRules'
+    is_missing_in_cai: true
+    type: Array
+    description: |
+      Defines which workloads can receive an identity within a pool. When an AttestationRule is
+      defined under a managed identity, matching workloads may receive that identity. A maximum of
+      50 AttestationRules can be set.
+    update_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}:setAttestationRules'
+    update_verb: 'POST'
+    is_set: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'googleCloudResource'
+          type: String
+          description: |
+            A single workload operating on Google Cloud. For example:
+            `//run.googleapis.com/projects/123/type/Service/*`.
+          required: true

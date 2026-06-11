@@ -10,6 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/orgpolicy"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -77,7 +79,7 @@ func TestAccOrgPolicyPolicy_OrganizationPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -97,6 +99,15 @@ func TestAccOrgPolicyPolicy_OrganizationPolicy(t *testing.T) {
 			},
 			{
 				Config: testAccOrgPolicyPolicy_OrganizationPolicyUpdate0(context),
+			},
+			{
+				ResourceName:            "google_org_policy_policy.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "spec.0.rules.0.condition.0.expression"},
+			},
+			{
+				Config: testAccOrgPolicyPolicy_DryRunSpecHandWritten(context),
 			},
 			{
 				ResourceName:            "google_org_policy_policy.primary",
@@ -140,31 +151,6 @@ func TestAccOrgPolicyPolicy_ProjectPolicy(t *testing.T) {
 			},
 			{
 				Config: testAccOrgPolicyPolicy_ProjectPolicyUpdate1(context),
-			},
-			{
-				ResourceName:            "google_org_policy_policy.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "spec.0.rules.0.condition.0.expression"},
-			},
-		},
-	})
-}
-func TestAccOrgPolicyPolicy_DryRunSpecHandWritten(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckOrgPolicyPolicyDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccOrgPolicyPolicy_DryRunSpecHandWritten(context),
 			},
 			{
 				ResourceName:            "google_org_policy_policy.primary",
@@ -266,7 +252,7 @@ resource "google_folder" "basic" {
 func testAccOrgPolicyPolicy_OrganizationPolicy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_org_policy_custom_constraint" "constraint" {
-  name         = "custom.tfTest%{random_suffix}"
+  name         = "custom.tfTestdisableGkeAutoUpgrade%{random_suffix}"
   parent       = "organizations/%{org_id}"
   display_name = "Disable GKE auto upgrade"
   description  = "Only allow GKE NodePool resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced."
@@ -291,7 +277,7 @@ resource "google_org_policy_policy" "primary" {
 func testAccOrgPolicyPolicy_OrganizationPolicyUpdate0(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_org_policy_custom_constraint" "constraint" {
-  name         = "custom.tfTest%{random_suffix}"
+  name         = "custom.tfTestdisableGkeAutoUpgrade%{random_suffix}"
   parent       = "organizations/%{org_id}"
   display_name = "Disable GKE auto upgrade"
   description  = "Only allow GKE NodePool resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced."
@@ -429,14 +415,14 @@ resource "google_project" "basic" {
 func testAccOrgPolicyPolicy_DryRunSpecHandWritten(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_org_policy_custom_constraint" "constraint" {
-  name         = "custom.disableGkeAutoUpgrade%{random_suffix}"
+  name         = "custom.tfTestdisableGkeAutoUpgrade%{random_suffix}"
   parent       = "organizations/%{org_id}"
   display_name = "Disable GKE auto upgrade"
   description  = "Only allow GKE NodePool resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced."
 
   action_type    = "ALLOW"
   condition      = "resource.management.autoUpgrade == false"
-  method_types   = ["CREATE"]
+  method_types   = ["CREATE", "UPDATE"]
   resource_types = ["container.googleapis.com/NodePool"]
 }
 
@@ -473,7 +459,7 @@ func testAccCheckOrgPolicyPolicyDestroyProducer(t *testing.T) func(s *terraform.
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{OrgPolicyBasePath}}{{parent}}/policies/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(orgpolicy.Product, config)+"{{parent}}/policies/{{name}}")
 			if err != nil {
 				return err
 			}

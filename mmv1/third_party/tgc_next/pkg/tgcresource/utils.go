@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 )
 
 // Remove the Terraform attribution label "goog-terraform-provisioned" from labels
@@ -15,11 +15,17 @@ func RemoveTerraformAttributionLabel(raw interface{}) interface{} {
 
 	if labels, ok := raw.(map[string]string); ok {
 		delete(labels, "goog-terraform-provisioned")
+		if len(labels) == 0 {
+			return nil
+		}
 		return labels
 	}
 
 	if labels, ok := raw.(map[string]interface{}); ok {
 		delete(labels, "goog-terraform-provisioned")
+		if len(labels) == 0 {
+			return nil
+		}
 		return labels
 	}
 
@@ -75,4 +81,15 @@ func AllValuesAreNil(m map[string]interface{}) bool {
 	}
 
 	return true
+}
+
+// ParseFieldValue extracts named part from resource url.
+func ParseFieldValue(url string, name string) string {
+	fragments := strings.Split(url, "/")
+	for ix, item := range fragments {
+		if item == name && ix+1 < len(fragments) {
+			return fragments[ix+1]
+		}
+	}
+	return ""
 }

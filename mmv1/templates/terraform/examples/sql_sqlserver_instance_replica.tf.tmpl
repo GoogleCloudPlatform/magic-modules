@@ -1,7 +1,7 @@
 resource "google_sql_database_instance" "primary" {
   name             = "{{index $.Vars "sqlserver_primary_instance_name"}}"
   region           = "europe-west4"
-  database_version = "SQLSERVER_2019_ENTERPRISE"
+  database_version = "SQLSERVER_2022_ENTERPRISE"
   root_password    = "INSERT-PASSWORD-HERE"
   settings {
     tier = "db-custom-2-7680"
@@ -16,7 +16,7 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name                 = "{{index $.Vars "sqlserver_replica_instance_name"}}"
   master_instance_name = google_sql_database_instance.primary.name
   region               = "europe-west4"
-  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  database_version     = "SQLSERVER_2022_ENTERPRISE"
   root_password        = "INSERT-PASSWORD-HERE"
   replica_configuration {
     failover_target = false

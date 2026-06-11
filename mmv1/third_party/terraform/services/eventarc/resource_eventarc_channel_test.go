@@ -5,6 +5,9 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/eventarc"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -17,11 +20,11 @@ func TestAccEventarcChannel_cryptoKeyUpdate(t *testing.T) {
 		"region":         region,
 		"project_name":   envvar.GetTestProjectFromEnv(),
 		"project_number": envvar.GetTestProjectNumberFromEnv(),
-		"key1":           acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-channel-key1").CryptoKey.Name,
-		"key2":           acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-channel-key2").CryptoKey.Name,
+		"key1":           kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-channel-key1").CryptoKey.Name,
+		"key2":           kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-channel-key2").CryptoKey.Name,
 		"random_suffix":  acctest.RandString(t, 10),
 	}
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -37,17 +40,19 @@ func TestAccEventarcChannel_cryptoKeyUpdate(t *testing.T) {
 				Config: testAccEventarcChannel_setCryptoKey(context),
 			},
 			{
-				ResourceName:      "google_eventarc_channel.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_eventarc_channel.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccEventarcChannel_cryptoKeyUpdate(context),
 			},
 			{
-				ResourceName:      "google_eventarc_channel.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_eventarc_channel.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -60,6 +65,10 @@ resource "google_eventarc_channel" "primary" {
   name                 = "tf-test-name%{random_suffix}"
   crypto_key_name      = "%{key1}"
   third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
+
+  labels = {
+    "foo" = "bar"
+  }
 }
 `, context)
 }
@@ -71,6 +80,7 @@ resource "google_eventarc_channel" "primary" {
   name                 = "tf-test-name%{random_suffix}"
   crypto_key_name      = "%{key2}"
   third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
+
 }
 `, context)
 }

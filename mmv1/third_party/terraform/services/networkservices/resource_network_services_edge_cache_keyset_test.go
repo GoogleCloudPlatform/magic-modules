@@ -5,13 +5,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networkservices"
 )
 
 func TestAccNetworkServicesEdgeCacheKeyset_update(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"resource_name": "tf-test-my-keyset" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -45,7 +49,7 @@ func testAccNetworkServicesEdgeCacheKeyset_update(context map[string]interface{}
 	return acctest.Nprintf(`
 
 resource "google_network_services_edge_cache_keyset" "default" {
-  name                 = "default%{random_suffix}"
+  name                 = "%{resource_name}"
   description          = "T2"
   public_key {
     id = "my-public-key-2"

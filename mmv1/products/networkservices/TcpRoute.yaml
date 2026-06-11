@@ -50,25 +50,25 @@ examples:
     vars:
       resource_name: 'my-tcp-route'
       backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+      health_check_name: 'backend-service-health-check'
   - name: 'network_services_tcp_route_actions'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-tcp-route'
       backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+      health_check_name: 'backend-service-health-check'
   - name: 'network_services_tcp_route_mesh_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-tcp-route'
       backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+      health_check_name: 'backend-service-health-check'
   - name: 'network_services_tcp_route_gateway_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-tcp-route'
       backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+      health_check_name: 'backend-service-health-check'
 parameters:
   - name: 'name'
     type: String

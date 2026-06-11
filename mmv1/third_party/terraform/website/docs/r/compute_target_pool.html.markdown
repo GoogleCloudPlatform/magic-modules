@@ -73,7 +73,14 @@ The following arguments are supported:
     affinity). "CLIENT_IP" (hash of the source/dest addresses / ports), and
     "CLIENT_IP_PROTO" also includes the protocol (default "NONE").
 
-* `security_policy` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The resource URL for the security policy associated with this target pool.
+* `security_policy` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The resource URL for the security policy associated with this target pool.
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
 
 ## Attributes Reference
 

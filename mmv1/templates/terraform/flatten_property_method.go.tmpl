@@ -13,45 +13,40 @@
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
-{{- if $.WriteOnlyLegacy }}
+{{- if and (or $.WriteOnlyLegacy $.WriteOnly) }}
 {{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
-    {{- $.CustomTemplate $.CustomFlatten false -}}
+    {{- customTemplate $ $.CustomFlatten false -}}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  {{- if and $.IgnoreRead (not $.ResourceMetadata.IsTgcCompiler) }}
-  return d.Get("{{ $.TerraformLineage }}")
+  {{- if or $.IgnoreRead $.ClientSide }}
+  return d.Get("{{ join $.Lineage ".0." }}")
   {{- else if $.IsA "NestedObject" }}
   if v == nil {
     return nil
   }
-    {{- if not $.AllowEmptyObject }}
+        {{- if not $.AllowEmptyObject }}
   original := v.(map[string]interface{})
   if len(original) == 0 {
     return nil
   }
-    {{- else if $.UserProperties }}
+        {{- else if $.UserProperties }}
   original := v.(map[string]interface{})
-    {{- end }}
+        {{- end }}
   transformed := make(map[string]interface{})
-    {{- range $prop := $.UserProperties }}
-      {{- if $prop.WriteOnlyLegacy }}
-      {{- else if $prop.FlattenObject }}
+        {{- range $prop := $.UserProperties }}
+            {{- if or $prop.WriteOnlyLegacy $prop.WriteOnly }}
+            {{- else if $prop.FlattenObject }}
     if {{ $prop.ApiName }} := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config); {{ $prop.ApiName }} != nil {
       obj := {{ $prop.ApiName }}.([]interface{})[0]
       for k, v := range obj.(map[string]interface{}) {
         transformed[k] = v
       }
     }
-      {{- else }}
+            {{- else }}
     transformed["{{ underscore $prop.Name }}"] =
     flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config)
-      {{- end }}
-    {{- end }}
-    {{- if and $.ResourceMetadata.IsTgcCompiler (not $.AllowEmptyObject) }}
-    if tgcresource.AllValuesAreNil(transformed) {
-      return nil
-    }
-    {{- end }}
+            {{- end }}
+        {{- end }}{{/* range $prop := $.UserProperties */}}
   return []interface{}{transformed}
   {{- else if and ($.IsA "Array") ($.ItemType.IsA "NestedObject") }}
   if v == nil {
@@ -80,7 +75,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   {{- end }}
 
   {{- range $prop := $.ItemType.UserProperties }}
-    {{- if not (or $prop.IgnoreRead $prop.WriteOnlyLegacy) }}
+    {{- if not (or $prop.IgnoreRead $prop.WriteOnlyLegacy $prop.WriteOnly) }}
       "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
     {{- end }}
   {{- end }}
@@ -109,7 +104,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   }
 
   transformed := make(map[string]interface{})
-  if l, ok := d.GetOkExists("{{ $.TerraformLineage }}"); ok {
+  if l, ok := d.GetOkExists("{{ join $.Lineage ".0." }}"); ok {
     for k := range l.(map[string]interface{}) {
       transformed[k] = v.(map[string]interface{})[k]
     }
@@ -137,14 +132,10 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   }
   return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
   {{- else if $.IsA "ResourceRef" }}
-    {{- if $.ResourceMetadata.IsTgcCompiler }}
-  {{- template "fullToRelativePath" $ -}}
-    {{- else }}
   if v == nil {
     return v
   }
   return tpgresource.ConvertSelfLinkToV1(v.(string))
-    {{- end }}
   {{- else if $.IsSet }}
   if v == nil {
     return v
@@ -154,22 +145,13 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- else if or ($.ItemType.IsA "String") ($.ItemType.IsA "Enum") }}
   return schema.NewSet(schema.HashString, v.([]interface{}))
     {{- end }}
-  {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "Boolean") ($.Required) }}
-	if v == nil {
-		return false
-	}
-	return v
   {{- else }}
   return v
 {{- end }}
 }
 {{- if $.NestedProperties }}
     {{- range $prop := $.NestedProperties }}
-      {{- if $.ResourceMetadata.IsTgcCompiler }}
-      {{ template "flattenTgcPropertyMethod" $prop -}}
-      {{- else }}
       {{ template "flattenPropertyMethod" $prop -}}
-      {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}

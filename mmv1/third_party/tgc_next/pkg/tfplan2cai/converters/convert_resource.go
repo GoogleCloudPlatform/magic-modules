@@ -3,12 +3,12 @@ package converters
 import (
 	"fmt"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/ancestrymanager"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/models"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/ancestrymanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/models"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"

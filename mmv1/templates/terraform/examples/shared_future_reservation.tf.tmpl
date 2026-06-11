@@ -21,7 +21,7 @@ resource "google_project" "guest_project" {
   deletion_policy = "DELETE"
 }
 
-resource "google_org_policy_policy" "shared_reservation_org_policy" {
+resource "google_org_policy_policy" "shared_future_reservation_org_policy" {
   provider = google-beta
   name   = "projects/${google_project.owner_project.project_id}/policies/compute.sharedReservationsOwnerProjects"
   parent = "projects/${google_project.owner_project.project_id}"
@@ -37,9 +37,10 @@ resource "google_compute_future_reservation" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   project = google_project.owner_project.project_id
   name    = "{{index $.Vars "future_reservation_name"}}"
+  auto_delete_auto_created_reservations = true
   time_window {
-    start_time = "2025-08-01T00:00:00Z"
-    end_time   = "2025-08-02T00:00:00Z"
+    start_time = "{{ index $.Vars "start_time" }}"
+    end_time   = "{{ index $.Vars "end_time" }}"
   }
 
   share_settings {

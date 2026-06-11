@@ -5,18 +5,24 @@ enableGitInfo: true
 disableKinds:
   - taxonomy
   - term
-module:
-  imports:
-    - path: github.com/alex-shpak/hugo-book
-params:
-  BookTheme: light
-  BookLogo: magic-modules.svg
-  BookRepo: https://github.com/GoogleCloudPlatform/magic-modules
-  BookCommitPath: commit
-  BookEditPath: edit/main/docs
-  BookComments: false
-  BookSection: '*'
 markup:
   goldmark:
     renderer:
       unsafe: true
+  highlight:
+    style: base16-snazzy
+    tabWidth: 2
+module:
+  imports:
+    - path: github.com/alex-shpak/hugo-book/v12
+menu:
+  before:
+    - name: "Overview"
+      pageRef: "/"
+params:
+  BookTheme: light
+  BookLogo: magic-modules.svg
+  BookLastChangeLink: 'https://github.com/GoogleCloudPlatform/magic-modules/commit/{{ .GitInfo.Hash }}'
+  BookEditLink: 'https://github.com/GoogleCloudPlatform/magic-modules/edit/main/docs/{{ .Path }}'
+  BookComments: false
+  BookSection: '*'

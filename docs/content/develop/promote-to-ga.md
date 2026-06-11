@@ -26,12 +26,13 @@ For more information about types of resources and the generation process overall
 
 ## Promote fields and resources
 
-{{< tabs "resources" >}}
+{{% tabs "resources" %}}
 {{< tab "MMv1" >}}
-1. Remove `min_version: 'beta'` from the resource's or field's configuration in `ResourceName.yaml`.
-2. If necessary, remove version guards from resource-level `custom_code`.
-3. Add `min_version: 'beta'` on any fields or subfields that should not be promoted.
-4. If necessary, add `{{- if ne $.TargetVersionName "ga" }}...{{- end }} ` version guards to resource-level `custom_code` that should not be promoted.
+1. In `product.yaml` (located in `mmv1/products/<product_name>/product.yaml`), ensure that the `versions` list includes the `ga` version and its corresponding `base_url`. If the product was previously beta-only, this entry will be missing and must be added before any resources can be promoted.
+2. Remove `min_version: 'beta'` from the resource's or field's configuration in `ResourceName.yaml`.
+3. If necessary, remove version guards from resource-level `custom_code`.
+4. Add `min_version: 'beta'` on any fields or subfields that should not be promoted.
+5. If necessary, add `{{- if ne $.TargetVersionName "ga" }}...{{- end }} ` version guards to resource-level `custom_code` that should not be promoted.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Remove version guards from the resource's implementation for any functionality being promoted. Be sure to check:
@@ -46,7 +47,7 @@ For more information about types of resources and the generation process overall
    - For other fields, expanders and flatteners
    - Any other resource-specific code
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## Promote tests
 
@@ -65,7 +66,7 @@ For handwritten resources, modify the documentation as appropriate for your chan
 3. Add `Beta` as an annotation on any fields or subfields that remained beta-only. For example:
 
    ```markdown
-   * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
+   * `FIELD_NAME` - (Optional, [Beta](../guides/provider_versions.html.markdown)) FIELD_DESCRIPTION
    ```
 
    Replace `FIELD_NAME` and `FIELD_DESCRIPTION` with the field's name and description.

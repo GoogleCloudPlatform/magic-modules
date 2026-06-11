@@ -3,8 +3,8 @@ package cai
 import (
 	"regexp"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 )
 
 // AssetName templates an asset.name by looking up and replacing all instances

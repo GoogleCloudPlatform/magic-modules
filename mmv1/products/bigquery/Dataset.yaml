@@ -37,10 +37,14 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
+custom_diff:
+  - 'customCollationDiff'
+# exluding resource_identity due to dataset_id field
+exclude_identity_generation: true
 exclude_sweeper: true
 examples:
   - name: 'bigquery_dataset_basic'
@@ -48,11 +52,17 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
   - name: 'bigquery_dataset_with_max_time_travel_hours'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
   - name: 'bigquery_dataset_cmek'
     primary_resource_id: 'dataset'
@@ -67,6 +77,13 @@ examples:
       private: 'private'
       public: 'public'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      private: '"private" + randomSuffix'
+      # for backward compatible
+      public: '"public" + randomSuffix'
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
   - name: 'bigquery_dataset_authorized_routine'
     primary_resource_id: 'private'
     vars:
@@ -80,12 +97,18 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
   - name: 'bigquery_dataset_default_collation_set'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    test_vars_overrides:
+      # for backward compatible
+      account_name: '"bqowner" + randomSuffix'
     exclude_docs: true
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
@@ -98,13 +121,15 @@ examples:
       dataset_id: 'example_dataset'
   - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
     vars:
       dataset_id: 'dataset'
       tag_key1: 'tag_key1'
       tag_value1: 'tag_value1'
       tag_key2: 'tag_key2'
       tag_value2: 'tag_value2'
+    test_vars_overrides:
+      # for backward compatible
+      dataset_id: '"dataset" + randomSuffix'
     exclude_docs: true
 virtual_fields:
   - name: 'delete_contents_on_destroy'
@@ -141,6 +166,8 @@ properties:
         - name: 'groupByEmail'
           type: String
           description: An email address of a Google Group to grant access to.
+          custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
         - name: 'role'
           type: String
           description: |
@@ -167,6 +194,8 @@ properties:
           description: |
             An email address of a user to grant access to. For example:
             fred@example.com
+          custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
         - name: 'view'
           type: NestedObject
           description: |
@@ -420,6 +449,8 @@ properties:
       - 'und:ci': undetermined locale, case insensitive.
       - '': empty string. Default to case-sensitive behavior.
     default_from_api: true
+    send_empty_value: true
+    custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_default_collation.go.tmpl'
   - name: 'storageBillingModel'
     type: String
     description: |

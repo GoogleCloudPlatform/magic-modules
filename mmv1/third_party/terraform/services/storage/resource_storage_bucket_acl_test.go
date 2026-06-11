@@ -65,7 +65,7 @@ func TestAccStorageBucketAcl_upgrade(t *testing.T) {
 			},
 
 			{
-				Config: testGoogleStorageBucketsAclBasic2(bucketName),
+				Config: testGoogleStorageBucketsAclBasic2Owner(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageBucketAcl(t, bucketName, roleEntityBasic2),
 					testAccCheckGoogleStorageBucketAcl(t, bucketName, roleEntityBasic3_owner),
@@ -216,7 +216,7 @@ func testAccCheckGoogleStorageBucketAclDelete(t *testing.T, bucket, roleEntityS 
 		roleEntity, _ := storage.GetRoleEntityPair(roleEntityS)
 		config := acctest.GoogleProviderConfig(t)
 
-		_, err := config.NewStorageClient(config.UserAgent).BucketAccessControls.Get(bucket, roleEntity.Entity).Do()
+		_, err := storage.NewClient(config, config.UserAgent).BucketAccessControls.Get(bucket, roleEntity.Entity).Do()
 
 		if err != nil {
 			return nil
@@ -231,7 +231,7 @@ func testAccCheckGoogleStorageBucketAcl(t *testing.T, bucket, roleEntityS string
 		roleEntity, _ := storage.GetRoleEntityPair(roleEntityS)
 		config := acctest.GoogleProviderConfig(t)
 
-		res, err := config.NewStorageClient(config.UserAgent).BucketAccessControls.Get(bucket, roleEntity.Entity).Do()
+		res, err := storage.NewClient(config, config.UserAgent).BucketAccessControls.Get(bucket, roleEntity.Entity).Do()
 
 		if err != nil {
 			return fmt.Errorf("Error retrieving contents of acl for bucket %s: %s", bucket, err)
@@ -256,7 +256,7 @@ func testAccStorageBucketAclDestroyProducer(t *testing.T) func(s *terraform.Stat
 
 			bucket := rs.Primary.Attributes["bucket"]
 
-			_, err := config.NewStorageClient(config.UserAgent).BucketAccessControls.List(bucket).Do()
+			_, err := storage.NewClient(config, config.UserAgent).BucketAccessControls.List(bucket).Do()
 
 			if err == nil {
 				return fmt.Errorf("Acl for bucket %s still exists", bucket)
@@ -307,6 +307,20 @@ resource "google_storage_bucket_acl" "acl" {
   role_entity = ["%s", "%s", "%s", "%s", "%s"]
 }
 `, bucketName, roleEntityOwners, roleEntityEditors, roleEntityViewers, roleEntityBasic2, roleEntityBasic3_owner)
+}
+
+func testGoogleStorageBucketsAclBasic2Owner(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+}
+
+resource "google_storage_bucket_acl" "acl" {
+  bucket      = google_storage_bucket.bucket.name
+  role_entity = ["%s", "%s", "%s", "%s", "%s", "%s"]
+}
+`, bucketName, roleEntityOwners, roleEntityEditors, roleEntityViewers, roleEntityBasic1, roleEntityBasic2, roleEntityBasic3_owner)
 }
 
 func testGoogleStorageBucketsAclBasicDelete(bucketName string) string {

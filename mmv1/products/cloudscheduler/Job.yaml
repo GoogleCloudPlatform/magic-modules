@@ -36,6 +36,7 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/cloud_scheduler.go.tmpl'
   post_create: 'templates/terraform/post_create/cloud_scheduler.go.tmpl'
   post_update: 'templates/terraform/post_update/cloud_scheduler.go.tmpl'
+generate_list_resource: true
 custom_diff:
   - 'validateAuthHeaders'
 examples:

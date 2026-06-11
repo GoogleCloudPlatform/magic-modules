@@ -15,7 +15,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		return ""
 	}
 
-    dec, err := base64.RawStdEncoding.DecodeString(v.(string))
+	dec, err := base64.URLEncoding.DecodeString(v.(string))
 	if err != nil {
 		return ""
 	}

@@ -1,0 +1,15 @@
+config := meta.(*transport_tpg.Config)
+
+importFormat := "(?P<org_id>organizations/[^/]+)/developers/(?P<developer_email>[^/]+)/apps/(?P<name>.+)"
+
+if err := tpgresource.ParseImportId([]string{importFormat}, d, config); err != nil {
+	return nil, err
+}
+
+id, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}org_id{{ "}}" }}/developers/{{ "{{" }}developer_email{{ "}}" }}/apps/{{ "{{" }}name{{ "}}" }}")
+if err != nil {
+	return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil

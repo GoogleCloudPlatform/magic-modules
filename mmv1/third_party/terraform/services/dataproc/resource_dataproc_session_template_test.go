@@ -8,16 +8,28 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/dataproc"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/dataprocmetastore"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccDataprocSessionTemplate_update(t *testing.T) {
 	t.Parallel()
 
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@dataproc-accounts.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
 	context := map[string]interface{}{
 		"project_name":    envvar.GetTestProjectFromEnv(),
-		"kms_key_name":    acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-session-template-key1").CryptoKey.Name,
+		"kms_key_name":    kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-session-template-key1").CryptoKey.Name,
 		"prevent_destroy": false,
-		"subnetwork_name": acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork"),
+		"subnetwork_name": BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork"),
 		"random_suffix":   acctest.RandString(t, 10),
 	}
 
@@ -103,7 +115,7 @@ resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_
         ttl = "4800s"
         network_tags = ["tag2"]
         kms_key = "%{kms_key_name}"
-	subnetwork_uri = "%{subnetwork_name}"
+  subnetwork_uri = "%{subnetwork_name}"
         service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
         staging_bucket = google_storage_bucket.bucket.name
       }
@@ -119,10 +131,6 @@ resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_
       kernel       = "SCALA"
       display_name = "tf scala kernel"
     }
-
-    depends_on = [
-      google_kms_crypto_key_iam_member.crypto_key_member_1,
-    ]
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -130,12 +138,6 @@ resource "google_storage_bucket" "bucket" {
   name                        = "tf-test-dataproc-bucket%{random_suffix}"
   location                    = "US"
   force_destroy               = true
-}
-
-resource "google_kms_crypto_key_iam_member" "crypto_key_member_1" {
-  crypto_key_id = "%{kms_key_name}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@dataproc-accounts.iam.gserviceaccount.com"
 }
 
 resource "google_dataproc_cluster" "basic" {

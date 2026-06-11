@@ -5,6 +5,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/alloydb"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
 func TestAccAlloydbBackup_update(t *testing.T) {
@@ -12,7 +17,7 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 
 	random_suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": random_suffix,
 	}
 
@@ -64,6 +69,10 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   deletion_protection = false
 }
 
@@ -102,6 +111,10 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   deletion_protection = false
 }
 
@@ -123,7 +136,7 @@ func TestAccAlloydbBackup_createBackupWithMandatoryFields(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -154,6 +167,10 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   deletion_protection = false
 }
 
@@ -175,9 +192,9 @@ func TestAccAlloydbBackup_usingCMEK(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-alloydb-backup-key1").CryptoKey.Name,
+		"kms_key_name":  kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-alloydb-backup-key1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -223,6 +240,10 @@ resource "google_alloydb_cluster" "default" {
 	location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 
   deletion_protection = false

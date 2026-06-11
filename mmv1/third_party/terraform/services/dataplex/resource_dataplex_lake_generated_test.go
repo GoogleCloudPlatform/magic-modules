@@ -1,0 +1,127 @@
+package dataplex_test
+
+import (
+	"context"
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/dataplex"
+	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
+)
+
+func TestAccDataplexLake_BasicLake(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataplexLakeDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataplexLake_BasicLake(context),
+			},
+			{
+				ResourceName:            "google_dataplex_lake.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccDataplexLake_BasicLakeUpdate0(context),
+			},
+			{
+				ResourceName:            "google_dataplex_lake.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccDataplexLake_BasicLake(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataplex_lake" "primary" {
+  location     = "%{region}"
+  name         = "tf-test-lake%{random_suffix}"
+  description  = "Lake for DCL"
+  display_name = "Lake for DCL"
+  project      = "%{project_name}"
+
+  labels = {
+    my-lake = "exists"
+  }
+}
+
+
+`, context)
+}
+
+func testAccDataplexLake_BasicLakeUpdate0(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataplex_lake" "primary" {
+  location     = "%{region}"
+  name         = "tf-test-lake%{random_suffix}"
+  description  = "Updated description for lake"
+  display_name = "Lake for DCL"
+  project      = "%{project_name}"
+
+  labels = {
+    my-lake = "exists"
+  }
+}
+
+
+`, context)
+}
+
+func testAccCheckDataplexLakeDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "rs.google_dataplex_lake" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			billingProject := ""
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			obj := &dataplex.Lake{
+				Location:       dcl.String(rs.Primary.Attributes["location"]),
+				Name:           dcl.String(rs.Primary.Attributes["name"]),
+				Description:    dcl.String(rs.Primary.Attributes["description"]),
+				DisplayName:    dcl.String(rs.Primary.Attributes["display_name"]),
+				Project:        dcl.StringOrNil(rs.Primary.Attributes["project"]),
+				CreateTime:     dcl.StringOrNil(rs.Primary.Attributes["create_time"]),
+				ServiceAccount: dcl.StringOrNil(rs.Primary.Attributes["service_account"]),
+				State:          dataplex.LakeStateEnumRef(rs.Primary.Attributes["state"]),
+				Uid:            dcl.StringOrNil(rs.Primary.Attributes["uid"]),
+				UpdateTime:     dcl.StringOrNil(rs.Primary.Attributes["update_time"]),
+			}
+
+			client := dataplex.NewDCLDataplexClient(config, config.UserAgent, billingProject, 0)
+			_, err := client.GetLake(context.Background(), obj)
+			if err == nil {
+				return fmt.Errorf("google_dataplex_lake still exists %v", obj)
+			}
+		}
+		return nil
+	}
+}

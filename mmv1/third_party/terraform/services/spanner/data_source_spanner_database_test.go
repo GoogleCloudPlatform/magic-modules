@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/spanner"
 )
 
 func TestAccDataSourceSpannerDatabase_basic(t *testing.T) {
@@ -25,10 +26,10 @@ func TestAccDataSourceSpannerDatabase_basic(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_spanner_database.bar",
 						"google_spanner_database.foo",
-						map[string]struct{}{
-							"ddl.#":               {},
-							"ddl.0":               {},
-							"deletion_protection": {},
+						[]string{
+							"ddl.#",
+							"ddl.0",
+							"deletion_protection",
 						},
 					),
 				),

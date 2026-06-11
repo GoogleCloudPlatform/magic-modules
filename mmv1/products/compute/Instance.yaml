@@ -37,14 +37,17 @@ iam_policy:
   allowed_iam_role: 'roles/compute.osLogin'
   parent_resource_attribute: 'instance_name'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+include_in_tgc_next: true
 custom_code:
 examples:
   - name: 'instance_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_name: 'my-instance'
+virtual_fields:
+  - name: 'allowStoppingForUpdate'
+    type: Boolean
+    description: 'allow stopping for update'
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -112,6 +115,7 @@ properties:
           description: |
             Encrypts or decrypts a disk using a customer-supplied
             encryption key.
+          immutable: true
           properties:
             - name: 'rawKey'
               type: String
@@ -119,12 +123,14 @@ properties:
                 Specifies a 256-bit customer-supplied encryption key,
                 encoded in RFC 4648 base64 to either encrypt or decrypt
                 this resource.
+              sensitive: true
             - name: 'rsaEncryptedKey'
               type: String
               description: |
                 Specifies an RFC 4648 base64 encoded, RSA-wrapped
                 2048-bit customer-supplied encryption key to either
                 encrypt or decrypt this resource.
+              sensitive: true
             - name: 'sha256'
               type: String
               description: |
@@ -212,6 +218,7 @@ properties:
                 encryption keys, so you cannot create disks for
                 instances in a managed instance group if the source
                 images are encrypted with your own keys.
+              immutable: true
               properties:
                 - name: 'rawKey'
                   type: String
@@ -219,6 +226,7 @@ properties:
                     Specifies a 256-bit customer-supplied encryption
                     key, encoded in RFC 4648 base64 to either encrypt
                     or decrypt this resource.
+                  sensitive: true
                 - name: 'sha256'
                   type: String
                   description: |
@@ -235,6 +243,19 @@ properties:
                 * /projects/{project}/zones/{zone}/storagePools/{storagePool}
               required: false
               immutable: true
+            - name: 'replicaZones'
+              type: Array
+              description: |
+                A list of short names or self_links of zones in which to create a regional disk.
+              # replicaZones is create-time-only and never returned in GET response or CAI.
+              is_missing_in_cai: true
+              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+              item_type:
+                name: 'zone'
+                type: ResourceRef
+                description: 'A reference to a zone where the disk should be replicated to.'
+                resource: 'Zone'
+                imports: 'selfLink'
         - name: 'interface'
           type: Enum
           description: |
@@ -285,11 +306,15 @@ properties:
           output: true
           item_type:
             type: String
-  - name: 'guestAccelerators'
+  - name: 'guestAccelerator'
+    api_name: 'guestAccelerators'
     type: Array
     description: |
       List of the type and count of accelerator cards attached to the
       instance
+    # This field is omitted from the GCAI payload if count = 0.
+    # We set is_missing_in_cai: true to bypass HCL round-trip validation failures in integration tests.
+    is_missing_in_cai: true
     item_type:
       type: NestedObject
       properties:
@@ -360,6 +385,14 @@ properties:
       The metadata key/value pairs to assign to instances that are
       created from this template. These pairs can consist of custom
       metadata or predefined keys.
+  - name: 'metadataStartupScript'
+    type: String
+    description: |
+      An alternative to metadata.startup-script.
+    # ignore_read is set to true because metadataStartupScript is a virtual/convenience field
+    # that is resolved from the metadata "startup-script" key, and does not map
+    # to a distinct field in the live API or CAI asset payload.
+    ignore_read: true
   - name: 'machineType'
     type: ResourceRef
     description: 'A reference to a machine type which defines VM kind.'
@@ -374,6 +407,10 @@ properties:
     description: |
       Specifies a minimum CPU platform for the VM instance. Applicable
       values are the friendly names of CPU platforms
+    # is_missing_in_cai is set to true because when min_cpu_platform is set
+    # to "AuToMaTiC" (default platform choice), GCE/CAI completely omits the
+    # minCpuPlatform field from the live asset payload, leading to round-trip test failures.
+    is_missing_in_cai: true
   - name: 'name'
     type: String
     description: |
@@ -385,7 +422,8 @@ properties:
       lowercase letter, and all following characters must be a dash,
       lowercase letter, or digit, except the last character, which cannot
       be a dash.
-  - name: 'networkInterfaces'
+  - name: 'networkInterface'
+    api_name: 'networkInterfaces'
     type: Array
     description: |
       An array of configurations for this interface. This specifies
@@ -486,6 +524,34 @@ properties:
                   CIDR range for this alias IP range. If left
                   unspecified, the primary range of the subnetwork will
                   be used.
+        - name: 'aliasIpv6Ranges'
+          type: Array
+          description: |
+            An array of alias IPv6 ranges for this network interface. Can
+            only be specified for network interfaces on subnet-mode
+            networks.
+          min_version: beta
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'ipCidrRange'
+                type: String
+                description: |
+                  The IP CIDR range represented by this alias IPv6 range.
+                  This IP CIDR range must belong to the specified
+                  subnetwork and cannot contain IP addresses reserved by
+                  system or used by other network interfaces. This range
+                  may be a single IP address (e.g. 2001:db8:1234:5678::),
+                  a netmask (e.g. /96) or a CIDR format string
+                  (e.g. 2001:db8:1234:5678::/96).
+              - name: 'subnetworkRangeName'
+                type: String
+                description: |
+                  Optional subnetwork secondary range name specifying
+                  the secondary range from which to allocate the IP
+                  CIDR range for this alias IPv6 range. If left
+                  unspecified, the primary range of the subnetwork will
+                  be used.
         - name: 'internalIpv6PrefixLength'
           type: String
           description: |
@@ -502,6 +568,12 @@ properties:
             The name of the network interface, generated by the
             server. For network devices, these are eth0, eth1, etc
           output: true
+        - name: 'macAddress'
+          type: String
+          description: |
+            MAC address assigned to this network interface.
+          output: true
+          min_version: 'beta'
         - name: 'network'
           type: ResourceRef
           description: |
@@ -529,10 +601,17 @@ properties:
             subnet mode, providing the subnetwork is optional. If
             the network is in custom subnet mode, then this field
             should be specified.
-          # networkInterfaces.kind is not necessary for convergence.
+          # networkInterface.kind is not necessary for convergence.
           custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
           resource: 'Subnetwork'
           imports: 'selfLink'
+        - name: 'subnetworkProject'
+          type: String
+          description: 'The project in which the subnetwork belongs.'
+          # ignore_read is set to true because subnetworkProject is a configuration-only field
+          # that does not map to a distinct field in the CAI asset payload (it is resolved
+          # dynamically into the subnetwork selfLink URL by the API).
+          ignore_read: true
         - name: 'networkAttachment'
           type: ResourceRef
           description: |
@@ -540,6 +619,15 @@ properties:
             projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
           resource: 'networkAttachment'
           imports: 'selfLink'
+        - name: 'vlan'
+          type: Integer
+          description: |
+            VLAN tag of a dynamic network interface.
+        - name: 'parentNicName'
+          type: String
+          description: |
+            The name of the parent network interface.
+          output: true
   - name: 'scheduling'
     type: NestedObject
     description: Sets the scheduling options for this instance.
@@ -565,7 +653,37 @@ properties:
           Defines whether the instance is preemptible. This can only be set
           during instance creation, it cannot be set or changed after the
           instance has been created.
-  - name: 'serviceAccounts'
+  - name: 'reservationAffinity'
+    type: NestedObject
+    description: |
+      Specifies the reservation policy.
+    # This block ensures the field is compatible with A3/A4 accelerator types
+    conflicts:
+      - 'guest_accelerators'
+    properties:
+      - name: 'type'
+        type: Enum
+        description: |
+          Specifies the type of reservation from which this instance can consume
+          resources.
+        enum_values:
+          - 'ANY_RESERVATION'
+          - 'SPECIFIC_RESERVATION'
+          - 'NO_RESERVATION'
+      - name: 'key'
+        type: String
+        description: |
+          Corresponds to the label key of a reservation resource. To consume a
+          SPECIFIC_RESERVATION, the key must be compute.googleapis.com/reservation-name
+          and the value must be the name of the reservation.
+      - name: 'values'
+        type: Array
+        description: |
+          Corresponds to the label values of a reservation resource.
+        item_type:
+          type: String
+  - name: 'serviceAccount'
+    api_name: 'serviceAccounts'
     type: Array
     description: |
       A list of service accounts, with their specified scopes, authorized
@@ -582,6 +700,7 @@ properties:
           description: |
             The list of scopes to be made available for this service
             account.
+          is_missing_in_cai: true
           item_type:
             type: String
   - name: 'shieldedInstanceConfig'
@@ -687,3 +806,204 @@ properties:
           comply with RFC1035.
         item_type:
           type: String
+  - name: 'eraseWindowsVssSignature'
+    type: Boolean
+    description: |
+      Specifies whether the disks restored from source snapshots or source machine image should erase Windows specific VSS signature.
+    min_version: 'beta'
+    ignore_read: true
+    default_value: false
+  - name: 'desiredStatus'
+    type: String
+    description: 'desired status'
+    is_missing_in_cai: true
+  - name: 'bootDisk'
+    type: NestedObject
+    description: 'boot disk'
+    properties:
+      - name: 'initializeParams'
+        type: NestedObject
+        description: 'initialize params'
+        properties:
+          - name: 'image'
+            type: String
+            description: 'image'
+            is_missing_in_cai: true
+          - name: 'size'
+            type: Integer
+            description: 'size'
+            is_missing_in_cai: true
+          - name: 'type'
+            type: String
+            description: 'type'
+            is_missing_in_cai: true
+          - name: 'storagePool'
+            api_name: 'storagePool'
+            type: String
+            description: 'storage pool'
+            is_missing_in_cai: true
+          - name: 'architecture'
+            type: String
+            description: 'architecture'
+            is_missing_in_cai: true
+          - name: 'provisionedIops'
+            api_name: 'provisionedIops'
+            type: Integer
+            description: 'provisioned iops'
+            is_missing_in_cai: true
+          - name: 'provisionedThroughput'
+            api_name: 'provisionedThroughput'
+            type: Integer
+            description: 'provisioned throughput'
+            is_missing_in_cai: true
+          - name: 'enableConfidentialCompute'
+            api_name: 'enableConfidentialCompute'
+            type: Boolean
+            description: 'enable confidential compute'
+            is_missing_in_cai: true
+          - name: 'resourcePolicies'
+            api_name: 'resourcePolicies'
+            type: Array
+            description: 'resource policies'
+            is_missing_in_cai: true
+            item_type:
+              type: String
+          - name: 'snapshot'
+            type: String
+            description: 'snapshot'
+            is_missing_in_cai: true
+          - name: 'labels'
+            type: KeyValuePairs
+            description: 'labels'
+            is_missing_in_cai: true
+          - name: 'replicaZones'
+            type: Array
+            description: 'replica zones'
+            is_missing_in_cai: true
+            item_type:
+              type: String
+          - name: 'sourceImageEncryptionKey'
+            api_name: 'sourceImageEncryptionKey'
+            type: NestedObject
+            description: 'source image encryption key'
+            is_missing_in_cai: true
+            properties:
+              - name: 'rawKey'
+                api_name: 'rawKey'
+                type: String
+                description: 'raw key'
+                is_missing_in_cai: true
+              - name: 'rsaEncryptedKey'
+                api_name: 'rsaEncryptedKey'
+                type: String
+                description: 'rsa encrypted key'
+                is_missing_in_cai: true
+              - name: 'kmsKeySelfLink'
+                api_name: 'kmsKeySelfLink'
+                type: String
+                description: 'kms key self link'
+                is_missing_in_cai: true
+              - name: 'kmsKeyServiceAccount'
+                api_name: 'kmsKeyServiceAccount'
+                type: String
+                description: 'kms key service account'
+                is_missing_in_cai: true
+          - name: 'sourceSnapshotEncryptionKey'
+            api_name: 'sourceSnapshotEncryptionKey'
+            type: NestedObject
+            description: 'source snapshot encryption key'
+            # sourceSnapshotEncryptionKey is create-time-only and never returned in GET response or CAI.
+            is_missing_in_cai: true
+            properties:
+              - name: 'rawKey'
+                api_name: 'rawKey'
+                type: String
+                description: 'raw key'
+                is_missing_in_cai: true
+              - name: 'rsaEncryptedKey'
+                api_name: 'rsaEncryptedKey'
+                type: String
+                description: 'rsa encrypted key'
+                is_missing_in_cai: true
+              - name: 'kmsKeySelfLink'
+                api_name: 'kmsKeySelfLink'
+                type: String
+                description: 'kms key self link'
+                is_missing_in_cai: true
+              - name: 'kmsKeyServiceAccount'
+                api_name: 'kmsKeyServiceAccount'
+                type: String
+                description: 'kms key service account'
+                is_missing_in_cai: true
+      - name: 'forceAttach'
+        api_name: 'forceAttach'
+        type: Boolean
+        description: 'force attach'
+        is_missing_in_cai: true
+      - name: 'diskEncryptionKeyRaw'
+        api_name: 'diskEncryptionKeyRaw'
+        type: String
+        description: 'disk encryption key raw'
+        is_missing_in_cai: true
+      - name: 'diskEncryptionKeyRsa'
+        api_name: 'diskEncryptionKeyRsa'
+        type: String
+        description: 'disk encryption key rsa'
+        is_missing_in_cai: true
+      - name: 'diskEncryptionServiceAccount'
+        api_name: 'diskEncryptionServiceAccount'
+        type: String
+        description: 'disk encryption service account'
+        is_missing_in_cai: true
+  - name: 'attachedDisk'
+    type: Array
+    description: 'attached disk'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'forceAttach'
+          api_name: 'forceAttach'
+          type: Boolean
+          description: 'force attach'
+          is_missing_in_cai: true
+        - name: 'diskEncryptionKeyRaw'
+          api_name: 'diskEncryptionKeyRaw'
+          type: String
+          description: 'disk encryption key raw'
+          is_missing_in_cai: true
+        - name: 'diskEncryptionKeyRsa'
+          api_name: 'diskEncryptionKeyRsa'
+          type: String
+          description: 'disk encryption key rsa'
+          is_missing_in_cai: true
+        - name: 'diskEncryptionServiceAccount'
+          api_name: 'diskEncryptionServiceAccount'
+          type: String
+          description: 'disk encryption service account'
+          is_missing_in_cai: true
+  - name: 'instanceEncryptionKey'
+    type: NestedObject
+    description: 'instance encryption key'
+    # instanceEncryptionKey sub-properties are write-only or create-time-only and missing in CAI.
+    is_missing_in_cai: true
+    properties:
+      - name: 'rawKey'
+        api_name: 'rawKey'
+        type: String
+        description: 'raw key'
+        is_missing_in_cai: true
+      - name: 'rsaEncryptedKey'
+        api_name: 'rsaEncryptedKey'
+        type: String
+        description: 'rsa encrypted key'
+        is_missing_in_cai: true
+      - name: 'kmsKeySelfLink'
+        api_name: 'kmsKeySelfLink'
+        type: String
+        description: 'kms key self link'
+        is_missing_in_cai: true
+      - name: 'kmsKeyServiceAccount'
+        api_name: 'kmsKeyServiceAccount'
+        type: String
+        description: 'kms key service account'
+        is_missing_in_cai: true

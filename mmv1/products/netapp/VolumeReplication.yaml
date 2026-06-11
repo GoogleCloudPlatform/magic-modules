@@ -54,6 +54,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/netapp_volume_replication.go.tmpl'
   post_create: 'templates/terraform/post_create/netapp_volume_replication_post_create.go.tmpl'
@@ -71,7 +72,7 @@ examples:
       destination_volume: 'destination-volume'
       network_name: 'test-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
     ignore_read_extra:
       - 'delete_destination_volume'
       - 'replication_enabled'
@@ -264,9 +265,6 @@ properties:
         type: NestedObject
         description: |-
           Tiering policy for the volume.
-        update_mask_fields:
-          - 'tiering_policy.cooling_threshold_days'
-          - 'tiering_policy.tier_action'
         properties:
           - name: 'coolingThresholdDays'
             type: Integer
@@ -343,4 +341,17 @@ properties:
         type: String
         description: |
           Optional. Name of the user's local source vserver svm to be peered with the destination vserver svm.
+        output: true
+  - name: 'hybridReplicationUserCommands'
+    type: NestedObject
+    description: |-
+      Copy pastable snapmirror commands to be executed on onprem cluster by the customer.
+    output: true
+    properties:
+      - name: 'commands'
+        type: Array
+        description: |
+          List of commands to be executed by the customer.
+        item_type:
+          type: String
         output: true

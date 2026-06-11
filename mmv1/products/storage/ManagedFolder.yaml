@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'ManagedFolder'
-kind: 'storage#managedFolder'
+name: ManagedFolder
 description: |
   A Google Cloud Storage Managed Folder.
 
@@ -28,14 +27,15 @@ description: |
   bucket-level access enabled.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/storage/docs/managed-folders'
-  api: 'https://cloud.google.com/storage/docs/json_api/v1/managedFolder'
+    Official Documentation: https://cloud.google.com/storage/docs/managed-folders
+  api: https://cloud.google.com/storage/docs/json_api/v1/managedFolder
 docs:
-id_format: '{{bucket}}/{{name}}'
-base_url: 'b/{{bucket}}/managedFolders'
-self_link: 'b/{{bucket}}/managedFolders/{{%name}}'
+base_url: b/{{bucket}}/managedFolders
 has_self_link: true
-delete_url: 'b/{{bucket}}/managedFolders/{{%name}}?allowNonEmpty={{force_destroy}}'
+self_link: b/{{bucket}}/managedFolders/{{%name}}
+delete_url: b/{{bucket}}/managedFolders/{{%name}}?allowNonEmpty={{force_destroy}}
+kind: storage#managedFolder
+id_format: '{{bucket}}/{{name}}'
 # iam_policy: handwritten in mmv1/third_party/terraform/services/storage/iam_storage_managed_folder.go
 import_format:
   - '{{bucket}}/managedFolders/{{%name}}'
@@ -44,19 +44,21 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  custom_update: 'templates/terraform/custom_update/storage_managed_folder.go.tmpl'
- # Skipping sweeper since this is a child resource.
+# Skipping sweeper since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'storage_managed_folder_basic'
-    primary_resource_id: 'folder'
-    vars:
-      bucket_name: 'my-bucket'
-    ignore_read_extra:
-      - 'force_destroy'
+custom_code:
+  custom_update: templates/terraform/custom_update/storage_managed_folder.go.tmpl
+samples:
+  - name: storage_managed_folder_basic
+    primary_resource_id: folder
+    steps:
+      - name: storage_managed_folder_basic
+        resource_id_vars:
+          bucket_name: my-bucket
+        ignore_read_extra:
+          - force_destroy
 virtual_fields:
-  - name: 'force_destroy'
+  - name: force_destroy
     description: |
       Allows the deletion of a managed folder even if contains
       objects. If a non-empty managed folder is deleted, any objects
@@ -65,14 +67,14 @@ virtual_fields:
     type: Boolean
     default_value: false
 parameters:
-  - name: 'bucket'
+  - name: bucket
     type: ResourceRef
-    description: 'The name of the bucket that contains the managed folder.'
+    description: The name of the bucket that contains the managed folder.
     required: true
     immutable: true
-    resource: 'Bucket'
-    imports: 'name'
-  - name: 'name'
+    resource: Bucket
+    imports: name
+  - name: name
     type: String
     description: |
       The name of the managed folder expressed as a path. Must include
@@ -83,19 +85,19 @@ parameters:
     # provided. Enforcing trailing slashes prevents diffs and ensures
     # consistent output.
     validation:
-      regex: '/$'
+      regex: /$
 properties:
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The timestamp at which this managed folder was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The timestamp at which this managed folder was most recently updated.
     output: true
-  - name: 'metageneration'
+  - name: metageneration
     type: String
     description: |
       The metadata generation of the managed folder.

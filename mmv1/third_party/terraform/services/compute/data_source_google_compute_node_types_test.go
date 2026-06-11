@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccDataSourceComputeNodeTypes_basic(t *testing.T) {
@@ -62,7 +63,10 @@ func testAccCheckGoogleComputeNodeTypes(n string) resource.TestCheckFunc {
 			}
 
 			if !regexp.MustCompile(`-[0-9]+-[0-9]+$`).MatchString(v) {
-				return fmt.Errorf("unexpected type format for %q, value is %v", idx, v)
+				// Added this condition to cover https://github.com/hashicorp/terraform-provider-google/issues/24697
+				if !regexp.MustCompile(`-[0-9]+-[0-9]+-[a-z]+$`).MatchString(v) {
+					return fmt.Errorf("unexpected type format for %q, value is %v", idx, v)
+				}
 			}
 		}
 		return nil

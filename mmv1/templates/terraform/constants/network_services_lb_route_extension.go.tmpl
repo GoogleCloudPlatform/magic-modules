@@ -1,0 +1,16 @@
+func ValidateSupportedEvent(i interface{}, k string) (warnings []string, errors []error) {
+	str, ok := i.(string)
+	if !ok {
+		errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+		return
+	}
+	validEvents := map[string]bool{
+		"REQUEST_HEADERS":  true,
+		"REQUEST_BODY":     true,
+		"REQUEST_TRAILERS": true,
+	}
+	if !validEvents[str] {
+		errors = append(errors, fmt.Errorf("value %s in %s is invalid, must be one of: REQUEST_HEADERS, REQUEST_BODY, REQUEST_TRAILERS", str, k))
+	}
+	return
+}

@@ -1,4 +1,4 @@
-resource "google_compute_target_tcp_proxy" "default" {
+resource "google_compute_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
   name            = "{{index $.Vars "target_tcp_proxy_name"}}"
   backend_service = google_compute_backend_service.default.id
 }

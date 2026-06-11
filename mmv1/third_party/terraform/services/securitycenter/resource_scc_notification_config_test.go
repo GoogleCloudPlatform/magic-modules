@@ -6,14 +6,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/securitycenter"
 )
 
 func TestAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
+		"config_id":     "tf-test-my-config" + randomSuffix,
+		"topic_name":    "tf-test-my-topic" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -55,11 +61,11 @@ func TestAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(t *test
 func testAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_notification" {
-  name = "tf-test-my-topic%{random_suffix}"
+  name = "%{topic_name}"
 }
 
 resource "google_scc_notification_config" "custom_notification_config" {
-  config_id    = "tf-test-my-config%{random_suffix}"
+  config_id    = "%{config_id}"
   organization = "%{org_id}"
   description  = "My custom Cloud Security Command Center Finding Notification Configuration"
   pubsub_topic =  google_pubsub_topic.scc_notification.id
@@ -74,11 +80,11 @@ resource "google_scc_notification_config" "custom_notification_config" {
 func testAccSecurityCenterNotificationConfig_emptyStreamingConfigFilter(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_notification" {
-  name = "tf-test-my-topic%{random_suffix}"
+  name = "%{topic_name}"
 }
 
 resource "google_scc_notification_config" "custom_notification_config" {
-  config_id    = "tf-test-my-config%{random_suffix}"
+  config_id    = "%{config_id}"
   organization = "%{org_id}"
   description  = "My custom Cloud Security Command Center Finding Notification Configuration"
   pubsub_topic =  google_pubsub_topic.scc_notification.id

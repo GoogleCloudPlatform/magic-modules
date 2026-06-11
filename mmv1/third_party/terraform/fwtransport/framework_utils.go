@@ -21,6 +21,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
@@ -75,7 +76,7 @@ type SendRequestOptions struct {
 	ErrorAbortPredicates []transport_tpg.RetryErrorPredicateFunc
 }
 
-func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) map[string]interface{} {
+func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) (map[string]interface{}, error) {
 	reqHeaders := opt.Headers
 	if reqHeaders == nil {
 		reqHeaders = make(http.Header)
@@ -138,12 +139,12 @@ func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) map[string]int
 	})
 	if err != nil {
 		diags.AddError("Error when sending HTTP request: ", err.Error())
-		return nil
+		return nil, err
 	}
 
 	if res == nil {
 		diags.AddError("Unable to parse server response. This is most likely a terraform problem, please file a bug at https://github.com/hashicorp/terraform-provider-google/issues.", "")
-		return nil
+		return nil, fmt.Errorf("Unable to parse server response. This is most likely a terraform problem, please file a bug at https://github.com/hashicorp/terraform-provider-google/issues.")
 	}
 
 	// The defer call must be made outside of the retryFunc otherwise it's closed too soon.
@@ -152,15 +153,15 @@ func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) map[string]int
 	// 204 responses will have no body, so we're going to error with "EOF" if we
 	// try to parse it. Instead, we can just return nil.
 	if res.StatusCode == 204 {
-		return nil
+		return nil, nil
 	}
 	result := make(map[string]interface{})
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
 		diags.AddError("Error when sending HTTP request: ", err.Error())
-		return nil
+		return nil, err
 	}
 
-	return result
+	return result, nil
 }
 
 type DefaultVars struct {
@@ -356,7 +357,12 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 
 		// terraform-google-conversion doesn't provide a provider config in tests.
 		if config != nil {
-			// Attempt to draw values from the provider config if it's present.
+			// Draw base path values from the provider config. For other config fields, fall back to reflection.
+			if pName, found := strings.CutSuffix(m, "BasePath"); found {
+				// the field will look like ComputeBasePath, but the product name will be like compute (just lowercase, no underscores)
+				p := registry.GetProduct(strings.ToLower(pName))
+				return transport_tpg.BaseUrl(p, config)
+			}
 			if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
 				return f.String()
 			}

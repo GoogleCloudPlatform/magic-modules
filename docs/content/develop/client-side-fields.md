@@ -12,7 +12,7 @@ Common client-side fields include:
 - [`deletion_protection`]({{< ref "/best-practices/deletion-behaviors#deletion_protection" >}})
 - [`deletion_policy`]({{< ref "/best-practices/deletion-behaviors#deletion_policy" >}})
 
-{{< tabs "schema" >}}
+{{% tabs "schema" %}}
 {{< tab "MMv1" >}}
 ## Add to the schema
 
@@ -85,7 +85,7 @@ if clientSideOnly {
 
 Replace `ResourceSpannerInstance` with the appropriate resource function.
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## Update data source
 
@@ -111,7 +111,7 @@ If the resource has a corresponding data source that calls the resource's Read f
 
 At this point, you should be ready to implement your logic! For example, a `deletion_protection` field short-ciruits the deletion process if it is not explicitly set to `false`.
 
-{{< tabs "implementation" >}}
+{{% tabs "implementation" %}}
 {{< tab "MMv1" >}}
 Add the following as [pre_delete custom code]({{< ref "/develop/custom-code#pre_post_injection" >}}).
 
@@ -130,4 +130,4 @@ if d.Get("deletion_protection").(bool) {
 }
 ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}

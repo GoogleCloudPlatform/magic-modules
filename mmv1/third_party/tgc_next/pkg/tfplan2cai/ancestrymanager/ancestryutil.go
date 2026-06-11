@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	"github.com/hashicorp/errwrap"
 	"google.golang.org/api/googleapi"
 )
@@ -82,7 +83,11 @@ func getProjectFromSchema(projectSchemaField string, d tpgresource.TerraformReso
 	}
 	res, ok = d.GetOk("parent")
 	if ok && strings.HasPrefix(res.(string), "projects/") {
-		return res.(string), nil
+		// It is possible that parent is not a project
+		// parent = "projects/project-test/locations/us-central1-a/privateClouds/test"
+		if project := tgcresource.ParseFieldValue(res.(string), "projects"); project != "" {
+			return project, nil
+		}
 	}
 	if config.Project != "" {
 		return config.Project, nil

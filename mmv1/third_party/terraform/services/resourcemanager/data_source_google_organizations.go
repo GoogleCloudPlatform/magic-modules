@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package resourcemanager
 
 import (
@@ -8,6 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -68,7 +68,7 @@ func datasourceGoogleOrganizationsRead(d *schema.ResourceData, meta interface{})
 		filter = v.(string)
 	}
 
-	request := config.NewResourceManagerClient(userAgent).Organizations.Search(&cloudresourcemanager.SearchOrganizationsRequest{
+	request := rmClient.NewClient(config, userAgent).Organizations.Search(&cloudresourcemanager.SearchOrganizationsRequest{
 		Filter: filter,
 	})
 
@@ -104,4 +104,13 @@ func datasourceGoogleOrganizationsRead(d *schema.ResourceData, meta interface{})
 	d.SetId(filter)
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_organizations",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleOrganizations(),
+	}.Register()
 }

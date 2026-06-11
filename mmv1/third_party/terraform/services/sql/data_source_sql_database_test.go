@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/sql"
 )
 
 func TestAccDataSourceSqlDatabase_basic(t *testing.T) {
@@ -25,9 +26,7 @@ func TestAccDataSourceSqlDatabase_basic(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_sql_database.qa",
 						"google_sql_database.db",
-						map[string]struct{}{
-							"deletion_policy": {},
-						},
+						[]string{"deletion_policy"},
 					),
 				),
 			},

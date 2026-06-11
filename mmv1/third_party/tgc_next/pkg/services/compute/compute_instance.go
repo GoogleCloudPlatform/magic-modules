@@ -3,14 +3,24 @@ package compute
 import (
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/verify"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v1"
 )
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_instance",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceComputeInstance(),
+	}.Register()
+}
 
 // ComputeInstanceAssetType is the CAI asset type name for compute instance.
 const ComputeInstanceAssetType string = "compute.googleapis.com/Instance"
@@ -71,8 +81,6 @@ var (
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
 		"scheduling.0.maintenance_interval",
-		"scheduling.0.host_error_timeout_seconds",
-		"scheduling.0.graceful_shutdown",
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
 
@@ -472,11 +480,33 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
 						},
 
+						"parent_nic_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Name of the parent network interface of a dynamic network interface.`,
+						},
+
+						"vlan": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntBetween(2, 255),
+							Description:  `VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively.`,
+						},
+
 						"subnetwork_project": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
 							Description: `The project in which the subnetwork belongs.`,
+						},
+
+						"igmp_query": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.StringInSlice([]string{"IGMP_QUERY_V2", "IGMP_QUERY_DISABLED"}, false),
+							Description:  `Indicates whether igmp query is enabled on the network interface or not. If enabled, also indicates the version of IGMP supported.`,
 						},
 
 						"network_ip": {
@@ -829,15 +859,6 @@ func ResourceComputeInstance() *schema.Resource {
 				Description: `Metadata key/value pairs made available within the instance.`,
 			},
 
-			"partner_metadata": {
-				Type:                  schema.TypeMap,
-				Optional:              true,
-				DiffSuppressFunc:      ComparePartnerMetadataDiff,
-				DiffSuppressOnRefresh: true,
-				Elem:                  &schema.Schema{Type: schema.TypeString},
-				Description:           `Partner Metadata Map made available within the instance.`,
-			},
-
 			"metadata_startup_script": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -985,11 +1006,6 @@ be from 0 to 999,999,999 inclusive.`,
 									},
 								},
 							},
-						},
-						"host_error_timeout_seconds": {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							Description: `Specify the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.`,
 						},
 
 						"maintenance_interval": {
@@ -1441,8 +1457,6 @@ func flattenAliasIpRangeTgc(ranges []*compute.AliasIpRange) []map[string]interfa
 func flattenSchedulingTgc(resp *compute.Scheduling) []map[string]interface{} {
 	schedulingMap := make(map[string]interface{}, 0)
 
-	// gracefulShutdown is not in the cai asset, so graceful_shutdown is skipped.
-
 	if resp.InstanceTerminationAction != "" {
 		schedulingMap["instance_termination_action"] = resp.InstanceTerminationAction
 	}
@@ -1487,14 +1501,6 @@ func flattenSchedulingTgc(resp *compute.Scheduling) []map[string]interface{} {
 		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(resp.OnInstanceStopAction)
 	}
 
-	if resp.HostErrorTimeoutSeconds != 0 {
-		schedulingMap["host_error_timeout_seconds"] = resp.HostErrorTimeoutSeconds
-	}
-
-	if resp.MaintenanceInterval != "" {
-		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
-	}
-
 	if resp.LocalSsdRecoveryTimeout != nil {
 		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(resp.LocalSsdRecoveryTimeout)
 	}
@@ -1527,7 +1533,7 @@ func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, 
 			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
 		}
 
-		subnetProject := utils.ParseFieldValue(iface.Subnetwork, "projects")
+		subnetProject := tgcresource.ParseFieldValue(iface.Subnetwork, "projects")
 		if subnetProject != project {
 			flattened[i]["subnetwork_project"] = subnetProject
 		}
@@ -1544,14 +1550,6 @@ func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, 
 
 		if internalIP == "" {
 			internalIP = iface.NetworkIP
-		}
-
-		if iface.NetworkAttachment != "" {
-			networkAttachment, err := tpgresource.GetRelativePath(iface.NetworkAttachment)
-			if err != nil {
-				return nil, "", "", err
-			}
-			flattened[i]["network_attachment"] = networkAttachment
 		}
 
 		// the security_policy for a network_interface is found in one of its accessConfigs.

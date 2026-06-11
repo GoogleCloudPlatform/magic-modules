@@ -7,6 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/logging"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccLoggingFolderSettings_update(t *testing.T) {
@@ -15,8 +18,8 @@ func TestAccLoggingFolderSettings_update(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"original_key":  acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
-		"updated_key":   acctest.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name,
+		"original_key":  kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+		"updated_key":   kms.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -65,6 +68,9 @@ resource "google_kms_crypto_key_iam_member" "iam_folder" {
 
 data "google_logging_organization_settings" "settings" {
   organization = "%{org_id}"
+  depends_on   = [
+    google_kms_crypto_key_iam_member.iam_folder
+  ]
 }
 
 resource "google_kms_crypto_key_iam_member" "iam_org" {
@@ -79,8 +85,7 @@ resource "google_logging_folder_settings" "example" {
   kms_key_name         = "%{original_key}"
   storage_location     = "us-central1"
   depends_on   = [
-    google_kms_crypto_key_iam_member.iam_folder,
-	google_kms_crypto_key_iam_member.iam_org
+    google_kms_crypto_key_iam_member.iam_org
   ]
 }
 `, context)
@@ -106,6 +111,9 @@ resource "google_kms_crypto_key_iam_member" "iam_folder" {
 
 data "google_logging_organization_settings" "settings" {
   organization = "%{org_id}"
+  depends_on   = [
+    google_kms_crypto_key_iam_member.iam_folder
+  ]
 }
 
 resource "google_kms_crypto_key_iam_member" "iam_org" {
@@ -117,8 +125,7 @@ resource "google_kms_crypto_key_iam_member" "iam_org" {
 resource "google_logging_folder_settings" "example" {
   folder       = google_folder.my_folder.folder_id
   depends_on   = [
-    google_kms_crypto_key_iam_member.iam_folder,
-	google_kms_crypto_key_iam_member.iam_org
+    google_kms_crypto_key_iam_member.iam_org
   ]
 }
 `, context)

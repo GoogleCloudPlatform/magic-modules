@@ -1,0 +1,45 @@
+[
+  {
+    "name": "//vmwareengine.googleapis.com/projects/{{.Provider.project}}/locations/us-central1-a/privateClouds/gg-asset-pc-38930-c6db/clusters/gg-asset-cl-38930-c6db",
+    "asset_type": "vmwareengine.googleapis.com/Cluster",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://vmwareengine.googleapis.com/$discovery/rest",
+      "discovery_name": "Cluster",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+
+      "data": {
+        "nodeTypeConfigs": {
+          "standard-72": {
+            "nodeCount": 1,
+            "customCoreCount": 32
+          }
+        },
+        "autoscalingSettings": {
+          "autoscalingPolicies": {
+            "autoscaling-policy": {
+              "nodeTypeId": "standard-72",
+              "scaleOutSize": 1,
+              "cpuThresholds": {
+                "scaleOut": 80,
+                "scaleIn": 15
+              },
+              "consumedMemoryThresholds": {
+                "scaleOut": 75,
+                "scaleIn": 20
+              },
+              "storageThresholds": {
+                "scaleOut": 80,
+                "scaleIn": 20
+              }
+            }
+          },
+          "minClusterNodeCount": 3,
+          "maxClusterNodeCount": 8,
+          "coolDownPeriod": "1800s"
+        }
+      }
+    }
+  }
+]

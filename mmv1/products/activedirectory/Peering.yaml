@@ -48,6 +48,9 @@ examples:
     vars:
       domain_name: 'ad.test.hashicorptest.com'
       project_id: 'my-peered-project'
+    test_vars_overrides:
+      # for backward compatible
+      domain_name: '"ad.test.hashicorptest.com" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'

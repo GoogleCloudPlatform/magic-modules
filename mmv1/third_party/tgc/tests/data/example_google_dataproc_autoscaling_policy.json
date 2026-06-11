@@ -1,6 +1,6 @@
 [
     {
-        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/clusters/dataproc-policy1",
+        "name": "//dataproc.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/clusters/dataproc-policy1",
         "asset_type": "dataproc.googleapis.com/Cluster",
         "resource": {
             "version": "v1",
@@ -34,7 +34,7 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//dataproc.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/autoscalingPolicies/dataproc-policy1",
+        "name": "//dataproc.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/autoscalingPolicies/dataproc-policy1",
         "asset_type": "dataproc.googleapis.com/AutoscalingPolicy",
         "resource": {
             "version": "v1beta2",

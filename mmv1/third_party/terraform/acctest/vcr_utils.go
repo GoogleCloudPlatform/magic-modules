@@ -10,9 +10,11 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -22,9 +24,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/fwprovider"
 	tpgprovider "github.com/hashicorp/terraform-provider-google/google/provider"
-	"github.com/hashicorp/terraform-provider-google/google/services/compute"
-	"github.com/hashicorp/terraform-provider-google/google/services/pubsublite"
-	"github.com/hashicorp/terraform-provider-google/google/services/sql"
+
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -170,6 +170,15 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		if s.ImportStateVerify && !slices.Contains(s.ImportStateVerifyIgnore, "terraform_labels") {
 			s.ImportStateVerifyIgnore = append(s.ImportStateVerifyIgnore, "terraform_labels")
 		}
+		if IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING" {
+			re := regexp.MustCompile(`create_duration = "\d+[sm]"`)
+			s.Config = re.ReplaceAllString(s.Config, `create_duration = "1s"`)
+		}
+		// deletion_policy is a universal virtual attribute for managing the behavior of resources when a delete is attempted
+		// in Terraform. Because it is a virtual attribute, it needs to be excluded from these ImportStateVerifys.
+		if s.ImportStateVerify && !slices.Contains(s.ImportStateVerifyIgnore, "deletion_policy") {
+			s.ImportStateVerifyIgnore = append(s.ImportStateVerifyIgnore, "deletion_policy")
+		}
 		steps = append(steps, s)
 	}
 	c.Steps = steps
@@ -264,8 +273,13 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 // NewVcrMatcherFunc returns a function used for matching HTTP requests with data recorded in VCR cassettes
 func NewVcrMatcherFunc(ctx context.Context) func(r *http.Request, i cassette.Request) bool {
 	return func(r *http.Request, i cassette.Request) bool {
-		// Default matcher compares method and URL only
-		if !cassette.DefaultMatcher(r, i) {
+		// Compare method and URL, normalizing standard Google API query
+		// params (alt, prettyPrint) so that cassettes recorded via the
+		// typed client match requests made via transport_tpg.SendRequest.
+		if r.Method != i.Method {
+			return false
+		}
+		if stripStandardQueryParams(r.URL.String()) != stripStandardQueryParams(i.URL) {
 			return false
 		}
 		if r.Body == nil {
@@ -306,6 +320,22 @@ func NewVcrMatcherFunc(ctx context.Context) func(r *http.Request, i cassette.Req
 	}
 }
 
+// stripStandardQueryParams removes standard Google API query parameters
+// (alt, prettyPrint) from a URL string. This allows VCR cassettes recorded
+// via the typed API client to match requests made via transport_tpg.SendRequest,
+// which may include a different set of these decorative parameters.
+func stripStandardQueryParams(rawurl string) string {
+	u, err := url.Parse(rawurl)
+	if err != nil {
+		return rawurl
+	}
+	q := u.Query()
+	q.Del("alt")
+	q.Del("prettyPrint")
+	u.RawQuery = q.Encode()
+	return u.String()
+}
+
 // MuxedProviders configures the providers, thus, if we want the providers to be configured
 // to use VCR, the configure functions need to be altered. The only way to do this is to create
 // test versions of the provider that will call the same configure function, only append the VCR
@@ -344,13 +374,13 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 func (p *frameworkTestProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	ds := p.FrameworkProvider.DataSources(ctx)
 	ds = append(ds, fwprovider.NewGoogleProviderConfigPluginFrameworkDataSource) // google_provider_config_plugin_framework
-	ds = append(ds, compute.NewComputeNetworkFWDataSource)                       // google_fw_compute_network
+
 	return ds
 }
 
 func (p *frameworkTestProvider) Resources(ctx context.Context) []func() fwResource.Resource {
 	r := p.FrameworkProvider.Resources(ctx)
-	r = append(r, pubsublite.NewGooglePubsubLiteReservationFWResource, sql.NewSQLUserFWResource) // google_fwprovider_pubsub_lite_reservation
+
 	return r
 }
 

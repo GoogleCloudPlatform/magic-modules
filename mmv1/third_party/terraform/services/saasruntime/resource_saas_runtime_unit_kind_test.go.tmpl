@@ -9,11 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/saasruntime"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+  "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccSaasRuntimeUnitKind_update(t *testing.T) {
 	t.Parallel()
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com",
 			Role:   "roles/saasservicemgmt.serviceAgent",
@@ -21,6 +24,7 @@ func TestAccSaasRuntimeUnitKind_update(t *testing.T) {
 	})
 
 	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -60,29 +64,40 @@ func testAccSaasRuntimeUnitKind_basic(context map[string]interface{}) string {
 resource "google_saas_runtime_saas" "example_saas" {
   provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
-  location = "global"
+  location = "us-east1"
 
   locations {
-    name = "us-central1"
+    name = "us-east1"
   }
 }
 
 resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
   provider = google-beta
-  location = "global"
+  location = "us-east1"
   unit_kind_id = "tf-test-cluster-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
+  default_release = "projects/%{project}/locations/us-east1/releases/tf-test-example-release%{random_suffix}"
 }
 
 resource "google_saas_runtime_unit_kind" "example" {
   provider = google-beta
-  location = "global"
+  location = "us-east1"
   unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
 
   dependencies {
     unit_kind = google_saas_runtime_unit_kind.cluster_unit_kind.id
     alias     = "cluster"
+  }
+}
+
+resource "google_saas_runtime_release" "example_release" {
+  provider          = google-beta
+  location          = "us-east1"
+  release_id        = "tf-test-example-release%{random_suffix}"
+  unit_kind         = google_saas_runtime_unit_kind.cluster_unit_kind.id
+  blueprint {
+    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-alpha-image@sha256:7992fdbaeaf998ecd31a7f937bb26e38a781ecf49b24857a6176c1e9bfc299ee"
   }
 }
 `, context)
@@ -93,23 +108,24 @@ func testAccSaasRuntimeUnitKind_update(context map[string]interface{}) string {
 resource "google_saas_runtime_saas" "example_saas" {
   provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
-  location = "global"
+  location = "us-east1"
 
   locations {
-    name = "us-central1"
+    name = "us-east1"
   }
 }
 
 resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
   provider = google-beta
-  location = "global"
+  location = "us-east1"
   unit_kind_id = "tf-test-cluster-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
+  default_release = "projects/%{project}/locations/us-east1/releases/tf-test-example-release%{random_suffix}"
 }
 
 resource "google_saas_runtime_unit_kind" "example" {
   provider = google-beta
-  location = "global"
+  location = "us-east1"
   unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
 
@@ -157,6 +173,16 @@ resource "google_saas_runtime_unit_kind" "example" {
   
   annotations = {
     "annotation-one": "bar"
+  }
+}
+
+resource "google_saas_runtime_release" "example_release" {
+  provider          = google-beta
+  location          = "us-east1"
+  release_id        = "tf-test-example-release%{random_suffix}"
+  unit_kind         = google_saas_runtime_unit_kind.cluster_unit_kind.id
+  blueprint {
+    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-alpha-image@sha256:7992fdbaeaf998ecd31a7f937bb26e38a781ecf49b24857a6176c1e9bfc299ee"
   }
 }
 `, context)

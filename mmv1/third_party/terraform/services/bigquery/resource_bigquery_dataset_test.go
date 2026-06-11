@@ -1,18 +1,19 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package bigquery_test
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	bigquery_tpg "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
 	"google.golang.org/api/bigquery/v2"
+	"regexp"
+	"strings"
+	"testing"
 )
 
 func TestAccBigQueryDataset_basic(t *testing.T) {
@@ -319,6 +320,52 @@ func TestAccBigQueryDataset_access(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryDataset_accessMixedCase_userByEmail(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_access_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDataset_accessMixedCase(datasetID, "user_by_email", "alicE@google.COM"),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.access_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDataset_accessMixedCase_groupByEmail(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_access_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDataset_accessMixedCase(datasetID, "group_by_email", "MAGIC-MODULES@gOOgle.com"),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.access_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
 func TestAccBigQueryDataset_regionalLocation(t *testing.T) {
 	t.Parallel()
 
@@ -345,7 +392,7 @@ func TestAccBigQueryDataset_regionalLocation(t *testing.T) {
 func TestAccBigQueryDataset_cmek(t *testing.T) {
 	t.Parallel()
 
-	kms := acctest.BootstrapKMSKeyInLocation(t, "us")
+	bootstrapped := kms.BootstrapKMSKeyInLocation(t, "us")
 	pid := envvar.GetTestProjectFromEnv()
 	datasetID1 := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 
@@ -354,7 +401,7 @@ func TestAccBigQueryDataset_cmek(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryDataset_cmek(pid, datasetID1, kms.CryptoKey.Name),
+				Config: testAccBigQueryDataset_cmek(pid, datasetID1, bootstrapped.CryptoKey.Name),
 			},
 			{
 				ResourceName:      "google_bigquery_dataset.test",
@@ -522,6 +569,44 @@ func TestAccBigQueryDataset_externalCatalogDatasetOptions_update(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryDataset_collationUpdate(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDataset_defaultCollation(datasetID, "und:ci"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "default_collation", "und:ci"),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigQueryDataset_defaultCollation(datasetID, ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "default_collation", ""),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
 func testAccAddTable(t *testing.T, datasetID string, tableID string) resource.TestCheckFunc {
 	// Not actually a check, but adds a table independently of terraform
 	return func(s *terraform.State) error {
@@ -533,7 +618,7 @@ func testAccAddTable(t *testing.T, datasetID string, tableID string) resource.Te
 				ProjectId: config.Project,
 			},
 		}
-		_, err := config.NewBigQueryClient(config.UserAgent).Tables.Insert(config.Project, datasetID, table).Do()
+		_, err := bigquery_tpg.NewClient(config, config.UserAgent).Tables.Insert(config.Project, datasetID, table).Do()
 		if err != nil {
 			return fmt.Errorf("Could not create table")
 		}
@@ -546,13 +631,13 @@ func addOutOfBandLabels(t *testing.T, datasetID string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		dataset, err := config.NewBigQueryClient(config.UserAgent).Datasets.Get(config.Project, datasetID).Do()
+		dataset, err := bigquery_tpg.NewClient(config, config.UserAgent).Datasets.Get(config.Project, datasetID).Do()
 		if err != nil {
 			return fmt.Errorf("Could not get dataset with ID %s", datasetID)
 		}
 
 		dataset.Labels["outband_key"] = "test"
-		_, err = config.NewBigQueryClient(config.UserAgent).Datasets.Patch(config.Project, datasetID, dataset).Do()
+		_, err = bigquery_tpg.NewClient(config, config.UserAgent).Datasets.Patch(config.Project, datasetID, dataset).Do()
 		if err != nil {
 			return fmt.Errorf("Could not update labele for the dataset")
 		}
@@ -839,6 +924,19 @@ resource "google_bigquery_dataset" "access_test" {
 `, otherDatasetID, otherTableID, datasetID)
 }
 
+func testAccBigQueryDataset_accessMixedCase(datasetID, accessType, email string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "access_test" {
+  dataset_id = "%s"
+
+  access {
+    role   = "OWNER"
+    %s = "%s"
+  }
+}
+`, datasetID, accessType, email)
+}
+
 func testAccBigQueryDataset_cmek(pid, datasetID, kmsKey string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
@@ -1011,4 +1109,16 @@ resource "google_bigquery_dataset" "dataset" {
   }
 }
 `, context)
+}
+
+func testAccBigQueryDataset_defaultCollation(datasetID, collation string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id        = "%s"
+  friendly_name     = "foo"
+  description       = "This is a foo description"
+  location          = "US"
+  default_collation = "%s"
+}
+`, datasetID, collation)
 }

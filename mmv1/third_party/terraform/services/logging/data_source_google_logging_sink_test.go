@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/logging"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccDataSourceGoogleLoggingSink_basic(t *testing.T) {
@@ -28,9 +29,9 @@ func TestAccDataSourceGoogleLoggingSink_basic(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_logging_sink.basic",
 						"google_logging_project_sink.basic",
-						map[string]struct{}{
-							"project":                {},
-							"unique_writer_identity": {},
+						[]string{
+							"project",
+							"unique_writer_identity",
 						},
 					),
 				),

@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -41,7 +42,7 @@ func dataSourceGoogleStorageBucketObjectRead(d *schema.ResourceData, meta interf
 		name = url.QueryEscape(name)
 	}
 	// Using REST apis because the storage go client doesn't support folders
-	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{StorageBasePath}}b/%s/o/%s", bucket, name))
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"b/%s/o/%s", bucket, name))
 	if err != nil {
 		return fmt.Errorf("Error formatting url for storage bucket object: %s", err)
 	}
@@ -113,4 +114,13 @@ func flattenStorageBucketObjectGeneration(v interface{}, d *schema.ResourceData,
 	}
 
 	return v // let terraform core handle it otherwise
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_bucket_object",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageBucketObject(),
+	}.Register()
 }

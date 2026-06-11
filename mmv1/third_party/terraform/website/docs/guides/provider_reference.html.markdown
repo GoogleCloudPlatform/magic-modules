@@ -38,7 +38,7 @@ To use Google Cloud Platform features that are in beta, you need to both:
 
 * explicitly set the provider for your resource to `google-beta`.
 
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html)
+See [Provider Versions](./provider_versions.html.markdown)
 for a full reference on how to use features from different GCP API versions in
 the Google provider.
 
@@ -329,12 +329,11 @@ provider "google" {
 the provider should wait for individual HTTP requests. This will not adjust the
 amount of time the provider will wait for a logical operation - use the resource
 timeout blocks for that. This will adjust only the amount of time that a single
-synchronous request will wait for a response. The default is 120 seconds, and
-that should be a suitable value in most cases. Many GCP APIs will cancel a
+synchronous request will wait for a response. The default is 120 seconds (`"120s"`),
+and that should be a suitable value in most cases. Many GCP APIs will cancel a
 request if no response is forthcoming within 30 seconds in any event. In
 limited cases, such as DNS record set creation, there is a synchronous request
 to create the resource. This may help in those cases.
-
 
 ---
 
@@ -345,6 +344,17 @@ Alternatively, this can be specified using the `CLOUDSDK_CORE_REQUEST_REASON`
 environment variable.
 
 ---
+
+* `poll_interval` - (Optional) A duration string controlling the amount of time
+the provider should wait between calls polling long-running operations. Defaults
+to 10 seconds (`"10s"`). Setting this is not recommended outside highly
+latency-sensitive use cases, as quota usage will go up quickly, particularly if
+the [`-parallelism` option](https://developer.hashicorp.com/terraform/cli/commands/apply#parallelism-n)
+is set. Most slow plan/apply cycles are addressed with [`-parallelism`](https://developer.hashicorp.com/terraform/cli/commands/apply#parallelism-n)
+instead.
+
+---
+
 
 * `{{service}}_custom_endpoint` - (Optional) The endpoint for a service's APIs,
 such as `compute_custom_endpoint`. Defaults to the production GCP endpoint for
@@ -368,9 +378,42 @@ Support for custom endpoints is on a best-effort basis. The underlying
 endpoint and default values for a resource can be changed at any time without
 being considered a breaking change.
 
+**Data residency at rest and advanced data residency**
+
+For services that support data residency at rest, you can specify a regional endpoint 
+to ensure your data is processed and stored in a specific geographic location.
+
+For services offering advanced data residency, it is critical to use the correct regional 
+endpoint to ensure data remains within the chosen region when at use, in use, and in transit.
+
+Example of Apigee regional endpoint for the European Union:
+
+```
+provider "google" {
+  apigee_custom_endpoint = "https://apigee.eu.rep.googleapis.com/v1/"
+}
+```
+
+Always consult the specific service documentation for the correct regional or multi-regional endpoint to use.
+
 ---
 
 * `universe_domain` - (Optional) Specify the GCP universe to deploy in.
+
+---
+
+* `prefer_regional_endpoints` - (Optional) Whether resources should prefer using
+regional endpoints when sending requests. This setting should be used when
+regional endpoints are partially available for a resource and a user wants to
+opt-in to using those endpoints. Setting this may result in calls being sent to
+regional endpoints that do not exist. Users should evaluate if regional
+endpoints are available prior to using this setting.
+
+* `prefer_global_endpoints` - (Optional) Whether resources should prefer using
+global endpoints when sending requests.
+
+To find out what regional endpoints are available, check the
+[official documentation](https://docs.cloud.google.com/vpc/docs/regional-service-endpoints).
 
 ---
 

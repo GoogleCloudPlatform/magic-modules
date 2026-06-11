@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/sql"
 )
 
 func TestAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_basic(t *testing.T) {
@@ -19,6 +20,9 @@ func TestAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_basic(t *testing.T) 
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_basic(context),
@@ -52,8 +56,15 @@ resource "google_sql_database_instance" "main" {
   deletion_protection = false
 }
 
+resource "time_sleep" "wait_for_instance" {
+  // Wait 30 seconds after the instance is created
+  depends_on = [google_sql_database_instance.main]
+  create_duration = "330s"
+}
+
 data "google_sql_database_instance_latest_recovery_time" "default" {
-  instance = resource.google_sql_database_instance.main.name
+  instance = google_sql_database_instance.main.name
+  depends_on = [time_sleep.wait_for_instance]
 }
 `, context)
 }

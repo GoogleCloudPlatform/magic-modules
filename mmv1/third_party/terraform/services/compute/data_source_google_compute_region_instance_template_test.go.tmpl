@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -24,7 +25,7 @@ func TestAccRegionInstanceTemplateDatasource_name(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_region_instance_template.default",
 						"google_compute_region_instance_template.default",
-						map[string]struct{}{},
+						[]string{},
 					),
 				),
 			},
@@ -45,7 +46,7 @@ func TestAccRegionInstanceTemplateDatasource_filter(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_region_instance_template.default",
 						"google_compute_region_instance_template.c",
-						map[string]struct{}{},
+						[]string{},
 					),
 				),
 			},
@@ -66,7 +67,7 @@ func TestAccRegionInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_region_instance_template.default",
 						"google_compute_region_instance_template.c",
-						map[string]struct{}{},
+						[]string{},
 					),
 				),
 			},

@@ -3,17 +3,20 @@ package storage
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"github.com/gammazero/workerpool"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -24,6 +27,30 @@ import (
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
 )
+
+func buckeEncryptionEnforcementConfigSchema(encryptionType string) *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"restriction_mode": {
+					Type:         schema.TypeString,
+					Required:     true,
+					ValidateFunc: verify.ValidateEnum([]string{"NotRestricted", "FullyRestricted"}),
+					Description:  fmt.Sprintf("Whether %s is restricted for new objects within the bucket. If FullyRestricted, new objects can't be created using %s encryption. If NotRestricted or unset, creation of new objects with %s encryption is allowed.", encryptionType, encryptionType, encryptionType),
+				},
+				"effective_time": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: `Time from which the config was effective. This is service-provided.`,
+				},
+			},
+		},
+		Description: fmt.Sprintf("If omitted, then new objects with %s encryption-type is allowed. If FullyRestricted, then new objects created in this bucket must comply with enforcement config. Changing this has no effect on existing objects; it applies to new objects only.", encryptionType),
+	}
+}
 
 func ResourceStorageBucket() *schema.Resource {
 	return &schema.Resource{
@@ -37,7 +64,24 @@ func ResourceStorageBucket() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
 			tpgresource.SetLabelsDiff,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -85,9 +129,12 @@ func ResourceStorageBucket() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"default_kms_key_name": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Optional:    true,
 							Description: `A Cloud KMS key that will be used to encrypt objects inserted into this bucket, if no encryption method is specified. You must pay attention to whether the crypto key is available in the location that this bucket is created in. See the docs for more details.`,
 						},
+						"google_managed_encryption_enforcement_config":    buckeEncryptionEnforcementConfigSchema("GMEK"),
+						"customer_managed_encryption_enforcement_config":  buckeEncryptionEnforcementConfigSchema("CMEK"),
+						"customer_supplied_encryption_enforcement_config": buckeEncryptionEnforcementConfigSchema("CSEK"),
 					},
 				},
 				Description: `The bucket's encryption configuration.`,
@@ -103,7 +150,7 @@ func ResourceStorageBucket() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: `When deleting a bucket, this boolean option will delete all contained objects, or anywhereCaches (if any). If you try to delete a bucket that contains objects or anywhereCaches, Terraform will fail that run, deleting anywhereCaches may take 80 minutes to complete.`,
+				Description: `When true, before deleting a bucket, delete all objects within the bucket, or Anywhere Caches caching data for that bucket. Otherwise, buckets with objects/caches will fail. Anywhere Cache requires additional permissions to interact with and will be ignored when those are not present, attempting to delete anyways. This may result in the objects in the bucket getting destroyed but not the bucket itself if there is a cache in use with the bucket. Force deletion may take a long time to delete buckets with lots of objects or with any Anywhere Caches (80m+).`,
 			},
 
 			"labels": {
@@ -664,7 +711,10 @@ func ResourceStorageBucket() *schema.Resource {
 					}
 					return false
 				},
-      },
+      		},
+      		//UDP schema start
+      		"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+      		//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -691,7 +741,7 @@ func labelKeyValidator(val interface{}, key string) (warns []string, errs []erro
 
 func getAnywhereCacheListResult(d *schema.ResourceData, config *transport_tpg.Config) ([]interface{}, error) {
 	// Define the cache list URL
-	cacheListUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{name}}/anywhereCaches/"}}")
+	cacheListUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"b/{{name}}/anywhereCaches/"}}")
 	if err != nil {
 		return nil, err
 	}
@@ -756,7 +806,7 @@ func deleteAnywhereCacheIfAny(d *schema.ResourceData, config *transport_tpg.Conf
 			if !ok {
 				return fmt.Errorf("missing or invalid anywhereCacheId: %v", obj)
 			}
-			anywhereCacheUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{name}}/anywhereCaches/"}}")
+			anywhereCacheUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"b/{{name}}/anywhereCaches/"}}")
 			if err != nil {
 				return err
 			}
@@ -920,7 +970,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			insertCall := config.NewStorageClient(userAgent).Buckets.Insert(project, sb)
+			insertCall := NewClient(config, userAgent).Buckets.Insert(project, sb)
 			if d.Get("enable_object_retention").(bool) {
 				insertCall.EnableObjectRetention(true)
 			}
@@ -943,7 +993,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	// to make sure it exists before moving on
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
-			_, retryErr := config.NewStorageClient(userAgent).Buckets.Get(res.Name).Do()
+			_, retryErr := NewClient(config, userAgent).Buckets.Get(res.Name).Do()
 			return retryErr
 		},
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -964,7 +1014,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 		retentionPolicy := retention_policies[0].(map[string]interface{})
 
 		if locked, ok := retentionPolicy["is_locked"]; ok && locked.(bool) {
-			err = lockRetentionPolicy(config.NewStorageClient(userAgent).Buckets, bucket, res.Metageneration)
+			err = lockRetentionPolicy(NewClient(config, userAgent).Buckets, bucket, res.Metageneration)
 			if err != nil {
 				return err
 			}
@@ -977,6 +1027,11 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error {
+	
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceStorageBucket) {
+	    return ResourceStorageBucket().Read(d, meta)
+	}
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1106,7 +1161,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	res, err := config.NewStorageClient(userAgent).Buckets.Patch(d.Get("name").(string), sb).Do()
+	res, err := NewClient(config, userAgent).Buckets.Patch(d.Get("name").(string), sb).Do()
 	if err != nil {
 		return err
 	}
@@ -1120,7 +1175,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 	// to make sure it exists before moving on
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
-			_, retryErr := config.NewStorageClient(userAgent).Buckets.Get(res.Name).Do()
+			_, retryErr := NewClient(config, userAgent).Buckets.Get(res.Name).Do()
 			return retryErr
 		},
 		Timeout: d.Timeout(schema.TimeoutUpdate),
@@ -1140,7 +1195,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 			retentionPolicy := retention_policies[0].(map[string]interface{})
 
 			if locked, ok := retentionPolicy["is_locked"]; ok && locked.(bool) && d.HasChange("retention_policy.0.is_locked") {
-				err = lockRetentionPolicy(config.NewStorageClient(userAgent).Buckets, d.Get("name").(string), res.Metageneration)
+				err = lockRetentionPolicy(NewClient(config, userAgent).Buckets, d.Get("name").(string), res.Metageneration)
 				if err != nil {
 					return err
 				}
@@ -1152,7 +1207,10 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 
 	d.SetId(res.Id)
 
-	return nil
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"name":    res.Name,
+		"project": d.Get("project").(string),
+	})
 }
 
 func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
@@ -1167,7 +1225,7 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 
 	// There seems to be some eventual consistency errors in some cases, so we want to check a few times
 	// to make sure it exists before moving on
-	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
+	res, err := NewClient(config, userAgent).Buckets.Get(bucket).Do()
 
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Storage Bucket %q", d.Get("name").(string)))
@@ -1178,101 +1236,135 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error {
+	
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
+	}
+	
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	// Get the bucket
 	bucket := d.Get("name").(string)
+	forceDestroy := d.Get("force_destroy").(bool)
 
-	var listError, deleteObjectError, deleteCacheError error
-	for deleteObjectError == nil {
-		res, err := config.NewStorageClient(userAgent).Objects.List(bucket).Versions(true).Do()
-		if err != nil {
-			log.Printf("Error listing contents of bucket %s: %v", bucket, err)
-			// If we can't list the contents, try deleting the bucket anyway in case it's empty
-			listError = err
-			break
-		}
+	// set up force_destroy state- we're deleting multiple resource kinds and parallelising those deletions, so we
+	// store some data in function scope to handle during cleanup
+	var objectsListError, deleteObjectError, deleteCacheError error
 
-		cacheList, cacheListErr := getAnywhereCacheListResult(d, config)
-		if cacheListErr != nil {
-			// If we get any error, try deleting the bucket anyway in case it's empty
-			// This would help our customers to avoid requiring extra storage.anywhereCaches.list permission.
-			break
-		}
+	// Create a workerpool for parallel deletion of resources. In the
+	// future, it would be great to expose Terraform's global parallelism
+	// flag here, but that's currently reserved for core use. Testing
+	// shows that NumCPUs-1 is the most performant on average networks.
+	//
+	// The challenge with making this user-configurable is that the
+	// configuration would reside in the Terraform configuration file,
+	// decreasing its portability. Ideally we'd want this to connect to
+	// Terraform's top-level -parallelism flag, but that's not plumbed nor
+	// is it scheduled to be plumbed to individual providers.
+	wp := workerpool.New(runtime.NumCPU() - 1)
 
-		if len(res.Items) == 0 && len(cacheList) == 0 {
-			break // 0 items and no caches, bucket empty
-		}
+	// Create a bounded semaphore channel allowing up to 2000 uncompleted deletion tasks in the queue
+	sem := make(chan struct{}, 2000)
 
-		if d.Get("retention_policy.0.is_locked").(bool) {
-			for _, item := range res.Items {
-				expiration, err := time.Parse(time.RFC3339, item.RetentionExpirationTime)
-				if err != nil {
-					return err
-				}
-				if expiration.After(time.Now()) {
-					deleteErr := errors.New("Bucket '" + d.Get("name").(string) + "' contains objects that have not met the retention period yet and cannot be deleted.")
-					log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
-					return deleteErr
-				}
-			}
-		}
-
-		if !d.Get("force_destroy").(bool) {
+	// delete anywhere caches
+	cacheList, _ := getAnywhereCacheListResult(d, config) // intentionally ignore errors on list- this requires extra permissions (storage.anywhereCaches.list) and we fall through if not permissioned
+	if len(cacheList) != 0 {
+		if !forceDestroy {
 			deleteErr := fmt.Errorf("Error trying to delete bucket %s without `force_destroy` set to true", bucket)
-			log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
+			log.Printf("[DEBUG] Error attempting to delete bucket %q with anywhere caches present: %s\n\n", bucket, deleteErr)
 			return deleteErr
 		}
 
-		// GCS requires that a bucket be empty (have no objects or object
-		// versions) before it can be deleted.
-		log.Printf("[DEBUG] GCS Bucket attempting to forceDestroy\n\n")
-
-		// Create a workerpool for parallel deletion of resources. In the
-		// future, it would be great to expose Terraform's global parallelism
-		// flag here, but that's currently reserved for core use. Testing
-		// shows that NumCPUs-1 is the most performant on average networks.
-		//
-		// The challenge with making this user-configurable is that the
-		// configuration would reside in the Terraform configuration file,
-		// decreasing its portability. Ideally we'd want this to connect to
-		// Terraform's top-level -parallelism flag, but that's not plumbed nor
-		// is it scheduled to be plumbed to individual providers.
-		wp := workerpool.New(runtime.NumCPU() - 1)
-
+		log.Printf("[DEBUG] Attempting to destroy %v anywhere caches on bucket %q due to `force_destroy` being set to true.", len(cacheList), bucket)
 		wp.Submit(func() {
 			err = deleteAnywhereCacheIfAny(d, config)
 			if err != nil {
 				deleteCacheError = fmt.Errorf("error deleting the caches on the bucket %s : %w", bucket, err)
 			}
 		})
+	}
 
-		for _, object := range res.Items {
-			log.Printf("[DEBUG] Found %s", object.Name)
-			object := object
+	// delete objects
+	var token string
+	first := true
+	var errMu sync.Mutex
+
+	for token != "" || first {
+		first = false
+
+		listCall := NewClient(config, userAgent).Objects.List(bucket).Versions(true)
+		if token != "" {
+			listCall.PageToken(token)
+		}
+		listResponse, listErr := listCall.Do()
+		if listErr != nil {
+			log.Printf("Error listing contents of bucket %s: %v", bucket, listErr)
+			// If we can't list the contents, fall through and try deleting the bucket anyway in case it's empty
+			objectsListError = listErr
+			break
+		}
+		token = listResponse.NextPageToken
+
+		if len(listResponse.Items) == 0 {
+			continue // 0 items on this page, but there might be more pages (unlikely but possible)
+		}
+
+		if d.Get("retention_policy.0.is_locked").(bool) {
+			for _, item := range listResponse.Items {
+				expiration, err := time.Parse(time.RFC3339, item.RetentionExpirationTime)
+				if err != nil {
+					return err
+				}
+
+				if expiration.After(time.Now()) {
+					deleteErr := fmt.Errorf("Bucket %q contains objects that have not met the retention period yet and cannot be deleted.", bucket)
+					log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
+					return deleteErr
+				}
+			}
+		}
+
+		if !forceDestroy {
+			deleteErr := fmt.Errorf("Error trying to delete bucket %s without `force_destroy` set to true", bucket)
+			log.Printf("[DEBUG] Error attempting to delete bucket %q with objects: %s\n\n", bucket, deleteErr)
+			return deleteErr
+		}
+
+		// GCS requires that a bucket be empty (have no objects or object versions) before it can be deleted.
+		log.Printf("[DEBUG] Attempting to destroy %v objects in bucket %q due to `force_destroy` being set to true.", len(listResponse.Items), bucket)
+
+		for _, object := range listResponse.Items {
+			object := object // ensure that local variable is maintained over loop iterations.
+
+			// Enforce backpressure: blocks when 2000 uncompleted tasks are queued/in-flight
+			sem <- struct{}{}
 
 			wp.Submit(func() {
-				log.Printf("[TRACE] Attempting to delete %s", object.Name)
-				if err := config.NewStorageClient(userAgent).Objects.Delete(bucket, object.Name).Generation(object.Generation).Do(); err != nil {
-					deleteObjectError = err
-					log.Printf("[ERR] Failed to delete storage object %s: %s", object.Name, err)
-				} else {
-					log.Printf("[TRACE] Successfully deleted %s", object.Name)
+				defer func() { <-sem }()
+				err := NewClient(config, userAgent).Objects.Delete(bucket, object.Name).Generation(object.Generation).Do()
+				if err != nil {
+					errMu.Lock()
+					defer errMu.Unlock()
+					if deleteObjectError == nil {
+						deleteObjectError = err
+						log.Printf("[DEBUG] Failed to delete object %q in bucket %q: %s", object.Name, bucket, err)
+					}
 				}
 			})
 		}
-
-		// Wait for everything to finish.
-		wp.StopWait()
 	}
 
-	// remove empty bucket
+	// Wait for all force-destroyed children (objects, anywhereCaches) to finish getting destroyed
+	wp.StopWait()
+
+	// destroy bucket
 	err = retry.Retry(1*time.Minute, func() *retry.RetryError {
-		err := config.NewStorageClient(userAgent).Buckets.Delete(bucket).Do()
+		err := NewClient(config, userAgent).Buckets.Delete(bucket).Do()
 		if err == nil {
 			return nil
 		}
@@ -1281,8 +1373,8 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		}
 		return retry.NonRetryableError(err)
 	})
-	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contains(gerr.Message, "not empty") && listError != nil {
-		return fmt.Errorf("could not delete non-empty bucket due to error when listing contents: %v", listError)
+	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contains(gerr.Message, "not empty") && objectsListError != nil {
+		return fmt.Errorf("could not delete non-empty bucket due to error when listing contents: %v", objectsListError)
 	}
 	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contains(gerr.Message, "not empty") && deleteObjectError != nil {
 		return fmt.Errorf("could not delete non-empty bucket due to error when deleting contents: %v", deleteObjectError)
@@ -1300,6 +1392,35 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	if d.Id() == "" {
+		identity, err := d.Identity()
+		if err != nil {
+			return nil, fmt.Errorf("Error reading import identity: %s", err)
+		}
+		if identity == nil {
+			return nil, fmt.Errorf("import requires bucket name")
+		}
+
+		nameValue, ok := identity.GetOk("name")
+		if !ok || nameValue.(string) == "" {
+			return nil, fmt.Errorf("import requires bucket name")
+		}
+
+		name := nameValue.(string)
+		if err := d.Set("name", name); err != nil {
+			return nil, fmt.Errorf("Error setting name: %s", err)
+		}
+
+		if projectValue, ok := identity.GetOk("project"); ok && projectValue.(string) != "" {
+			if err := d.Set("project", projectValue.(string)); err != nil {
+				return nil, fmt.Errorf("Error setting project: %s", err)
+			}
+			d.SetId(fmt.Sprintf("%s/%s", projectValue.(string), name))
+		} else {
+			d.SetId(name)
+		}
+	}
+
 	// We need to support project/bucket_name and bucket_name formats. This will allow
 	// importing a bucket that is in a different project than the provider default.
 	// ParseImportID can't be used because having no project will cause an error but it
@@ -1330,20 +1451,38 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 	}
 	corsRules := make([]*storage.BucketCors, 0, len(configured))
 	for _, raw := range configured {
+		if raw == nil {
+			corsRule := storage.BucketCors{}
+			corsRules = append(corsRules, &corsRule)
+			continue
+		}
 		data := raw.(map[string]interface{})
-		corsRule := storage.BucketCors{
-			Origin:         tpgresource.ConvertStringArr(data["origin"].([]interface{})),
-			Method:         tpgresource.ConvertStringArr(data["method"].([]interface{})),
-			ResponseHeader: tpgresource.ConvertStringArr(data["response_header"].([]interface{})),
-			MaxAgeSeconds:  int64(data["max_age_seconds"].(int)),
+		corsRule := storage.BucketCors{}
+		if v, ok := data["method"].([]interface{}); ok {
+			corsRule.Method = tpgresource.ConvertStringArr(v)
 		}
 
+		if v, ok := data["origin"].([]interface{}); ok {
+			corsRule.Origin = tpgresource.ConvertStringArr(v)
+		}
+
+		if v, ok := data["response_header"].([]interface{}); ok {
+			corsRule.ResponseHeader = tpgresource.ConvertStringArr(v)
+		}
+
+		if v, ok := data["max_age_seconds"].(int); ok {
+			corsRule.MaxAgeSeconds = int64(v)
+		}
 		corsRules = append(corsRules, &corsRule)
 	}
 	return corsRules
 }
 
-func flattenCors(corsRules []*storage.BucketCors) []map[string]interface{} {
+func flattenCors(d *schema.ResourceData, corsRules []*storage.BucketCors) []map[string]interface{} {
+	cors, _ := d.GetOk("cors")
+	if corsRules == nil && len(cors.([]interface{})) == 0 {
+		return []map[string]interface{}{}
+	}
 	corsRulesSchema := make([]map[string]interface{}, 0, len(corsRules))
 	for _, corsRule := range corsRules {
 		data := map[string]interface{}{
@@ -1352,10 +1491,41 @@ func flattenCors(corsRules []*storage.BucketCors) []map[string]interface{} {
 			"response_header": corsRule.ResponseHeader,
 			"max_age_seconds": corsRule.MaxAgeSeconds,
 		}
-
 		corsRulesSchema = append(corsRulesSchema, data)
 	}
+
+	if len(corsRules) < len(cors.([]interface{})) {
+		emptyCors := map[string]interface{}{
+			"origin":          []string{},
+			"method":          []string{},
+			"response_header": []string{},
+			"max_age_seconds": 0,
+		}
+		for k, v := range cors.([]interface{}) {
+			if isCorsRuleEmpty(v) {
+				corsRulesSchema = append(corsRulesSchema[:k], append([]map[string]interface{}{emptyCors}, corsRulesSchema[k:]...)...)
+			}
+		}
+	}
 	return corsRulesSchema
+}
+
+func isCorsRuleEmpty(rule interface{}) bool {
+	if rule == nil {
+		return true
+	}
+	corsRule, ok := rule.(map[string]interface{})
+	if !ok {
+		return true
+	}
+	method := corsRule["method"] == nil || len(corsRule["method"].([]interface{})) == 0
+	origin := corsRule["origin"] == nil || len(corsRule["origin"].([]interface{})) == 0
+	responseHeader := corsRule["response_header"] == nil || len(corsRule["response_header"].([]interface{})) == 0
+	maxAgeSeconds := corsRule["max_age_seconds"] == 0
+	if method && origin && responseHeader && maxAgeSeconds {
+		return true
+	}
+	return false
 }
 
 func expandBucketEncryption(configured interface{}) *storage.BucketEncryption {
@@ -1365,13 +1535,59 @@ func expandBucketEncryption(configured interface{}) *storage.BucketEncryption {
 	}
 	enc := encs[0].(map[string]interface{})
 	keyname := enc["default_kms_key_name"]
-	if keyname == nil || keyname.(string) == "" {
+	bucketencryption := &storage.BucketEncryption{
+		DefaultKmsKeyName:                           keyname.(string),
+		GoogleManagedEncryptionEnforcementConfig:    expandGoogleManagedEncryptionEnforcementConfig(enc["google_managed_encryption_enforcement_config"]),
+		CustomerManagedEncryptionEnforcementConfig:  expandCustomerManagedEncryptionEnforcementConfig(enc["customer_managed_encryption_enforcement_config"]),
+		CustomerSuppliedEncryptionEnforcementConfig: expandCustomerSuppliedEncryptionEnforcementConfig(enc["customer_supplied_encryption_enforcement_config"]),
+	}
+
+	return bucketencryption
+}
+
+func expandGoogleManagedEncryptionEnforcementConfig(gmek interface{}) *storage.BucketEncryptionGoogleManagedEncryptionEnforcementConfig {
+	if gmek == nil {
 		return nil
 	}
-	bucketenc := &storage.BucketEncryption{
-		DefaultKmsKeyName: keyname.(string),
+	l := gmek.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
 	}
-	return bucketenc
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	return &storage.BucketEncryptionGoogleManagedEncryptionEnforcementConfig{
+		RestrictionMode: original["restriction_mode"].(string),
+	}
+}
+
+func expandCustomerManagedEncryptionEnforcementConfig(cmek interface{}) *storage.BucketEncryptionCustomerManagedEncryptionEnforcementConfig {
+	if cmek == nil {
+		return nil
+	}
+	l := cmek.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	return &storage.BucketEncryptionCustomerManagedEncryptionEnforcementConfig{
+		RestrictionMode: original["restriction_mode"].(string),
+	}
+}
+
+func expandCustomerSuppliedEncryptionEnforcementConfig(csek interface{}) *storage.BucketEncryptionCustomerSuppliedEncryptionEnforcementConfig {
+	if csek == nil {
+		return nil
+	}
+	l := csek.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	return &storage.BucketEncryptionCustomerSuppliedEncryptionEnforcementConfig{
+		RestrictionMode: original["restriction_mode"].(string),
+	}
 }
 
 func flattenBucketEncryption(enc *storage.BucketEncryption) []map[string]interface{} {
@@ -1381,11 +1597,67 @@ func flattenBucketEncryption(enc *storage.BucketEncryption) []map[string]interfa
 		return encryption
 	}
 
-	encryption = append(encryption, map[string]interface{}{
-		"default_kms_key_name": enc.DefaultKmsKeyName,
-	})
+	flattenEncryption := make(map[string]interface{})
 
+	if enc.DefaultKmsKeyName != "" {
+		flattenEncryption["default_kms_key_name"] = enc.DefaultKmsKeyName
+	}
+
+	if enc.CustomerManagedEncryptionEnforcementConfig != nil {
+		flattenEncryption["customer_managed_encryption_enforcement_config"] = flattenCustomerManagedEncryptionEnforcementConfig(enc.CustomerManagedEncryptionEnforcementConfig)
+	}
+
+	if enc.CustomerSuppliedEncryptionEnforcementConfig != nil {
+		flattenEncryption["customer_supplied_encryption_enforcement_config"] = flattenCustomerSuppliedEncryptionEnforcementConfig(enc.CustomerSuppliedEncryptionEnforcementConfig)
+	}
+
+	if enc.GoogleManagedEncryptionEnforcementConfig != nil {
+		flattenEncryption["google_managed_encryption_enforcement_config"] = flattenGoogleManagedEncryptionEnforcementConfig(enc.GoogleManagedEncryptionEnforcementConfig)
+	}
+	encryption = append(encryption, flattenEncryption)
 	return encryption
+}
+
+func flattenCustomerManagedEncryptionEnforcementConfig(cmek *storage.BucketEncryptionCustomerManagedEncryptionEnforcementConfig) []map[string]interface{} {
+	encryptionConfig := make([]map[string]interface{}, 0, 1)
+
+	if cmek == nil {
+		return encryptionConfig
+	}
+
+	encryptionConfig = append(encryptionConfig, map[string]interface{}{
+		"restriction_mode": cmek.RestrictionMode,
+		"effective_time":   cmek.EffectiveTime,
+	})
+	return encryptionConfig
+}
+
+func flattenCustomerSuppliedEncryptionEnforcementConfig(cmek *storage.BucketEncryptionCustomerSuppliedEncryptionEnforcementConfig) []map[string]interface{} {
+	encryptionConfig := make([]map[string]interface{}, 0, 1)
+
+	if cmek == nil {
+		return encryptionConfig
+	}
+
+	encryptionConfig = append(encryptionConfig, map[string]interface{}{
+		"restriction_mode": cmek.RestrictionMode,
+		"effective_time":   cmek.EffectiveTime,
+	})
+	return encryptionConfig
+}
+
+func flattenGoogleManagedEncryptionEnforcementConfig(cmek *storage.BucketEncryptionGoogleManagedEncryptionEnforcementConfig) []map[string]interface{} {
+	encryptionConfig := make([]map[string]interface{}, 0, 1)
+
+	if cmek == nil {
+		return encryptionConfig
+	}
+
+	encryptionConfig = append(encryptionConfig, map[string]interface{}{
+		"restriction_mode": cmek.RestrictionMode,
+		"effective_time":   cmek.EffectiveTime,
+	})
+	return encryptionConfig
 }
 
 func expandBucketCustomPlacementConfig(configured interface{}) *storage.BucketCustomPlacementConfig {
@@ -1481,7 +1753,7 @@ func expandBucketRetentionPolicy(configured interface{}) *storage.BucketRetentio
 	if v, ok := retentionPolicy["retention_period"]; ok {
 		retentionPeriod, _ = strconv.ParseInt(v.(string), 10, 64)
 	}
-	
+
 	bucketRetentionPolicy := &storage.BucketRetentionPolicy{
 		IsLocked:        retentionPolicy["is_locked"].(bool),
 		RetentionPeriod: retentionPeriod,
@@ -2186,7 +2458,7 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	// from the projectNumber which is included in the bucket API response
 	if d.Get("project") == "" {
 		projectName, _ := tpgresource.GetProject(d, config)
-		proj, err := config.NewComputeClient(userAgent).Projects.Get(strconv.FormatUint(res.ProjectNumber, 10)).Do()
+		proj, err := compute_tpg.NewClient(config, userAgent).Projects.Get(strconv.FormatUint(res.ProjectNumber, 10)).Do()
 		if err != nil {
 			log.Printf("[ERROR] Missing Compute API permissions, fallback to provider/resource default")
 		}
@@ -2218,7 +2490,7 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("location", res.Location); err != nil {
 		return fmt.Errorf("Error setting location: %s", err)
 	}
-	if err := d.Set("cors", flattenCors(res.Cors)); err != nil {
+	if err := d.Set("cors", flattenCors(d, res.Cors)); err != nil {
 		return fmt.Errorf("Error setting cors: %s", err)
 	}
 	if err := d.Set("default_event_based_hold", res.DefaultEventBasedHold); err != nil {
@@ -2243,11 +2515,11 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := tpgresource.SetLabels(res.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
-	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
-		return fmt.Errorf("Error setting terraform_labels: %s", err)
-	}
 	if err := d.Set("effective_labels", res.Labels); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
 	if err := d.Set("website", flattenBucketWebsite(res.Website)); err != nil {
 		return fmt.Errorf("Error setting website: %s", err)
@@ -2306,9 +2578,18 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("ip_filter", flattenBucketIpFilter(res.IpFilter)); err != nil {
 		return fmt.Errorf("Error setting ip_filter: %s", err)
 	}
+	
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	
 
 	d.SetId(res.Id)
-	return nil
+
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+    "name":    res.Name,
+    "project": d.Get("project").(string),
+})
 }
 
 func hierachicalNamespaceDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
@@ -2320,4 +2601,13 @@ func hierachicalNamespaceDiffSuppress(k, old, new string, r *schema.ResourceData
 	}
 
 	return false
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_storage_bucket",
+		ProductName: "storage",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceStorageBucket(),
+	}.Register()
 }

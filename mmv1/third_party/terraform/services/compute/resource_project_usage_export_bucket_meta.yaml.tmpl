@@ -8,6 +8,10 @@ api_version: 'v1'
 {{- end }}
 api_resource_type_kind: 'Project'
 fields:
-  - field: 'bucket_name'
-  - field: 'prefix'
+  - api_field: 'usageExportLocation.bucketName'
+    field: 'bucket_name'
+  - api_field: 'usageExportLocation.reportNamePrefix'
+    field: 'prefix'
   - field: 'project'
+  - field: 'deletion_policy'
+    provider_only: true

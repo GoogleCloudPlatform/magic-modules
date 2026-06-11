@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/firebase"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -28,8 +29,8 @@ func TestAccDataSourceGoogleFirebaseWebApp(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						resourceName,
 						"google_firebase_web_app.my_app",
-						map[string]struct{}{
-							"deletion_policy": {},
+						[]string{
+							"deletion_policy",
 						},
 					),
 				),

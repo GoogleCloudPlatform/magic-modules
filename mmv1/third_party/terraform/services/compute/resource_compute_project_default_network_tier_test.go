@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccComputeProjectDefaultNetworkTier_basic(t *testing.T) {
@@ -19,6 +21,9 @@ func TestAccComputeProjectDefaultNetworkTier_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, org, billingId),
@@ -42,6 +47,9 @@ func TestAccComputeProjectDefaultNetworkTier_modify(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, org, billingId),
@@ -79,10 +87,15 @@ resource "google_project_service" "compute" {
   service = "compute.googleapis.com"
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_compute_project_default_network_tier" "fizzbuzz" {
   project      = google_project.project.project_id
   network_tier = "PREMIUM"
-  depends_on   = [google_project_service.compute]
+  depends_on   = [time_sleep.wait_120_seconds]
 }
 `, projectID, projectID, org, billing)
 }
@@ -102,10 +115,15 @@ resource "google_project_service" "compute" {
   service = "compute.googleapis.com"
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_compute_project_default_network_tier" "fizzbuzz" {
   project      = google_project.project.project_id
   network_tier = "STANDARD"
-  depends_on   = [google_project_service.compute]
+  depends_on   = [time_sleep.wait_120_seconds]
 }
 `, projectID, projectID, org, billing)
 }

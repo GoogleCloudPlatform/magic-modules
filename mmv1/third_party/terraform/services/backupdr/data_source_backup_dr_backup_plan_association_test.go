@@ -9,6 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/backupdr"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/sql"
 )
 
 func TestAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(t *testing.T) {
@@ -23,8 +27,8 @@ func TestAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_backup_dr_backup_plan_association.bpa-test", "google_backup_dr_backup_plan_association.bpa", map[string]struct{}{
-						"resource": {},
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_backup_dr_backup_plan_association.bpa-test", "google_backup_dr_backup_plan_association.bpa", []string{
+						"resource",
 					},
 					),
 				),
@@ -176,8 +180,6 @@ func testAccCheckBackupPlanAssociationInList(dataSourceName, instanceName, backu
 		projectID := project.Primary.Attributes["project_id"]
 		projectNumber := project.Primary.Attributes["number"]
 
-		fmt.Printf("\n--- Performing Direct Association Check ---\n")
-
 		// 1. Reconstruct the 'resource' string using the project NUMBER and instance ID
 		//    to match the format returned by the BackupDR API.
 		instanceID := instance.Primary.Attributes["instance_id"]
@@ -191,21 +193,32 @@ func testAccCheckBackupPlanAssociationInList(dataSourceName, instanceName, backu
 
 		associationsCount, _ := strconv.Atoi(ds.Primary.Attributes["associations.#"])
 		fmt.Printf("Total associations found by data source: %d\n", associationsCount)
+		found := false
 
 		for i := 0; i < associationsCount; i++ {
 			resourceAttr := ds.Primary.Attributes[fmt.Sprintf("associations.%d.resource", i)]
 			backupPlanAttr := ds.Primary.Attributes[fmt.Sprintf("associations.%d.backup_plan", i)]
 
-			fmt.Printf("Found Association #%d: Resource='%s', BackupPlan='%s'\n", i, resourceAttr, backupPlanAttr)
-
 			if resourceAttr == expectedResource && backupPlanAttr == expectedBackupPlan {
-				fmt.Println("--- Match found! Test successful. ---")
-				return nil
+				prefix := fmt.Sprintf("associations.%d.", i)
+				checks := []resource.TestCheckFunc{
+					resource.TestCheckResourceAttrSet(dataSourceName, prefix+"name"),
+					resource.TestCheckResourceAttrSet(dataSourceName, prefix+"data_source"),
+
+					resource.TestCheckResourceAttrSet(dataSourceName, prefix+"rules_config_info.0.rule_id"),
+					resource.TestCheckResourceAttrSet(dataSourceName, prefix+"rules_config_info.0.last_backup_state"),
+				}
+				if err := resource.ComposeTestCheckFunc(checks...)(s); err != nil {
+					return fmt.Errorf("error checking new fields for association %d: %v", i, err)
+				}
+				found = true
+				break
 			}
 		}
-
-		fmt.Println("--- No match found after checking all associations. ---")
-		return fmt.Errorf("no matching backup plan association found in data source '%s' for resource '%s'", dataSourceName, expectedResource)
+		if !found {
+			return fmt.Errorf("no matching backup plan association found in data source '%s' for resource '%s'", dataSourceName, expectedResource)
+		}
+		return nil
 	}
 }
 
@@ -286,8 +299,118 @@ resource "google_backup_dr_backup_plan_association" "bpa" {
 
 data "google_backup_dr_backup_plan_associations" "bpas" {
   location      = "us-central1"
-  resource_type = "compute.googleapis.com/Instance"
   depends_on = [google_backup_dr_backup_plan_association.bpa]
 }
+`, context)
+}
+
+func TestAccDataSourceGoogleBackupDRBackupPlanAssociation_MultiRegion(t *testing.T) {
+	t.Parallel()
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceGoogleBackupDRBackupPlanAssociation_MultiRegion(context),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_backup_dr_backup_plan_association.bpa-test", "google_backup_dr_backup_plan_association.bpa", []string{
+						"resource",
+					},
+					),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataSourceGoogleBackupDRBackupPlanAssociation_MultiRegion(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_service_account" "default" {
+ account_id   = "tf-test-my-custom-%{random_suffix}"
+ display_name = "Custom SA for VM Instance"
+}
+
+resource "google_sql_database_instance" "instance" {
+ name             = "default-%{random_suffix}"
+ database_version = "MYSQL_8_0"
+ region          = "us-central1"
+ deletion_protection = false
+ settings {
+   tier = "db-f1-micro"
+   availability_type = "ZONAL"
+   activation_policy = "ALWAYS"
+ }
+}
+
+resource "google_backup_dr_backup_vault" "my-backup-vault" {
+   location ="us"
+   backup_vault_id    = "tf-test-bv-%{random_suffix}"
+   description = "This is a second backup vault built by Terraform."
+   backup_minimum_enforced_retention_duration = "100000s"
+   labels = {
+     foo = "bar1"
+     bar = "baz1"
+   }
+   annotations = {
+     annotations1 = "bar1"
+     annotations2 = "baz1"
+   }
+   force_update = "true"
+   force_delete = "true"
+   allow_missing = "true"
+}
+
+resource "google_backup_dr_backup_plan" "foo" {
+ location       = "us-central1"
+ backup_plan_id = "tf-test-bp-test-%{random_suffix}"
+ resource_type  = "sqladmin.googleapis.com/Instance"
+ backup_vault   = google_backup_dr_backup_vault.my-backup-vault.name
+
+ backup_rules {
+   rule_id                = "rule-1"
+   backup_retention_days  = 2
+
+   standard_schedule {
+     recurrence_type     = "HOURLY"
+     hourly_frequency    = 6
+     time_zone           = "UTC"
+
+     backup_window {
+       start_hour_of_day = 12
+       end_hour_of_day   = 18
+     }
+   }
+ }
+}
+
+resource "google_backup_dr_backup_plan_association" "bpa" {
+ location = "us-central1"
+ backup_plan_association_id = "tf-test-bpa-test-%{random_suffix}"
+ resource = "projects/${data.google_project.project.project_id}/instances/${google_sql_database_instance.instance.name}"
+ resource_type= "sqladmin.googleapis.com/Instance"
+ backup_plan = google_backup_dr_backup_plan.foo.name
+ depends_on = [ google_sql_database_instance.instance ]
+}
+
+resource "time_sleep" "wait_for_bpa" {
+  // Wait 30 seconds after the bpa is created
+  depends_on = [google_backup_dr_backup_plan_association.bpa]
+  create_duration = "30s"
+}
+
+data "google_backup_dr_backup_plan_association" "bpa-test" {
+  location      = "us-central1"
+  backup_plan_association_id="tf-test-bpa-test-%{random_suffix}"
+  depends_on = [google_backup_dr_backup_plan_association.bpa]
+}
+
 `, context)
 }

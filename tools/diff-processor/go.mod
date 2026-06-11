@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor
 
-go 1.23
+go 1.26
 
 replace google/provider/old => ./old
 
@@ -29,7 +29,6 @@ require (
 )
 
 require (
-	bitbucket.org/creachadair/stringset v0.0.8 // indirect
 	cel.dev/expr v0.15.0 // indirect
 	cloud.google.com/go v0.115.1 // indirect
 	cloud.google.com/go/auth v0.9.0 // indirect

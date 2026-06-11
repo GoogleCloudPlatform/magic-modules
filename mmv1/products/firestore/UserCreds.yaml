@@ -1,0 +1,97 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'UserCreds'
+description: |
+  User credentials for a Cloud Firestore with MongoDB compatibility database.
+  The resource is owned by the database and is deleted along with the database.
+references:
+  guides:
+    'Authenticate and connect to a database': 'https://cloud.google.com/firestore/mongodb-compatibility/docs/connect'
+  api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.userCreds'
+base_url: 'projects/{{project}}/databases/{{database}}/userCreds'
+self_link: 'projects/{{project}}/databases/{{database}}/userCreds/{{name}}'
+immutable: true
+create_url: 'projects/{{project}}/databases/{{database}}/userCreds?userCredsId={{name}}'
+autogen_async: false
+custom_code:
+  post_create: templates/terraform/post_create/firestore_user_creds.go.tmpl
+examples:
+  - name: 'firestore_user_creds_basic'
+    primary_resource_id: 'my-user-creds'
+    vars:
+      database_id: 'database-id-mongodb-compatible'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: 'firestore_user_creds_with_secret_manager'
+    primary_resource_id: 'my-user-creds'
+    vars:
+      database_id: 'database-id-mongodb-compatible'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+parameters:
+  - name: 'database'
+    type: String
+    description: |
+      The Firestore database ID.
+    required: true
+    url_param_only: true
+  - name: 'name'
+    type: String
+    description: |
+      The ID to use for the user creds, which will become the final component
+      of the user cred's resource name.
+
+      This value should be 4-63 characters. Valid characters are /[a-z][0-9]-/
+      with first character a letter and the last a letter or a number. Must not
+      be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
+properties:
+  - name: 'createTime'
+    type: String
+    description: |
+      The timestamp at which these user creds were created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The timestamp at which these user creds were updated.
+    output: true
+  - name: 'state'
+    type: String
+    description: |
+      The state of the user creds.
+    output: true
+  - name: 'securePassword'
+    type: String
+    description: |
+      The plaintext server-generated password for the user creds.
+    output: true
+    sensitive: true
+    # Only returned in the create call.
+    ignore_read: true
+  - name: 'resourceIdentity'
+    type: NestedObject
+    description: |
+      Describes the Resource Identity principal.
+    output: true
+    properties:
+      - name: 'principal'
+        type: String
+        description: |
+          The principal identifier string.
+          See https://cloud.google.com/iam/docs/principal-identifiers.
+        output: true

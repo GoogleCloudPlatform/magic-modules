@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'FirewallEndpointAssociation'
+name: FirewallEndpointAssociation
 description: |
   Firewall endpoint association links a firewall endpoint to a VPC network in
   the same zone. After you define this association, Cloud Firewall forwards the
@@ -20,9 +20,9 @@ description: |
   the attached firewall endpoint.
 references:
   guides:
-    'Firewall endpoint overview': 'https://cloud.google.com/firewall/docs/about-firewall-endpoints'
-    'Create and associate firewall endpoints': 'https://cloud.google.com/firewall/docs/configure-firewall-endpoints'
-  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/projects.locations.firewallEndpointAssociations#FirewallEndpointAssociation'
+    Firewall endpoint overview: https://cloud.google.com/firewall/docs/about-firewall-endpoints
+    Create and associate firewall endpoints: https://cloud.google.com/firewall/docs/configure-firewall-endpoints
+  api: https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/projects.locations.firewallEndpointAssociations#FirewallEndpointAssociation
 docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
@@ -33,54 +33,57 @@ docs:
 base_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations'
 self_link: '{{parent}}/locations/{{location}}/firewallEndpointAssociations/{{name}}'
 create_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations?firewallEndpointAssociationId={{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
 import_format:
   - '{{%parent}}/locations/{{location}}/firewallEndpointAssociations/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  url_substitutions:
+    - parent: projects/${PROJECT_NAME}
+      region: us-central1-a
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
   include_project: true
+include_in_tgc_next: true
 custom_code:
-sweeper:
-  url_substitutions:
-    - parent: "projects/${PROJECT_NAME}"
-      region: "us-central1-a"
-examples:
-  - name: 'network_security_firewall_endpoint_association_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name_prefix: 'my-firewall-endpoint'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
+samples:
+  - name: network_security_firewall_endpoint_association_basic
+    primary_resource_id: default
     # Handwritten test will take care of creates and updates.
     # Firewall endpoint association creation is subjet to firewall endpoint creation which is long and expensive.
     exclude_test: true
+    steps:
+      - name: network_security_firewall_endpoint_association_basic
+        resource_id_vars:
+          resource_name_prefix: my-firewall-endpoint
+        test_env_vars:
+          org_id: ORG_ID
+          project: PROJECT_NAME
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the firewall endpoint association resource.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location (zone) of the firewall endpoint association.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The name of the parent this firewall endpoint association belongs to.
@@ -88,25 +91,25 @@ parameters:
     url_param_only: true
     immutable: true
 properties:
-  - name: 'firewallEndpoint'
+  - name: firewallEndpoint
     type: String
     description: |
       The URL of the firewall endpoint that is being associated.
     required: true
-  - name: 'network'
+  - name: network
     type: String
     description: |
       The URL of the network that is being associated.
     required: true
-  - name: 'tlsInspectionPolicy'
+  - name: tlsInspectionPolicy
     type: String
     description: |
       The URL of the TlsInspectionPolicy that is being associated.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       A map of key/value label pairs to assign to the resource.
-  - name: 'disabled'
+  - name: disabled
     type: Boolean
     description: |
       Whether the association is disabled. True indicates that traffic will not be intercepted.
@@ -114,30 +117,30 @@ properties:
       ~> **Note:** The API will reject the request if this value is set to true when creating the resource,
       otherwise on an update the association can be disabled.
     default_value: false
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: |
       Server-defined URL of this resource.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: Time the firewall endpoint was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: Time the firewall endpoint was updated in UTC.
     output: true
-  - name: 'reconciling'
+  - name: reconciling
     type: Boolean
     description: |
       Whether reconciling is in progress, recommended per https://google.aip.dev/128.
     output: true
-  - name: 'state'
+  - name: state
     type: Enum
     description: The current state of the endpoint.
     output: true
     enum_values:
-      - 'ACTIVE'
-      - 'CREATING'
-      - 'DELETING'
-      - 'INACTIVE'
+      - ACTIVE
+      - CREATING
+      - DELETING
+      - INACTIVE

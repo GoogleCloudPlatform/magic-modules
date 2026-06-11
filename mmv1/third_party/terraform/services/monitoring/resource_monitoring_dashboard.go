@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -75,6 +76,7 @@ func ResourceMonitoringDashboard() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -96,6 +98,9 @@ func ResourceMonitoringDashboard() *schema.Resource {
 				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -118,7 +123,7 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{MonitoringBasePath}}v1/projects/{{project}}/dashboards")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"v1/projects/{{project}}/dashboards")
 	if err != nil {
 		return err
 	}
@@ -152,7 +157,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -183,10 +188,19 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error reading Dashboard: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceMonitoringDashboard) {
+		return ResourceMonitoringDashboard().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -210,7 +224,7 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:               config,
 		Method:               "PATCH",
@@ -229,13 +243,20 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url := config.MonitoringBasePath + "v1/" + d.Id()
+	url := transport_tpg.BaseUrl(Product, config) + "v1/" + d.Id()
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -273,4 +294,13 @@ func resourceMonitoringDashboardImport(d *schema.ResourceData, meta interface{})
 	d.SetId(fmt.Sprintf("projects/%s/dashboards/%s", parts["project"], parts["id"]))
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_monitoring_dashboard",
+		ProductName: "monitoring",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceMonitoringDashboard(),
+	}.Register()
 }

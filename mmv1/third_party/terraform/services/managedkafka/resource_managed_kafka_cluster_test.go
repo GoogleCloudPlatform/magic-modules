@@ -5,6 +5,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/managedkafka"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/privateca"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccManagedKafkaCluster_update(t *testing.T) {
@@ -88,6 +91,9 @@ resource "google_managed_kafka_cluster" "example" {
     vcpu_count = 4
     memory_bytes = 4512135122
   }
+  broker_capacity_config {
+    disk_size_gib = 1500
+  }
   gcp_config {
     access_config {
       network_configs {
@@ -134,6 +140,9 @@ resource "google_managed_kafka_cluster" "example" {
   capacity_config {
     vcpu_count = 4
     memory_bytes = 4512135122
+  }
+  broker_capacity_config {
+    disk_size_gib = 1500
   }
   gcp_config {
     access_config {

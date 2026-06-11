@@ -12,10 +12,8 @@
 # limitations under the License.
 
 ---
-name: 'Client'
+name: Client
 api_resource_type_kind: IdentityAwareProxyClient
-deprecation_message: >-
-  After July 2025, the `google_iap_client` Terraform resource will no longer function as intended due to the deprecation of the IAP OAuth Admin API
 description: |
   Contains the data that describes an Identity Aware Proxy owned client.
 
@@ -24,44 +22,46 @@ description: |
   in this tool.
 references:
   guides:
-    'Setting up IAP Client': 'https://cloud.google.com/iap/docs/authentication-howto'
-  api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands.identityAwareProxyClients'
+    Setting up IAP Client: https://cloud.google.com/iap/docs/authentication-howto
+  api: https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands.identityAwareProxyClients
 docs:
-id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
 base_url: '{{brand}}/identityAwareProxyClients'
-self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
 immutable: true
+self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
+id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
 import_format:
   - '{{brand}}/identityAwareProxyClients/{{client_id}}'
-datasource:
-  generate: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  custom_import: 'templates/terraform/custom_import/iap_client.go.tmpl'
+datasource_experimental:
+  generate: true
 exclude_sweeper: true
 error_retry_predicates:
-
-  - 'transport_tpg.IapClient409Operation'
-examples:
-  - name: 'iap_client'
-    primary_resource_id: 'project_client'
-    vars:
-      project_id: 'my-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      org_domain: 'ORG_DOMAIN'
+  - transport_tpg.IapClient409Operation
+deprecation_message: This resource is deprecated on Jan 22, 2025. After Jan 19, 2026 the `google_iap_client` Terraform resource will no longer function as intended due to the deprecation of the IAP OAuth Admin APIs. New projects will not be able to use these APIs. March 19, 2026 The IAP OAuth Admin APIs will be permanently shut down. Access to this feature will no longer be available.
+custom_code:
+  custom_import: templates/terraform/custom_import/iap_client.go.tmpl
+samples:
+  - name: iap_client
+    primary_resource_id: project_client
+    steps:
+      - name: iap_client
+        resource_id_vars:
+          project_id: my-project
+        test_env_vars:
+          org_id: ORG_ID
+          org_domain: ORG_DOMAIN
 parameters:
-  - name: 'clientId'
+  - name: clientId
     type: String
     description: |
       Output only. Unique identifier of the OAuth client.
     api_name: name
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'brand'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: brand
     type: String
     description: |
       Identifier of the brand to which this client
@@ -71,13 +71,13 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'secret'
+  - name: secret
     type: String
     description: |
       Output only. Client secret of the OAuth client.
     sensitive: true
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       Human-friendly name given to the OAuth client.

@@ -228,7 +228,7 @@ properties:
         required_with:
           - 'sensitive_params.0.secretAccessKeyWo'
         description: |
-          The version of the sensitive params - used to trigger updates of the write-only params. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+          The version of the sensitive params - used to trigger updates of the write-only params. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
       - name: 'secretAccessKey'
         type: String
         description: |
@@ -239,7 +239,7 @@ properties:
           - 'sensitive_params.0.secretAccessKeyWo'
         conflicts:
           - 'sensitive_params.0.secretAccessKeyWo'
-      - name: 'secretAccessKeyWo' # Wo is convention for write-only properties
+      - name: 'secretAccessKeyWo'  # Wo is convention for write-only properties
         type: String
         description: |
           The Secret Access Key of the AWS account transferring data from.

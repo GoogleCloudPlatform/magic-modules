@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccDataSourceGoogleProject_basic(t *testing.T) {
@@ -24,11 +25,11 @@ func TestAccDataSourceGoogleProject_basic(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_project.project",
 						"google_project.project",
-						map[string]struct{}{
+						[]string{
 							// Virtual fields
-							"auto_create_network": {},
-							"skip_delete":         {},
-							"deletion_policy":     {},
+							"auto_create_network",
+							"skip_delete",
+							"deletion_policy",
 						}),
 				),
 			},

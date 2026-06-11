@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 {{$.CodeHeader TemplatePath}}
@@ -20,49 +20,93 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
-
+    "bytes"
+    "context"
+    "encoding/base64"
+    "encoding/json"
     "fmt"
     "log"
     "net/http"
     "reflect"
-{{- if $.SupportsIndirectUserProjectOverride }}
     "regexp"
-{{- end }}
-{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
+    "slices"
+    "sort"
+    "strconv"
     "strings"
-{{- end }}
     "time"
 
-{{/*     # We list all the v2 imports here, because we run 'goimports' to guess the correct */}}
-{{/*     # set of imports, which will never guess the major version correctly. */}}
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+    "github.com/hashicorp/errwrap"
+    "github.com/hashicorp/go-cty/cty"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-    "github.com/hashicorp/go-cty/cty"
-
+    {{- if and $.IdentityUpgraders (not $.IsTgcCompiler) }}
+    "github.com/hashicorp/terraform-plugin-go/tftypes"
+    {{- end }}
+    "{{ $.ImportPath }}/registry"
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
     "{{ $.ImportPath }}/verify"
 
-{{ if $.FlattenedProperties }}
     "google.golang.org/api/googleapi"
-{{- end}}
 )
 
 {{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants true -}}
+    {{- customTemplate $ $.CustomCode.Constants true -}}
 {{- end}}
+
+var (
+    _ = bytes.Clone
+    _ = context.WithCancel
+    _ = base64.NewDecoder
+    _ = json.Marshal
+    _ = fmt.Sprintf
+    _ = log.Print
+    _ = http.Get
+    _ = reflect.ValueOf
+    _ = regexp.Match
+    _ = slices.Min([]int{1})
+    _ = sort.IntSlice{}
+    _ = strconv.Atoi
+    _ = strings.Trim
+    _ = time.Now
+    _ = errwrap.Wrap
+    _ = cty.BoolVal
+    _ = diag.Diagnostic{}
+    _ = customdiff.All
+    _ = id.UniqueId
+    _ = logging.LogLevel
+    _ = retry.Retry
+    _ = schema.Noop
+    _ = validation.All
+    _ = structure.ExpandJsonFromString
+    _ = terraform.State{}
+    _ = tpgresource.SetLabels
+    _ = transport_tpg.Config{}
+    _ = verify.ValidateEnum
+    _ = googleapi.Error{}
+)
+
+func init() {
+    registry.Schema{
+        Name: "{{ $.TerraformName }}",
+        ProductName: "{{ lower $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeResource,
+        Schema: Resource{{ $.ResourceName -}}(),
+    }.Register()
+}
 
 func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
         Create: resource{{ $.ResourceName -}}Create,
         Read: resource{{ $.ResourceName -}}Read,
-{{- if or $.Updatable $.RootLabels }}
+{{- if or (or $.Updatable $.RootLabels (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude))) $.VirtualFields }}
         Update: resource{{ $.ResourceName -}}Update,
 {{- end}}
         Delete: resource{{ $.ResourceName -}}Delete,
@@ -76,7 +120,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 
         Timeouts: &schema.ResourceTimeout {
             Create: schema.DefaultTimeout({{ $.Timeouts.InsertMinutes -}} * time.Minute),
-{{- if or $.Updatable $.RootLabels }}
+{{- if or (or $.Updatable $.RootLabels) $.VirtualFields }}
             Update: schema.DefaultTimeout({{ $.Timeouts.UpdateMinutes -}} * time.Minute),
 {{- end}}
             Delete: schema.DefaultTimeout({{ $.Timeouts.DeleteMinutes -}} * time.Minute),
@@ -120,26 +164,65 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{if and ($.HasZone) (not $.ExcludeDefaultCdiff)  }}
             tpgresource.DefaultProviderZone,
 {{- end }}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+            tpgresource.DefaultProviderDeletionPolicy("{{$.DeletionPolicyDefault}}"),
+{{- end }}
         ),
 {{- end}}
 {{- if $.CustomCode.ValidateRawResourceConfigFuncs }}
 		ValidateRawResourceConfigFuncs: []schema.ValidateRawResourceConfigFunc{
-			{{$.CustomTemplate $.CustomCode.ValidateRawResourceConfigFuncs false}},
+			{{customTemplate $ $.CustomCode.ValidateRawResourceConfigFuncs false}},
 		},
 {{- end }}
 {{ if $.DeprecationMessage }}
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
+{{ if and (not $.ExcludeIdentityGeneration) (not $.ExcludeRead) }}
+        Identity: &schema.ResourceIdentity{
+          Version: {{ $.GetIdentitySchemaVersion }},
+          SchemaFunc: func() map[string]*schema.Schema {
+            return map[string]*schema.Schema{
+              {{- range $p := .IdentityProperties }}
+              "{{ underscore $p.Name}}": {
+                Type:     {{ $p.TFType $p.Type }},
+                {{- if or $p.Required $p.Output }}
+                RequiredForImport: true,
+                {{- else }}
+                OptionalForImport: true,
+                {{- end }}
+              },
+              {{- end }}
+            }
+          },
+{{- if $.IdentityUpgraders }}
+          IdentityUpgraders: []schema.IdentityUpgrader{
+{{- range $v := $.IdentityUpgradersCount }}
+              {
+                Type: identity{{ $.ResourceName }}ResourceV{{$v}}(),
+                Upgrade: Identity{{ $.ResourceName }}UpgradeV{{$v}},
+                Version: {{$v}},
+              },
+{{- end }}
+          },
+{{- end }}
+        },
+        ResourceBehavior: schema.ResourceBehavior{
+            MutableIdentity: true,
+        },
+{{- end }}
+
         Schema: map[string]*schema.Schema{
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
 			{{- end }}
             {{- range $prop := $.VirtualFields }}
+            {{- if not $prop.Exclude }}
 {{template "SchemaFields" $prop -}}
             {{- end }}
+            {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
-    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+    {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}
 {{ if $.HasProject -}}
             "project": {
@@ -153,6 +236,24 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
             "self_link": {
                 Type:     schema.TypeString,
                 Computed: true,
+            },
+{{- end}}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+            "deletion_policy": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Computed: true,
+    {{- if $.DeletionPolicyCustomDocs}}
+                Description: `This field uses a custom implementation please refer to documentation under /hashicorp/terraform-provider-google-beta/website/docs/r/{{ underscore $.ResourceName}}.html.markdown for specifics`,
+    {{else}}
+                Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "{{$.DeletionPolicyDefault}}".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`,
+    {{- end}}
             },
 {{- end}}
         },
@@ -176,7 +277,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
     config := meta.(*transport_tpg.Config)
 {{ if $.CustomCode.CustomCreate -}}
-    {{ $.CustomTemplate $.CustomCode.CustomCreate false -}}
+    {{ customTemplate $ $.CustomCode.CustomCreate false -}}
 {{  else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
@@ -186,7 +287,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 
 {{- range $prop := $.SettableProperties }}
-    {{ $prop.CamelizeProperty -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
+    {{ $prop.CamelizeProperty -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
     if err != nil {
         return err
     {{- if $prop.SendEmptyValue -}}
@@ -216,10 +317,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{- end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.CreateUri}}")
     if err != nil {
         return err
     }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+    }
+{{- end }}
 
     log.Printf("[DEBUG] Creating new {{ $.Name -}}: %#v", obj)
 {{- if $.NestedQuery -}}
@@ -264,11 +370,19 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
     headers := make(http.Header)
 {{- if $.CustomCode.PreCreate }}
-    {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
+    {{ customTemplate $ $.CustomCode.PreCreate false -}}
 {{- end}}
+{{- if $.RPCCreateMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCCreateMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.CreateVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -310,11 +424,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
 {{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
     err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
-    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }},{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}}{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
@@ -356,7 +474,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     {{- $renderedIdFromName := "false" }}
     {{- range $prop := $.GettableProperties }}
     {{- /* Check if prop is potentially computed */}}
-    {{-   if and ($.InPostCreateComputed $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
+    {{-   if and ($.InPostCreateComputed $prop) (or $prop.Output $prop.DefaultFromApi) }}
     {{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
     // Setting `name` field so that `id_from_name` flattener will work properly.
     if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(opRes["name"], d, config)); err != nil {
@@ -364,11 +482,11 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
     {{-       $renderedIdFromName = "true" }}
     {{-     end }}
-    {{-     if and $prop.Output (not $prop.IgnoreRead) }}
+    {{-     if $prop.Output }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return err
     }
-    {{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    {{-     else if $prop.DefaultFromApi }}
     // {{ underscore $prop.Name }} is set by API when unset
     if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
         if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
@@ -388,8 +506,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 {{        else -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
@@ -407,7 +529,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{      end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
 {{    end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
 {{if $.CustomCode.PostCreate -}} 
-    {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
+    {{- customTemplate $ $.CustomCode.PostCreate false -}}
 {{- end}}
 
 {{if and ($.GetAsync) ($.GetAsync.Allow "Create") -}}
@@ -430,6 +552,30 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Finished creating {{ $.Name }} %q: %#v", d.Id(), res)
 
+{{ if not $.ExcludeIdentityGeneration -}}
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+    {{ if eq $p.Type "Integer" -}}
+        if _, ok := d.GetOk("{{ underscore $p.Name}}"); ok {
+            err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(int))
+            if err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- else -}}
+        if {{ $p.CamelizeProperty }}Value, ok := d.GetOk("{{ underscore $p.Name}}"); ok && {{ $p.CamelizeProperty }}Value.(string)!= "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.(string)); err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- end -}}
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] (Create) identity not set: %s", err)
+    }
+{{ end }}
+
     return resource{{ $.ResourceName -}}Read(d, meta)
 {{  end -}}
 }
@@ -439,12 +585,15 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
     return func() (map[string]interface{}, error) {
         config := meta.(*transport_tpg.Config)
 
-
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
-
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
         if err != nil {
             return nil, err
         }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+        }
+{{- end }}
 
         billingProject := ""
 
@@ -476,9 +625,17 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
 
+{{ if $.RPCReadMethod -}}
+        res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
         res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
             Project: billingProject,
             RawURL: url,
             UserAgent: userAgent,
@@ -532,10 +689,15 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
     if err != nil {
         return err
     }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+    }
+{{- end }}
 
     billingProject := ""
 
@@ -564,11 +726,19 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
     headers := make(http.Header)
     {{- if $.CustomCode.PreRead }}
-        {{ $.CustomTemplate $.CustomCode.PreRead false -}}
+        {{ customTemplate $ $.CustomCode.PreRead false -}}
     {{- end }}
+{{- if $.RPCReadMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -587,8 +757,10 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
 {{- end}}
     }
+
+    log.Printf("[DEBUG] Finished reading {{ $.ResourceName }} %q: %#v", d.Id(), res)
 {{- if $.CustomCode.PostRead }}
-    {{ $.CustomTemplate $.CustomCode.PostRead false -}}
+    {{ customTemplate $ $.CustomCode.PostRead false -}}
 {{- end }}
 
 {{if $.NestedQuery -}}
@@ -619,7 +791,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return nil
     }
 {{ end}}
-{{- if $.VirtualFields }}
+{{- if or $.VirtualFields (and (not $.ExcludeDelete)  (not $.DeletionPolicyExclude)) }}
 
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
@@ -630,6 +802,20 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         }
     }
 {{- end}}
+{{- end}}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+    if _, ok := d.GetOkExists("deletion_policy"); !ok {
+        //prioritize config's value if present
+        if config.DeletionPolicy != ""{
+            if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
+                return fmt.Errorf("Error setting deletion_policy: %s", err)
+            }
+        }else{
+            if err := d.Set("deletion_policy", "{{ $.DeletionPolicyDefault -}}"); err != nil {
+                return fmt.Errorf("Error setting deletion_policy: %s", err)
+            }
+        }
+    }
 {{- end}}
 {{- end}}
 {{- if $.HasProject }}
@@ -657,53 +843,89 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
 {{- end}}
-{{ range $prop := $.ReadProperties }}
-{{if $prop.FlattenObject -}}
-// Terraform must set the top level schema field, but since this object contains collapsed properties
-// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
-    if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
-        if gerr, ok := flattenedProp.(*googleapi.Error); ok {
-            return fmt.Errorf("Error reading {{ $.Name -}}: %s", gerr)
-        }
-        casted := flattenedProp.([]interface{})[0]
-        if casted != nil {
-            for k, v := range casted.(map[string]interface{}) {
-                if err := d.Set(k, v); err != nil {
-                    return fmt.Errorf("Error setting %s: %s", k, err)
-                }
-            }
-        }
+    err = Resource{{ $.ResourceName -}}Flatten(d, meta, res, config, {{- if $.HasProject }}project,{{ end }} userAgent, billingProject, url, headers)
+    if err != nil {
+        return err
     }
-{{-    else -}}
-    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
-        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-    }
-{{- end}}
-{{- end}}
-{{if $.HasSelfLink -}}
-    if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
-        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-    }
-{{- end}}
 
+{{ if and (not $.ExcludeIdentityGeneration) (not $.ExcludeRead) }}
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+    {{ if eq $p.Type "Integer" -}}
+    if _, ok := identity.GetOk("{{ underscore $p.Name}}");!ok  {
+        err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(int))
+        if err != nil {
+            return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+        }
+    }
+    {{- else -}}
+    if v, ok := identity.GetOk("{{ underscore $p.Name}}");!ok && v == "" {
+        err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
+            if err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }     
+    }
+    {{- end -}}
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] (Read) identity not set: %s", err)
+    }
+{{ end }}
+{{- end }}
     return nil
-{{  end -}}
 }
 
 {{if $.Updatable -}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-{{-     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
+{{-     if and (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)) (not $.BypassClientsideUpdateCheck)}}
+    clientSideFields := map[string]bool{"deletion_policy": true}
+    clientSideOnly := true
+    for field := range Resource{{ $.ResourceName -}}().Schema {
+        if d.HasChange(field) && !clientSideFields[field] {
+            clientSideOnly = false
+            break
+        }
+    }
+    if clientSideOnly {
+        log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
+        return resource{{ $.ResourceName -}}Read(d, meta)
+    }
+{{-     end}}
+{{     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
     var project string
 {{-     end}}
     config := meta.(*transport_tpg.Config)
 {{      if $.CustomCode.CustomUpdate -}}
-    {{ $.CustomTemplate $.CustomCode.CustomUpdate false -}}
+    {{ customTemplate $ $.CustomCode.CustomUpdate false -}}
 {{      else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
     }
-
+{{ if not $.ExcludeIdentityGeneration -}}
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+    {{if eq $p.Type "Integer" -}}
+        if _, ok := d.GetOk("{{ underscore $p.Name}}"); ok {
+            err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(int))
+            if err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- else -}}
+        if {{ $p.CamelizeProperty }}Value, ok := d.GetOk("{{ underscore $p.Name}}"); ok && {{ $p.CamelizeProperty }}Value.(string)!= "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.(string)); err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- end -}}
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] (Update) identity not set: %s", err)
+    }
+{{ end }}
     billingProject := ""
 
 {{          if $.HasProject -}}
@@ -723,7 +945,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 {{-             range $prop := $.UpdateBodyProperties }}
     {{/* flattened $s won't have something stored in state so instead nil is passed to the next expander. */}}
-    {{- $prop.CamelizeProperty -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
+    {{- $prop.CamelizeProperty -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
     if err != nil {
         return err
 {{-                 if $prop.SendEmptyValue -}}
@@ -759,18 +981,23 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{-             end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUri }}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.UpdateUri }}")
     if err != nil {
         return err
     }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+        return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+    }
+{{- end }}
 
     log.Printf("[DEBUG] Updating {{ $.Name }} %q: %#v", d.Id(), obj)
 	headers := make(http.Header)
 {{-              if $.UpdateMask }}
-{{ $.CustomTemplate "templates/terraform/update_mask.go.tmpl" false -}}
+{{ customTemplate $ "templates/terraform/update_mask.go.tmpl" false -}}
 {{              end}}
 {{-             if $.CustomCode.PreUpdate -}}{{""}}
-    {{ $.CustomTemplate $.CustomCode.PreUpdate true -}}
+    {{ customTemplate $ $.CustomCode.PreUpdate true -}}
 {{              end}}
 {{              if $.NestedQuery -}}
 {{                  if $.NestedQuery.ModifyByPatch -}}
@@ -796,9 +1023,17 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) > 0 {
 {{-             end}}
+{{- if $.RPCUpdateMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCUpdateMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ $.UpdateVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -821,8 +1056,12 @@ if len(updateMask) > 0 {
 
 {{              if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                  if $.GetAsync.IsA "OpAsync" -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
@@ -853,10 +1092,15 @@ if len(updateMask) > 0 {
 if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
 {{		            if $group.FingerprintName }}
-        getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+        getUrl, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
         if err != nil {
             return err
         }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        if strings.Contains(getUrl, "{{"{{"}}location{{"}}"}}") {
+            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", getUrl)
+        }
+{{- end }}
 {{		                if $.SupportsIndirectUserProjectOverride -}}
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
             billingProject = parts[1]
@@ -868,9 +1112,17 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         billingProject = bp
         }
 
+{{ if $.RPCReadMethod -}}
+        getRes, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
         getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
             Project: billingProject,
             RawURL: getUrl,
             UserAgent: userAgent,
@@ -935,15 +1187,19 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         transport_tpg.MutexStore.Lock(lockName)
         defer transport_tpg.MutexStore.Unlock(lockName)
 {{-                 end}}
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $group.UpdateUrl }}")
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $group.UpdateUrl }}")
         if err != nil {
             return err
         }
-
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+        }
+{{- end }}
 
         headers := make(http.Header)
 {{                  if $.CustomCode.PreUpdate -}}
-    {{ $.CustomTemplate $.CustomCode.PreUpdate false -}}
+    {{ customTemplate $ $.CustomCode.PreUpdate false -}}
 {{                  end}}
 {{                  if $.SupportsIndirectUserProjectOverride -}}
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
@@ -956,9 +1212,17 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         billingProject = bp
         }
 
+{{ if $.RPCUpdateMethod -}}
+        res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCUpdateMethod -}}",
+{{- else }}
         res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ $group.UpdateVerb }}",
+{{- end}}
             Project: billingProject,
             RawURL: url,
             UserAgent: userAgent,
@@ -980,8 +1244,12 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 
 {{                  if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                      if $.GetAsync.IsA "OpAsync" -}}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
 	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
-	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
 	        d.Timeout(schema.TimeoutUpdate))
 	    if err != nil {
 	        return err
@@ -1004,22 +1272,19 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-         end  }}{{/*if FieldSpecificUpdateMethods*/}}
 
 {{          if $.CustomCode.PostUpdate -}}
-    {{ $.CustomTemplate $.CustomCode.PostUpdate false -}}
+    {{ customTemplate $ $.CustomCode.PostUpdate false -}}
  {{end}}
     return resource{{ $.ResourceName -}}Read(d, meta)
 {{-      end }}{{/*if CustomUpdate*/}}
 }
-{{  else if $.RootLabels -}}{{/*if not immutable*/}}
+{{  else if or $.RootLabels $.VirtualFields (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)) -}}{{/*if not immutable*/}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-    // Only the root field "labels" and "terraform_labels" are mutable
+    // Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
     return resource{{ $.ResourceName -}}Read(d, meta)
 }
 
 {{ end}}
 func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}) error {
-{{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
-    var project string
-{{- end }}
 {{- if $.ExcludeDelete }}
     log.Printf("[WARNING] {{ $.ProductMetadata.Name }}{{" "}}{{ $.Name }} resources" +
     " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
@@ -1028,13 +1293,25 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     return nil
 {{- else }}
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing {{ $.Name }} %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+{{- end }}
+{{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
+    var project string
+{{- end }}
     config := meta.(*transport_tpg.Config)
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
     }
 {{ if $.CustomCode.CustomDelete }} 
-{{ $.CustomTemplate $.CustomCode.CustomDelete false -}}
+{{ customTemplate $ $.CustomCode.CustomDelete false -}}
 {{- else }}
 
     billingProject := ""
@@ -1058,11 +1335,15 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     transport_tpg.MutexStore.Lock(lockName)
     defer transport_tpg.MutexStore.Unlock(lockName)
     {{- end }}
-
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.DeleteUri}}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.DeleteUri}}")
     if err != nil {
         return err
     }
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+    }
+{{- end }}
     {{/*If the deletion of the object requires sending a request body, the custom code will set 'obj' */}}
     var obj map[string]interface{}
     {{- if and $.NestedQuery $.NestedQuery.ModifyByPatch }}
@@ -1072,6 +1353,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
         {{- if $.UpdateMask }}
+
     url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{- join $.NestedQuery.Keys "." -}}"})
     if err != nil {
         return err
@@ -1091,13 +1373,21 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     headers := make(http.Header)
     {{- if $.CustomCode.PreDelete }} 
-        {{ $.CustomTemplate $.CustomCode.PreDelete false -}}
+        {{ customTemplate $ $.CustomCode.PreDelete false -}}
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
+{{- if $.RPCDeleteMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCDeleteMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ camelize $.DeleteVerb "upper" -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -1125,8 +1415,12 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
             {{- end }}
     }
         {{- else }}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal }}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Deleting {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Deleting {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
@@ -1135,7 +1429,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     {{- end }}
 {{- end }}
 {{- if $.CustomCode.PostDelete }}
-    {{ $.CustomTemplate $.CustomCode.PostDelete false -}}
+    {{ customTemplate $ $.CustomCode.PostDelete false -}}
 {{- end }}
 
     log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", d.Id(), res)
@@ -1147,7 +1441,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 {{ if not $.ExcludeImport -}}
 func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
     {{- if $.CustomCode.CustomImport }}
-        {{ $.CustomTemplate $.CustomCode.CustomImport false -}}
+        {{ customTemplate $ $.CustomCode.CustomImport false -}}
     {{- else }}
     config := meta.(*transport_tpg.Config)
     if err := tpgresource.ParseImportId([]string{
@@ -1176,7 +1470,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
             {{- end }}
         {{- end }}
         {{- if $.CustomCode.PostImport }}
-            {{ $.CustomTemplate $.CustomCode.PostImport false -}}
+            {{ customTemplate $ $.CustomCode.PostImport false -}}
         {{- end }}
 
     return []*schema.ResourceData{d}, nil
@@ -1184,22 +1478,20 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 }
 {{ end }}
 {{- range $prop := $.GettableProperties }}
-    {{- if not $prop.IgnoreRead }}
-        {{ template "flattenPropertyMethod" $prop -}}
-    {{- end }}
+    {{ template "flattenPropertyMethod" $prop -}}
 {{- end }}
 {{- range $prop := $.SettableProperties }}
     {{- template "expandPropertyMethod" $prop -}}
 {{- end }}
 {{- if $.CustomCode.Encoder }}
 func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ $.CustomTemplate $.CustomCode.Encoder false -}}
+{{ customTemplate $ $.CustomCode.Encoder false -}}
 }
 {{ end -}}
 {{- if $.CustomCode.UpdateEncoder }}
 
 func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{ $.CustomTemplate $.CustomCode.UpdateEncoder false -}}
+    {{ customTemplate $ $.CustomCode.UpdateEncoder false -}}
 }
 {{- end }}
 {{- if $.NestedQuery }}
@@ -1210,18 +1502,23 @@ func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta int
 {{ "" }}
 {{- end }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-    {{ $.CustomTemplate $.CustomCode.Decoder false -}}
+    {{ customTemplate $ $.CustomCode.Decoder false -}}
 }
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
 func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
-    {{- $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
+    {{- customTemplate $ $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}
 {{- if and $.SchemaVersion $.StateUpgraders }}
 
-    {{ $.CustomTemplate $.StateMigrationFile false -}}
+    {{ customTemplate $ $.StateMigrationFile false -}}
 {{- end }}
+
+{{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
+    {{ customTemplate $ $.IdentityUpgraderFile false -}}
+{{- end }}
+
 {{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
 func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
     config := meta.(*transport_tpg.Config)
@@ -1252,7 +1549,7 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     {{- $renderedIdFromName := "false" }}
     {{- range $prop := $.GettableProperties }}
     {{- /* Check if prop is potentially computed */}}
-    {{-   if and ($.InPostCreateComputed $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
+    {{-   if and ($.InPostCreateComputed $prop) (or $prop.Output $prop.DefaultFromApi) }}
     {{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
     // Setting `name` field so that `id_from_name` flattener will work properly.
     if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(res["name"], d, config)); err != nil {
@@ -1260,11 +1557,11 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     }
     {{-       $renderedIdFromName = "true" }}
     {{-     end }}
-    {{-     if and $prop.Output (not $prop.IgnoreRead) }}
+    {{-     if $prop.Output }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
     }
-    {{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    {{-     else if $prop.DefaultFromApi }}
     // {{ underscore $prop.Name }} is set by API when unset
     if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
         if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
@@ -1277,3 +1574,40 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     return nil
 }
 {{- end }}
+
+{{ if not $.ExcludeRead }}
+func Resource{{ $.ResourceName -}}Flatten(d *schema.ResourceData, meta interface{}, res map[string]interface{}, config *transport_tpg.Config,{{if $.HasProject -}}project string, {{end -}}userAgent string, billingProject string, url string, headers http.Header) error {
+{{- if or $.GettableProperties $.HasSelfLink }}
+var err error
+{{- end }}
+{{ range $prop := $.GettableProperties }}
+{{if $prop.FlattenObject -}}
+// Terraform must set the top level schema field, but since this object contains collapsed properties
+// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
+if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
+    if gerr, ok := flattenedProp.(*googleapi.Error); ok {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", gerr)
+    }
+    casted := flattenedProp.([]interface{})[0]
+    if casted != nil {
+        for k, v := range casted.(map[string]interface{}) {
+            if err := d.Set(k, v); err != nil {
+                return fmt.Errorf("Error setting %s: %s", k, err)
+            }
+        }
+    }
+}
+{{- else -}}
+    if err = d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end}}
+{{- end}}
+{{if $.HasSelfLink -}}
+    if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end }}
+    return nil
+}
+{{- end -}}

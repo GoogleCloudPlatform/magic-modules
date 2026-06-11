@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccSnapshotDatasource_name(t *testing.T) {
@@ -21,7 +22,7 @@ func TestAccSnapshotDatasource_name(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
 						"google_compute_snapshot.default",
-						map[string]struct{}{"zone": {}},
+						[]string{"zone"},
 					),
 				),
 			},
@@ -42,7 +43,7 @@ func TestAccSnapshotDatasource_filter(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
 						"google_compute_snapshot.c",
-						map[string]struct{}{"zone": {}},
+						[]string{"zone"},
 					),
 				),
 			},
@@ -63,7 +64,7 @@ func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
 						"google_compute_snapshot.c",
-						map[string]struct{}{"zone": {}},
+						[]string{"zone"},
 					),
 				),
 			},

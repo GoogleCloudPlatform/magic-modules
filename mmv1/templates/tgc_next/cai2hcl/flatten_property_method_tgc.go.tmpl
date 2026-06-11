@@ -12,25 +12,198 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
-{{- define "flattenTgcPropertyMethod" }}
-	{{- if $.CustomTgcFlatten }}
-{{ $.CustomTemplate $.CustomTgcFlatten true -}}
-	{{- else if $.IsA "KeyValueLabels" }}
+{{define "flattenTgcPropertyMethod" }}
+	{{ if $.CustomTgcFlatten }}
+{{ customTemplate $ $.CustomTgcFlatten true }}
+	{{ else if $.IsA "KeyValueLabels" }}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return tgcresource.RemoveTerraformAttributionLabel(v)
 }
-  {{- else if $.IsA "KeyValueAnnotations" }}
+  {{ else if $.IsA "KeyValueAnnotations" }}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
-	{{- else if or (and (eq $.Name "zone") $.ResourceMetadata.HasZone) (and (eq $.Name "region") $.ResourceMetadata.HasRegion) -}}
+	{{ else if or (and (eq $.Name "zone") $.ResourceMetadata.HasZone) (and (eq $.Name "region") $.ResourceMetadata.HasRegion) }}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
 	return tpgresource.GetResourceNameFromSelfLink(v.(string))
 }
-	{{- else }}
-{{ template "flattenPropertyMethod" $ -}}
-	{{- end }}
+	{{ else }}
+    {{ if and (or $.WriteOnlyLegacy $.WriteOnly) }}
+    {{ else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
+        {{- customTemplate $ $.CustomFlatten false }}
+    {{ else }}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  {{- if $.IsA "NestedObject" }}
+    {{- if and $.HasRequiredProperty $.FlattenObject }}
+      {{- if $.UserProperties }}
+  original := make(map[string]interface{}, 0)
+  if v != nil {
+    original = v.(map[string]interface{})
+  }
+      {{- end }}
+    {{- else }}
+  if v == nil {
+    return nil
+  }
+      {{- if $.UserProperties }}
+  original := v.(map[string]interface{})
+      {{- end }}
+    {{- end }}
+  transformed := make(map[string]interface{})
+      {{- range $prop := $.UserProperties }}
+        {{- if or $prop.WriteOnlyLegacy $prop.WriteOnly }}
+        {{- else if $prop.FlattenObject }}
+    if {{ $prop.ApiName }} := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config); {{ $prop.ApiName }} != nil {
+      obj := {{ $prop.ApiName }}.([]interface{})[0]
+      for k, v := range obj.(map[string]interface{}) {
+        transformed[k] = v
+      }
+    }
+        {{- else }}
+    transformed["{{ underscore $prop.Name }}"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config)
+        {{- end }}
+      {{- end }}{{/* range $prop := $.UserProperties */}}
+      {{- if not $.AllowEmptyObject }}
+    if tgcresource.AllValuesAreNil(transformed) {
+      return nil
+    }
+      {{- end }}
+  return []interface{}{transformed}
+  {{- else if and ($.IsA "Array") ($.ItemType.IsA "NestedObject") }}
+  if v == nil {
+    return v
+  }
+  l := v.([]interface{})
+    {{- if $.IsSet }}
+      {{- if $.SetHashFunc }}
+  transformed := schema.NewSet({{ $.SetHashFunc }}, []interface{}{})
+      {{- else }}
+  transformed := schema.NewSet(schema.HashResource({{ $.NamespaceProperty }}Schema()), []interface{}{})
+      {{- end }}
+    {{- else }}
+  transformed := make([]interface{}, 0, len(l))
+    {{- end }}
+  for _, raw := range l {
+    original := raw.(map[string]interface{})
+    if len(original) < 1 {
+      // Do not include empty json objects coming back from the api
+      continue
+    }
+  {{- if $.IsSet }}
+    transformed.Add(map[string]interface{}{
+  {{- else }}
+    transformed = append(transformed, map[string]interface{}{
+  {{- end }}
+
+  {{- range $prop := $.ItemType.UserProperties }}
+    {{- if not (or $prop.IgnoreRead $prop.WriteOnlyLegacy $prop.WriteOnly) }}
+      "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
+    {{- end }}
+  {{- end }}
+    })
+  }
+  return transformed
+  {{- else if $.IsA "Map" }}
+  if v == nil {
+    return v
+  }
+  l := v.(map[string]interface{})
+  transformed := make([]interface{}, 0, len(l))
+  for k, raw := range l {
+    original := raw.(map[string]interface{})
+    transformed = append(transformed, map[string]interface{}{
+      "{{ $.KeyName }}": k,
+    {{- range $prop := $.ValueType.UserProperties }}
+      "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
+    {{- end }}
+    })
+  }
+  return transformed
+    {{- else if or ($.IsA "KeyValueLabels") (or ($.IsA "KeyValueAnnotations") ($.IsA "KeyValueTerraformLabels")) }}
+  if v == nil {
+    return v
+  }
+
+  transformed := make(map[string]interface{})
+  if l, ok := d.GetOkExists("{{ join $.Lineage ".0." }}"); ok {
+    for k := range l.(map[string]interface{}) {
+      transformed[k] = v.(map[string]interface{})[k]
+    }
+  }
+
+  return transformed
+  {{- else if $.IsA "Integer" }}
+	// Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+			return intVal
+		}
+	}
+
+	// number values are represented as float64
+	if floatVal, ok := v.(float64); ok {
+		intVal := int(floatVal)
+		return intVal
+	}
+
+  {{- if $.Required }}
+	if v == nil {
+		return 0
+	}
+  {{- end }}
+
+	return v // let terraform core handle it otherwise
+  {{- else if and ($.IsA "Array") ($.ItemType.IsA "ResourceRef")}}
+  if v == nil {
+    return v
+  }
+  return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
+  {{- else if $.IsA "ResourceRef" }}
+  {{- template "fullToRelativePath" $ }}
+  {{- else if $.IsSet }}
+  if v == nil {
+    return v
+  }
+    {{- if $.SetHashFunc }}
+  return schema.NewSet({{- $.SetHashFunc }}, v.([]interface{}))
+    {{- else if or ($.ItemType.IsA "String") ($.ItemType.IsA "Enum") }}
+  return schema.NewSet(schema.HashString, v.([]interface{}))
+    {{- end }}
+  {{- else if and ($.IsA "Boolean") ($.Required) }}
+	if v == nil {
+		return false
+	}
+	return v
+  {{- else if and ($.IsA "String") ($.Required) }}
+	if v == nil {
+		return "unknown"
+	}
+	transformed := v.(string)
+	if transformed == "" {
+		return "unknown"
+	}
+	return v
+  {{- else if and ($.IsA "String") (not $.Required) (not $.DefaultFromApi) (eq $.DefaultValue nil) (not $.SendEmptyValue) }}
+	if v == nil {
+		return nil
+	}
+	if strVal, ok := v.(string); ok && strVal == "" {
+		return nil
+	}
+	return v
+  {{- else }}
+  return v
 {{- end }}
+}
+{{ if $.NestedProperties }}
+  {{ range $prop := $.NestedProperties }}
+    {{ template "flattenTgcPropertyMethod" $prop }}
+  {{ end }}
+{{ end }}
+	{{ end }}
+	{{ end }}
+{{ end }}

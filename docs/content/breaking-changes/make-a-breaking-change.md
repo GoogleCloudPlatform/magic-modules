@@ -89,7 +89,7 @@ provider at runtime as well as in documentation.
 
 #### Field deprecation (due to removal or rename)
 
-{{< tabs "Field deprecations" >}}
+{{% tabs "Field deprecations" %}}
 {{< tab "MMv1" >}}
 Set `deprecation_message` on the field. For example:
 
@@ -121,14 +121,14 @@ The deprecation message will automatically show up in the resource documentation
 2. Update the [documentation for the field]({{< ref "/document/add-documentation" >}}) to include the deprecation notice. For example:
 
    ```markdown
-   * `api_field_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Deprecated) FIELD_DESCRIPTION. `api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.
+   * `api_field_name` - (Optional, [Beta](../guides/provider_versions.html.markdown), Deprecated) FIELD_DESCRIPTION. `api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.
    ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 #### Resource deprecation (due to removal or rename)
 
-{{< tabs "Resource deprecations" >}}
+{{% tabs "Resource deprecations" %}}
 {{< tab "MMv1" >}}
 Set `deprecation_message` on the resource. For example:
 
@@ -165,7 +165,7 @@ The deprecation message will automatically show up in the resource documentation
    major release. Use `google_OTHER_RESOURCE_NAME` instead.
    ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 #### Other breaking changes
 

@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudfunctions2"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccDataSourceGoogleCloudFunctions2Function_basic(t *testing.T) {
@@ -28,7 +30,7 @@ func TestAccDataSourceGoogleCloudFunctions2Function_basic(t *testing.T) {
 				// but the "labels" field in resource are user defined labels, which is the reason for the mismatch.
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(funcDataNameHttp,
-						"google_cloudfunctions2_function.function_http_v2", map[string]struct{}{"build_config.0.source.0.storage_source.0.bucket": {}, "build_config.0.source.0.storage_source.0.object": {}, "labels.%": {}, "terraform_labels.%": {}}),
+						"google_cloudfunctions2_function.function_http_v2", []string{"build_config.0.source.0.storage_source.0.bucket", "build_config.0.source.0.storage_source.0.object", "labels.%", "terraform_labels.%"}),
 				),
 			},
 		},
@@ -62,7 +64,7 @@ resource "google_cloudfunctions2_function" "function_http_v2" {
     env = "test"
   }
   build_config {
-    runtime = "nodejs18"
+    runtime = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {

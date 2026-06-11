@@ -12,11 +12,17 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
+	"github.com/hashicorp/terraform-plugin-testing/config"
+	"github.com/hashicorp/terraform-plugin-testing/echoprovider"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -25,11 +31,16 @@ import (
 )
 
 func CheckDataSourceStateMatchesResourceState(dataSourceName, resourceName string) func(*terraform.State) error {
-	return CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName, map[string]struct{}{})
+	return CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName, []string{})
 }
 
-func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName string, ignoreFields map[string]struct{}) func(*terraform.State) error {
+func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName string, fieldsToIgnore []string) func(*terraform.State) error {
 	return func(s *terraform.State) error {
+		ignoreFields := make(map[string]struct{}, len(fieldsToIgnore))
+		for _, field := range fieldsToIgnore {
+			ignoreFields[field] = struct{}{}
+		}
+
 		ds, ok := s.RootModule().Resources[dataSourceName]
 		if !ok {
 			return fmt.Errorf("can't find %s in state", dataSourceName)
@@ -43,16 +54,18 @@ func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 		dsAttr := ds.Primary.Attributes
 		rsAttr := rs.Primary.Attributes
 
-		errMsg := ""
+		var errMsg strings.Builder
+
 		// Data sources are often derived from resources, so iterate over the resource fields to
 		// make sure all fields are accounted for in the data source.
 		// If a field exists in the data source but not in the resource, its expected value should
 		// be checked separately.
 		for k := range rsAttr {
-			if _, ok := ignoreFields[k]; ok {
+			if _, ignored := ignoreFields[k]; ignored {
 				continue
 			}
-			if strings.HasPrefix(k, "labels.") || strings.HasPrefix(k, "terraform_labels.") || strings.HasPrefix(k, "effective_labels.") {
+
+			if strings.HasPrefix(k, "labels.") || strings.HasPrefix(k, "terraform_labels.") || strings.HasPrefix(k, "effective_labels.") || strings.HasPrefix(k, "deletion_policy") {
 				continue
 			}
 			if k == "%" {
@@ -60,20 +73,95 @@ func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 			}
 			if dsAttr[k] != rsAttr[k] {
 				// ignore data sources where an empty list is being compared against a null list.
-				if k[len(k)-1:] == "#" && (dsAttr[k] == "" || dsAttr[k] == "0") && (rsAttr[k] == "" || rsAttr[k] == "0") {
+				if strings.HasSuffix(k, "#") && (dsAttr[k] == "" || dsAttr[k] == "0") && (rsAttr[k] == "" || rsAttr[k] == "0") {
 					continue
 				}
-				errMsg += fmt.Sprintf("%s is %s; want %s\n", k, dsAttr[k], rsAttr[k])
+				errMsg.WriteString(fmt.Sprintf("%s is %s; want %s\n", k, dsAttr[k], rsAttr[k]))
 			}
 		}
 
-		if errMsg != "" {
-			return errors.New(errMsg)
+		if errMsg.Len() > 0 {
+			return errors.New(errMsg.String())
 		}
 
 		return nil
 	}
 }
+
+// List test utils
+
+// ListDisplayName captures a resource's display-name attribute during a
+// create step and exposes a knownvalue.Check that asserts list-query results
+// match the captured value.
+type ListDisplayName struct {
+	value string
+}
+
+// Capture returns a TestCheckFunc that copies the first non-empty value
+// among attrCandidates from resourceAddr's state into the captured value.
+// attrCandidates are checked in order from first index to last.
+func (c *ListDisplayName) Capture(resourceAddr string, attrCandidates []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceAddr]
+		if !ok {
+			return fmt.Errorf("resource not found in state: %s", resourceAddr)
+		}
+		for _, k := range attrCandidates {
+			if v, ok := rs.Primary.Attributes[k]; ok && v != "" {
+				c.value = v
+				return nil
+			}
+		}
+		return fmt.Errorf("no display name attribute found in state for resource %s; tried %v", resourceAddr, attrCandidates)
+	}
+}
+
+// CheckValue returns a knownvalue.Check that compares against the
+// captured value. Fails if Capture has not run yet.
+func (c *ListDisplayName) CheckValue() knownvalue.Check {
+	return knownvalue.StringFunc(func(v string) error {
+		if c.value == "" {
+			return fmt.Errorf("display name was not captured from create step")
+		}
+		if v != c.value {
+			return fmt.Errorf("expected display name %q, got %q", c.value, v)
+		}
+		return nil
+	})
+}
+
+
+type ListScopeCapture struct {
+	vars config.Variables
+}
+
+func (c *ListScopeCapture) Capture(scopeToResource map[string]string) resource.TestCheckFunc {
+	if c.vars == nil {
+		c.vars = config.Variables{}
+	}
+	return func(s *terraform.State) error {
+		for scope, addr := range scopeToResource {
+			rs, ok := s.RootModule().Resources[addr]
+			if !ok {
+				return fmt.Errorf("list scope %q: resource %q not found in state", scope, addr)
+			}
+			v, ok := rs.Primary.Attributes[scope]
+			if !ok || v == "" {
+				return fmt.Errorf("list scope %q: attribute %q on %s is empty", scope, scope, addr)
+			}
+			c.vars[scope] = config.StringVariable(v)
+		}
+		return nil
+	}
+}
+
+func (c *ListScopeCapture) AsConfigVariables() config.Variables {
+	if c.vars == nil {
+		c.vars = config.Variables{}
+	}
+	return c.vars
+}
+
 
 // General test utils
 
@@ -150,6 +238,22 @@ func RandIntRange(t *testing.T, minInt int, maxInt int) int {
 	return rand.New(s.source).Intn(maxInt-minInt) + minInt
 }
 
+// SkipTestUntil skips a test until a given date, specified in YYYY-MM-DD.
+// You can bypass this skip by setting DISABLE_SKIP_TEST_UNTIL to "true"
+func SkipTestUntil(t *testing.T, enableDate string) {
+	format := "2006-01-02" // go string for YYYY-MM-DD.
+	enableDateTime, err := time.Parse(format, enableDate) // With no timezone we will use local time rather than UTC or a fixed TZ.
+	if err != nil {
+		t.Fatalf("failed to parse SkipTestUntil: %q, err: %v", enableDate, err)
+	}
+
+	if time.Now().Before(enableDateTime) {
+		if v := os.Getenv("DISABLE_SKIP_TEST_UNTIL"); v != "true" {
+			t.Skipf("skipping test until %v", enableDate)
+		}
+	}
+}
+
 // ProtoV5ProviderFactories returns a muxed ProviderServer that uses the provider code from this repo (SDK and plugin-framework).
 // Used to set ProtoV5ProviderFactories in a resource.TestStep within an acceptance test.
 func ProtoV5ProviderFactories(t *testing.T) map[string]func() (tfprotov5.ProviderServer, error) {
@@ -174,6 +278,28 @@ func ProtoV5ProviderBetaFactories(t *testing.T) map[string]func() (tfprotov5.Pro
 		},
 {{- end }}
 	}
+}
+
+// ProtoV6ProviderFactories returns a provider server for that currently
+// only contains an echo provider for testing usage of ephemeral values
+func ProtoV6ProviderFactories(t *testing.T) map[string]func() (tfprotov6.ProviderServer, error) {
+	return map[string]func() (tfprotov6.ProviderServer, error){
+		"echo": echoprovider.NewProviderServer(),
+	}
+}
+
+var EchoResourceName string = "echo.test"
+
+// EchoResourceConfig returns some HCL that configures the echo provider with a reference to an ephemeral value (e.g. an ephemeral resource)
+// and provisions an echo resource that surfaces that ephemeral data in a non-ephemeral way, for testing purposes.
+// See: https://github.com/hashicorp/terraform-plugin-testing/pull/389
+func EchoResourceConfig(ephemeralReference string) string {
+	return fmt.Sprintf(`
+provider "echo" {
+  data = %s
+}
+resource "echo" "test" {}
+`, ephemeralReference)
 }
 
 // This is a Printf sibling (Nprintf; Named Printf), which handles strings like

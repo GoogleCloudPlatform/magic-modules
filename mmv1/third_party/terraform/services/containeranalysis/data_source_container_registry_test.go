@@ -5,9 +5,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/container"
 )
 
-func TestDataSourceGoogleContainerRegistryRepository(t *testing.T) {
+func TestAccDataSourceGoogleContainerRegistryRepository(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_container_registry_repository.test"
@@ -41,7 +42,7 @@ data "google_container_registry_repository" "testScoped" {
 }
 `
 
-func TestDataSourceGoogleContainerRegistryImage(t *testing.T) {
+func TestAccDataSourceGoogleContainerRegistryImage(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_container_registry_image.test"

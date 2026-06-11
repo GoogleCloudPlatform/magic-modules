@@ -37,3 +37,5 @@ if d.HasChange("aspects") {
 		return err
 	}
 }
+
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"allow_missing": "false"})

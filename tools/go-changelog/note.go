@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package changelog
@@ -25,6 +25,7 @@ var TypeValues = []string{
 	"note",
 	"none",
 	"new-resource",
+	"new-list-resource",
 	"new-datasource",
 	"deprecation",
 	"breaking-change",

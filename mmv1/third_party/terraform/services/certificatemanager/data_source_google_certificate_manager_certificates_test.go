@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/certificatemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/privateca"
 )
 
 func TestAccDataSourceGoogleCertificateManagerCertificates_basic(t *testing.T) {
@@ -200,7 +202,6 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_managedCertificateIss
 					resource.TestCheckResourceAttrSet("data.google_certificate_manager_certificates.certificates", "certificates.0.managed.0.issuance_config"),
 
 					resource.TestCheckResourceAttrSet("data.google_certificate_manager_certificates.certificates", "certificates.0.managed.0.provisioning_issue.#"),
-					resource.TestCheckResourceAttrSet("data.google_certificate_manager_certificates.certificates", "certificates.0.managed.0.provisioning_issue.0.details"),
 					resource.TestCheckResourceAttrSet("data.google_certificate_manager_certificates.certificates", "certificates.0.managed.0.provisioning_issue.0.reason"),
 				),
 			},

@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccDataSourceGoogleGlobalForwardingRule(t *testing.T) {
@@ -20,7 +21,7 @@ func TestAccDataSourceGoogleGlobalForwardingRule(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleGlobalForwardingRuleConfig(poolName, ruleName),
-				Check:  acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_compute_global_forwarding_rule.my_forwarding_rule", "google_compute_global_forwarding_rule.foobar-fr", map[string]struct{}{"port_range": {}, "target": {}}),
+				Check:  acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_compute_global_forwarding_rule.my_forwarding_rule", "google_compute_global_forwarding_rule.foobar-fr", []string{"port_range", "target"}),
 			},
 		},
 	})

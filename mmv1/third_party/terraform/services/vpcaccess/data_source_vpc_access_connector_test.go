@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/vpcaccess"
 )
 
 func TestAccVPCAccessConnectorDatasource_basic(t *testing.T) {
@@ -21,10 +22,10 @@ func TestAccVPCAccessConnectorDatasource_basic(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vpc_access_connector.connector",
 						"google_vpc_access_connector.connector",
-						map[string]struct{}{
+						[]string{
 							// Ignore fields not returned in response
-							"self_link": {},
-							"region":    {},
+							"self_link",
+							"region",
 						},
 					),
 				),

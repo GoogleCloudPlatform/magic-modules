@@ -2,12 +2,15 @@ package accesscontextmanager_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/accesscontextmanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -17,7 +20,12 @@ import (
 
 func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basicTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
-	//projects := acctest.BootstrapServicePerimeterProjects(t, 1)
+	//projects := BootstrapServicePerimeterProjects(t, 1)
+
+	// Bootstrap a service account to use as ingress from identity
+	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
+	serviceAccount := iambeta.BootstrapServiceAccount(t, "acm-ingress-1", initialServiceAccount)
+
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "perimeter"
 
@@ -26,7 +34,7 @@ func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basicTest(t 
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basic(org, policyTitle, perimeterTitle),
+				Config: testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basic(org, policyTitle, perimeterTitle, serviceAccount),
 			},
 			{
 				Config: testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_destroy(org, policyTitle, perimeterTitle),
@@ -45,7 +53,7 @@ func testAccCheckAccessContextManagerServicePerimeterDryRunIngressPolicyDestroyP
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{perimeter}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(accesscontextmanager.Product, config)+"{{perimeter}}")
 			if err != nil {
 				return err
 			}
@@ -83,7 +91,7 @@ func testAccCheckAccessContextManagerServicePerimeterDryRunIngressPolicyDestroyP
 	}
 }
 
-func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basic(org, policyTitle, perimeterTitleName string) string {
+func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basic(org, policyTitle, perimeterTitleName, serviceAccount string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -134,7 +142,23 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
   depends_on = [google_access_context_manager_service_perimeter_dry_run_ingress_policy.test-access1]
 }
 
-`, testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "test-identity1" {
+	perimeter = google_access_context_manager_service_perimeter.test-access.name
+	ingress_from {
+		identities = ["serviceAccount:%s"]
+		sources {
+			access_level = google_access_context_manager_access_level.test-access.name
+		}
+	}
+	ingress_to {
+		resources = ["*"]
+		roles = ["roles/bigquery.admin"]
+	}
+  depends_on = [google_access_context_manager_service_perimeter_dry_run_ingress_policy.test-access2]
+}
+
+`, testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_destroy(org, policyTitle, perimeterTitleName), strings.ToUpper(serviceAccount))
+	// Using an uppercase service account to test normalization of IAM principal casing
 }
 
 func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {

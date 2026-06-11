@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -35,7 +36,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 
 	id := fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, name)
 
-	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, name).Do()
+	instance, err := NewClient(config, userAgent).Instances.Get(project, zone, name).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Instance %s", name), id)
 	}
@@ -142,7 +143,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	err = d.Set("service_account", flattenServiceAccounts(instance.ServiceAccounts))
+	err = d.Set("service_account", flattenServiceAccounts(serviceAccountsToInterface(instance.ServiceAccounts)))
 	if err != nil {
 		return err
 	}
@@ -162,12 +163,24 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instance.ShieldedInstanceConfig))
+	var shieldedVmConfigMap map[string]interface{}
+	if sic := instance.ShieldedInstanceConfig; sic != nil {
+		shieldedVmConfigMap = map[string]interface{}{
+			"enableSecureBoot":          sic.EnableSecureBoot,
+			"enableVtpm":                sic.EnableVtpm,
+			"enableIntegrityMonitoring": sic.EnableIntegrityMonitoring,
+		}
+	}
+	err = d.Set("shielded_instance_config", flattenShieldedVmConfig(shieldedVmConfigMap))
 	if err != nil {
 		return err
 	}
 
-	err = d.Set("enable_display", flattenEnableDisplay(instance.DisplayDevice))
+	var displayDeviceMap map[string]interface{}
+	if instance.DisplayDevice != nil {
+		displayDeviceMap = map[string]interface{}{"enableDisplay": instance.DisplayDevice.EnableDisplay}
+	}
+	err = d.Set("enable_display", flattenEnableDisplay(displayDeviceMap))
 	if err != nil {
 		return err
 	}
@@ -211,4 +224,13 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, tpgresource.GetResourceNameFromSelfLink(instance.Zone), instance.Name))
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_instance",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeInstance(),
+	}.Register()
 }

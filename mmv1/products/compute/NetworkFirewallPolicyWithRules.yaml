@@ -49,6 +49,13 @@ examples:
       tag_value: 'tag-value'
       security_profile_group: 'spg'
       security_profile: 'sp'
+    test_vars_overrides:
+      # for backward compatible
+      network: '"network" + randomSuffix'
+      # for backward compatible
+      security_profile_group: '"spg" + randomSuffix'
+      # for backward compatible
+      security_profile: '"sp" + randomSuffix'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
@@ -84,7 +91,6 @@ properties:
       A policy can be associated with a network only if the network has the matching policyType in its network profile.
       Different policy types may support some of the Firewall Rules features.
     default_from_api: true
-    min_version: 'beta'
     enum_values:
       - 'VPC_POLICY'
   - name: 'rule'

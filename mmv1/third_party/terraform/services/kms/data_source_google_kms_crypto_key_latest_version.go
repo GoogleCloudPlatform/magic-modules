@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -124,14 +125,14 @@ func dataSourceGoogleKmsLatestCryptoKeyVersionRead(d *schema.ResourceData, meta 
 		return fmt.Errorf("Error setting LatestCryptoKeyVersion: %s", err)
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{crypto_key}}/cryptoKeyVersions/{{version}}")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Getting attributes for CryptoKeyVersion: %#v", url)
 
-	url, err = tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}")
+	url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{crypto_key}}")
 	if err != nil {
 		return err
 	}
@@ -149,7 +150,7 @@ func dataSourceGoogleKmsLatestCryptoKeyVersionRead(d *schema.ResourceData, meta 
 	}
 
 	if res["purpose"] == "ASYMMETRIC_SIGN" || res["purpose"] == "ASYMMETRIC_DECRYPT" {
-		url, err = tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}/publicKey")
+		url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{crypto_key}}/cryptoKeyVersions/{{version}}/publicKey")
 		if err != nil {
 			return err
 		}
@@ -176,4 +177,13 @@ func dataSourceGoogleKmsLatestCryptoKeyVersionRead(d *schema.ResourceData, meta 
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_kms_crypto_key_latest_version",
+		ProductName: "kms",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsLatestCryptoKeyVersion(),
+	}.Register()
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -16,6 +17,14 @@ var (
 	_ datasource.DataSource              = &GoogleClientConfigDataSource{}
 	_ datasource.DataSourceWithConfigure = &GoogleClientConfigDataSource{}
 )
+
+func init() {
+	registry.FrameworkDataSource{
+		Name:        "google_client_config",
+		ProductName: "resourcemanager",
+		Func:        NewGoogleClientConfigDataSource,
+	}.Register()
+}
 
 func NewGoogleClientConfigDataSource() datasource.DataSource {
 	return &GoogleClientConfigDataSource{}
@@ -123,14 +132,7 @@ func (d *GoogleClientConfigDataSource) Read(ctx context.Context, req datasource.
 	data.Region = types.StringValue(d.providerConfig.Region)
 	data.Zone = types.StringValue(d.providerConfig.Zone)
 
-	// Convert default labels from SDK type system to plugin-framework data type
-	m := map[string]*string{}
-	for k, v := range d.providerConfig.DefaultLabels {
-		// m[k] = types.StringValue(v)
-		val := v
-		m[k] = &val
-	}
-	dls, diags := types.MapValueFrom(ctx, types.StringType, m)
+	dls, diags := types.MapValueFrom(ctx, types.StringType, d.providerConfig.DefaultLabels)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

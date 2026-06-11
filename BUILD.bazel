@@ -1,0 +1,19 @@
+load("@gazelle//:def.bzl", "gazelle", "gazelle_test")
+
+# gazelle:exclude .ci
+# gazelle:exclude .github
+# gazelle:exclude docs
+# gazelle:exclude mmv1/products
+# gazelle:exclude mmv1/templates
+# gazelle:exclude mmv1/third_party
+# gazelle:exclude scripts
+# gazelle:exclude tools
+# gazelle:exclude tpgtools/ignored_handwritten
+# gazelle:exclude tpgtools/serializable
+# gazelle:prefix github.com/GoogleCloudPlatform/magic-modules
+gazelle(name = "gazelle")
+
+gazelle_test(
+    name = "gazelle_test",
+    workspace = "//:BUILD.bazel",  # a file in the workspace root, where the gazelle will be run
+)

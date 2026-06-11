@@ -1,5 +1,5 @@
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
-// Copyright (c) HashiCorp, Inc.
+{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 {{ end }}
 // ----------------------------------------------------------------------------
@@ -19,4 +19,21 @@
 // Package {{ lower $.Name }} contains resources, datasources, etc. for the {{ lower $.DisplayName }} service.
 package {{ lower $.Name }}
 
-const ProductName = "{{ lower $.Name }}"
+import (
+    "{{ $.ImportPath }}/registry"
+)
+
+var Product = registry.Product{
+    Name: "{{ lower $.Name }}",
+    BaseUrl: "{{ $.Version.BaseUrl }}",
+    {{- if $.Version.RepUrl }}
+    RepUrl: "{{ $.Version.RepUrl }}",
+    RepByDefault: {{ $.RepByDefault }},
+    {{- end }}
+    CustomEndpointField: "{{ underscore $.Name }}_custom_endpoint",
+    CustomEndpointEnvVar: "GOOGLE_{{ upper (underscore $.Name) }}_CUSTOM_ENDPOINT",
+}
+
+func init() {
+    Product.Register()
+}

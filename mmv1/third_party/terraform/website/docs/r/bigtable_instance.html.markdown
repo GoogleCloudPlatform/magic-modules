@@ -103,7 +103,7 @@ to default to the backend value. See [structure below](#nested_cluster).
   When the field is set to true or unset in Terraform state, a `terraform apply` or `terraform destroy` that would delete
   the instance will fail. When the field is set to false, deleting the instance is allowed.
 
-* `labels` - (Optional) A set of key/value label pairs to assign to the resource. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
+* `labels` - (Optional) A set of key/value label pairs to assign to the resource. Label keys must follow the requirements at https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
 
   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
   Please refer to the field 'effective_labels' for all of the labels present on the resource.
@@ -113,6 +113,18 @@ to default to the backend value. See [structure below](#nested_cluster).
 
 * `effective_labels` -
   All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
+
+* `deletion_policy` - 
+  (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+  When a 'terraform destroy' or 'terraform apply' would delete the resource,
+  the command will fail if this field is set to "PREVENT" in Terraform state.
+  When set to "ABANDON", the command will remove the resource from Terraform
+  management without updating or deleting the resource in the API.
+  When set to "DELETE", deleting the resource is allowed.
+
+* `tags` - (Optional) A set of key/value label pairs to assign to the resource. Tags must follow the requirements at [create and manage tags](https://docs.cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing).
+
+* `edition` (Optional) The edition of the Bigtable instance. One of "ENTERPRISE" or "ENTERPRISE_PLUS". Defaults to "ENTERPRISE". Details can be found at the [Cloud Bigtable editions page](https://docs.cloud.google.com/bigtable/docs/editions-overview).
 
 -----
 

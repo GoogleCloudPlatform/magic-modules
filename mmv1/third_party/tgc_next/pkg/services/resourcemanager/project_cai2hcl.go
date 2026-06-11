@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
 
 	tfschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -29,9 +29,13 @@ func NewProjectCai2hclConverter(provider *tfschema.Provider) models.Cai2hclConve
 }
 
 // Convert converts asset resource data.
-func (c *ProjectCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ProjectCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
+	}
+
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(asset)
+	block, err := c.convertResourceData(assets[0])
 	if err != nil {
 		return nil, err
 	}
@@ -51,9 +55,9 @@ func (c *ProjectCai2hclConverter) convertResourceData(asset caiasset.Asset) (*mo
 	hclData["project_id"] = assetResourceData["projectId"]
 	hclData["labels"] = tgcresource.RemoveTerraformAttributionLabel(assetResourceData["labels"])
 	if strings.Contains(asset.Resource.Parent, "folders/") {
-		hclData["folder_id"] = utils.ParseFieldValue(asset.Resource.Parent, "folders")
+		hclData["folder_id"] = tgcresource.ParseFieldValue(asset.Resource.Parent, "folders")
 	} else if strings.Contains(asset.Resource.Parent, "organizations/") {
-		hclData["org_id"] = utils.ParseFieldValue(asset.Resource.Parent, "organizations")
+		hclData["org_id"] = tgcresource.ParseFieldValue(asset.Resource.Parent, "organizations")
 	}
 
 	ctyVal, err := utils.MapToCtyValWithSchema(hclData, c.schema)

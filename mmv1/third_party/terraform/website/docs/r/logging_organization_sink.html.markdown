@@ -1,12 +1,12 @@
 ---
 subcategory: "Cloud (Stackdriver) Logging"
 description: |-
-  Manages a organization-level logging sink.
+  Manages an organization-level logging sink.
 ---
 
 # google_logging_organization_sink
 
-Manages a organization-level logging sink. For more information see:
+Manages an organization-level logging sink. For more information see:
 * [API documentation](https://cloud.google.com/logging/docs/reference/v2/rest/v2/organizations.sinks)
 * How-to Guides
     * [Exporting Logs](https://cloud.google.com/logging/docs/export)
@@ -73,6 +73,13 @@ The following arguments are supported:
 * `bigquery_options` - (Optional) Options that affect sinks exporting data to BigQuery. Structure [documented below](#nested_bigquery_options).
 
 * `exclusions` - (Optional) Log entries that match any of the exclusion filters will not be exported. If a log entry is matched by both `filter` and one of `exclusions.filter`, it will not be exported.  Can be repeated multiple times for multiple exclusions. Structure is [documented below](#nested_exclusions).
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
 
 <a name="nested_bigquery_options"></a>The `bigquery_options` block supports:
 

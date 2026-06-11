@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccComputeRegionBackendService_regionBackendServiceHaPolicyManualLeader_update(t *testing.T) {
@@ -73,6 +74,7 @@ resource "google_compute_network_endpoint" "endpoint2" {
 
   instance   = google_compute_instance.endpoint-instance2.name
   ip_address = google_compute_instance.endpoint-instance2.network_interface[0].network_ip
+  depends_on = [google_compute_network_endpoint.endpoint1]
 }
 
 data "google_compute_image" "my_image" {
@@ -112,6 +114,7 @@ resource "google_compute_instance" "endpoint-instance2" {
     access_config {
     }
   }
+  depends_on = [google_compute_instance.endpoint-instance1]
 }
 
 resource "google_compute_network_endpoint_group" "neg" {
@@ -145,11 +148,7 @@ resource "google_compute_region_backend_service" "default" {
   connection_draining_timeout_sec		= 0
   // Explicitly depend on the endpoints to prevent test flakes due to creating
   // the BackendService before the endpoints have been added to the NEG.
-  depends_on = [
-  	google_compute_network_endpoint_group.neg,
-	google_compute_network_endpoint.endpoint1,
-	google_compute_network_endpoint.endpoint2
-  ]
+  depends_on = [google_compute_network_endpoint.endpoint2]
 }
 `, context)
 }

@@ -12,183 +12,185 @@
 # limitations under the License.
 
 ---
-name: 'CertificateTemplate'
+name: CertificateTemplate
 description: |
   Certificate Authority Service provides reusable and parameterized templates that you can use for common certificate issuance scenarios. A certificate template represents a relatively static and well-defined certificate issuance schema within an organization. A certificate template can essentially become a full-fledged vertical certificate issuance framework.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/certificate-authority-service'
-    'Understanding Certificate Templates': 'https://cloud.google.com/certificate-authority-service/docs/certificate-template'
-    'Common configurations and Certificate Profiles': 'https://cloud.google.com/certificate-authority-service/docs/certificate-profile'
-  api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest'
+    Official Documentation: https://cloud.google.com/certificate-authority-service
+    Understanding Certificate Templates: https://cloud.google.com/certificate-authority-service/docs/certificate-template
+    Common configurations and Certificate Profiles: https://cloud.google.com/certificate-authority-service/docs/certificate-profile
+  api: https://cloud.google.com/certificate-authority-service/docs/reference/rest
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/certificateTemplates'
-self_link: 'projects/{{project}}/locations/{{location}}/certificateTemplates/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/certificateTemplates?certificateTemplateId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/certificateTemplates
+self_link: projects/{{project}}/locations/{{location}}/certificateTemplates/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/certificateTemplates?certificateTemplateId={{name}}
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  method_name_separator: ':'
+  allowed_iam_role: roles/privateca.templateUser
+  parent_resource_attribute: certificate_template
+  sample_config_body: templates/terraform/iam/example_config_body/privateca_certificate_template.tf.tmpl
+  iam_conditions_request_type: QUERY_PARAM_NESTED
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
-iam_policy:
-  method_name_separator: ':'
-  allowed_iam_role: 'roles/privateca.templateUser'
-  parent_resource_attribute: 'certificate_template'
-  iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  example_config_body: 'templates/terraform/iam/example_config_body/privateca_certificate_template.tf.tmpl'
-custom_code:
 legacy_long_form_project: true
-examples:
-  - name: 'privateca_template_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
-    vars:
-      name: 'my-template'
-  - name: 'privateca_template_zero_max_issuer_path_length_null_ca'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
-    vars:
-      name: 'my-template'
+include_in_tgc_next: true
+samples:
+  - name: privateca_template_basic
+    primary_resource_id: default
+    steps:
+      - name: privateca_template_basic
+        resource_id_vars:
+          name: my-template
+  - name: privateca_template_zero_max_issuer_path_length_null_ca
+    primary_resource_id: default
+    steps:
+      - name: privateca_template_zero_max_issuer_path_length_null_ca
+        resource_id_vars:
+          name: my-template
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: The resource name for this CertificateTemplate in the format `projects/*/locations/*/certificateTemplates/*`.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: The location for the resource
     url_param_only: true
     required: true
     immutable: true
-  - name: 'predefinedValues'
+  - name: predefinedValues
     type: NestedObject
     description: Optional. A set of X.509 values that will be applied to all issued certificates that use this template. If the certificate request includes conflicting values for the same properties, they will be overwritten by the values defined here. If the issuing CaPool's IssuancePolicy defines conflicting baseline_values for the same properties, the certificate issuance request will fail.
-    custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_template_509_config.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/privateca_certificate_template_509_config.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/privateca_certificate_template_509_config.go.tmpl
+    custom_expand: templates/terraform/custom_expand/privateca_certificate_template_509_config.go.tmpl
     properties:
-      - name: 'keyUsage'
+      - name: keyUsage
         type: NestedObject
         description: Optional. Indicates the intended use for keys that correspond to a certificate.
         properties:
-          - name: 'baseKeyUsage'
+          - name: baseKeyUsage
             type: NestedObject
             description: Describes high-level ways in which a key may be used.
-            diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+            diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
             properties:
-              - name: 'digitalSignature'
+              - name: digitalSignature
                 type: Boolean
                 description: The key may be used for digital signatures.
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'contentCommitment'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: contentCommitment
                 type: Boolean
                 description: The key may be used for cryptographic commitments. Note that this may also be referred to as "non-repudiation".
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'keyEncipherment'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: keyEncipherment
                 type: Boolean
                 description: The key may be used to encipher other keys.
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'dataEncipherment'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: dataEncipherment
                 type: Boolean
                 description: The key may be used to encipher data.
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'keyAgreement'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: keyAgreement
                 type: Boolean
                 description: The key may be used in a key agreement protocol.
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'certSign'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: certSign
                 type: Boolean
                 description: The key may be used to sign certificates.
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'crlSign'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: crlSign
                 type: Boolean
                 description: The key may be used sign certificate revocation lists.
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'encipherOnly'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: encipherOnly
                 type: Boolean
                 description: The key may be used to encipher only.
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'decipherOnly'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: decipherOnly
                 type: Boolean
                 description: The key may be used to decipher only.
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-          - name: 'extendedKeyUsage'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+          - name: extendedKeyUsage
             type: NestedObject
             description: Detailed scenarios in which a key may be used.
-            diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+            diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
             properties:
-              - name: 'serverAuth'
+              - name: serverAuth
                 type: Boolean
                 description: Corresponds to OID 1.3.6.1.5.5.7.3.1. Officially described as "TLS WWW server authentication", though regularly used for non-WWW TLS.
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'clientAuth'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: clientAuth
                 type: Boolean
                 description: Corresponds to OID 1.3.6.1.5.5.7.3.2. Officially described as "TLS WWW client authentication", though regularly used for non-WWW TLS.
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'codeSigning'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: codeSigning
                 type: Boolean
                 description: Corresponds to OID 1.3.6.1.5.5.7.3.3. Officially described as "Signing of downloadable executable code client authentication".
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'emailProtection'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: emailProtection
                 type: Boolean
                 description: Corresponds to OID 1.3.6.1.5.5.7.3.4. Officially described as "Email protection".
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'timeStamping'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: timeStamping
                 type: Boolean
                 description: Corresponds to OID 1.3.6.1.5.5.7.3.8. Officially described as "Binding the hash of an object to a time".
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-              - name: 'ocspSigning'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+              - name: ocspSigning
                 type: Boolean
                 description: Corresponds to OID 1.3.6.1.5.5.7.3.9. Officially described as "Signing OCSP responses".
                 send_empty_value: true
-                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
-          - name: 'unknownExtendedKeyUsages'
+                diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+          - name: unknownExtendedKeyUsages
             type: Array
             description: Used to describe extended key usages that are not listed in the KeyUsage.ExtendedKeyUsageOptions message.
             item_type:
               description: Used to describe extended key usages that are not listed in the KeyUsage.ExtendedKeyUsageOptions message.
               type: NestedObject
               properties:
-                - name: 'objectIdPath'
+                - name: objectIdPath
                   type: Array
                   description: Required. The parts of an OID path. The most significant parts of the path come first.
                   required: true
                   item_type:
                     type: Integer
-      - name: 'caOptions'
+      - name: caOptions
         type: NestedObject
         description: Optional. Describes options in this X509Parameters that are relevant in a CA certificate.
         properties:
-          - name: 'isCa'
+          - name: isCa
             type: Boolean
             description: |
               Optional. Refers to the "CA" X.509 extension, which is a boolean value. When this value is true, the "CA" in Basic Constraints extension will be set to true.
             send_empty_value: true
-          - name: 'nullCa'
+          - name: nullCa
             type: Boolean
             description: |
               Optional. When true, the "CA" in Basic Constraints extension will be set to null and omitted from the CA certificate.
@@ -196,74 +198,72 @@ properties:
               Note that the behavior when `is_ca = false` for this resource is different from the behavior in the Certificate Authority, Certificate and CaPool resources.
             url_param_only: true
             send_empty_value: true
-          - name: 'maxIssuerPathLength'
+          - name: maxIssuerPathLength
             type: Integer
             description: |
               Optional. Refers to the "path length constraint" in Basic Constraints extension. For a CA certificate, this value describes the depth of
               subordinate CA certificates that are allowed. If this value is less than 0, the request will fail.
-          - name: 'zeroMaxIssuerPathLength'
+          - name: zeroMaxIssuerPathLength
             type: Boolean
             description: |
               Optional. When true, the "path length constraint" in Basic Constraints extension will be set to 0.
               if both `max_issuer_path_length` and `zero_max_issuer_path_length` are unset,
               the max path length will be omitted from the CA certificate.
             url_param_only: true
-      - name: 'policyIds'
+      - name: policyIds
         type: Array
         description: Optional. Describes the X.509 certificate policy object identifiers, per https://tools.ietf.org/html/rfc5280#section-4.2.1.4.
         item_type:
           description: Optional. Describes the X.509 certificate policy object identifiers, per https://tools.ietf.org/html/rfc5280#section-4.2.1.4.
           type: NestedObject
           properties:
-            - name: 'objectIdPath'
+            - name: objectIdPath
               type: Array
               description: Required. The parts of an OID path. The most significant parts of the path come first.
               required: true
               item_type:
                 type: Integer
-      - name: 'aiaOcspServers'
+      - name: aiaOcspServers
         type: Array
         description: Optional. Describes Online Certificate Status Protocol (OCSP) endpoint addresses that appear in the "Authority Information Access" extension in the certificate.
         item_type:
           type: String
-      - name: 'additionalExtensions'
+      - name: additionalExtensions
         type: Array
         description: Optional. Describes custom X.509 extensions.
         item_type:
           description: Optional. Describes custom X.509 extensions.
           type: NestedObject
           properties:
-            - name: 'objectId'
+            - name: objectId
               type: NestedObject
               description: Required. The OID for this X.509 extension.
               required: true
               properties:
-                - name: 'objectIdPath'
+                - name: objectIdPath
                   type: Array
                   description: Required. The parts of an OID path. The most significant parts of the path come first.
                   required: true
                   item_type:
                     type: Integer
-            - name: 'critical'
+            - name: critical
               type: Boolean
               description: Optional. Indicates whether or not this extension is critical (i.e., if the client does not know how to handle this extension, the client should consider this to be an error).
               send_empty_value: true
-            - name: 'value'
+            - name: value
               type: String
               description: Required. The value of this X.509 extension.
               required: true
-      - name: 'nameConstraints'
+      - name: nameConstraints
         type: NestedObject
         description: |
           Describes the X.509 name constraints extension.
         properties:
-          - name: 'critical'
+          - name: critical
             type: Boolean
-            description:
-              Indicates whether or not the name constraints are marked
-              critical.
+            description: Indicates whether or not the name constraints are marked critical.
             required: true
-          - name: 'permittedDnsNames'
+          - name: permittedDnsNames
             type: Array
             description: |
               Contains permitted DNS names. Any DNS name that can be
@@ -273,7 +273,7 @@ properties:
               would satisfy `example.com` while `example1.com` does not.
             item_type:
               type: String
-          - name: 'excludedDnsNames'
+          - name: excludedDnsNames
             type: Array
             description: |
               Contains excluded DNS names. Any DNS name that can be
@@ -283,7 +283,7 @@ properties:
               would satisfy `example.com` while `example1.com` does not.
             item_type:
               type: String
-          - name: 'permittedIpRanges'
+          - name: permittedIpRanges
             type: Array
             description: |
               Contains the permitted IP ranges. For IPv4 addresses, the ranges
@@ -292,7 +292,7 @@ properties:
               addresses.
             item_type:
               type: String
-          - name: 'excludedIpRanges'
+          - name: excludedIpRanges
             type: Array
             description: |
               Contains the excluded IP ranges. For IPv4 addresses, the ranges
@@ -301,7 +301,7 @@ properties:
               addresses.
             item_type:
               type: String
-          - name: 'permittedEmailAddresses'
+          - name: permittedEmailAddresses
             type: Array
             description: |
               Contains the permitted email addresses. The value can be a particular
@@ -310,7 +310,7 @@ properties:
               all email addresses in that domain.
             item_type:
               type: String
-          - name: 'excludedEmailAddresses'
+          - name: excludedEmailAddresses
             type: Array
             description: |
               Contains the excluded email addresses. The value can be a particular
@@ -319,7 +319,7 @@ properties:
               all email addresses in that domain.
             item_type:
               type: String
-          - name: 'permittedUris'
+          - name: permittedUris
             type: Array
             description: |
               Contains the permitted URIs that apply to the host part of the name.
@@ -327,7 +327,7 @@ properties:
               leading period (like `.example.com`)
             item_type:
               type: String
-          - name: 'excludedUris'
+          - name: excludedUris
             type: Array
             description: |
               Contains the excluded URIs that apply to the host part of the name.
@@ -335,72 +335,72 @@ properties:
               leading period (like `.example.com`)
             item_type:
               type: String
-  - name: 'identityConstraints'
+  - name: identityConstraints
     type: NestedObject
     description: Optional. Describes constraints on identities that may be appear in Certificates issued using this template. If this is omitted, then this template will not add restrictions on a certificate's identity.
     properties:
-      - name: 'celExpression'
+      - name: celExpression
         type: NestedObject
         description: Optional. A CEL expression that may be used to validate the resolved X.509 Subject and/or Subject Alternative Name before a certificate is signed. To see the full allowed syntax and some examples, see https://cloud.google.com/certificate-authority-service/docs/using-cel
         properties:
-          - name: 'expression'
+          - name: expression
             type: String
             description: Textual representation of an expression in Common Expression Language syntax.
-          - name: 'title'
+          - name: title
             type: String
             description: Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
-          - name: 'description'
+          - name: description
             type: String
             description: Optional. Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
-          - name: 'location'
+          - name: location
             type: String
             description: Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
-      - name: 'allowSubjectPassthrough'
+      - name: allowSubjectPassthrough
         type: Boolean
         description: Required. If this is true, the Subject field may be copied from a certificate request into the signed certificate. Otherwise, the requested Subject will be discarded.
         required: true
         send_empty_value: true
-      - name: 'allowSubjectAltNamesPassthrough'
+      - name: allowSubjectAltNamesPassthrough
         type: Boolean
         description: Required. If this is true, the SubjectAltNames extension may be copied from a certificate request into the signed certificate. Otherwise, the requested SubjectAltNames will be discarded.
         required: true
         send_empty_value: true
-  - name: 'passthroughExtensions'
+  - name: passthroughExtensions
     type: NestedObject
     description: Optional. Describes the set of X.509 extensions that may appear in a Certificate issued using this CertificateTemplate. If a certificate request sets extensions that don't appear in the passthrough_extensions, those extensions will be dropped. If the issuing CaPool's IssuancePolicy defines baseline_values that don't appear here, the certificate issuance request will fail. If this is omitted, then this template will not add restrictions on a certificate's X.509 extensions. These constraints do not apply to X.509 extensions set in this CertificateTemplate's predefined_values.
     properties:
-      - name: 'knownExtensions'
+      - name: knownExtensions
         type: Array
         description: Optional. A set of named X.509 extensions. Will be combined with additional_extensions to determine the full set of X.509 extensions.
         item_type:
           type: String
-      - name: 'additionalExtensions'
+      - name: additionalExtensions
         type: Array
         description: Optional. A set of ObjectIds identifying custom X.509 extensions. Will be combined with known_extensions to determine the full set of X.509 extensions.
         item_type:
           description: Optional. A set of ObjectIds identifying custom X.509 extensions. Will be combined with known_extensions to determine the full set of X.509 extensions.
           type: NestedObject
           properties:
-            - name: 'objectIdPath'
+            - name: objectIdPath
               type: Array
               description: Required. The parts of an OID path. The most significant parts of the path come first.
               required: true
               item_type:
                 type: Integer
-  - name: 'maximumLifetime'
+  - name: maximumLifetime
     type: String
     description: Optional. The maximum lifetime allowed for all issued certificates that use this template. If the issuing CaPool's IssuancePolicy specifies a maximum lifetime the minimum of the two durations will be the maximum lifetime for issued. Note that if the issuing CertificateAuthority expires before a Certificate's requested maximum_lifetime, the effective lifetime will be explicitly truncated to match it.
-  - name: 'description'
+  - name: description
     type: String
     description: Optional. A human-readable description of scenarios this template is intended for.
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: Output only. The time at which this CertificateTemplate was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: Output only. The time at which this CertificateTemplate was updated.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Optional. Labels with user-defined metadata.

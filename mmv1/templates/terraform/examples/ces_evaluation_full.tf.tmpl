@@ -1,0 +1,255 @@
+resource "google_ces_app" "app" {
+  provider = google-beta
+  app_id = "{{index $.Vars "app_id"}}"
+  location = "us"
+  display_name = "{{index $.Vars "app_display_name"}}"
+
+  language_settings {
+    default_language_code    = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_tool" "tool" {
+  provider = google-beta
+  location       = "us"
+  app            = google_ces_app.app.app_id
+  tool_id        = "{{index $.Vars "tool_id"}}"
+  execution_type = "SYNCHRONOUS"
+  python_function {
+      name = "example_function"
+      python_code = "def example_function() -> int: return 0"
+  }
+}
+
+resource "google_ces_evaluation" "ces_evaluation_full" {
+  provider = google-beta
+  evaluation_id = "{{index $.Vars "evaluation_id"}}"
+  display_name = "my-evaluation-full"
+  location     = "us"
+  app          = google_ces_app.app.app_id
+  description  = "Full evaluation for testing"
+  tags         = ["test", "full"]
+
+  golden {
+    evaluation_expectations = ["projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/evaluationExpectations/dummy-exp"]
+
+    turns {
+      steps {
+        user_input {
+          text = "Hello"
+          will_continue = true
+        }
+      }
+      steps {
+        user_input {
+          variables = {
+            key = "value"
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect tool call"
+          tool_call {
+            id = "tool-call-id"
+            tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+            args = {
+              param = "value"
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect agent response"
+          agent_response {
+            role = "agent"
+            chunks {
+              updated_variables = { "key": "value" }
+            }
+            chunks {
+              agent_transfer {
+                target_agent = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/agents/dummy-agent"
+              }
+            }
+            chunks {
+              tool_call {
+                id = "tool-call-id-3"
+                tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+              }
+            }
+            chunks {
+              tool_response {
+                id = "tool-call-id-3"
+                response = { result = "success" }
+                tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+              }
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect toolset tool call"
+          tool_call {
+            id = "tool-call-id-2"
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset"
+              tool_id = "dummy-tool"
+            }
+          }
+        }
+      }
+      steps {
+        agent_transfer {
+          target_agent = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/agents/dummy-agent"
+        }
+      }
+      steps {
+        expectation {
+          agent_transfer {
+            target_agent = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/agents/dummy-agent"
+            display_name = "dummy-agent"
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect mock tool response"
+          mock_tool_response {
+            id = "tool-call-id-4"
+            response = { result = "mocked" }
+            tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect tool response"
+          tool_response {
+            toolset_tool {
+              toolset = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/toolsets/dummy-toolset"
+              tool_id = "dummy-tool"
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect updated variables"
+          updated_variables {
+            notes = "Some notes"
+          }
+        }
+      }
+      steps {
+        user_input {
+          tool_responses {
+            tool_responses {
+              id = "tool-call-id-5"
+              response = { result = "user-provided" }
+              tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+            }
+          }
+        }
+      }
+      steps {
+        user_input {
+          event {
+            event = "my-event"
+          }
+        }
+      }
+      steps {
+        user_input {
+          dtmf = "1234"
+        }
+      }
+      steps {
+        user_input {
+          audio = "c29tZSBhdWRpbyBkYXRh" # base64 for "some audio data"
+        }
+      }
+      steps {
+        user_input {
+          blob {
+            mime_type = "text/plain"
+            data = "c29tZSBibG9iIGRhdGE=" # base64 for "some blob data"
+          }
+        }
+      }
+      steps {
+        user_input {
+          image {
+            mime_type = "image/png"
+            data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" # valid 1x1 pixel PNG base64
+          }
+        }
+      }
+      steps {
+        user_input {
+          tool_responses {
+            tool_responses {
+              id = "tool-call-id"
+              response = {
+                result = "success"
+              }
+              tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+            }
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect tool response"
+          tool_response {
+            id = "tool-call-id"
+            response = {
+              result = "success"
+            }
+            tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+          }
+        }
+      }
+      steps {
+        expectation {
+          note = "Expect agent response with chunks"
+          agent_response {
+            role = "agent"
+            chunks {
+              text = "Hello again"
+            }
+            chunks {
+              text = "Hello again transcript"
+            }
+
+            chunks {
+              blob {
+                mime_type = "text/plain"
+                data = "c29tZSBibG9iIGRhdGE="
+              }
+            }
+            chunks {
+              image {
+                mime_type = "image/png"
+                data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+              }
+            }
+            chunks {
+              tool_call {
+                id = "tool-call-id-3"
+                tool = "projects/${google_ces_app.app.project}/locations/us/apps/${google_ces_app.app.app_id}/tools/${google_ces_tool.tool.tool_id}"
+                args = {
+                  param = "value"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

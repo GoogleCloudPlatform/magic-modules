@@ -39,9 +39,11 @@ custom_code:
 examples:
   - name: 'endpoints_iam'
     primary_resource_id: 'endpoints_service'
-    primary_resource_name: 'fmt.Sprintf("endpoint%s.endpoints.%s.cloud.goog", context["random_suffix"], context["project_name"]), context["project_name"]'
     vars:
       name: 'endpoint'
+    test_vars_overrides:
+      # for backward compatible
+      name: '"endpoint" + randomSuffix'
     test_env_vars:
       project_name: 'PROJECT_NAME'
       consumer_project: 'PROJECT_NAME'

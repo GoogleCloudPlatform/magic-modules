@@ -1,3 +1,5 @@
+import "net"
+
 func forwardingRuleCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
 	log.Println("[DEBUG] [PSC] Reached forwardingRuleCustomizeDiff function")
 
@@ -9,6 +11,21 @@ func forwardingRuleCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v
 				// https://discuss.hashicorp.com/t/force-new-resource-based-on-api-read-difference/29759/6
 				diff.SetNewComputed("psc_connection_status")
 				diff.ForceNew("psc_connection_status")
+			}
+		}
+	}
+
+	// Force recreation if PSC target is updated to a new PSC service attachment and
+	// the existing target was also a PSC service attachment.
+	if diff.Id() != "" && diff.HasChange("target") {
+		oldTarget, newTarget := diff.GetChange("target")
+		oldTargetStr, oldOk := oldTarget.(string)
+		newTargetStr, newOk := newTarget.(string)
+
+		// Check if there is an actual semantic change, ignoring v1 vs beta differences
+		if oldOk && newOk && !tpgresource.CompareSelfLinkRelativePathsIgnoreProjectId("target", oldTargetStr, newTargetStr, nil) {
+			if strings.Contains(newTargetStr, "/serviceAttachments/") && strings.Contains(oldTargetStr, "/serviceAttachments/") {
+				diff.ForceNew("target")
 			}
 		}
 	}

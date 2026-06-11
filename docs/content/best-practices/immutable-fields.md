@@ -8,9 +8,8 @@ aliases:
 
 # Immutable fields
 
-{{< hint info >}}
-**Note:** This page covers best practices guidance for the Terraform provider for Google Cloud, which is used to ensure a consistent UX for Terraform users across providers or GCP users across the Google provider. Generally, this guidance should be followed and exceptions should be clearly demarcated / discussed.
-{{< /hint >}}
+> [!NOTE]
+> **Note:** This page covers best practices guidance for the Terraform provider for Google Cloud, which is used to ensure a consistent UX for Terraform users across providers or GCP users across the Google provider. Generally, this guidance should be followed and exceptions should be clearly demarcated / discussed.
 
 [`ForceNew`](https://developer.hashicorp.com/terraform/intro#how-does-terraform-work) in a Terraform resource schema attribute that indicates that a field is immutable – that is, that a change to the field requires the resource to be destroyed and recreated.
 

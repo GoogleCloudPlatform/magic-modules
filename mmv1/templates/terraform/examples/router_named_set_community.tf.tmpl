@@ -1,0 +1,27 @@
+resource "google_compute_network" "net" {
+  provider = google-beta
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_router" "router" {
+  provider = google-beta
+  name    = "{{index $.Vars "router_name"}}"
+  network = google_compute_network.net.name
+  region  = "us-central1"
+}
+
+resource "google_compute_router_named_set" "community_set" {
+  provider = google-beta
+  name        = "{{index $.Vars "named_set_name"}}"
+  router      = google_compute_router.router.name
+  region      = "us-central1"
+  description = "A sample community named set"
+  type        = "NAMED_SET_TYPE_COMMUNITY"
+
+  elements {
+    expression  = "'65512:100'"
+    title       = "community-one"
+    description = "A sample BGP community"
+  }
+}

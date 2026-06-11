@@ -8,9 +8,9 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
-	tpg_provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/provider"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
+	tpg_provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -247,6 +247,13 @@ func TestParseUrlParamValuesFromAssetName(t *testing.T) {
 			assetName:    "//bigquery.googleapis.com/projects/my-project/datasets/my-dataset",
 			outputFields: make(map[string]struct{}),
 			want:         map[string]any{},
+		},
+		{
+			name:         "PartialTemplate",
+			template:     "//cloudkms.googleapis.com/{{crypto_key}}/cryptoKeyVersions/",
+			assetName:    "//cloudkms.googleapis.com/projects/tf-test-6813515571143553110/locations/us-central1/keyRings/tf-test-f0qeplfob8/cryptoKeys/tf-test-zvizc6wldk/cryptoKeyVersions/1",
+			outputFields: make(map[string]struct{}),
+			want:         map[string]any{"crypto_key": "projects/tf-test-6813515571143553110/locations/us-central1/keyRings/tf-test-f0qeplfob8/cryptoKeys/tf-test-zvizc6wldk"},
 		},
 	}
 

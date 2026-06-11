@@ -14,6 +14,7 @@
 ---
 name: 'RegionSecurityPolicyRule'
 api_resource_type_kind: SecurityPolicy
+api_resource_field: 'rules'
 description: |
   A rule for the RegionSecurityPolicy.
 references:
@@ -46,29 +47,46 @@ async:
 custom_code:
   pre_create: 'templates/terraform/pre_create/region_security_policy_default_rule_update_on_create.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/security_policy_default_rule_delete.go.tmpl'
+# excluding identity due to region value inconsistency
+exclude_identity_generation: true
 examples:
   - name: 'region_security_policy_rule_basic'
     primary_resource_id: 'policy_rule'
     vars:
       sec_policy_name: 'policyruletest'
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policyruletest" + randomSuffix'
   - name: 'region_security_policy_rule_multiple_rules'
     primary_resource_id: 'policy_rule_one'
     vars:
       sec_policy_name: 'policywithmultiplerules'
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policywithmultiplerules" + randomSuffix'
   - name: 'region_security_policy_rule_default_rule'
     primary_resource_id: 'policy_rule'
     vars:
       sec_policy_name: 'policywithdefaultrule'
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policywithdefaultrule" + randomSuffix'
   - name: 'region_security_policy_rule_with_preconfigured_waf_config'
     primary_resource_id: 'policy_rule'
     vars:
       sec_policy_name: 'policyruletest'
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policyruletest" + randomSuffix'
   - name: 'region_security_policy_rule_with_network_match'
     primary_resource_id: 'policy_rule_network_match'
     vars:
       sec_policy_name: 'policyfornetworkmatch'
     # it needs to run synchronously because a region can have only one google_compute_network_edge_security_service.
     # there is a robust handwritten test which covers this scenario.
+    test_vars_overrides:
+      # for backward compatible
+      sec_policy_name: '"policyfornetworkmatch" + randomSuffix'
     exclude_test: true
 parameters:
   - name: 'region'
@@ -309,6 +327,7 @@ properties:
     description: |
       Must be specified if the action is "rate_based_ban" or "throttle". Cannot be specified for any other actions.
     update_mask_fields:
+      - 'rateLimitOptions'
       - 'rateLimitOptions.rateLimitThreshold'
       - 'rateLimitOptions.conformAction'
       - 'rateLimitOptions.exceedAction'

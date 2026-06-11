@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/backupdr"
 )
 
 func TestAccDataSourceGoogleBackupDRBackupPlan_basic(t *testing.T) {
@@ -77,6 +78,7 @@ resource "google_backup_dr_backup_plan" "test" {
   lifecycle {
     ignore_changes = [backup_vault]
   }
+  max_custom_on_demand_retention_days = 30
   backup_rules {
 	rule_id = "rule-1"
 	backup_retention_days = 5
@@ -131,6 +133,7 @@ resource "google_backup_dr_backup_plan" "csql-test" {
     ignore_changes = [backup_vault]
   }
   log_retention_days = 4
+  max_custom_on_demand_retention_days = 30
   backup_rules {
     rule_id = "rule-1"
     backup_retention_days = 5

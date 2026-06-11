@@ -48,7 +48,7 @@ func (w *ContainerOperationWaiter) Error() error {
 	}
 
 	if w.Op.StatusMessage != "" {
-		return fmt.Errorf(w.Op.StatusMessage)
+		return fmt.Errorf("%s", w.Op.StatusMessage)
 	}
 
 	return nil
@@ -114,7 +114,7 @@ func (w *ContainerOperationWaiter) TargetStates() []string {
 
 func ContainerOperationWait(config *transport_tpg.Config, op *container.Operation, project, location, activity, userAgent string, timeout time.Duration) error {
 	w := &ContainerOperationWaiter{
-		Service:             config.NewContainerClient(userAgent),
+		Service:             NewClient(config, userAgent),
 		Context:             config.Context,
 		Op:                  op,
 		Project:             project,

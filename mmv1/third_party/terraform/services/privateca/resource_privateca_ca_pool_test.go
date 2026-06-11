@@ -1,11 +1,79 @@
 package privateca_test
 
 import (
+	"fmt"
+	"log"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
+	project := envvar.GetTestProjectFromEnv()
+	poolName := "static-ca-pool"
+
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+
+	log.Printf("[DEBUG] Getting shared CA pool %q", poolName)
+	url := fmt.Sprintf("%sprojects/%s/locations/%s/caPools/%s", transport_tpg.BaseUrl(privateca.Product, config), project, location, poolName)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
+	if err != nil {
+		log.Printf("[DEBUG] CA pool %q not found, bootstrapping", poolName)
+		poolObj := map[string]interface{}{
+			"tier": "ENTERPRISE",
+		}
+		createUrl := fmt.Sprintf("%sprojects/%s/locations/%s/caPools?caPoolId=%s", transport_tpg.BaseUrl(privateca.Product, config), project, location, poolName)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    createUrl,
+			UserAgent: config.UserAgent,
+			Body:      poolObj,
+			Timeout:   4 * time.Minute,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared CA pool %q: %s", poolName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for CA pool creation to finish")
+		var opRes map[string]interface{}
+		err = privateca.PrivatecaOperationWaitTimeWithResponse(
+			config, res, &opRes, project, "Creating CA pool", config.UserAgent,
+			4*time.Minute)
+		if err != nil {
+			t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
+		}
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
+		}
+	}
+	return poolName
+}
 
 func TestAccPrivatecaCaPool_privatecaCapoolUpdate(t *testing.T) {
 	t.Parallel()
@@ -436,6 +504,133 @@ resource "google_privateca_ca_pool" "default" {
         }
         extended_key_usage {
           server_auth = true
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccPrivatecaCaPool_CmekKeyUpdate(t *testing.T) {
+	t.Parallel()
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-privateca.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	context := map[string]interface{}{
+		"kms_key1":      kms.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name,
+		"kms_key2":      kms.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name,
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPrivatecaCaPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolWithCmek(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "labels"},
+			},
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolWithCmekUpdate0(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "labels"},
+			},
+		},
+	})
+}
+
+func testAccPrivatecaCaPool_privatecaCapoolWithCmek(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_privateca_ca_pool" "default" {
+  name = "tf-test-my-capool%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = false
+    publish_crl = true
+  }
+  labels = {
+    foo = "bar"
+  }
+  encryption_spec {
+    cloud_kms_key = "%{kms_key1}"
+  }
+  issuance_policy {
+    baseline_values {
+      additional_extensions {
+        critical = false
+        value = "asdf"
+        object_id {
+          object_id_path = [1, 6]
+        }
+      }
+      ca_options {
+        is_ca = false
+      }
+      key_usage {
+        base_key_usage {
+          digital_signature = false
+        }
+        extended_key_usage {
+          server_auth = false
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccPrivatecaCaPool_privatecaCapoolWithCmekUpdate0(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_privateca_ca_pool" "default" {
+  name = "tf-test-my-capool%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = false
+    publish_crl = true
+  }
+  labels = {
+    foo = "bar"
+  }
+  encryption_spec {
+    cloud_kms_key = "%{kms_key2}"
+  }
+  issuance_policy {
+    baseline_values {
+      additional_extensions {
+        critical = false
+        value = "asdf"
+        object_id {
+          object_id_path = [1, 6]
+        }
+      }
+      ca_options {
+        is_ca = false
+      }
+      key_usage {
+        base_key_usage {
+          digital_signature = false
+        }
+        extended_key_usage {
+          server_auth = false
         }
       }
     }

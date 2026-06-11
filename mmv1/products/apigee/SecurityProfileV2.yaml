@@ -28,6 +28,7 @@ update_mask: true
 import_format:
   - '{{org_id}}/securityProfilesV2/{{profile_id}}'
   - '{{org_id}}/{{profile_id}}'
+exclude_identity_generation: true
 custom_code:
   custom_import: "templates/terraform/custom_import/apigee_security_profile_v2.go.tmpl"
 examples:
@@ -77,7 +78,6 @@ properties:
     required: true
     key_name: 'assessment'
     value_type:
-      name: profileAssessmentConfig
       type: NestedObject
       properties:
         - name: 'weight'

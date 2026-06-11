@@ -14,12 +14,12 @@
 ---
 name: 'OrganizationSecurityPolicyRule'
 api_resource_type_kind: SecurityPolicy
+api_resource_field: 'rules'
 description: |
   A rule for the OrganizationSecurityPolicy.
-min_version: 'beta'
 references:
   guides:
-    'Creating firewall rules': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-rules'
+    'Configure hierarchical security policies': 'https://docs.cloud.google.com/armor/docs/hierarchical-policies-using'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
 docs:
 id_format: '{{policy_id}}/priority/{{priority}}'
@@ -40,12 +40,34 @@ custom_code:
   post_create: 'templates/terraform/post_create/org_security_policy_rule.go.tmpl'
   post_delete: 'templates/terraform/post_create/org_security_policy_rule.go.tmpl'
   post_update: 'templates/terraform/post_create/org_security_policy_rule.go.tmpl'
-    # TODO: Remove once b/154369201 is closed.
+  update_encoder: 'templates/terraform/encoders/compute_organization_security_policy_rule.go.tmpl'
+  decoder: 'templates/terraform/decoders/compute_organization_security_policy_rule.go.tmpl'
+  # TODO: Remove once b/154369201 is closed.
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 examples:
   - name: 'organization_security_policy_rule_basic'
     primary_resource_id: 'policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'organization_security_policy_rule_expression'
+    primary_resource_id: 'policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'organization_security_policy_rule_with_preconfigured_waf_config'
+    primary_resource_id: 'policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'organization_security_policy_rule_with_header_action'
+    primary_resource_id: 'policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'organization_security_policy_rule_with_redirect'
+    primary_resource_id: 'policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'organization_security_policy_rule_firewall'
     min_version: 'beta'
+    primary_resource_id: 'policy'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
@@ -53,7 +75,6 @@ parameters:
     type: String
     description: |
       The ID of the OrganizationSecurityPolicy this rule applies to.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -62,14 +83,12 @@ properties:
     type: String
     description: |
       A description of the rule.
-    min_version: 'beta'
   - name: 'priority'
     type: Integer
     description: |
       An integer indicating the priority of a rule in the list. The priority must be a value
       between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
       highest priority and 2147483647 is the lowest prority.
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'match'
@@ -77,35 +96,38 @@ properties:
     description:
       A match condition that incoming traffic is evaluated against. If it
       evaluates to true, the corresponding 'action' is enforced.
-    min_version: 'beta'
     required: true
     properties:
       - name: 'description'
         type: String
         description: |
           A description of the rule.
-        min_version: 'beta'
       - name: 'versionedExpr'
-        type: Enum
+        type: String
         description: |
           Preconfigured versioned expression. For organization security policy rules,
-          the only supported type is "FIREWALL".
-        min_version: 'beta'
+          the only supported type is "SRC_IPS_V1".
+          **NOTE** : 'FIREWALL' type is deprecated. Please use 'google_compute_firewall_policy_rule' resource instead.
         default_value: "FIREWALL"
-        enum_values:
-          - 'FIREWALL'
+      - name: 'expr'
+        type: NestedObject
+        description: |
+          User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip, source.region_code and contents in the request header.
+        properties:
+          - name: 'expression'
+            type: String
+            description: |
+              Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.
+            required: true
       - name: 'config'
         type: NestedObject
         description: The configuration options for matching the rule.
-        min_version: 'beta'
-        required: true
         properties:
           - name: 'srcIpRanges'
             type: Array
             description: |
               Source IP address range in CIDR format. Required for
               INGRESS rules.
-            min_version: 'beta'
             exactly_one_of:
               - 'match.0.config.0.src_ip_ranges'
               - 'match.0.config.0.dest_ip_ranges'
@@ -114,8 +136,8 @@ properties:
           - name: 'destIpRanges'
             type: Array
             description: |
-              Destination IP address range in CIDR format. Required for
-              EGRESS rules.
+              Destination IP address range in CIDR format. Required for EGRESS rules.
+              This field may only be specified when versionedExpr is set to FIREWALL.
             min_version: 'beta'
             exactly_one_of:
               - 'match.0.config.0.src_ip_ranges'
@@ -126,9 +148,9 @@ properties:
             type: Array
             description: |
               Pairs of IP protocols and ports that the rule should match.
+              This field may only be specified when versionedExpr is set to FIREWALL.
             api_name: layer4Configs
             min_version: 'beta'
-            required: true
             item_type:
               type: NestedObject
               properties:
@@ -140,7 +162,6 @@ properties:
                     This value can either be one of the following well
                     known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
                     or the IP protocol number.
-                  min_version: 'beta'
                   required: true
                 - name: 'ports'
                   type: Array
@@ -152,25 +173,202 @@ properties:
 
                     Example inputs include: ["22"], ["80","443"], and
                     ["12345-12349"].
-                  min_version: 'beta'
                   item_type:
                     type: String
   - name: 'action'
     type: String
     description: |
-      The Action to perform when the client connection triggers the rule. Can currently be either
-      "allow", "deny" or "goto_next".
-    min_version: 'beta'
+      The Action to perform when the client connection triggers the rule. Valid actions are:
+      "allow": allow access to target.
+      "deny": deny access to target.
+      "goto_next": forward the request to the next hierarchical policy for evaluation.
+      "redirect": redirect to a different target. Parameters for this action can be configured via redirectOptions. Only EXTERNAL_302 redirect type is supported for organization security policies.
     required: true
+  - name: 'preconfiguredWafConfig'
+    type: NestedObject
+    description: |
+      Preconfigured WAF configuration to be applied for the rule.
+      If the rule does not evaluate preconfigured WAF rules, i.e., if evaluatePreconfiguredWaf() is not used, this field will have no effect.
+    send_empty_value: true
+    properties:
+      - name: 'exclusion'
+        type: Array
+        description: |
+          An exclusion to apply during preconfigured WAF evaluation.
+        api_name: exclusions
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'requestHeader'
+              type: Array
+              description: |
+                Request header whose value will be excluded from inspection during preconfigured WAF evaluation.
+              api_name: requestHeadersToExclude
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'operator'
+                    type: String
+                    description: |
+                      You can specify an exact match or a partial match by using a field operator and a field value.
+                      Available options:
+                      EQUALS: The operator matches if the field value equals the specified value.
+                      STARTS_WITH: The operator matches if the field value starts with the specified value.
+                      ENDS_WITH: The operator matches if the field value ends with the specified value.
+                      CONTAINS: The operator matches if the field value contains the specified value.
+                      EQUALS_ANY: The operator matches if the field value is any value.
+                    api_name: op
+                    required: true
+                    validation:
+                      function: 'validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)'
+                  - name: 'value'
+                    type: String
+                    description: |
+                      A request field matching the specified value will be excluded from inspection during preconfigured WAF evaluation.
+                      The field value must be given if the field operator is not EQUALS_ANY, and cannot be given if the field operator is EQUALS_ANY.
+                    api_name: val
+            - name: 'requestCookie'
+              type: Array
+              description: |
+                Request cookie whose value will be excluded from inspection during preconfigured WAF evaluation.
+              api_name: requestCookiesToExclude
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'operator'
+                    type: String
+                    description: |
+                      You can specify an exact match or a partial match by using a field operator and a field value.
+                      Available options:
+                      EQUALS: The operator matches if the field value equals the specified value.
+                      STARTS_WITH: The operator matches if the field value starts with the specified value.
+                      ENDS_WITH: The operator matches if the field value ends with the specified value.
+                      CONTAINS: The operator matches if the field value contains the specified value.
+                      EQUALS_ANY: The operator matches if the field value is any value.
+                    api_name: op
+                    required: true
+                    validation:
+                      function: 'validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)'
+                  - name: 'value'
+                    type: String
+                    description: |
+                      A request field matching the specified value will be excluded from inspection during preconfigured WAF evaluation.
+                      The field value must be given if the field operator is not EQUALS_ANY, and cannot be given if the field operator is EQUALS_ANY.
+                    api_name: val
+            - name: 'requestUri'
+              type: Array
+              description: |
+                Request URI from the request line to be excluded from inspection during preconfigured WAF evaluation.
+                When specifying this field, the query or fragment part should be excluded.
+              api_name: requestUrisToExclude
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'operator'
+                    type: String
+                    description: |
+                      You can specify an exact match or a partial match by using a field operator and a field value.
+                      Available options:
+                      EQUALS: The operator matches if the field value equals the specified value.
+                      STARTS_WITH: The operator matches if the field value starts with the specified value.
+                      ENDS_WITH: The operator matches if the field value ends with the specified value.
+                      CONTAINS: The operator matches if the field value contains the specified value.
+                      EQUALS_ANY: The operator matches if the field value is any value.
+                    api_name: op
+                    required: true
+                    validation:
+                      function: 'validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)'
+                  - name: 'value'
+                    type: String
+                    description: |
+                      A request field matching the specified value will be excluded from inspection during preconfigured WAF evaluation.
+                      The field value must be given if the field operator is not EQUALS_ANY, and cannot be given if the field operator is EQUALS_ANY.
+                    api_name: val
+            - name: 'requestQueryParam'
+              type: Array
+              description: |
+                Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation.
+                Note that the parameter can be in the query string or in the POST body.
+              api_name: requestQueryParamsToExclude
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'operator'
+                    type: String
+                    description: |
+                      You can specify an exact match or a partial match by using a field operator and a field value.
+                      Available options:
+                      EQUALS: The operator matches if the field value equals the specified value.
+                      STARTS_WITH: The operator matches if the field value starts with the specified value.
+                      ENDS_WITH: The operator matches if the field value ends with the specified value.
+                      CONTAINS: The operator matches if the field value contains the specified value.
+                      EQUALS_ANY: The operator matches if the field value is any value.
+                    api_name: op
+                    required: true
+                    validation:
+                      function: 'validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)'
+                  - name: 'value'
+                    type: String
+                    description: |
+                      A request field matching the specified value will be excluded from inspection during preconfigured WAF evaluation.
+                      The field value must be given if the field operator is not EQUALS_ANY, and cannot be given if the field operator is EQUALS_ANY.
+                    api_name: val
+            - name: 'targetRuleSet'
+              type: String
+              description: |
+                Target WAF rule set to apply the preconfigured WAF exclusion.
+              required: true
+            - name: 'targetRuleIds'
+              type: Array
+              description: |
+                A list of target rule IDs under the WAF rule set to apply the preconfigured WAF exclusion.
+                If omitted, it refers to all the rule IDs under the WAF rule set.
+              item_type:
+                type: String
   - name: 'preview'
     type: Boolean
     description: |
       If set to true, the specified action is not enforced.
-    min_version: 'beta'
+  - name: 'redirectOptions'
+    type: NestedObject
+    description: |
+      Parameters defining the redirect action. Cannot be specified for any other actions.
+      Note: For organization security policies, only EXTERNAL_302 redirect type is supported. GOOGLE_RECAPTCHA is not supported.
+    properties:
+      - name: 'type'
+        type: String
+        description: |
+          Type of the redirect action. For organization security policies, only EXTERNAL_302 is supported.
+        required: true
+      - name: 'target'
+        type: String
+        description: |
+          Target for the redirect action. This is required if the type is EXTERNAL_302.
+  - name: 'headerAction'
+    type: NestedObject
+    description: |
+      Optional, additional actions that are performed on headers.
+    properties:
+      - name: 'requestHeadersToAdds'
+        type: Array
+        description: |
+          The list of request headers to add or overwrite if they're already present.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'headerName'
+              type: String
+              description: |
+                The name of the header to set.
+            - name: 'headerValue'
+              type: String
+              description: |
+                The value to set the named header to.
   - name: 'direction'
     type: Enum
     description: |
       The direction in which this rule applies. If unspecified an INGRESS rule is created.
+      This field may only be specified when the versionedExpr is set to FIREWALL.
     min_version: 'beta'
     enum_values:
       - 'INGRESS'
@@ -191,6 +389,7 @@ properties:
       Denotes whether to enable logging for a particular rule.
       If logging is enabled, logs will be exported to the
       configured export destination in Stackdriver.
+      This field may only be specified when the versionedExpr is set to FIREWALL.
     min_version: 'beta'
     send_empty_value: true
   - name: 'targetServiceAccounts'

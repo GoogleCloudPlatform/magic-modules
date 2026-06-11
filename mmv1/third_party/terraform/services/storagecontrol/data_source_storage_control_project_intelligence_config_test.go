@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storagecontrol"
 )
 
 func TestAccDataSourceGoogleStorageControlProjectIntelligenceConfig_basic(t *testing.T) {
@@ -13,7 +15,7 @@ func TestAccDataSourceGoogleStorageControlProjectIntelligenceConfig_basic(t *tes
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"project":       acctest.BootstrapProject(t, "tf-boot-stor-int-", envvar.GetTestBillingAccountFromEnv(t), []string{"storage.googleapis.com"}).ProjectId,
+		"project":       resourcemanager.BootstrapProject(t, "tf-boot-stor-int-", envvar.GetTestBillingAccountFromEnv(t), []string{"storage.googleapis.com"}).ProjectId,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -23,7 +25,11 @@ func TestAccDataSourceGoogleStorageControlProjectIntelligenceConfig_basic(t *tes
 			{
 				Config: testAccDataSourceGoogleStorageControlProjectIntelligenceConfig_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_storage_control_project_intelligence_config.project_storage_intelligence", "google_storage_control_project_intelligence_config.project_storage_intelligence"),
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_storage_control_project_intelligence_config.project_storage_intelligence",
+						"google_storage_control_project_intelligence_config.project_storage_intelligence",
+						[]string{"update_time"},
+					),
 				),
 			},
 		},

@@ -98,14 +98,13 @@ properties:
     description: |
       List of terms (the order in the list is not important, they are evaluated in order of priority).
     required: true
-    immutable: true
     item_type:
       type: NestedObject
       properties:
         - name: 'priority'
           type: Integer
           description: |
-            The evaluation priority for this term, which must be between 0 (inclusive) and 231 (exclusive), and unique within the list.
+            The evaluation priority for this term, which must be between 0 (inclusive) and 2147483648 (exclusive), and unique within the list.
           required: true
         - name: 'match'
           type: NestedObject

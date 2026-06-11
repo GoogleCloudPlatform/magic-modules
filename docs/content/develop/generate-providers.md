@@ -28,7 +28,7 @@ By default, running a full `make provider` command cleans the output directory (
 
 ## Generate a provider change
 
-1. Clone the `google` and `google-beta` provider repositories with the following commands:
+1. If you haven't already, clone the `google` and `google-beta` provider repositories with the following commands:
 
    ```bash
    git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src/github.com/hashicorp/terraform-provider-google
@@ -53,9 +53,8 @@ By default, running a full `make provider` command cleans the output directory (
    ```
 
 
-   {{< hint info >}}
-   **Note**: You might see additional changes in your `git diff` output beyond your own. This can happen if your `magic-modules` repository is out of sync with the provider repositories, causing the generator to also apply any pending updates from `magic-modules`.
-   {{< /hint >}}
+   > [!NOTE]
+   > **Note**: You might see additional changes in your `git diff` output beyond your own. This can happen if your `magic-modules` repository is out of sync with the provider repositories, causing the generator to also apply any pending updates from `magic-modules`.
 
 ## Troubleshoot
 
@@ -63,13 +62,13 @@ By default, running a full `make provider` command cleans the output directory (
 
 If you are getting “Too many open files” ulimit needs to be raised.
 
-{{< tabs "ulimit" >}}
+{{% tabs "ulimit" %}}
 {{< tab "Mac OS" >}}
 ```bash
 ulimit -n 8192
 ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## What's next
 

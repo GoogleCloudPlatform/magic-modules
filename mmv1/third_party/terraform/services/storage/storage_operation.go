@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package storage
 
 import (
@@ -34,7 +32,7 @@ func (w *StorageOperationWaiter) QueryOp() (interface{}, error) {
 	}
 
 	// Returns the proper get.
-	url := fmt.Sprintf(w.SelfLink)
+	url := w.SelfLink
 
 	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    w.Config,

@@ -6,6 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccPubsubTopic_update(t *testing.T) {
@@ -45,10 +50,10 @@ func TestAccPubsubTopic_update(t *testing.T) {
 func TestAccPubsubTopic_cmek(t *testing.T) {
 	t.Parallel()
 
-	kms := acctest.BootstrapKMSKey(t)
+	bootstrapped := kms.BootstrapKMSKey(t)
 	topicName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -61,7 +66,7 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubTopic_cmek(topicName, kms.CryptoKey.Name),
+				Config: testAccPubsubTopic_cmek(topicName, bootstrapped.CryptoKey.Name),
 			},
 			{
 				ResourceName:      "google_pubsub_topic.topic",
@@ -205,6 +210,167 @@ func TestAccPubsubTopic_cloudStorageIngestionUpdate(t *testing.T) {
 				ImportStateId:     topic,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubTopic_azureEventHubsIngestionUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_updateWithAzureEventHubsIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubTopic_updateWithUpdatedAzureEventHubsIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubTopic_awsMskIngestionUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_updateWithAwsMskIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubTopic_updateWithUpdatedAwsMskIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubTopic_confluentCloudIngestionUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_updateWithConfluentCloudIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubTopic_updateWithUpdatedConfluentCloudIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	functionName := "my_func"
+	code := "function my_func(message, metadata) {return null;}"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Initial transform
+			{
+				Config: testAccPubsubTopic_javascriptUdfSettings(topic, functionName, code),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Destroy transform
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubTopic_tags(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	tagKey := tags.BootstrapSharedTestOrganizationTagKey(t, "pubsub-topic-tagkey", nil)
+	context := map[string]interface{}{
+		"topic":    topic,
+		"org":      envvar.GetTestOrgFromEnv(t),
+		"tagKey":   tagKey,
+		"tagValue": tags.BootstrapSharedTestOrganizationTagValue(t, "pubsub-topic-tagvalue", tagKey),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_tags(context),
+			},
+			{
+				ResourceName:            "google_pubsub_topic.foo",
+				ImportStateId:           topic,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags"},
 			},
 		},
 	})
@@ -372,38 +538,6 @@ resource "google_pubsub_topic" "foo" {
 `, topic)
 }
 
-func TestAccPubsubTopic_azureEventHubsIngestionUpdate(t *testing.T) {
-	t.Parallel()
-
-	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccPubsubTopic_updateWithAzureEventHubsIngestionSettings(topic),
-			},
-			{
-				ResourceName:      "google_pubsub_topic.foo",
-				ImportStateId:     topic,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccPubsubTopic_updateWithUpdatedAzureEventHubsIngestionSettings(topic),
-			},
-			{
-				ResourceName:      "google_pubsub_topic.foo",
-				ImportStateId:     topic,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func testAccPubsubTopic_updateWithAzureEventHubsIngestionSettings(topic string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
@@ -446,38 +580,6 @@ resource "google_pubsub_topic" "foo" {
 `, topic)
 }
 
-func TestAccPubsubTopic_awsMskIngestionUpdate(t *testing.T) {
-	t.Parallel()
-
-	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccPubsubTopic_updateWithAwsMskIngestionSettings(topic),
-			},
-			{
-				ResourceName:      "google_pubsub_topic.foo",
-				ImportStateId:     topic,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccPubsubTopic_updateWithUpdatedAwsMskIngestionSettings(topic),
-			},
-			{
-				ResourceName:      "google_pubsub_topic.foo",
-				ImportStateId:     topic,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func testAccPubsubTopic_updateWithAwsMskIngestionSettings(topic string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
@@ -512,38 +614,6 @@ resource "google_pubsub_topic" "foo" {
   }
 }
 `, topic)
-}
-
-func TestAccPubsubTopic_confluentCloudIngestionUpdate(t *testing.T) {
-	t.Parallel()
-
-	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccPubsubTopic_updateWithConfluentCloudIngestionSettings(topic),
-			},
-			{
-				ResourceName:      "google_pubsub_topic.foo",
-				ImportStateId:     topic,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccPubsubTopic_updateWithUpdatedConfluentCloudIngestionSettings(topic),
-			},
-			{
-				ResourceName:      "google_pubsub_topic.foo",
-				ImportStateId:     topic,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
 }
 
 func testAccPubsubTopic_updateWithConfluentCloudIngestionSettings(topic string) string {
@@ -583,39 +653,6 @@ resource "google_pubsub_topic" "foo" {
 }
 `, topic)
 }
-func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
-	t.Parallel()
-
-	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
-
-	functionName := "my_func"
-	code := "function my_func(message, metadata) {return null;}"
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
-		Steps: []resource.TestStep{
-			// Initial transform
-			{
-				Config: testAccPubsubTopic_javascriptUdfSettings(topic, functionName, code),
-			},
-			{
-				ResourceName:      "google_pubsub_topic.foo",
-				ImportStateId:     topic,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// Destroy transform
-			{
-				ResourceName:      "google_pubsub_topic.foo",
-				ImportStateId:     topic,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
 
 func testAccPubsubTopic_javascriptUdfSettings(topic, functionName, code string) string {
 	return fmt.Sprintf(`
@@ -630,4 +667,15 @@ resource "google_pubsub_topic" "foo" {
 	}
 }
 	`, topic, functionName, code)
+}
+
+func testAccPubsubTopic_tags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%{topic}"
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }

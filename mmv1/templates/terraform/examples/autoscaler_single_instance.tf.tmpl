@@ -9,6 +9,7 @@ resource "google_compute_autoscaler" "{{$.PrimaryResourceId}}" {
     max_replicas    = 5
     min_replicas    = 1
     cooldown_period = 60
+    stabilization_period = 300
 
     metric {
       name                       = "pubsub.googleapis.com/subscription/num_undelivered_messages"

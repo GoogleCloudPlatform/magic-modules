@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/appengine"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccAppEngineApplication_basic(t *testing.T) {
@@ -71,12 +73,39 @@ func TestAccAppEngineApplication_withIAP(t *testing.T) {
 	})
 }
 
+func TestAccAppEngineApplication_withSSLPolicy(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAppEngineApplication_withSSLPolicy(pid, org, billingAccount),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_app_engine_application.acceptance", "ssl_policy", "MODERN"),
+					resource.TestCheckResourceAttr("google_app_engine_application.acceptance", "location_id", "us-central"),
+				),
+			},
+			{
+				ResourceName:      "google_app_engine_application.acceptance",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccAppEngineApplication_withIAP(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
-  project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
+  project_id      = "%s"
+  name            = "%s"
+  org_id          = "%s"
   billing_account = "%s"
   deletion_policy = "DELETE"
 }
@@ -99,9 +128,9 @@ resource "google_app_engine_application" "acceptance" {
 func testAccAppEngineApplication_basic(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
-  project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
+  project_id      = "%s"
+  name            = "%s"
+  org_id          = "%s"
   billing_account = "%s"
   deletion_policy = "DELETE"
 }
@@ -119,9 +148,9 @@ resource "google_app_engine_application" "acceptance" {
 func testAccAppEngineApplication_update(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
-  project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
+  project_id      = "%s"
+  name            = "%s"
+  org_id          = "%s"
   billing_account = "%s"
   deletion_policy = "DELETE"
 }
@@ -132,6 +161,24 @@ resource "google_app_engine_application" "acceptance" {
   location_id    = "us-central"
   database_type  = "CLOUD_DATASTORE_COMPATIBILITY"
   serving_status = "USER_DISABLED"
+}
+`, pid, pid, org, billingAccount)
+}
+
+func testAccAppEngineApplication_withSSLPolicy(pid, org, billingAccount string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  project_id      = "%s"
+  name            = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
+  deletion_policy = "DELETE"
+}
+
+resource "google_app_engine_application" "acceptance" {
+  project     = google_project.acceptance.project_id
+  location_id = "us-central"
+  ssl_policy  = "MODERN"
 }
 `, pid, pid, org, billingAccount)
 }

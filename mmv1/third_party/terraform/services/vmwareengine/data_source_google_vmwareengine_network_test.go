@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/vmwareengine"
 )
 
 func TestAccDataSourceVmwareEngineNetwork_basic(t *testing.T) {
@@ -28,7 +30,7 @@ func TestAccDataSourceVmwareEngineNetwork_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceVmwareEngineNetworkConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_vmwareengine_network.ds", "google_vmwareengine_network.nw", map[string]struct{}{}),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_vmwareengine_network.ds", "google_vmwareengine_network.nw"),
 				),
 			},
 		},

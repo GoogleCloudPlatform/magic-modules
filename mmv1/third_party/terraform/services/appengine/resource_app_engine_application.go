@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -67,6 +68,17 @@ func ResourceAppEngineApplication() *schema.Resource {
 				}, false),
 				Computed:    true,
 				Description: `The serving status of the app.`,
+			},
+			"ssl_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"SSL_POLICY_UNSPECIFIED",
+					"DEFAULT",
+					"MODERN",
+				}, false),
+				Computed:    true,
+				Description: `The SSL policy that will be applied to the application. If set to Modern it will restrict traffic with TLS \u003c 1.2 and allow only Modern Ciphers suite`,
 			},
 			"database_type": {
 				Type:     schema.TypeString,
@@ -226,7 +238,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	log.Printf("[DEBUG] Creating App Engine App")
-	op, err := config.NewAppEngineClient(userAgent).Apps.Create(app).Do()
+	op, err := NewClient(config, userAgent).Apps.Create(app).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating App Engine application: %s", err.Error())
 	}
@@ -252,7 +264,7 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 	}
 	pid := d.Id()
 
-	app, err := config.NewAppEngineClient(userAgent).Apps.Get(pid).Do()
+	app, err := NewClient(config, userAgent).Apps.Get(pid).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("App Engine Application %q", pid))
 	}
@@ -279,6 +291,9 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 	}
 	if err := d.Set("serving_status", app.ServingStatus); err != nil {
 		return fmt.Errorf("Error setting serving_status: %s", err)
+	}
+	if err := d.Set("ssl_policy", app.SslPolicy); err != nil {
+		return fmt.Errorf("Error setting ssl_policy: %s", err)
 	}
 	if err := d.Set("gcr_domain", app.GcrDomain); err != nil {
 		return fmt.Errorf("Error setting gcr_domain: %s", err)
@@ -336,7 +351,7 @@ func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}
 	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	log.Printf("[DEBUG] Updating App Engine App")
-	op, err := config.NewAppEngineClient(userAgent).Apps.Patch(pid, app).UpdateMask("authDomain,databaseType,servingStatus,featureSettings.splitHealthChecks,iap").Do()
+	op, err := NewClient(config, userAgent).Apps.Patch(pid, app).UpdateMask("authDomain,databaseType,servingStatus,featureSettings.splitHealthChecks,iap").Do()
 	if err != nil {
 		return fmt.Errorf("Error updating App Engine application: %s", err.Error())
 	}
@@ -364,6 +379,7 @@ func expandAppEngineApplication(d *schema.ResourceData, project string) (*appeng
 		GcrDomain:     d.Get("gcr_domain").(string),
 		DatabaseType:  d.Get("database_type").(string),
 		ServingStatus: d.Get("serving_status").(string),
+		SslPolicy:     d.Get("ssl_policy").(string),
 	}
 	featureSettings, err := expandAppEngineApplicationFeatureSettings(d)
 	if err != nil {
@@ -436,4 +452,13 @@ func flattenAppEngineApplicationDispatchRules(rules []*appengine.UrlDispatchRule
 		})
 	}
 	return results, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_app_engine_application",
+		ProductName: "appengine",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceAppEngineApplication(),
+	}.Register()
 }

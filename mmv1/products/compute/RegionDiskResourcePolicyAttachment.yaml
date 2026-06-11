@@ -12,32 +12,19 @@
 # limitations under the License.
 
 ---
-name: 'RegionDiskResourcePolicyAttachment'
+name: RegionDiskResourcePolicyAttachment
 api_resource_type_kind: Disk
 description: |
   Adds existing resource policies to a disk. You can only add one policy
   which will be applied to this disk for scheduling snapshot creation.
 
   ~> **Note:** This resource does not support zonal disks (`google_compute_disk`). For zonal disks, please refer to [`google_compute_disk_resource_policy_attachment`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk_resource_policy_attachment)
-docs:
-id_format: '{{project}}/{{region}}/{{disk}}/{{name}}'
-base_url: 'projects/{{project}}/regions/{{region}}/disks/{{disk}}'
-self_link: 'projects/{{project}}/regions/{{region}}/disks/{{disk}}'
-create_url: 'projects/{{project}}/regions/{{region}}/disks/{{disk}}/addResourcePolicies'
-delete_url: 'projects/{{project}}/regions/{{region}}/disks/{{disk}}/removeResourcePolicies'
-delete_verb: 'POST'
+base_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}
 immutable: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
+self_link: projects/{{project}}/regions/{{region}}/disks/{{disk}}
+create_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}/addResourcePolicies
+delete_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}/removeResourcePolicies
+delete_verb: POST
 identity:
   - name
 nested_query:
@@ -45,39 +32,42 @@ nested_query:
     - resourcePolicies
   is_list_of_ids: true
   modify_by_patch: false
+id_format: '{{project}}/{{region}}/{{disk}}/{{name}}'
+async:
+  operation:
+    base_url: '{{op_id}}'
 custom_code:
-  encoder: 'templates/terraform/encoders/compute_region_disk_resource_policies_attachment.go.tmpl'
-  decoder: 'templates/terraform/decoders/compute_disk_resource_policies_attachment.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/compute_region_disk_resource_policies_attachment.go.tmpl'
+  encoder: templates/terraform/encoders/compute_region_disk_resource_policies_attachment.go.tmpl
+  decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.tmpl
+  pre_delete: templates/terraform/pre_delete/compute_region_disk_resource_policies_attachment.go.tmpl
 examples:
-  - name: 'region_disk_resource_policy_attachment_basic'
-    primary_resource_id: 'attachment'
+  - name: region_disk_resource_policy_attachment_basic
+    primary_resource_id: attachment
     vars:
-      base_disk_name: 'my-base-disk'
-      snapshot_name: 'my-snapshot'
-      disk_name: 'my-disk'
-      policy_name: 'my-resource-policy'
+      base_disk_name: my-base-disk
+      disk_name: my-disk
+      policy_name: my-resource-policy
+      snapshot_name: my-snapshot
 parameters:
-  - name: 'disk'
+  - name: disk
     type: ResourceRef
+    required: true
     description: |
       The name of the regional disk in which the resource policies are attached to.
     url_param_only: true
-    required: true
-    resource: 'Disk'
-    imports: 'name'
-  - name: 'region'
+    resource: Disk
+    imports: name
+  - name: region
     type: ResourceRef
-    description: 'A reference to the region where the disk resides.'
+    description: A reference to the region where the disk resides.
     url_param_only: true
-    required: false
+    resource: Region
+    imports: name
     default_from_api: true
-    resource: 'Region'
-    imports: 'name'
 properties:
-  - name: 'name'
+  - name: name
     type: String
+    required: true
     description: |
       The resource policy to be attached to the disk for scheduling snapshot
       creation. Do not specify the self link.
-    required: true

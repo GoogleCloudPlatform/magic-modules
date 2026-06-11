@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/iam3"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccIAM3FoldersPolicyBinding_iamFoldersPolicyBindingExample_update(t *testing.T) {
@@ -57,7 +59,7 @@ resource "google_iam_principal_access_boundary_policy" "pab_policy" {
 }
 
 resource "google_folder" "folder" {
-  display_name        = "test folder%{random_suffix}"
+  display_name        = "tf-test-iam3-folder%{random_suffix}"
   parent              = "organizations/%{org_id}"
   deletion_protection = false
 }
@@ -92,7 +94,7 @@ resource "google_iam_principal_access_boundary_policy" "pab_policy" {
 }
 
 resource "google_folder" "folder" {
-  display_name        = "test folder%{random_suffix}"
+  display_name        = "tf-test-iam3-folder%{random_suffix}"
   parent              = "organizations/%{org_id}"
   deletion_protection = false
 }

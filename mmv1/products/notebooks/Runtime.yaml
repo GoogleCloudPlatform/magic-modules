@@ -15,9 +15,7 @@
 name: 'Runtime'
 # This resource should not be removed until the 2025 major release or later.
 # Check instance availability first before fully removing.
-deprecation_message: >-
-  `google_notebook_runtime` is deprecated and will be removed in a future major release.
-  Use `google_workbench_instance` instead.
+deprecation_message: '`google_notebooks_runtime` is deprecated and will be removed in a future major release. Use `google_workbench_instance` instead.'
 description: |
   A Cloud AI Platform Notebook runtime.
 
@@ -55,7 +53,6 @@ iam_policy:
   parent_resource_attribute: 'runtime_name'
   # Sets the base url for base_url:GetIamPolicy and base_url:SetIamPolicy in function `qualifyRuntimeUrl`
   base_url: 'projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}'
     - '{{runtime_name}}'
@@ -65,31 +62,26 @@ custom_code:
 examples:
   - name: 'notebook_runtime_basic'
     primary_resource_id: 'runtime'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-runtime%s", context["random_suffix"])'
     region_override: 'us-central1'
     vars:
       runtime_name: 'notebooks-runtime'
   - name: 'notebook_runtime_basic_gpu'
     primary_resource_id: 'runtime_gpu'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-runtime-gpu%s", context["random_suffix"])'
     region_override: 'us-central1'
     vars:
       runtime_name: 'notebooks-runtime-gpu'
   - name: 'notebook_runtime_basic_container'
     primary_resource_id: 'runtime_container'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-runtime-container%s", context["random_suffix"])'
     region_override: 'us-central1'
     vars:
       runtime_name: 'notebooks-runtime-container'
   - name: 'notebook_runtime_kernels'
     primary_resource_id: 'runtime_container'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-runtime-container%s", context["random_suffix"])'
     region_override: 'us-central1'
     vars:
       runtime_name: 'notebooks-runtime-kernel'
   - name: 'notebook_runtime_script'
     primary_resource_id: 'runtime_container'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-runtime-container%s", context["random_suffix"])'
     region_override: 'us-central1'
     vars:
       runtime_name: 'notebooks-runtime-script'

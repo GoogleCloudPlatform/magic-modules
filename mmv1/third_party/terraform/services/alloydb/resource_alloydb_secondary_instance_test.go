@@ -5,6 +5,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/alloydb"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
 // This test passes if secondary instance's machine config can be updated
@@ -13,7 +17,7 @@ func TestAccAlloydbInstance_secondaryInstanceUpdateMachineConfig(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -50,6 +54,10 @@ resource "google_alloydb_cluster" "primary" {
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
   deletion_protection = false
@@ -115,6 +123,10 @@ resource "google_alloydb_cluster" "primary" {
     network = data.google_compute_network.default.id
   }
 
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
   deletion_protection = false
 }
 
@@ -175,7 +187,7 @@ func TestAccAlloydbInstance_secondaryInstanceWithReadPoolInstance(t *testing.T) 
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -203,6 +215,10 @@ resource "google_alloydb_cluster" "primary" {
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
   deletion_protection = false
@@ -275,8 +291,8 @@ func TestAccAlloydbCluster_secondaryInstanceWithNetworkConfigAndAllocatedIPRange
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydb-1"),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"address_name":  tpgcompute.BootstrapSharedTestGlobalAddress(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -305,6 +321,10 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network    = data.google_compute_network.default.id
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
+  }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
   deletion_protection = false
@@ -372,7 +392,7 @@ func TestAccAlloydbInstance_secondaryInstanceUpdateDatabaseFlag(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -409,6 +429,10 @@ resource "google_alloydb_cluster" "primary" {
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
   deletion_protection = false
@@ -457,7 +481,7 @@ resource "google_alloydb_instance" "secondary" {
   }
 
   database_flags = {
-	  "alloydb.enable_auto_explain" = "true"
+    "alloydb.enable_auto_explain" = "true"
   }
 }
 
@@ -475,7 +499,7 @@ func TestAccAlloydbInstance_secondaryInstanceUpdateQueryInsightConfig(t *testing
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -512,6 +536,10 @@ resource "google_alloydb_cluster" "primary" {
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
   deletion_protection = false
@@ -581,7 +609,7 @@ func TestAccAlloydbInstance_secondaryInstanceMaximumFields(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -609,6 +637,10 @@ resource "google_alloydb_cluster" "primary" {
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
   deletion_protection = false
