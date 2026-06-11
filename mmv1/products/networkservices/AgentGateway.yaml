@@ -103,12 +103,12 @@ properties:
   - name: 'protocols'
     type: Array
     description: |
-      List of protocols supported by an Agent Gateway.
+      Deprecated. List of protocols supported by an Agent Gateway.
+    deprecation_message: '`protocols` is deprecated and will be removed in a future release.'
     item_type:
       type: Enum
       enum_values:
         - 'MCP'
-    required: true
   - name: 'googleManaged'
     immutable: true
     exactly_one_of:
