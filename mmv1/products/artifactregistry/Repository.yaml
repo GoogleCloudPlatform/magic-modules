@@ -506,7 +506,6 @@ properties:
     type: NestedObject
     description: |-
       Configuration specific for a Remote Repository.
-    immutable: true
     conflicts:
       - virtual_repository_config
     properties:

@@ -361,6 +361,7 @@ func TestAccArtifactRegistryRepository_remoteWithAuthUpdate(t *testing.T) {
 				ResourceName:            "google_artifact_registry_repository.my-repo",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "remote_repository_config.0.disable_upstream_validation", "repository_id", "terraform_labels"},
 			},
 			{
 				Config: testAccArtifactRegistryRepository_remoteWithAuthUpdate2(context),
@@ -369,6 +370,7 @@ func TestAccArtifactRegistryRepository_remoteWithAuthUpdate(t *testing.T) {
 				ResourceName:            "google_artifact_registry_repository.my-repo",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "remote_repository_config.0.disable_upstream_validation", "repository_id", "terraform_labels"},
 			},
 		},
 	})
