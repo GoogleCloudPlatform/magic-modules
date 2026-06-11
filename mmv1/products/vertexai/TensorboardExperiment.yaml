@@ -1,0 +1,115 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: TensorboardExperiment
+description: A TensorboardExperiment is a group of TensorboardRuns that are logically grouped together.
+base_url: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments
+self_link: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{tensorboard_experiment_id}}
+create_url: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments?tensorboardExperimentId={{tensorboard_experiment_id}}
+update_verb: PATCH
+update_mask: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{tensorboard_experiment_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: VGVuc29yYm9hcmRFeHBlcmltZW50QXV0b2dlblYyQWdlbnQ=
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.tensorboards.experiments'
+samples:
+  - name: "vertex_ai_tensorboard_experiment"
+    primary_resource_id: "tensorboard_experiment"
+    steps:
+      - name: "vertex_ai_tensorboard_experiment_basic"
+        resource_id_vars:
+          tensorboardExperimentId: "experiment"
+          tensorboard: "tensorboard"
+      - name: "vertex_ai_tensorboard_experiment_update"
+        resource_id_vars:
+          tensorboardExperimentId: "experiment"
+          tensorboard: "tensorboard"
+parameters:
+  - name: location
+    type: String
+    description: The location of the Tensorboard Experiment. eg us-central1
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: tensorboard
+    type: String
+    required: true
+    description: The Tensorboard instance.
+    immutable: true
+    url_param_only: true
+  - name: tensorboardExperimentId
+    type: String
+    required: true
+    description: |-
+      The ID to use for the Tensorboard experiment, which becomes the final
+      component of the Tensorboard experiment's resource name.
+
+      This value should be 1-128 characters, and valid characters
+      are `/a-z-/`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: Timestamp when this TensorboardExperiment was created.
+    output: true
+  - name: description
+    type: String
+    description: Description of this TensorboardExperiment.
+  - name: displayName
+    type: String
+    description: User provided name of this TensorboardExperiment.
+  - name: labels
+    type: KeyValueLabels
+    description: |-
+      The labels with user-defined metadata to organize your
+      TensorboardExperiment.
+
+      Label keys and values cannot be longer than 64 characters
+      (Unicode codepoints), can only contain lowercase letters, numeric
+      characters, underscores and dashes. International characters are allowed.
+      No more than 64 user labels can be associated with one Dataset (System
+      labels are excluded).
+
+      See https://goo.gl/xmQnxf for more information and examples of labels.
+      System reserved label keys are prefixed with `aiplatform.googleapis.com/`
+      and are immutable. The following system labels exist for each Dataset:
+
+      * `aiplatform.googleapis.com/dataset_metadata_schema`: output only. Its
+      value is the metadata_schema's title.
+  - name: name
+    type: String
+    description: |-
+      Name of the TensorboardExperiment.
+      Format:
+      `projects/{project}/locations/{location}/tensorboards/{tensorboard}/experiments/{experiment}`
+    output: true
+  - name: source
+    type: String
+    description: 'Source of the TensorboardExperiment. Example: a custom training job.'
+    immutable: true
+  - name: updateTime
+    type: String
+    description: Timestamp when this TensorboardExperiment was last updated.
+    output: true
