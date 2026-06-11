@@ -4,8 +4,6 @@ min_version: 'beta'
 api_service_name: 'cloudresourcemanager.googleapis.com'
 api_version: 'v3'
 api_resource_type_kind: 'TagBindingCollection'
-cai_asset_name_formats:
-- '//cloudresourcemanager.googleapis.com/{{name}}'
 fields:
   - field: 'location'
   - field: 'full_resource_name'
