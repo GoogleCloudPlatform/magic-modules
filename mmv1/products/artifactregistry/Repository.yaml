@@ -761,7 +761,6 @@ properties:
         type: NestedObject
         description: |-
           The credentials used to access the remote repository.
-        is_missing_in_cai: true
         properties:
           - name: 'usernamePasswordCredentials'
             type: NestedObject
