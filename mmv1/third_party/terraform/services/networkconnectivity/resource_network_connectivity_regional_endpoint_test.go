@@ -31,7 +31,7 @@ func TestAccNetworkConnectivityRegionalEndpoint_addressUri(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
-					"labels", "terraform_labels", "location", "name",
+					"address", "labels", "terraform_labels", "location", "name", "subnetwork",
 				},
 			},
 			{
