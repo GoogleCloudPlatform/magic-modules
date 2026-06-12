@@ -35,7 +35,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProviderScimToken_update(t *testing.T) 
 				ResourceName:            "google_iam_workforce_pool_provider_scim_token.scim_token",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"state"},
+				ImportStateVerifyIgnore: []string{"state", "security_token"},
 			},
 			{
 				Config: testAccIAMWorkforcePoolWorkforcePoolProviderScimToken_update(context),
@@ -52,7 +52,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProviderScimToken_update(t *testing.T) 
 				ResourceName:            "google_iam_workforce_pool_provider_scim_token.scim_token",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"state"},
+				ImportStateVerifyIgnore: []string{"state", "security_token"},
 			},
 		},
 	})
