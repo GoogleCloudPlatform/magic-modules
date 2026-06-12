@@ -16,8 +16,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 // Acceptance Tests
@@ -672,7 +672,10 @@ func testAccCheckTagADeleted(t *testing.T, contextMap map[string]interface{}) re
 		location := "global"
 
 		headers := make(http.Header)
-		apiURL := fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, nil, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		if err != nil {
+			return err
+		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:  config,
@@ -715,7 +718,10 @@ func testAccCheckBindingUpdatedExternally(t *testing.T, contextMap map[string]in
 		encodedResourceName := url.PathEscape(resourceName)
 		location := "global"
 
-		apiURL := fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, nil, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		if err != nil {
+			return err
+		}
 
 		body := map[string]interface{}{
 			"full_resource_name": resourceName,
@@ -756,7 +762,10 @@ func testAccCheckBindingDeletedExternally(t *testing.T, contextMap map[string]in
 		location := "global"
 
 		// 1. Get current TagBindingCollection to find Etag
-		apiURL := fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, nil, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		if err != nil {
+			return err
+		}
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
@@ -806,7 +815,10 @@ func testAccCheckBindingValueViaAPI(t *testing.T, contextMap map[string]interfac
 		encodedResourceName := url.PathEscape(resourceName)
 		location := "global"
 
-		apiURL := fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, nil, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		if err != nil {
+			return err
+		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:  config,

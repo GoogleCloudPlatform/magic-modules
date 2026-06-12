@@ -83,7 +83,10 @@ func resourceTagsTagBindingCollectionRead(ctx context.Context, d *schema.Resourc
 	}
 
 	location, resourceName, encodedResourceName := getTagBindingCollectionInfo(d)
-	readUrl := buildTagBindingCollectionUrl(config, location, encodedResourceName)
+	readUrl, err := buildTagBindingCollectionUrl(d, config, location, encodedResourceName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	billingProject := ""
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
@@ -168,7 +171,7 @@ func resourceTagsTagBindingCollectionUpsert(ctx context.Context, d *schema.Resou
 	backoff := time.Second
 	for {
 		// Step 1: Read current state
-		currentTags, currentEtag, err := getCurrentTagBindingCollectionState(config, userAgent, location, encodedResourceName)
+		currentTags, currentEtag, err := getCurrentTagBindingCollectionState(d, config, userAgent, location, encodedResourceName)
 		if err != nil {
 			return diag.Errorf("error reading current state for upsert: %s", err)
 		}
@@ -255,7 +258,7 @@ func resourceTagsTagBindingCollectionDelete(ctx context.Context, d *schema.Resou
 
 	for {
 		// Read current state
-		currentTags, currentEtag, err := getCurrentTagBindingCollectionState(config, userAgent, location, encodedResourceName)
+		currentTags, currentEtag, err := getCurrentTagBindingCollectionState(d, config, userAgent, location, encodedResourceName)
 		if err != nil {
 			return diag.FromErr(transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("TagBindingCollection %q", resourceName)))
 		}
@@ -349,8 +352,8 @@ func getTagBindingCollectionInfo(d *schema.ResourceData) (location, resourceName
 	return location, resourceName, encodedResourceName
 }
 
-func buildTagBindingCollectionUrl(config *transport_tpg.Config, location, encodedResourceName string) string {
-	return fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+func buildTagBindingCollectionUrl(d *schema.ResourceData, config *transport_tpg.Config, location, encodedResourceName string) (string, error) {
+	return tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
 }
 
 func flattenTagsTagBindingCollectionTags(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
@@ -358,8 +361,11 @@ func flattenTagsTagBindingCollectionTags(v interface{}, d *schema.ResourceData, 
 }
 
 // Helper to fetch the current state of the TagBindingCollection from GCP
-func getCurrentTagBindingCollectionState(config *transport_tpg.Config, userAgent, location, encodedResourceName string) (currentTags map[string]string, currentEtag string, err error) {
-	readUrl := buildTagBindingCollectionUrl(config, location, encodedResourceName)
+func getCurrentTagBindingCollectionState(d *schema.ResourceData, config *transport_tpg.Config, userAgent, location, encodedResourceName string) (currentTags map[string]string, currentEtag string, err error) {
+	readUrl, err := buildTagBindingCollectionUrl(d, config, location, encodedResourceName)
+	if err != nil {
+		return nil, "", err
+	}
 	headers := make(http.Header)
 
 	log.Printf("[DEBUG] Reading current TagBindingCollection state with URL %s", readUrl)
@@ -395,8 +401,11 @@ func getCurrentTagBindingCollectionState(config *transport_tpg.Config, userAgent
 
 // Helper to send a PATCH request for TagBindingCollection and wait for the operation
 func patchTagBindingCollection(config *transport_tpg.Config, userAgent string, d *schema.ResourceData, location, encodedResourceName string, patchObj map[string]interface{}, timeout time.Duration, operationDesc string) error {
-	patchUrl := buildTagBindingCollectionUrl(config, location, encodedResourceName)
-	patchUrl, err := transport_tpg.AddQueryParams(patchUrl, map[string]string{"updateMask": "*"})
+	patchUrl, err := buildTagBindingCollectionUrl(d, config, location, encodedResourceName)
+	if err != nil {
+		return err
+	}
+	patchUrl, err = transport_tpg.AddQueryParams(patchUrl, map[string]string{"updateMask": "*"})
 	if err != nil {
 		return err
 	}
