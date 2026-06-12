@@ -1,6 +1,6 @@
 resource "google_vertex_ai_online_evaluator" "evaluator" {
   project        = "my-project-name"
-  location       = "us-central1"
+  region         = "us-central1"
   display_name   = "{{index $.Vars "evaluator_name"}}"
   
   agent_resource = "projects/my-project-name/locations/us-central1/reasoningEngines/test-engine-123"
