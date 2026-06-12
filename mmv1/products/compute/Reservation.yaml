@@ -48,6 +48,7 @@ collection_url_key: 'items'
 include_in_tgc_next: true
 cai_resource_kind: 'Reservation'
 custom_code:
+  decoder: templates/terraform/decoders/compute_reservation_share_settings_decoder.go.tmpl
   tgc_decoder: 'templates/tgc_next/decoders/reservation.go.tmpl'
   constants: 'templates/terraform/constants/reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
@@ -183,7 +184,6 @@ properties:
         description: |
           A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
         key_name: 'id'
-        custom_flatten: templates/terraform/custom_flatten/compute_reservation_project_map.go.tmpl
         value_type:
           type: NestedObject
           properties:
