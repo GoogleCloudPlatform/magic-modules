@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -663,8 +664,8 @@ func TestHandleBuildFailures(t *testing.T) {
 		BuildFailures: []string{"package1", "package2"},
 	}
 
-	rnr := &mockRunner{}
-	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Replaying, gh, rnr)
+	sb := newSandbox(t)
+	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Replaying, gh, sb.Runner)
 
 	assert.NoError(t, err)
 	assert.True(t, handled)
@@ -690,8 +691,8 @@ func TestHandleBuildFailures_Recording(t *testing.T) {
 		BuildFailures: []string{"package1", "package2"},
 	}
 
-	rnr := &mockRunner{}
-	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Recording, gh, rnr)
+	sb := newSandbox(t)
+	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Recording, gh, sb.Runner)
 
 	assert.NoError(t, err)
 	assert.True(t, handled)
@@ -709,8 +710,8 @@ func TestHandleBuildFailures_NoFailures(t *testing.T) {
 	}
 	result := vcr.Result{}
 
-	rnr := &mockRunner{}
-	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Replaying, gh, rnr)
+	sb := newSandbox(t)
+	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", result, vcr.Replaying, gh, sb.Runner)
 
 	assert.NoError(t, err)
 	assert.False(t, handled)
@@ -736,8 +737,8 @@ func TestAppendVCRResultToDiffComment_NotExists(t *testing.T) {
 		},
 	}
 
-	rnr := &mockRunner{}
-	err := appendVCRResultToDiffComment("123", "VCR Results", gh, rnr)
+	sb := newSandbox(t)
+	err := appendVCRResultToDiffComment("123", "VCR Results", gh, sb.Runner)
 
 	assert.NoError(t, err)
 	assert.Len(t, gh.calledMethods["PostComment"], 1)
@@ -761,13 +762,13 @@ func TestAppendVCRResultToDiffComment_UseFileID(t *testing.T) {
 			},
 		},
 	}
-	rnr := &mockRunner{
-		fileContents: map[string]string{
-			"/workspace/diff_comment_id.txt": "456",
-		},
-	}
+	sb := newSandbox(t)
+	os.Setenv("WORKSPACE", sb.Dir)
+	defer os.Unsetenv("WORKSPACE")
 
-	err := appendVCRResultToDiffComment("123", "VCR Results", gh, rnr)
+	sb.Runner.WriteFile("diff_comment_id.txt", "456")
+
+	err := appendVCRResultToDiffComment("123", "VCR Results", gh, sb.Runner)
 
 	assert.NoError(t, err)
 	assert.Len(t, gh.calledMethods["UpdateComment"], 1)
