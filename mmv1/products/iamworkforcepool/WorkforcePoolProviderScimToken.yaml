@@ -33,7 +33,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
-  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
+  post_create: 'templates/terraform/post_create/iam_workforce_pool_provider_scim_token.go.tmpl'
   post_update: 'templates/terraform/post_create/sleep.go.tmpl'
 examples:
   - name: 'iam_workforce_pool_provider_scim_token_basic'
@@ -61,6 +61,8 @@ properties:
     description:
       The token string provided to the IdP for authentication and will be set only during creation.
     output: true
+    sensitive: true
+    ignore_read: true
   - name: 'state'
     type: Enum
     description: |
