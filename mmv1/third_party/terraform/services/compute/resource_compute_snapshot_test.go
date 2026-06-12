@@ -241,6 +241,17 @@ resource "google_tags_tag_value" "tag_value" {
   short_name = "tf-test-value-%{random_suffix}"
 }
 
+data "google_project" "project" {}
+
+# createSnapshot binds the tag under an identity other than the caller
+# (caller-side grants proved insufficient), so grant tagUser on the value
+# to the Compute Engine service agent instead.
+resource "google_tags_tag_value_iam_member" "agent_tag_user" {
+  tag_value = google_tags_tag_value.tag_value.name
+  role      = "roles/resourcemanager.tagUser"
+  member    = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
+}
+
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
@@ -263,6 +274,7 @@ resource "google_compute_snapshot" "foobar" {
       "${google_tags_tag_key.tag_key.id}" = "${google_tags_tag_value.tag_value.id}"
     }
   }
+  depends_on = [google_tags_tag_value_iam_member.agent_tag_user]
 }
 `, context)
 }
