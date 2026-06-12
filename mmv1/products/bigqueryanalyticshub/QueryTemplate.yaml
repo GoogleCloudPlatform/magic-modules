@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'QueryTemplate'
+name: "QueryTemplate"
 min_version: beta
 description: |
   Represents a BigQuery Query Template within a Data Exchange.
@@ -20,63 +20,80 @@ description: |
   shared or executed via the Data Exchange.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
-self_link: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
-id_format: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates?queryTemplateId={{query_template_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates'
-update_verb: 'PATCH'
+    "Official Documentation": "https://cloud.google.com/bigquery/docs/analytics-hub-introduction"
+self_link: "projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}"
+id_format: "projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}"
+create_url: "projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates?queryTemplateId={{query_template_id}}"
+base_url: "projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates"
+update_verb: "PATCH"
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
+  - "projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}"
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-examples:
-  - name: 'bigquery_analyticshub_querytemplate_basic'
-    primary_resource_id: 'querytemplate'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_query_template%s", context["random_suffix"])'
-    region_override: 'us'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      query_template_id: 'my_query_template'
-      desc: 'example of query template'
-    ignore_read_extra:
-      - 'submit'
+samples:
+  - name: "bigquery_analyticshub_querytemplate_basic"
+    primary_resource_id: "querytemplate"
+    region_override: "us"
+    steps:
+      - name: "bigquery_analyticshub_querytemplate_basic"
+        resource_id_vars:
+          data_exchange_id: "my_data_exchange"
+          query_template_id: "my_query_template"
+        vars:
+          desc: "example of query template"
+          primary_contact: "admin@example.com"
+          table_name: "t1"
+          submit: "false"
+        ignore_read_extra:
+          - "submit"
+      - name: "bigquery_analyticshub_querytemplate_basic"
+        resource_id_vars:
+          data_exchange_id: "my_data_exchange"
+          query_template_id: "my_query_template"
+        vars:
+          desc: "updated example of query template"
+          primary_contact: "adminupdated@example.com"
+          table_name: "t1updated"
+          submit: "true"
+        ignore_read_extra:
+          - "submit"
+
 custom_code:
-  post_update: 'templates/terraform/post_update/bigquery_analytics_hub_query_template.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/bigquery_analytics_hub_query_template.go.tmpl'
-  post_create: 'templates/terraform/post_create/bigquery_analytics_hub_query_template.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/bigquery_analytics_hub_query_template.go.tmpl'
+  post_update: "templates/terraform/post_update/bigquery_analytics_hub_query_template.go.tmpl"
+  pre_update: "templates/terraform/pre_update/bigquery_analytics_hub_query_template.go.tmpl"
+  post_create: "templates/terraform/post_create/bigquery_analytics_hub_query_template.go.tmpl"
+  custom_delete: "templates/terraform/custom_delete/bigquery_analytics_hub_query_template.go.tmpl"
 virtual_fields:
-  - name: 'submit'
+  - name: "submit"
     type: Boolean
-    description: 'If set to `true`, the QueryTemplate will be submitted for approval and cannot be updated afterwards. This is a one-time action.'
+    description: "If set to `true`, the QueryTemplate will be submitted for approval and cannot be updated afterwards. This is a one-time action."
 properties:
-  - name: 'name'
+  - name: "name"
     type: String
-    description: 'The resource name of the QueryTemplate. e.g. `projects/myproject/locations/us/dataExchanges/123/queryTemplates/456`'
+    description: "The resource name of the QueryTemplate. e.g. `projects/myproject/locations/us/dataExchanges/123/queryTemplates/456`"
     output: true
-  - name: 'location'
+  - name: "location"
     type: String
-    description: 'The name of the location this data exchange query template.'
+    description: "The name of the location this data exchange query template."
     required: true
     url_param_only: true
     immutable: true
-  - name: 'data_exchange_id'
+  - name: "data_exchange_id"
     type: String
-    description: 'The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.'
+    description: "The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces."
     required: true
     url_param_only: true
     immutable: true
-  - name: 'query_template_id'
+  - name: "query_template_id"
     type: String
-    description: 'Unique QueryTemplate ID.'
+    description: "Unique QueryTemplate ID."
     required: true
     url_param_only: true
     immutable: true
-  - name: 'displayName'
+  - name: "displayName"
     type: String
     description: |
       Human-readable display name of the QueryTemplate. The display name must
@@ -85,44 +102,42 @@ properties:
       value is an empty string.
     required: true
     immutable: true
-  - name: 'description'
+  - name: "description"
     type: String
     description: |
       Short description of the QueryTemplate. The description must not contain
       Unicode non-characters and C0 and C1 control codes except tabs,
       new lines, carriage returns, and page breaks.
       Default value is an empty string. Max length: 2000 bytes.
-  - name: 'primaryContact'
+  - name: "primaryContact"
     type: String
     description: |
       Email or URL of the primary point of contact of the QueryTemplate.
-  - name: 'documentation'
+  - name: "documentation"
     type: String
-    description: 'Documentation describing the QueryTemplate.'
+    description: "Documentation describing the QueryTemplate."
     immutable: true
-  - name: 'state'
+  - name: "state"
     type: String
-    description: 'The QueryTemplate lifecycle state.'
+    description: "The QueryTemplate lifecycle state."
     output: true
-  - name: 'routine'
+  - name: "routine"
     type: NestedObject
-    description: 'The routine associated with the QueryTemplate.'
+    description: "The routine associated with the QueryTemplate."
     properties:
-      - name: 'routineType'
+      - name: "routineType"
         type: Enum
-        description: 'Type of routine (e.g., TABLE_VALUED_FUNCTION).'
-        default_value: 'ROUTINE_TYPE_UNSPECIFIED'
+        description: "Type of routine (e.g., TABLE_VALUED_FUNCTION)."
         enum_values:
-          - 'ROUTINE_TYPE_UNSPECIFIED'
-          - 'TABLE_VALUED_FUNCTION'
-      - name: 'definitionBody'
+          - "TABLE_VALUED_FUNCTION"
+      - name: "definitionBody"
         type: String
-        description: 'SQL query logic.'
-  - name: 'createTime'
+        description: "SQL query logic."
+  - name: "createTime"
     type: String
-    description: 'Timestamp when the QueryTemplate was created.'
+    description: "Timestamp when the QueryTemplate was created."
     output: true
-  - name: 'updateTime'
+  - name: "updateTime"
     type: String
-    description: 'Timestamp when the QueryTemplate was last modified.'
+    description: "Timestamp when the QueryTemplate was last modified."
     output: true

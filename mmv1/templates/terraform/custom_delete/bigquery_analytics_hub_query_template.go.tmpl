@@ -23,7 +23,7 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 })
 
 if err != nil {
-	if transport_tpg.IsGoogleApiErrorWithCode(err, 400) && (strings.Contains(err.Error(), "must be in DRAFTED state") || strings.Contains(err.Error(), "must be inDRAFTED state")) {
+	if transport_tpg.IsGoogleApiErrorWithCode(err, 400) && (strings.Contains(err.Error(), "must be in DRAFTED state")) {
 		log.Printf("[WARN] QueryTemplate %q cannot be deleted because it is no longer in DRAFTED state. Removing from state.", d.Id())
 		d.SetId("")
 		return nil
