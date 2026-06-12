@@ -128,6 +128,11 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	}
 	hclData["logging_service"] = asset.Resource.Data["loggingService"]
 	hclData["monitoring_service"] = asset.Resource.Data["monitoringService"]
+	if options != nil && options.AreNewResources {
+		if resourceLabels, ok := asset.Resource.Data["resourceLabels"].(map[string]interface{}); ok && len(resourceLabels) > 0 {
+			hclData["resource_labels"] = resourceLabels
+		}
+	}
 	hclData["node_config"] = flattenNodeConfig(asset.Resource.Data["nodeConfig"], nil)
 	hclData["description"] = asset.Resource.Data["description"]
 	hclData["security_posture_config"] = flattenSecurityPostureConfig(asset.Resource.Data["securityPostureConfig"])
