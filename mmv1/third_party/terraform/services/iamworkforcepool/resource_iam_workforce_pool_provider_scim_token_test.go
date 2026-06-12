@@ -45,7 +45,6 @@ func TestAccIAMWorkforcePoolWorkforcePoolProviderScimToken_update(t *testing.T) 
 					},
 				},
 				Check: resource.ComposeTestCheckFunc(
-					// Verify the token is STILL preserved in the state after the update call
 					resource.TestCheckResourceAttrSet("google_iam_workforce_pool_provider_scim_token.scim_token", "security_token"),
 				),
 			},
