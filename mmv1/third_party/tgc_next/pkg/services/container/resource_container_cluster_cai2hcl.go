@@ -129,11 +129,9 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	hclData["logging_service"] = asset.Resource.Data["loggingService"]
 	hclData["monitoring_service"] = asset.Resource.Data["monitoringService"]
 	if options != nil && options.AreNewResources {
-		if resourceLabels, ok := asset.Resource.Data["resourceLabels"].(map[string]interface{}); ok && len(resourceLabels) > 0 {
-			hclData["resource_labels"] = resourceLabels
-		}
+		hclData["resource_labels"] = asset.Resource.Data["resourceLabels"]
 	}
-	hclData["node_config"] = flattenNodeConfig(asset.Resource.Data["nodeConfig"], nil)
+	hclData["node_config"] = flattenNodeConfig(asset.Resource.Data["nodeConfig"], nil, options)
 	hclData["description"] = asset.Resource.Data["description"]
 	hclData["security_posture_config"] = flattenSecurityPostureConfig(asset.Resource.Data["securityPostureConfig"])
 	hclData["enterprise_config"] = flattenEnterpriseConfig(asset.Resource.Data["enterpriseConfig"])
@@ -146,7 +144,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	}
 	hclData["addons_config"] = flattenClusterAddonsConfig(asset.Resource.Data["addonsConfig"], enableAutopilot)
 	if !enableAutopilot {
-		hclData["node_pool"], err = flattenContainerClusterNodePools(d, config, asset.Resource.Data["nodePools"])
+		hclData["node_pool"], err = flattenContainerClusterNodePools(d, config, asset.Resource.Data["nodePools"], options)
 	}
 	hclData["node_pool_defaults"] = flattenNodePoolDefaults(asset.Resource.Data["nodePoolDefaults"])
 	hclData["authenticator_groups_config"] = flattenAuthenticatorGroupsConfig(asset.Resource.Data["authenticatorGroupsConfig"])
@@ -1902,7 +1900,7 @@ func flattenNodePoolAutoConfigNetworkTags(v interface{}) []map[string]interface{
 	return []map[string]interface{}{transformed}
 }
 
-func flattenContainerClusterNodePools(d *schema.ResourceData, config *transport.Config, v interface{}) ([]map[string]interface{}, error) {
+func flattenContainerClusterNodePools(d *schema.ResourceData, config *transport.Config, v interface{}, options *models.ResourceConverterOptions) ([]map[string]interface{}, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -1913,7 +1911,7 @@ func flattenContainerClusterNodePools(d *schema.ResourceData, config *transport.
 	result := make([]map[string]interface{}, 0, len(nodePools))
 	for _, np := range nodePools {
 		if npMap, ok := np.(map[string]interface{}); ok {
-			nodePool, err := flattenNodePool(d, config, npMap, "")
+			nodePool, err := flattenNodePool(d, config, npMap, "", options)
 			if err != nil {
 				return nil, err
 			}

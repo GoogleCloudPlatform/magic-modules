@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
@@ -2554,7 +2555,7 @@ func flattenNodeConfigDefaults(v interface{}) []map[string]interface{} {
 	return []map[string]interface{}{transformed}
 }
 
-func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
+func flattenNodeConfig(v interface{}, _ interface{}, options *models.ResourceConverterOptions) []map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2590,23 +2591,22 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"min_cpu_platform":                   c["minCpuPlatform"],
 		"shielded_instance_config":           flattenShieldedInstanceConfig(c["shieldedInstanceConfig"]),
 		"sandbox_config":                     flattenSandboxConfig(c["sandboxConfig"]),
-		// TODO: need to differentiate the new resource and existing resource
-		// "taint":                              flattenEffectiveTaints(c["taints"]),
-		"workload_metadata_config":    flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
-		"confidential_nodes":          flattenConfidentialNodes(c["confidentialNodes"]),
-		"boot_disk_kms_key":           c["bootDiskKmsKey"],
-		"kubelet_config":              flattenKubeletConfig(c["kubeletConfig"]),
-		"linux_node_config":           flattenLinuxNodeConfig(c["linuxNodeConfig"]),
-		"windows_node_config":         flattenWindowsNodeConfig(c["windowsNodeConfig"]),
-		"node_group":                  c["nodeGroup"],
-		"advanced_machine_features":   flattenAdvancedMachineFeaturesConfig(c["advancedMachineFeatures"]),
-		"max_run_duration":            c["maxRunDuration"],
-		"flex_start":                  c["flexStart"],
-		"sole_tenant_config":          flattenSoleTenantConfig(c["soleTenantConfig"]),
-		"fast_socket":                 flattenFastSocket(c["fastSocket"]),
-		"resource_manager_tags":       flattenResourceManagerTags(c["resourceManagerTags"]),
-		"enable_confidential_storage": c["enableConfidentialStorage"],
-		"local_ssd_encryption_mode":   c["localSsdEncryptionMode"],
+		"taint":                              flattenTaintsCai2hcl(c["taints"], options),
+		"workload_metadata_config":           flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
+		"confidential_nodes":                 flattenConfidentialNodes(c["confidentialNodes"]),
+		"boot_disk_kms_key":                  c["bootDiskKmsKey"],
+		"kubelet_config":                     flattenKubeletConfig(c["kubeletConfig"]),
+		"linux_node_config":                  flattenLinuxNodeConfig(c["linuxNodeConfig"]),
+		"windows_node_config":                flattenWindowsNodeConfig(c["windowsNodeConfig"]),
+		"node_group":                         c["nodeGroup"],
+		"advanced_machine_features":          flattenAdvancedMachineFeaturesConfig(c["advancedMachineFeatures"]),
+		"max_run_duration":                   c["maxRunDuration"],
+		"flex_start":                         c["flexStart"],
+		"sole_tenant_config":                 flattenSoleTenantConfig(c["soleTenantConfig"]),
+		"fast_socket":                        flattenFastSocket(c["fastSocket"]),
+		"resource_manager_tags":              flattenResourceManagerTags(c["resourceManagerTags"]),
+		"enable_confidential_storage":        c["enableConfidentialStorage"],
+		"local_ssd_encryption_mode":          c["localSsdEncryptionMode"],
 	}
 
 	// Suppress Default Value
@@ -3685,4 +3685,11 @@ func flattenGpuDirectConfig(v interface{}) string {
 		return ""
 	}
 	return strategy
+}
+
+func flattenTaintsCai2hcl(v interface{}, options *models.ResourceConverterOptions) []map[string]interface{} {
+	if options != nil && options.AreNewResources {
+		return flattenEffectiveTaints(v)
+	}
+	return nil
 }
