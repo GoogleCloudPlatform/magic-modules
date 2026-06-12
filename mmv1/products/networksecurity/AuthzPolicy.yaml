@@ -76,22 +76,35 @@ examples:
     vars:
       policy_name: 'my-mcp-policy'
 samples:
-  - name: 'network_security_authz_policy_network_rules'
-    primary_resource_id: 'default'
-    min_version: beta
+  - name: "network_security_authz_policy_basic"
+    primary_resource_id: "default"
     steps:
-      - name: 'network_security_authz_policy_with_network_rules'
+      - name: "network_security_authz_policy_with_network_rules"
+        resource_id_vars:
+          network_name: "lb-network"
+          subnet_name: "backend-subnet"
+          proxy_subnet_name: "proxy-only-subnet"
+          swp_policy: "swp-policy"
+          gateway_address_name: "swp-gateway-ip"
+          gateway_name: "swp-gateway"
+          resource_name: "authz-policy"
         vars:
-          resource_name: 'authz-policy'
-          swp_policy: 'swp-policy'
+          to_operations_snis_exact: "example.com"
         test_env_vars:
-          project: 'PROJECT_NAME'
-      - name: 'network_security_authz_policy_with_network_rules'
+          project: "PROJECT_NAME"
+      - name: "network_security_authz_policy_with_network_rules"
+        resource_id_vars:
+          network_name: "lb-network"
+          subnet_name: "backend-subnet"
+          proxy_subnet_name: "proxy-only-subnet"
+          swp_policy: "swp-policy"
+          gateway_address_name: "swp-gateway-ip"
+          gateway_name: "swp-gateway"
+          resource_name: "authz-policy"
         vars:
-          resource_name: 'authz-policy'
-          swp_policy: 'swp-policy'
+          to_operations_snis_exact: "google.com"
         test_env_vars:
-          project: 'PROJECT_NAME'
+          project: "PROJECT_NAME"
 parameters:
   - name: 'name'
     type: String

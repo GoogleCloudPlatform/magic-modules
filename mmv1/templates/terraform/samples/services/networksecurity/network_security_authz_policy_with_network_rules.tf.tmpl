@@ -1,13 +1,13 @@
 resource "google_compute_network" "default" {
   provider                = google-beta
-  name                    = "lb-network"
+  name                    = "{{index $.Vars "network_name"}}"
   project                 = "{{index $.TestEnvVars "project"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
   provider                = google-beta
-  name          = "backend-subnet"
+  name          = "{{index $.Vars "subnet_name"}}"
   project       = "{{index $.TestEnvVars "project"}}"
   region        = "us-east4"
   ip_cidr_range = "10.1.2.0/24"
@@ -16,7 +16,7 @@ resource "google_compute_subnetwork" "default" {
 
 resource "google_compute_subnetwork" "proxy_only" {
   provider                = google-beta
-  name          = "proxy-only-subnet"
+  name          = "{{index $.Vars "proxy_subnet_name"}}"
   project       = "{{index $.TestEnvVars "project"}}"
   region        = "us-east4"
   ip_cidr_range = "10.129.0.0/23"
@@ -29,14 +29,14 @@ resource "google_compute_subnetwork" "proxy_only" {
 
 resource "google_network_security_gateway_security_policy" "default" {
   provider                = google-beta
-  name     =  "{{index $.Vars "swp_policy"}}"
+  name     = "{{index $.Vars "swp_policy"}}"
   project  = "{{index $.TestEnvVars "project"}}"
   location = "us-east4"
 }
 
 resource "google_compute_address" "swp_ip" {
   provider                = google-beta
-  name         = "swp-gateway"
+  name         = "{{index $.Vars "gateway_address_name"}}"
   project      = "{{index $.TestEnvVars "project"}}"
   region       = "us-east4"
 
@@ -46,7 +46,7 @@ resource "google_compute_address" "swp_ip" {
 
 resource "google_network_services_gateway" "swp_gateway" {
   provider                = google-beta
-  name     = "swp-gateway"
+  name     = "{{index $.Vars "gateway_name"}}"
   project  = "{{index $.TestEnvVars "project"}}"
   location = "us-east4"
 
@@ -120,7 +120,7 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
     to {
       operations {
         snis {
-          exact = "example.com"
+          exact = "{{index $.Vars "to_operations_snis_exact"}}"
         }
       }
     }
