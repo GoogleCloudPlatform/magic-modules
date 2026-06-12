@@ -2,7 +2,14 @@ package fwtransport
 
 import (
 	"context"
+	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
+	ephemeraltypes "github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func TestCompileUserAgentString(t *testing.T) {
@@ -49,6 +56,66 @@ func TestCompileUserAgentString(t *testing.T) {
 			// Assert
 			if ua != tc.ExpectedUserAgent {
 				t.Fatalf("Incorrect user agent output: got %s, want %s", ua, tc.ExpectedUserAgent)
+			}
+		})
+	}
+}
+
+func TestBuildReplacementFunc_EphemeralOpenRequest(t *testing.T) {
+	testSchema := ephemeraltypes.Schema{
+		Attributes: map[string]ephemeraltypes.Attribute{
+			"name": ephemeraltypes.StringAttribute{Required: true},
+		},
+	}
+
+	cases := map[string]struct {
+		linkTmpl    string
+		configValue map[string]tftypes.Value
+		expected    string
+	}{
+		"replaces resource-specific variable from ephemeral config": {
+			linkTmpl: "projects/my-project/instances/{{name}}",
+			configValue: map[string]tftypes.Value{
+				"name": tftypes.NewValue(tftypes.String, "my-instance"),
+			},
+			expected: "projects/my-project/instances/my-instance",
+		},
+		"leaves unresolvable variables empty": {
+			linkTmpl: "projects/my-project/instances/{{unknown}}",
+			configValue: map[string]tftypes.Value{
+				"name": tftypes.NewValue(tftypes.String, "my-instance"),
+			},
+			expected: "projects/my-project/instances/",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			ctx := context.Background()
+
+			config := tfsdk.Config{
+				Schema: testSchema,
+				Raw: tftypes.NewValue(tftypes.Object{
+					AttributeTypes: map[string]tftypes.Type{
+						"name": tftypes.String,
+					},
+				}, tc.configValue),
+			}
+
+			req := ephemeral.OpenRequest{Config: config}
+
+			var diags diag.Diagnostics
+			re := regexp.MustCompile("{{([%[:word:]]+)}}")
+			data := DefaultVars{}
+
+			f := BuildReplacementFunc(ctx, re, req, &diags, data, nil, tc.linkTmpl, false)
+			if diags.HasError() {
+				t.Fatalf("unexpected diagnostics error: %v", diags)
+			}
+
+			result := re.ReplaceAllStringFunc(tc.linkTmpl, f)
+			if result != tc.expected {
+				t.Errorf("got %q, want %q", result, tc.expected)
 			}
 		})
 	}
