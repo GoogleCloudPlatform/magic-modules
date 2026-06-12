@@ -52,6 +52,14 @@ samples:
           bucket_name: my-bucket
           namespace_id: my_namespace
           table_name: my_table
+  - name: biglake_iceberg_table_sort_order
+    primary_resource_id: my_iceberg_table
+    steps:
+      - name: biglake_iceberg_table_sort_order
+        resource_id_vars:
+          bucket_name: my-bucket
+          namespace_id: my_namespace
+          table_name: my_table
   - name: biglake_iceberg_table_update
     primary_resource_id: my_iceberg_table
     skip_test: true
@@ -186,14 +194,23 @@ properties:
               required: true
               description: |
                 The transform to apply to the source field.
-  - name: sort_order
+  # The Iceberg REST Catalog API uses three different names for one concept:
+  # the create request body field is "write-order" (hence api_name), the read
+  # response returns "sort-orders" + "default-sort-order-id" (bridged in
+  # post_read), and updates use "add-sort-order"/"set-default-sort-order" commit
+  # actions. The user-facing field stays "sort_order" to match the read shape and
+  # to mirror the existing "partition_spec" field. default_from_api is set
+  # because the API always returns a sort order (order-id 0, the unsorted order)
+  # even when none is configured, which would otherwise diff against an empty
+  # config.
+  - name: sortOrder
     api_name: write-order
     type: NestedObject
     default_from_api: true
     description: |
       The sort order of the table.
     properties:
-      - name: order_id
+      - name: orderId
         api_name: order-id
         type: Integer
         output: true
@@ -205,7 +222,7 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: source_id
+            - name: sourceId
               api_name: source-id
               type: Integer
               required: true
@@ -221,7 +238,7 @@ properties:
               required: true
               description: |
                 The sort direction for the sort field. Possible values: "asc", "desc".
-            - name: null_order
+            - name: nullOrder
               api_name: null-order
               type: String
               required: true
