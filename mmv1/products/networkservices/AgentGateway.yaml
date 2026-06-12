@@ -13,12 +13,11 @@
 
 ---
 name: 'AgentGateway'
-min_version: beta
 description: |
   AgentGateway represents the agent gateway resource.
 references:
   guides:
-  api: 'https://cloud.google.com/network-services/docs/reference/network-services/rest/v1beta1/projects.locations.agentGateways'
+  api: 'https://cloud.google.com/network-services/docs/reference/network-services/rest/v1/projects.locations.agentGateways'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/agentGateways'
 self_link: 'projects/{{project}}/locations/{{location}}/agentGateways/{{name}}'
@@ -41,16 +40,12 @@ async:
     resource_inside_response: true
 examples:
   - name: 'network_services_agent_gateway_full'
-    skip_docs: true  # temporary b/484137930
-    skip_test: true  # temporary b/484137930
     primary_resource_id: 'default'
     vars:
       name: 'my-full-agent-gateway'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'network_services_agent_gateway_client_to_agent'
-    skip_docs: true  # temporary b/484137930
-    skip_test: true  # temporary b/484137930
     primary_resource_id: 'default'
     vars:
       name: 'my-client-to-agent-gateway'
@@ -172,6 +167,7 @@ properties:
           - name: 'networkAttachment'
             type: String
             required: true
+            immutable: true
             diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
             description: |
               The URI of the Network Attachment resource.
