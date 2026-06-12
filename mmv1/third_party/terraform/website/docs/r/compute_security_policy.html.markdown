@@ -503,13 +503,15 @@ The following arguments are supported:
 
 * `request_uri` - (Optional) Request URI from the request line to be excluded from inspection during preconfigured WAF evaluation. When specifying this field, the query or fragment part should be excluded. Structure is [documented below](#nested_field_params).
 
+* `request_body` - (Optional) A list of request body fields to be excluded from inspection during preconfigured WAF evaluation. Structure is [documented below](#nested_field_params).
+
 * `request_query_param` - (Optional) Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation. Note that the parameter can be in the query string or in the POST body. Structure is [documented below](#nested_field_params).
 
 * `target_rule_set` - (Required) Target WAF rule set to apply the preconfigured WAF exclusion.
 
 * `target_rule_ids` - (Optional) A list of target rule IDs under the WAF rule set to apply the preconfigured WAF exclusion. If omitted, it refers to all the rule IDs under the WAF rule set.
 
-<a name="nested_field_params"></a>The `request_header`, `request_cookie`, `request_uri` and `request_query_param` blocks support:
+<a name="nested_field_params"></a>The `request_header`, `request_cookie`, `request_uri` , `request_body` and `request_query_param` blocks support:
 
 * `operator` - (Required) You can specify an exact match or a partial match by using a field operator and a field value.
 
