@@ -958,6 +958,7 @@ resource "google_compute_security_policy" "policy" {
 `, spName)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeSecurityPolicy_securityPolicyWithBodyExclude(t *testing.T) {
 	t.Parallel()
 
@@ -1108,7 +1109,9 @@ resource "google_compute_backend_service" "default" {
 }
 `, context)
 }
+{{- end }}
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeSecurityPolicy_withRequestBody(t *testing.T) {
 	t.Parallel()
 
@@ -1164,6 +1167,7 @@ resource "google_compute_security_policy" "policy" {
 }
 `, context)
 }
+{{- end }}
 
 func testAccCheckComputeSecurityPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
