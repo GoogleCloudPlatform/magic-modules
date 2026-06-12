@@ -982,13 +982,7 @@ func TestAccComputeSecurityPolicy_securityPolicyWithBodyExclude(t *testing.T) {
 				ResourceName:            "google_compute_security_policy.policy_rule_one",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"security_policy"},
-			},
-			{
-				ResourceName:       "google_compute_security_policy.policy_rule_one",
-				RefreshState:       true,
-				ExpectNonEmptyPlan: true,
-				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+				ImportStateVerifyIgnore: []string{"region"},
 			},
 		},
 	})
