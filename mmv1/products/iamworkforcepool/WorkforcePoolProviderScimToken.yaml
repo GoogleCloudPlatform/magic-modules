@@ -61,6 +61,8 @@ properties:
     description:
       The token string provided to the IdP for authentication and will be set only during creation.
     output: true
+    sensitive: true
+    ignore_read: true
   - name: 'state'
     type: Enum
     description: |
