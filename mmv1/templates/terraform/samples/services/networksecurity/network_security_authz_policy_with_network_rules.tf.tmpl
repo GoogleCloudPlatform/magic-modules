@@ -35,8 +35,8 @@ resource "google_network_security_gateway_security_policy" "default" {
 }
 
 resource "google_compute_address" "swp_ip" {
-  provider                = google-beta
-  name         = "{{index $.ResourceIdVars "gateway_address_name"}}"
+  provider     = google-beta
+  name         = "{{index $.ResourceIdVars "gateway_name"}}" # Alterado para amarrar com a regra de nomenclatura do GCP
   project      = "{{index $.TestEnvVars "project"}}"
   region       = "us-east4"
 
@@ -89,7 +89,7 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
     from {
       not_sources {
         ip_blocks {
-          prefix = "10.1.5.0"
+          prefix = "{{index $.Vars "not_sources_prefix"}}"
           length = 24
         }
 
@@ -97,21 +97,21 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
           principal_selector = "CLIENT_CERT_URI_SAN"
 
           principal {
-            exact = "spiffe://example/ns/default/sa/example"
+            exact = "{{index $.Vars "not_sources_principal"}}"
           }
         }
       }
       sources {
         ip_blocks {
           length = 24
-          prefix = "10.2.0.0"
+          prefix = "{{index $.Vars "sources_prefix"}}"
         }
         
         principals {
           principal_selector = "CLIENT_CERT_URI_SAN"
           
           principal {
-            exact = "spiffe://example.com/ns/prod/sa/app-valid"
+            exact = "{{index $.Vars "sources_principal"}}"
           }
         }
       }

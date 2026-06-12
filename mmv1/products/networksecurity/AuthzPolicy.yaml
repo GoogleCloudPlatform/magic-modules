@@ -86,10 +86,13 @@ samples:
           subnet_name: "backend-subnet"
           proxy_subnet_name: "proxy-only-subnet"
           swp_policy: "swp-policy"
-          gateway_address_name: "swp-gateway-ip"
           gateway_name: "swp-gateway"
           resource_name: "authz-policy"
         vars:
+          not_sources_prefix: "10.1.5.0"
+          not_sources_principal: "spiffe://example/ns/default/sa/example"
+          sources_prefix: "10.2.0.0"
+          sources_principal: "spiffe://example.com/ns/prod/sa/app-valid"
           to_operations_snis_exact: "example.com"
         test_env_vars:
           project: "PROJECT_NAME"
@@ -99,10 +102,13 @@ samples:
           subnet_name: "backend-subnet"
           proxy_subnet_name: "proxy-only-subnet"
           swp_policy: "swp-policy"
-          gateway_address_name: "swp-gateway-ip"
           gateway_name: "swp-gateway"
           resource_name: "authz-policy"
         vars:
+          not_sources_prefix: "10.1.6.0"
+          not_sources_principal: "spiffe://example/ns/default/sa/example-updated"
+          sources_prefix: "10.3.0.0"
+          sources_principal: "spiffe://example.com/ns/prod/sa/app-updated"
           to_operations_snis_exact: "google.com"
         test_env_vars:
           project: "PROJECT_NAME"
