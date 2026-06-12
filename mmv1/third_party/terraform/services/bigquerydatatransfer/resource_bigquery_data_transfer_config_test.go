@@ -297,14 +297,15 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 // but it will get deleted by parallel tests, so they need to be run serially.
 func TestAccBigqueryDataTransferConfig(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"basic":                  testAccBigqueryDataTransferConfig_scheduledQuery_basic,
-		"update":                 testAccBigqueryDataTransferConfig_scheduledQuery_update,
-		"service_account":        testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account,
-		"no_destintation":        testAccBigqueryDataTransferConfig_scheduledQuery_no_destination,
-		"booleanParam":           testAccBigqueryDataTransferConfig_copy_booleanParam,
-		"update_params":          testAccBigqueryDataTransferConfig_force_new_update_params,
-		"update_service_account": testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account,
-		"schedule_options_v2":    testAccBigqueryDataTransferConfig_scheduleOptionsV2_timeBased,
+		"basic":                            testAccBigqueryDataTransferConfig_scheduledQuery_basic,
+		"update":                           testAccBigqueryDataTransferConfig_scheduledQuery_update,
+		"service_account":                  testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account,
+		"no_destintation":                  testAccBigqueryDataTransferConfig_scheduledQuery_no_destination,
+		"booleanParam":                     testAccBigqueryDataTransferConfig_copy_booleanParam,
+		"update_params":                    testAccBigqueryDataTransferConfig_force_new_update_params,
+		"update_service_account":           testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account,
+		"schedule_options_v2":              testAccBigqueryDataTransferConfig_scheduleOptionsV2_timeBased,
+		"schedule_options_v2_event_driven": testAccBigqueryDataTransferConfig_scheduleOptionsV2_eventDriven,
 		// Multiple connector.authentication.* fields have been deprecated and return 400 errors
 		// "salesforce":             testAccBigqueryDataTransferConfig_salesforce_basic,
 	}
@@ -365,6 +366,27 @@ func testAccBigqueryDataTransferConfig_scheduleOptionsV2_timeBased(t *testing.T)
 			},
 			{
 				ResourceName:            "google_bigquery_data_transfer_config.query_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
+func testAccBigqueryDataTransferConfig_scheduleOptionsV2_eventDriven(t *testing.T) {
+	random_suffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDataTransferConfig_scheduleOptionsV2EventDriven(random_suffix),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.event_driven_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -764,6 +786,78 @@ resource "google_bigquery_data_transfer_config" "query_config" {
   }
 }
 `, random_suffix, random_suffix, schedule, start_time, end_time)
+}
+
+func testAccBigqueryDataTransferConfig_scheduleOptionsV2EventDriven(random_suffix string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+# Event-driven Cloud Storage transfers require the BigQuery Data Transfer
+# Service agent to be able to pull from the Pub/Sub subscription and to consume
+# the project's services. See
+# https://cloud.google.com/bigquery/docs/event-driven-transfer
+resource "google_project_iam_member" "pubsub_subscriber" {
+  project = data.google_project.project.project_id
+
+  role   = "roles/pubsub.subscriber"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "service_usage_consumer" {
+  project = data.google_project.project.project_id
+
+  role   = "roles/serviceusage.serviceUsageConsumer"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
+}
+
+resource "google_pubsub_topic" "topic" {
+  name = "tf-test-dts-topic-%s"
+}
+
+resource "google_pubsub_subscription" "subscription" {
+  name  = "tf-test-dts-subscription-%s"
+  topic = google_pubsub_topic.topic.id
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "tf-test-dts-bucket-%s"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_bigquery_dataset" "my_dataset" {
+  dataset_id    = "my_dataset%s"
+  friendly_name = "foo"
+  description   = "bar"
+  location      = "US"
+}
+
+resource "google_bigquery_data_transfer_config" "event_driven_config" {
+  depends_on = [
+    google_project_iam_member.pubsub_subscriber,
+    google_project_iam_member.service_usage_consumer,
+  ]
+
+  display_name           = "my-event-driven-%s"
+  location               = google_bigquery_dataset.my_dataset.location
+  data_source_id         = "google_cloud_storage"
+  destination_dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+
+  schedule_options_v2 {
+    event_driven_schedule {
+      pubsub_subscription = google_pubsub_subscription.subscription.id
+    }
+  }
+
+  params = {
+    data_path_template              = "${google_storage_bucket.bucket.url}/*.json"
+    destination_table_name_template = "my_table"
+    file_format                     = "JSON"
+    write_disposition               = "APPEND"
+  }
+}
+`, random_suffix, random_suffix, random_suffix, random_suffix, random_suffix)
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_service_account(random_suffix string) string {

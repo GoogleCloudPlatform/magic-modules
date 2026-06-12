@@ -180,6 +180,11 @@ properties:
       Options customizing different types of data transfer schedule.
       This field replaces "schedule" and "schedule_options". It cannot be used
       together with either of them.
+    # The API mirrors a legacy `schedule`/`scheduleOptions` value into
+    # scheduleOptionsV2 on read (and applies a data-source default when nothing
+    # is set), so without default_from_api a config that omits this block sees a
+    # permanent diff. Optional+Computed lets the server value be absorbed.
+    default_from_api: true
     properties:
       - name: 'timeBasedSchedule'
         type: NestedObject
