@@ -134,7 +134,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
 
-	networkInterfaces, err := expandNetworkInterfaces(d, config)
+	networkInterfaces, err := expandNetworkInterfacesTyped(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}

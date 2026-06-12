@@ -464,16 +464,29 @@ func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *tra
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
 
+		accessConfigs, err := expandAccessConfigsTyped(data["access_config"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		aliasIpRanges, err := expandAliasIpRangesTyped(data["alias_ip_range"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		ipv6AccessConfigs, err := expandIpv6AccessConfigsTyped(data["ipv6_access_config"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:                data["network_ip"].(string),
 			Network:                  network,
 			Subnetwork:               subnetwork,
-			AccessConfigs:            expandAccessConfigs(data["access_config"].([]interface{})),
-			AliasIpRanges:            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
+			AccessConfigs:            accessConfigs,
+			AliasIpRanges:            aliasIpRanges,
 			NicType:                  data["nic_type"].(string),
 			StackType:                data["stack_type"].(string),
 			QueueCount:               int64(data["queue_count"].(int)),
-			Ipv6AccessConfigs:        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
+			Ipv6AccessConfigs:        ipv6AccessConfigs,
 			Ipv6Address:              data["ipv6_address"].(string),
 			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
 			NetworkAttachment:        data["network_attachment"].(string),
