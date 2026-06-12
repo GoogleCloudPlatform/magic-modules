@@ -75,18 +75,23 @@ examples:
     skip_test: true  # temporary b/484137930
     vars:
       policy_name: 'my-mcp-policy'
-  - name: 'network_security_authz_policy_with_network_rules'
+samples:
+  - name: 'network_security_authz_policy_network_rules'
     primary_resource_id: 'default'
     min_version: beta
-    vars:
-      resource_name: 'authz-policy'
-      gateway_name: 'swp-gateway'
-      network_name: 'lb-network'
-      subnet_name: 'backend-subnet'
-      proxy_subnet_name: 'proxy-only-subnet'
-      swp_policy: 'swp-policy'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_security_authz_policy_with_network_rules'
+        vars:
+          resource_name: 'authz-policy'
+          swp_policy: 'swp-policy'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+      - name: 'network_security_authz_policy_with_network_rules'
+        vars:
+          resource_name: 'authz-policy'
+          swp_policy: 'swp-policy'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 parameters:
   - name: 'name'
     type: String
