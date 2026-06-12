@@ -131,7 +131,8 @@ properties:
         - name: 'soakDuration'
           type: String
           description: |
-            Soak time after upgrading all the clusters in the stage, specified in seconds.
+            Soak time after upgrading all the clusters in the stage.
+            Has to be specified in seconds, minutes, hours or days.
           custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
           diff_suppress_func: 'durationDiffSuppress'
   - name: 'autoUpgradeConfig'
