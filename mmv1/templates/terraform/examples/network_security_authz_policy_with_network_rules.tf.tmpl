@@ -101,6 +101,20 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
           }
         }
       }
+      sources {
+        ip_blocks {
+          length = 24
+          prefix = "10.2.0.0"
+        }
+        
+        principals {
+          principal_selector = "CLIENT_CERT_URI_SAN"
+          
+          principal {
+            exact = "spiffe://example.com/ns/prod/sa/app-valid"
+          }
+        }
+      }
     }
 
     to {
