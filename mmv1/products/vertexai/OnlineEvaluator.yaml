@@ -20,7 +20,12 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 60
 async:
+  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
   actions:
@@ -31,7 +36,7 @@ async:
     resource_inside_response: true
 autogen_status: T25saW5lRXZhbHVhdG9y
 parameters:
-- name: location
+- name: region
   type: String
   required: true
   description: Resource ID segment making up resource `name`. It identifies the resource
@@ -169,14 +174,14 @@ properties:
       type: String
       description: Inline metric config. Provide this field as a JSON-formatted string.
       custom_expand: 'templates/terraform/custom_expand/vertexai_online_evaluator_metric.go.tmpl'
-      custom_flatten: 'templates/terraform/custom_flatten/vertexai_online_evaluator_metric.go.tmpl' # <--- EKLENEN SATIR BURASI
+      custom_flatten: 'templates/terraform/custom_flatten/vertexai_online_evaluator_metric.go.tmpl'
     - name: metricResourceName
       type: String
       description: Resource name for registered metric.
 - name: name
   type: String
   description: 'Identifier. The resource name of the OnlineEvaluator.
-    Format: projects/{project}/locations/{location}/onlineEvaluators/{id}.'
+    Format: projects/{project}/locations/{region}/onlineEvaluators/{id}.'
   output: true
 - name: state
   type: String
