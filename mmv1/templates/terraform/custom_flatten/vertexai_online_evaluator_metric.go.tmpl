@@ -1,0 +1,11 @@
+func flattenVertexAIOnlineEvaluatorMetricSourcesMetric(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	// API'den gelen objeyi (map) alıp string'e çeviriyoruz
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil
+	}
+	return string(b)
+}
