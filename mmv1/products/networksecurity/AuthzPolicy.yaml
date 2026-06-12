@@ -75,6 +75,43 @@ examples:
     skip_test: true  # temporary b/484137930
     vars:
       policy_name: 'my-mcp-policy'
+samples:
+  - name: "network_security_authz_policy_network_rules"
+    primary_resource_id: "default"
+    min_version: beta
+    steps:
+      - name: "network_security_authz_policy_with_network_rules"
+        resource_id_vars:
+          network_name: "lb-network"
+          subnet_name: "backend-subnet"
+          proxy_subnet_name: "proxy-only-subnet"
+          swp_policy: "swp-policy"
+          gateway_name: "swp-gateway"
+          resource_name: "authz-policy"
+        vars:
+          not_sources_prefix: "10.1.5.0"
+          not_sources_principal: "spiffe://example/ns/default/sa/example"
+          sources_prefix: "10.2.0.0"
+          sources_principal: "spiffe://example.com/ns/prod/sa/app-valid"
+          to_operations_snis_exact: "example.com"
+        test_env_vars:
+          project: "PROJECT_NAME"
+      - name: "network_security_authz_policy_with_network_rules"
+        resource_id_vars:
+          network_name: "lb-network"
+          subnet_name: "backend-subnet"
+          proxy_subnet_name: "proxy-only-subnet"
+          swp_policy: "swp-policy"
+          gateway_name: "swp-gateway"
+          resource_name: "authz-policy"
+        vars:
+          not_sources_prefix: "10.1.6.0"
+          not_sources_principal: "spiffe://example/ns/default/sa/example-updated"
+          sources_prefix: "10.3.0.0"
+          sources_principal: "spiffe://example.com/ns/prod/sa/app-updated"
+          to_operations_snis_exact: "google.com"
+        test_env_vars:
+          project: "PROJECT_NAME"
 parameters:
   - name: 'name'
     type: String
@@ -814,6 +851,144 @@ properties:
           type: String
           description: |
             CEL expression that describes the conditions to be satisfied for the action. The result of the CEL expression is ANDed with the from and to. Refer to the CEL language reference for a list of available attributes.
+  - name: 'networkRules'
+    type: Array
+    description: |
+      A list of authorization HTTP rules to match against the incoming request.A policy match occurs when at least one HTTP rule matches the request or when no HTTP rules are specified in the policy. At least one HTTP Rule is required for Allow or Deny Action.
+      Limited to 5 rules.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'from'
+          type: NestedObject
+          description: |
+            Describes properties of one or more sources of a request.
+          properties:
+            - name: 'sources'
+              type: Array
+              description: |
+                Describes the properties of a request's sources. At least one of sources or notSources must be specified. Limited to 1 source. A match occurs when ANY source (in sources or notSources) matches the request. Within a single source, the match follows AND semantics across fields and OR semantics within a single field, i.e. a match occurs when ANY principal matches AND ANY ipBlocks match.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'ipBlocks'
+                    type: Array
+                    description: |
+                      A list of IP addresses or IP address ranges to match against the source IP address of the request. Limited to 10 ipBlocks per Authorization Policy
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'prefix'
+                          type: String
+                          description: The address prefix.
+                          required: true
+                        - name: 'length'
+                          type: Integer
+                          description: The length of the address range.
+                          required: true
+                  - name: 'principals'
+                    type: Array
+                    required: false
+                    description: |
+                      A list of identities derived from the client's certificate. This field will not match on a request unless mutual TLS is enabled for the Forwarding rule or Gateway. Each identity is a string whose value is matched against the URI SAN, or DNS SAN or the subject field in the client's certificate. The match can be exact, prefix, suffix or a substring match. One of exact, prefix, suffix or contains must be specified.
+                      Limited to 5 principals.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'principalSelector'
+                          type: Enum
+                          description: |
+                            An enum to decide what principal value the principal rule will match against. If not specified, the PrincipalSelector is CLIENT_CERT_URI_SAN.
+                          default_value: "CLIENT_CERT_URI_SAN"
+                          enum_values:
+                            - 'PRINCIPAL_SELECTOR_UNSPECIFIED'
+                            - 'CLIENT_CERT_URI_SAN'
+                            - 'CLIENT_CERT_DNS_NAME_SAN'
+                            - 'CLIENT_CERT_COMMON_NAME'
+                        - name: 'principal'
+                          type: NestedObject
+                          description: |
+                            Required. A non-empty string whose value is matched against the principal value based on the principalSelector.
+                            Only exact match can be applied for CLIENT_CERT_URI_SAN, CLIENT_CERT_DNS_NAME_SAN, CLIENT_CERT_COMMON_NAME selectors.
+                          properties:
+                            - name: 'exact'
+                              type: String
+                              description: |
+                                The input string must match exactly the string specified here.
+                                Examples:
+                                * abc only matches the value abc.
+            - name: 'notSources'
+              type: Array
+              description: |
+                Describes the negated properties of request sources. Matches requests from sources that do not match the criteria specified in this field. At least one of sources or notSources must be specified. Limited to 1 not_source.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'ipBlocks'
+                    type: Array
+                    description: |
+                      A list of IP addresses or IP address ranges to match against the source IP address of the request. Limited to 10 ipBlocks per Authorization Policy
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'prefix'
+                          type: String
+                          description: The address prefix.
+                          required: true
+                        - name: 'length'
+                          type: Integer
+                          description: The length of the address range.
+                          required: true
+                  - name: 'principals'
+                    type: Array
+                    description: |
+                      A list of identities derived from the client's certificate. This field will not match on a request unless mutual TLS is enabled for the Forwarding rule or Gateway. Each identity is a string whose value is matched against the URI SAN, or DNS SAN or the subject field in the client's certificate. The match can be exact, prefix, suffix or a substring match. One of exact, prefix, suffix or contains must be specified.
+                      Limited to 5 principals.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'principalSelector'
+                          type: Enum
+                          description: |
+                            An enum to decide what principal value the principal rule will match against. If not specified, the PrincipalSelector is CLIENT_CERT_URI_SAN.
+                          default_value: "CLIENT_CERT_URI_SAN"
+                          enum_values:
+                            - 'PRINCIPAL_SELECTOR_UNSPECIFIED'
+                            - 'CLIENT_CERT_URI_SAN'
+                            - 'CLIENT_CERT_DNS_NAME_SAN'
+                            - 'CLIENT_CERT_COMMON_NAME'
+                        - name: 'principal'
+                          type: NestedObject
+                          description: |
+                            Required. A non-empty string whose value is matched against the principal value based on the principalSelector.
+                            Only exact match can be applied for CLIENT_CERT_URI_SAN, CLIENT_CERT_DNS_NAME_SAN, CLIENT_CERT_COMMON_NAME selectors.
+                          properties:
+                            - name: 'exact'
+                              type: String
+                              description: |
+                                The input string must match exactly the string specified here.
+                                Examples:
+                                * abc only matches the value abc.
+        - name: 'to'
+          type: NestedObject
+          description: |
+            Describes properties of one or more targets of a request
+          properties:
+            - name: 'operations'
+              type: Array
+              description: |
+                Describes properties of one or more targets of a request. At least one of operations or notOperations must be specified. Limited to 1 operation.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'snis'
+                    required: false
+                    type: Array
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'exact'
+                          type: String
   - name: 'action'
     type: Enum
     description: |
