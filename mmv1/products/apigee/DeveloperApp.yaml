@@ -32,6 +32,7 @@ import_format:
 custom_code:
   decoder: "templates/terraform/decoders/apigee_developer_app.go.tmpl"
   custom_import: "templates/terraform/custom_import/apigee_developer_app.go.tmpl"
+  post_create: "templates/terraform/post_create/apigee_developer_app_credentials.go.tmpl"
 examples:
   - name: "apigee_developer_app_basic"
     primary_resource_id: "apigee_developer_app"
@@ -84,6 +85,34 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - name: "consumerKey"
+    type: String
+    description: |
+      Optionally specify a static consumer key for the developer app's credential.
+      If not set, the API auto-generates a key. The consumer key must be unique
+      across all developer apps in an organization. Changing this field forces the
+      resource to be recreated.
+
+      This is a write-only input used at create time: the provider creates the
+      credential with this key via the keys API and removes the auto-generated
+      one. The effective key is exposed in the `credentials` output.
+    url_param_only: true
+    immutable: true
+    ignore_read: true
+  - name: "consumerSecret"
+    type: String
+    description: |
+      Optionally specify a static consumer secret for the developer app's
+      credential. Required if `consumer_key` is specified. If not set, the API
+      auto-generates a secret. Changing this field forces the resource to be
+      recreated.
+
+      This is a write-only input used at create time; the effective secret is
+      exposed in the `credentials` output.
+    url_param_only: true
+    sensitive: true
+    immutable: true
+    ignore_read: true
 properties:
   - name: "name"
     type: String
