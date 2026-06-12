@@ -70,6 +70,11 @@ properties:
     type: String
     required: true
     description: SoarDomain associated logical environments (json).
+    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+    validation:
+      function: validation.StringIsJSON
+    custom_expand: templates/terraform/custom_expand/json_value.tmpl
+    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
   - name: name
     type: String
     description: |-
