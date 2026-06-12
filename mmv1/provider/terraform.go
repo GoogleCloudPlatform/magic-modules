@@ -318,19 +318,20 @@ func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templat
 
 }
 
-func (t *Terraform) GenerateEphemeralResource(object api.Resource, templateData TempData, outputFolder string) {
-	if !object.ShouldGenerateEphemeralResource() {
-		return
-	}
-	if generateCode {
-		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("ephemeral_%s.go", t.ResourceGoFilename(object)))
-	}
-	if generateDocs {
-		targetFolder := t.makeFolder(outputFolder, "website", "docs", "ephemeral-resources")
-		targetFilePath := path.Join(targetFolder, fmt.SprintF("%s.html.markdown", t.FullResourceName(object)))
-		templateData.GenerateEphemeralResourceDocumentationFile(targetFilePath, object)
-	}
+func (t *Terraform) GenerateEphemeralResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+    if !object.ShouldGenerateEphemeralResource() {
+        return
+    }
+    if generateCode {
+        targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
+        targetFilePath := path.Join(targetFolder, fmt.Sprintf("ephemeral_%s.go", t.ResourceGoFilename(object)))
+        templateData.GenerateEphemeralResourceFile(targetFilePath, object)
+    }
+    if generateDocs {
+        targetFolder := t.makeFolder(outputFolder, "website", "docs", "ephemeral-resources")
+        targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
+        templateData.GenerateEphemeralResourceDocumentationFile(targetFilePath, object)
+    }
 }
 
 // GenerateProduct creates the product.go file for a given service directory.
