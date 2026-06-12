@@ -53,6 +53,7 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
+  pre_update: 'templates/terraform/update_encoder/artifact_registry_repository_update.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -506,6 +507,7 @@ properties:
     type: NestedObject
     description: |-
       Configuration specific for a Remote Repository.
+    immutable: true
     conflicts:
       - virtual_repository_config
     properties:
