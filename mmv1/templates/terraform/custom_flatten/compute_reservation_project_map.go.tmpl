@@ -1,0 +1,74 @@
+// This function converts project numbers in the API response to project IDs if they're project IDs in the config.
+// This is a map, not an ordered list, so the API response looks like:
+// 
+//   "shareSettings": {
+//     "shareType": "SPECIFIC_PROJECTS",
+//     "projectMap": {
+//       "12345": {
+//         "projectId": "12345"
+//       },
+//       "67890": {
+//         "projectId": "67890"
+//       }
+//     },
+//
+// Any of these that are provided in the config as project IDs need to be remapped to project IDs in the response, but any that are
+// numbers in the config need to be left as numbers in the response.
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		log.Printf("[WARN] Failed to generate user agent: %s", err)
+		return v
+	}
+
+	// Based on the config, create a map for project number -> values currently configured.
+	configProjects := make(map[string]map[string]interface{})
+	if val, ok := d.GetOk("share_settings.0.project_map"); ok && val != nil {
+		log.Printf("[MARK TWO] project map found in config: %#v", val)
+		for _, raw := range val.(*schema.Set).List() {
+			item := raw.(map[string]interface{})
+			log.Printf("MARK THREE: raw %#v", raw)
+			if id, ok := item["id"].(string); ok && id != "" {
+				log.Printf("MARK FOUR: id %s", id)
+				// Check if this is a project number. If not, convert it to one via an API call.
+				_, err := strconv.Atoi(id)
+				if err != nil {
+					log.Printf("MARK FIVE")
+					proj, err := rmClient.NewClient(config, userAgent).Projects.Get(id).Do()
+					if err != nil {
+						log.Printf("[WARN] Failed to retrieve project metadata for %s: %s", id, err)
+						continue
+					}
+					configProjects[strconv.FormatInt(proj.ProjectNumber, 10)] = item
+				} else {
+					log.Printf("MARK SIX")
+					configProjects[id] = item
+				}
+			}
+		}
+	} else {
+		log.Printf("[MARK ONE] No project map found in config")
+	}
+
+	// For each value in the API response, convert it to match what's in the config (if there's a match.)
+	l := v.(map[string]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for id, raw := range l {
+		original := raw.(map[string]interface{})
+		var t map[string]interface{}
+	
+		if cfgItem, ok := configProjects[id]; ok {
+			t = cfgItem
+		} else {
+			t = map[string]interface{}{
+				"id": id,
+				"project_id": original["projectId"],
+			}
+		}
+		transformed = append(transformed, t)
+	}
+	return transformed
+}

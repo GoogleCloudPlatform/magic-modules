@@ -183,6 +183,7 @@ properties:
         description: |
           A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
         key_name: 'id'
+        custom_flatten: templates/terraform/custom_flatten/compute_reservation_project_map.go.tmpl
         value_type:
           type: NestedObject
           properties:
