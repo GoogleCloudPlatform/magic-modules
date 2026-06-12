@@ -633,12 +633,12 @@ func ResourceContainerCluster() *schema.Resource {
 							},
 						},
 						"slurm_operator_config": {
-							Type:          schema.TypeList,
-							Optional:      true,
-							Computed:      true,
-							AtLeastOneOf:  addonsConfigKeys,
-							MaxItems:      1,
-							Description:   `The status of the Slurm Operator addon, which creates slurm related CRDs and KCP pods to manage them. Defaults to disabled for Standard clusters; set enabled = true to enable. It can not be enabled for Autopilot clusters.`,
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Slurm Operator addon, which creates slurm related CRDs and KCP pods to manage them. Defaults to disabled for Standard clusters; set enabled = true to enable. It can not be enabled for Autopilot clusters.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
