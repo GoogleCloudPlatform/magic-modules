@@ -53,7 +53,9 @@ func (c *ProjectCai2hclConverter) convertResourceData(asset caiasset.Asset, opti
 	hclData := make(map[string]interface{})
 	hclData["name"] = assetResourceData["name"]
 	hclData["project_id"] = assetResourceData["projectId"]
-	hclData["labels"] = tgcresource.RemoveTerraformAttributionLabel(assetResourceData["labels"])
+	if options != nil && options.AreNewResources {
+		hclData["labels"] = tgcresource.RemoveTerraformAttributionLabel(assetResourceData["labels"])
+	}
 	if strings.Contains(asset.Resource.Parent, "folders/") {
 		hclData["folder_id"] = tgcresource.ParseFieldValue(asset.Resource.Parent, "folders")
 	} else if strings.Contains(asset.Resource.Parent, "organizations/") {
