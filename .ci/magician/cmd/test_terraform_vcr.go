@@ -657,8 +657,13 @@ func getMentions(prNumber string, gh GithubClient) string {
 func appendVCRResultToDiffComment(prNumber string, content string, gh GithubClient, rnr ExecRunner) error {
 	var diffComment *github.PullRequestComment
 
+	workspace := os.Getenv("WORKSPACE")
+	if workspace == "" {
+		workspace = "/workspace"
+	}
+
 	// Try to find by ID from file
-	if idStr, err := rnr.ReadFile("/workspace/diff_comment_id.txt"); err == nil {
+	if idStr, err := rnr.ReadFile(filepath.Join(workspace, "diff_comment_id.txt")); err == nil {
 		if id, err := strconv.Atoi(strings.TrimSpace(idStr)); err == nil {
 			if comment, err := gh.GetPullRequestComment(id); err == nil {
 				diffComment = &comment
