@@ -5,8 +5,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestExecVCRMerge(t *testing.T) {
@@ -15,33 +13,16 @@ func TestExecVCRMerge(t *testing.T) {
 		baseBranch      string
 		commitSha       string
 		lsReturnedError bool
-		calledMethods   []string
 	}{
 		{
 			name:       "base branch is main",
 			baseBranch: "main",
 			commitSha:  "sha",
-			calledMethods: []string{
-				"gcloud storage ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
-				"gcloud storage cp gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/fixtures/",
-				"gcloud storage rm --recursive gs://ci-vcr-cassettes/refs/heads/auto-pr-123/",
-				"gcloud storage ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
-				"gcloud storage cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/beta/fixtures/",
-				"gcloud storage rm --recursive gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/",
-			},
 		},
 		{
 			name:       "base branch is not main",
 			baseBranch: "test-branch",
 			commitSha:  "sha",
-			calledMethods: []string{
-				"gcloud storage ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
-				"gcloud storage cp gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/refs/branches/test-branch/fixtures/",
-				"gcloud storage rm --recursive gs://ci-vcr-cassettes/refs/heads/auto-pr-123/",
-				"gcloud storage ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
-				"gcloud storage cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/beta/refs/branches/test-branch/fixtures/",
-				"gcloud storage rm --recursive gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/",
-			},
 		},
 		{
 			name:       "pr not found",
@@ -53,10 +34,6 @@ func TestExecVCRMerge(t *testing.T) {
 			commitSha:       "sha",
 			lsReturnedError: true,
 			baseBranch:      "main",
-			calledMethods: []string{
-				"gcloud storage ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
-				"gcloud storage ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
-			},
 		},
 	}
 
@@ -67,34 +44,65 @@ func TestExecVCRMerge(t *testing.T) {
 		},
 		calledMethods: make(map[string][][]any),
 	}
-	for _, test := range testCases {
-		t.Run(test.name, func(t *testing.T) {
-			runner := &mockRunner{
-				cwd:           "cwd",
-				calledMethods: make(map[string][]ParameterList),
-				cmdResults:    make(map[string]string),
-			}
-			if test.lsReturnedError {
-				runner.notifyError = true
-			}
-			err := execVCRMerge(githubClient, test.commitSha, test.baseBranch, runner)
-			if err != nil {
-				t.Fatalf("execVCRMerge = %s, want = nil", err)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			sb := newSandbox(t)
+
+			// Intercepts the hardcoded `gcloud storage` commands and translates gs:// URLs into local directory operations.
+			fakeGcloud := `#!/bin/bash
+				if [ "$1" = "storage" ]; then
+					if [ "$2" = "ls" ]; then
+						TARGET=$(echo $3 | sed 's|gs://|gs/|')
+						ls "$TARGET" > /dev/null 2>&1
+						exit $?
+					elif [ "$2" = "cp" ]; then
+						SRC=$(echo $3 | sed 's|gs://|gs/|' | sed 's|/\*$||')
+						DEST=$(echo $4 | sed 's|gs://|gs/|')
+						mkdir -p "$DEST"
+						cp -r "$SRC"/* "$DEST"
+					elif [ "$2" = "rm" ]; then
+						TARGET=$(echo $4 | sed 's|gs://|gs/|')
+						rm -r "$TARGET"
+					fi
+				fi`
+			sb.Runner.WriteFile("gcloud", fakeGcloud)
+			sb.Runner.MustRun("chmod", []string{"+x", "gcloud"}, nil)
+
+			origPath := os.Getenv("PATH")
+			os.Setenv("PATH", sb.Dir+":"+origPath)
+			defer os.Setenv("PATH", origPath)
+
+			if !tc.lsReturnedError && tc.name != "pr not found" {
+				sb.Runner.MustRun("mkdir", []string{"-p", "gs/ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures"}, nil)
+				sb.Runner.MustRun("mkdir", []string{"-p", "gs/ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures"}, nil)
+				sb.Runner.WriteFile("gs/ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/dummy1.txt", "data")
+				sb.Runner.WriteFile("gs/ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/dummy2.txt", "data")
 			}
 
-			got, ok := runner.Calls("Run")
-			if !ok && test.calledMethods != nil {
-				t.Fatalf("execVCRMerge() expect %d calls, got none", len(test.calledMethods))
+			err := execVCRMerge(githubClient, tc.commitSha, tc.baseBranch, sb.Runner)
+			if err != nil {
+				t.Fatalf("execVCRMerge() failed: %v", err)
 			}
-			var want []ParameterList
-			for _, cmd := range test.calledMethods {
-				words := strings.Split(cmd, " ")
-				if len(words) > 0 {
-					want = append(want, []any{"cwd", words[0], words[1:], map[string]string(nil)})
+
+			if !tc.lsReturnedError && tc.name != "pr not found" {
+				destBranchPath := ""
+				if tc.baseBranch != "main" {
+					destBranchPath = "/refs/branches/" + tc.baseBranch
 				}
-			}
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Fatalf("execVCRMerge() executed commands diff = %s\n want = %+v, got = %+v", diff, want, got)
+
+				if _, err := os.Stat(sb.Dir + "/gs/ci-vcr-cassettes" + destBranchPath + "/fixtures/dummy1.txt"); os.IsNotExist(err) {
+					t.Fatalf("Expected file to be copied to /gs/ci-vcr-cassettes%s/fixtures/dummy1.txt", destBranchPath)
+				}
+				if _, err := os.Stat(sb.Dir + "/gs/ci-vcr-cassettes/beta" + destBranchPath + "/fixtures/dummy2.txt"); os.IsNotExist(err) {
+					t.Fatalf("Expected file to be copied to /gs/ci-vcr-cassettes/beta%s/fixtures/dummy2.txt", destBranchPath)
+				}
+
+				if _, err := os.Stat(sb.Dir + "/gs/ci-vcr-cassettes/refs/heads/auto-pr-123/"); !os.IsNotExist(err) {
+					t.Fatalf("Expected source directory /gs/ci-vcr-cassettes/refs/heads/auto-pr-123/ to be deleted")
+				}
+				if _, err := os.Stat(sb.Dir + "/gs/ci-vcr-cassettes/beta/refs/heads/auto-pr-123/"); !os.IsNotExist(err) {
+					t.Fatalf("Expected source directory /gs/ci-vcr-cassettes/beta/refs/heads/auto-pr-123/ to be deleted")
+				}
 			}
 		})
 	}
