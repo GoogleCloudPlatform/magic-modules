@@ -1,5 +1,6 @@
 package compute
 
+{{- if ne $.TargetVersionName "ga" }}
 import (
 	"reflect"
 	"testing"
@@ -110,3 +111,4 @@ func TestReservationDiffSuppress(t *testing.T) {
 		}
 	}
 }
+{{- end }}
