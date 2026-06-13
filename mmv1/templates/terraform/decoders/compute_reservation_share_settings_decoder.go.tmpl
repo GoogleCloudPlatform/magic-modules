@@ -1,3 +1,4 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 if shareSettingsVal, ok := res["shareSettings"]; ok && shareSettingsVal != nil {
 	shareSettings := shareSettingsVal.(map[string]interface{})
 
@@ -126,5 +127,6 @@ if shareSettingsVal, ok := res["shareSettings"]; ok && shareSettingsVal != nil {
 
 	res["shareSettings"] = shareSettings
 }
+{{- end }}
 
 return res, nil
