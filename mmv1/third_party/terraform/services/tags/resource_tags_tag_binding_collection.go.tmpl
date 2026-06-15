@@ -40,13 +40,16 @@ func ResourceTagsTagBindingCollection() *schema.Resource {
 			"location": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Default:     "global",
 				Description: `The location of the TagBindingCollection.`,
 			},
 			"full_resource_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: `The full resource name of the resource to which the tags are bound. E.g. //cloudresourcemanager.googleapis.com/projects/123`,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: tpgresource.ProjectNumberDiffSuppress,
+				Description:      `The full resource name of the resource to which the tags are bound. E.g. //cloudresourcemanager.googleapis.com/projects/123`,
 			},
 			"tags": {
 				Type:     schema.TypeMap,

@@ -1256,6 +1256,245 @@ resource "google_tags_tag_binding_collection" "regional" {
 `, context)
 }
 
+func TestAccTagsTagBindingCollection_forceNew(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	context := map[string]interface{}{
+		"org_id":           orgId,
+		"key_short_name":   "tf-test-fn-" + acctest.RandString(t, 6),
+		"value_short_name": "tf-test-val-" + acctest.RandString(t, 6),
+		"project_id":       envvar.GetTestProjectFromEnv(),
+		"instance_name":    "tf-test-vm-fn-" + acctest.RandString(t, 10),
+		"zone_1":           "us-central1-a",
+		"zone_2":           "us-central1-b",
+	}
+
+	keyNamespaced := fmt.Sprintf("%s/%s", orgId, context["key_short_name"])
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create TagBindingCollection on VM in zone_1
+			{
+				Config: testAccTagsTagBindingCollection_forceNewConfig1(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.fn", "tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.fn", fmt.Sprintf("tags.%s", keyNamespaced), context["value_short_name"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.fn", "location", "us-central1-a"),
+				),
+			},
+			// Step 2: Update configuration to target VM in zone_2! This must trigger a perfect ForceNew replacement!
+			{
+				Config: testAccTagsTagBindingCollection_forceNewConfig2(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.fn", "tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.fn", fmt.Sprintf("tags.%s", keyNamespaced), context["value_short_name"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.fn", "location", "us-central1-b"),
+				),
+			},
+		},
+	})
+}
+
+func testAccTagsTagBindingCollection_forceNewConfig1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-11"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance" "vm1" {
+  provider     = google-beta
+  name         = "%{instance_name}-1"
+  machine_type = "e2-micro"
+  zone         = "%{zone_1}"
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_instance" "vm2" {
+  provider     = google-beta
+  name         = "%{instance_name}-2"
+  machine_type = "e2-micro"
+  zone         = "%{zone_2}"
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_tags_tag_key" "key" {
+  provider    = google-beta
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{key_short_name}"
+}
+
+resource "google_tags_tag_value" "value" {
+  provider    = google-beta
+  parent      = google_tags_tag_key.key.id
+  short_name  = "%{value_short_name}"
+}
+
+resource "google_tags_tag_binding_collection" "fn" {
+  provider = google-beta
+  full_resource_name = "//compute.googleapis.com/projects/%{project_id}/zones/%{zone_1}/instances/${google_compute_instance.vm1.instance_id}"
+  location = "us-central1-a"
+
+  tags = {
+    "${google_tags_tag_key.key.namespaced_name}" = google_tags_tag_value.value.short_name
+  }
+}
+`, context)
+}
+
+func testAccTagsTagBindingCollection_forceNewConfig2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-11"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance" "vm1" {
+  provider     = google-beta
+  name         = "%{instance_name}-1"
+  machine_type = "e2-micro"
+  zone         = "%{zone_1}"
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_instance" "vm2" {
+  provider     = google-beta
+  name         = "%{instance_name}-2"
+  machine_type = "e2-micro"
+  zone         = "%{zone_2}"
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_tags_tag_key" "key" {
+  provider    = google-beta
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{key_short_name}"
+}
+
+resource "google_tags_tag_value" "value" {
+  provider    = google-beta
+  parent      = google_tags_tag_key.key.id
+  short_name  = "%{value_short_name}"
+}
+
+resource "google_tags_tag_binding_collection" "fn" {
+  provider = google-beta
+  full_resource_name = "//compute.googleapis.com/projects/%{project_id}/zones/%{zone_2}/instances/${google_compute_instance.vm2.instance_id}"
+  location = "us-central1-b"
+
+  tags = {
+    "${google_tags_tag_key.key.namespaced_name}" = google_tags_tag_value.value.short_name
+  }
+}
+`, context)
+}
+
+func TestAccTagsTagBindingCollection_regionalMismatch(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	context := map[string]interface{}{
+		"org_id":           orgId,
+		"key_short_name":   "tf-test-err-" + acctest.RandString(t, 6),
+		"value_short_name": "tf-test-val-" + acctest.RandString(t, 6),
+		"project_id":       envvar.GetTestProjectFromEnv(),
+		"instance_name":    "tf-test-vm-err-" + acctest.RandString(t, 10),
+		"zone":             "us-central1-a",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			// Attempt to bind to a Zonal Compute VM but pass location = "global"
+			{
+				Config:      testAccTagsTagBindingCollection_regionalMismatchConfig(context),
+				ExpectError: regexp.MustCompile("Must be a valid One Platform resource name of a tag-compatible global resource"),
+			},
+		},
+	})
+}
+
+func testAccTagsTagBindingCollection_regionalMismatchConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-11"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance" "instance" {
+  provider     = google-beta
+  name         = "%{instance_name}"
+  machine_type = "e2-micro"
+  zone         = "%{zone}"
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_tags_tag_key" "key" {
+  provider    = google-beta
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{key_short_name}"
+}
+
+resource "google_tags_tag_value" "value" {
+  provider    = google-beta
+  parent      = google_tags_tag_key.key.id
+  short_name  = "%{value_short_name}"
+}
+
+resource "google_tags_tag_binding_collection" "err" {
+  provider           = google-beta
+  full_resource_name = "//compute.googleapis.com/projects/%{project_id}/zones/%{zone}/instances/${google_compute_instance.instance.instance_id}"
+  location           = "global"
+
+  tags = {
+    "${google_tags_tag_key.key.namespaced_name}" = google_tags_tag_value.value.short_name
+  }
+}
+`, context)
+}
+
 func testAccCheckBindingUpdatedExternally_VM(t *testing.T, contextMap map[string]interface{}, keyNamespacedName, newValueShortName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
