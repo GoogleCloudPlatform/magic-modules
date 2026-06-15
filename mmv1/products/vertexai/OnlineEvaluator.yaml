@@ -27,20 +27,20 @@ async:
   operation:
     base_url: '{{op_id}}'
   actions:
-      - create
-      - update
-      - delete
+    - create
+    - update
+    - delete
   result:
     resource_inside_response: true
 autogen_status: T25saW5lRXZhbHVhdG9y
 parameters:
-    - name: region
-      type: String
-      required: true
-      description: Resource ID segment making up resource `name`. It identifies the resource
-        within its parent collection as described in https://google.aip.dev/122.
-      immutable: true
-      url_param_only: true
+  - name: region
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource
+      within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
 properties:
   - name: agentResource
     type: String
@@ -168,9 +168,19 @@ properties:
     item_type:
       type: NestedObject
       properties:
+        # TODO: Support structured metric config instead of JSON string.
         - name: metric
           type: String
-          description: Inline metric config. Provide this field as a JSON-formatted string.
+          description: |
+            Inline metric config. Provide this field as a JSON-formatted string.
+            Suggested predefined metricSpecName values:
+            - `final_response_quality_v1`
+            - `tool_use_quality_v1`
+            - `hallucination_v1`
+            - `safety_v1`
+            - `multi_turn_task_success_v1`
+            - `multi_turn_tool_use_quality_v1`
+            - `multi_turn_trajectory_quality_v1`
           custom_expand: 'templates/terraform/custom_expand/vertexai_online_evaluator_metric.go.tmpl'
           custom_flatten: 'templates/terraform/custom_flatten/vertexai_online_evaluator_metric.go.tmpl'
         - name: metricResourceName
@@ -208,7 +218,7 @@ properties:
     type: String
     description: Timestamp when the OnlineEvaluator was last updated.
     output: true
-  
+
 examples:
   - name: 'vertex_ai_online_evaluator_basic'
     primary_resource_id: 'evaluator'
