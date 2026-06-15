@@ -18538,6 +18538,36 @@ func TestAccContainerCluster_withTaintConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_skipNodePoolRefresh(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	poolName := fmt.Sprintf("tf-test-pool-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_skipNodePoolRefresh(clusterName, poolName, networkName, subnetworkName, true),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.#", "0"),
+				),
+			},
+			{
+				Config: testAccContainerCluster_skipNodePoolRefresh(clusterName, poolName, networkName, subnetworkName, false),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.#", "1"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.0.name", poolName),
+				),
+			},
+		},
+	})
+}
+
 func testAccContainerCluster_withTaintConfig(cluster, networkName, subnetworkName, behavior string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -18659,4 +18689,33 @@ resource "google_container_cluster" "cluster" {
   deletion_protection = false
 }
 `, cluster, networkName, subnetworkName, behavior)
+}
+
+func testAccContainerCluster_skipNodePoolRefresh(clusterName, poolName, networkName, subnetworkName string, skipRefresh bool) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  network             = "%s"
+  subnetwork          = "%s"
+  deletion_protection = false
+
+  # We must delete the default node pool to ensure we only have our standalone node pool
+  remove_default_node_pool = true
+
+  skip_node_pool_refresh = %t
+}
+
+resource "google_container_node_pool" "extra" {
+  name       = "%s"
+  location   = "us-central1-a"
+  cluster    = google_container_cluster.primary.name
+  node_count = 1
+
+  node_config {
+    machine_type = "e2-medium"
+  }
+}
+`, clusterName, networkName, subnetworkName, skipRefresh, poolName)
 }
