@@ -14,11 +14,10 @@
 ---
 name: Feed
 description: The FeedsService is responsible for configuring and managing the ingestion of third-party security data and logs into Google Security Operations through various feed creation, updates, and lifecycle management, and schema validation.
-min_version: 'beta'
 references:
   guides:
     'Feed management overview': 'https://docs.cloud.google.com/chronicle/docs/administration/feed-management-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.feeds'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.feeds'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds
