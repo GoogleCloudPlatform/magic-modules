@@ -40,6 +40,7 @@ type TgcMetadataPayload struct {
 	ResourceMetadata map[string]*ResourceMetadata `json:"resource_metadata"`
 	PrimaryResource  string                       `json:"primary_resource"`
 	CaiReadTime      time.Time                    `json:"cai_read_time"`
+	RawStateFile     string                       `json:"raw_state_file,omitempty"`
 }
 
 type ResourceTestData struct {
@@ -51,6 +52,7 @@ type StepTestData struct {
 	StepNumber       int
 	PrimaryResource  string
 	ResourceTestData map[string]ResourceTestData // key is resource address
+	RawStateFile     string
 }
 
 type Resource struct {
@@ -83,12 +85,10 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 		retries := 0
 		for i := 0; i < len(TestsMetadata); i++ {
 			var metadata map[string]map[int]TgcMetadataPayload
-			if os.Getenv("WRITE_FILES") != "" {
-				filename := fmt.Sprintf("../../../test_mata/tests_metadata_%s.json", currentDate.Format(ymdFormat))
-				_, err := os.Stat(filename)
-				if !os.IsNotExist(err) {
-					metadata = readTestsDataFromLocalFile(filename)
-				}
+			filename := fmt.Sprintf("../../../test_mata/tests_metadata_%s.json", currentDate.Format(ymdFormat))
+			_, err = os.Stat(filename)
+			if !os.IsNotExist(err) {
+				metadata = readTestsDataFromLocalFile(filename)
 			}
 			if metadata == nil {
 				if client == nil {
@@ -101,8 +101,8 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 				}
 				metadata, err = readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
 				if os.Getenv("WRITE_FILES") != "" {
-					os.MkdirAll("../../../test_mata", 0755)
-					writeJSONFile(fmt.Sprintf("../../../test_mata/tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
+          os.MkdirAll("../../../test_mata", 0755)
+          writeJSONFile(fmt.Sprintf("../../../test_mata/tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
 				}
 
 				if err != nil {
@@ -182,6 +182,7 @@ func readTestsDataFromLocalFile(filename string) map[string]map[int]TgcMetadataP
 
 	err = json.Unmarshal(data, &metadata)
 	if err != nil {
+		log.Printf("Error unmarshaling local file %s: %v", filename, err)
 		return nil
 	}
 
@@ -262,6 +263,7 @@ func prepareTestData(testName string, stepNumber int, retries int) (*StepTestDat
 			StepNumber:       stepNumber,
 			PrimaryResource:  stepMetadata.PrimaryResource,
 			ResourceTestData: resourceTestData,
+			RawStateFile:     stepMetadata.RawStateFile,
 		}, nil
 	}
 

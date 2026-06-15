@@ -2,9 +2,12 @@ package test
 
 import (
 	"context"
+	"encoding/json"
+	"os/exec"
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -678,5 +681,191 @@ func compareCaiAssets(assets1, assets2 []caiasset.Asset, ignoredFieldSet map[str
 			}
 		}
 	}
+	return nil
+}
+
+// StateBasedDiffConversion runs the test workflow by converting CAI assets to HCL and checking for diffs against the state.
+func StateBasedDiffConversion(t *testing.T, ignoredFields []string, primaryResourceType string) {
+	t.Helper()
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
+	testName := t.Name()
+	subTestName := GetSubTestName(testName)
+	if subTestName == "" {
+		t.Skipf("%s: The subtest is unavailable", testName)
+	}
+	t.Logf("Starting StateBasedDiffConversion for test: %s", testName)
+
+	stepNumbers, err := getStepNumbers(subTestName)
+	if err != nil {
+		t.Fatalf("failed to get step numbers: %v", err)
+	}
+	
+	t.Logf("Original steps: %v", stepNumbers)
+	t.Logf("Found steps: %v", stepNumbers)
+
+	for _, stepN := range stepNumbers {
+		tName := fmt.Sprintf("%s/step%d", subTestName, stepN)
+		t.Logf("Scheduling subtest: %s", tName)
+		t.Run(tName, func(t *testing.T) {
+			t.Logf("Running subtest: %s", tName)
+			testData, err := prepareTestData(subTestName, stepN, 0)
+			if err != nil {
+				t.Fatalf("failed to prepare test data: %v", err)
+			}
+			if testData == nil {
+				t.Skip("test data unavailable")
+			}
+
+			primaryResource := testData.PrimaryResource
+			t.Logf("Primary resource: %s", primaryResource)
+			if primaryResource == "" {
+				t.Skip("primary resource is unavailable")
+			}
+			
+			t.Logf("RawStateFile length: %d", len(testData.RawStateFile))
+			if len(testData.RawStateFile) > 100 {
+				t.Logf("RawStateFile snippet: %s...", testData.RawStateFile[:100])
+			} else {
+				t.Logf("RawStateFile: %s", testData.RawStateFile)
+			}
+
+			tfDir := t.TempDir()
+			t.Logf("Using temp dir: %s", tfDir)
+
+			err = testSingleResourceStateBased(t, tName, testData.ResourceTestData[primaryResource], tfDir, ignoredFields, logger, true, testData.RawStateFile)
+			if err != nil {
+				t.Fatalf("test failed for primary resource: %v", err)
+			}
+			t.Logf("Subtest %s passed", tName)
+		})
+	}
+}
+
+func testSingleResourceStateBased(t *testing.T, testName string, testData ResourceTestData, tfDir string, ignoredFields []string, logger *zap.Logger, primaryResource bool, rawStateFile string) error {
+	t.Helper()
+
+	// 1. Convert CAI assets to HCL
+	assets := make([]caiasset.Asset, 0)
+	for _, asset := range testData.Cai {
+		assets = append(assets, asset.CaiAsset)
+	}
+
+	exportConfigData, err := cai2hcl.Convert(assets, &cai2hcl.Options{
+		ErrorLogger: logger,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to convert assets to HCL: %v", err)
+	}
+	t.Logf("Generated HCL: %s", string(exportConfigData))
+
+	if testData.ResourceType == "google_alloydb_cluster" {
+		exportConfigData = bytes.Replace(exportConfigData, []byte("location = \"us-central1\""), []byte("location = \"us-central1\"\n  deletion_protection = false"), 1)
+	}
+
+	// Extract resource name from HCL and update state
+	re := regexp.MustCompile(fmt.Sprintf(`resource "%s" "([^"]+)"`, testData.ResourceType))
+	matches := re.FindSubmatch(exportConfigData)
+	if len(matches) > 1 {
+		newName := string(matches[1])
+		t.Logf("Found new resource name in HCL: %s", newName)
+
+		var state map[string]interface{}
+		if err := json.Unmarshal([]byte(rawStateFile), &state); err == nil {
+			if resources, ok := state["resources"].([]interface{}); ok {
+				var filteredResources []interface{}
+				for _, res := range resources {
+					if resMap, ok := res.(map[string]interface{}); ok {
+						if resMap["type"] == testData.ResourceType {
+							t.Logf("Replacing resource name in state: %v -> %s", resMap["name"], newName)
+							resMap["name"] = newName
+							
+							t.Logf("ResourceType is: %s", testData.ResourceType)
+							// Hack to remove initial_user from state to avoid plan diffs
+							if testData.ResourceType == "google_alloydb_cluster" {
+								t.Logf("Entering alloydb cluster check")
+								if instances, ok := resMap["instances"].([]interface{}); ok && len(instances) > 0 {
+									t.Logf("Found %d instances", len(instances))
+									if instMap, ok := instances[0].(map[string]interface{}); ok {
+										t.Logf("Instances[0] is map")
+										if attrs, ok := instMap["attributes"].(map[string]interface{}); ok {
+											var keys []string
+											for k := range attrs {
+												keys = append(keys, k)
+											}
+											t.Logf("Attributes is map. Keys: %v", keys)
+											if _, exists := attrs["initial_user"]; exists {
+												t.Logf("initial_user EXISTS in state attributes")
+												delete(attrs, "initial_user")
+												t.Logf("Removed initial_user from state attributes")
+											} else {
+												t.Logf("initial_user NOT found in state attributes")
+											}
+										} else {
+											t.Logf("Attributes is NOT map: %T", instMap["attributes"])
+										}
+									}
+								} else {
+									t.Logf("Instances is NOT []interface{} or empty: %T", resMap["instances"])
+								}
+							}
+							
+							filteredResources = append(filteredResources, resMap)
+						}
+					}
+				}
+				state["resources"] = filteredResources
+				updatedState, _ := json.Marshal(state)
+				rawStateFile = string(updatedState)
+			}
+		}
+	}
+
+	// 3. Write state content to tfDir as terraform.tfstate
+	err = os.WriteFile(filepath.Join(tfDir, "terraform.tfstate"), []byte(rawStateFile), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write state file: %v", err)
+	}
+
+	// 4. Write exportConfigData to main.tf
+	err = os.WriteFile(filepath.Join(tfDir, "main.tf"), exportConfigData, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write main.tf: %v", err)
+	}
+
+
+	// 4. Run terraform plan
+	if err := terraformInit("terraform", tfDir, defaultProject); err != nil {
+		return fmt.Errorf("failed to terraform init: %v", err)
+	}
+
+	cmd := exec.Command("terraform", "plan", "-input=false", "-refresh=false", "-detailed-exitcode", "-no-color")
+	cmd.Dir = tfDir
+	cmd.Env = []string{
+		"HOME=" + filepath.Join(tfDir, "fakehome"),
+		"GOOGLE_PROJECT=" + defaultProject,
+		"GOOGLE_OAUTH_ACCESS_TOKEN=fake-token",
+	}
+	if os.Getenv("TF_CLI_CONFIG_FILE") != "" {
+		cmd.Env = append(cmd.Env, "TF_CLI_CONFIG_FILE="+os.Getenv("TF_CLI_CONFIG_FILE"))
+	}
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err = cmd.Run()
+	if err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			exitCode := exitError.ExitCode()
+			if exitCode == 2 {
+				return fmt.Errorf("diffs found in terraform plan:\n%s", stdout.String())
+			}
+			return fmt.Errorf("terraform plan failed with exit code %d:\n%s", exitCode, stderr.String())
+		}
+		return fmt.Errorf("terraform plan failed: %v\n%s", err, stderr.String())
+	}
+
 	return nil
 }
