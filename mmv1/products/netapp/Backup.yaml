@@ -151,7 +151,6 @@ properties:
       Details of the ONTAP source volume and snapshot.
     required: false
     immutable: true
-    min_version: beta
     properties:
       - name: 'storagePool'
         type: String
@@ -171,6 +170,7 @@ properties:
         description: |
           The UUID of the ONTAP source snapshot.
         immutable: true
+        default_from_api: true
   - name: 'volumeRegion'
     type: String
     description: |

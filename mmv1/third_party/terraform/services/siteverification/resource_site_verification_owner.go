@@ -61,7 +61,7 @@ func resourceSiteVerificationOwnerCreate(d *schema.ResourceData, meta interface{
 
 	log.Printf("[DEBUG] Reading existing WebResource")
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{SiteVerificationBasePath}}{{web_resource_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{web_resource_id}}")
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func resourceSiteVerificationOwnerRead(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{SiteVerificationBasePath}}{{web_resource_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{web_resource_id}}")
 	if err != nil {
 		return err
 	}
@@ -215,7 +215,7 @@ func resourceSiteVerificationOwnerDelete(d *schema.ResourceData, meta interface{
 
 	billingProject := ""
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{SiteVerificationBasePath}}{{web_resource_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{web_resource_id}}")
 	if err != nil {
 		return err
 	}

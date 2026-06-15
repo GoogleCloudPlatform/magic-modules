@@ -16,62 +16,71 @@ name: DataPolicy
 description: BigQuery Data Policy
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/bigquery/docs/column-data-masking-intro'
-  api: 'https://cloud.google.com/bigquery/docs/reference/bigquerydatapolicy/rest/v2/projects.locations.dataPolicies'
+    Official Documentation: https://cloud.google.com/bigquery/docs/column-data-masking-intro
+  api: https://cloud.google.com/bigquery/docs/reference/bigquerydatapolicy/rest/v2/projects.locations.dataPolicies
 docs: null
-id_format: 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/dataPolicies'
-self_link: 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/dataPolicies'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/dataPolicies
+self_link: projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}
+create_url: projects/{{project}}/locations/{{location}}/dataPolicies
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: POST
+  parent_resource_attribute: data_policy_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}
+    - '{{data_policy_id}}'
+id_format: projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
+  - projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}
   - '{{project}}/{{location}}/{{data_policy_id}}'
   - '{{location}}/{{data_policy_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-iam_policy:
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'data_policy_id'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
-    - '{{data_policy_id}}'
 custom_code:
   encoder: templates/terraform/encoders/bigquery_datapolicyv2_datapolicy.go.tmpl
   update_encoder: templates/terraform/update_encoder/bigquery_datapolicyv2_datapolicy.go.tmpl
-examples:
-  - name: 'bigquery_datapolicyv2_datapolicy_basic'
-    primary_resource_id: 'basic_data_policy'
-    vars:
-      data_policy_id: 'basic_data_policy'
-  - name: 'bigquery_datapolicyv2_datapolicy_predefined_masking'
-    primary_resource_id: 'predefined_masking_data_policy'
-    vars:
-      data_policy_id: 'predefined_masking_data_policy'
-  - name: 'bigquery_datapolicyv2_datapolicy_routine'
-    primary_resource_id: 'routine_data_policy'
-    vars:
-      data_policy_id: 'routine_data_policy'
-      dataset_id: 'dataset_id'
-  - name: 'bigquery_datapolicyv2_datapolicy_withgrantees'
-    primary_resource_id: 'data_policy_with_grantees'
+samples:
+  - name: bigquery_datapolicyv2_datapolicy_basic
+    primary_resource_id: basic_data_policy
+    steps:
+      - name: bigquery_datapolicyv2_datapolicy_basic
+        resource_id_vars:
+          data_policy_id: basic_data_policy
+  - name: bigquery_datapolicyv2_datapolicy_predefined_masking
+    primary_resource_id: predefined_masking_data_policy
+    steps:
+      - name: bigquery_datapolicyv2_datapolicy_predefined_masking
+        resource_id_vars:
+          data_policy_id: predefined_masking_data_policy
+  - name: bigquery_datapolicyv2_datapolicy_routine
+    primary_resource_id: routine_data_policy
+    steps:
+      - name: bigquery_datapolicyv2_datapolicy_routine
+        resource_id_vars:
+          data_policy_id: routine_data_policy
+          dataset_id: dataset_id
+  - name: bigquery_datapolicyv2_datapolicy_withgrantees
+    primary_resource_id: data_policy_with_grantees
     exclude_test: true
-    vars:
-      data_policy_id: 'data_policy_with_grantees'
-  - name: 'bigquery_datapolicyv2_datapolicy_withgrantees_test'
-    primary_resource_id: 'data_policy_with_grantees'
-    exclude_docs: true
-    vars:
-      data_policy_id: 'data_policy_with_grantees'
+    steps:
+      - name: bigquery_datapolicyv2_datapolicy_withgrantees
+        resource_id_vars:
+          data_policy_id: data_policy_with_grantees
+  - name: bigquery_datapolicyv2_datapolicy_withgrantees_test
+    primary_resource_id: data_policy_with_grantees
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_datapolicyv2_datapolicy_withgrantees_test
+        resource_id_vars:
+          data_policy_id: data_policy_with_grantees
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource
-      within its parent collection as described in https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
@@ -99,7 +108,7 @@ properties:
           The name of the BigQuery routine that contains the custom masking
           routine, in the format of
           `projects/{project_number}/datasets/{dataset_id}/routines/{routine_id}`.
-        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
   - name: dataPolicyType
     type: String
     description: |-

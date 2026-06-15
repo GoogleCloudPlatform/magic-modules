@@ -14,7 +14,6 @@
 ---
 name: 'RegionSslPolicy'
 api_resource_type_kind: SslPolicy
-kind: 'compute#sslPolicy'
 description: |
   Represents a Regional SSL policy. SSL policies give you the ability to control the
   features of SSL that your SSL proxy or HTTPS load balancer negotiates.
@@ -26,10 +25,14 @@ docs:
 base_url: 'projects/{{project}}/regions/{{region}}/sslPolicies'
 has_self_link: true
 update_verb: 'PATCH'
+collection_url_key: 'items'
+kind: 'compute#sslPolicy'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_diff:
+  - 'regionSslPolicyCustomizeDiff'
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -37,12 +40,9 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_ssl_policy.tmpl'
-custom_diff:
-  - 'regionSslPolicyCustomizeDiff'
 examples:
   - name: 'region_ssl_policy_basic'
     primary_resource_id: 'region-ssl-policy'
@@ -140,6 +140,7 @@ properties:
       type: String
   - name: 'postQuantumKeyExchange'
     type: Enum
+    is_missing_in_cai: true
     description: |
       One of `DEFAULT`, `ENABLED`, or `DEFERRED`. Controls whether the load balancer negotiates
       X25519MLKEM768 key exchange when clients advertise support for it.

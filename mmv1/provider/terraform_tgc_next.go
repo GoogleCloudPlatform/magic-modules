@@ -124,15 +124,17 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 
+	fileNamePrefix := tgc.ResourceGoFilename(object)
+
 	converters := []string{"tfplan2cai", "cai2hcl"}
 	for _, converter := range converters {
 		templatePath := fmt.Sprintf("templates/tgc_next/%s/resource_converter.go.tmpl", converter)
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_%s.go", productName, google.Underscore(object.Name), converter))
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", fileNamePrefix, converter))
 		templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 	}
 
 	templatePath := "templates/tgc_next/services/resource.go.tmpl"
-	fileName := fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name))
+	fileName := fmt.Sprintf("%s.go", fileNamePrefix)
 	targetFilePath := path.Join(targetFolder, fileName)
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 	tgc.replaceImportPath(targetFolder, fileName)
@@ -157,7 +159,7 @@ func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resou
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_generated_test.go", tgc.ResourceGoFilename(object)))
 	templateData.GenerateTGCNextTestFile(targetFilePath, object)
 	return nil
 }
@@ -348,25 +350,9 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	}
 }
 
-func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resource) {
-	for _, example := range object.Examples {
-		if example.ExcludeTest {
-			continue
-		}
-		if object.ProductMetadata.VersionObjOrClosest(tgc.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
-			continue
-		}
-		object.TGCTests = append(object.TGCTests, resource.TGCTest{
-			Name: "TestAcc" + example.TestSlug(object.ProductMetadata.Name, object.Name),
-			Skip: example.TGCSkipTest,
-		})
-	}
-}
-
 func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resource) {
 	if object.Examples != nil {
-		tgc.addTestsFromExamples(object)
-		return
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 	for _, sample := range object.Samples {
 		if sample.ExcludeTest {
@@ -465,7 +451,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 		if errors.Is(err, os.ErrNotExist) {
 			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
 				log.Printf("no handwritten test file found at %s", handwrittenTestFilePath)
-				return nil
+				return tgc.addTestsByTestNameMatch(object)
 			}
 			handwrittenTestFilePath += ".tmpl"
 			data, err = fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)

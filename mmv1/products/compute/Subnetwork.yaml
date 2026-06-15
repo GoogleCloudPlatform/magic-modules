@@ -44,6 +44,7 @@ references:
 base_url: projects/{{project}}/regions/{{region}}/subnetworks
 immutable: true
 has_self_link: true
+generate_list_resource: true
 bypass_clientside_update_check: true
 collection_url_key: items
 iam_policy:
@@ -330,7 +331,6 @@ properties:
             function: verify.ValidateGCEName
         - name: ipCidrRange
           type: String
-          diff_suppress_func: IpDiffSuppress
           description: |
             The range of IP addresses belonging to this subnetwork secondary
             range. Provide this property when you create the subnetwork.
@@ -595,6 +595,7 @@ properties:
     description: |
       'Configures subnet mask resolution for this subnetwork.'
     immutable: true
+    is_missing_in_cai: true
     enum_values:
       - ARP_ALL_RANGES
       - ARP_PRIMARY_RANGE

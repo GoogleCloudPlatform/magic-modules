@@ -16,31 +16,72 @@ name: Framework
 description: Frameworks allow you to monitor and enforce compliance and security requirements. Manage compliance by assigning built-in or custom frameworks to resources.
 references:
   api: "https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworks"
-base_url: organizations/{{organization}}/locations/{{location}}/frameworks
+base_url: '{{parent}}/locations/{{location}}/frameworks'
 update_mask: true
-self_link: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
-create_url: organizations/{{organization}}/locations/{{location}}/frameworks?frameworkId={{framework_id}}
+self_link: '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
+create_url: '{{parent}}/locations/{{location}}/frameworks?frameworkId={{framework_id}}'
 update_verb: PATCH
-id_format: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
+id_format: '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
 import_format:
-  - organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
+  - 'organizations/{{%organization}}/locations/{{location}}/frameworks/{{framework_id}}'
+  - "{{%parent}}/locations/{{location}}/frameworks/{{framework_id}}"
 examples:
-  - name: "cloudsecuritycompliance_framework_basic"
+  - name: "cloudsecuritycompliance_framework_org_basic"
     primary_resource_id: "example"
     vars:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
+  - name: "cloudsecuritycompliance_framework_project_basic"
+    primary_resource_id: "example"
+    vars:
+      framework_name: "example-framework"
+    test_env_vars:
+      project_number: "PROJECT_NUMBER"
+  - name: "cloudsecuritycompliance_framework_org_basic_backward"
+    primary_resource_id: "example"
+    vars:
+      framework_name: "example-framework"
+    test_env_vars:
+      org_id: "ORG_ID"
+identity_schema_version: 2
+identity_upgraders: true
 autogen_status: RnJhbWV3b3Jr
 custom_code:
+  custom_identity:
+    - parent
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl"
+  pre_create: "templates/terraform/pre_create/cloudsecuritycompliance_pre_create.go.tmpl"
+  pre_read: "templates/terraform/pre_read/cloudsecuritycompliance_pre_read.go.tmpl"
+  pre_update: "templates/terraform/pre_update/cloudsecuritycompliance_pre_update.go.tmpl"
+  pre_delete: "templates/terraform/pre_delete/cloudsecuritycompliance_pre_delete.go.tmpl"
+  post_import: "templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl"
+  custom_import: "templates/terraform/custom_import/cloudsecuritycompliance_framework.go.tmpl"
 parameters:
+  - name: parent
+    type: String
+    description: |
+      The parent resource in which to create the resource.
+      Must be in one of the following formats:
+      * `projects/{{project}}`
+      * `organizations/{{organization}}`
+    immutable: true
+    default_from_api: true
+    url_param_only: true
+    exactly_one_of:
+      - parent
+      - organization
   - name: organization
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: |
+      Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
+    default_from_api: true
+    deprecation_message: "Use `parent` instead."
+    exactly_one_of:
+      - parent
+      - organization
   - name: location
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
@@ -79,7 +120,7 @@ properties:
           type: String
           description: |-
             The name of the CloudControl in the format:
-            “organizations/{organization}/locations/{location}/cloudControls/{cloud-control}”
+            "{parent}/locations/{location}/cloudControls/{cloud-control}"
           required: true
         - name: parameters
           type: Array
@@ -163,7 +204,7 @@ properties:
     description: |-
       Identifier. The name of the framework.
       Format:
-      organizations/{organization}/locations/{{location}}/frameworks/{framework_id}
+      {parent}/locations/{location}/frameworks/{framework_id}
     output: true
   - name: supportedCloudProviders
     type: Array
