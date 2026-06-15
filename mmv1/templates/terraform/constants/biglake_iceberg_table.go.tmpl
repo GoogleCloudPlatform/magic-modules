@@ -52,6 +52,7 @@ func expandIcebergTableSortOrderForCommit(v interface{}) map[string]interface{} 
 	}
 }
 
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 // addIcebergTableAccessDelegationHeader sets the X-Iceberg-Access-Delegation
 // header that the Iceberg REST catalog requires for every table operation when
 // the parent catalog uses credential_mode = CREDENTIAL_MODE_VENDED_CREDENTIALS.
@@ -80,3 +81,4 @@ func addIcebergTableAccessDelegationHeader(d *schema.ResourceData, config *trans
 	}
 	return nil
 }
+{{- end }}
