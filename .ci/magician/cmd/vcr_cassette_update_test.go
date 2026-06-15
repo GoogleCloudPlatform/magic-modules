@@ -371,10 +371,6 @@ fi`
 			sb.Runner.WriteFile("go", fakeGo)
 			sb.Runner.MustRun("chmod", []string{"+x", "go"}, nil)
 
-			origPath := os.Getenv("PATH")
-			os.Setenv("PATH", sb.Dir+":"+origPath)
-			defer os.Setenv("PATH", origPath)
-
 			testEnv := map[string]string{
 				"SA_KEY": "sa_key",
 			}
@@ -440,10 +436,6 @@ func TestExecVCRCassetteUpdate_BuildFailure(t *testing.T) {
 		fi`
 	sb.Runner.WriteFile("gcloud", fakeGcloud)
 	sb.Runner.MustRun("chmod", []string{"+x", "gcloud"}, nil)
-
-	origPath := os.Getenv("PATH")
-	os.Setenv("PATH", sb.Dir+":"+origPath)
-	defer os.Setenv("PATH", origPath)
 
 	ctlr := source.NewController("gopath", "hashicorp", "token", sb.Runner)
 	vt, err := vcr.NewTester(map[string]string{
