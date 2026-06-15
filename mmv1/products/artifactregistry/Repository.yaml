@@ -53,6 +53,7 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
+  pre_update: 'templates/terraform/update_encoder/artifact_registry_repository_update.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -761,27 +762,26 @@ properties:
         type: NestedObject
         description: |-
           The credentials used to access the remote repository.
-        immutable: true
-        is_missing_in_cai: true
         properties:
           - name: 'usernamePasswordCredentials'
             type: NestedObject
             description: |-
               Use username and password to access the remote repository.
-            immutable: true
             properties:
+              # Username is sensitive credentials and is never returned in CAI response payload.
               - name: 'username'
                 type: String
+                is_missing_in_cai: true
                 description: |-
                   The username to access the remote repository.
-                immutable: true
+              # PasswordSecretVersion is sensitive credentials and is never returned in CAI response payload.
               - name: 'passwordSecretVersion'
                 type: String
+                is_missing_in_cai: true
                 description: |-
                   The Secret Manager key version that holds the password to access the
                   remote repository. Must be in the format of
                   `projects/{project}/secrets/{secret}/versions/{version}`.
-                immutable: true
       - name: 'disableUpstreamValidation'
         type: Boolean
         description: |-

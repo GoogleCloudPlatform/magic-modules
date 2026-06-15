@@ -107,6 +107,7 @@ var (
 		"addons_config.0.kalm_config",
 		"addons_config.0.slice_controller_config",
 		"addons_config.0.pod_snapshot_config",
+		"addons_config.0.slurm_operator_config",
 	}
 
 	privateClusterConfigKeys = []string{
@@ -627,6 +628,22 @@ func ResourceContainerCluster() *schema.Resource {
 												},
 											},
 										},
+									},
+								},
+							},
+						},
+						"slurm_operator_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Slurm Operator addon, which creates slurm related CRDs and KCP pods to manage them. Defaults to disabled for Standard clusters; set enabled = true to enable. It can not be enabled for Autopilot clusters.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
 									},
 								},
 							},

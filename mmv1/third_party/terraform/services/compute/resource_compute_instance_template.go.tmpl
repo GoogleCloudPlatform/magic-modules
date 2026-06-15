@@ -1683,7 +1683,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	}
 	{{- end }}
 
-	networks, err := expandNetworkInterfaces(d, config)
+	networks, err := expandNetworkInterfacesTyped(d, config)
 	if err != nil {
 		return err
 	}
