@@ -2064,14 +2064,21 @@ func expandPscAutoConnectionConfig(configured []interface{}) []*sqladmin.PscAuto
 func expandPscConfig(configured []interface{}) *sqladmin.PscConfig {
 	for _, _pscConfig := range configured {
 		_entry := _pscConfig.(map[string]interface{})
-		return &sqladmin.PscConfig{
-			PscEnabled:                 _entry["psc_enabled"].(bool),
-			PscAutoDnsEnabled:          _entry["psc_auto_dns_enabled"].(bool),
-			PscWriteEndpointDnsEnabled: _entry["psc_write_endpoint_dns_enabled"].(bool),
-			AllowedConsumerProjects:    tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
+		res := &sqladmin.PscConfig{
+			PscEnabled:              _entry["psc_enabled"].(bool),
+			AllowedConsumerProjects: tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
 			NetworkAttachmentUri:    _entry["network_attachment_uri"].(string),
 			PscAutoConnections:      expandPscAutoConnectionConfig(_entry["psc_auto_connections"].([]interface{})),
 		}
+		if v, ok := _entry["psc_auto_dns_enabled"]; ok {
+			res.PscAutoDnsEnabled = v.(bool)
+			res.ForceSendFields = append(res.ForceSendFields, "PscAutoDnsEnabled")
+		}
+		if v, ok := _entry["psc_write_endpoint_dns_enabled"]; ok {
+			res.PscWriteEndpointDnsEnabled = v.(bool)
+			res.ForceSendFields = append(res.ForceSendFields, "PscWriteEndpointDnsEnabled")
+		}
+		return res
 	}
 
 	return nil

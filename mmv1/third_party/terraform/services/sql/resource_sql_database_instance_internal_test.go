@@ -1,9 +1,11 @@
 package sql
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 func TestMaintenanceVersionDiffSuppress(t *testing.T) {
@@ -219,6 +221,83 @@ func TestDatabaseVersionDiffSuppress(t *testing.T) {
 			t.Parallel()
 			if databaseVersionDiffSuppress("version", testCase.oldVersion, testCase.newVersion, nil) != testCase.shouldSuppressDiff {
 				t.Fatalf("%q => %q expect DiffSuppress to return %t", testCase.oldVersion, testCase.newVersion, testCase.shouldSuppressDiff)
+			}
+		})
+	}
+}
+
+func TestExpandPscConfig(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		Config   []interface{}
+		Expected *sqladmin.PscConfig
+	}{
+		"full psc config with force send fields": {
+			Config: []interface{}{
+				map[string]interface{}{
+					"psc_enabled":                    true,
+					"psc_auto_dns_enabled":           true,
+					"psc_write_endpoint_dns_enabled": false,
+					"allowed_consumer_projects":      schema.NewSet(schema.HashString, []interface{}{"project1"}),
+					"network_attachment_uri":         "uri1",
+					"psc_auto_connections":           []interface{}{},
+				},
+			},
+			Expected: &sqladmin.PscConfig{
+				PscEnabled:                 true,
+				PscAutoDnsEnabled:          true,
+				PscWriteEndpointDnsEnabled: false,
+				AllowedConsumerProjects:    []string{"project1"},
+				NetworkAttachmentUri:       "uri1",
+				PscAutoConnections:         []*sqladmin.PscAutoConnectionConfig{},
+				ForceSendFields:            []string{"PscAutoDnsEnabled", "PscWriteEndpointDnsEnabled"},
+			},
+		},
+		"both psc dns fields set to false": {
+			Config: []interface{}{
+				map[string]interface{}{
+					"psc_enabled":                    true,
+					"psc_auto_dns_enabled":           false,
+					"psc_write_endpoint_dns_enabled": false,
+					"allowed_consumer_projects":      schema.NewSet(schema.HashString, []interface{}{}),
+					"network_attachment_uri":         "",
+					"psc_auto_connections":           []interface{}{},
+				},
+			},
+			Expected: &sqladmin.PscConfig{
+				PscEnabled:                 true,
+				PscAutoDnsEnabled:          false,
+				PscWriteEndpointDnsEnabled: false,
+				AllowedConsumerProjects:    []string{},
+				NetworkAttachmentUri:       "",
+				PscAutoConnections:         []*sqladmin.PscAutoConnectionConfig{},
+				ForceSendFields:            []string{"PscAutoDnsEnabled", "PscWriteEndpointDnsEnabled"},
+			},
+		},
+		"psc dns fields missing from config": {
+			Config: []interface{}{
+				map[string]interface{}{
+					"psc_enabled":               true,
+					"allowed_consumer_projects": schema.NewSet(schema.HashString, []interface{}{}),
+					"network_attachment_uri":    "",
+					"psc_auto_connections":      []interface{}{},
+				},
+			},
+			Expected: &sqladmin.PscConfig{
+				PscEnabled:              true,
+				AllowedConsumerProjects: []string{},
+				NetworkAttachmentUri:    "",
+				PscAutoConnections:      []*sqladmin.PscAutoConnectionConfig{},
+			},
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			res := expandPscConfig(tc.Config)
+			if !reflect.DeepEqual(res, tc.Expected) {
+				t.Fatalf("%s: expected %+v, got %+v", tn, tc.Expected, res)
 			}
 		})
 	}
