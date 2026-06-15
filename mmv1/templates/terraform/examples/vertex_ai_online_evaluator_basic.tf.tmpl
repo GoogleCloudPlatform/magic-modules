@@ -1,9 +1,18 @@
+resource "google_vertex_ai_reasoning_engine" "engine" {
+  display_name = "integration-test-engine"
+  description  = "A basic reasoning engine"
+  labels       = {
+    "key" = "value"
+  }
+  region       = "us-central1"
+}
+
 resource "google_vertex_ai_online_evaluator" "evaluator" {
   project        = "my-project-name"
   region         = "us-central1"
   display_name   = "{{index $.Vars "evaluator_name"}}"
   
-  agent_resource = "projects/my-project-name/locations/us-central1/reasoningEngines/test-engine-123"
+  agent_resource = google_vertex_ai_reasoning_engine.engine.id
 
   config {
     max_evaluated_samples_per_run = "100"
