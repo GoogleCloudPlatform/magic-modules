@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -7169,7 +7170,7 @@ func testAccResizeNodePoolExternally(t *testing.T, clusterName, poolName string,
 		t.Fatalf("Failed to resize node pool externally: %s", err)
 	}
 	
-	err = container.ContainerOperationWait(config, op, config.Project, location, "resizing node pool externally", userAgent, 20)
+	err = container.ContainerOperationWait(config, op, config.Project, location, "resizing node pool externally", userAgent, 20 * time.Minute)
 	if err != nil {
 		t.Fatalf("Failed waiting for external GKE resize operation: %s", err)
 	}
