@@ -156,7 +156,7 @@ var (
 			vacations: []Vacation{
 				{
 					startDate: newDate(2026, 4, 4),
-					endDate:   newDate(2026, 6, 13),
+					endDate:   newDate(2026, 7, 13),
 				},
 			},
 		},
