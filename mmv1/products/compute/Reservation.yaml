@@ -103,7 +103,7 @@ examples:
     min_version: 'beta'
     external_providers: ["time"]
     ignore_read_extra:
-    - share_settings.0.projects
+      - share_settings.0.projects
 virtual_fields:
   - name: 'block_names'
     type: Array
