@@ -2544,9 +2544,9 @@ resource "google_storage_bucket" "bucket" {
       storage_class = "NEARLINE"
     }
     condition {
-		  age              = 5
-      size_above_bytes = 100
-		  size_below_bytes = 500
+	   age              = 5
+       size_above_bytes = 100
+	   size_below_bytes = 500
     }
   }
 }
@@ -2646,9 +2646,9 @@ resource "google_storage_bucket" "bucket" {
       storage_class = "NEARLINE"
     }
     condition {
-			age              = 5
+	  age              = 5
       size_above_bytes = 200
-		  size_below_bytes = 1000
+	  size_below_bytes = 1000
     }
   }
 }
