@@ -25,7 +25,6 @@
 	if err := d.Set("name", cryptoKeyVersionId.Name); err != nil {
 		return nil, fmt.Errorf("Error setting name: %s", err)
 	}
-
 	id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
