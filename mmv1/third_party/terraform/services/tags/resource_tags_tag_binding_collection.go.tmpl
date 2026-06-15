@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -83,27 +84,7 @@ func resourceTagsTagBindingCollectionRead(ctx context.Context, d *schema.Resourc
 	}
 
 	location, resourceName, encodedResourceName := getTagBindingCollectionInfo(d)
-	readUrl, err := buildTagBindingCollectionUrl(d, config, location, encodedResourceName)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	billingProject := ""
-	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
-		billingProject = bp
-	}
-
-	headers := make(http.Header)
-
-	log.Printf("[DEBUG] Reading TagBindingCollection with URL %s", readUrl)
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    readUrl,
-		UserAgent: userAgent,
-		Headers:   headers,
-	})
+	currentRes, currentTags, _, err := getCurrentTagBindingCollectionState(d, config, userAgent, location, encodedResourceName)
 	if err != nil {
 		return diag.FromErr(transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("TagBindingCollection %q", d.Id())))
 	}
@@ -114,26 +95,20 @@ func resourceTagsTagBindingCollectionRead(ctx context.Context, d *schema.Resourc
 	if err := d.Set("full_resource_name", resourceName); err != nil {
 		return diag.Errorf("error setting full_resource_name: %s", err)
 	}
-	if err := d.Set("name", res["name"]); err != nil {
+	if err := d.Set("name", currentRes["name"]); err != nil {
 		return diag.Errorf("error setting name: %s", err)
 	}
 
-	apiTags := flattenTagsTagBindingCollectionTags(res["tags"], d, config)
-	if err := d.Set("active_tags", apiTags); err != nil {
+	if err := d.Set("active_tags", currentTags); err != nil {
 		return diag.Errorf("error setting active_tags: %s", err)
 	}
 
 	// Sync "tags" to detect drift for configured keys
-	if apiTags != nil {
-		apiTagsMap, err := convertToStringMap(apiTags.(map[string]interface{}))
-		if err != nil {
-			return diag.Errorf("error converting API tags: %s", err)
-		}
-
+	if currentTags != nil {
 		transformedTags := make(map[string]interface{})
 		if v, ok := d.GetOk("tags"); ok {
 			for k := range v.(map[string]interface{}) {
-				if val, exists := apiTagsMap[k]; exists {
+				if val, exists := currentTags[k]; exists {
 					transformedTags[k] = val
 				}
 			}
@@ -171,7 +146,7 @@ func resourceTagsTagBindingCollectionUpsert(ctx context.Context, d *schema.Resou
 	backoff := time.Second
 	for {
 		// Step 1: Read current state
-		currentTags, currentEtag, err := getCurrentTagBindingCollectionState(d, config, userAgent, location, encodedResourceName)
+		_, currentTags, currentEtag, err := getCurrentTagBindingCollectionState(d, config, userAgent, location, encodedResourceName)
 		if err != nil {
 			return diag.Errorf("error reading current state for upsert: %s", err)
 		}
@@ -258,7 +233,7 @@ func resourceTagsTagBindingCollectionDelete(ctx context.Context, d *schema.Resou
 
 	for {
 		// Read current state
-		currentTags, currentEtag, err := getCurrentTagBindingCollectionState(d, config, userAgent, location, encodedResourceName)
+		_, currentTags, currentEtag, err := getCurrentTagBindingCollectionState(d, config, userAgent, location, encodedResourceName)
 		if err != nil {
 			return diag.FromErr(transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("TagBindingCollection %q", resourceName)))
 		}
@@ -353,7 +328,11 @@ func getTagBindingCollectionInfo(d *schema.ResourceData) (location, resourceName
 }
 
 func buildTagBindingCollectionUrl(d *schema.ResourceData, config *transport_tpg.Config, location, encodedResourceName string) (string, error) {
-	return tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+	basePath := "{{"{{"}}TagsLocationBasePath{{"}}"}}"
+	if location == "global" {
+		basePath = "{{"{{"}}TagsBasePath{{"}}"}}"
+	}
+	return tpgresource.ReplaceVars(d, config, fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", basePath, location, encodedResourceName))
 }
 
 func flattenTagsTagBindingCollectionTags(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
@@ -361,15 +340,15 @@ func flattenTagsTagBindingCollectionTags(v interface{}, d *schema.ResourceData, 
 }
 
 // Helper to fetch the current state of the TagBindingCollection from GCP
-func getCurrentTagBindingCollectionState(d *schema.ResourceData, config *transport_tpg.Config, userAgent, location, encodedResourceName string) (currentTags map[string]string, currentEtag string, err error) {
+func getCurrentTagBindingCollectionState(d *schema.ResourceData, config *transport_tpg.Config, userAgent, location, encodedResourceName string) (currentRes map[string]interface{}, currentTags map[string]string, currentEtag string, err error) {
 	readUrl, err := buildTagBindingCollectionUrl(d, config, location, encodedResourceName)
 	if err != nil {
-		return nil, "", err
+		return nil, nil, "", err
 	}
 	headers := make(http.Header)
 
 	log.Printf("[DEBUG] Reading current TagBindingCollection state with URL %s", readUrl)
-	currentRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	currentRes, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		RawURL:    readUrl,
@@ -378,7 +357,7 @@ func getCurrentTagBindingCollectionState(d *schema.ResourceData, config *transpo
 	})
 
 	if err != nil {
-		return nil, "", err
+		return nil, nil, "", err
 	}
 
 	currentEtag, _ = currentRes["etag"].(string)
@@ -388,15 +367,15 @@ func getCurrentTagBindingCollectionState(d *schema.ResourceData, config *transpo
 	if currentApiTags != nil {
 		currentTagsIFace, ok := currentApiTags.(map[string]interface{})
 		if !ok {
-			return nil, currentEtag, fmt.Errorf("API returned 'tags' in an unexpected format: %T", currentApiTags)
+			return nil, nil, currentEtag, fmt.Errorf("API returned 'tags' in an unexpected format: %T", currentApiTags)
 		}
 		currentTags, err = convertToStringMap(currentTagsIFace)
 		if err != nil {
-			return nil, currentEtag, fmt.Errorf("error converting current API tags: %s", err)
+			return nil, nil, currentEtag, fmt.Errorf("error converting current API tags: %s", err)
 		}
 	}
 
-	return currentTags, currentEtag, nil
+	return currentRes, currentTags, currentEtag, nil
 }
 
 // Helper to send a PATCH request for TagBindingCollection and wait for the operation
@@ -474,6 +453,15 @@ func convertToStringMap(in map[string]interface{}) (map[string]string, error) {
 		out[k] = s
 	}
 	return out, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_tags_tag_binding_collection",
+		ProductName: "tags",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceTagsTagBindingCollection(),
+	}.Register()
 }
 
 {{- end }}

@@ -16,6 +16,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -66,6 +67,11 @@ func TestAccTagsTagBindingCollection_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"tags"},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "tags.%", "0"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "active_tags.%", "2"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "location", "global"),
+				),
 			},
 			// Step 3: Update - modify one tag, remove one tag, add one tag
 			{
@@ -186,19 +192,22 @@ func TestAccTagsTagBindingCollection_outOfBandUpdate(t *testing.T) {
 
 	orgId := envvar.GetTestOrgFromEnv(t)
 	context := map[string]interface{}{
-		"org_id":      orgId,
-		"project_id":  "tf-test-" + acctest.RandString(t, 10),
-		"key_1_short": "tf-test-k1-" + acctest.RandString(t, 6),
-		"val_1_short": "tf-test-v1-" + acctest.RandString(t, 6), // Initial value
-		"val_2_short": "tf-test-v2-" + acctest.RandString(t, 6), // Value to change to externally
+		"org_id":        orgId,
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"instance_name": "tf-test-vm-oob-" + acctest.RandString(t, 10),
+		"zone":          "us-central1-a",
+		"key_1_short":   "tf-test-k1-" + acctest.RandString(t, 6),
+		"val_1_short":   "tf-test-v1-" + acctest.RandString(t, 6), // Initial value
+		"val_2_short":   "tf-test-v2-" + acctest.RandString(t, 6), // Value to change to externally
 	}
 
 	keyNamespaced := fmt.Sprintf("%s/%s", orgId, context["key_1_short"])
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
-			// Step 1: Create the collection with initial tag value (val_1)
+			// Step 1: Create the collection with initial tag value (val_1) on Compute VM
 			{
 				Config: testAccTagsTagBindingCollection_oob_config(context),
 				Check: resource.ComposeTestCheckFunc(
@@ -206,34 +215,28 @@ func TestAccTagsTagBindingCollection_outOfBandUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_oob", "active_tags.%", "1"),
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_oob", fmt.Sprintf("tags.%s", keyNamespaced), context["val_1_short"].(string)),
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_oob", fmt.Sprintf("active_tags.%s", keyNamespaced), context["val_1_short"].(string)),
-					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.test_oob", "id", regexp.MustCompile(fmt.Sprintf("locations/global/tagBindingCollections/.+"))),
-					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.test_oob", "name", regexp.MustCompile(fmt.Sprintf("locations/global/tagBindingCollections/.+"))),
 				),
 			},
-			// Step 2: Modify the binding outside of Terraform to use val_2
+			// Step 2: Intermediate PlanOnly step that mutates the physical server in its Check helper!
 			{
-				Config: testAccTagsTagBindingCollection_oob_config(context), // Same config
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+				Config:             testAccTagsTagBindingCollection_oob_config(context),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBindingUpdatedExternally(t, context, keyNamespaced, context["val_2_short"].(string)),
-					// Also verify the change via API read right after the update
-					testAccCheckBindingValueViaAPI(t, context, keyNamespaced, context["val_2_short"].(string)),
-					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_oob", "active_tags.%", "1"),
+					testAccCheckBindingUpdatedExternally_VM(t, context, keyNamespaced, context["val_2_short"].(string)),
+					testAccCheckBindingValueViaAPI_VM(t, context, keyNamespaced, context["val_2_short"].(string)),
 				),
-				// Taint: []string{"google_tags_tag_binding_collection.test_oob"}, // Taint to force refresh
 			},
-			// Step 3: Terraform runs again, detects the change, and reverts it back to val_2
+			// Step 3: Let Terraform execute apply to flawlessly reconcile the drift back to val_1!
 			{
-				Config: testAccTagsTagBindingCollection_oob_config(context), // Same config
-				PlanOnly: false, // Ensure apply is run
+				Config:   testAccTagsTagBindingCollection_oob_config(context),
+				PlanOnly: false,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_oob", "tags.%", "1"),
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_oob", "active_tags.%", "1"),
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_oob", fmt.Sprintf("tags.%s", keyNamespaced), context["val_1_short"].(string)),
-					// resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_oob", fmt.Sprintf("active_tags.%s", keyNamespaced), context["val_1_short"].(string)),
-					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.test_oob", "id", regexp.MustCompile(fmt.Sprintf("locations/global/tagBindingCollections/.+"))),
-					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.test_oob", "name", regexp.MustCompile(fmt.Sprintf("locations/global/tagBindingCollections/.+"))),
-					// Verify via API that it's reverted
-					// testAccCheckBindingValueViaAPI(t, context, keyNamespaced, context["val_1_short"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_oob", fmt.Sprintf("active_tags.%s", keyNamespaced), context["val_1_short"].(string)),
+					testAccCheckBindingValueViaAPI_VM(t, context, keyNamespaced, context["val_1_short"].(string)),
 				),
 			},
 		},
@@ -281,18 +284,21 @@ func TestAccTagsTagBindingCollection_restoration(t *testing.T) {
 
 	orgId := envvar.GetTestOrgFromEnv(t)
 	context := map[string]interface{}{
-		"org_id":      orgId,
-		"project_id":  "tf-test-" + acctest.RandString(t, 10),
-		"key_short":   "tf-test-rest-" + acctest.RandString(t, 6),
-		"val_short":   "tf-test-rval-" + acctest.RandString(t, 6),
+		"org_id":        orgId,
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"instance_name": "tf-test-vm-rest-" + acctest.RandString(t, 10),
+		"zone":          "us-central1-a",
+		"key_short":     "tf-test-rest-" + acctest.RandString(t, 6),
+		"val_short":     "tf-test-rval-" + acctest.RandString(t, 6),
 	}
 
 	keyNamespaced := fmt.Sprintf("%s/%s", orgId, context["key_short"])
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
-			// Step 1: Create the collection managing 1 tag
+			// Step 1: Create TagBindingCollection managing 1 tag on Compute VM
 			{
 				Config: testAccTagsTagBindingCollection_restorationConfig(context),
 				Check: resource.ComposeTestCheckFunc(
@@ -300,21 +306,23 @@ func TestAccTagsTagBindingCollection_restoration(t *testing.T) {
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.rest", fmt.Sprintf("tags.%s", keyNamespaced), context["val_short"].(string)),
 				),
 			},
-			// Step 2: Delete the tag binding externally out of band
+			// Step 2: Intermediate PlanOnly step that deletes the physical server tag in its Check helper!
 			{
-				Config: testAccTagsTagBindingCollection_restorationConfig(context),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+				Config:             testAccTagsTagBindingCollection_restorationConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBindingDeletedExternally(t, context, keyNamespaced),
+					testAccCheckBindingDeletedExternally_VM(t, context, keyNamespaced),
 				),
 			},
-			// Step 3: Run apply again, verify Terraform fully restores the deleted tag!
+			// Step 3: Let Terraform execute apply to fully and flawlessly restore the deleted tag!
 			{
-				Config: testAccTagsTagBindingCollection_restorationConfig(context),
+				Config:   testAccTagsTagBindingCollection_restorationConfig(context),
 				PlanOnly: false,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.rest", "tags.%", "1"),
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.rest", fmt.Sprintf("tags.%s", keyNamespaced), context["val_short"].(string)),
-					testAccCheckBindingValueViaAPI(t, context, keyNamespaced, context["val_short"].(string)),
+					testAccCheckBindingValueViaAPI_VM(t, context, keyNamespaced, context["val_short"].(string)),
 				),
 			},
 		},
@@ -613,36 +621,52 @@ resource "google_tags_tag_binding" "other_binding" {
 
 func testAccTagsTagBindingCollection_oob_config(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "project" {
+data "google_compute_image" "my_image" {
   provider = google-beta
-  project_id = "%{project_id}"
-  name       = "%{project_id}"
-  org_id     = "%{org_id}"
-  deletion_policy = "DELETE"
+  family   = "debian-11"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance" "instance" {
+  provider     = google-beta
+  name         = "%{instance_name}"
+  machine_type = "e2-micro"
+  zone         = "%{zone}"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
 }
 
 resource "google_tags_tag_key" "key_1" {
-  provider = google-beta
+  provider    = google-beta
   parent      = "organizations/%{org_id}"
   short_name  = "%{key_1_short}"
 }
 
 resource "google_tags_tag_value" "key_1_val_1" {
-  provider = google-beta
+  provider    = google-beta
   parent      = google_tags_tag_key.key_1.id
   short_name  = "%{val_1_short}"
 }
 
 resource "google_tags_tag_value" "key_1_val_2" {
-  provider = google-beta
+  provider    = google-beta
   parent      = google_tags_tag_key.key_1.id
   short_name  = "%{val_2_short}"
 }
 
 resource "google_tags_tag_binding_collection" "test_oob" {
-  provider = google-beta
-  full_resource_name = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
-  location = "global"
+  provider             = google-beta
+  full_resource_name   = "//compute.googleapis.com/projects/%{project_id}/zones/%{zone}/instances/${google_compute_instance.instance.instance_id}"
+  location             = "us-central1-a"
+
   tags = {
     "${google_tags_tag_key.key_1.namespaced_name}" = google_tags_tag_value.key_1_val_1.short_name
   }
@@ -653,6 +677,54 @@ resource "google_tags_tag_binding_collection" "test_oob" {
   ]
 }
 `, context)
+}
+
+func dummyResourceState() *terraform.ResourceState {
+	return &terraform.ResourceState{
+		Primary: &terraform.InstanceState{},
+	}
+}
+
+func dummyResourceStateWithLocation(loc string) *terraform.ResourceState {
+	return &terraform.ResourceState{
+		Primary: &terraform.InstanceState{
+			Attributes: map[string]string{
+				"location": loc,
+			},
+		},
+	}
+}
+
+func testAccCheckBindingValueViaAPI_Direct(t *testing.T, location, encodedResourceName, keyNamespacedName, expectedValueShortName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		basePath := "{{"{{"}}TagsLocationBasePath{{"}}"}}"
+		if location == "global" {
+			basePath = "{{"{{"}}TagsBasePath{{"}}"}}"
+		}
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, dummyResourceState(), fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", basePath, location, encodedResourceName))
+		if err != nil {
+			return err
+		}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:  config,
+			Method:  "GET",
+			RawURL:  apiURL,
+			Headers: make(http.Header),
+		})
+		if err != nil {
+			return fmt.Errorf("Error reading TagBindingCollection via API: %s", err)
+		}
+		tagsMap, ok := res["tags"].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("API response does not contain 'tags' map")
+		}
+		currentValue, ok := tagsMap[keyNamespacedName].(string)
+		if !ok || currentValue != expectedValueShortName {
+			return fmt.Errorf("TagValue mismatch via direct API GET: expected %s, got %s", expectedValueShortName, currentValue)
+		}
+		return nil
+	}
 }
 
 func testAccCheckTagADeleted(t *testing.T, contextMap map[string]interface{}) resource.TestCheckFunc {
@@ -672,7 +744,7 @@ func testAccCheckTagADeleted(t *testing.T, contextMap map[string]interface{}) re
 		location := "global"
 
 		headers := make(http.Header)
-		apiURL, err := tpgresource.ReplaceVarsForTest(config, nil, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, dummyResourceState(), fmt.Sprintf("{{"{{"}}TagsBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
 		if err != nil {
 			return err
 		}
@@ -718,7 +790,7 @@ func testAccCheckBindingUpdatedExternally(t *testing.T, contextMap map[string]in
 		encodedResourceName := url.PathEscape(resourceName)
 		location := "global"
 
-		apiURL, err := tpgresource.ReplaceVarsForTest(config, nil, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, dummyResourceState(), fmt.Sprintf("{{"{{"}}TagsBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
 		if err != nil {
 			return err
 		}
@@ -730,7 +802,7 @@ func testAccCheckBindingUpdatedExternally(t *testing.T, contextMap map[string]in
 			},
 		}
 
-		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:  config,
 			Method:  "PATCH",
 			RawURL:  apiURL,
@@ -762,7 +834,7 @@ func testAccCheckBindingDeletedExternally(t *testing.T, contextMap map[string]in
 		location := "global"
 
 		// 1. Get current TagBindingCollection to find Etag
-		apiURL, err := tpgresource.ReplaceVarsForTest(config, nil, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, dummyResourceState(), fmt.Sprintf("{{"{{"}}TagsBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
 		if err != nil {
 			return err
 		}
@@ -815,7 +887,7 @@ func testAccCheckBindingValueViaAPI(t *testing.T, contextMap map[string]interfac
 		encodedResourceName := url.PathEscape(resourceName)
 		location := "global"
 
-		apiURL, err := tpgresource.ReplaceVarsForTest(config, nil, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, dummyResourceState(), fmt.Sprintf("{{"{{"}}TagsBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
 		if err != nil {
 			return err
 		}
@@ -1035,30 +1107,47 @@ resource "google_tags_tag_binding_collection" "mix" {
 
 func testAccTagsTagBindingCollection_restorationConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "project" {
-  provider = google-beta 
-  project_id = "%{project_id}"
-  name       = "%{project_id}"
-  org_id     = "%{org_id}"
-  deletion_policy = "DELETE"
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-11"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance" "instance" {
+  provider     = google-beta
+  name         = "%{instance_name}"
+  machine_type = "e2-micro"
+  zone         = "%{zone}"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
 }
 
 resource "google_tags_tag_key" "key" {
-  provider = google-beta 
+  provider    = google-beta
   parent      = "organizations/%{org_id}"
   short_name  = "%{key_short}"
 }
+
 resource "google_tags_tag_value" "val" {
-  provider = google-beta 
+  provider    = google-beta
   parent      = google_tags_tag_key.key.id
   short_name  = "%{val_short}"
 }
 
 resource "google_tags_tag_binding_collection" "rest" {
-  provider = google-beta 
-  full_resource_name    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
-  location  = "global"
-  tags      = {
+  provider             = google-beta
+  full_resource_name   = "//compute.googleapis.com/projects/%{project_id}/zones/%{zone}/instances/${google_compute_instance.instance.instance_id}"
+  location             = "us-central1-a"
+
+  tags = {
     "${google_tags_tag_key.key.namespaced_name}" = google_tags_tag_value.val.short_name
   }
 
@@ -1071,4 +1160,249 @@ resource "google_tags_tag_binding_collection" "rest" {
 
 // TODO: Add more unit tests for Upsert and Delete logic, mocking API calls.
 
+func TestAccTagsTagBindingCollection_regional_basic(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	context := map[string]interface{}{
+		"org_id":           orgId,
+		"key_short_name":   "tf-test-reg-" + acctest.RandString(t, 6),
+		"value_short_name": "tf-test-val-" + acctest.RandString(t, 6),
+		"project_id":       envvar.GetTestProjectFromEnv(),
+		"instance_name":    "tf-test-vm-" + acctest.RandString(t, 10),
+		"zone":             "us-central1-a",
+	}
+
+	keyNamespaced := fmt.Sprintf("%s/%s", orgId, context["key_short_name"])
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create regional TagBindingCollection on Compute VM
+			{
+				Config: testAccTagsTagBindingCollection_regional_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.regional", "tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.regional", "active_tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.regional", fmt.Sprintf("tags.%s", keyNamespaced), context["value_short_name"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.regional", fmt.Sprintf("active_tags.%s", keyNamespaced), context["value_short_name"].(string)),
+					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.regional", "id", regexp.MustCompile("locations/us-central1-a/tagBindingCollections/.+")),
+					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.regional", "name", regexp.MustCompile("locations/us-central1-a/tagBindingCollections/.+")),
+				),
+			},
+			// Step 2: Import
+			{
+				ResourceName:            "google_tags_tag_binding_collection.regional",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"full_resource_name", "location", "tags"},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.regional", "tags.%", "0"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.regional", "active_tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.regional", "location", "us-central1-a"),
+				),
+			},
+		},
+	})
+}
+
+func testAccTagsTagBindingCollection_regional_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-11"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance" "instance" {
+  provider     = google-beta
+  name         = "%{instance_name}"
+  machine_type = "e2-micro"
+  zone         = "%{zone}"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_tags_tag_key" "key" {
+  provider    = google-beta
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{key_short_name}"
+}
+
+resource "google_tags_tag_value" "value" {
+  provider    = google-beta
+  parent      = google_tags_tag_key.key.id
+  short_name  = "%{value_short_name}"
+}
+
+resource "google_tags_tag_binding_collection" "regional" {
+  provider = google-beta
+  full_resource_name   = "//compute.googleapis.com/projects/%{project_id}/zones/%{zone}/instances/${google_compute_instance.instance.instance_id}"
+  location = "us-central1-a"
+
+  tags = {
+    "${google_tags_tag_key.key.namespaced_name}" = google_tags_tag_value.value.short_name
+  }
+}
+`, context)
+}
+
+func testAccCheckBindingUpdatedExternally_VM(t *testing.T, contextMap map[string]interface{}, keyNamespacedName, newValueShortName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		vmResource := s.RootModule().Resources["google_compute_instance.instance"]
+		if vmResource == nil {
+			return fmt.Errorf("Resource 'google_compute_instance.instance' not found in state")
+		}
+		instanceId := vmResource.Primary.Attributes["instance_id"]
+		projectId := contextMap["project_id"].(string)
+		zone := contextMap["zone"].(string)
+
+		resourceName := fmt.Sprintf("//compute.googleapis.com/projects/%s/zones/%s/instances/%s", projectId, zone, instanceId)
+		encodedResourceName := url.PathEscape(resourceName)
+		location := zone
+
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, dummyResourceStateWithLocation(location), fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		if err != nil {
+			return err
+		}
+		apiURL, err = tpgresource.ReplaceVarsForTest(config, dummyResourceStateWithLocation(location), apiURL)
+		if err != nil {
+			return err
+		}
+
+		body := map[string]interface{}{
+			"full_resource_name": resourceName,
+			"tags": map[string]string{
+				keyNamespacedName: newValueShortName,
+			},
+		}
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:  config,
+			Method:  "PATCH",
+			RawURL:  apiURL + "?updateMask=*",
+			Body:    body,
+			Headers: make(http.Header),
+		})
+		if err != nil {
+			return fmt.Errorf("Error updating TagBindingCollection via API: %s", err)
+		}
+		t.Logf("Successfully updated physical binding for %s to %s via API", keyNamespacedName, newValueShortName)
+		return nil
+	}
+}
+
+func testAccCheckBindingDeletedExternally_VM(t *testing.T, contextMap map[string]interface{}, keyNamespacedName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		vmResource := s.RootModule().Resources["google_compute_instance.instance"]
+		if vmResource == nil {
+			return fmt.Errorf("Resource 'google_compute_instance.instance' not found in state")
+		}
+		instanceId := vmResource.Primary.Attributes["instance_id"]
+		projectId := contextMap["project_id"].(string)
+		zone := contextMap["zone"].(string)
+
+		resourceName := fmt.Sprintf("//compute.googleapis.com/projects/%s/zones/%s/instances/%s", projectId, zone, instanceId)
+		encodedResourceName := url.PathEscape(resourceName)
+		location := zone
+
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, dummyResourceStateWithLocation(location), fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		if err != nil {
+			return err
+		}
+		apiURL, err = tpgresource.ReplaceVarsForTest(config, dummyResourceStateWithLocation(location), apiURL)
+		if err != nil {
+			return err
+		}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "GET",
+			RawURL: apiURL,
+		})
+		if err != nil {
+			return fmt.Errorf("Error fetching parent TagBindingCollection before deletion: %v", err)
+		}
+
+		currentEtag := res["etag"].(string)
+
+		body := map[string]interface{}{
+			"full_resource_name": resourceName,
+			"etag":               currentEtag,
+			"tags":               make(map[string]interface{}),
+		}
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:  config,
+			Method:  "PATCH",
+			RawURL:  apiURL + "?updateMask=*",
+			Body:    body,
+			Headers: make(http.Header),
+		})
+		if err != nil {
+			return fmt.Errorf("Error deleting TagBindingCollection via API: %s", err)
+		}
+		t.Logf("Successfully deleted physical binding for %s externally via API", keyNamespacedName)
+		return nil
+	}
+}
+
+func testAccCheckBindingValueViaAPI_VM(t *testing.T, contextMap map[string]interface{}, keyNamespacedName, expectedValueShortName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		vmResource := s.RootModule().Resources["google_compute_instance.instance"]
+		if vmResource == nil {
+			return fmt.Errorf("Resource 'google_compute_instance.instance' not found in state")
+		}
+		instanceId := vmResource.Primary.Attributes["instance_id"]
+		projectId := contextMap["project_id"].(string)
+		zone := contextMap["zone"].(string)
+
+		resourceName := fmt.Sprintf("//compute.googleapis.com/projects/%s/zones/%s/instances/%s", projectId, zone, instanceId)
+		encodedResourceName := url.PathEscape(resourceName)
+		location := zone
+
+		apiURL, err := tpgresource.ReplaceVarsForTest(config, dummyResourceStateWithLocation(location), fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+		if err != nil {
+			return err
+		}
+		apiURL, err = tpgresource.ReplaceVarsForTest(config, dummyResourceStateWithLocation(location), apiURL)
+		if err != nil {
+			return err
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "GET",
+			RawURL: apiURL,
+		})
+		if err != nil {
+			return fmt.Errorf("Error reading TagBindingCollection via API: %s", err)
+		}
+		var tagsMap map[string]interface{}
+		if res["tags"] != nil {
+			tagsMap = res["tags"].(map[string]interface{})
+		}
+		var currentValue string
+		if tagsMap != nil {
+			currentValue, _ = tagsMap[keyNamespacedName].(string)
+		}
+		if currentValue != expectedValueShortName {
+			return fmt.Errorf("TagValue mismatch via direct API GET: expected %q, got %q", expectedValueShortName, currentValue)
+		}
+		return nil
+	}
+}
+
 {{- end }}
+

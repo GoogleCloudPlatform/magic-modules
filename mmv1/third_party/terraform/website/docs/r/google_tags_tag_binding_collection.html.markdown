@@ -103,6 +103,7 @@ This resource provides the following
 
 ## Import
 
+> **Note on Import and Non-Authoritative Behavior:** Because `tags` is a non-authoritative field, `terraform import` does not automatically populate the desired `tags` map in your configuration, to avoid inadvertently adopting system tags or unmanaged third-party tags. After running `terraform import`, inspect the computed `active_tags` attribute in your state file to discover all tags currently attached to the physical resource, and explicitly add only the specific keys you wish Terraform to manage into your `.tf` `tags` map.
 
 TagBindingCollection can be imported using any of these accepted formats:
 
