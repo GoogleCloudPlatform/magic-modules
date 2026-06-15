@@ -29,6 +29,30 @@ resource "google_vertex_ai_online_evaluator" "evaluator" {
     })
   }
 
+  metric_sources {
+    metric = jsonencode({
+      "predefinedMetricSpec" = {
+        "metricSpecName" = "hallucination_v1"
+      }
+    })
+  }
+
+  metric_sources {
+    metric = jsonencode({
+      "predefinedMetricSpec" = {
+        "metricSpecName" = "final_response_quality_v1"
+      }
+    })
+  }
+
+  metric_sources {
+    metric = jsonencode({
+      "predefinedMetricSpec" = {
+        "metricSpecName" = "tool_use_quality_v1"
+      }
+    })
+  }
+
   cloud_observability {
     open_telemetry {
       semconv_version = "1.39.0"
