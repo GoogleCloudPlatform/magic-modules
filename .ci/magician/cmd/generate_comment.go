@@ -167,6 +167,7 @@ var generateCommentCmd = &cobra.Command{
 			env["BUILD_STEP"],
 			env["PROJECT_ID"],
 			env["COMMIT_SHA"],
+			workspace,
 			gh,
 			rnr,
 			ctlr,
@@ -182,7 +183,7 @@ func listGCEnvironmentVariables() string {
 	return result
 }
 
-func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
+func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha, workspace string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
 	errors := map[string][]string{"Other": []string{}}
 
 	// TODO - temporary fix to ensure the label is removed.
@@ -275,10 +276,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
 		}
 		if shortStat != "" {
-			workspace := os.Getenv("WORKSPACE")
-			if workspace == "" {
-				workspace = "/workspace"
-			}
+
 			variablePath := filepath.Join(workspace, fmt.Sprintf("commitSHA_modular-magician_%s.txt", repo.Name))
 			oldVariablePath := filepath.Join(workspace, fmt.Sprintf("commitSHA_modular-magician_%s-old.txt", repo.Name))
 			commitSHA, err := rnr.ReadFile(variablePath)
@@ -536,10 +534,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		return fmt.Errorf("error posting comment to PR %d: %w", prNumber, err)
 	}
 
-	workspace := os.Getenv("WORKSPACE")
-	if workspace == "" {
-		workspace = "/workspace"
-	}
 	if err := rnr.WriteFile(filepath.Join(workspace, "diff_comment_id.txt"), strconv.Itoa(commentId)); err != nil {
 		fmt.Printf("Warning: failed to save comment ID to file: %v\n", err)
 	}
