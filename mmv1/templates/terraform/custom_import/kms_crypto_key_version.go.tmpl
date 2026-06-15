@@ -1,13 +1,10 @@
 
 	config := meta.(*transport_tpg.Config)
 	importId := d.Id()
-	importByIdentity := importId == ""
-	var identityErr error
-	var identity *schema.IdentityData
 	if importId == "" {
-		identity, identityErr = d.Identity()
-		if identityErr != nil || identity == nil {
-			return nil, fmt.Errorf("Error reading import identity: %s", identityErr)
+		identity, err := d.Identity()
+		if err != nil {
+			return nil, fmt.Errorf("Error reading import identity: %s", err)
 		}
 
 		identityName, ok := identity.Get("name").(string)
@@ -27,16 +24,6 @@
 	}
 	if err := d.Set("name", cryptoKeyVersionId.Name); err != nil {
 		return nil, fmt.Errorf("Error setting name: %s", err)
-	}
-
-	if importByIdentity {
-		if identityErr == nil && identity != nil {
-			if err := identity.Set("name", cryptoKeyVersionId.Name); err != nil {
-				return nil, fmt.Errorf("Error setting identity name: %s", err)
-			}
-		} else {
-			log.Printf("[DEBUG] (Import) identity not set: %s", identityErr)
-		}
 	}
 
 	id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
