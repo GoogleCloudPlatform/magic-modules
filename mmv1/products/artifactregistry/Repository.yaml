@@ -768,12 +768,16 @@ properties:
             description: |-
               Use username and password to access the remote repository.
             properties:
+              # Username is sensitive credentials and is never returned in CAI response payload.
               - name: 'username'
                 type: String
+                is_missing_in_cai: true
                 description: |-
                   The username to access the remote repository.
+              # PasswordSecretVersion is sensitive credentials and is never returned in CAI response payload.
               - name: 'passwordSecretVersion'
                 type: String
+                is_missing_in_cai: true
                 description: |-
                   The Secret Manager key version that holds the password to access the
                   remote repository. Must be in the format of
