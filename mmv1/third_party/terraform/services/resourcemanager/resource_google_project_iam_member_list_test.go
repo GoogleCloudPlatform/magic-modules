@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
@@ -12,11 +13,11 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccProjectIamMemberList_basic(t *testing.T) {
+func TestAccProjectIamMemberListResource_queryIdentity(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	role := "roles/compute.instanceAdmin"
+	role := "roles/viewer"
 	member := "user:admin@hashicorptest.com"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -28,6 +29,11 @@ func TestAccProjectIamMemberList_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectIamMemberCreate(project, role, member),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_project_iam_member.test", "project", project),
+					resource.TestCheckResourceAttr("google_project_iam_member.test", "role", role),
+					resource.TestCheckResourceAttr("google_project_iam_member.test", "member", member),
+				),
 			},
 
 			{
@@ -42,11 +48,11 @@ func TestAccProjectIamMemberList_basic(t *testing.T) {
 }
 
 // test with optional filters
-func TestAccProjectIamMemberList_filter(t *testing.T) {
+func TestAccProjectIamMemberListResource_queryIdentityWithFilter(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	role := "roles/compute.instanceAdmin"
+	role := "roles/viewer"
 	member := "user:admin@hashicorptest.com"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -58,14 +64,24 @@ func TestAccProjectIamMemberList_filter(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectIamMemberCreate(project, role, member),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_project_iam_member.test", "project", project),
+					resource.TestCheckResourceAttr("google_project_iam_member.test", "role", role),
+					resource.TestCheckResourceAttr("google_project_iam_member.test", "member", member),
+				),
 			},
-
 			{
 				Query:  true,
 				Config: testAccProjectIamMemberListQueryWithFilters(project, role, member),
 
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("google_project_iam_member.test", 1),
+					querycheck.ExpectIdentity("google_project_iam_member.test", map[string]knownvalue.Check{
+						"project":         knownvalue.StringExact(project),
+						"role":            knownvalue.StringExact(role),
+						"member":          knownvalue.StringExact(member),
+						"condition_title": knownvalue.Null(),
+					}),
 				},
 			},
 		},

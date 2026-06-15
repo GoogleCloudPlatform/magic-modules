@@ -282,6 +282,12 @@ func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.
 		}
 	}
 
+	if binding.Condition != nil {
+		if err := rd.Set("condition", FlattenIamCondition(binding.Condition)); err != nil {
+			return list.ListResult{}, fmt.Errorf("set condition: %w", err)
+		}
+	}
+
 	id := updater.GetResourceId() + "/" + binding.Role + "/" + normalized
 	if k := conditionKeyFromCondition(binding.Condition); !k.Empty() {
 		id += "/" + k.String()
