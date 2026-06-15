@@ -14,7 +14,7 @@ import (
 func TestAccFolderIamMemberList_basic(t *testing.T) {
 	t.Parallel()
 
-	folder := acctest.BootstraFolder(t, "tf-test_iam_member_list")
+	folder := BootstrapSharedTestFolder(t, "tf-test_iam_member_list")
 	folderName := folder.Name
 	role := "roles/compute.instanceAdmin"
 	member := "user:admin@hashicorptest.com"
@@ -45,7 +45,7 @@ func TestAccFolderIamMemberList_basic(t *testing.T) {
 func TestAccFolderIamMemberList_filter(t *testing.T) {
 	t.Parallel()
 
-	folder := acctest.BootstraFolder(t, "tf-test_iam_member_list")
+	folder := BootstrapSharedTestFolder(t, "tf-test_iam_member_list")
 	folderName := folder.Name
 	role := "roles/compute.instanceAdmin"
 	member := "user:admin@hashicorptest.com"
