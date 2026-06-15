@@ -165,7 +165,7 @@ func getCacheTTL() time.Duration {
 	if os.Getenv("VCR_PATH") != "" && os.Getenv("VCR_MODE") != "" {
 		return 0 * time.Second
 	}
-	return 30 * time.Second
+	return 5 * time.Minute
 }
 
 var (
