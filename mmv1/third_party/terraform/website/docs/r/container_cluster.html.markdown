@@ -284,6 +284,7 @@ region are guaranteed to support the same version.
     cluster creation without deleting and recreating the entire cluster. Unless you absolutely need the ability
     to say "these are the _only_ node pools associated with this cluster", use the
     [google_container_node_pool](container_node_pool.html) resource instead of this property.
+    * `ignore_node_count_drift` - (Optional) Whether to ignore external changes (drift) to the node count (e.g. from GKE autoscaling). Setting this to `true` skips querying Compute Engine Instance Group Managers (IGMs) to determine the current node count on read, which can save API quota and speed up plans on large clusters. Unlike Terraform core's `lifecycle { ignore_changes = [node_count] }`, this allows configuration-driven scaling updates in your HCL while still ignoring runtime autoscaling drift.
 
 * `skip_node_pool_refresh` - (Optional) Whether to skip refreshing the GKE cluster's inline node pool list during read operations. Setting this to `true` prevents the provider from querying GKE API for node pools, resolving long plan times on clusters with a large number of node pools. **Warning:** When enabled, the cluster's `node_pool` attribute in the Terraform state will remain empty (`[]`), even if node pools exist externally. This flag cannot be set to `true` if you define inline `node_pool` blocks in your configuration; doing so will result in a validation error during plan.
 
