@@ -351,7 +351,7 @@ properties:
                 required: true
                 description: |
                   The plain text of the client secret value.
-                sensitive: true
+                write_only: true
                 validation:
                   function: validation.StringIsNotEmpty
               - name: thumbprint
@@ -457,6 +457,7 @@ properties:
                 required: true
                 description: |
                   The plain text of the client secret value.
+                write_only: true
                 validation:
                   function: validation.StringIsNotEmpty
               - name: thumbprint
@@ -549,6 +550,7 @@ properties:
                 required: true
                 description: |
                   The plain text of the client secret value.
+                write_only: true
                 validation:
                   function: validation.StringIsNotEmpty
               - name: thumbprint
