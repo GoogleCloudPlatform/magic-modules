@@ -13,3 +13,41 @@ func icebergTablePropertiesDiffSuppress(k, old, new string, d *schema.ResourceDa
 	}
 	return false
 }
+
+// expandIcebergTableSortOrderForCommit converts the Terraform "sort_order" block
+// into the SortOrder body of an "add-sort-order" commit update. The "order-id" is
+// assigned by the server, so only the fields are sent. Returns nil when no sort
+// order is configured.
+func expandIcebergTableSortOrderForCommit(v interface{}) map[string]interface{} {
+	l, ok := v.([]interface{})
+	if !ok || len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	raw, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	rawFields, ok := raw["fields"].([]interface{})
+	if !ok || len(rawFields) == 0 {
+		return nil
+	}
+	fields := make([]interface{}, 0, len(rawFields))
+	for _, f := range rawFields {
+		fm, ok := f.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		fields = append(fields, map[string]interface{}{
+			"source-id":  fm["source_id"],
+			"transform":  fm["transform"],
+			"direction":  fm["direction"],
+			"null-order": fm["null_order"],
+		})
+	}
+	return map[string]interface{}{
+		// order-id is required on the SortOrder body; the server reassigns it,
+		// and "set-default-sort-order: -1" then selects this last-added order.
+		"order-id": 1,
+		"fields":   fields,
+	}
+}
