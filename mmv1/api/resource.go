@@ -1010,6 +1010,10 @@ func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type)
 		woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
 		writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
 		writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
+		// Set ResourceMetadata so constraint list methods (ExactlyOneOfList, RequiredWithList, etc.)
+		// can resolve schema paths for the generated fields.
+		writeOnlyField.ResourceMetadata = r
+		writeOnlyVersionField.ResourceMetadata = r
 		props = append(props, writeOnlyField, writeOnlyVersionField)
 	}
 	return props

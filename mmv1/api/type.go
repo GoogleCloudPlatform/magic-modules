@@ -1494,6 +1494,27 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 			})
 		}
 
+		// if still not found, search inside flatten_object NestedObjects —
+		// their children appear at the same Terraform schema level as siblings
+		if index == -1 {
+			for _, fp := range nestedProps {
+				if fp.FlattenObject {
+					childProps := fp.NestedProperties()
+					childIdx := slices.IndexFunc(childProps, func(p *Type) bool {
+						// Compare camelCase or underscore forms to handle mixed-case
+						// field names (e.g. "secret_dataWo" vs "secret_data_wo")
+						return p.Name == camelPname || p.Name == pname ||
+							google.Underscore(p.Name) == pname
+					})
+					if childIdx != -1 {
+						nestedProps = childProps
+						index = childIdx
+						break
+					}
+				}
+			}
+		}
+
 		if index == -1 {
 			return ""
 		}
