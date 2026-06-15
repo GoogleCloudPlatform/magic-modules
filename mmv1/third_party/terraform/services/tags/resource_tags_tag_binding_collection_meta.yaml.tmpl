@@ -1,3 +1,4 @@
+{{- if ne $.TargetVersionName "ga" }}
 resource: 'google_tags_tag_binding_collection'
 generation_type: 'handwritten'
 min_version: 'beta'
@@ -12,3 +13,4 @@ fields:
     provider_only: true
   - field: 'tags'
     provider_only: true
+{{- end }}
