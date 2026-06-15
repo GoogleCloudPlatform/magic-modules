@@ -1702,6 +1702,9 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true, // TODO: Add ability to add/remove nodePools
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return true
+				},
 				Elem: &schema.Resource{
 					Schema: schemaNodePool,
 				},
@@ -2885,6 +2888,12 @@ func ResourceContainerCluster() *schema.Resource {
 	//UDP schema start
             "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 	//UDP schema end
+			"ignore_node_count_changes": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: `When true, the provider will not fetch the instance group managers for the node pools to determine the current node count. This can save API quota on massive clusters. Setting this to true will result in missing managed_instance_group_urls in the state for all node pools in the cluster.`,
+			},
 		},
 	}
 }
@@ -3143,23 +3152,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.Subnetwork = subnetwork.RelativeLink()
 	}
 
-	nodePoolsCount := d.Get("node_pool.#").(int)
-	if nodePoolsCount > 0 {
-		nodePools := make([]*container.NodePool, 0, nodePoolsCount)
-		for i := 0; i < nodePoolsCount; i++ {
-			prefix := fmt.Sprintf("node_pool.%d.", i)
-			nodePool, err := expandNodePool(d, prefix)
-			if err != nil {
-				return err
-			}
-			nodePools = append(nodePools, nodePool)
-		}
-		cluster.NodePools = nodePools
-	} else {
-		// Node Configs have default values that are set in the expand function,
-		// but can only be set if node pools are unspecified.
-		cluster.NodeConfig = expandNodeConfig(d, "", []interface{}{})
-	}
+	// Inline node_pool is completely ignored. Node Configs have default values that are
+	// set in the expand function, but can only be set if node pools are unspecified.
+	cluster.NodeConfig = expandNodeConfig(d, "", []interface{}{})
 
         if v, ok := d.GetOk("node_pool_defaults"); ok {
                 cluster.NodePoolDefaults = expandNodePoolDefaults(v)
@@ -3717,11 +3712,8 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("addons_config", flattenClusterAddonsConfig(cluster.AddonsConfig)); err != nil {
 		return err
 	}
-	nps, err := flattenClusterNodePools(d, config, cluster.NodePools)
-	if err != nil {
-		return err
-	}
-	if err := d.Set("node_pool", nps); err != nil {
+
+	if err := d.Set("node_pool", []map[string]interface{}{}); err != nil {
 		return err
 	}
 
@@ -4714,18 +4706,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's NetworkTierConfig has been updated", d.Id())
 	}
 
-	if n, ok := d.GetOk("node_pool.#"); ok {
-		for i := 0; i < n.(int); i++ {
-			nodePoolInfo, err := extractNodePoolInformationFromCluster(d, config, clusterName)
-			if err != nil {
-				return err
-			}
-
-			if err := nodePoolUpdate(d, meta, nodePoolInfo, fmt.Sprintf("node_pool.%d.", i), d.Timeout(schema.TimeoutUpdate)); err != nil {
-				return err
-			}
-		}
-	}
+	// Inline node_pool updates are completely ignored.
 
 	// The master must be updated before the nodes
 	// If set to "", skip this step- any master version satisfies that minimum.
