@@ -1435,7 +1435,13 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 	managedIgmUrls := []string{}
 	nodeCount := 0
 
-	ignoreNodeCountDrift := d.Get(prefix + "ignore_node_count_drift").(bool) || d.Get("ignore_node_count_drift").(bool)
+	var ignoreNodeCountDrift bool
+	if v := d.Get(prefix + "ignore_node_count_drift"); v != nil {
+		ignoreNodeCountDrift = v.(bool)
+	}
+	if v := d.Get("ignore_node_count_drift"); v != nil {
+		ignoreNodeCountDrift = ignoreNodeCountDrift || v.(bool)
+	}
 
 	if ignoreNodeCountDrift {
 		log.Printf("[DEBUG] Skipping IGM fetch for node pool %q due to ignore_node_count_drift = true", np.Name)

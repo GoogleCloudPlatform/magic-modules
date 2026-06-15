@@ -18541,10 +18541,9 @@ func TestAccContainerCluster_withTaintConfig(t *testing.T) {
 func TestAccContainerCluster_skipNodePoolRefresh(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	poolName := fmt.Sprintf("tf-test-pool-%s", acctest.RandString(t, 10))
-	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+	suffix := acctest.RandString(t, 10)
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", suffix)
+	poolName := fmt.Sprintf("tf-test-pool-%s", suffix)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -18552,13 +18551,13 @@ func TestAccContainerCluster_skipNodePoolRefresh(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_skipNodePoolRefresh(clusterName, poolName, networkName, subnetworkName, true),
+				Config: testAccContainerCluster_skipNodePoolRefresh(suffix, clusterName, poolName, true),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.#", "0"),
 				),
 			},
 			{
-				Config: testAccContainerCluster_skipNodePoolRefresh(clusterName, poolName, networkName, subnetworkName, false),
+				Config: testAccContainerCluster_skipNodePoolRefresh(suffix, clusterName, poolName, false),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.#", "1"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.0.name", poolName),
@@ -18691,15 +18690,47 @@ resource "google_container_cluster" "cluster" {
 `, cluster, networkName, subnetworkName, behavior)
 }
 
-func testAccContainerCluster_skipNodePoolRefresh(clusterName, poolName, networkName, subnetworkName string, skipRefresh bool) string {
+func testAccContainerCluster_skipNodePoolRefresh(suffix, clusterName, poolName string, skipRefresh bool) string {
 	return fmt.Sprintf(`
+resource "google_compute_network" "custom" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "custom" {
+  name          = "tf-test-subnet-%s"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.custom.id
+
+  secondary_ip_range {
+    range_name    = "pods"
+    ip_cidr_range = "10.1.0.0/16"
+  }
+
+  secondary_ip_range {
+    range_name    = "services"
+    ip_cidr_range = "10.2.0.0/20"
+  }
+}
+
 resource "google_container_cluster" "primary" {
   name                = "%s"
   location            = "us-central1-a"
   initial_node_count  = 1
-  network             = "%s"
-  subnetwork          = "%s"
+  network             = google_compute_network.custom.id
+  subnetwork          = google_compute_subnetwork.custom.id
   deletion_protection = false
+
+  ip_allocation_policy {
+    cluster_secondary_range_name  = "pods"
+    services_secondary_range_name = "services"
+  }
+
+  node_config {
+    preemptible  = true
+    machine_type = "e2-medium"
+  }
 
   # We must delete the default node pool to ensure we only have our standalone node pool
   remove_default_node_pool = true
@@ -18714,8 +18745,9 @@ resource "google_container_node_pool" "extra" {
   node_count = 1
 
   node_config {
+    preemptible  = true
     machine_type = "e2-medium"
   }
 }
-`, clusterName, networkName, subnetworkName, skipRefresh, poolName)
+`, suffix, suffix, clusterName, skipRefresh, poolName)
 }
