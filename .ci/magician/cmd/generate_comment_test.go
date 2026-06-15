@@ -30,20 +30,6 @@ import (
 func TestExecGenerateComment(t *testing.T) {
 	sb := newSandbox(t)
 
-	originalWorkspace := os.Getenv("WORKSPACE")
-	os.Setenv("WORKSPACE", sb.Dir)
-	defer func() {
-		if originalWorkspace == "" {
-			os.Unsetenv("WORKSPACE")
-		} else {
-			os.Setenv("WORKSPACE", originalWorkspace)
-		}
-	}()
-
-	originalPath := os.Getenv("PATH")
-	os.Setenv("PATH", fmt.Sprintf("%s:%s", sb.Dir, originalPath))
-	defer os.Setenv("PATH", originalPath)
-
 	magicModulesDir := filepath.Join(sb.Dir, "workspace", "magic-modules", ".ci", "magician")
 	os.MkdirAll(magicModulesDir, 0755)
 	sb.Runner.PushDir(magicModulesDir)
@@ -110,6 +96,7 @@ exit 0
 		"17",
 		"project1",
 		"sha1",
+		sb.Dir,
 		gh,
 		sb.Runner,
 		ctlr,
