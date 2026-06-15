@@ -2,7 +2,6 @@
 # Valid for source type: HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE.
 
 resource "google_chronicle_feed" "{{$.PrimaryResourceId}}" {
-  provider     = google-beta
   location     = "us"
   instance     = "{{index $.TestEnvVars "chronicle_id"}}"
   display_name = "{{index $.Vars "resource_name"}}"
