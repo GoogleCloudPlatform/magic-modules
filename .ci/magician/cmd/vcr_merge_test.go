@@ -68,10 +68,6 @@ func TestExecVCRMerge(t *testing.T) {
 			sb.Runner.WriteFile("gcloud", fakeGcloud)
 			sb.Runner.MustRun("chmod", []string{"+x", "gcloud"}, nil)
 
-			origPath := os.Getenv("PATH")
-			os.Setenv("PATH", sb.Dir+":"+origPath)
-			defer os.Setenv("PATH", origPath)
-
 			if !tc.lsReturnedError && tc.name != "pr not found" {
 				sb.Runner.MustRun("mkdir", []string{"-p", "gs/ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures"}, nil)
 				sb.Runner.MustRun("mkdir", []string{"-p", "gs/ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures"}, nil)
