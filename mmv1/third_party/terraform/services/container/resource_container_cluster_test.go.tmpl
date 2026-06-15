@@ -18727,11 +18727,6 @@ resource "google_container_cluster" "primary" {
     services_secondary_range_name = "services"
   }
 
-  node_config {
-    preemptible  = true
-    machine_type = "e2-medium"
-  }
-
   # We must delete the default node pool to ensure we only have our standalone node pool
   remove_default_node_pool = true
 

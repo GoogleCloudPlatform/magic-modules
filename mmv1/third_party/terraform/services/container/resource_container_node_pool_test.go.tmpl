@@ -7134,11 +7134,6 @@ resource "google_container_cluster" "cluster" {
     services_secondary_range_name = "services"
   }
 
-  node_config {
-    preemptible  = true
-    machine_type = "e2-medium"
-  }
-
   remove_default_node_pool = true
 }
 
