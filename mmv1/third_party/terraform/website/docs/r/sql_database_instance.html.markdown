@@ -506,8 +506,15 @@ The optional `settings.database_flags` sublist supports:
 
 The optional `settings.active_directory_config` subblock supports:
 
-* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
-    Can only be used with SQL Server.
+* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com). Can only be used with SQL Server.
+
+* `mode` - (Optional) The mode of the Active Directory configuration. Can be `MANAGED_ACTIVE_DIRECTORY` or `CUSTOMER_MANAGED_ACTIVE_DIRECTORY`.
+
+* `dns_servers` - (Optional) Domain controller IPv4 addresses used to bootstrap Active Directory.
+
+* `admin_credential_secret_name` - (Optional) The secret manager key storing the administrator credential. (e.g., `projects/{project}/secrets/{secret}`).
+
+* `organizational_unit` - (Optional) The organizational unit distinguished name. This is the full hierarchical path to the organizational unit.
 
 The optional `settings.entraid_config` block supports:
 
@@ -601,6 +608,10 @@ The optional `settings.ip_configuration.authorized_networks[]` sublist supports:
 The optional `settings.ip_configuration.psc_config` sublist supports:
 
 * `psc_enabled` - (Optional) Whether PSC connectivity is enabled for this instance.
+
+* `psc_auto_dns_enabled` - (Optional) Whether PSC auto DNS is enabled for this instance.
+
+* `psc_write_endpoint_dns_enabled` - (Optional) Whether PSC write endpoint DNS is enabled for this instance. This is only supported for Enterprise Plus edition instances.
 
 * `allowed_consumer_projects` - (Optional) List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).
 

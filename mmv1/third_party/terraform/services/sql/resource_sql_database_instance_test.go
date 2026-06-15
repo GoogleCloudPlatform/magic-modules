@@ -3,6 +3,7 @@ package sql_test
 import (
 	"fmt"
 	"log"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -1252,7 +1253,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t 
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
-				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil, false, false)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1280,7 +1281,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
-				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{})),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{}, false, false)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1308,13 +1309,64 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(t *te
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
-				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()})),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()}, false, false)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_pscDnsConfig(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := envvar.GetTestProjectFromEnv()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCDnsEnabled(instanceName, projectId),
+				Check: resource.ComposeTestCheckFunc(
+					verifyPscOperation("google_sql_database_instance.instance", true, true, []string{projectId}, true, true),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCDnsDisabled(instanceName, projectId),
+				Check: resource.ComposeTestCheckFunc(
+					verifyPscOperation("google_sql_database_instance.instance", true, true, []string{projectId}, false, false),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCOnlyAutoDnsEnabled(instanceName, projectId),
+				Check: resource.ComposeTestCheckFunc(
+					verifyPscOperation("google_sql_database_instance.instance", true, true, []string{projectId}, true, false),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
@@ -1336,7 +1388,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
-				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil)),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil, false, false)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1347,7 +1399,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 			},
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
-				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()})),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()}, false, false)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1358,7 +1410,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 			},
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
-				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{})),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{}, false, false)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -2645,6 +2697,47 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance-with-ad",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_SelfManagedActiveDirectory(t *testing.T) {
+	adDomainName := os.Getenv("TF_SQL_CMAD_DOMAIN")
+	secretName := os.Getenv("TF_SQL_CMAD_SECRET_NAME")
+	dnsServersEnv := os.Getenv("TF_SQL_CMAD_DNS_SERVERS")
+	ou := os.Getenv("TF_SQL_CMAD_OU")
+	if adDomainName == "" || secretName == "" || dnsServersEnv == "" || ou == "" {
+		t.Skip("TF_SQL_CMAD_DOMAIN, TF_SQL_CMAD_SECRET_NAME, TF_SQL_CMAD_DNS_SERVERS, and TF_SQL_CMAD_OU must be set for self-managed Active Directory acceptance tests")
+	}
+
+	var dnsServersList []string
+	for _, ip := range strings.Split(dnsServersEnv, ",") {
+		dnsServersList = append(dnsServersList, fmt.Sprintf("%q", strings.TrimSpace(ip)))
+	}
+	dnsServersHCL := fmt.Sprintf("[%s]", strings.Join(dnsServersList, ", "))
+
+	t.Parallel()
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	networkName := os.Getenv("TF_SQL_CMAD_NETWORK")
+	if networkName == "" {
+		networkName = servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "sql-instance-cmad-1")
+	}
+	rootPassword := acctest.RandString(t, 15) + "A1!"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_SelfManagedActiveDirectoryConfig(databaseName, networkName, rootPassword, adDomainName, secretName, dnsServersHCL, ou),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance-with-self-managed-ad",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
@@ -5450,6 +5543,36 @@ resource "google_sql_database_instance" "instance-with-ad" {
 }`, networkName, databaseName, rootPassword, adDomainName)
 }
 
+func testGoogleSqlDatabaseInstance_SelfManagedActiveDirectoryConfig(databaseName, networkName, rootPassword, adDomainName, secretName, dnsServersHCL, ou string) string {
+	return fmt.Sprintf(`
+data "google_compute_network" "servicenet" {
+  name                    = "%s"
+}
+
+resource "google_sql_database_instance" "instance-with-self-managed-ad" {
+  name             = "%s"
+  region           = "us-central1"
+  database_version = "SQLSERVER_2022_STANDARD"
+  root_password    = "%s"
+  deletion_protection = false
+  settings {
+    tier = "db-custom-2-7680"
+    ip_configuration {
+      ipv4_enabled       = "false"
+      private_network    = data.google_compute_network.servicenet.self_link
+    }
+
+    active_directory_config {
+      domain                       = "%s"
+      mode                         = "CUSTOMER_MANAGED_ACTIVE_DIRECTORY"
+      dns_servers                  = %s
+      admin_credential_secret_name = "%s"
+      organizational_unit          = "%s"
+    }
+  }
+}`, networkName, databaseName, rootPassword, adDomainName, dnsServersHCL, secretName, ou)
+}
+
 func testGoogleSqlDatabaseInstance_DenyMaintenancePeriodConfig(databaseName, endDate, startDate, time string) string {
 	return fmt.Sprintf(`
 
@@ -7153,7 +7276,97 @@ resource "google_sql_database_instance" "instance" {
 `, projectId, projectId, orgId, billingAccount, instanceName, projectId)
 }
 
-func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, expectedAllowedConsumerProjects []string) func(*terraform.State) error {
+func testAccSqlDatabaseInstance_withPSCDnsEnabled(instanceName string, projectId string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  project             = "%s"
+  name                = "%s"
+  region              = "us-south1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier    = "db-perf-optimized-N-2"
+    edition = "ENTERPRISE_PLUS"
+    ip_configuration {
+		psc_config {
+			psc_enabled                    = true
+			psc_auto_dns_enabled           = true
+			psc_write_endpoint_dns_enabled = true
+			allowed_consumer_projects      = ["%s"]
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+`, projectId, instanceName, projectId)
+}
+
+func testAccSqlDatabaseInstance_withPSCDnsDisabled(instanceName string, projectId string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  project             = "%s"
+  name                = "%s"
+  region              = "us-south1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier    = "db-perf-optimized-N-2"
+    edition = "ENTERPRISE_PLUS"
+    ip_configuration {
+		psc_config {
+			psc_enabled                    = true
+			psc_auto_dns_enabled           = false
+			psc_write_endpoint_dns_enabled = false
+			allowed_consumer_projects      = ["%s"]
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+`, projectId, instanceName, projectId)
+}
+
+func testAccSqlDatabaseInstance_withPSCOnlyAutoDnsEnabled(instanceName string, projectId string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  project             = "%s"
+  name                = "%s"
+  region              = "us-south1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier    = "db-perf-optimized-N-2"
+    edition = "ENTERPRISE_PLUS"
+    ip_configuration {
+		psc_config {
+			psc_enabled                    = true
+			psc_auto_dns_enabled           = true
+			psc_write_endpoint_dns_enabled = false
+			allowed_consumer_projects      = ["%s"]
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+`, projectId, instanceName, projectId)
+}
+
+func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, expectedAllowedConsumerProjects []string, expectedPscAutoDnsEnabled bool, expectedPscWriteEndpointDnsEnabled bool) func(*terraform.State) error {
 	return func(s *terraform.State) error {
 		resource, ok := s.RootModule().Resources[resourceName]
 		if !ok {
@@ -7176,6 +7389,18 @@ func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedP
 			pscEnabled, err := strconv.ParseBool(pscEnabledStr)
 			if err != nil || pscEnabled != expectedPscEnabled {
 				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_enabled property value is not set as expected in state of %s, expected %v, actual %v", resourceName, expectedPscEnabled, pscEnabled)
+			}
+
+			pscAutoDnsEnabledStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_dns_enabled"]
+			pscAutoDnsEnabled, err := strconv.ParseBool(pscAutoDnsEnabledStr)
+			if err != nil || pscAutoDnsEnabled != expectedPscAutoDnsEnabled {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_dns_enabled property value is not set as expected in state of %s, expected %v, actual %v", resourceName, expectedPscAutoDnsEnabled, pscAutoDnsEnabled)
+			}
+
+			pscWriteEndpointDnsEnabledStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_write_endpoint_dns_enabled"]
+			pscWriteEndpointDnsEnabled, err := strconv.ParseBool(pscWriteEndpointDnsEnabledStr)
+			if err != nil || pscWriteEndpointDnsEnabled != expectedPscWriteEndpointDnsEnabled {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_write_endpoint_dns_enabled property value is not set as expected in state of %s, expected %v, actual %v", resourceName, expectedPscWriteEndpointDnsEnabled, pscWriteEndpointDnsEnabled)
 			}
 
 			allowedConsumerProjectsStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.allowed_consumer_projects.#"]
