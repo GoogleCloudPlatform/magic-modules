@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccProjectIamMemberList_basic(t *testing.T) {
+func (t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()

@@ -263,8 +263,8 @@ func (r *IamMemberListResource) yieldPolicyMembers(ctx context.Context, req list
 func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.ListRequest, targetRd *schema.ResourceData, updater ResourceIamUpdater, binding *cloudresourcemanager.Binding, member, etag string) (list.ListResult, error) {
 	rd := r.memberResource.TestResourceData()
 	for k := range r.iamResourceSchema {
-		if v, ok := rd.GetOk(k); ok {
-			if err := targetRd.Set(k, v); err != nil {
+		if v, ok := targetRd.GetOk(k); ok {
+			if err := rd.Set(k, v); err != nil {
 				return list.ListResult{}, fmt.Errorf("setting %s: %w", k, err)
 			}
 		}
