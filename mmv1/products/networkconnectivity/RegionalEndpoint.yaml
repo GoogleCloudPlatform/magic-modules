@@ -101,7 +101,7 @@ properties:
     description: |
       The name of the subnetwork from which the IP address will be allocated. Format: `projects/{project}/regions/{region}/subnetworks/{subnetwork}`
     default_from_api: true
-    ignore_read: true
+    custom_flatten: 'templates/terraform/custom_flatten/network_connectivity_regional_endpoint_subnetwork.go.tmpl'
   - name: 'accessType'
     type: Enum
     description: |
