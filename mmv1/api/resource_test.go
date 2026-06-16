@@ -884,3 +884,55 @@ func TestResource_TestDependencies(t *testing.T) {
 		})
 	}
 }
+
+// TestListScopePropertiesIncludesUrlParamOnlyParameters verifies that
+// ListScopeProperties returns parameters that appear in the CollectionUrl but
+// are url_param_only and therefore absent from import_format / IdentityProperties.
+// Regression test for the CryptoKeyVersion pattern:
+//
+//	base_url:       '{{crypto_key}}/cryptoKeyVersions'
+//	import_format:  ['{{name}}']
+//
+// Without the fix, ListScopeProperties() returned an empty slice because
+// `crypto_key` never appeared in IdentityProperties (built from import_format only).
+func TestListScopePropertiesIncludesUrlParamOnlyParameters(t *testing.T) {
+	t.Parallel()
+
+	prod := &api.Product{
+		Name: "Kms",
+		Version: &product.Version{
+			Name:    "ga",
+			BaseUrl: "https://cloudkms.googleapis.com/v1/",
+		},
+	}
+
+	r := api.Resource{
+		Name:            "CryptoKeyVersion",
+		BaseUrl:         "{{crypto_key}}/cryptoKeyVersions",
+		ImportFormat:    []string{"{{name}}"},
+		ProductMetadata: prod,
+		Parameters: []*api.Type{
+			{
+				Name:         "cryptoKey",
+				Type:         "String",
+				UrlParamOnly: true,
+				Required:     true,
+			},
+		},
+		Properties: []*api.Type{
+			{
+				Name:   "name",
+				Type:   "String",
+				Output: true,
+			},
+		},
+	}
+
+	got := r.ListScopeProperties()
+	if len(got) != 1 {
+		t.Fatalf("ListScopeProperties() returned %d properties, want 1; got: %v", len(got), got)
+	}
+	if got[0].Name != "cryptoKey" {
+		t.Errorf("ListScopeProperties()[0].Name = %q, want %q", got[0].Name, "cryptoKey")
+	}
+}
