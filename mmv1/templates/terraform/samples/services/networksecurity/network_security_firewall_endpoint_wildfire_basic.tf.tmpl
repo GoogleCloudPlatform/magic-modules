@@ -1,0 +1,47 @@
+resource "google_compute_network" "default" {
+  provider = google-beta
+
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  project                 = "{{index $.TestEnvVars "project"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider = google-beta
+
+  name          = "{{index $.ResourceIdVars "subnet_name"}}"
+  project       = "{{index $.TestEnvVars "project"}}"
+  region        = "us-central1"
+  ip_cidr_range = "10.0.0.0/24"
+
+  network = google_compute_network.default.id
+}
+
+resource "google_network_security_firewall_endpoint" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  name     = "{{index $.ResourceIdVars "endpoint_name"}}"
+  project  = "{{index $.TestEnvVars "project"}}"
+  location = "us-central1"
+
+  parent = "organizations/{{index $.TestEnvVars "org_id"}}"
+
+  billing_project_id = "{{index $.TestEnvVars "project"}}"
+
+  associated_networks = [
+    google_compute_network.default.id
+  ]
+
+  wildfire_settings {
+    enabled = true
+    wildfire_region = "us"
+
+    wildfire_realtime_lookup_duration = "3s"
+    wildfire_realtime_lookup_timeout_action = "{{index $.Vars "lookup_timeout_action"}}"
+
+    wildfire_inline_cloud_analysis_settings {
+      max_analysis_duration = "{{index $.Vars "max_analysis_duration"}}"
+      timeout_action        = "{{index $.Vars "inline_timeout_action"}}"
+    }
+  }
+}
