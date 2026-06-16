@@ -1,0 +1,22 @@
+resource "google_gke_hub_rollout_sequence" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  rollout_sequence_id = "{{index $.ResourceIdVars "rollout_sequence_id"}}"
+  display_name        = "Basic Rollout Sequence"
+  ignored_clusters_selector {
+    label_selector = "resource.labels.ignored == 'true'"
+  }
+  stages {
+    fleet_projects = ["projects/{{index $.TestEnvVars "project_id"}}"]
+    soak_duration  = "1h"
+  }
+  auto_upgrade_config {
+    rollout_creation_scope {
+      upgrade_types = [
+        "CONTROL_PLANE_MINOR",
+        "CONTROL_PLANE_PATCH",
+        "NODE_MINOR",
+        "NODE_PATCH"
+      ]
+    }
+  }
+}
