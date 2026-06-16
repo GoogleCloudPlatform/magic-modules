@@ -2256,7 +2256,7 @@ func flattenRegionInstanceLifecyclePolicy(raw interface{}) []map[string]interfac
 	entry := map[string]interface{}{
 		"force_update_on_repair":    ilp["forceUpdateOnRepair"],
 		"default_action_on_failure": ilp["defaultActionOnFailure"],
-		"on_failed_health_check" = ilp["onFailedHealthCheck"]
+		"on_failed_health_check": ilp["onFailedHealthCheck"],
 	}
 {{- if ne $.TargetVersionName "ga" }}
 	if onRepair, ok := ilp["onRepair"].(map[string]interface{}); ok && onRepair != nil {
