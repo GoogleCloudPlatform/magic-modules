@@ -45,4 +45,4 @@ If the file name does not match, the generator function `addTestsFromHandwritten
 
 The detailed troubleshooting playbook has been moved to a separate file to keep this skill description concise.
 
-Please refer to [Troubleshooting Playbook](file:///Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/skills/tgc-fix-integration-tests-skill/troubleshooting_playbook.md) for solutions to common test failures.
+Please refer to [Troubleshooting Playbook](file:///Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/skills/tgc/tgc-fix-integration-tests-skill/troubleshooting_playbook.md) for solutions to common test failures.

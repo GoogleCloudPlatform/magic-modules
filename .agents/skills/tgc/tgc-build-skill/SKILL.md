@@ -17,7 +17,7 @@ You must execute the script `build_tgc.sh` to automate both the code generation 
 1. Ensure your current working directory is the root of the `magic-modules` repository.
 2. Execute the script from the `.agents/skills` directory:
    ```bash
-   ./.agents/skills/tgc-build-skill/scripts/build_tgc.sh
+   ./.agents/skills/tgc/tgc-build-skill/scripts/build_tgc.sh
    ```
 
 This will automatically:

@@ -23,15 +23,15 @@ If you added or modified a resource, you must run its corresponding integration 
 
 2. Run the test using the script from the `scripts` file, passing the test path and test name:
    ```bash
-   .agents/skills/tgc-run-integration-tests-skill/scripts/run_integration_test.sh <test-path> <test-name>
+   .agents/skills/tgc/tgc-run-integration-tests-skill/scripts/run_integration_test.sh <test-path> <test-name>
    ```
    **Example**:
    ```bash
-   .agents/skills/tgc-run-integration-tests-skill/scripts/run_integration_test.sh ./test/services/alloydb TestAccAlloydbBackup
+   .agents/skills/tgc/tgc-run-integration-tests-skill/scripts/run_integration_test.sh ./test/services/alloydb TestAccAlloydbBackup
    ```
 
 > [!IMPORTANT]
 > You MUST use the `./` prefix for the `<test-path>` (e.g., `./test/services/alloydb`) to ensure `go test` interprets it as a local directory rather than a standard library package.
 
 > ### Error Reporting
-   If a failure is detected or provided, you **MUST** report it using the template specified in GEMINI.md before proceeding.
+   If a failure is detected or provided, you **MUST** report it using the template specified in TGC_WORKFLOWS.md before proceeding.
