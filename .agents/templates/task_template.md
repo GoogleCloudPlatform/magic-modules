@@ -1,8 +1,8 @@
 # Tasks - TGC Resource Workflow
 
 ## Phase 1: Session Setup
-- [ ] [MANDATORY] Read GEMINI.md <!-- id: 1 -->
-- [ ] [MANDATORY] Read GEMINI_ADD.md or GEMINI_FIX.md <!-- id: 2 -->
+- [ ] [MANDATORY] Read TGC_WORKFLOWS.md (or GEMINI.md) <!-- id: 1 -->
+- [ ] [MANDATORY] Read tgc_add.md or tgc_fix.md (or GEMINI_ADD.md or GEMINI_FIX.md) <!-- id: 2 -->
 - [ ] [MANDATORY] Read skill: sync-provider <!-- id: 3 -->
 - [ ] [MANDATORY] Read skill: tgc-build-skill <!-- id: 4 -->
 - [ ] [MANDATORY] Read skill: tgc-run-unit-tests-skill <!-- id: 5 -->
