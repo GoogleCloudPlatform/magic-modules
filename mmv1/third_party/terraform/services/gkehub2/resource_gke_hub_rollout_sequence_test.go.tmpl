@@ -1,10 +1,12 @@
 package gkehub2
 
+{{ if ne $.TargetVersionName "ga" }}
+
 import (
 	"testing"
 )
 
-func TestDurationDiffSuppress(t *testing.T) {
+func TestRolloutSequenceDurationDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Old, New           string
 		ExpectDiffSuppress bool
@@ -37,3 +39,5 @@ func TestDurationDiffSuppress(t *testing.T) {
 		}
 	}
 }
+
+{{ end }}
