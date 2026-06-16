@@ -39,6 +39,7 @@ import_format:
   - '{{catalog}}/{{namespace}}/{{name}}'
 supports_indirect_user_project_override: true
 custom_code:
+  encoder: templates/terraform/encoders/biglake_iceberg_table_create.go.tmpl
   update_encoder: templates/terraform/encoders/biglake_iceberg_table.go.tmpl
   constants: templates/terraform/constants/biglake_iceberg_table.go.tmpl
   post_read: templates/terraform/post_read/biglake_iceberg_table.go.tmpl
@@ -47,6 +48,14 @@ samples:
     primary_resource_id: my_iceberg_table
     steps:
       - name: biglake_iceberg_table_basic
+        resource_id_vars:
+          bucket_name: my-bucket
+          namespace_id: my_namespace
+          table_name: my_table
+  - name: biglake_iceberg_table_sort_order
+    primary_resource_id: my_iceberg_table
+    steps:
+      - name: biglake_iceberg_table_sort_order
         resource_id_vars:
           bucket_name: my-bucket
           namespace_id: my_namespace
@@ -185,6 +194,56 @@ properties:
               required: true
               description: |
                 The transform to apply to the source field.
+  # The Iceberg REST Catalog API uses three different names for one concept:
+  # the create request body field is "write-order" (hence api_name), the read
+  # response returns "sort-orders" + "default-sort-order-id" (bridged in
+  # post_read), and updates use "add-sort-order"/"set-default-sort-order" commit
+  # actions. The user-facing field stays "sort_order" to match the read shape and
+  # to mirror the existing "partition_spec" field. default_from_api is set
+  # because the API always returns a sort order (order-id 0, the unsorted order)
+  # even when none is configured, which would otherwise diff against an empty
+  # config.
+  - name: sortOrder
+    api_name: write-order
+    type: NestedObject
+    default_from_api: true
+    description: |
+      The sort order of the table.
+    properties:
+      - name: orderId
+        api_name: order-id
+        type: Integer
+        output: true
+        description: |
+          The unique identifier of the sort order.
+      - name: fields
+        type: Array
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: sourceId
+              api_name: source-id
+              type: Integer
+              required: true
+              description: |
+                The source field ID for the sort field.
+            - name: transform
+              type: String
+              required: true
+              description: |
+                The transform to apply to the source field.
+            - name: direction
+              type: String
+              required: true
+              description: |
+                The sort direction for the sort field. Possible values: "asc", "desc".
+            - name: nullOrder
+              api_name: null-order
+              type: String
+              required: true
+              description: |
+                The null ordering for the sort field. Possible values: "nulls-first", "nulls-last".
   - name: properties
     type: KeyValuePairs
     description: |
