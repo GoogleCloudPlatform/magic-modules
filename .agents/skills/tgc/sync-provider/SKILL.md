@@ -11,8 +11,16 @@ description: "Synchronize a downstream Terraform provider repository with Magic 
 ## Prerequisites
 
 - You must be operating relative to the `magic-modules` and downstream provider repositories.
-- You must have the absolute path to the downstream repository (e.g., `terraform-provider-google-beta`).
+- You must have the absolute path to the downstream repository.
 - You must have verified there are no unsaved or uncommitted changes in the downstream provider directory that would be overwritten by code generation.
+
+## How to Choose Your Path
+
+Before proceeding, determine which synchronization method you need:
+
+1. **Aligning to a Specific Base Commit**: Use this if you need to synchronize the repositories to a specific state in the past (e.g., to match a specific pull request or isolate a failure). Follow the numbered **Execution Steps** below.
+2. **Synchronizing to Latest (Fast-Forward)**: Use this if you simply want to bring both repositories up to date with their latest remote commits. Follow the steps in the **Synchronizing to Latest** section.
+3. **Skip Synchronization**: Use this if you want to bypass synchronization to save time. Follow the steps in the **Skip Synchronization** section.
 
 ## Execution Steps
 
@@ -43,7 +51,8 @@ Before checking out older commits, check if there are local modifications in the
 cd <downstream-provider-path>
 git status
 ```
-If changes exist, point them out to the user and **ask if they wish to save/stash them**. Do not proceed without consent. If consent is given, you can stash or reset them.
+If changes exist, always clean the uncommitted and untracked files in the downstream repository using `git reset --hard` and `git clean -fd`.
+
 
 ### 3. Find the Matching Downstream Commit
 
@@ -86,13 +95,57 @@ git checkout <matching-commit-hash>
 
 ### 5. Verify Parity
 
-Return to `magic-modules` and run code generation to verify that there are no unexpected diffs:
+Return to `magic-modules` and run the automation script from `tgc-build-skill` to generate code and verify parity:
 ```bash
-cd <magic-modules-path>
-make provider VERSION=<beta|ga> OUTPUT_PATH="<downstream-provider-path>"
+./.agents/skills/tgc-build-skill/scripts/build_tgc.sh <downstream-provider-path>
 ```
 Verify the output of `git status` in the downstream repository. It should be clean or only contain changes from our specific branch.
 
 ### 6. Verification & Handoff
 
-Verify that the `make provider` command succeeded without unexpected diffs. Return to the workflow that invoked this skill to proceed.
+Verify that the `make tgc` command succeeded without unexpected diffs. Return to the workflow that invoked this skill to proceed.
+
+---
+
+## Synchronizing to Latest (Fast-Forward)
+
+If your goal is to bring both repositories to their most recent remote commits rather than aligning to an older base:
+
+### 1. Update Magic Modules to Latest
+Fetch the latest changes from the canonical remote (e.g., `upstream` or `origin`) and rebase your feature branch on it. This avoids failures if `main` is already checked out in another worktree:
+```bash
+git fetch <canonical-remote> main
+git rebase <canonical-remote>/main
+```
+
+### 2. Clean and Update Downstream to Latest
+Downstream is generated, so clean local changes first to avoid conflicts. Then fetch the latest commit from the remote main branch:
+```bash
+cd <downstream-provider-path>
+git reset --hard
+git clean -fd
+git fetch origin main
+```
+
+### 3. Project Latest Changes
+Return to `magic-modules` and run the build script to project all changes to the latest downstream state:
+```bash
+./.agents/skills/tgc-build-skill/scripts/build_tgc.sh <downstream-provider-path>
+```
+
+---
+
+## Skip Synchronization
+
+If you are confident that the downstream repository and Magic Modules are already synchronized, or you explicitly wish to bypass this phase:
+
+### 1. Confirm Parity
+Briefly check the status of both repositories to ensure there are no uncommitted or conflicting changes:
+```bash
+git status
+cd <downstream-provider-path>
+git status
+```
+
+### 2. Proceed to the Next Phase
+Skip all checkout/sync steps and directly proceed to the next phase of the workflow.
