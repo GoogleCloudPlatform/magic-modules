@@ -21,6 +21,8 @@ references:
 # Marks the resource as beta-only. Ensure a beta version block is present in
 # provider.yaml.
 min_version: beta
+# hive/v1beta is added here instead of into the base url of the product.yaml.
+# This is because the IAM policy does not contain this prefix, so it must be separated.
 base_url: 'hive/v1beta/projects/{{project}}/catalogs'
 self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{name}}'
 create_url: 'hive/v1beta/projects/{{project}}/catalogs?hiveCatalogId={{name}}&primary_location={{primary_location}}'
