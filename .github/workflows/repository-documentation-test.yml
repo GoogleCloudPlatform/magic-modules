@@ -1,5 +1,13 @@
 name: repository-documentation-test
 
+# peaceiris/actions-hugo still runs on Node 16, which has no Node 24-compatible
+# release. Allow the runner to keep executing it on the deprecated Node 20
+# runtime until it is replaced; Node 24-native actions in this workflow are
+# unaffected. Node 20 is removed on 2026-09-16, so this action must be swapped
+# out before then.
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+
 permissions: read-all
 
 on:
@@ -11,7 +19,7 @@ jobs:
   deploy:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: false  # Fetch Hugo themes (true OR recursive)
           fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
