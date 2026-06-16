@@ -18,8 +18,8 @@ def main():
 
     # Required checklist patterns (must be marked with [x] or [X])
     checks = {
-        "TGC_WORKFLOWS.md/GEMINI.md": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+(TGC_WORKFLOWS|GEMINI)\.md",
-        "tgc_add.md/tgc_fix.md/GEMINI_ADD.md/GEMINI_FIX.md": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+(tgc_(add|fix)|GEMINI_(ADD|FIX))\.md",
+        "TGC_WORKFLOWS.md": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+(AGENTS\.md and )?TGC_WORKFLOWS\.md",
+        "tgc_add.md/tgc_fix.md": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+tgc_(add|fix)\.md",
         "skill: sync-provider": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*sync-provider",
         "skill: tgc-build-skill": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*tgc-build-skill",
         "skill: tgc-run-unit-tests-skill": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*tgc-run-unit-tests-skill",
