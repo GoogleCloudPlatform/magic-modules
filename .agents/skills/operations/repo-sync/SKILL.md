@@ -10,7 +10,7 @@ Use this skill to check if the downstream workspace is synchronized with Magic M
 ## Execution Steps
 
 ### 1. Check Sync Status
-*   Execute the `check-sync-provider` skill (located in `.agents/skills/provider/utils/check-sync-provider/SKILL.md`) to determine if the downstream repository is aligned with the correct Magic Modules base commit.
+*   Execute the `check-sync-provider` skill (located in `.agents/skills/utils/check-sync-provider/SKILL.md`) to determine if the downstream repository is aligned with the correct Magic Modules base commit.
 
 ### 2. Prompt User if Needed
 *   If the workspace is clearly out of sync or if you are unsure, **ask the user** if they would like to run a full repository sync to establish a clean baseline.
