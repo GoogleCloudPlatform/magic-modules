@@ -2936,7 +2936,7 @@ func ResourceContainerCluster() *schema.Resource {
 	//UDP schema start
             "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 	//UDP schema end
-			"ignore_node_count_drift": {
+			"ignore_node_count_changes": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,

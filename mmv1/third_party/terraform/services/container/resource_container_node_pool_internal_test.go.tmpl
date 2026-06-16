@@ -20,8 +20,12 @@ import (
 func TestUnitFlattenNodePool(t *testing.T) {
 	t.Parallel()
 
+	// nodeCountFromAPI is the size the prepopulated IGM cache reports; the
+	// standard-flow case expects flattenNodePool to surface exactly this.
+	const nodeCountFromAPI = 5
+
 	resourceSchema := map[string]*schema.Schema{
-		"ignore_node_count_drift": {
+		"ignore_node_count_changes": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
@@ -61,7 +65,7 @@ func TestUnitFlattenNodePool(t *testing.T) {
 		expectedManagedIgmUrls []string
 	}{
 		{
-			name: "Standard flow (ignore_node_count_drift=false) fetches from IGM",
+			name: "Standard flow (ignore_node_count_changes=false) fetches from IGM",
 			d:    schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{}),
 			np: &container.NodePool{
 				Name: "pool-1",
@@ -71,7 +75,7 @@ func TestUnitFlattenNodePool(t *testing.T) {
 				Locations: []string{"us-central1-a"},
 			},
 			prepopulateCache:  true,
-			expectedNodeCount: 5,
+			expectedNodeCount: nodeCountFromAPI,
 			expectedIgmUrls: []string{
 				"https://www.googleapis.com/compute/v1/projects/ci-project/zones/us-central1-a/instanceGroupManagers/gke-pool-1-grp",
 			},
@@ -80,9 +84,9 @@ func TestUnitFlattenNodePool(t *testing.T) {
 			},
 		},
 		{
-			name: "Skip flow (ignore_node_count_drift=true) reads from state",
+			name: "Skip flow (ignore_node_count_changes=true) reads from state",
 			d: schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{
-				"ignore_node_count_drift": true,
+				"ignore_node_count_changes": true,
 				"node_count":              10,
 			}),
 			np: &container.NodePool{
@@ -99,9 +103,9 @@ func TestUnitFlattenNodePool(t *testing.T) {
 			expectedManagedIgmUrls: []string{}, // Unpopulated because IGM query was skipped
 		},
 		{
-			name: "Skip flow (ignore_node_count_drift=true) falls back to InitialNodeCount when no state",
+			name: "Skip flow (ignore_node_count_changes=true) falls back to InitialNodeCount when no state",
 			d: schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{
-				"ignore_node_count_drift": true,
+				"ignore_node_count_changes": true,
 			}),
 			np: &container.NodePool{
 				Name:              "pool-1",
@@ -126,7 +130,7 @@ func TestUnitFlattenNodePool(t *testing.T) {
 				igmCache.instanceGroupManagers["projects/ci-project/zones/us-central1-a/instanceGroupManagers/gke-pool-1-grp"] = &instanceGroupManagerWithUpdateTime{
 					instanceGroupManager: &compute.InstanceGroupManager{
 						Name:          "gke-pool-1-grp",
-						TargetSize:    5,
+						TargetSize:    nodeCountFromAPI,
 						InstanceGroup: "https://www.googleapis.com/compute/v1/projects/ci-project/zones/us-central1-a/instanceGroups/gke-pool-1-grp",
 						SelfLink:      "https://www.googleapis.com/compute/v1/projects/ci-project/zones/us-central1-a/instanceGroupManagers/gke-pool-1-grp",
 					},

@@ -671,17 +671,20 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 	}
 
 	cases := []struct {
-		name              string
-		d                 *schema.ResourceData
-		c                 []*container.NodePool
-		expected          []map[string]interface{}
-		expectError       bool
-		nodePoolsInConfig []interface{}
-		skipRefresh       bool
+		name        string
+		d           *schema.ResourceData
+		c           []*container.NodePool
+		expected    []map[string]interface{}
+		expectError bool
 	}{
 		{
 			name: "Default path flattens API node pools",
-			d:    schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{}),
+			d: schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{
+				"node_pool": []interface{}{
+					map[string]interface{}{"name": "pool-1"},
+					map[string]interface{}{"name": "pool-2"},
+				},
+			}),
 			c: []*container.NodePool{
 				&container.NodePool{Name: "pool-1"},
 				&container.NodePool{Name: "pool-2"},
@@ -713,58 +716,45 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 				},
 			},
 			expectError: false,
-			nodePoolsInConfig: []interface{}{
-				map[string]interface{}{"name": "pool-1"},
-				map[string]interface{}{"name": "pool-2"},
-			},
 		},
 		{
-			name:              "Empty node_pools from API",
-			d:                 schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{}),
-			c:                 []*container.NodePool{},
-			expected:          []map[string]interface{}{},
-			expectError:       false,
-			nodePoolsInConfig: []interface{}{map[string]interface{}{"name": "default-pool"}},
+			name: "Empty node_pools from API",
+			d: schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{
+				"node_pool": []interface{}{map[string]interface{}{"name": "default-pool"}},
+			}),
+			c:           []*container.NodePool{},
+			expected:    []map[string]interface{}{},
+			expectError: false,
 		},
 		{
 			name: "skip_node_pool_refresh=true overrides populated state",
-			d:    schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{}),
+			d: schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{
+				"node_pool": []interface{}{
+					map[string]interface{}{"name": "pool-1"},
+					map[string]interface{}{"name": "pool-2"},
+				},
+				"skip_node_pool_refresh": true,
+			}),
 			c: []*container.NodePool{
 				&container.NodePool{Name: "pool-1"},
 				&container.NodePool{Name: "pool-2"},
 			},
 			expected:    nil,
 			expectError: false,
-			nodePoolsInConfig: []interface{}{
-				map[string]interface{}{"name": "pool-1"},
-				map[string]interface{}{"name": "pool-2"},
-			},
-			skipRefresh: true,
 		},
 		{
-			name:              "skip_node_pool_refresh=true with empty state",
-			d:                 schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{}),
-			c:                 []*container.NodePool{&container.NodePool{Name: "pool-1"}},
-			expected:          nil,
-			expectError:       false,
-			nodePoolsInConfig: nil,
-			skipRefresh:       true,
+			name: "skip_node_pool_refresh=true with empty state",
+			d: schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{
+				"skip_node_pool_refresh": true,
+			}),
+			c:           []*container.NodePool{&container.NodePool{Name: "pool-1"}},
+			expected:    nil,
+			expectError: false,
 		},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.nodePoolsInConfig != nil {
-				if err := tc.d.Set("node_pool", tc.nodePoolsInConfig); err != nil {
-					t.Fatalf("Error setting node_pool: %v", err)
-				}
-			}
-			if tc.skipRefresh {
-				if err := tc.d.Set("skip_node_pool_refresh", true); err != nil {
-					t.Fatalf("Error setting skip_node_pool_refresh: %v", err)
-				}
-			}
-
 			config := &transport_tpg.Config{}
 			result, err := flattenClusterNodePools(tc.d, config, tc.c)
 

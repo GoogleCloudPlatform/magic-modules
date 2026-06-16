@@ -701,7 +701,7 @@ var schemaNodePool = map[string]*schema.Schema{
 			},
 		},
 	},
-	"ignore_node_count_drift": {
+	"ignore_node_count_changes": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
@@ -1435,16 +1435,16 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 	managedIgmUrls := []string{}
 	nodeCount := 0
 
-	var ignoreNodeCountDrift bool
-	if v := d.Get(prefix + "ignore_node_count_drift"); v != nil {
-		ignoreNodeCountDrift = v.(bool)
+	var ignoreNodeCountChanges bool
+	if v := d.Get(prefix + "ignore_node_count_changes"); v != nil {
+		ignoreNodeCountChanges = v.(bool)
 	}
-	if v := d.Get("ignore_node_count_drift"); v != nil {
-		ignoreNodeCountDrift = ignoreNodeCountDrift || v.(bool)
+	if v := d.Get("ignore_node_count_changes"); v != nil {
+		ignoreNodeCountChanges = ignoreNodeCountChanges || v.(bool)
 	}
 
-	if ignoreNodeCountDrift {
-		log.Printf("[DEBUG] Skipping IGM fetch for node pool %q due to ignore_node_count_drift = true", np.Name)
+	if ignoreNodeCountChanges {
+		log.Printf("[DEBUG] Skipping IGM fetch for node pool %q due to ignore_node_count_changes = true", np.Name)
 		if v, ok := d.GetOkExists(prefix + "node_count"); ok {
 			nodeCount = v.(int)
 		} else {

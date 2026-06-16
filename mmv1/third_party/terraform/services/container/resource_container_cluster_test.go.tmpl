@@ -9441,12 +9441,12 @@ resource "google_container_cluster" "regional" {
 
   node_pool {
     name = "%s"
-    ignore_node_count_drift = true
+    ignore_node_count_changes = true
   }
   network    = "%s"
   subnetwork = "%s"
 
-  ignore_node_count_drift = true
+  ignore_node_count_changes = true
   deletion_protection = false
 }
 `, cluster, nodePool, networkName, subnetworkName)
