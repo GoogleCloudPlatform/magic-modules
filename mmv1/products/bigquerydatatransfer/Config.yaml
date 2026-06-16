@@ -182,9 +182,15 @@ properties:
       together with either of them.
     # The API mirrors a legacy `schedule`/`scheduleOptions` value into
     # scheduleOptionsV2 on read (and applies a data-source default when nothing
-    # is set), so without default_from_api a config that omits this block sees a
-    # permanent diff. Optional+Computed lets the server value be absorbed.
-    default_from_api: true
+    # is set), so a config that omits this block would otherwise see a permanent
+    # diff. We can't fix this with default_from_api (Optional+Computed): that
+    # would persist the server value and send it back on every update, but
+    # scheduleOptionsV2 "cannot be used together with" the legacy schedule /
+    # scheduleOptions fields, so re-sending it alongside a legacy schedule update
+    # is rejected by the API. Instead ignore_read makes the flattener return the
+    # configured value rather than the server response, suppressing the diff
+    # without persisting (or re-sending) a value.
+    ignore_read: true
     properties:
       - name: 'timeBasedSchedule'
         type: NestedObject

@@ -3,13 +3,14 @@ package bigquerydatatransfer_test
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
 	"github.com/hashicorp/terraform-provider-google/google/services/bigquerydatatransfer"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/kms"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"strings"
@@ -293,9 +294,27 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 	}
 }
 
-// The service account TF uses needs the permission granted in the configs
-// but it will get deleted by parallel tests, so they need to be run serially.
+// The BigQuery Data Transfer Service agent needs a few project-level roles for
+// these tests. We bootstrap them once here rather than provisioning IAM in each
+// test config: managing the same shared bindings from parallel tests races and
+// can also fail due to IAM propagation delays.
+// See https://googlecloudplatform.github.io/magic-modules/test/test/#iam-resources
 func TestAccBigqueryDataTransferConfig(t *testing.T) {
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com",
+			Role:   "roles/iam.serviceAccountTokenCreator",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com",
+			Role:   "roles/pubsub.subscriber",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com",
+			Role:   "roles/serviceusage.serviceUsageConsumer",
+		},
+	})
+
 	testCases := map[string]func(t *testing.T){
 		"basic":                            testAccBigqueryDataTransferConfig_scheduledQuery_basic,
 		"update":                           testAccBigqueryDataTransferConfig_scheduledQuery_update,
@@ -365,10 +384,22 @@ func testAccBigqueryDataTransferConfig_scheduleOptionsV2_timeBased(t *testing.T)
 				Config: testAccBigqueryDataTransferConfig_scheduleOptionsV2(random_suffix, "third", start_time, end_time),
 			},
 			{
-				ResourceName:            "google_bigquery_data_transfer_config.query_config",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				// Update the time-based schedule in place and confirm the
+				// resource is updated rather than recreated.
+				Config: testAccBigqueryDataTransferConfig_scheduleOptionsV2(random_suffix, "first", start_time, end_time),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_data_transfer_config.query_config", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_bigquery_data_transfer_config.query_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// schedule_options_v2 uses ignore_read, so it is not populated on
+				// import and must be excluded from import verification.
+				ImportStateVerifyIgnore: []string{"location", "schedule_options_v2"},
 			},
 		},
 	})
@@ -383,13 +414,25 @@ func testAccBigqueryDataTransferConfig_scheduleOptionsV2_eventDriven(t *testing.
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigqueryDataTransferConfig_scheduleOptionsV2EventDriven(random_suffix),
+				Config: testAccBigqueryDataTransferConfig_scheduleOptionsV2EventDriven(random_suffix, "subscription"),
 			},
 			{
-				ResourceName:            "google_bigquery_data_transfer_config.event_driven_config",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				// Switch the Pub/Sub subscription and confirm the event-driven
+				// schedule is updated in place rather than recreated.
+				Config: testAccBigqueryDataTransferConfig_scheduleOptionsV2EventDriven(random_suffix, "subscription2"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_data_transfer_config.event_driven_config", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_bigquery_data_transfer_config.event_driven_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// schedule_options_v2 uses ignore_read, so it is not populated on
+				// import and must be excluded from import verification.
+				ImportStateVerifyIgnore: []string{"location", "schedule_options_v2"},
 			},
 		},
 	})
@@ -670,19 +713,7 @@ func testAccBigqueryDataTransferConfig_salesforce_basic(t *testing.T) {
 
 func testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, random_suffix2, schedule, start_time, end_time, letter string) string {
 	return fmt.Sprintf(`
-data "google_project" "project" {}
-
-resource "google_project_iam_member" "permissions" {
-  project = data.google_project.project.project_id
-
-  role   = "roles/iam.serviceAccountTokenCreator"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
-}
-
-
 resource "google_bigquery_dataset" "my_dataset" {
-  depends_on = [google_project_iam_member.permissions]
-
   dataset_id    = "my_dataset%s"
   friendly_name = "foo"
   description   = "bar"
@@ -707,8 +738,6 @@ resource "google_bigquery_table" "my_table" {
 }
 
 resource "google_bigquery_data_transfer_config" "query_config" {
-  depends_on = [google_project_iam_member.permissions]
-
   display_name           = "my-query-%s"
   location               = "asia-northeast1"
   data_source_id         = "scheduled_query"
@@ -734,18 +763,7 @@ resource "google_bigquery_data_transfer_config" "query_config" {
 
 func testAccBigqueryDataTransferConfig_scheduleOptionsV2(random_suffix, schedule, start_time, end_time string) string {
 	return fmt.Sprintf(`
-data "google_project" "project" {}
-
-resource "google_project_iam_member" "permissions" {
-  project = data.google_project.project.project_id
-
-  role   = "roles/iam.serviceAccountTokenCreator"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
-}
-
 resource "google_bigquery_dataset" "my_dataset" {
-  depends_on = [google_project_iam_member.permissions]
-
   dataset_id    = "my_dataset%s"
   friendly_name = "foo"
   description   = "bar"
@@ -766,8 +784,6 @@ resource "google_bigquery_table" "my_table" {
 }
 
 resource "google_bigquery_data_transfer_config" "query_config" {
-  depends_on = [google_project_iam_member.permissions]
-
   display_name           = "my-query-%s"
   location               = "asia-northeast1"
   data_source_id         = "scheduled_query"
@@ -788,34 +804,19 @@ resource "google_bigquery_data_transfer_config" "query_config" {
 `, random_suffix, random_suffix, schedule, start_time, end_time)
 }
 
-func testAccBigqueryDataTransferConfig_scheduleOptionsV2EventDriven(random_suffix string) string {
+func testAccBigqueryDataTransferConfig_scheduleOptionsV2EventDriven(random_suffix, subscription string) string {
 	return fmt.Sprintf(`
-data "google_project" "project" {}
-
-# Event-driven Cloud Storage transfers require the BigQuery Data Transfer
-# Service agent to be able to pull from the Pub/Sub subscription and to consume
-# the project's services. See
-# https://cloud.google.com/bigquery/docs/event-driven-transfer
-resource "google_project_iam_member" "pubsub_subscriber" {
-  project = data.google_project.project.project_id
-
-  role   = "roles/pubsub.subscriber"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "service_usage_consumer" {
-  project = data.google_project.project.project_id
-
-  role   = "roles/serviceusage.serviceUsageConsumer"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
-}
-
 resource "google_pubsub_topic" "topic" {
   name = "tf-test-dts-topic-%s"
 }
 
 resource "google_pubsub_subscription" "subscription" {
   name  = "tf-test-dts-subscription-%s"
+  topic = google_pubsub_topic.topic.id
+}
+
+resource "google_pubsub_subscription" "subscription2" {
+  name  = "tf-test-dts-subscription2-%s"
   topic = google_pubsub_topic.topic.id
 }
 
@@ -833,12 +834,20 @@ resource "google_bigquery_dataset" "my_dataset" {
   location      = "US"
 }
 
-resource "google_bigquery_data_transfer_config" "event_driven_config" {
-  depends_on = [
-    google_project_iam_member.pubsub_subscriber,
-    google_project_iam_member.service_usage_consumer,
-  ]
+resource "google_bigquery_table" "my_table" {
+  deletion_protection = false
 
+  dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+  table_id   = "my_table"
+  schema     = <<EOF
+  [
+    { "name": "name", "type": "STRING" },
+    { "name": "x", "type": "INTEGER" }
+  ]
+  EOF
+}
+
+resource "google_bigquery_data_transfer_config" "event_driven_config" {
   display_name           = "my-event-driven-%s"
   location               = google_bigquery_dataset.my_dataset.location
   data_source_id         = "google_cloud_storage"
@@ -846,18 +855,18 @@ resource "google_bigquery_data_transfer_config" "event_driven_config" {
 
   schedule_options_v2 {
     event_driven_schedule {
-      pubsub_subscription = google_pubsub_subscription.subscription.id
+      pubsub_subscription = google_pubsub_subscription.%s.id
     }
   }
 
   params = {
     data_path_template              = "${google_storage_bucket.bucket.url}/*.json"
-    destination_table_name_template = "my_table"
+    destination_table_name_template = google_bigquery_table.my_table.table_id
     file_format                     = "JSON"
     write_disposition               = "APPEND"
   }
 }
-`, random_suffix, random_suffix, random_suffix, random_suffix, random_suffix)
+`, random_suffix, random_suffix, random_suffix, random_suffix, random_suffix, random_suffix, subscription)
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_service_account(random_suffix string) string {
@@ -909,14 +918,6 @@ resource "google_bigquery_data_transfer_config" "query_config" {
 
 func testAccBigqueryDataTransferConfig_scheduledQueryNoDestination(random_suffix, schedule, start_time, end_time, letter string) string {
 	return fmt.Sprintf(`
-data "google_project" "project" {}
-
-resource "google_project_iam_member" "permissions" {
-  project = data.google_project.project.project_id
-  role   = "roles/iam.serviceAccountTokenCreator"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
-}
-
 resource "google_pubsub_topic" "my_topic" {
   name = "tf-test-my-topic-%s"
 }
@@ -942,8 +943,6 @@ resource "google_bigquery_table" "my_table" {
 }
 
 resource "google_bigquery_data_transfer_config" "query_config" {
-  depends_on = [google_project_iam_member.permissions]
-
   display_name           = "my-query-%s"
   location               = "asia-northeast1"
   data_source_id         = "scheduled_query"
@@ -970,15 +969,7 @@ func testAccBigqueryDataTransferConfig_booleanParam(random_suffix string) string
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
-resource "google_project_iam_member" "permissions" {
-  project = data.google_project.project.project_id
-  role   = "roles/iam.serviceAccountTokenCreator"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
-}
-
 resource "google_bigquery_dataset" "source_dataset" {
-  depends_on = [google_project_iam_member.permissions]
-
   dataset_id    = "source_%s"
   friendly_name = "foo"
   description   = "bar"
@@ -986,8 +977,6 @@ resource "google_bigquery_dataset" "source_dataset" {
 }
 
 resource "google_bigquery_dataset" "destination_dataset" {
-  depends_on = [google_project_iam_member.permissions]
-
   dataset_id    = "destination_%s"
   friendly_name = "foo"
   description   = "bar"
@@ -995,8 +984,6 @@ resource "google_bigquery_dataset" "destination_dataset" {
 }
 
 resource "google_bigquery_data_transfer_config" "copy_config" {
-  depends_on = [google_project_iam_member.permissions]
-
   location = "asia-northeast1"
 
   display_name           = "Copy test %s"
