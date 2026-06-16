@@ -20,6 +20,14 @@ resource "google_ces_evaluation" "evaluation" {
   app           = google_ces_app.app.app_id
 }
 
+resource "google_ces_evaluation" "evaluation2" {
+  provider      = google-beta
+  evaluation_id = "{{index $.ResourceIdVars "evaluation_id"}}-2"
+  display_name  = "my-evaluation-2"
+  location      = "us"
+  app           = google_ces_app.app.app_id
+}
+
 resource "google_ces_evaluation_dataset" "default" {
   provider              = google-beta
   evaluation_dataset_id = "{{index $.ResourceIdVars "dataset_id"}}"
@@ -27,5 +35,8 @@ resource "google_ces_evaluation_dataset" "default" {
   app                   = google_ces_app.app.app_id
   location              = "us"
 
-  evaluations = [google_ces_evaluation.evaluation.id]
+  evaluations = [
+    google_ces_evaluation.evaluation.id,
+    google_ces_evaluation.evaluation2.id
+  ]
 }
