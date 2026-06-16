@@ -1,0 +1,128 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: MetadataFeed
+description: A Dataplex Metadata Feed monitors Dataplex metadata entries in a specified scope and publishes notifications of changes to a Cloud Pub/Sub topic.
+base_url: projects/{{project}}/locations/{{location}}/metadataFeeds
+self_link: projects/{{project}}/locations/{{location}}/metadataFeeds/{{metadata_feed_id}}
+create_url: projects/{{project}}/locations/{{location}}/metadataFeeds?metadataFeedId={{metadata_feed_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/metadataFeeds/{{metadata_feed_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: TWV0YWRhdGFGZWVkQXV0b2dlblYyQWdlbnQ=
+autogen_async: true
+samples:
+  - name: dataplex_metadata_feed_basic
+    primary_resource_id: primary
+    steps:
+      - name: dataplex_metadata_feed_basic
+        resource_id_vars:
+          metadata_feed_id: tf-test-feed
+        vars:
+          label_val: 'bar'
+        test_env_vars:
+          project_name: PROJECT_NAME
+      - name: dataplex_metadata_feed_basic
+        resource_id_vars:
+          metadata_feed_id: tf-test-feed
+        vars:
+          label_val: 'baz'
+        test_env_vars:
+          project_name: PROJECT_NAME
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: metadataFeedId
+    type: String
+    required: true
+    description: The metadata job ID. If not provided, a unique ID is generated with the prefix metadata-job-.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: The time when the feed was created.
+    output: true
+  - name: filters
+    type: NestedObject
+    description: Filters defines the type of changes that you want to listen to. You can have multiple entry type filters and multiple aspect type filters. All of the entry type filters are OR'ed together. All of the aspect type filters are OR'ed together. All of the entry type filters and aspect type filters are AND'ed together.
+    properties:
+      - name: aspectTypes
+        type: Array
+        description: 'The aspect types that you want to listen to. Depending on how the aspect is attached to the entry, in the format: projects/{project_id_or_number}/locations/{location}/aspectTypes/{aspect_type_id}.'
+        item_type:
+          type: String
+      - name: changeTypes
+        type: Array
+        description: The type of change that you want to listen to. If not specified, all changes are published.
+        item_type:
+          type: String
+      - name: entryTypes
+        type: Array
+        description: The entry types that you want to listen to, specified as relative resource names in the format projects/{project_id_or_number}/locations/{location}/entryTypes/{entry_type_id}. Only entries that belong to the specified entry types are published.
+        item_type:
+          type: String
+  - name: labels
+    type: KeyValueLabels
+    description: User-defined labels.
+  - name: name
+    type: String
+    description: Identifier. The resource name of the metadata feed, in the format projects/{project_id_or_number}/locations/{location_id}/metadataFeeds/{metadata_feed_id}.
+    output: true
+  - name: pubsubTopic
+    type: String
+    description: 'The pubsub topic that you want the metadata feed messages to publish to. Please grant Dataplex service account the permission to publish messages to the topic. The service account is: service-{PROJECT_NUMBER}@gcp-sa-dataplex.iam.gserviceaccount.com.'
+  - name: scope
+    type: NestedObject
+    required: true
+    description: Scope defines the scope of the metadata feed. Scopes are exclusive. Only one of the scopes can be specified.
+    properties:
+      - name: entryGroups
+        type: Array
+        description: 'The entry groups whose entries you want to listen to. Must be in the format: projects/{project_id_or_number}/locations/{location_id}/entryGroups/{entry_group_id}.'
+        item_type:
+          type: String
+      - name: organizationLevel
+        type: Boolean
+        description: |-
+          Whether the metadata feed is at the organization-level.
+          If true, all changes happened to the entries in the same organization as the feed are published.
+          If false, you must specify a list of projects or a list of entry groups whose entries you want to listen to.The default is false.
+      - name: projects
+        type: Array
+        description: 'The projects whose entries you want to listen to. Must be in the same organization as the feed. Must be in the format: projects/{project_id_or_number}.'
+        item_type:
+          type: String
+  - name: uid
+    type: String
+    description: A system-generated, globally unique ID for the metadata job. If the metadata job is deleted and then re-created with the same name, this ID is different.
+    output: true
+  - name: updateTime
+    type: String
+    description: The time when the feed was updated.
+    output: true
