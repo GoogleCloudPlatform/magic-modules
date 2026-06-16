@@ -57,7 +57,7 @@ samples:
     primary_resource_id: "policy_rule_one"
     min_version: beta
     steps:
-      - name: "region_security_policy_with_body_exclude" 
+      - name: "region_security_policy_with_body_exclude"
         resource_id_vars:
           sec_policy_name: "policyruletest"
           backend_name: "backendpolicy"
