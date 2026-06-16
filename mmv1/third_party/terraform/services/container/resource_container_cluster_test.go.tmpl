@@ -1994,7 +1994,7 @@ func TestAccContainerCluster_regionalWithNodePool(t *testing.T) {
 				ResourceName:		 "google_container_cluster.regional",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_node_count_changes", "node_pool.0.ignore_node_count_changes"},
 			},
 		},
 	})
