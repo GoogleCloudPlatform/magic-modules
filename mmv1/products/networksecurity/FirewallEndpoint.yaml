@@ -76,8 +76,6 @@ samples:
   - name: "network_security_firewall_endpoint_wildfire"
     primary_resource_id: "default"
     min_version: "beta"
-    # update tests will take care of create and update. Firewall endpoint creation is too long.
-    exclude_test: true
     steps:
       - name: "network_security_firewall_endpoint_wildfire_basic"
         resource_id_vars:
