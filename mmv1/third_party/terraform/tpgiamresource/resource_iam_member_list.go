@@ -82,9 +82,16 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 	}
 
 	iamResourceSchema := make(map[string]*schema.Schema)
-	for key, schemaField := range memberResource.Schema {
-		// Include all fields from memberResource - these are the parent-identifying fields
-		iamResourceSchema[key] = schemaField
+	for _, field := range listConfigFields {
+		if field.Name == "role" || field.Name == "member" {
+			continue
+		}
+		schemaField, ok := memberResource.Schema[field.Name]
+		if !ok {
+			panic(fmt.Sprintf("tpgiamresource: list config field %q not found in member resource schema", field.Name))
+		}
+
+		iamResourceSchema[field.Name] = schemaField
 	}
 
 	return &IamMemberListResource{
@@ -272,10 +279,8 @@ func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.
 
 	normalized := tpgresource.NormalizeIamPrincipalCasing(member)
 	for k, v := range map[string]interface{}{
-		"role":      binding.Role,
-		"member":    normalized,
-		"condition": FlattenIamCondition(binding.Condition),
-		"etag":      etag,
+		"role":   binding.Role,
+		"member": normalized,
 	} {
 		if err := rd.Set(k, v); err != nil {
 			return list.ListResult{}, fmt.Errorf("set %s: %w", k, err)
@@ -302,7 +307,7 @@ func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.
 	if binding.Condition != nil {
 		condTitle = binding.Condition.Title
 	}
-	setIamMemberResourceIdentity(identity, rd, r.iamResourceSchema, binding.Role, member, condTitle)
+	setIamMemberResourceIdentity(identity, rd, r.iamResourceSchema, binding.Role, normalized, condTitle)
 
 	res := req.NewListResult(ctx)
 	tfIdent, err := rd.TfTypeIdentityState()
@@ -311,6 +316,16 @@ func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.
 	}
 	if err := res.Identity.Set(ctx, *tfIdent); err != nil {
 		return list.ListResult{}, fmt.Errorf("set identity: %v", err)
+	}
+
+	if err := rd.Set("etag", etag); err != nil {
+		return list.ListResult{}, fmt.Errorf("set etag: %w", err)
+	}
+
+	if binding.Condition != nil {
+		if err := rd.Set("condition", FlattenIamCondition(binding.Condition)); err != nil {
+			return list.ListResult{}, fmt.Errorf("set condition: %W", err)
+		}
 	}
 
 	if req.IncludeResource {
