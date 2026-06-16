@@ -1,0 +1,330 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EvaluationDataset
+description: |-
+  An Evaluation Dataset is a collection of Evaluations that are used to measure the performance and quality of an App.
+min_version: beta
+base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluationDatasets
+self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluationDatasets/{{evaluation_dataset_id}}
+create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluationDatasets?evaluationDatasetId={{evaluation_dataset_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluationDatasets/{{evaluation_dataset_id}}
+autogen_status: RXZhbHVhdGlvbkRhdGFzZXRBdXRvZ2VuVjJBZ2VudA==
+samples:
+  - name: ces_evaluation_dataset_basic
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: ces_evaluation_dataset_basic
+        resource_id_vars:
+          app_id: app-id
+          dataset_id: dataset-id
+        vars:
+          display_name: my-dataset
+      - name: ces_evaluation_dataset_basic
+        resource_id_vars:
+          app_id: app-id
+          dataset_id: dataset-id
+        vars:
+          display_name: my-dataset-updated
+  - name: ces_evaluation_dataset_full
+    primary_resource_id: default
+    min_version: beta
+    exclude_basic_doc: true
+    steps:
+      - name: ces_evaluation_dataset_full
+        resource_id_vars:
+          app_id: app-id-full
+          evaluation_id: eval-id-full
+          dataset_id: dataset-id-full
+        vars:
+          display_name: my-dataset
+      - name: ces_evaluation_dataset_full
+        resource_id_vars:
+          app_id: app-id-full
+          evaluation_id: eval-id-full
+          dataset_id: dataset-id-full
+        vars:
+          display_name: my-dataset-updated
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: app
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: evaluationDatasetId
+    type: String
+    required: true
+    description: |-
+      The ID to use for the evaluation dataset, which will become the final
+      component of the evaluation dataset's resource name. If not provided, a
+      unique ID will be automatically assigned for the evaluation.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: aggregatedMetrics
+    type: NestedObject
+    description: Aggregated metrics for an evaluation or evaluation dataset.
+    properties:
+      - name: metricsByAppVersion
+        type: Array
+        description: Aggregated metrics, grouped by app version ID.
+        output: true
+        item_type:
+          name: item
+          type: NestedObject
+          description: Metrics aggregated per app version.
+          output: true
+          properties:
+            - name: appVersionId
+              type: String
+              description: The app version ID.
+              output: true
+            - name: failCount
+              type: Integer
+              description: The number of times the evaluation failed.
+              output: true
+            - name: hallucinationMetrics
+              type: Array
+              description: Metrics for hallucination within this app version.
+              output: true
+              item_type:
+                name: item
+                type: NestedObject
+                description: Metrics for hallucination results.
+                output: true
+                properties:
+                  - name: score
+                    type: Double
+                    description: The average hallucination score (0 to 1).
+                    output: true
+            - name: metricsByTurn
+              type: Array
+              description: Metrics aggregated per turn within this app version.
+              output: true
+              item_type:
+                name: item
+                type: NestedObject
+                description: Metrics aggregated per turn.
+                output: true
+                properties:
+                  - name: hallucinationMetrics
+                    type: Array
+                    description: Metrics for hallucination within this turn.
+                    output: true
+                    item_type:
+                      name: item
+                      type: NestedObject
+                      description: Metrics for hallucination results.
+                      output: true
+                      properties:
+                        - name: score
+                          type: Double
+                          description: The average hallucination score (0 to 1).
+                          output: true
+                  - name: semanticSimilarityMetrics
+                    type: Array
+                    description: Metrics for semantic similarity within this turn.
+                    output: true
+                    item_type:
+                      name: item
+                      type: NestedObject
+                      description: Metrics for semantic similarity results.
+                      output: true
+                      properties:
+                        - name: score
+                          type: Double
+                          description: The average semantic similarity score (0-4).
+                          output: true
+                  - name: toolCallLatencyMetrics
+                    type: Array
+                    description: Metrics for tool call latency within this turn.
+                    output: true
+                    item_type:
+                      name: item
+                      type: NestedObject
+                      description: Metrics for tool call latency.
+                      output: true
+                      properties:
+                        - name: averageLatency
+                          type: String
+                          description: The average latency of the tool calls.
+                          output: true
+                        - name: tool
+                          type: String
+                          description: The name of the tool.
+                          output: true
+                  - name: toolMetrics
+                    type: Array
+                    description: Metrics for each tool within this turn.
+                    output: true
+                    item_type:
+                      name: item
+                      type: NestedObject
+                      description: Metrics for a single tool.
+                      output: true
+                      properties:
+                        - name: failCount
+                          type: Integer
+                          description: The number of times the tool failed.
+                          output: true
+                        - name: passCount
+                          type: Integer
+                          description: The number of times the tool passed.
+                          output: true
+                        - name: tool
+                          type: String
+                          description: The name of the tool.
+                          output: true
+                  - name: turnIndex
+                    type: Integer
+                    description: The turn index (0-based).
+                    output: true
+                  - name: turnLatencyMetrics
+                    type: Array
+                    description: Metrics for turn latency within this turn.
+                    output: true
+                    item_type:
+                      name: item
+                      type: NestedObject
+                      description: Metrics for turn latency.
+                      output: true
+                      properties:
+                        - name: averageLatency
+                          type: String
+                          description: The average latency of the turns.
+                          output: true
+            - name: passCount
+              type: Integer
+              description: The number of times the evaluation passed.
+              output: true
+            - name: semanticSimilarityMetrics
+              type: Array
+              description: Metrics for semantic similarity within this app version.
+              output: true
+              item_type:
+                name: item
+                type: NestedObject
+                description: Metrics for semantic similarity results.
+                output: true
+                properties:
+                  - name: score
+                    type: Double
+                    description: The average semantic similarity score (0-4).
+                    output: true
+            - name: toolCallLatencyMetrics
+              type: Array
+              description: Metrics for tool call latency within this app version.
+              output: true
+              item_type:
+                name: item
+                type: NestedObject
+                description: Metrics for tool call latency.
+                output: true
+                properties:
+                  - name: averageLatency
+                    type: String
+                    description: The average latency of the tool calls.
+                    output: true
+                  - name: tool
+                    type: String
+                    description: The name of the tool.
+                    output: true
+            - name: toolMetrics
+              type: Array
+              description: Metrics for each tool within this app version.
+              output: true
+              item_type:
+                name: item
+                type: NestedObject
+                description: Metrics for a single tool.
+                output: true
+                properties:
+                  - name: failCount
+                    type: Integer
+                    description: The number of times the tool failed.
+                    output: true
+                  - name: passCount
+                    type: Integer
+                    description: The number of times the tool passed.
+                    output: true
+                  - name: tool
+                    type: String
+                    description: The name of the tool.
+                    output: true
+            - name: turnLatencyMetrics
+              type: Array
+              description: Metrics for turn latency within this app version.
+              output: true
+              item_type:
+                name: item
+                type: NestedObject
+                description: Metrics for turn latency.
+                output: true
+                properties:
+                  - name: averageLatency
+                    type: String
+                    description: The average latency of the turns.
+                    output: true
+  - name: createTime
+    type: String
+    description: Timestamp when the evaluation dataset was created.
+    output: true
+  - name: createdBy
+    type: String
+    description: The user who created the evaluation dataset.
+    output: true
+  - name: displayName
+    type: String
+    required: true
+    description: User-defined display name of the evaluation dataset. Unique within an App.
+  - name: etag
+    type: String
+    description: |-
+      Etag used to ensure the object hasn't changed during a read-modify-write
+      operation. If the etag is empty, the update will overwrite any concurrent
+      changes.
+    output: true
+  - name: evaluations
+    type: Array
+    description: Evaluations that are included in this dataset.
+    item_type:
+      name: item
+      type: String
+      description: No description
+  - name: lastUpdatedBy
+    type: String
+    description: The user who last updated the evaluation dataset.
+    output: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The unique identifier of this evaluation dataset.
+      Format:
+      `projects/{project}/locations/{location}/apps/{app}/evaluationDatasets/{evaluationDataset}`
+    output: true
+  - name: updateTime
+    type: String
+    description: Timestamp when the evaluation dataset was last updated.
+    output: true
