@@ -165,7 +165,7 @@ func getCacheTTL() time.Duration {
 	if os.Getenv("VCR_PATH") != "" && os.Getenv("VCR_MODE") != "" {
 		return 0 * time.Second
 	}
-	return 30 * time.Second
+	return 5 * time.Minute
 }
 
 var (
@@ -701,7 +701,12 @@ var schemaNodePool = map[string]*schema.Schema{
 			},
 		},
 	},
-	
+	"ignore_node_count_changes": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: `When true, the provider will not fetch the instance group managers for the node pool to determine the current node count. This can save API quota on massive clusters. Setting this to true will result in missing managed_instance_group_urls in the state.`,
+	},
 }
 
 type NodePoolInformation struct {
@@ -1431,32 +1436,52 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 	size := 0
 	igmUrls := []string{}
 	managedIgmUrls := []string{}
-	for _, url := range np.InstanceGroupUrls {
-		// retrieve instance group manager (InstanceGroupUrls are actually URLs for InstanceGroupManagers)
-		matches := instanceGroupManagerURL.FindStringSubmatch(url)
-		if len(matches) < 4 {
-			return nil, fmt.Errorf("Error reading instance group manage URL '%q'", url)
-		}
-        if strings.HasPrefix("gk3", matches[3]) {
-            // IGM is autopilot so we know it will not be found, skip it
-            continue
-        }
-		if err := igmCache.refreshIfNeeded(d, config, userAgent, np.Name, url); err != nil {
-			return nil, err
-		}
-		igm, ok := igmCache.get(matches[0])
-		if !ok {
-		    // The IGM URL is stale; don't include it
-		    continue
-		}
-		size += int(igm.TargetSize)
-		igmUrls = append(igmUrls, url)
-		managedIgmUrls = append(managedIgmUrls, igm.InstanceGroup)
-	}
 	nodeCount := 0
-	if len(igmUrls) > 0 {
-		nodeCount = size / len(igmUrls)
+
+	ignoreNodeCountChanges := d.Get(prefix + "ignore_node_count_changes").(bool) || d.Get("ignore_node_count_changes").(bool)
+
+	if ignoreNodeCountChanges {
+		log.Printf("[DEBUG] Skipping IGM fetch for node pool %q due to ignore_node_count_changes = true", np.Name)
+		if v, ok := d.GetOkExists(prefix + "node_count"); ok {
+			nodeCount = v.(int)
+		} else if v, ok := d.GetOk(prefix + "node_count"); ok { // Fallback if GetOkExists is unsupported in this TF SDK version
+			nodeCount = v.(int)
+		} else {
+			nodeCount = int(np.InitialNodeCount)
+		}
+		// When ignoring, we might not get exact matching IGMs but we can still pass the unvalidated list from API
+		// or leave them empty. Passing the API URLs to igmUrls at least populates them for basic usage.
+		for _, url := range np.InstanceGroupUrls {
+			igmUrls = append(igmUrls, url)
+		}
+	} else {
+		for _, url := range np.InstanceGroupUrls {
+			// retrieve instance group manager (InstanceGroupUrls are actually URLs for InstanceGroupManagers)
+			matches := instanceGroupManagerURL.FindStringSubmatch(url)
+			if len(matches) < 4 {
+				return nil, fmt.Errorf("Error reading instance group manage URL '%q'", url)
+			}
+			if strings.HasPrefix("gk3", matches[3]) {
+				// IGM is autopilot so we know it will not be found, skip it
+				continue
+			}
+			if err := igmCache.refreshIfNeeded(d, config, userAgent, np.Name, url); err != nil {
+				return nil, err
+			}
+			igm, ok := igmCache.get(matches[0])
+			if !ok {
+				// The IGM URL is stale; don't include it
+				continue
+			}
+			size += int(igm.TargetSize)
+			igmUrls = append(igmUrls, url)
+			managedIgmUrls = append(managedIgmUrls, igm.InstanceGroup)
+		}
+		if len(igmUrls) > 0 {
+			nodeCount = size / len(igmUrls)
+		}
 	}
+
 	nodePool := map[string]interface{}{
 		"name":                np.Name,
 		"name_prefix":         d.Get(prefix + "name_prefix"),
