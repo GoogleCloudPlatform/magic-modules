@@ -391,16 +391,14 @@ func expandNetworkPeering(d *schema.ResourceData) map[string]interface{} {
 		"exportCustomRoutes":             d.Get("export_custom_routes").(bool),
 		"importCustomRoutes":             d.Get("import_custom_routes").(bool),
 		"exportSubnetRoutesWithPublicIp": d.Get("export_subnet_routes_with_public_ip").(bool),
+		"stackType":                      d.Get("stack_type").(string),
+		"updateStrategy":                 d.Get("update_strategy").(string),
 	}
-	if d.HasChange("stack_type") {
-		networkPeering["stackType"] = d.Get("stack_type").(string)
-	}
-	if d.HasChange("update_strategy") {
-		networkPeering["updateStrategy"] = d.Get("update_strategy").(string)
-	}
-	// Field has no schema Default, so omit when unset to match omitempty behavior.
-	if v, ok := d.GetOkExists("import_subnet_routes_with_public_ip"); ok { //nolint:staticcheck
-		networkPeering["importSubnetRoutesWithPublicIp"] = v.(bool)
+	// Only include when true: matches typed library omitempty behavior for booleans not in
+	// ForceSendFields. Read unconditionally sets this field (even to false), so GetOkExists
+	// returns ok=true after the first Read and would incorrectly send false in update bodies.
+	if v, ok := d.GetOkExists("import_subnet_routes_with_public_ip"); ok && v.(bool) { //nolint:staticcheck
+		networkPeering["importSubnetRoutesWithPublicIp"] = true
 	}
 	return networkPeering
 }
