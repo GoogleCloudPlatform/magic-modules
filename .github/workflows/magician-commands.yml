@@ -1,13 +1,5 @@
 name: magician-commands
 
-# actions-ecosystem/action-regex-match still runs on Node 16, which has no
-# Node 24-compatible release. Allow the runner to keep executing it on the
-# deprecated Node 20 runtime until it is replaced; Node 24-native actions in
-# this workflow are unaffected. Node 20 is removed on 2026-09-16, so this action
-# must be swapped out before then.
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
-
 permissions: read-all
 
 on:
@@ -25,10 +17,14 @@ jobs:
     steps:
       - name: Check for magician invocation
         id: read-comment
-        uses: actions-ecosystem/action-regex-match@d50fd2e7a37d0e617aea3d7ada663bd56862b9cc # v2.0.2
-        with:
-          text: ${{ github.event.comment.body }}
-          regex: '.*@modular-magician .*'
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if [[ "$COMMENT_BODY" =~ .*@modular-magician\ .* ]]; then
+            echo "match=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "match=" >> "$GITHUB_OUTPUT"
+          fi
       
       - name: Checkout Repository
         if: steps.read-comment.outputs.match != ''
