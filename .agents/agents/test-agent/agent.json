@@ -1,6 +1,0 @@
-{
-  "name": "test-agent",
-  "configPath": {
-    "relativePathToConfig": "config.yaml"
-  }
-}

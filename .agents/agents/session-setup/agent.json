@@ -1,6 +1,0 @@
-{
-  "name": "session-setup",
-  "configPath": {
-    "relativePathToConfig": "config.yaml"
-  }
-}
