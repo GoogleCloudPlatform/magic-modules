@@ -134,3 +134,4 @@ properties:
     type: String
     description: The timestamp when the findings refinement deployment was last updated.
     output: true
+    
