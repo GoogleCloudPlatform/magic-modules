@@ -7089,6 +7089,16 @@ func TestAccContainerNodePool_ignoreNodeCountChanges(t *testing.T) {
 				PlanOnly: true,
 			},
 			{
+				// Step 3: Flip ignore_node_count_changes to false and set node_count = 3 (matching GKE cloud state).
+				// This registers the flag update and aligns HCL with the actual GKE size.
+				Config: testAccContainerNodePool_ignoreNodeCountChanges(suffix, clusterName, poolName, 3, false),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_count", "3"),
+				),
+			},
+			{
+				// Step 4: Now that drift detection is active (flag is false in state), set node_count = 2.
+				// This detects the difference (3 -> 2) and resizes the GKE Node Pool back to 2.
 				Config: testAccContainerNodePool_ignoreNodeCountChanges(suffix, clusterName, poolName, 2, false),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_count", "2"),
