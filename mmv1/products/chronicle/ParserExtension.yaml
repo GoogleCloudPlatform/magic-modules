@@ -89,8 +89,7 @@ parameters:
 properties:
   - name: cbnSnippet
     type: String
-    exactly_one_of:
-      - 'cbn_snippet'
+    conflicts:
       - 'field_extractors'
       - 'dynamic_parsing'
     description: Parser config could be a cbn snippet.
@@ -100,6 +99,9 @@ properties:
     output: true
   - name: dynamicParsing
     type: NestedObject
+    conflicts:
+      - 'cbn_snippet'
+      - 'field_extractors'
     description: A representation of a parser extension as dynamic parsing config.
     properties:
       - name: optedFields
@@ -122,6 +124,9 @@ properties:
       validation report for this extension.
   - name: fieldExtractors
     type: NestedObject
+    conflicts:
+      - 'cbn_snippet'
+      - 'dynamic_parsing'
     description: A representation of a parser extension as a set of field extractors.
     properties:
       - name: appendRepeatedFields
