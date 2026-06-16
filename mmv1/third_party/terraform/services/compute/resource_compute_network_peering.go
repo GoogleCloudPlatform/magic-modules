@@ -394,9 +394,7 @@ func expandNetworkPeering(d *schema.ResourceData) map[string]interface{} {
 		"stackType":                      d.Get("stack_type").(string),
 		"updateStrategy":                 d.Get("update_strategy").(string),
 	}
-	// Only include when true: matches typed library omitempty behavior for booleans not in
-	// ForceSendFields. Read unconditionally sets this field (even to false), so GetOkExists
-	// returns ok=true after the first Read and would incorrectly send false in update bodies.
+	// Only include when true: matches typed library omitempty behavior for booleans not in ForceSendFields
 	if v, ok := d.GetOkExists("import_subnet_routes_with_public_ip"); ok && v.(bool) { //nolint:staticcheck
 		networkPeering["importSubnetRoutesWithPublicIp"] = true
 	}
