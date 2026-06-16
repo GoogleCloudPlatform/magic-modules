@@ -1,6 +1,0 @@
-{
-  "name": "integration-tests-runner",
-  "configPath": {
-    "relativePathToConfig": "config.yaml"
-  }
-}
