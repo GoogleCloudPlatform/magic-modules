@@ -13,6 +13,7 @@
 
 ---
 name: 'TagBinding'
+include_in_tgc_next: true
 description:
   A TagBinding represents a connection between a TagValue and a cloud resource
   (currently project, folder, or organization). Once a TagBinding is created,
@@ -44,6 +45,11 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+tgc_tests:
+  - name: 'TestAccTags/tagBindingBasic'
+  - name: 'TestAccTags/tagBindingBasicDynamic'
+  - name: 'TestAccTags/tagBindingNamespaced'
+cai_asset_name_format: 'tagBindings/{{%parent}}/{{tag_value}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/tags_tag_binding.go.tmpl'
   pre_create: 'templates/terraform/pre_create/tags_tag_binding.go.tmpl'
