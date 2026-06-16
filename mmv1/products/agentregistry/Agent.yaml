@@ -45,6 +45,11 @@ examples:
     min_version: beta
     vars:
       agent_id: default-agent
+  - name: agent_registry_agent_full
+    primary_resource_id: example
+    min_version: beta
+    vars:
+      agent_id: full-agent
 parameters:
   - name: location
     type: String

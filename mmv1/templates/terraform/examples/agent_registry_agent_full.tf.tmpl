@@ -1,0 +1,34 @@
+resource "google_agent_registry_agent" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+  agent_id     = "{{index $.Vars "agent_id"}}"
+  location     = "global"
+  display_name = "My Agent"
+  description  = "An agent registered in Agent Registry"
+
+  agent_spec {
+    type    = "A2A_AGENT_CARD"
+    content = jsonencode({
+      protocolVersion = "0.3"
+      name            = "My Agent"
+      description     = "An agent that does things"
+      url         = "https://myagent.com"
+      version     = "1.0.0"
+      capabilities = {
+        streaming = true
+      }
+      authentication = {
+        schemes = ["Bearer"]
+      }
+      defaultInputModes  = ["text/plain"]
+      defaultOutputModes = ["text/plain"]
+      skills = [
+        {
+          id          = "do-things"
+          name        = "Do Things"
+          description = "Does various things"
+          tags        = ["utility"]
+        }
+      ]
+    })
+  }
+}
