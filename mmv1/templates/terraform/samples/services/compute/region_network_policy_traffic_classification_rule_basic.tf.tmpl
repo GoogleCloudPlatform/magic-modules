@@ -1,13 +1,13 @@
 resource "google_compute_region_network_policy" "basic_regional_network_policy" {
   provider     = google-beta
 
-  name        = "{{index $.Vars "nw_policy"}}"
+  name        = "{{index $.ResourceIdVars "nw_policy"}}"
   description = "Sample regional network firewall policy"
   project     = "{{index $.TestEnvVars "project_name"}}"
   region      = "{{index $.TestEnvVars "region"}}"
 }
 
-resource "google_compute_region_network_policy_traffic_classification_rule" "{{$.PrimaryResourceId}}" {
+resource "google_compute_region_network_policy_traffic_classification_rule" "{{.PrimaryResourceId}}" {
   provider     = google-beta
 
   rule_name               = "test-rule"

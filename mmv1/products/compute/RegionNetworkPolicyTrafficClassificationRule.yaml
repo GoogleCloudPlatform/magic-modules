@@ -49,15 +49,18 @@ async:
     resource_inside_response: false
 custom_diff:
   - 'tpgresource.DefaultProviderRegion'
-examples:
-  - name: 'region_network_policy_traffic_classification_rule_basic'
-    primary_resource_id: 'primary'
+samples:
+  - name: "region_network_policy_traffic_classification_rule_basic"
+    primary_resource_id: "primary"
     min_version: beta
-    vars:
-      nw_policy: 'nw-policy'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
+    steps:
+      - name: "region_network_policy_traffic_classification_rule_basic" 
+        resource_id_vars:
+          nw_policy: "nw-policy"
+          network_name: "example-network"
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+          region: 'REGION'
 parameters:
   - name: 'networkPolicy'
     type: ResourceRef

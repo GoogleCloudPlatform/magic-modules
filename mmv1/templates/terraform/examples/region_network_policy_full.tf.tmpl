@@ -1,6 +1,0 @@
-resource "google_compute_region_network_policy" "{{$.PrimaryResourceId}}" {
-  provider     = google-beta
-
-  name = "{{index $.Vars "policy_name"}}"
-  description = "Terraform test"
-}
