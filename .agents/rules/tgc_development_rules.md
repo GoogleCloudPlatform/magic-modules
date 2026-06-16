@@ -17,7 +17,7 @@ The agent MUST run the `sync-provider` skill during Phase 1 (Session Setup) befo
 
 As an AI agent operating in this repository, you must **ALWAYS** follow these steps before attempting to add a new resource/field to TGC:
 
-1. **[MANDATORY WORKFLOW ENTRYPOINT]**: At the very start of any session (Phase 1: Session Setup), the agent MUST execute the `view_file` tool on `GEMINI.md`, and either `GEMINI_ADD.md` or `GEMINI_FIX.md` depending on the task. The agent MUST print a summary of these entrypoints in their first response and list them as checked items in `task.md`. Failure to call `view_file` on these files in Phase 1 is a fatal process violation.
+1. **[MANDATORY WORKFLOW ENTRYPOINT]**: At the very start of any session (Phase 1: Session Setup), the agent MUST execute the `view_file` tool on `.agents/TGC_WORKFLOWS.md`, and either `.agents/tgc_add.md` or `.agents/tgc_fix.md` depending on the task. The agent MUST print a summary of these entrypoints in their first response and list them as checked items in `task.md`. Failure to call `view_file` on these files in Phase 1 is a fatal process violation.
 
 2. In the magic-modules repository, don't run command `go test` or `go mod tidy`.
 
@@ -37,13 +37,13 @@ As an AI agent operating in this repository, you must **ALWAYS** follow these st
 
 6. DO NOT make changes directly in the downstream repository (`terraform-google-conversion`). All changes must be driven through Magic Modules (`mmv1/`).
 
-7. You must strictly follow the sequence of phases defined in `GEMINI_ADD.md` or `GEMINI_FIX.md` depending on whether you are adding a resource or fixing a failure (Session Setup -> Implementation -> Unit Testing -> Integration Testing). Code generation (Phase 2) MUST be performed before unit tests (Phase 3), and unit tests MUST be performed before integration tests (Phase 5). Structure your `task.md` to reflect these phases.
+7. You must strictly follow the sequence of phases defined in `.agents/tgc_add.md` or `.agents/tgc_fix.md` depending on whether you are adding a resource or fixing a failure (Session Setup -> Implementation -> Unit Testing -> Integration Testing). Code generation (Phase 2) MUST be performed before unit tests (Phase 3), and unit tests MUST be performed before integration tests (Phase 5). Structure your `task.md` to reflect these phases.
 
-8. For any failure (build, unit test, integration test, or verification), stop execution immediately after reporting the error using the template in GEMINI.md. Do not proceed with applying any fixes or running subsequent steps until the user has explicitly approved the proposed solution in the chat.
+8. For any failure (build, unit test, integration test, or verification), stop execution immediately after reporting the error using the template in .agents/TGC_WORKFLOWS.md. Do not proceed with applying any fixes or running subsequent steps until the user has explicitly approved the proposed solution in the chat.
 
-9. **Prioritize process reporting**: If the user's request involves a test failure (input or discovered), you must follow the reporting template specified in `GEMINI.md` before proceeding with planning or execution.
+9. **Prioritize process reporting**: If the user's request involves a test failure (input or discovered), you must follow the reporting template specified in `.agents/TGC_WORKFLOWS.md` before proceeding with planning or execution.
 
-10. **Integration Test Subtests**: When running integration tests using `run_integration_test.sh`, if the test name contains an underscore (e.g., `TestAccContainerCluster_withAutopilotClusterPolicy`), it is likely a subtest. You MUST verify if it expects the format `ParentTest/SubTest` (e.g., `TestAccContainerCluster/TestAccContainerCluster_withAutopilotClusterPolicy`) and pass it accordingly as documented in `GEMINI.md`. For new resources, you MUST run the top-level test (e.g., `TestAccGKEHub2Feature`) instead of a specific subtest, as the top-level test will cover all of the subtests.
+10. **Integration Test Subtests**: When running integration tests using `run_integration_test.sh`, if the test name contains an underscore (e.g., `TestAccContainerCluster_withAutopilotClusterPolicy`), it is likely a subtest. You MUST verify if it expects the format `ParentTest/SubTest` (e.g., `TestAccContainerCluster/TestAccContainerCluster_withAutopilotClusterPolicy`) and pass it accordingly as documented in `.agents/TGC_WORKFLOWS.md`. For new resources, you MUST run the top-level test (e.g., `TestAccGKEHub2Feature`) instead of a specific subtest, as the top-level test will cover all of the subtests.
 
 11. **Mandatory Skill Reading for Specialized Tasks**: Before proposing an implementation plan or making code changes for a resource identified as handwritten or generated, you MUST:
     - Identify the resource type.

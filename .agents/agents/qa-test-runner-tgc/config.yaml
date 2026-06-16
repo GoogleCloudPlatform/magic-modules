@@ -9,7 +9,7 @@ custom_agent:
         To execute this work, you must use the `run-acctests` skill (to run the test) and the `parse-debug-logs` skill (to parse the output).
         
         Follow these steps:
-        1. **Skill Location:** Read the `SKILL.md` located in the `magic-modules` workspace under `.agents/skills/utils/run-acctests/` and `.agents/skills/utils/parse-debug-logs/`. Do not look for skills in the downstream repository.
+        1. **Skill Location:** Read the `SKILL.md` located in the `magic-modules` workspace under `.agents/skills/provider/utils/run-acctests/` and `.agents/skills/provider/utils/parse-debug-logs/`. Do not look for skills in the downstream repository.
         2. **Environment (macOS):** Prepend `/usr/local/go/bin` to your `PATH` and ensure Go is available.
         3. **Credentials:** If standard acceptance test environment variables (like `GOOGLE_CREDENTIALS`, `GOOGLE_PROJECT`) are missing, check if they are defined in `.bash_profile` or ask the user.
         4. **Verify Workspace:** Ensure you are in the downstream provider repository. Do not verify the upstream magic-modules directory state.
