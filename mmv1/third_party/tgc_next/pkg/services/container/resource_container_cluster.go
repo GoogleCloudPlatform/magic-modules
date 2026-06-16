@@ -12,9 +12,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/container/v1"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
 )
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_cluster",
+		ProductName: "container",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceContainerCluster(),
+	}.Register()
+}
 
 // ContainerClusterAssetType is the CAI asset type name for container cluster.
 const ContainerClusterAssetType string = "container.googleapis.com/Cluster"
@@ -96,6 +106,8 @@ var (
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
 		"addons_config.0.slice_controller_config",
+		"addons_config.0.pod_snapshot_config",
+		"addons_config.0.slurm_operator_config",
 	}
 
 	privateClusterConfigKeys = []string{
@@ -526,6 +538,23 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"pod_snapshot_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `Configuration for the Pod Snapshot feature.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether the Pod Snapshot feature is enabled for this cluster.`,
+									},
+								},
+							},
+						},
 						"stateful_ha_config": {
 							Type:          schema.TypeList,
 							Optional:      true,
@@ -599,6 +628,22 @@ func ResourceContainerCluster() *schema.Resource {
 												},
 											},
 										},
+									},
+								},
+							},
+						},
+						"slurm_operator_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Slurm Operator addon, which creates slurm related CRDs and KCP pods to manage them. Defaults to disabled for Standard clusters; set enabled = true to enable. It can not be enabled for Autopilot clusters.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
 									},
 								},
 							},
@@ -1008,6 +1053,42 @@ func ResourceContainerCluster() *schema.Resource {
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringMatch(regexp.MustCompile(`^((?:gke|gs)://.+)?$`), "allowlist path must start with either gke:// or gs://"),
+				},
+			},
+
+			"autopilot_cluster_policy_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Configuration for Autopilot cluster policy.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"no_standard_node_pools": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether standard node pools are disabled.`,
+						},
+						"no_system_impersonation": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether system impersonation is disabled.`,
+						},
+						"no_system_mutation": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether system mutation is disabled.`,
+						},
+						"no_unsafe_webhooks": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether unsafe webhooks are disabled.`,
+						},
+					},
 				},
 			},
 
@@ -2615,6 +2696,26 @@ func ResourceContainerCluster() *schema.Resource {
  Accepted values are:
 * ENABLED: Authentication of anonymous users is enabled for all endpoints.
 * LIMITED: Anonymous access is only allowed for health check endpoints.`,
+						},
+					},
+				},
+			},
+			"node_creation_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `NodeCreationConfig defines the settings of node creation mode.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"node_creation_mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"VIA_KUBELET", "VIA_CONTROL_PLANE"}, false),
+							Description: `NodeCreationMode defines the settings of node creation mode.
+ Accepted values are:
+* VIA_KUBELET: Kubelet registers itself.
+* VIA_CONTROL_PLANE: gcp-controller-manager automatically creates the node object after CSR approval.`,
 						},
 					},
 				},

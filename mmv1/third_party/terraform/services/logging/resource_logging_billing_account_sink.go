@@ -3,6 +3,7 @@ package logging
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -19,6 +20,9 @@ func ResourceLoggingBillingAccountSink() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceLoggingSinkImportState("billing_account"),
 		},
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
 		UseJSONNumber: true,
 	}
 	schm.Schema["billing_account"] = &schema.Schema{
@@ -40,7 +44,7 @@ func resourceLoggingBillingAccountSinkCreate(d *schema.ResourceData, meta interf
 	id, sink := expandResourceLoggingSink(d, "billingAccounts", d.Get("billing_account").(string))
 
 	// The API will reject any requests that don't explicitly set 'uniqueWriterIdentity' to true.
-	_, err = config.NewLoggingClient(userAgent).BillingAccounts.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(true).Do()
+	_, err = NewClient(config, userAgent).BillingAccounts.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(true).Do()
 	if err != nil {
 		return err
 	}
@@ -56,7 +60,7 @@ func resourceLoggingBillingAccountSinkRead(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	sink, err := config.NewLoggingClient(userAgent).BillingAccounts.Sinks.Get(d.Id()).Do()
+	sink, err := NewClient(config, userAgent).BillingAccounts.Sinks.Get(d.Id()).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Billing Logging Sink %s", d.Get("name").(string)))
 	}
@@ -65,10 +69,19 @@ func resourceLoggingBillingAccountSinkRead(d *schema.ResourceData, meta interfac
 		return err
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceLoggingBillingAccountSink) {
+		return ResourceLoggingBillingAccountSink().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -78,7 +91,7 @@ func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interf
 	sink, updateMask := expandResourceLoggingSinkForUpdate(d)
 
 	// The API will reject any requests that don't explicitly set 'uniqueWriterIdentity' to true.
-	_, err = config.NewLoggingClient(userAgent).BillingAccounts.Sinks.Patch(d.Id(), sink).
+	_, err = NewClient(config, userAgent).BillingAccounts.Sinks.Patch(d.Id(), sink).
 		UpdateMask(updateMask).UniqueWriterIdentity(true).Do()
 	if err != nil {
 		return err
@@ -88,13 +101,20 @@ func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interf
 }
 
 func resourceLoggingBillingAccountSinkDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Delete(d.Id()).Do()
+	_, err = NewClient(config, userAgent).Projects.Sinks.Delete(d.Id()).Do()
 	if err != nil {
 		return err
 	}

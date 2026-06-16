@@ -8,6 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	"github.com/hashicorp/terraform-provider-google/google/services/storagetransfer"
 )
 
 func TestAccStorageTransferJob_basic(t *testing.T) {
@@ -25,6 +29,9 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_omitNotificationConfig(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
@@ -113,7 +120,7 @@ func TestAccStorageTransferJob_updateLoggingConfig(t *testing.T) {
 func TestAccStorageTransferReplicationJob_basic(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gs-project-accounts.iam.gserviceaccount.com",
 			Role:   "roles/pubsub.publisher",
@@ -247,7 +254,7 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 func TestAccStorageTransferJob_posixSource(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
 			Role:   "roles/pubsub.admin",
@@ -285,7 +292,7 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 func TestAccStorageTransferJob_posixSink(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
 			Role:   "roles/pubsub.admin",
@@ -326,6 +333,9 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_basic(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
@@ -379,6 +389,9 @@ func TestAccStorageTransferJob_eventStream(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_basic(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
@@ -428,6 +441,9 @@ func TestAccStorageTransferJob_objectConditions(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_basic(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
@@ -495,6 +511,9 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_basic(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
@@ -543,7 +562,7 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 func TestAccStorageTransferJob_hdfsSource(t *testing.T) {
 	t.Parallel()
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
 			Role:   "roles/pubsub.admin",
@@ -746,7 +765,7 @@ func testAccStorageTransferJobDestroyProducer(t *testing.T) func(s *terraform.St
 				return err
 			}
 
-			res, err := config.NewStorageTransferClient(config.UserAgent).TransferJobs.Get(name, project).Do()
+			res, err := storagetransfer.NewClient(config, config.UserAgent).TransferJobs.Get(name, project).Do()
 			if err != nil {
 				return fmt.Errorf("Transfer Job does not exist, should exist and be DELETED")
 			}
@@ -809,9 +828,16 @@ resource "google_storage_transfer_job" "transfer_job" {
   }
 
   depends_on = [
+    time_sleep.wait_30_seconds,
+  ]
+}
+
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [
     google_storage_bucket_iam_member.data_source,
     google_storage_bucket_iam_member.data_sink,
   ]
+  create_duration = "30s"
 }
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
 }
@@ -979,9 +1005,16 @@ resource "google_storage_transfer_job" "transfer_job" {
   }
 
   depends_on = [
+    time_sleep.wait_30_seconds,
+  ]
+}
+
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [
     google_storage_bucket_iam_member.data_source,
     google_storage_bucket_iam_member.data_sink,
   ]
+  create_duration = "30s"
 }
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
 }
@@ -1086,10 +1119,17 @@ resource "google_storage_transfer_job" "transfer_job" {
   }
 
   depends_on = [
+    time_sleep.wait_30_seconds,
+  ]
+}
+
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [
     google_storage_bucket_iam_member.data_source,
     google_storage_bucket_iam_member.data_sink,
     google_pubsub_topic_iam_member.notification_config,
   ]
+  create_duration = "30s"
 }
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, pubsubTopicName, transferJobDescription, project)
 }

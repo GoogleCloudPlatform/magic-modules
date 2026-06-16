@@ -26,9 +26,13 @@ func NewContainerClusterCai2hclConverter(provider *schema.Provider) models.Cai2h
 	}
 }
 
-func (c *ContainerClusterCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ContainerClusterCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
+	}
+
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(asset)
+	block, err := c.convertResourceData(assets[0], options)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +40,7 @@ func (c *ContainerClusterCai2hclConverter) Convert(asset caiasset.Asset) ([]*mod
 	return blocks, nil
 }
 
-func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.Asset, options *models.ResourceConverterOptions) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -76,6 +80,25 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 		if workloadPolicyConfig, ok := autopilot["workloadPolicyConfig"].(map[string]interface{}); ok {
 			hclData["allow_net_admin"] = workloadPolicyConfig["allowNetAdmin"]
 		}
+
+		if clusterPolicyConfig, ok := autopilot["clusterPolicyConfig"].(map[string]interface{}); ok {
+			policyConfig := map[string]interface{}{}
+			if v, ok := clusterPolicyConfig["noStandardNodePools"]; ok {
+				policyConfig["no_standard_node_pools"] = v
+			}
+			if v, ok := clusterPolicyConfig["noSystemImpersonation"]; ok {
+				policyConfig["no_system_impersonation"] = v
+			}
+			if v, ok := clusterPolicyConfig["noSystemMutation"]; ok {
+				policyConfig["no_system_mutation"] = v
+			}
+			if v, ok := clusterPolicyConfig["noUnsafeWebhooks"]; ok {
+				policyConfig["no_unsafe_webhooks"] = v
+			}
+			if len(policyConfig) > 0 {
+				hclData["autopilot_cluster_policy_config"] = []map[string]interface{}{policyConfig}
+			}
+		}
 		if privilegedAdmissionConfig, ok := autopilot["privilegedAdmissionConfig"].(map[string]interface{}); ok {
 			hclData["autopilot_privileged_admission"] = privilegedAdmissionConfig["allowlistPaths"]
 		}
@@ -103,8 +126,6 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 			hclData["node_locations"] = locations
 		}
 	}
-	hclData["min_master_version"] = asset.Resource.Data["currentNodeVersion"]
-	hclData["node_version"] = asset.Resource.Data["currentNodeVersion"]
 	hclData["logging_service"] = asset.Resource.Data["loggingService"]
 	hclData["monitoring_service"] = asset.Resource.Data["monitoringService"]
 	hclData["node_config"] = flattenNodeConfig(asset.Resource.Data["nodeConfig"], nil)
@@ -112,6 +133,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	hclData["security_posture_config"] = flattenSecurityPostureConfig(asset.Resource.Data["securityPostureConfig"])
 	hclData["enterprise_config"] = flattenEnterpriseConfig(asset.Resource.Data["enterpriseConfig"])
 	hclData["anonymous_authentication_config"] = flattenAnonymousAuthenticationConfig(asset.Resource.Data["anonymousAuthenticationConfig"])
+	hclData["node_creation_config"] = flattenNodeCreationConfig(asset.Resource.Data["nodeCreationConfig"])
 	hclData["notification_config"] = flattenNotificationConfig(asset.Resource.Data["notificationConfig"])
 	hclData["binary_authorization"] = flattenBinaryAuthorization(asset.Resource.Data["binaryAuthorization"])
 	if !enableAutopilot {
@@ -192,6 +214,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	hclData["master_authorized_networks_config"] = flattenMasterAuthorizedNetworksConfig(asset.Resource.Data["masterAuthorizedNetworksConfig"])
 	hclData["pod_autoscaling"] = flattenPodAutoscaling(asset.Resource.Data["podAutoscaling"])
 	hclData["secret_manager_config"] = flattenSecretManagerConfig(asset.Resource.Data["secretManagerConfig"])
+	hclData["secret_sync_config"] = flattenSecretSyncConfig(asset.Resource.Data["secretSyncConfig"])
 	hclData["resource_usage_export_config"] = flattenResourceUsageExportConfig(asset.Resource.Data["resourceUsageExportConfig"])
 	hclData["mesh_certificates"] = flattenMeshCertificates(asset.Resource.Data["meshCertificates"])
 	hclData["cost_management_config"] = flattenManagementConfig(asset.Resource.Data["costManagementConfig"])
@@ -210,8 +233,14 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	}
 	// name is likely string, safe cast or fallback
 	name, _ := asset.Resource.Data["name"].(string)
+	var hclBlockName string
+	if options != nil && options.ResourceName != "" {
+		hclBlockName = options.ResourceName
+	} else {
+		hclBlockName = name
+	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, name},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }
@@ -604,6 +633,32 @@ func flattenClusterAddonsConfig(v interface{}, enableAutopilot bool) []map[strin
 		}
 	}
 
+	if val, ok := c["podSnapshotConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
+		result["pod_snapshot_config"] = []map[string]interface{}{
+			{
+				"enabled": enabled,
+			},
+		}
+	}
+
+	if val, ok := c["slurmOperatorConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
+		result["slurm_operator_config"] = []map[string]interface{}{
+			{
+				"enabled": enabled,
+			},
+		}
+	}
+
 	return []map[string]interface{}{result}
 }
 
@@ -688,6 +743,7 @@ func flattenPrivateClusterConfig(cpec, pcc, nc interface{}) []map[string]interfa
 	if cpec != nil {
 		if c, ok := cpec.(map[string]interface{}); ok {
 			// Note the change in semantics from private to public endpoint.
+			r["enable_private_endpoint"] = true
 			if ipEndpointsConfig, ok := c["ipEndpointsConfig"].(map[string]interface{}); ok {
 				if v, ok := ipEndpointsConfig["enablePublicEndpoint"].(bool); ok {
 					r["enable_private_endpoint"] = !v
@@ -1158,11 +1214,11 @@ func flattenClusterAutoscaling(v interface{}, enableAutopilot bool) []map[string
 		if !enableAutopilot {
 			transformed["enabled"] = true
 		}
-	} else if !enableAutopilot {
-		transformed["enabled"] = false
+		transformed["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a["autoprovisioningNodePoolDefaults"])
 	}
-	transformed["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a["autoprovisioningNodePoolDefaults"])
-	transformed["auto_provisioning_locations"] = a["autoprovisioningLocations"]
+	if v := a["autoprovisioningLocations"]; v != nil {
+		transformed["auto_provisioning_locations"] = v
+	}
 	if v := a["autoscalingProfile"]; v != nil && v != "BALANCED" {
 		transformed["autoscaling_profile"] = v
 	}
@@ -1170,6 +1226,9 @@ func flattenClusterAutoscaling(v interface{}, enableAutopilot bool) []map[string
 		transformed["default_compute_class_enabled"] = dccc["enabled"]
 	}
 
+	if len(transformed) == 0 {
+		return nil
+	}
 	return []map[string]interface{}{transformed}
 }
 
@@ -1380,6 +1439,47 @@ func flattenPodAutoscaling(v interface{}) []map[string]interface{} {
 }
 
 func flattenSecretManagerConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return []map[string]interface{}{
+			{
+				"enabled": false,
+			},
+		}
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	result := make(map[string]interface{})
+	if val, ok := c["enabled"]; ok && val != nil {
+		result["enabled"] = val
+	} else {
+		result["enabled"] = false
+	}
+
+	rotationList := []map[string]interface{}{}
+	if rotationConfig, ok := c["rotationConfig"].(map[string]interface{}); ok && rotationConfig != nil {
+		rotationConfigMap := map[string]interface{}{}
+		if rVal, ok := rotationConfig["enabled"]; ok && rVal != nil {
+			rotationConfigMap["enabled"] = rVal
+		} else {
+			rotationConfigMap["enabled"] = false
+		}
+
+		if interval, ok := rotationConfig["rotationInterval"].(string); ok && interval != "" {
+			rotationConfigMap["rotation_interval"] = interval
+		}
+		rotationList = append(rotationList, rotationConfigMap)
+	}
+
+	if len(rotationList) > 0 {
+		result["rotation_config"] = rotationList
+	}
+	return []map[string]interface{}{result}
+}
+
+func flattenSecretSyncConfig(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return []map[string]interface{}{
 			{
@@ -1846,5 +1946,19 @@ func flattenRBACBindingConfig(v interface{}) []map[string]interface{} {
 		"enable_insecure_binding_system_unauthenticated": c["enableInsecureBindingSystemUnauthenticated"],
 	}
 
+	return []map[string]interface{}{transformed}
+}
+
+func flattenNodeCreationConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	ncc, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"node_creation_mode": ncc["nodeCreationMode"],
+	}
 	return []map[string]interface{}{transformed}
 }

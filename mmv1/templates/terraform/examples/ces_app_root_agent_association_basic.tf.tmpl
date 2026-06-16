@@ -1,0 +1,35 @@
+resource "google_ces_app" "app" {
+  location     = "eu"
+  app_id       = "{{index $.Vars "app_id"}}"
+  display_name = "Example App {{index $.Vars "app_id"}}"
+
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES"]
+    fallback_action          = "escalate"
+  }
+
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+
+  lifecycle {
+    ignore_changes = [root_agent]
+  }
+}
+
+resource "google_ces_agent" "agent" {
+  location     = google_ces_app.app.location
+  app          = google_ces_app.app.app_id
+  agent_id     = "{{index $.Vars "agent_id"}}"
+  display_name = "Example Agent"
+
+  instruction = "You are a helpful assistant."
+  llm_agent {}
+}
+
+resource "google_ces_app_root_agent_association" "{{$.PrimaryResourceId}}" {
+  location = google_ces_app.app.location
+  app_id   = google_ces_app.app.app_id
+  agent_id = google_ces_agent.agent.agent_id
+}

@@ -13,7 +13,7 @@
 
 ---
 # API resource name
-name: 'kmsconfig'
+name: kmsconfig
 api_resource_type_kind: KmsConfig
 description: |
   NetApp Volumes always encrypts your data at rest using volume-specific keys.
@@ -23,49 +23,51 @@ references:
   guides:
     # Link to quickstart in the API's Guides section. For example:
     # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
-    'Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/cmek/cmek-overview'
+    Documentation: https://cloud.google.com/netapp/volumes/docs/configure-and-use/cmek/cmek-overview
   # Link to the REST API reference for the resource. For example,
-  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.kmsConfigs'
+  api: https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.kmsConfigs
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
-base_url: 'projects/{{project}}/locations/{{location}}/kmsConfigs'
-self_link: 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/kmsConfigs?kmsConfigId={{name}}'
-update_url: 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/kmsConfigs
+self_link: projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/kmsConfigs?kmsConfigId={{name}}
+update_url: projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}
 update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
+  - projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   # Overrides which API calls return operations. Default: ['create',
   # 'update', 'delete']
   # actions: ['create', 'update', 'delete']
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
+autogen_async: true
 include_in_tgc_next: true
 custom_code:
-  post_create: 'templates/terraform/post_create/KMS_Verify.go.tmpl'
-# Skipping the sweeper since we need to sweep multiple regions
-exclude_sweeper: true
-examples:
-  - name: 'kmsConfig_create'
-    primary_resource_id: 'kmsConfig'
-    vars:
-      kms_name: 'kms-test'
-      kms_key_name: 'crypto-name'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-netapp-kmsconfig-key1").CryptoKey.Name'
+  post_create: templates/terraform/post_create/KMS_Verify.go.tmpl
+samples:
+  - name: kmsConfig_create
+    primary_resource_id: kmsConfig
+    steps:
+      - name: kmsConfig_create
+        resource_id_vars:
+          kms_name: kms-test
+          kms_key_name: crypto-name
+        test_vars_overrides:
+          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-netapp-kmsconfig-key1").CryptoKey.Name
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       Name of the policy location. CMEK policies apply to the whole region.
@@ -73,7 +75,7 @@ parameters:
     required: true
     immutable: true
     # OK: This needs to be 'name' IMHO
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the CMEK policy.
@@ -81,27 +83,27 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description for the CMEK policy.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
-  - name: 'cryptoKeyName'
+  - name: cryptoKeyName
     type: String
     description: |
       Resource name of the KMS key to use. Only regional keys are supported. Format: `projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{key}}`.
     required: true
-  - name: 'instructions'
+  - name: instructions
     type: String
     description: |
       Access to the key needs to be granted. The instructions contain gcloud commands to run to grant access.
 
       To make the policy work, a CMEK policy check is required, which verifies key access.
     output: true
-  - name: 'serviceAccount'
+  - name: serviceAccount
     type: String
     description: |
       The Service account which needs to have access to the  provided KMS key.

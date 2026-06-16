@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package biglakeiceberg_test
 
 import (
@@ -10,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/biglakeiceberg"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccBiglakeIcebergIcebergTable_update(t *testing.T) {
@@ -82,6 +81,20 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
       type     = "long"
       required = true
     }
+    fields {
+      id       = 2
+      name     = "data"
+      type     = "long"
+      required = true
+    }
+  }
+  sort_order {
+    fields {
+      source_id  = 1
+      transform  = "identity"
+      direction  = "asc"
+      null_order = "nulls-first"
+    }
   }
 
   properties = {
@@ -121,6 +134,20 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
       name     = "id"
       type     = "long"
       required = true
+    }
+    fields {
+      id       = 2
+      name     = "data"
+      type     = "long"
+      required = true
+    }
+  }
+  sort_order {
+    fields {
+      source_id  = 2
+      transform  = "bucket[4]"
+      direction  = "desc"
+      null_order = "nulls-last"
     }
   }
 

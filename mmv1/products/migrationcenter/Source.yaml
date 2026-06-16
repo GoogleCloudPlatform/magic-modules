@@ -1,0 +1,112 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Source
+description: Source represents a data source from which asset discovery data is ingested into Migration Center.
+base_url: projects/{{project}}/locations/{{location}}/sources
+self_link: projects/{{project}}/locations/{{location}}/sources/{{source_id}}
+create_url: projects/{{project}}/locations/{{location}}/sources?sourceId={{source_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/sources/{{source_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: U291cmNlQXV0b2dlblYyQWdlbnQ=
+autogen_async: true
+examples:
+  - name: 'migration_center_source_basic'
+    primary_resource_id: 'default'
+    vars:
+      source_id: 'source-test'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: sourceId
+    type: String
+    required: true
+    description: |-
+      User specified ID for the source. It will become the last component of the
+      source name. The ID must be unique within the project, must conform with
+      RFC-1034, is restricted to lower-cased letters, and has a maximum
+      length of 63 characters. The ID must match the
+      regular expression: `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: The timestamp when the source was created.
+    output: true
+  - name: description
+    type: String
+    description: Free-text description.
+  - name: displayName
+    type: String
+    description: User-friendly display name.
+  - name: errorFrameCount
+    type: Integer
+    description: The number of frames that were reported by the source and contained errors.
+    output: true
+  - name: managed
+    type: Boolean
+    description: If `true`, the source is managed by other service(s).
+  - name: name
+    type: String
+    description: The full name of the source.
+    output: true
+  - name: pendingFrameCount
+    type: Integer
+    description: Number of frames that are still being processed.
+    output: true
+  - name: priority
+    type: Integer
+    description: |-
+      The information confidence of the source.
+      The higher the value, the higher the confidence.
+  - name: state
+    type: String
+    description: |-
+      The state of the source.
+      Possible values:
+      ACTIVE
+      DELETING
+      INVALID
+    output: true
+  - name: type
+    type: String
+    description: |-
+      Data source type.
+      Possible values:
+      SOURCE_TYPE_UNKNOWN
+      SOURCE_TYPE_UPLOAD
+      SOURCE_TYPE_GUEST_OS_SCAN
+      SOURCE_TYPE_INVENTORY_SCAN
+      SOURCE_TYPE_CUSTOM
+      SOURCE_TYPE_DISCOVERY_CLIENT
+  - name: updateTime
+    type: String
+    description: The timestamp when the source was last updated.
+    output: true

@@ -12,14 +12,22 @@ func TestProcessInput(t *testing.T) {
 		"mmv1/templates/terraform/examples/abc.go.tmpl",
 		"mmv1/templates/terraform/examples/subfolder/abc.tf.tmpl",
 		"mmv1/templates/terraform/custom_flatten/abc.go.tmpl",
+		"mmv1/templates/terraform/samples/services/workstations/workstation_cluster_custom_urls.tf.tmpl",
+		"mmv1/templates/terraform/list_resource.go.tmpl",
+		"mmv1/templates/terraform/samples/base_configs/query_test_file.go.tmpl",
 	}
-	tmpl, examples := processInputFiles(fileList)
-	wantTmpl, wantExamples := []string{
+	tmpl, examples, samples, baseTmpls := processInputFiles(fileList)
+	wantTmpl, wantExamples, wantSamples, wantBaseTmpls := []string{
 		"mmv1/templates/terraform/examples/abc.go.tmpl",
 		"mmv1/templates/terraform/examples/subfolder/abc.tf.tmpl",
 		"mmv1/templates/terraform/custom_flatten/abc.go.tmpl",
 	}, []string{
 		"mmv1/templates/terraform/examples/abc.tf.tmpl",
+	}, []string{
+		"mmv1/templates/terraform/samples/services/workstations/workstation_cluster_custom_urls.tf.tmpl",
+	}, []string{
+		"mmv1/templates/terraform/list_resource.go.tmpl",
+		"mmv1/templates/terraform/samples/base_configs/query_test_file.go.tmpl",
 	}
 
 	if diff := cmp.Diff(wantTmpl, tmpl); diff != "" {
@@ -27,6 +35,12 @@ func TestProcessInput(t *testing.T) {
 	}
 	if diff := cmp.Diff(wantExamples, examples); diff != "" {
 		t.Errorf("processInputFiles() got diff(-want, got) for example files = %s", diff)
+	}
+	if diff := cmp.Diff(wantSamples, samples); diff != "" {
+		t.Errorf("processInputFiles() got diff(-want, got) for sample files = %s", diff)
+	}
+	if diff := cmp.Diff(wantBaseTmpls, baseTmpls); diff != "" {
+		t.Errorf("processInputFiles() got diff(-want, got) for base template files = %s", diff)
 	}
 }
 
@@ -52,6 +66,7 @@ func TestFindTmpls(t *testing.T) {
 		"templates/terraform/custom_flatten/bigquery_dataset_ref.go.tmpl":                      true,
 		"templates/terraform/iam/example_config_body/app_engine_service.tf.tmpl":               true,
 		"templates/terraform/state_migrations/big_query_job.go.tmpl":                           true,
+		"custom/path/to/step2.tf.tmpl":                                                         true,
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("findTmpls() got unexpected diff(-want, got) = %s", diff)
@@ -82,5 +97,34 @@ func TestFindExamples(t *testing.T) {
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("findExamples() got unexpected diff(-want, got) = %s", diff)
+	}
+}
+
+func TestFindSamples(t *testing.T) {
+	yamlFiles := []string{"testdata/resource1.yaml"}
+	got, err := findSamples(yamlFiles)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := map[string]bool{
+		"templates/terraform/samples/services/testdata/step1.tf.tmpl": true,
+		"custom/path/to/step2.tf.tmpl":                                true,
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("findSamples() got unexpected diff(-want, got) = %s", diff)
+	}
+}
+
+func TestFindCodeReferencedTmpls(t *testing.T) {
+	got, err := findCodeReferencedTmpls("../../../mmv1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got["templates/terraform/resource.go.tmpl"] {
+		t.Errorf("findCodeReferencedTmpls() expected to find templates/terraform/resource.go.tmpl")
+	}
+	if !got["templates/terraform/samples/base_configs/test_file.go.tmpl"] {
+		t.Errorf("findCodeReferencedTmpls() expected to find templates/terraform/samples/base_configs/test_file.go.tmpl")
 	}
 }

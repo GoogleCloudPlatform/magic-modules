@@ -39,15 +39,26 @@ autogen_async: true
 custom_code:
   custom_update: templates/terraform/custom_update/storage_batch_operations_job.go.tmpl
   pre_delete: templates/terraform/pre_delete/storage_batch_operations_job.go.tmpl
-examples:
+samples:
   - name: storage_batch_operations
     primary_resource_id: tf-job
-    ignore_read_extra:
-      - delete_protection
-    config_path: templates/terraform/examples/storage_batch_operations_job.tf.tmpl
-    vars:
-      bucket_name: tf-sample-bucket
-      job_id: tf-job
+    steps:
+      - name: storage_batch_operations
+        ignore_read_extra:
+          - delete_protection
+        config_path: templates/terraform/samples/services/storagebatchoperations/storage_batch_operations_job.tf.tmpl
+        resource_id_vars:
+          bucket_name: tf-sample-bucket
+          job_id: tf-job
+  - name: storage_batch_operations_description
+    primary_resource_id: tf-job
+    steps:
+      - name: storage_batch_operations_description
+        ignore_read_extra:
+          - delete_protection
+        resource_id_vars:
+          bucket_name: tf-sample-bucket
+          job_id: tf-job
 virtual_fields:
   - name: delete_protection
     type: Boolean
@@ -287,3 +298,6 @@ properties:
         immutable: true
         validation:
           function: validation.StringInSlice([]string{"SET", "UNSET"}, false)
+  - name: description
+    type: String
+    description: A description provided by the user for the job. Its max length is 1024 bytes when Unicode-encoded.

@@ -12,7 +12,7 @@
 		{{$breaking = append $breaking (renderReleaseNote .) -}}
 	{{else if eq "deprecation" .Type -}}
 		{{$deprecations = append $deprecations (renderReleaseNote .) -}}
-	{{else if or (eq "new-resource" .Type) (eq "new-datasource" .Type) (eq "feature" .Type) -}}
+	{{else if or (eq "new-list-resource" .Type) (eq "new-resource" .Type) (eq "new-datasource" .Type) (eq "feature" .Type) -}}
 		{{$features = append $features (renderReleaseNote .) -}}
 	{{else if or (eq "improvement" .Type) (eq "enhancement" .Type) -}}
 		{{$improvements = append $improvements (renderReleaseNote .) -}}

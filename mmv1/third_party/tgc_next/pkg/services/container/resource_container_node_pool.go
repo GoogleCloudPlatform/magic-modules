@@ -4,8 +4,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 )
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_node_pool",
+		ProductName: "container",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceContainerNodePool(),
+	}.Register()
+}
 
 // ContainerNodePoolAssetType is the CAI asset type name for container node pool.
 const ContainerNodePoolAssetType string = "container.googleapis.com/NodePool"
@@ -306,6 +316,12 @@ var schemaNodePool = map[string]*schema.Schema{
 					Optional:    true,
 					Computed:    true,
 					Description: `Whether nodes have internal IP addresses only.`,
+				},
+				"accelerator_network_profile": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					ForceNew:    true,
+					Description: `The accelerator network profile for the node pool.`,
 				},
 				"pod_range": {
 					Type:        schema.TypeString,

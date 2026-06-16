@@ -272,6 +272,14 @@ func schemaNodeConfig() *schema.Schema {
 
 				"boot_disk": schemaBootDiskConfig(),
 
+				"gpudirect_strategy": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Computed:    true,
+					DiffSuppressFunc: tpgresource.CaseDiffSuppress,
+					Description: `The type of GPUDirect strategy to enable on the node.`,
+				},
+
 				"guest_accelerator": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -351,6 +359,29 @@ func schemaNodeConfig() *schema.Schema {
 					Computed: true,
 					DiffSuppressFunc: tpgresource.CaseDiffSuppress,
 					Description: `The image type to use for this node. Note that for a given image type, the latest version of it will be used.`,
+				},
+
+				"node_image_config": {
+					Type:     schema.TypeList,
+					Optional: true,
+					Computed:    true,
+					Description: `The node image configuration to use for this node pool.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"image": {
+								Type:         schema.TypeString,
+								Optional:     true,
+								Computed:     true,
+								Description:  `The name of the image to use for this node.`,
+							},
+							"image_project": {
+								Type:         schema.TypeString,
+								Optional:     true,
+								Computed:     true,
+								Description:  `The project containing the image to use for this node.`,
+              },
+						},
+					},
 				},
 
 				"labels": {
@@ -981,6 +1012,21 @@ func schemaNodeConfig() *schema.Schema {
                                                                         },
                                                                 },
                                                         },
+							"crash_loop_back_off": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `Contains configuration options to modify node-level parameters for container restart behavior.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"max_container_restart_period": {
+											Type: schema.TypeString,
+											Optional: true,
+											Description: `The maximum duration the backoff delay can accrue to for container restarts.`,
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1054,6 +1100,106 @@ func schemaNodeConfig() *schema.Schema {
 											Type:        schema.TypeInt,
 											Optional:    true,
 											Description: `Amount of 1G hugepages.`,
+										},
+									},
+								},
+							},
+							"swap_config": {
+								Type:     schema.TypeList,
+								Optional: true,
+								MaxItems: 1,
+								Description: `Swap configuration for the node.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"boot_disk_profile": {
+											Type:     schema.TypeList,
+											Optional: true,
+											MaxItems: 1,
+											Description: `Swap on the node's boot disk.`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"swap_size_gib": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Description: `Specifies the size of the swap space in gibibytes (GiB).`,
+													},
+													"swap_size_percent": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Description: `Specifies the size of the swap space as a percentage of the boot disk size.`,
+													},
+												},
+											},
+										},
+										"dedicated_local_ssd_profile": {
+											Type:     schema.TypeList,
+											Optional: true,
+											MaxItems: 1,
+											Description: `Provisions a new, separate local NVMe SSD exclusively for swap.`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"disk_count": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Description: `The number of physical local NVMe SSD disks to attach.`,
+													},
+												},
+											},
+										},
+										"enabled": {
+											Type:        schema.TypeBool,
+											Optional:    true,
+											Description: `Enables or disables swap for the node pool.`,
+										},
+										"encryption_config": {
+											Type:     schema.TypeList,
+											Optional: true,
+											MaxItems: 1,
+											Description: `If omitted, swap space is encrypted by default.`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"disabled": {
+														Type:        schema.TypeBool,
+														Optional:    true,
+														Description: `If true, swap space will not be encrypted. Defaults to false (encrypted).`,
+													},
+												},
+											},
+										},
+										"ephemeral_local_ssd_profile": {
+											Type:     schema.TypeList,
+											Optional: true,
+											MaxItems: 1,
+											Description: `Swap on the local SSD shared with pod ephemeral storage.`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"swap_size_gib": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Description: `Specifies the size of the swap space in gibibytes (GiB).`,
+													},
+													"swap_size_percent": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Description: `Specifies the size of the swap space as a percentage of the ephemeral local SSD capacity.`,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+							"accurate_time_config": {
+								Type:             schema.TypeList,
+								Optional:         true,
+								MaxItems: 1,
+								Description: `The settings for the accurate time configuration.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"enable_ptp_kvm_time_sync": {
+											Type:        schema.TypeBool,
+											Optional:    true,
+											Description: `Whether to enable accurate time synchronization with PTP-KVM.`,
 										},
 									},
 								},
@@ -1403,6 +1549,10 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		nc.MachineType = v.(string)
 	}
 
+	if v, ok := nodeConfig["gpudirect_strategy"]; ok {
+		nc.GpuDirectConfig = expandGpuDirectConfig(v)
+	}
+
 	if v, ok := nodeConfig["guest_accelerator"]; ok {
 		accels := v.([]interface{})
 		guestAccelerators := make([]*container.AcceleratorConfig, 0, len(accels))
@@ -1715,6 +1865,10 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		nc.NodeGroup = v.(string)
 	}
 
+	if v, ok := nodeConfig["node_image_config"]; ok {
+		nc.NodeImageConfig = expandNodeImageConfig(v)
+	}
+
 	if v, ok := nodeConfig["advanced_machine_features"]; ok && len(v.([]interface{})) > 0 {
 		advanced_machine_features := v.([]interface{})[0].(map[string]interface{})
 		nc.AdvancedMachineFeatures = &container.AdvancedMachineFeatures{
@@ -1755,6 +1909,17 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 	}
 
 	return nc
+}
+
+// GPUDirectConfig is currently directly stored as a GpuDirectStrategy string.
+func expandGpuDirectConfig(v interface{}) *container.GPUDirectConfig {
+	if v == nil  || v.(string) == "" {
+		return nil
+	}
+
+	return &container.GPUDirectConfig{
+		GpuDirectStrategy: v.(string),
+	}
 }
 
 func expandBootDiskConfig(v interface{}) *container.BootDisk {
@@ -1967,6 +2132,14 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
                 }
                 kConfig.EvictionMinimumReclaim = reclaim
         }
+	if v, ok := cfg["crash_loop_back_off"]; ok && len(v.([]interface{})) > 0 {
+		clb := v.([]interface{})[0].(map[string]interface{})
+		crashLoopBackOff := &container.CrashLoopBackOffConfig{}
+		if val, ok := clb["max_container_restart_period"]; ok {
+			crashLoopBackOff.MaxContainerRestartPeriod = val.(string)
+		}
+		kConfig.CrashLoopBackOff = crashLoopBackOff
+	}
 	return kConfig
 }
 
@@ -2056,6 +2229,14 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 		linuxNodeConfig.NodeKernelModuleLoading = expandNodeKernelModuleLoading(v)
 	}
 
+	if v, ok := cfg["swap_config"]; ok {
+		linuxNodeConfig.SwapConfig = expandSwapConfig(v)
+	}
+
+	if v, ok := cfg["accurate_time_config"]; ok {
+		linuxNodeConfig.AccurateTimeConfig = expandAccurateTimeConfig(v)
+	}
+
 	return linuxNodeConfig
 }
 
@@ -2075,6 +2256,28 @@ func expandWindowsNodeConfig(v interface{}) *container.WindowsNodeConfig {
 	return &container.WindowsNodeConfig{
 		OsVersion: osversionRaw.(string),
 	}
+}
+
+func expandNodeImageConfig(v interface{}) *container.CustomImageConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	nodeImageConfig := &container.CustomImageConfig{}
+
+	if v, ok := cfg["image_project"]; ok {
+		nodeImageConfig.ImageProject = v.(string)
+	}
+
+	if v, ok := cfg["image"]; ok {
+		nodeImageConfig.Image = v.(string)
+	}
+	return nodeImageConfig
 }
 
 func expandSysctls(cfg map[string]interface{}) map[string]string {
@@ -2144,6 +2347,168 @@ func expandNodeKernelModuleLoading(v interface{}) *container.NodeKernelModuleLoa
 	}
 
 	return NodeKernelModuleLoading
+}
+
+func expandAccurateTimeConfig(v interface{}) *container.AccurateTimeConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.AccurateTimeConfig{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	accurateTimeConfig := &container.AccurateTimeConfig{}
+
+	if v, ok := cfg["enable_ptp_kvm_time_sync"]; ok {
+		accurateTimeConfig.EnablePtpKvmTimeSync = v.(bool)
+	}
+
+	return accurateTimeConfig
+}
+
+func expandSwapConfig(v interface{}) *container.SwapConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.SwapConfig{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	swapConfig := &container.SwapConfig{}
+
+	if v, ok := cfg["boot_disk_profile"]; ok && len(v.([]interface{})) > 0 {
+		swapConfig.BootDiskProfile = expandBootDiskProfile(v)
+	}
+
+	if v, ok := cfg["dedicated_local_ssd_profile"]; ok && len(v.([]interface{})) > 0 {
+		swapConfig.DedicatedLocalSsdProfile = expandDedicatedLocalSsdProfile(v)
+	}
+
+	if v, ok := cfg["enabled"]; ok {
+		swapConfig.Enabled = v.(bool)
+		if !swapConfig.Enabled {
+			swapConfig.ForceSendFields = append(swapConfig.ForceSendFields, "Enabled")
+		}
+	}
+
+	if v, ok := cfg["encryption_config"]; ok && len(v.([]interface{})) > 0 {
+		swapConfig.EncryptionConfig = expandSwapEncryptionConfig(v)
+	}
+
+	if v, ok := cfg["ephemeral_local_ssd_profile"]; ok && len(v.([]interface{})) > 0 {
+		swapConfig.EphemeralLocalSsdProfile = expandEphemeralLocalSsdProfile(v)
+	}
+
+	return swapConfig
+}
+
+func expandBootDiskProfile(v interface{}) *container.BootDiskProfile {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.BootDiskProfile{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	profile := &container.BootDiskProfile{}
+
+	if v, ok := cfg["swap_size_gib"]; ok {
+		profile.SwapSizeGib = int64(v.(int))
+	}
+
+	if v, ok := cfg["swap_size_percent"]; ok {
+		profile.SwapSizePercent = int64(v.(int))
+	}
+
+	return profile
+}
+
+func expandDedicatedLocalSsdProfile(v interface{}) *container.DedicatedLocalSsdProfile {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.DedicatedLocalSsdProfile{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	profile := &container.DedicatedLocalSsdProfile{}
+
+	if v, ok := cfg["disk_count"]; ok {
+		profile.DiskCount = int64(v.(int))
+	}
+
+	return profile
+}
+
+func expandSwapEncryptionConfig(v interface{}) *container.EncryptionConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.EncryptionConfig{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	config := &container.EncryptionConfig{}
+
+	if v, ok := cfg["disabled"]; ok {
+		config.Disabled = v.(bool)
+		if !config.Disabled {
+			config.ForceSendFields = append(config.ForceSendFields, "Disabled")
+		}
+	}
+
+	return config
+}
+
+func expandEphemeralLocalSsdProfile(v interface{}) *container.EphemeralLocalSsdProfile {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.EphemeralLocalSsdProfile{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	profile := &container.EphemeralLocalSsdProfile{}
+
+	if v, ok := cfg["swap_size_gib"]; ok {
+		profile.SwapSizeGib = int64(v.(int))
+	}
+
+	if v, ok := cfg["swap_size_percent"]; ok {
+		profile.SwapSizePercent = int64(v.(int))
+	}
+
+	return profile
 }
 
 func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
@@ -2473,6 +2838,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"disk_size_gb":             c.DiskSizeGb,
 		"disk_type":                c.DiskType,
 		"boot_disk":                flattenBootDiskConfig(c.BootDisk),
+		"gpudirect_strategy": 		flattenGpuDirectConfig(c.GpuDirectConfig),
 		"guest_accelerator":        flattenContainerGuestAccelerators(c.Accelerators),
 		"local_ssd_count":          c.LocalSsdCount,
 		"logging_variant":          flattenLoggingVariant(c.LoggingConfig),
@@ -2509,6 +2875,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"linux_node_config":        flattenLinuxNodeConfig(c.LinuxNodeConfig),
 		"windows_node_config":      flattenWindowsNodeConfig(c.WindowsNodeConfig),
 		"node_group":               c.NodeGroup,
+		"node_image_config":        flattenNodeImageConfig(c.NodeImageConfig),
 		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
 		"max_run_duration": 		 c.MaxRunDuration,
 		"flex_start":				 c.FlexStart,
@@ -2555,6 +2922,15 @@ func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]int
 	}
 
 	return rmt
+}
+
+// GPUDirectConfig currently only has one field, flatten directly to string.
+func flattenGpuDirectConfig(c *container.GPUDirectConfig) string {
+	if c == nil {
+		return ""
+	}
+
+	return c.GpuDirectStrategy
 }
 
 func flattenAdvancedMachineFeaturesConfig(c *container.AdvancedMachineFeatures) []map[string]interface{} {
@@ -2903,6 +3279,7 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 			"eviction_soft":                          flattenEvictionSignals(c.EvictionSoft),
 			"eviction_soft_grace_period":             flattenEvictionGracePeriod(c.EvictionSoftGracePeriod),
 			"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c.EvictionMinimumReclaim),
+			"crash_loop_back_off":                    flattenCrashLoopBackOffConfig(c.CrashLoopBackOff),
 		})
 	}
 	return result
@@ -2939,6 +3316,15 @@ func flattenNodePoolAutoConfigNodeKubeletConfig(c *container.NodeKubeletConfig) 
 	return result
 }
 
+func flattenCrashLoopBackOffConfig(c *container.CrashLoopBackOffConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"max_container_restart_period": c.MaxContainerRestartPeriod,
+		})
+	}
+	return result
+}
 
 func flattenEvictionSignals(c *container.EvictionSignals) []map[string]interface{} {
         result := []map[string]interface{}{}
@@ -2995,6 +3381,74 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 			"transparent_hugepage_enabled": c.TransparentHugepageEnabled,
 			"transparent_hugepage_defrag":  c.TransparentHugepageDefrag,
 			"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c.NodeKernelModuleLoading),
+			"swap_config":                  flattenSwapConfig(c.SwapConfig),
+			"accurate_time_config":         flattenAccurateTimeConfig(c.AccurateTimeConfig),
+		})
+	}
+	return result
+}
+
+func flattenAccurateTimeConfig(c *container.AccurateTimeConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"enable_ptp_kvm_time_sync": c.EnablePtpKvmTimeSync,
+		})
+	}
+	return result
+}
+
+func flattenSwapConfig(c *container.SwapConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"enabled":                     c.Enabled,
+			"boot_disk_profile":           flattenBootDiskProfile(c.BootDiskProfile),
+			"dedicated_local_ssd_profile": flattenDedicatedLocalSsdProfile(c.DedicatedLocalSsdProfile),
+			"ephemeral_local_ssd_profile": flattenEphemeralLocalSsdProfile(c.EphemeralLocalSsdProfile),
+			"encryption_config":           flattenSwapEncryptionConfig(c.EncryptionConfig),
+		})
+	}
+	return result
+}
+
+func flattenBootDiskProfile(c *container.BootDiskProfile) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"swap_size_gib":     c.SwapSizeGib,
+			"swap_size_percent": c.SwapSizePercent,
+		})
+	}
+	return result
+}
+
+func flattenDedicatedLocalSsdProfile(c *container.DedicatedLocalSsdProfile) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"disk_count": c.DiskCount,
+		})
+	}
+	return result
+}
+
+func flattenEphemeralLocalSsdProfile(c *container.EphemeralLocalSsdProfile) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"swap_size_gib":     c.SwapSizeGib,
+			"swap_size_percent": c.SwapSizePercent,
+		})
+	}
+	return result
+}
+
+func flattenSwapEncryptionConfig(c *container.EncryptionConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"disabled": c.Disabled,
 		})
 	}
 	return result
@@ -3005,6 +3459,17 @@ func flattenWindowsNodeConfig(c *container.WindowsNodeConfig) []map[string]inter
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"osversion": c.OsVersion,
+		})
+	}
+	return result
+}
+
+func flattenNodeImageConfig(c *container.CustomImageConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"image": c.Image,
+			"image_project": c.ImageProject,
 		})
 	}
 	return result
@@ -3273,7 +3738,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 
 				updateF := func() error {
-					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+					clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 					if config.UserProjectOverride {
 						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 					}
@@ -3309,7 +3774,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 					req.ForceSendFields = []string{"ContainerdConfig"}
 				}
 				updateF := func() error {
-					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+					clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 					if config.UserProjectOverride {
 						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 					}
@@ -3345,7 +3810,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 					req.ForceSendFields = []string{"ConfidentialNodes"}
 				}
 				updateF := func() error {
-					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+					clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 					if config.UserProjectOverride {
 						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 					}
@@ -3422,7 +3887,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3478,7 +3943,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3530,7 +3995,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3572,7 +4037,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3608,7 +4073,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3646,7 +4111,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3680,7 +4145,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
-				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(nodePoolInfo.parent(), req)
+				clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(nodePoolInfo.parent(), req)
 				if config.UserProjectOverride {
 					clusterUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3713,7 +4178,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.ForceSendFields = []string{"WorkloadMetadataConfig"}
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3746,7 +4211,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				},
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3779,7 +4244,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				},
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3814,7 +4279,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.ForceSendFields = []string{"KubeletConfig"}
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3848,7 +4313,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.ForceSendFields = []string{"LinuxNodeConfig"}
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3882,7 +4347,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.ForceSendFields = []string{"WindowsNodeConfig"}
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3905,6 +4370,38 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 			log.Printf("[INFO] Updated windows_node_config for node pool %s", name)
 		}
+		if d.HasChange(prefix + "node_config.0.node_image_config") {
+			imageConfig := expandNodeImageConfig(d.Get(prefix + "node_config.0.node_image_config"))
+			req := &container.UpdateNodePoolRequest{
+				Name: name,
+				Image: imageConfig.Image,
+				ImageProject: imageConfig.ImageProject,
+			}
+
+			updateF := func() error {
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				if config.UserProjectOverride {
+					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+				}
+				op, err := clusterNodePoolsUpdateCall.Do()
+				if err != nil {
+					return err
+				}
+
+				// Wait until it's updated
+				return ContainerOperationWait(config, op,
+					nodePoolInfo.project,
+					nodePoolInfo.location,
+					"updating GKE node pool custom image config", userAgent,
+					timeout)
+			}
+
+			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] Updated custom image config for node pool %s", name)
+		}
 		if d.HasChange(prefix + "node_config.0.fast_socket") {
 			req := &container.UpdateNodePoolRequest{
 				NodePoolId: name,
@@ -3917,7 +4414,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}

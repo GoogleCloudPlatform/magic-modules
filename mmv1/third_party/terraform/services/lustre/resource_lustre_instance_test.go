@@ -7,13 +7,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/lustre"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccLustreInstance_withMaintenancePolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
+		"network_name":  tpgcompute.BootstrapSharedTestNetwork(t, "default-vpc"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -93,7 +97,7 @@ func TestAccLustreInstance_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
+		"network_name":  tpgcompute.BootstrapSharedTestNetwork(t, "default-vpc"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -164,7 +168,7 @@ func TestAccLustreInstance_withAccessRulesOptions(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
+		"network_name":  tpgcompute.BootstrapSharedTestNetwork(t, "default-vpc"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -279,9 +283,9 @@ func TestAccLustreInstance_withKmsKey(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
+		"network_name":  tpgcompute.BootstrapSharedTestNetwork(t, "default-vpc"),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms":           acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+		"kms":           kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -295,7 +299,7 @@ func TestAccLustreInstance_withKmsKey(t *testing.T) {
 				ResourceName:            "google_lustre_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "location", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "location", "terraform_labels", "update_time"},
 			},
 		},
 	})
@@ -371,7 +375,7 @@ func TestAccLustreInstance_withPlacementPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
+		"network_name":  tpgcompute.BootstrapSharedTestNetwork(t, "default-vpc"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -434,7 +438,7 @@ func TestAccLustreInstance_dynamicTier(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
+		"network_name":  tpgcompute.BootstrapSharedTestNetwork(t, "default-vpc"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

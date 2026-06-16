@@ -16,7 +16,6 @@ name: 'UllMirroringCollector'
 description: |-
   A Mirroring Collector is a logical representation of an appliance that collects
   mirrored traffic.
-min_version: 'beta'
 id_format: 'projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/ullMirroringCollectors'
 self_link: 'projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector_id}}'

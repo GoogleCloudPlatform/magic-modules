@@ -41,7 +41,7 @@ To get more information about {{$.Name}}, see:
     * [{{$title}}]({{$link}})
 		{{- end }}
 	{{- end }}
-	{{- if or (gt (len $.Examples) 0) (gt (len $.Samples) 0) }}
+	{{- if gt (len $.Samples) 0 }}
 {{ "" }}
 	{{- end }}
 {{- else }}
@@ -62,26 +62,6 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 ~> **Note:**  All arguments marked as write-only values will not be stored in the state: {{ $.WriteOnlyPropsToString }}.
 [Read more about Write-only Arguments](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
 {{ end }}
-{{- if $.Examples }}
-	{{- range $e := $.Examples }}
-		{{- if not $e.ExcludeDocs }}
-			{{- if not (or $e.ExcludeTest $e.TestEnvVars) }}
-<div class = "oics-button" style="float: right; margin: 0 0 -15px">
-  <a href="{{ $e.OiCSLink }}" target="_blank">
-    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
-  </a>
-</div>
-			{{- end }}
-## Example Usage - {{ title (camelize $e.Name "upper" )}}
-
-
-```hcl
-{{ $e.DocumentationHCLText -}}
-```
-		{{- end }}
-	{{- end }}
-{{- end }}
-
 {{- if $.Samples }}
 	{{- range $sample := $.Samples }}
 		{{- range $index, $step := $sample.Steps }}
@@ -124,6 +104,14 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 {{ "" }}
+{{- end }}
+{{- if and (not $.DeletionPolicyExclude) (not $.DeletionPolicyCustomDocs)}}
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to {{$.DeletionPolicyDefault}}.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 {{- end }}
 {{- range $f := $.VirtualFields }}
 * `{{$f.Name}}` - (Optional) {{$f.Description}}
@@ -178,8 +166,18 @@ This resource provides the following
 - `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.
 {{- end }}
 - `delete` - Default is {{$.Timeouts.DeleteMinutes}} minutes.
+{{ if $.ProductMetadata.Version.RepEnabled }}
+## Regional Endpoint Policies
 
+This resource supports Regional Endpoint Policies (REP). See the [provider reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#prefer_regional_endpoints) for more details on configuration.
+
+{{- if $.ProductMetadata.RepByDefault }}
+~> **Note:** REP is enabled by default for this product.
+{{- end }}
+{{ "" }}
+{{- end }}
 ## Import
+
 {{- if $.ExcludeImport }}
 
 This resource does not support import.
@@ -191,7 +189,7 @@ This resource does not support import.
 * `{{replaceAll $idFormat "%" "" }}`
 {{- end }}
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import {{$.Name}} using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import {{$.Name}} using identity values. For example:
 
 ```tf
 import {

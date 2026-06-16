@@ -116,7 +116,7 @@ examples:
       workforce_pool_id: example-pool
     test_env_vars:
       org_id: ORG_ID
-    skip_func: acctest.SkipTestUntil(t, "2026-03-05") # waiting for rollout
+    skip_func: acctest.SkipTestUntil(t, "2026-03-05")  # waiting for rollout
   - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_full
     primary_resource_id: example
     ignore_read_extra:
@@ -127,7 +127,7 @@ examples:
       workforce_pool_id: example-pool
     test_env_vars:
       org_id: ORG_ID
-    skip_func: acctest.SkipTestUntil(t, "2026-03-05") # waiting for rollout
+    skip_func: acctest.SkipTestUntil(t, "2026-03-05")  # waiting for rollout
   - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic
     primary_resource_id: example
     ignore_read_extra:
@@ -351,7 +351,7 @@ properties:
                 required: true
                 description: |
                   The plain text of the client secret value.
-                sensitive: true
+                write_only: true
                 validation:
                   function: validation.StringIsNotEmpty
               - name: thumbprint
@@ -457,6 +457,7 @@ properties:
                 required: true
                 description: |
                   The plain text of the client secret value.
+                write_only: true
                 validation:
                   function: validation.StringIsNotEmpty
               - name: thumbprint
@@ -549,6 +550,7 @@ properties:
                 required: true
                 description: |
                   The plain text of the client secret value.
+                write_only: true
                 validation:
                   function: validation.StringIsNotEmpty
               - name: thumbprint

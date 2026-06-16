@@ -1,0 +1,28 @@
+package container
+
+import (
+	"log"
+
+{{- if eq $.TargetVersionName "ga" }}
+	"google.golang.org/api/container/v1"
+{{- else }}
+	container "google.golang.org/api/container/v1beta1"
+{{- end }}
+	"google.golang.org/api/option"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func NewClient(c *transport_tpg.Config, userAgent string) *container.Service {
+	containerClientBasePath := transport_tpg.RemoveBasePathVersion(transport_tpg.BaseUrl(Product, c))
+	log.Printf("[INFO] Instantiating GKE client for path %s", containerClientBasePath)
+	clientContainer, err := container.NewService(c.Context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client container: %s", err)
+		return nil
+	}
+	clientContainer.UserAgent = userAgent
+	clientContainer.BasePath = containerClientBasePath
+
+	return clientContainer
+}

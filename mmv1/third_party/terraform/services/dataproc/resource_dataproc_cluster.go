@@ -105,6 +105,7 @@ var (
 
 	clusterConfigKeys = []string{
 		"cluster_config.0.cluster_tier",
+		"cluster_config.0.engine",
 		"cluster_config.0.cluster_type",
 		"cluster_config.0.staging_bucket",
 		"cluster_config.0.temp_bucket",
@@ -198,6 +199,7 @@ func ResourceDataprocCluster() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			// User labels are not supported in Dataproc Virtual Cluster
 			tpgresource.SetLabelsDiffWithoutAttributionLabel,
@@ -566,6 +568,15 @@ func ResourceDataprocCluster() *schema.Resource {
 							AtLeastOneOf: clusterConfigKeys,
 							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_TIER_UNSPECIFIED", "CLUSTER_TIER_STANDARD", "CLUSTER_TIER_PREMIUM"}, false),
+						},
+						"engine": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							Description:  `Specifies the engine of the cluster created.`,
+							AtLeastOneOf: clusterConfigKeys,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"ENGINE_UNSPECIFIED", "DEFAULT", "LIGHTNING"}, false),
 						},
 						"cluster_type": {
 							Type:         schema.TypeString,
@@ -1651,7 +1662,7 @@ by Dataproc`,
 										Computed:         true,
 										AtLeastOneOf:     clusterSoftwareConfigKeys,
 										ForceNew:         true,
-										DiffSuppressFunc: dataprocImageVersionDiffSuppress,
+										DiffSuppressFunc: DataprocImageVersionDiffSuppress,
 										Description:      `The Cloud Dataproc image version to use for the cluster - this controls the sets of software versions installed onto the nodes when you create clusters. If not specified, defaults to the latest version.`,
 									},
 									"override_properties": {
@@ -1778,7 +1789,7 @@ by Dataproc`,
 									"idle_delete_ttl": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Description: `The duration to keep the cluster alive while idling (no jobs running). After this TTL, the cluster will be deleted. Valid range: [10m, 14d].`,
+										Description: `The duration to keep the cluster alive while idling (no jobs running). After this TTL, the cluster will be deleted. Valid range: [300s, 1209600s].`,
 										AtLeastOneOf: []string{
 											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
 											"cluster_config.0.lifecycle_config.0.auto_delete_time",
@@ -2026,6 +2037,9 @@ by Dataproc`,
 					},
 				},
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -2113,7 +2127,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	// Create the cluster
-	op, err := config.NewDataprocClient(userAgent).Projects.Regions.Clusters.Create(
+	op, err := NewClient(config, userAgent).Projects.Regions.Clusters.Create(
 		project, region, cluster).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating Dataproc cluster: %s", err)
@@ -2341,6 +2355,10 @@ func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (
 
 	if v, ok := d.GetOk("cluster_config.0.cluster_tier"); ok {
 		conf.ClusterTier = v.(string)
+	}
+
+	if v, ok := d.GetOk("cluster_config.0.engine"); ok {
+		conf.Engine = v.(string)
 	}
 
 	if v, ok := d.GetOk("cluster_config.0.cluster_type"); ok {
@@ -2996,6 +3014,11 @@ func expandAccelerators(configured []interface{}) []*dataproc.AcceleratorConfig 
 }
 
 func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceDataprocCluster) {
+		return ResourceDataprocCluster().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -3103,7 +3126,7 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 	if len(updMask) > 0 {
 		gracefulDecommissionTimeout := d.Get("graceful_decommission_timeout").(string)
 
-		patch := config.NewDataprocClient(userAgent).Projects.Regions.Clusters.Patch(
+		patch := NewClient(config, userAgent).Projects.Regions.Clusters.Patch(
 			project, region, clusterName, cluster)
 		patch.GracefulDecommissionTimeout(gracefulDecommissionTimeout)
 		patch.UpdateMask(strings.Join(updMask, ","))
@@ -3139,7 +3162,7 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	region := d.Get("region").(string)
 	clusterName := d.Get("name").(string)
 
-	cluster, err := config.NewDataprocClient(userAgent).Projects.Regions.Clusters.Get(
+	cluster, err := NewClient(config, userAgent).Projects.Regions.Clusters.Get(
 		project, region, clusterName).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Dataproc Cluster %q", clusterName))
@@ -3184,6 +3207,10 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	err = d.Set("virtual_cluster_config", virtualCfg)
 
 	if err != nil {
+		return err
+	}
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
 
@@ -3318,6 +3345,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 	data := map[string]interface{}{
 		"staging_bucket":            d.Get("cluster_config.0.staging_bucket").(string),
 		"cluster_tier":              d.Get("cluster_config.0.cluster_tier").(string),
+		"engine":                    d.Get("cluster_config.0.engine").(string),
 		"cluster_type":              cfg.ClusterType,
 		"bucket":                    cfg.ConfigBucket,
 		"temp_bucket":               cfg.TempBucket,
@@ -3519,7 +3547,7 @@ func flattenInitializationActions(nia []*dataproc.NodeInitializationAction) ([]m
 			"script": v.ExecutableFile,
 		}
 		if len(v.ExecutionTimeout) > 0 {
-			tsec, err := extractInitTimeout(v.ExecutionTimeout)
+			tsec, err := ExtractInitTimeout(v.ExecutionTimeout)
 			if err != nil {
 				return nil, err
 			}
@@ -3818,7 +3846,7 @@ func flattenWorkerInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.Inst
 	return []map[string]interface{}{data}
 }
 
-func extractInitTimeout(t string) (int, error) {
+func ExtractInitTimeout(t string) (int, error) {
 	d, err := time.ParseDuration(t)
 	if err != nil {
 		return 0, err
@@ -3827,6 +3855,13 @@ func extractInitTimeout(t string) (int, error) {
 }
 
 func resourceDataprocClusterDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -3842,7 +3877,7 @@ func resourceDataprocClusterDelete(d *schema.ResourceData, meta interface{}) err
 	clusterName := d.Get("name").(string)
 
 	log.Printf("[DEBUG] Deleting Dataproc cluster %s", clusterName)
-	op, err := config.NewDataprocClient(userAgent).Projects.Regions.Clusters.Delete(
+	op, err := NewClient(config, userAgent).Projects.Regions.Clusters.Delete(
 		project, region, clusterName).Do()
 	if err != nil {
 		return err
@@ -3874,53 +3909,53 @@ func configOptions(d *schema.ResourceData, option string) (map[string]interface{
 	return nil, false
 }
 
-func dataprocImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	oldV, err := parseDataprocImageVersion(old)
+func DataprocImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	oldV, err := ParseDataprocImageVersion(old)
 	if err != nil {
 		return false
 	}
-	newV, err := parseDataprocImageVersion(new)
+	newV, err := ParseDataprocImageVersion(new)
 	if err != nil {
 		return false
 	}
 
-	if newV.major != oldV.major {
+	if newV.Major != oldV.Major {
 		return false
 	}
-	if newV.minor != oldV.minor {
+	if newV.Minor != oldV.Minor {
 		return false
 	}
 
 	ignoreSubminor := []string{"", "prodcurrent", "prodprevious"}
 	// Only compare subminor version if set to a numeric value in config version.
-	if !slices.Contains(ignoreSubminor, newV.subminor) && newV.subminor != oldV.subminor {
+	if !slices.Contains(ignoreSubminor, newV.Subminor) && newV.Subminor != oldV.Subminor {
 		return false
 	}
 	// Only compare os if it is set in config version.
-	if newV.osName != "" && newV.osName != oldV.osName {
+	if newV.OsName != "" && newV.OsName != oldV.OsName {
 		return false
 	}
 	return true
 }
 
-type dataprocImageVersion struct {
-	major    string
-	minor    string
-	subminor string
-	osName   string
+type DataprocImageVersion struct {
+	Major    string
+	Minor    string
+	Subminor string
+	OsName   string
 }
 
-func parseDataprocImageVersion(version string) (*dataprocImageVersion, error) {
+func ParseDataprocImageVersion(version string) (*DataprocImageVersion, error) {
 	matches := resolveDataprocImageVersion.FindStringSubmatch(version)
 	if len(matches) != 5 {
 		return nil, fmt.Errorf("invalid image version %q", version)
 	}
 
-	return &dataprocImageVersion{
-		major:    matches[1],
-		minor:    matches[2],
-		subminor: matches[3],
-		osName:   matches[4],
+	return &DataprocImageVersion{
+		Major:    matches[1],
+		Minor:    matches[2],
+		Subminor: matches[3],
+		OsName:   matches[4],
 	}, nil
 }
 

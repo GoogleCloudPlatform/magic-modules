@@ -36,6 +36,7 @@ base_url: 'projects/{{project}}/global/snapshots'
 has_self_link: true
 create_url: 'PRE_CREATE_REPLACE_ME/createSnapshot'
 immutable: true
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -113,6 +114,7 @@ parameters:
       If you do not provide an encryption key when creating the snapshot,
       then the snapshot will be encrypted using an automatically generated
       key and you do not need to provide a key to use the snapshot later.
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -154,6 +156,7 @@ parameters:
       if the source snapshot is protected by a customer-supplied encryption
       key.
     ignore_read: true
+    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -301,3 +304,18 @@ properties:
     enum_values:
       - 'ARCHIVE'
       - 'STANDARD'
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the snapshot. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true

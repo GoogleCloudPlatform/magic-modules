@@ -44,8 +44,9 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+generate_list_resource: true
 exclude_identity_from_identity_import: true
- # the identity values aren't used for identity import
+# the identity values aren't used for identity import
 identity:
   - role
   - userByEmail
@@ -76,7 +77,7 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
- # not importable
+    # not importable
     test_vars_overrides:
       # for backward compatible
       account_name: '"bqowner" + randomSuffix'
@@ -87,14 +88,14 @@ examples:
       dataset_id: 'example_dataset'
       dataset_id2: 'example_dataset2'
       table_id: 'example_table'
- # not importable
+    # not importable
     exclude_test: true
   - name: 'bigquery_dataset_access_authorized_dataset'
     primary_resource_id: 'access'
     vars:
       private: 'private'
       public: 'public'
- # not importable
+    # not importable
     test_vars_overrides:
       # for backward compatible
       private: '"private" + randomSuffix'
@@ -107,7 +108,7 @@ examples:
       private_dataset: 'private_dataset'
       public_dataset: 'public_dataset'
       public_routine: 'public_routine'
- # not importable
+    # not importable
     exclude_test: true
 parameters:
 properties:

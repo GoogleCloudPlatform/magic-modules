@@ -238,6 +238,13 @@ The following arguments are supported:
 
 * `ip_filter` -  (Optional) The bucket IP filtering configuration. Specifies the network sources that can access the bucket, as well as its underlying objects. Structure is [documented below](#nested_ip_filter).
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 
 * `action` - (Required) The Lifecycle Rule's action configuration. A single block of this type is supported. Structure is [documented below](#nested_action).
@@ -281,6 +288,10 @@ The following arguments are supported:
 * `send_days_since_noncurrent_time_if_zero` - (Optional) While set true, `days_since_noncurrent_time` value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the `days_since_noncurrent_time` field. It can be used alone or together with `days_since_noncurrent_time`.
 
 * `noncurrent_time_before` - (Optional) Relevant only for versioned objects. The date in RFC 3339 (e.g. `2017-06-13`) when the object became nonconcurrent. Due to a current bug you are unable to set this value to `0` within Terraform. When set to `0` it will be ignored, and your state will treat it as though you supplied no `noncurrent_time_before` condition.
+
+* `size_above_bytes` - (Optional) Objects having a size greater than this value in bytes will be matched.
+
+* `size_below_bytes` - (Optional) Objects having a size smaller than this value in bytes will be matched.
 
 <a name="nested_autoclass"></a>The `autoclass` block supports:
 
@@ -442,6 +453,18 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 ```tf
 import {
   id = "{{project_id}}/{{bucket}}"
+  to = google_storage_bucket.default
+}
+```
+
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Storage buckets using identity values. For example:
+
+```tf
+import {
+  identity = {
+    project = "{{project_id}}"
+    name    = "{{bucket}}"
+  }
   to = google_storage_bucket.default
 }
 ```
