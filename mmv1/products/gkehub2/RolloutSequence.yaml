@@ -134,7 +134,7 @@ properties:
             Soak time after upgrading all the clusters in the stage.
             Has to be specified in seconds, minutes, hours or days.
           custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
-          diff_suppress_func: 'durationDiffSuppress'
+          diff_suppress_func: 'rolloutSequenceDurationDiffSuppress'
   - name: 'autoUpgradeConfig'
     type: NestedObject
     description: |
