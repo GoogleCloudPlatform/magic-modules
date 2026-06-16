@@ -52,6 +52,23 @@ sweeper:
     - region: "europe-west1"
     - region: "southamerica-west1"
     - region: "us-central1"
+samples:
+  - name: "region_security_policy_with_body_exclude"
+    primary_resource_id: "policy_rule_one"
+    min_version: beta
+    steps:
+      - name: "region_security_policy_with_body_exclude" 
+        resource_id_vars:
+          sec_policy_name: "policyruletest"
+          backend_name: "backendpolicy"
+          network_name: "test-network"
+  - name: "region_security_policy_request_body_expression"
+    primary_resource_id: "policy_rule"
+    min_version: beta
+    steps:
+      - name: "region_security_policy_request_body_expression"
+        resource_id_vars:
+          sec_policy_name: "policyruletest"
 examples:
   - name: 'region_security_policy_basic'
     primary_resource_id: 'region-sec-policy-basic'
@@ -69,25 +86,6 @@ examples:
     primary_resource_id: 'region-sec-policy-with-rules'
     vars:
       sec_policy_name: 'my-sec-policy-with-rules'
-  - name: 'region_security_policy_with_body_exclude'
-    primary_resource_id: 'policy_rule_one'
-    min_version: 'beta'
-    vars:
-      sec_policy_name: 'policyruletest'
-      backend_name: 'backendpolicy'
-      network_name: 'test-network'
-    test_vars_overrides:
-      # for backward compatible
-      sec_policy_name: '"policyruletest" + randomSuffix'
-      backend_name: '"backendpolicy" + randomSuffix'
-  - name: 'region_security_policy_request_body_expression'
-    primary_resource_id: 'policy_rule'
-    min_version: 'beta'
-    vars:
-      sec_policy_name: 'policyruletest'
-    test_vars_overrides:
-      # for backward compatible
-      sec_policy_name: '"policyruletest" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef
