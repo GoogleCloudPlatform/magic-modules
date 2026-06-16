@@ -20,7 +20,7 @@ def main():
     checks = {
         "TGC_WORKFLOWS.md": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+(AGENTS\.md and )?TGC_WORKFLOWS\.md",
         "tgc_add.md/tgc_fix.md": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+tgc_(add|fix)\.md",
-        "skill: sync-provider": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*sync-provider",
+        "skill: tgc-sync-provider": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*(tgc-)?sync-provider",
         "skill: tgc-build-skill": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*tgc-build-skill",
         "skill: tgc-run-unit-tests-skill": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*tgc-run-unit-tests-skill",
         "skill: tgc-run-integration-tests-skill": r"-\s*\[([xX])\]\s*\[MANDATORY\]\s*Read\s+skill:\s*tgc-run-integration-tests-skill",

@@ -4,7 +4,7 @@ This document defines the main loop for adding a new resource to TGC.
 
 ## Required Skills
 Before proceeding with the workflow, ensure you are familiar with and read the following skills when prompted in the phases:
-- [sync-provider](skills/tgc/sync-provider/SKILL.md) (Phase 1)
+- [tgc-sync-provider](skills/tgc/tgc-sync-provider/SKILL.md) (Phase 1)
 - [tgc-new-generated-resource-skill](skills/tgc/tgc-add-new-generated-resource-skill/SKILL.md) (Phase 2)
 - [tgc-build-skill](skills/tgc/tgc-build-skill/SKILL.md) (Phase 3)
 - [tgc-run-integration-tests-skill](skills/tgc/tgc-run-integration-tests-skill/SKILL.md) (Phase 4)
@@ -19,7 +19,7 @@ Before proceeding with the workflow, ensure you are familiar with and read the f
   export TGC_DIR=/path/to/downstream/workspace
   export PATH=/usr/local/go/bin:/opt/homebrew/bin:$PATH
   ```
-- **Use Skill**: You MUST read the [sync-provider](skills/tgc/sync-provider/SKILL.md) skill. **Ask the user** which synchronization method to use (Aligning to Base Commit vs. Fast-Forward to Latest) and follow their choice to synchronize the downstream repository before proceeding to Phase 2.
+- **Use Skill**: You MUST read the [tgc-sync-provider](skills/tgc/tgc-sync-provider/SKILL.md) skill. **Ask the user** which synchronization method to use (Aligning to Base Commit vs. Fast-Forward to Latest) and follow their choice to synchronize the downstream repository before proceeding to Phase 2.
 
 ### 2. Implementation (Parent Agent)
 - **Read Skill**: Read [tgc-new-generated-resource-skill](skills/tgc/tgc-add-new-generated-resource-skill/SKILL.md) for guidance on adding a new resource.

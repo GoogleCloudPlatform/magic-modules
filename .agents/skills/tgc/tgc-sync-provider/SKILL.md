@@ -1,9 +1,9 @@
 ---
-name: sync-provider
+name: tgc-sync-provider
 description: "Synchronize a downstream Terraform provider repository with Magic Modules by aligning commit history and verifying parity."
 ---
 
-# `sync-provider`
+# `tgc-sync-provider`
 
 > **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your required task.
 > This skill is designed to be completely self-contained and unambiguous for a fresh agent without prior context.
@@ -97,7 +97,7 @@ git checkout <matching-commit-hash>
 
 Return to `magic-modules` and run the automation script from `tgc-build-skill` to generate code and verify parity:
 ```bash
-./.agents/skills/tgc-build-skill/scripts/build_tgc.sh <downstream-provider-path>
+./.agents/skills/tgc/tgc-build-skill/scripts/build_tgc.sh <downstream-provider-path>
 ```
 Verify the output of `git status` in the downstream repository. It should be clean or only contain changes from our specific branch.
 
@@ -130,7 +130,7 @@ git fetch origin main
 ### 3. Project Latest Changes
 Return to `magic-modules` and run the build script to project all changes to the latest downstream state:
 ```bash
-./.agents/skills/tgc-build-skill/scripts/build_tgc.sh <downstream-provider-path>
+./.agents/skills/tgc/tgc-build-skill/scripts/build_tgc.sh <downstream-provider-path>
 ```
 
 ---

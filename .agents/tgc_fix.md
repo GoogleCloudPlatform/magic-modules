@@ -4,7 +4,7 @@ This document defines the main loop for fixing a resource conversion or integrat
 
 ## Required Skills
 Before proceeding with the workflow, ensure you are familiar with and read the following skills when prompted in the phases:
-- [sync-provider](skills/tgc/sync-provider/SKILL.md) (Phase 1)
+- [tgc-sync-provider](skills/tgc/tgc-sync-provider/SKILL.md) (Phase 1)
 - [fixing-tgc-resource-or-test-failures](skills/tgc/fixing-tgc-resource-or-test-failures/SKILL.md) (Phase 4)
 - [tgc-fix-handwritten-resources-tests-skill](skills/tgc/tgc-fix-handwritten-resources-tests-skill/SKILL.md) (Phase 4 - if resource is handwritten)
 - [tgc-fix-integration-tests-skill](skills/tgc/tgc-fix-integration-tests-skill/SKILL.md) (Phase 4 - if resource is generated)
@@ -20,7 +20,7 @@ Before proceeding with the workflow, ensure you are familiar with and read the f
   export TGC_DIR=/path/to/downstream/workspace
   export PATH=/usr/local/go/bin:/opt/homebrew/bin:$PATH
   ```
-- **Use Skill**: You MUST read the [sync-provider](skills/tgc/sync-provider/SKILL.md) skill. **Ask the user** which synchronization method to use (Aligning to Base Commit vs. Fast-Forward to Latest) and follow their choice to synchronize the downstream repository before proceeding to Phase 2.
+- **Use Skill**: You MUST read the [tgc-sync-provider](skills/tgc/tgc-sync-provider/SKILL.md) skill. **Ask the user** which synchronization method to use (Aligning to Base Commit vs. Fast-Forward to Latest) and follow their choice to synchronize the downstream repository before proceeding to Phase 2.
 
 ### 2. Triage & Isolate (Systematic & Automated Diagnostics)
 - **Generate Code**: Before running tests, you MUST generate code to ensure the downstream repository is up to date with Magic Modules.

@@ -11,7 +11,7 @@ description: Enforce TGC development Rules
 # Environment Setup Rule
 Before proceeding to Phase 2 (Implementation) or running any tests, the agent MUST execute a command to verify that `TGC_DIR` is set to the active downstream TGC directory and print its value in the chat. Failure to do so is a violation of process.
 
-The agent MUST run the `sync-provider` skill during Phase 1 (Session Setup) before Phase 2, to ensure the downstream repository is aligned with Magic Modules.
+The agent MUST run the `tgc-sync-provider` skill during Phase 1 (Session Setup) before Phase 2, to ensure the downstream repository is aligned with Magic Modules.
 
 # TGC development Rules
 

@@ -3,13 +3,13 @@
 ## Phase 1: Session Setup
 - [ ] [MANDATORY] Read AGENTS.md and TGC_WORKFLOWS.md <!-- id: 1 -->
 - [ ] [MANDATORY] Read tgc_add.md or tgc_fix.md <!-- id: 2 -->
-- [ ] [MANDATORY] Read skill: sync-provider <!-- id: 3 -->
+- [ ] [MANDATORY] Read skill: tgc-sync-provider <!-- id: 3 -->
 - [ ] [MANDATORY] Read skill: tgc-build-skill <!-- id: 4 -->
 - [ ] [MANDATORY] Read skill: tgc-run-unit-tests-skill <!-- id: 5 -->
 - [ ] [MANDATORY] Read skill: tgc-run-integration-tests-skill <!-- id: 6 -->
 - [ ] [MANDATORY] Read skill: tgc-add-new-generated-resource-skill or tgc-fix-handwritten-resources-tests-skill <!-- id: 7 -->
 - [ ] Verify environment setup and TGC_DIR variable <!-- id: 8 -->
-- [ ] Run the sync-provider skill to align repositories <!-- id: 9 -->
+- [ ] Run the tgc-sync-provider skill to align repositories <!-- id: 9 -->
 - [ ] Obtain User Approval for the Implementation Plan <!-- id: 10 -->
 
 ## Phase 2: Implementation
