@@ -12,7 +12,6 @@ import (
 	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"google.golang.org/api/cloudbilling/v1"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -140,11 +139,12 @@ func BootstrapSharedTestFolder(t *testing.T, folderDisplayName string) string {
 	if config == nil {
 		return ""
 	}
+	resourceManagerBasePath := "https://cloudresourcemanager.googleapis.com/"
 
 	parent := fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t))
 
 	searchURL := fmt.Sprintf("%sv3/folders:search?query=%s",
-		config.ResourceManagerBasePath,
+		resourceManagerBasePath,
 		url.QueryEscape(fmt.Sprintf("displayName=%s AND parent=%s", folderDisplayName, parent)),
 	)
 
@@ -172,7 +172,7 @@ func BootstrapSharedTestFolder(t *testing.T, folderDisplayName string) string {
 			}
 		}
 	}
-	createURL := fmt.Sprintf("%sv3/folders", config.ResourceManagerBasePath)
+	createURL := fmt.Sprintf("%sv3/folders", resourceManagerBasePath)
 	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "POST",
@@ -193,7 +193,7 @@ func BootstrapSharedTestFolder(t *testing.T, folderDisplayName string) string {
 		t.Fatalf("bootstrap folder create returned no operation name: %v", op)
 	}
 
-	opURL := fmt.Sprintf("%sv3/%s", config.ResourceManagerBasePath, opName)
+	opURL := fmt.Sprintf("%sv3/%s", resourceManagerBasePath, opName)
 	deadline := time.Now().Add(2 * time.Minute)
 
 	for time.Now().Before(deadline) {

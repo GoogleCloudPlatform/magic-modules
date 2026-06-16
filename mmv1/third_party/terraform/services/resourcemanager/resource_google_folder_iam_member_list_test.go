@@ -9,13 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccFolderIamMemberList_basic(t *testing.T) {
 	t.Parallel()
 
-	folder := BootstrapSharedTestFolder(t, "tf-test_iam_member_list")
-	folderName := folder.Name
+	folderName := resourcemanager.BootstrapSharedTestFolder(t, "tf-test_iam_member_list")
+
 	role := "roles/compute.instanceAdmin"
 	member := "user:admin@hashicorptest.com"
 
@@ -45,8 +46,8 @@ func TestAccFolderIamMemberList_basic(t *testing.T) {
 func TestAccFolderIamMemberList_filter(t *testing.T) {
 	t.Parallel()
 
-	folder := BootstrapSharedTestFolder(t, "tf-test_iam_member_list")
-	folderName := folder.Name
+	folderName := resourcemanager.BootstrapSharedTestFolder(t, "tf-test_iam_member_list")
+
 	role := "roles/compute.instanceAdmin"
 	member := "user:admin@hashicorptest.com"
 
@@ -90,7 +91,7 @@ list "google_folder_iam_member" "test" {
 	provider = google
 	include_resource = true
 	config {
-		folder = local.folder_name
+		folder = "%s"
 	}
 
 }
