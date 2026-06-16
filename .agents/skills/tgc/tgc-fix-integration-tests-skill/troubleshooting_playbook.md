@@ -161,7 +161,7 @@ By isolating the exact file where the data disappears, you avoid dead-ends and i
   - **Example**: `TestAccComputeBackendBucket_backendBucketSecurityPolicyExample_step1: missing fields in resource google_compute_backend_bucket.image_backend after cai2hcl conversion: [edge_security_policy]`
 - **Cause**: The field is part of the Terraform provider's schema but is not included in the asset data provided by Cloud Asset Inventory.
 - **Debug**: 
-  - Check if the field exists in the CAI asset data by inspecting the test's JSON file. If the field is absent, verify its presence across other mock assets of the same resource by searching the cached metadata files in the `test_mata/tests_metadata_*.json` directory.
+  - Check if the field exists in the CAI asset data by inspecting the test's JSON file. If the field is absent, verify its presence across other mock assets of the same resource by searching the cached metadata files in the `test_meta/tests_metadata_*.json` directory.
   - > [!NOTE]
   - > **False-Positives with the Diagnostics Tool:**
   - > The automated diagnostics tool (`diagnose_test_failure.py`) may report a `[cai2hcl FLATTENER BUG DETECTED]` indicating the field is present in the live Google Cloud Asset API but missing in HCL. However, always check the actual local pre-recorded test asset JSON file (e.g., `step1.json`) first. If the field is completely absent in the recorded JSON file, the tool's report is a false-positive caused by live API discrepancy. You should proceed with `is_missing_in_cai: true` rather than trying to fix non-existent flattener code.
@@ -196,7 +196,7 @@ By isolating the exact file where the data disappears, you avoid dead-ends and i
   - **Special Case**: The test function in the handwritten file starts with a lowercase `t` (e.g., `testAcc...`) because it is a helper or subtest called by a top-level test. The generator regex `func (TestAcc[^(]+)` only matches uppercase `TestAcc`, so it fails to discover it.
 - **Solution**: Explicitly list the expected test name (or subtest name like `TestAcc.../subtest`) in `tgc_tests` in the resource's YAML file. This forces the generator to include that specific test case in the generated test file.
 - **Note on Missing Data Files**: If the `.tf` and `.json` files are missing in TGC because examples were excluded, running the test with `WRITE_FILES=true` will automatically generate these golden files in the TGC repository during execution.
-- **Verification via Metadata Cache**: The name in `tgc_tests` must match the key used in the GCS metadata to successfully retrieve the test data. You can verify if a key is valid by searching for it in the cached metadata files in the `test_mata/` directory at the root of the downstream repository. For example: `grep -r "TestAccAccessApprovalSettings/folder" test_mata/`. If it finds matches like `"TestAccAccessApprovalSettings/folder": {`, then it's a valid key!
+- **Verification via Metadata Cache**: The name in `tgc_tests` must match the key used in the GCS metadata to successfully retrieve the test data. You can verify if a key is valid by searching for it in the cached metadata files in the `test_meta/` directory at the root of the downstream repository. For example: `grep -r "TestAccAccessApprovalSettings/folder" test_meta/`. If it finds matches like `"TestAccAccessApprovalSettings/folder": {`, then it's a valid key!
 - **Example 1**: In `MessageBus.yaml` (forcing generation when examples are excluded):
   ```yaml
   tgc_tests:

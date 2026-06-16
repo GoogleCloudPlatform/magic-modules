@@ -13,7 +13,7 @@ fi
 echo "Starting TGC Build Process..."
 
 # Verify active task list GEMINI entrypoints before building
-ACTIVE_TASK_MD=$(find /Users/zhenhuali/.gemini/jetski/brain -name task.md -type f -print0 2>/dev/null | xargs -0 stat -f "%m %N" 2>/dev/null | sort -rn | head -n 1 | cut -d' ' -f2-)
+ACTIVE_TASK_MD=$(find "$HOME/.gemini/jetski/brain" -name task.md -type f -print0 2>/dev/null | xargs -0 stat -f "%m %N" 2>/dev/null | sort -rn | head -n 1 | cut -d' ' -f2-)
 
 if [ ! -z "$ACTIVE_TASK_MD" ]; then
   echo "Verifying task list at $ACTIVE_TASK_MD..."
@@ -50,4 +50,4 @@ make build
 echo "TGC build compiled successfully!"
 
 echo "[Phase 3] Executing selective unit tests..."
-TGC_DIR="$TGC_PATH" /Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/skills/tgc/tgc-build-skill/scripts/run_changed_folders_tests.sh
+TGC_DIR="$TGC_PATH" "$MAGIC_MODULES_PATH/.agents/skills/tgc/tgc-build-skill/scripts/run_changed_folders_tests.sh"

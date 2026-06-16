@@ -133,7 +133,7 @@ To fix `unsupported attribute` unmarshaling errors for newly mapped CAI fields:
 1. **Schema Update:** Locate the schema definition in the appropriate handwritten or generated file (e.g. `mmv1/third_party/tgc_next/pkg/services/container/resource_container_cluster.go` or `mmv1/products/...`) and ensure the new attribute block is declared structurally within its parent schema type definition map.
 2. **Rebuild TGC Generation Correctly:** Ensure you rebuild the codebase by providing the exact absolute path to the downstream repository so your target schema file gets cleanly overwritten. A relative path from the Magic Modules root will write the generated files to the wrong place since generation runs inside the `mmv1` directory!
    ```bash
-   make tgc OUTPUT_PATH="/Users/zhenhuali/go/src/github.com/GoogleCloudPlatform/terraform-google-conversion"
+   make tgc OUTPUT_PATH="/path/to/downstream/terraform-google-conversion"
    ```
 3. Re-build the conversion binaries downstream (`make mod-clean && make build`) and re-run the integration test.
 

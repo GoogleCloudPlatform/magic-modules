@@ -65,4 +65,4 @@ If you added or modified a generated resource, follow the steps below carefully.
 
 ### No Tests Generated Failure
 - **Symptom**: `Error generating resource tests: No TGC tests for resource <ResourceName>`
-- **Action**: This commonly happens when all examples in the YAML are excluded or there is a file naming mismatch. Please refer to **Item 11** in the [Troubleshooting Playbook](file:///Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/skills/tgc/tgc-fix-integration-tests-skill/troubleshooting_playbook.md) for detailed causes and solutions.
+- **Action**: This commonly happens when all examples in the YAML are excluded or there is a file naming mismatch. Please refer to **Item 11** in the [Troubleshooting Playbook](../tgc-fix-integration-tests-skill/troubleshooting_playbook.md) for detailed causes and solutions.

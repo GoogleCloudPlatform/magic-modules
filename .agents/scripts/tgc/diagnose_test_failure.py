@@ -101,7 +101,16 @@ def fuzzy_match_keys(hcl_key, cai_keys):
 
 def audit_historical_metadata(cai_type, camel_field):
     """Audit historical nightly run metadata JSON files for the missing field."""
-    meta_dir = "/Users/zhenhuali/go/src/github.com/GoogleCloudPlatform/tgc-supported-resources/test_mata"
+    tgc_dir = os.environ.get("TGC_DIR")
+    if not tgc_dir and len(sys.argv) >= 3:
+        test_path = sys.argv[2]
+        parts = os.path.abspath(test_path).split(os.sep)
+        if "test" in parts and "services" in parts:
+            idx = parts.index("test")
+            tgc_dir = os.sep.join(parts[:idx])
+    if not tgc_dir:
+        tgc_dir = "."
+    meta_dir = os.path.join(tgc_dir, "test_meta")
     pattern = os.path.join(meta_dir, "tests_metadata_*.json")
     files = glob.glob(pattern)
     
