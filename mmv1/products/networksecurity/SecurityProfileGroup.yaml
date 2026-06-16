@@ -162,3 +162,8 @@ properties:
     type: String
     description: |
       Reference to a SecurityProfile with the CustomIntercept configuration.
+  - name: 'wildfireAnalysisProfile'
+    type: String
+    description: |
+      Reference to a SecurityProfile with the WildFire analysis configuration for the Security Profile Group.
+    min_version: beta
