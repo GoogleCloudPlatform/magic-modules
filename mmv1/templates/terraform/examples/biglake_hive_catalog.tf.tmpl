@@ -1,0 +1,17 @@
+resource "google_storage_bucket" "bucket_for_{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "name"}}"
+  location      = "us-central1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+  provider = google-beta
+}
+
+resource "google_biglake_hive_catalog" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "name"}}"
+  primary_location = "us-central1"
+  location_uri = "gs://${google_storage_bucket.bucket_for_{{$.PrimaryResourceId}}.name}"
+  depends_on = [
+    google_storage_bucket.bucket_for_{{$.PrimaryResourceId}}
+  ]
+  provider = google-beta
+}
