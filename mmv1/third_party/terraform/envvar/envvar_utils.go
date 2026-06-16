@@ -113,6 +113,11 @@ var ChronicleInstanceIdEnvVars = []string{
 	"GOOGLE_CHRONICLE_INSTANCE_ID",
 }
 
+var ChronicleRegionEnvVars = []string{
+	"CHRONICLE_REGION",
+	"GOOGLE_CHRONICLE_REGION",
+}
+
 var ImpersonateServiceAccountEnvVars = []string{
 	"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 }
@@ -225,6 +230,15 @@ func GetTestPublicAdvertisedPrefixDescriptionFromEnv(t *testing.T) string {
 func GetTestChronicleInstanceIdFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, ChronicleInstanceIdEnvVars...)
 	return MultiEnvSearch(ChronicleInstanceIdEnvVars)
+}
+
+func GetTestChronicleRegionFromEnv(t *testing.T) string {
+	if os.Getenv("CHRONICLE_REGION") == "" && os.Getenv("GOOGLE_CHRONICLE_REGION") == "" {
+		if t != nil {
+			t.Skip("Neither CHRONICLE_REGION nor GOOGLE_CHRONICLE_REGION is set")
+		}
+	}
+	return MultiEnvSearch(ChronicleRegionEnvVars)
 }
 
 func GetTestVmwareengineProjectFromEnv(t *testing.T) string {
