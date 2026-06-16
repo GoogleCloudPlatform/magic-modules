@@ -29,7 +29,7 @@ import (
 	"github.com/golang/glog"
 )
 
-var hclResourceRegexp = regexp.MustCompile(`resource "(?P<resource>google_[^"]+)"`)
+var hclResourceRegexp = regexp.MustCompile(`(?:resource|data|list|ephemeral) "(?P<resource>google_[^"]+)"`)
 
 type Step struct {
 	Name string `yaml:"name,omitempty"`
@@ -124,19 +124,19 @@ func (s *Step) TestStepSlug(productName, resourceName string) string {
 	return ret
 }
 
-// TestServiceDependencies returns a map of service names to import aliases that are required
+// TestDependencies returns a map of service names to import aliases that are required
 // by this step.
-func (s *Step) TestServiceDependencies(resourcePrefixServiceMap map[string]string) map[string]string {
+func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[string]string {
 	deps := map[string]string{}
 	for _, val := range s.TestContextVars {
 		if strings.HasPrefix(val, "compute.") {
-			deps["compute"] = ""
+			deps["services/compute"] = ""
 		}
 		if strings.HasPrefix(val, "kms.") {
-			deps["kms"] = ""
+			deps["services/kms"] = ""
 		}
 		if strings.HasPrefix(val, "servicenetworking.") {
-			deps["servicenetworking"] = ""
+			deps["services/servicenetworking"] = ""
 		}
 	}
 	matches := hclResourceRegexp.FindAllStringSubmatch(s.TestHCLText, -1)
@@ -147,15 +147,15 @@ func (s *Step) TestServiceDependencies(resourcePrefixServiceMap map[string]strin
 
 	for r, _ := range resources {
 		longestPrefix := ""
-		for prefix, _ := range resourcePrefixServiceMap {
+		for prefix, _ := range resourcePrefixPkgMap {
 			if strings.HasPrefix(r, prefix) && len(prefix) > len(longestPrefix) {
 				longestPrefix = prefix
 			}
 		}
 		if longestPrefix != "" {
-			service := resourcePrefixServiceMap[longestPrefix]
-			if _, ok := deps[service]; !ok {
-				deps[service] = "_"
+			pkg := resourcePrefixPkgMap[longestPrefix]
+			if _, ok := deps[pkg]; !ok {
+				deps[pkg] = "_"
 			}
 		}
 	}

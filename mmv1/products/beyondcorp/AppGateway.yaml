@@ -51,6 +51,7 @@ samples:
       - name: beyondcorp_app_gateway_basic
         resource_id_vars:
           app_gateway_name: my-app-gateway
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/27729
   - name: beyondcorp_app_gateway_full
     primary_resource_id: app_gateway
     steps:
@@ -61,6 +62,7 @@ samples:
         test_vars_overrides:
           # for backward compatible
           display_name: '"some display name" + randomSuffix'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/27729
 parameters:
 properties:
   - name: name

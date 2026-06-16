@@ -18,14 +18,16 @@ description: |
 references:
   api: https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservationGroups
 base_url: projects/{{project}}/locations/{{location}}/reservationGroups
-create_url: projects/{{project}}/locations/{{location}}/reservationGroups?reservationGroupId={{name}}
 immutable: true
+create_url: projects/{{project}}/locations/{{location}}/reservationGroups?reservationGroupId={{name}}
 id_format: projects/{{project}}/locations/{{location}}/reservationGroups/{{name}}
-examples:
+samples:
   - name: bigquery_reservation_group_basic
     primary_resource_id: reservation_group
-    vars:
-      name: my-reservation-group
+    steps:
+      - name: bigquery_reservation_group_basic
+        resource_id_vars:
+          name: my-reservation-group
 parameters:
   - name: location
     type: String
