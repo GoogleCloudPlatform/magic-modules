@@ -352,7 +352,7 @@ func retrieveListOfManuallyDefinedTestsFromFile(fsys fs.FS, file string) []strin
 	return tests
 }
 
-func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, products []*api.Product, generateCode, generateDocs bool) {
 	log.Printf("Copying common files for tgc.")
 
 	if !generateCode {

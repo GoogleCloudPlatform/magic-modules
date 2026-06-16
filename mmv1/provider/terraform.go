@@ -445,16 +445,16 @@ func (t *Terraform) FullResourceName(object api.Resource) string {
 	return fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
 }
 
-func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
+func (t Terraform) CopyCommonFiles(outputFolder string, products []*api.Product, generateCode, generateDocs bool) {
 	log.Printf("Copying common files for %s", ProviderName(t))
 
-	files := t.getCommonCopyFiles(t.TargetVersionName, generateCode, generateDocs)
+	files := t.getCommonCopyFiles(t.TargetVersionName, products, generateCode, generateDocs)
 	t.CopyFileList(outputFolder, files, generateCode)
 }
 
 // To copy a new folder, add the folder to foldersCopiedToRootDir or foldersCopiedToGoogleDir.
 // To copy a file, add the file to singleFiles
-func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generateDocs bool) map[string]string {
+func (t Terraform) getCommonCopyFiles(versionName string, products []*api.Product, generateCode, generateDocs bool) map[string]string {
 	// key is the target file and value is the source file
 	commonCopyFiles := make(map[string]string, 0)
 
@@ -493,7 +493,6 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 			"third_party/terraform/fwvalidators",
 			"third_party/terraform/provider",
 			"third_party/terraform/registry",
-			"third_party/terraform/services",
 			"third_party/terraform/sweeper",
 			"third_party/terraform/test-fixtures",
 			"third_party/terraform/tpgdclresource",
@@ -511,6 +510,17 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 	for _, folder := range foldersCopiedToGoogleDir {
 		files := t.getCopyFilesInFolder(folder, googleDir)
 		maps.Copy(commonCopyFiles, files)
+	}
+
+	// Copy services folders only for active products
+	if generateCode {
+		for _, p := range products {
+			serviceFolder := fmt.Sprintf("third_party/terraform/services/%s", strings.ToLower(p.Name))
+			if t.dirExists(serviceFolder) {
+				files := t.getCopyFilesInFolder(serviceFolder, googleDir)
+				maps.Copy(commonCopyFiles, files)
+			}
+		}
 	}
 
 	// Case 3: When copy a single file, save the target as key and source as value to the map singleFiles
@@ -597,14 +607,14 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	log.Printf("Generating common files for %s", ProviderName(t))
 	t.generateResourcesForVersion(products)
-	files := t.getCommonCompileFiles(t.TargetVersionName)
+	files := t.getCommonCompileFiles(t.TargetVersionName, products)
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 	t.CompileFileList(outputFolder, files, *templateData, products)
 }
 
 // To compile a new folder, add the folder to foldersCompiledToRootDir or foldersCompiledToGoogleDir.
 // To compile a file, add the file to singleFiles
-func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
+func (t Terraform) getCommonCompileFiles(versionName string, products []*api.Product) map[string]string {
 	// key is the target file and the value is the source file
 	commonCompileFiles := make(map[string]string, 0)
 
@@ -628,7 +638,6 @@ func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 		"third_party/terraform/fwresource",
 		"third_party/terraform/fwtransport",
 		"third_party/terraform/provider",
-		"third_party/terraform/services",
 		"third_party/terraform/sweeper",
 		"third_party/terraform/test-fixtures",
 		"third_party/terraform/tpgdclresource",
@@ -644,6 +653,15 @@ func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 	for _, folder := range foldersCompiledToGoogleDir {
 		files := t.getCompileFilesInFolder(folder, googleDir)
 		maps.Copy(commonCompileFiles, files)
+	}
+
+	// Compile services folders only for active products
+	for _, p := range products {
+		serviceFolder := fmt.Sprintf("third_party/terraform/services/%s", strings.ToLower(p.Name))
+		if t.dirExists(serviceFolder) {
+			files := t.getCompileFilesInFolder(serviceFolder, googleDir)
+			maps.Copy(commonCompileFiles, files)
+		}
 	}
 
 	// Case 3: When compile a single file, save the target as key and source as value to the map singleFiles
@@ -1063,4 +1081,12 @@ type ProviderWithProducts struct {
 	Terraform
 	Compiler string
 	Products []*api.Product
+}
+
+func (t Terraform) dirExists(path string) bool {
+	fi, err := fs.Stat(t.templateFS, path)
+	if err != nil {
+		return false
+	}
+	return fi.IsDir()
 }

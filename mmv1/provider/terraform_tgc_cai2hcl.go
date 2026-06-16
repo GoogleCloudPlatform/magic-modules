@@ -56,7 +56,7 @@ func (cai2hcl CaiToTerraformConversion) Generate(outputFolder, resourceToGenerat
 func (cai2hcl CaiToTerraformConversion) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 }
 
-func (cai2hcl CaiToTerraformConversion) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
+func (cai2hcl CaiToTerraformConversion) CopyCommonFiles(outputFolder string, products []*api.Product, generateCode, generateDocs bool) {
 	if !generateCode {
 		return
 	}

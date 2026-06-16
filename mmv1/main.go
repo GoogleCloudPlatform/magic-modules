@@ -124,7 +124,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 	// In order to only copy/compile files once per provider this must be called outside
 	// of the products loop. Create an MMv1 provider with an arbitrary product (the first loaded).
 	providerToGenerate := newProvider(providerName, version, productsForVersion[0], startTime, wrappedFS)
-	providerToGenerate.CopyCommonFiles(outputPath, generateCode, generateDocs)
+	providerToGenerate.CopyCommonFiles(outputPath, productsForVersion, generateCode, generateDocs)
 
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(outputPath, productsForVersion, "")

@@ -238,7 +238,7 @@ func (tgc TerraformGoogleConversionNext) CompileFileList(outputFolder string, fi
 	}
 }
 
-func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, products []*api.Product, generateCode, generateDocs bool) {
 	if !generateCode {
 		return
 	}

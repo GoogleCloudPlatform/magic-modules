@@ -127,6 +127,6 @@ func (toics TerraformOiCS) CompileCommonFiles(outputFolder string, products []*a
 
 }
 
-func (toics TerraformOiCS) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
+func (toics TerraformOiCS) CopyCommonFiles(outputFolder string, products []*api.Product, generateCode, generateDocs bool) {
 
 }
