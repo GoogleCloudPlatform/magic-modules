@@ -2595,16 +2595,21 @@ func TestAccSqlDatabaseInstance_performanceCaptureConfig(t *testing.T) {
 			{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_performanceCaptureConfig, masterID),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.performance_capture_config.0.running_threads_threshold", "100"),
-				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_performanceCaptureConfig_update, masterID),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.performance_capture_config.0.running_threads_threshold", "200"),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.instance", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -8373,7 +8378,7 @@ var testGoogleSqlDatabaseInstance_performanceCaptureConfig = `
 resource "google_sql_database_instance" "instance" {
   name                = "tf-test-%d"
   region              = "us-central1"
-  database_version    = "MYSQL_9_7"
+  database_version    = "MYSQL_8_4"
   deletion_protection = false
 
   settings {
@@ -8400,7 +8405,7 @@ var testGoogleSqlDatabaseInstance_performanceCaptureConfig_update = `
 resource "google_sql_database_instance" "instance" {
   name                = "tf-test-%d"
   region              = "us-central1"
-  database_version    = "MYSQL_9_7"
+  database_version    = "MYSQL_8_4"
   deletion_protection = false
 
   settings {
@@ -8417,7 +8422,7 @@ resource "google_sql_database_instance" "instance" {
       probe_threshold                   = 4
       running_threads_threshold         = 200
       seconds_behind_source_threshold   = 3700
-      transaction_duration_threshold    = 600
+      transaction_duration_threshold    = 300
     }
   }
 }
