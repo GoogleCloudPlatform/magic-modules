@@ -1,0 +1,92 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Space
+description: Description
+base_url: projects/{{project}}/locations/{{location}}/spaces
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces?spaceId={{space_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+autogen_status: U3BhY2VBdXRvZ2VuVjJBZ2VudA==
+autogen_async: false
+examples:
+  - name: designcenter_space_basic
+    primary_resource_id: example
+    vars:
+      resource_name: test-resource
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: spaceId
+    type: String
+    required: true
+    description: The ID of the space to create.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: Space creation timestamp.
+    output: true
+  - name: description
+    type: String
+    description: Description for the space.
+  - name: displayName
+    type: String
+    description: Display name for the space.
+  - name: enableGcpSharedTemplates
+    type: Boolean
+    description: Flag to enable Google opinionated shared templates.
+  - name: gcsBucket
+    type: String
+    description: |-
+      An existing Google Cloud Storage bucket that you want to use instead of
+      creating a new bucket during Application Design Center setup.
+      If not provided, a default bucket is created during setup.
+      The bucket must exist in the same project as the space.
+      If the bucket name does not exist in the same project as the space, the
+      request fails with an INVALID_ARGUMENT error.
+      If you do not have access to the bucket, the request fails with a
+      PERMISSION_DENIED error.
+      Format: {$bucket_name}
+      For example, if the Cloud Storage bucket URI is gs:\/\/{$bucket_name}, the
+      format is {$bucket_name}.
+  - name: name
+    type: String
+    description: Identifier. The space name.
+    output: true
+  - name: tags
+    type: KeyValuePairs
+    description: |-
+      Input only. Immutable. Tags are key/values bound to space resource.
+      Example:
+      ```
+      "123/environment": "production"
+      "123/costCenter": "marketing"
+      ```
+
+      For more information on tag creation and management, see
+      https://cloud.google.com/resource-manager/docs/tags/tags-overview.
+    immutable: true
+  - name: updateTime
+    type: String
+    description: Space update timestamp
+    output: true

@@ -1,0 +1,794 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ApplicationTemplate
+description: Description
+base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates?applicationTemplateId={{application_template_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}
+autogen_status: QXBwbGljYXRpb25UZW1wbGF0ZUF1dG9nZW5WMkFnZW50
+autogen_async: false
+examples:
+  - name: designcenter_application_template_basic
+    primary_resource_id: example
+    vars:
+      resource_name: test-resource
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: space
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: applicationTemplateId
+    type: String
+    required: true
+    description: The ID of the application template to create.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: applicationParameters
+    type: Array
+    description: |-
+      Parameters to apply to all components in an application. You can specify
+      projectID and region.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: key
+          type: String
+          required: true
+          description: The key of the parameter.
+        - name: value
+          type: NestedObject
+          description: The value of the parameter.
+          properties: []
+        - name: valueExpr
+          type: String
+          description: The value of the parameter as a string.
+          output: true
+  - name: artifactLocation
+    type: NestedObject
+    description: Defines the location for storing an artifact, such as generated IaC.
+    properties:
+      - name: developerConnectExportConfig
+        type: NestedObject
+        description: |-
+          Through Developer Connect, defines a location where content such as
+          Infrastructure as Code (IaC) is stored.
+        properties:
+          - name: branch
+            type: String
+            description: |-
+              The branch in repo to which the content such as Infrastructure as Code
+              (IaC) should be written to. If empty, Application Design Center will create
+              a branch and push the changes.
+          - name: commitSha
+            type: String
+            description: |-
+              The SHA of the Git commit that contains the exported content such as
+              Infrastructure as Code (IaC).
+            output: true
+          - name: developerConnectRepoUri
+            type: String
+            required: true
+            description: |-
+              The Developer Connect Git repository link, formatted as
+              `projects/*/locations/*/connections/*/gitRepositoryLinks/*`.
+          - name: dir
+            type: String
+            required: true
+            description: |-
+              Directory, relative to the source repo, where content such as
+              Infrastructure as Code (IaC) will be stored.
+              This must be a relative path.To specify the root directory, use '/'.
+              If the path or any subdirectories do not exist, they will be created.
+      - name: gcsUri
+        type: String
+        description: The Cloud Storage URI for storing the generated IaC.
+  - name: compositionType
+    type: String
+    default_from_api: true
+    description: |-
+      Possible values:
+      STANDARD
+      COMPOSITE
+  - name: createTime
+    type: String
+    description: Application template creation timestamp.
+    output: true
+  - name: description
+    type: String
+    description: Application template description.
+  - name: displayName
+    type: String
+    description: Application template display name.
+  - name: iacFormat
+    type: String
+    description: |-
+      The IaC format of the application template.
+      Possible values:
+      TERRAFORM
+      HELM
+    output: true
+  - name: latestRevision
+    type: String
+    description: The latest application template revision.
+    output: true
+  - name: latestSystemRevisionUri
+    type: String
+    description: |-
+      The URI of the most recent System Revision generated for this
+      ApplicationTemplate. This ID corresponds to the `name` field in the
+      ApplicationTemplateSystemRevision resource.
+    output: true
+  - name: name
+    type: String
+    description: Identifier. Application template name.
+    output: true
+  - name: rootInputVariables
+    type: Array
+    description: Root level input variables of the application template.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: componentUri
+          type: String
+          required: true
+          description: Component to which this variable belongs.
+        - name: variable
+          type: String
+          required: true
+          description: Name of the variable.
+  - name: rootOutputVariables
+    type: Array
+    description: Root level output variables of the application template.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: componentUri
+          type: String
+          required: true
+          description: Component to which this variable belongs.
+        - name: variable
+          type: String
+          required: true
+          description: Name of the variable.
+  - name: saasRuntimeContext
+    type: NestedObject
+    description: SaaS runtime context.
+    properties:
+      - name: saasNames
+        type: Array
+        description: |-
+          The SaaS names. Format for each SaaS:
+          projects/{project}/locations/{location}/saas/{saas}
+        item_type:
+          type: String
+  - name: serializedApplicationTemplate
+    type: NestedObject
+    output: true
+    description: Serialized application template.
+    properties:
+      - name: apphubApplicationParameters
+        type: NestedObject
+        description: App Hub application parameters.
+        properties:
+          - name: applicationId
+            type: String
+            description: The App Hub application ID.
+          - name: attributes
+            type: NestedObject
+            description: Consumer provided attributes.
+            properties:
+              - name: businessOwners
+                type: Array
+                description: Business team that ensures user needs are met and value is delivered
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: channel
+                      type: NestedObject
+                      description: Separate message to accommodate custom formats across IRC and Slack.
+                      properties:
+                        - name: uri
+                          type: String
+                          required: true
+                          description: URI of the channel.
+                    - name: displayName
+                      type: String
+                      description: |-
+                        Contact's name.
+                        Can have a maximum length of 63 characters.
+                    - name: email
+                      type: String
+                      required: true
+                      description: Email address of the contacts.
+              - name: criticality
+                type: NestedObject
+                description: Criticality of the Application, Service, or Workload
+                properties:
+                  - name: level
+                    type: String
+                    description: |-
+                      Criticality level.
+                      Can contain only lowercase letters, numeric characters,
+                      underscores, and dashes. Can have a maximum length of 63 characters.
+                      Deprecated: Please refer to type instead.
+                  - name: missionCritical
+                    type: Boolean
+                    description: |-
+                      Indicates mission-critical Application, Service, or Workload.
+                      Deprecated: Please refer to type instead.
+                  - name: type
+                    type: String
+                    required: true
+                    description: |-
+                      Criticality Type.
+                      Possible values:
+                      MISSION_CRITICAL
+                      HIGH
+                      MEDIUM
+                      LOW
+              - name: developerOwners
+                type: Array
+                description: Developer team that owns development and coding.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: channel
+                      type: NestedObject
+                      description: Separate message to accommodate custom formats across IRC and Slack.
+                      properties:
+                        - name: uri
+                          type: String
+                          required: true
+                          description: URI of the channel.
+                    - name: displayName
+                      type: String
+                      description: |-
+                        Contact's name.
+                        Can have a maximum length of 63 characters.
+                    - name: email
+                      type: String
+                      required: true
+                      description: Email address of the contacts.
+              - name: environment
+                type: NestedObject
+                description: Environment of the Application, Service, or Workload
+                properties:
+                  - name: environment
+                    type: String
+                    description: |-
+                      Environment name.
+                      Can contain only lowercase letters, numeric characters,
+                      underscores, and dashes. Can have a maximum length of 63 characters.
+                      Deprecated: Please refer to type instead.
+                  - name: type
+                    type: String
+                    required: true
+                    description: |-
+                      Environment Type.
+                      Possible values:
+                      PRODUCTION
+                      STAGING
+                      TEST
+                      DEVELOPMENT
+              - name: operatorOwners
+                type: Array
+                description: Operator team that ensures runtime and operations.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: channel
+                      type: NestedObject
+                      description: Separate message to accommodate custom formats across IRC and Slack.
+                      properties:
+                        - name: uri
+                          type: String
+                          required: true
+                          description: URI of the channel.
+                    - name: displayName
+                      type: String
+                      description: |-
+                        Contact's name.
+                        Can have a maximum length of 63 characters.
+                    - name: email
+                      type: String
+                      required: true
+                      description: Email address of the contacts.
+          - name: hostProjectId
+            type: String
+            description: The host project ID where the App Hub application is created.
+          - name: location
+            type: String
+            description: |-
+              The App Hub application location. Only used for applications with REGIONAL
+              scope.
+          - name: scope
+            type: NestedObject
+            description: Scope of an application.
+            properties:
+              - name: type
+                type: String
+                required: true
+                description: |-
+                  Scope Type.
+                  Possible values:
+                  REGIONAL
+                  GLOBAL
+      - name: applicationParameters
+        type: Array
+        description: Parameters to apply to all components in the application template.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: key
+              type: String
+              required: true
+              description: The key of the parameter.
+            - name: value
+              type: NestedObject
+              description: The value of the parameter.
+              properties: []
+            - name: valueExpr
+              type: String
+              description: The value of the parameter as a string.
+              output: true
+      - name: components
+        type: Array
+        description: The application template components.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: apis
+              type: Array
+              description: |-
+                APIs required to be enabled to deploy the component, in the form
+                of "*.googleapis.com".
+              item_type:
+                type: String
+            - name: applicationInfo
+              type: NestedObject
+              description: This captures the apphub application details associated with the component.
+              properties:
+                - name: apphubApplicationId
+                  type: String
+                  required: true
+                  description: |-
+                    The application ID of the apphub application. The ID must be 1-63
+                    characters long and should match the regular expression
+                    `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`.
+                - name: attributes
+                  type: NestedObject
+                  description: Consumer provided attributes.
+                  properties:
+                    - name: businessOwners
+                      type: Array
+                      description: Business team that ensures user needs are met and value is delivered
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: channel
+                            type: NestedObject
+                            description: Separate message to accommodate custom formats across IRC and Slack.
+                            properties:
+                              - name: uri
+                                type: String
+                                required: true
+                                description: URI of the channel.
+                          - name: displayName
+                            type: String
+                            description: |-
+                              Contact's name.
+                              Can have a maximum length of 63 characters.
+                          - name: email
+                            type: String
+                            required: true
+                            description: Email address of the contacts.
+                    - name: criticality
+                      type: NestedObject
+                      description: Criticality of the Application, Service, or Workload
+                      properties:
+                        - name: level
+                          type: String
+                          description: |-
+                            Criticality level.
+                            Can contain only lowercase letters, numeric characters,
+                            underscores, and dashes. Can have a maximum length of 63 characters.
+                            Deprecated: Please refer to type instead.
+                        - name: missionCritical
+                          type: Boolean
+                          description: |-
+                            Indicates mission-critical Application, Service, or Workload.
+                            Deprecated: Please refer to type instead.
+                        - name: type
+                          type: String
+                          required: true
+                          description: |-
+                            Criticality Type.
+                            Possible values:
+                            MISSION_CRITICAL
+                            HIGH
+                            MEDIUM
+                            LOW
+                    - name: developerOwners
+                      type: Array
+                      description: Developer team that owns development and coding.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: channel
+                            type: NestedObject
+                            description: Separate message to accommodate custom formats across IRC and Slack.
+                            properties:
+                              - name: uri
+                                type: String
+                                required: true
+                                description: URI of the channel.
+                          - name: displayName
+                            type: String
+                            description: |-
+                              Contact's name.
+                              Can have a maximum length of 63 characters.
+                          - name: email
+                            type: String
+                            required: true
+                            description: Email address of the contacts.
+                    - name: environment
+                      type: NestedObject
+                      description: Environment of the Application, Service, or Workload
+                      properties:
+                        - name: environment
+                          type: String
+                          description: |-
+                            Environment name.
+                            Can contain only lowercase letters, numeric characters,
+                            underscores, and dashes. Can have a maximum length of 63 characters.
+                            Deprecated: Please refer to type instead.
+                        - name: type
+                          type: String
+                          required: true
+                          description: |-
+                            Environment Type.
+                            Possible values:
+                            PRODUCTION
+                            STAGING
+                            TEST
+                            DEVELOPMENT
+                    - name: operatorOwners
+                      type: Array
+                      description: Operator team that ensures runtime and operations.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: channel
+                            type: NestedObject
+                            description: Separate message to accommodate custom formats across IRC and Slack.
+                            properties:
+                              - name: uri
+                                type: String
+                                required: true
+                                description: URI of the channel.
+                          - name: displayName
+                            type: String
+                            description: |-
+                              Contact's name.
+                              Can have a maximum length of 63 characters.
+                          - name: email
+                            type: String
+                            required: true
+                            description: Email address of the contacts.
+                - name: deploymentRegion
+                  type: String
+                  description: |-
+                    Deployment region for the component. If the scope is set to REGIONAL,
+                    then the apphub application is created in this region, e.g.
+                    `us-central1`.
+                - name: displayName
+                  type: String
+                  description: |-
+                    Display name for the application. The number of characters should be less
+                    than 64 characters.
+                - name: scope
+                  type: NestedObject
+                  description: Scope of an application.
+                  properties:
+                    - name: type
+                      type: String
+                      required: true
+                      description: |-
+                        Scope Type.
+                        Possible values:
+                        REGIONAL
+                        GLOBAL
+            - name: componentParameterSchema
+              type: Array
+              description: The component parameter schema, which includes possible parameter values.
+              output: true
+              item_type:
+                type: NestedObject
+                output: true
+                properties:
+                  - name: defaultValue
+                    type: NestedObject
+                    description: The default value of the parameter.
+                    output: true
+                    properties: []
+                  - name: isRequired
+                    type: Boolean
+                    description: Whether the parameter is required.
+                    output: true
+                  - name: key
+                    type: String
+                    description: The key of the parameter.
+                    output: true
+                  - name: type
+                    type: String
+                    description: The type of the parameter.
+                    output: true
+            - name: connections
+              type: Array
+              description: The component connections.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: destinationComponentParameters
+                    type: Array
+                    description: The parameters of the connection associated with the destination component.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: key
+                          type: String
+                          required: true
+                          description: The key of the parameter.
+                        - name: value
+                          type: NestedObject
+                          description: The value of the parameter.
+                          properties: []
+                        - name: valueExpr
+                          type: String
+                          description: The value of the parameter as a string.
+                          output: true
+                  - name: destinationComponentUri
+                    type: String
+                    description: The destination component URI used to generate the connection.
+                  - name: sourceComponentParameters
+                    type: Array
+                    description: The parameters of the connection associated with the source component.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: key
+                          type: String
+                          required: true
+                          description: The key of the parameter.
+                        - name: value
+                          type: NestedObject
+                          description: The value of the parameter.
+                          properties: []
+                        - name: valueExpr
+                          type: String
+                          description: The value of the parameter as a string.
+                          output: true
+                  - name: uri
+                    type: String
+                    description: The connection URI.
+            - name: connectionsParameters
+              type: Array
+              description: The connection parameters of the component.
+              output: true
+              item_type:
+                type: NestedObject
+                output: true
+                properties:
+                  - name: connection
+                    type: String
+                    description: The name of the connection parameter.
+                    output: true
+                  - name: parameters
+                    type: Array
+                    description: A list of parameters associated with the connection.
+                    output: true
+                    item_type:
+                      type: NestedObject
+                      output: true
+                      properties:
+                        - name: key
+                          type: String
+                          description: The key of the parameter.
+                          output: true
+                        - name: value
+                          type: NestedObject
+                          description: The value of the parameter.
+                          output: true
+                          properties: []
+                        - name: valueExpr
+                          type: String
+                          description: The value of the parameter as a string.
+                          output: true
+            - name: displayName
+              type: String
+              description: The component display name.
+            - name: parameters
+              type: Array
+              description: The component parameters.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: key
+                    type: String
+                    required: true
+                    description: The key of the parameter.
+                  - name: value
+                    type: NestedObject
+                    description: The value of the parameter.
+                    properties: []
+                  - name: valueExpr
+                    type: String
+                    description: The value of the parameter as a string.
+                    output: true
+            - name: roles
+              type: Array
+              description: IAM roles required by the service account to deploy the component.
+              item_type:
+                type: String
+            - name: sharedTemplateRevisionUri
+              type: String
+              description: The shared template used to generate the component.
+            - name: uri
+              type: String
+              description: The component URI.
+      - name: compositionType
+        type: String
+        description: |-
+          Possible values:
+          STANDARD
+          COMPOSITE
+      - name: description
+        type: String
+        description: The application template description.
+      - name: displayName
+        type: String
+        description: The application template display name.
+      - name: hasGlobalResource
+        type: Boolean
+        description: Whether the application template is compatible with regional scope.
+        output: true
+      - name: iacFormat
+        type: String
+        description: |-
+          The IaC format of the application template.
+          Possible values:
+          TERRAFORM
+          HELM
+      - name: rootInputVariables
+        type: Array
+        description: Root level input variables of the application template.
+        output: true
+        item_type:
+          type: NestedObject
+          output: true
+          properties:
+            - name: componentUri
+              type: String
+              description: Component to which this variable belongs.
+              output: true
+            - name: variable
+              type: String
+              description: Name of the variable.
+              output: true
+      - name: rootOutputVariables
+        type: Array
+        description: Root level output variables of the application template.
+        output: true
+        item_type:
+          type: NestedObject
+          output: true
+          properties:
+            - name: componentUri
+              type: String
+              description: Component to which this variable belongs.
+              output: true
+            - name: variable
+              type: String
+              description: Name of the variable.
+              output: true
+      - name: saasRuntimeContext
+        type: NestedObject
+        description: SaaS runtime context.
+        properties:
+          - name: saasNames
+            type: Array
+            description: |-
+              The SaaS names. Format for each SaaS:
+              projects/{project}/locations/{location}/saas/{saas}
+            item_type:
+              type: String
+      - name: serializedPolicies
+        type: Array
+        description: Policies of the application template.
+        output: true
+        item_type:
+          type: NestedObject
+          output: true
+          properties:
+            - name: applyConditions
+              type: Array
+              description: The serialized policy apply conditions.
+              output: true
+              item_type:
+                type: NestedObject
+                output: true
+                properties:
+                  - name: conditionKey
+                    type: String
+                    description: The key of the parameter for the condition.
+                    output: true
+                  - name: conditionValue
+                    type: String
+                    description: The value of the parameter for the condition.
+                    output: true
+            - name: description
+              type: String
+              description: |-
+                The serialized policy description.
+                At most 2048 characters.
+              output: true
+            - name: displayName
+              type: String
+              description: |-
+                The serialized policy display name.
+                The number of characters should be less than 128 characters.
+              output: true
+            - name: policyRevisionUri
+              type: String
+              description: URI of the policy revision.
+              output: true
+            - name: policyType
+              type: String
+              description: |-
+                Policy type will be used to determine the domain of the policy.
+                Possible values:
+                COMPLIANCE_FRAMEWORK
+              output: true
+            - name: policyUri
+              type: String
+              description: URI of the policy.
+              output: true
+            - name: uri
+              type: String
+              description: |-
+                The uri of the policy in application template.
+                Format:
+                `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/policies/{policy}`
+              output: true
+      - name: uri
+        type: String
+        description: The application template URI.
+  - name: updateTime
+    type: String
+    description: Application template update timestamp.
+    output: true
