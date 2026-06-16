@@ -167,6 +167,15 @@ examples:
       subnetwork_name: 'rbs-subnet'
       instance_name: 'rbs-instance'
       neg_name: 'rbs-neg'
+  - name: 'region_backend_service_ha_policy_internal_lb'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      network_name: 'rbs-net'
+      subnetwork_name: 'rbs-subnet'
+      instance_name: 'rbs-instance'
+      neg_name: 'rbs-neg'
+    exclude_test: true
   - name: 'region_backend_service_tls_settings'
     primary_resource_id: 'default'
     vars:
