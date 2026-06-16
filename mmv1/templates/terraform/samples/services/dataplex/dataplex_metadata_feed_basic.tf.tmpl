@@ -14,6 +14,53 @@ resource "google_pubsub_topic_iam_member" "primary_viewer" {
   topic  = google_pubsub_topic.primary.name
   role   = "roles/pubsub.viewer"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-dataplex.iam.gserviceaccount.com"
+
+  depends_on = [google_pubsub_topic_iam_member.primary_publisher]
+}
+
+resource "google_dataplex_entry_group" "group" {
+  entry_group_id = "{{index $.ResourceIdVars "metadata_feed_id"}}-group"
+  project        = "{{index $.TestEnvVars "project_name"}}"
+  location       = "us-central1"
+}
+
+resource "google_dataplex_entry_type" "type" {
+  entry_type_id = "{{index $.ResourceIdVars "metadata_feed_id"}}-type"
+  project       = "{{index $.TestEnvVars "project_name"}}"
+  location      = "us-central1"
+}
+
+resource "google_dataplex_aspect_type" "aspect" {
+  aspect_type_id = "{{index $.ResourceIdVars "metadata_feed_id"}}-aspect"
+  project        = "{{index $.TestEnvVars "project_name"}}"
+  location       = "us-central1"
+
+  metadata_template = <<EOF
+{
+  "name": "tf-test-template",
+  "type": "record",
+  "recordFields": [
+    {
+      "name": "type",
+      "type": "enum",
+      "annotations": {
+        "displayName": "Type",
+        "description": "Specifies the type of view represented by the entry."
+      },
+      "index": 1,
+      "constraints": {
+        "required": true
+      },
+      "enumValues": [
+        {
+          "name": "VIEW",
+          "index": 1
+        }
+      ]
+    }
+  ]
+}
+EOF
 }
 
 resource "google_dataplex_metadata_feed" "primary" {
@@ -26,8 +73,15 @@ resource "google_dataplex_metadata_feed" "primary" {
     foo = "{{index $.Vars "label_val"}}"
   }
 
+  filters {
+    aspect_types = ["projects/${data.google_project.project.number}/locations/us-central1/aspectTypes/${google_dataplex_aspect_type.aspect.aspect_type_id}"]
+    change_types = ["CREATE"]
+    entry_types  = ["projects/${data.google_project.project.number}/locations/us-central1/entryTypes/${google_dataplex_entry_type.type.entry_type_id}"]
+  }
+
   scope {
-    projects = ["projects/${data.google_project.project.number}"]
+    entry_groups       = ["projects/${data.google_project.project.number}/locations/us-central1/entryGroups/${google_dataplex_entry_group.group.entry_group_id}"]
+    organization_level = false
   }
 
   depends_on = [
