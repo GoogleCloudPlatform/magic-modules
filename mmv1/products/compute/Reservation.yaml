@@ -91,6 +91,8 @@ examples:
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
     external_providers: ["time"]
+    ignore_read_extra:
+      - share_settings.0.project_map
   - name: 'shared_reservation_beta'
     primary_resource_id: 'gce_reservation'
     vars:
