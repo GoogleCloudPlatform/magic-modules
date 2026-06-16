@@ -39,7 +39,7 @@ samples:
     primary_resource_id: "policy"
     min_version: beta
     steps:
-      - name: "region_network_policy_full" 
+      - name: "region_network_policy_full"
         resource_id_vars:
           policy_name: "tf-test-policy"
 parameters:
