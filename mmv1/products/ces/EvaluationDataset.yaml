@@ -310,9 +310,7 @@ properties:
     type: Array
     description: Evaluations that are included in this dataset.
     item_type:
-      name: item
       type: String
-      description: No description
   - name: lastUpdatedBy
     type: String
     description: The user who last updated the evaluation dataset.
