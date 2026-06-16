@@ -17,7 +17,7 @@ ACTIVE_TASK_MD=$(find /Users/zhenhuali/.gemini/jetski/brain -name task.md -type 
 
 if [ ! -z "$ACTIVE_TASK_MD" ]; then
   echo "Verifying task list at $ACTIVE_TASK_MD..."
-  "$MAGIC_MODULES_PATH/.agents/scripts/verify_task_list.py" "$ACTIVE_TASK_MD"
+  "$MAGIC_MODULES_PATH/.agents/scripts/tgc/verify_task_list.py" "$ACTIVE_TASK_MD"
 else
   echo "Warning: Active task.md could not be detected automatically. Skipping task list verification."
 fi
@@ -29,10 +29,10 @@ if [ ! -z "$CHANGED_YAMLS" ]; then
   for yaml in $CHANGED_YAMLS; do
     if [ -f "$yaml" ]; then
       echo "Verifying field ordering compliance for $yaml..."
-      "$MAGIC_MODULES_PATH/.agents/scripts/verify_yaml_field_order.py" mmv1/api/resource.go "$yaml"
+      "$MAGIC_MODULES_PATH/.agents/scripts/tgc/verify_yaml_field_order.py" mmv1/api/resource.go "$yaml"
       
       echo "Verifying test configurations for $yaml..."
-      "$MAGIC_MODULES_PATH/.agents/scripts/verify_test_configs.py" "$yaml"
+      "$MAGIC_MODULES_PATH/.agents/scripts/tgc/verify_test_configs.py" "$yaml"
     fi
   done
 fi

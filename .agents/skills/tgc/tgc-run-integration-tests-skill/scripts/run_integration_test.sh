@@ -46,7 +46,7 @@ TEST_EXIT_CODE=$?
 if [ $TEST_EXIT_CODE -ne 0 ]; then
     echo "Test execution failed with exit code $TEST_EXIT_CODE."
     # Call our diagnostic python script
-    python3 /Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/scripts/diagnose_test_failure.py "$LOG_DIR/$LOG_FILE" "$TGC_DIR/$TEST_PATH"
+    python3 /Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/scripts/tgc/diagnose_test_failure.py "$LOG_DIR/$LOG_FILE" "$TGC_DIR/$TEST_PATH"
     exit $TEST_EXIT_CODE
 else
     echo "Test execution completed successfully."

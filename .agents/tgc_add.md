@@ -25,7 +25,7 @@ Before proceeding with the workflow, ensure you are familiar with and read the f
 - **Read Skill**: Read [tgc-new-generated-resource-skill](file:///Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/skills/tgc/tgc-add-new-generated-resource-skill/SKILL.md) for guidance on adding a new resource.
 - **Define Resource**: Add or modify the resource definition in Magic Modules (`mmv1/products/...`).
 - **Field Ordering**: Ensure fields in YAML files follow the order defined in `mmv1/api/resource.go`.
-- **Redundant Overrides**: Ensure you do not add redundant `cai_asset_name_format` overrides that match `id_format`. Run `.agents/scripts/check_redundant_cai_overrides.py <yaml-file>` to verify.
+- **Redundant Overrides**: Ensure you do not add redundant `cai_asset_name_format` overrides that match `id_format`. Run `.agents/scripts/tgc/check_redundant_cai_overrides.py <yaml-file>` to verify.
 
 ### 3. Generate Code & Unit Testing
 - **Read Skill**: Read [tgc-build-skill](file:///Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/skills/tgc/tgc-build-skill/SKILL.md) to project changes to the downstream repository.
