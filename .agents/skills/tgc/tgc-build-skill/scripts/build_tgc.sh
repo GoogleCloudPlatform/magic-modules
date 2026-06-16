@@ -50,4 +50,4 @@ make build
 echo "TGC build compiled successfully!"
 
 echo "[Phase 3] Executing selective unit tests..."
-TGC_DIR="$TGC_PATH" /Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/skills/tgc-build-skill/scripts/run_changed_folders_tests.sh
+TGC_DIR="$TGC_PATH" /Users/zhenhuali/Documents/workspace/tgc-supported-resources/.agents/skills/tgc/tgc-build-skill/scripts/run_changed_folders_tests.sh
