@@ -134,7 +134,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
 
-	networkInterfaces, err := expandNetworkInterfaces(d, config)
+	networkInterfaces, err := expandNetworkInterfacesTyped(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}
@@ -142,6 +142,15 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	accels, err := expandInstanceGuestAccelerators(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
+	}
+
+	tagsMap := resourceInstanceTags(d)
+	var tags *compute.Tags
+	if tagsMap != nil {
+		tags = &compute.Tags{}
+		if err := tpgresource.Convert(tagsMap, tags); err != nil {
+			return nil, fmt.Errorf("Error converting tags: %s", err)
+		}
 	}
 
 	// Create the instance information
@@ -154,7 +163,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Name:                    d.Get("name").(string),
 		Zone:                    d.Get("zone").(string),
 		NetworkInterfaces:       networkInterfaces,
-		Tags:                    resourceInstanceTags(d),
+		Tags:                    tags,
 		Labels:                  tpgresource.ExpandLabels(d),
 		ServiceAccounts:         expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
 		GuestAccelerators:       accels,

@@ -268,6 +268,10 @@ fields:
     api_field: 'config.minCpuPlatform'
   - field: 'node_config.node_group'
     api_field: 'config.nodeGroup'
+  - field: 'node_config.node_image_config.image'
+    api_field: 'config.nodeImageConfig.image'
+  - field: 'node_config.node_image_config.image_project'
+    api_field: 'config.nodeImageConfig.imageProject'
   - field: 'node_config.oauth_scopes'
     api_field: 'config.oauthScopes'
   - field: 'node_config.preemptible'
@@ -318,6 +322,8 @@ fields:
     api_field: 'config.taints.key'
   - field: 'node_config.taint.value'
     api_field: 'config.taints.value'
+  - field: 'node_config.taint_config.architecture_taint_behavior'
+    api_field: 'config.taintConfig.architectureTaintBehavior'
   - field: 'node_config.windows_node_config.osversion'
     api_field: 'config.windowsNodeConfig.osVersion'
   - field: 'node_config.workload_metadata_config.mode'
@@ -347,4 +353,6 @@ fields:
   - api_field: 'upgradeSettings.strategy'
   - api_field: 'version'
   - field: 'deletion_policy'
+    provider_only: true
+  - field: 'ignore_node_count_changes'
     provider_only: true
