@@ -39,13 +39,12 @@ resource "google_vertex_ai_persistent_resource" "persistent_resource" {
   name = "tf-test-persistent-resource%{random_suffix}"
   location = "us-central1"
   resource_pools {
-    id = "pool-1"
     machine_spec {
-      machine_type = "n1-standard-4"
+      machine_type = "e2-standard-4"
     }
     replica_count = 1
     disk_spec {
-      boot_disk_type = "pd-ssd"
+      boot_disk_type = "pd-standard"
       boot_disk_size_gb = 100
     }
   }

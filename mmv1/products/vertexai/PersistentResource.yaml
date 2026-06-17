@@ -46,6 +46,11 @@ examples:
     primary_resource_id: persistent_resource
     vars:
       name: persistent_resource
+  - name: vertex_ai_persistent_resource_full
+    primary_resource_id: persistent_resource
+    exclude_test: true
+    vars:
+      name: persistent_resource
 parameters:
   - name: location
     type: String
