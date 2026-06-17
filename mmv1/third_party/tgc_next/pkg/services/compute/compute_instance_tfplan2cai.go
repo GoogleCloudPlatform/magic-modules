@@ -197,7 +197,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Scheduling:               scheduling,
 		DeletionProtection:       d.Get("deletion_protection").(bool),
 		Hostname:                 d.Get("hostname").(string),
-		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
+		AdvancedMachineFeatures:  expandAdvancedMachineFeaturesTypedTgcNext(d),
 		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:      reservationAffinity,
 		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
@@ -579,21 +579,33 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		scheduling.AvailabilityDomain = int64(v.(int))
 	}
 	if v, ok := original["max_run_duration"]; ok {
-		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
+		maxRunDurationMap, err := expandComputeMaxRunDuration(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.MaxRunDuration = transformedMaxRunDuration
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
+		if maxRunDurationMap != nil {
+			typed := &compute.Duration{}
+			if err := tpgresource.Convert(maxRunDurationMap, typed); err != nil {
+				return nil, fmt.Errorf("Error converting max_run_duration: %s", err)
+			}
+			scheduling.MaxRunDuration = typed
+			scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
+		}
 	}
 
 	if v, ok := original["on_instance_stop_action"]; ok {
-		transformedOnInstanceStopAction, err := expandComputeOnInstanceStopAction(v)
+		onInstanceStopActionMap, err := expandComputeOnInstanceStopAction(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
+		if onInstanceStopActionMap != nil {
+			typed := &compute.SchedulingOnInstanceStopAction{}
+			if err := tpgresource.Convert(onInstanceStopActionMap, typed); err != nil {
+				return nil, fmt.Errorf("Error converting on_instance_stop_action: %s", err)
+			}
+			scheduling.OnInstanceStopAction = typed
+			scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
+		}
 	}
 
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
@@ -655,4 +667,56 @@ func expandComputeLocalSsdRecoveryTimeoutTgc(v interface{}) (*compute.Duration, 
 		duration.ForceSendFields = append(duration.ForceSendFields, "Seconds")
 	}
 	return duration, nil
+}
+
+func expandServiceAccountsTyped(configs []interface{}) []*compute.ServiceAccount {
+	expanded := expandServiceAccounts(configs)
+	accounts := make([]*compute.ServiceAccount, len(expanded))
+	for i, raw := range expanded {
+		data := raw.(map[string]interface{})
+		accounts[i] = &compute.ServiceAccount{
+			Email:  data["email"].(string),
+			Scopes: data["scopes"].([]string),
+		}
+	}
+	return accounts
+}
+
+func expandAccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
+	expanded := expandAccessConfigs(configs)
+	acs := make([]*compute.AccessConfig, 0, len(expanded))
+	if err := tpgresource.Convert(expanded, &acs); err != nil {
+		return nil, fmt.Errorf("Error converting access configs: %s", err)
+	}
+	return acs, nil
+}
+
+func expandAliasIpRangesTyped(ranges []interface{}) ([]*compute.AliasIpRange, error) {
+	expanded := expandAliasIpRanges(ranges)
+	out := make([]*compute.AliasIpRange, 0, len(expanded))
+	if err := tpgresource.Convert(expanded, &out); err != nil {
+		return nil, fmt.Errorf("Error converting alias ip ranges: %s", err)
+	}
+	return out, nil
+}
+
+func expandIpv6AccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
+	expanded := expandIpv6AccessConfigs(configs)
+	acs := make([]*compute.AccessConfig, 0, len(expanded))
+	if err := tpgresource.Convert(expanded, &acs); err != nil {
+		return nil, fmt.Errorf("Error converting ipv6 access configs: %s", err)
+	}
+	return acs, nil
+}
+
+func expandAdvancedMachineFeaturesTypedTgcNext(d tpgresource.TerraformResourceData) *compute.AdvancedMachineFeatures {
+	amfMap := expandAdvancedMachineFeatures(d)
+	if amfMap == nil {
+		return nil
+	}
+	typed := &compute.AdvancedMachineFeatures{}
+	if err := tpgresource.Convert(amfMap, typed); err != nil {
+		return nil
+	}
+	return typed
 }
