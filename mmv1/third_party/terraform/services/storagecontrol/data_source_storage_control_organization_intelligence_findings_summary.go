@@ -1,3 +1,6 @@
+//go:build !ga
+// +build !ga
+
 package storagecontrol
 
 import (
