@@ -784,6 +784,22 @@ func getInterfaceSlice(v interface{}) []interface{} {
 	return s
 }
 
+func getInt(v interface{}) int64 {
+	switch t := v.(type) {
+	case int:
+		return int64(t)
+	case int64:
+		return t
+	case float64:
+		return int64(t)
+	case string:
+		i, _ := strconv.ParseInt(t, 10, 64)
+		return i
+	default:
+		return 0
+	}
+}
+
 {{ if ne $.TargetVersionName `ga` -}}
 // firstAccessConfigSecurityPolicy returns the securityPolicy of the first
 // access config in the list, or "" if absent.
