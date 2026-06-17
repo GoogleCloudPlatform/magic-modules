@@ -1910,6 +1910,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 	}
 	{{- end }}
 
+
 	networkInterfaces, err := expandNetworkInterfacesTyped(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
@@ -1974,7 +1975,6 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		NetworkInterfaces:          networkInterfaces,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Tags:                       tags,
-		Params:                     params,
 		Labels:                     tpgresource.ExpandEffectiveLabels(d),
 		ServiceAccounts:            expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
 		GuestAccelerators:          accels,
@@ -2178,6 +2178,11 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	}
 	if amf := expandAdvancedMachineFeatures(d); amf != nil {
 		instanceBody["advancedMachineFeatures"] = amf
+	}
+	if paramsBody, err := expandParams(d); err != nil {
+		return fmt.Errorf("Error expanding params: %s", err)
+	} else if len(paramsBody) > 0 {
+		instanceBody["params"] = paramsBody
 	}
 	insertUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances")
 	if err != nil {
