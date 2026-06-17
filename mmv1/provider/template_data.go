@@ -101,6 +101,7 @@ func (td *TemplateData) GenerateEphemeralResourceFile(filePath string, resource 
 	templates := []string{
 		templatePath,
 		"templates/terraform/schema_property_ephemeral.go.tmpl",
+		"templates/terraform/flatten_property_ephemeral.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
