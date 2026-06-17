@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -585,7 +586,7 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		}
 		if maxRunDurationMap != nil {
 			typed := &compute.Duration{}
-			if err := tpgresource.Convert(maxRunDurationMap, typed); err != nil {
+			if err := convertViaJSONTgcNext(maxRunDurationMap, typed); err != nil {
 				return nil, fmt.Errorf("Error converting max_run_duration: %s", err)
 			}
 			scheduling.MaxRunDuration = typed
@@ -600,7 +601,7 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		}
 		if onInstanceStopActionMap != nil {
 			typed := &compute.SchedulingOnInstanceStopAction{}
-			if err := tpgresource.Convert(onInstanceStopActionMap, typed); err != nil {
+			if err := convertViaJSONTgcNext(onInstanceStopActionMap, typed); err != nil {
 				return nil, fmt.Errorf("Error converting on_instance_stop_action: %s", err)
 			}
 			scheduling.OnInstanceStopAction = typed
@@ -685,7 +686,7 @@ func expandServiceAccountsTyped(configs []interface{}) []*compute.ServiceAccount
 func expandAccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
 	expanded := expandAccessConfigs(configs)
 	acs := make([]*compute.AccessConfig, 0, len(expanded))
-	if err := tpgresource.Convert(expanded, &acs); err != nil {
+	if err := convertViaJSONTgcNext(expanded, &acs); err != nil {
 		return nil, fmt.Errorf("Error converting access configs: %s", err)
 	}
 	return acs, nil
@@ -694,7 +695,7 @@ func expandAccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, e
 func expandAliasIpRangesTyped(ranges []interface{}) ([]*compute.AliasIpRange, error) {
 	expanded := expandAliasIpRanges(ranges)
 	out := make([]*compute.AliasIpRange, 0, len(expanded))
-	if err := tpgresource.Convert(expanded, &out); err != nil {
+	if err := convertViaJSONTgcNext(expanded, &out); err != nil {
 		return nil, fmt.Errorf("Error converting alias ip ranges: %s", err)
 	}
 	return out, nil
@@ -703,7 +704,7 @@ func expandAliasIpRangesTyped(ranges []interface{}) ([]*compute.AliasIpRange, er
 func expandIpv6AccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
 	expanded := expandIpv6AccessConfigs(configs)
 	acs := make([]*compute.AccessConfig, 0, len(expanded))
-	if err := tpgresource.Convert(expanded, &acs); err != nil {
+	if err := convertViaJSONTgcNext(expanded, &acs); err != nil {
 		return nil, fmt.Errorf("Error converting ipv6 access configs: %s", err)
 	}
 	return acs, nil
@@ -715,8 +716,16 @@ func expandAdvancedMachineFeaturesTypedTgcNext(d tpgresource.TerraformResourceDa
 		return nil
 	}
 	typed := &compute.AdvancedMachineFeatures{}
-	if err := tpgresource.Convert(amfMap, typed); err != nil {
+	if err := convertViaJSONTgcNext(amfMap, typed); err != nil {
 		return nil
 	}
 	return typed
+}
+
+func convertViaJSONTgcNext(in, out interface{}) error {
+	b, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, out)
 }
