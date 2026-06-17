@@ -1743,7 +1743,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		Scheduling:                 scheduling,
 		ServiceAccounts:            expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
 		Tags:                       tags,
-		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
+		AdvancedMachineFeatures:    expandAdvancedMachineFeaturesTyped(d),
 		ResourcePolicies:           resourcePolicies,
 		ReservationAffinity:        reservationAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
@@ -2281,7 +2281,11 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 	if instanceTemplate.Properties.Scheduling != nil {
-		scheduling := flattenScheduling(instanceTemplate.Properties.Scheduling)
+		schedulingMap, err := tpgresource.ConvertToMap(instanceTemplate.Properties.Scheduling)
+		if err != nil {
+			return fmt.Errorf("Error converting scheduling: %s", err)
+		}
+		scheduling := flattenScheduling(schedulingMap)
 {{ if ne $.TargetVersionName `ga` }}
 		// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
 		// To avoid diff, we need to set the value from the state not from API response.
@@ -2338,7 +2342,11 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 	if instanceTemplate.Properties.AdvancedMachineFeatures != nil {
-		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(instanceTemplate.Properties.AdvancedMachineFeatures)); err != nil {
+		amfMap, err := tpgresource.ConvertToMap(instanceTemplate.Properties.AdvancedMachineFeatures)
+		if err != nil {
+			return fmt.Errorf("Error converting advanced_machine_features: %s", err)
+		}
+		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(amfMap)); err != nil {
 			return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 		}
 	}
@@ -2429,10 +2437,128 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 	}
 
 	// Make sure we have an appropriate value for OnHostMaintenance if Preemptible
-	if expanded.Preemptible && expanded.OnHostMaintenance == "" {
-		expanded.OnHostMaintenance = "TERMINATE"
+	preemptible, _ := expanded["preemptible"].(bool)
+	onHostMaintenance, _ := expanded["onHostMaintenance"].(string)
+	if preemptible && onHostMaintenance == "" {
+		expanded["onHostMaintenance"] = "TERMINATE"
 	}
-	return expanded, nil
+
+	schedulingTyped := &compute.Scheduling{}
+	if err := tpgresource.Convert(expanded, schedulingTyped); err != nil {
+		return nil, fmt.Errorf("Error converting scheduling: %s", err)
+	}
+	return schedulingTyped, nil
+}
+
+// networkInterfacesToInterface converts a slice of typed Apiary network
+// interface structs into the []interface{} of JSON-shaped maps expected by
+// flattenNetworkInterfaces.
+func networkInterfacesToInterface(networkInterfaces []*compute.NetworkInterface) ([]interface{}, error) {
+	result := make([]interface{}, 0, len(networkInterfaces))
+	for _, ni := range networkInterfaces {
+		b, err := json.Marshal(ni)
+		if err != nil {
+			return nil, err
+		}
+		var m map[string]interface{}
+		if err := json.Unmarshal(b, &m); err != nil {
+			return nil, err
+		}
+		result = append(result, m)
+	}
+	return result, nil
+}
+
+func convertViaJSON(in, out interface{}) error {
+	bytes, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bytes, out)
+}
+
+func expandNetworkInterfacesTyped(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.NetworkInterface, error) {
+	expanded, err := expandNetworkInterfaces(d, config)
+	if err != nil {
+		return nil, err
+	}
+	ifaces := make([]*compute.NetworkInterface, 0, len(expanded))
+	if err := convertViaJSON(expanded, &ifaces); err != nil {
+		return nil, fmt.Errorf("Error converting network interfaces: %s", err)
+	}
+	return ifaces, nil
+}
+
+func expandAccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
+	return accessConfigsToTyped(expandAccessConfigs(configs))
+}
+
+func expandIpv6AccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
+	return accessConfigsToTyped(expandIpv6AccessConfigs(configs))
+}
+
+func accessConfigsToTyped(expanded []interface{}) ([]*compute.AccessConfig, error) {
+	acs := make([]*compute.AccessConfig, 0, len(expanded))
+	if err := convertViaJSON(expanded, &acs); err != nil {
+		return nil, fmt.Errorf("Error converting access configs: %s", err)
+	}
+	return acs, nil
+}
+
+func expandAliasIpRangesTyped(ranges []interface{}) ([]*compute.AliasIpRange, error) {
+	expanded := expandAliasIpRanges(ranges)
+	out := make([]*compute.AliasIpRange, 0, len(expanded))
+	if err := convertViaJSON(expanded, &out); err != nil {
+		return nil, fmt.Errorf("Error converting alias ip ranges: %s", err)
+	}
+	return out, nil
+}
+
+func expandServiceAccountsTyped(configs []interface{}) []*compute.ServiceAccount {
+	expanded := expandServiceAccounts(configs)
+	accounts := make([]*compute.ServiceAccount, len(expanded))
+	for i, raw := range expanded {
+		data := raw.(map[string]interface{})
+		accounts[i] = &compute.ServiceAccount{
+			Email:  data["email"].(string),
+			Scopes: data["scopes"].([]string),
+		}
+	}
+	return accounts
+}
+
+func serviceAccountsToInterface(serviceAccounts []*compute.ServiceAccount) []interface{} {
+	result := make([]interface{}, len(serviceAccounts))
+	for i, sa := range serviceAccounts {
+		result[i] = map[string]interface{}{
+			"email":  sa.Email,
+			"scopes": tpgresource.ConvertStringArrToInterface(sa.Scopes),
+		}
+	}
+	return result
+}
+
+func guestAcceleratorsToInterface(accelerators []*compute.AcceleratorConfig) []interface{} {
+	result := make([]interface{}, len(accelerators))
+	for i, a := range accelerators {
+		result[i] = map[string]interface{}{
+			"acceleratorCount": a.AcceleratorCount,
+			"acceleratorType":  a.AcceleratorType,
+		}
+	}
+	return result
+}
+
+func expandAdvancedMachineFeaturesTyped(d tpgresource.TerraformResourceData) *compute.AdvancedMachineFeatures {
+	amfMap := expandAdvancedMachineFeatures(d)
+	if amfMap == nil {
+		return nil
+	}
+	typed := &compute.AdvancedMachineFeatures{}
+	if err := tpgresource.Convert(amfMap, typed); err != nil {
+		return nil
+	}
+	return typed
 }
 
 func resourceComputeInstanceTemplateImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

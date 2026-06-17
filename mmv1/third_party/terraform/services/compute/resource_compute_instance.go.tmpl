@@ -1862,12 +1862,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		disks = append(disks, disk)
 	}
 
-	scheduling, err := expandScheduling(d.Get("scheduling"))
-	if err != nil {
-		return nil, fmt.Errorf("Error creating scheduling: %s", err)
-	}
-
-	params, err := expandParamsTyped(d)
+	params, err := expandParams(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating params: %s", err)
 	}
@@ -1957,11 +1952,9 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		ServiceAccounts:            expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
 		GuestAccelerators:          accels,
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
-		Scheduling:                 scheduling,
 		DeletionProtection:         d.Get("deletion_protection").(bool),
 		Hostname:                   d.Get("hostname").(string),
 		ForceSendFields:            []string{"CanIpForward", "DeletionProtection"},
-		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
 		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
@@ -2127,6 +2120,16 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	instanceBody, err := tpgresource.ConvertToMap(instance)
 	if err != nil {
 		return fmt.Errorf("Error converting instance: %s", err)
+	}
+	schedulingBody, err := expandScheduling(d.Get("scheduling"))
+	if err != nil {
+		return fmt.Errorf("Error creating scheduling: %s", err)
+	}
+	if schedulingBody != nil {
+		instanceBody["scheduling"] = schedulingBody
+	}
+	if amf := expandAdvancedMachineFeatures(d); amf != nil {
+		instanceBody["advancedMachineFeatures"] = amf
 	}
 	insertUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances")
 	if err != nil {
@@ -2447,9 +2450,35 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compu
 		return fmt.Errorf("Error setting scratch_disk: %s", err)
 	}
 
-	if err := d.Set("scheduling", flattenScheduling(instance.Scheduling)); err != nil {
+{{ if eq $.TargetVersionName `ga` -}}
+	schedulingMap, err := tpgresource.ConvertToMap(instance.Scheduling)
+	if err != nil {
+		return fmt.Errorf("Error converting scheduling: %s", err)
+	}
+	if err := d.Set("scheduling", flattenScheduling(schedulingMap)); err != nil {
 		return fmt.Errorf("Error setting scheduling: %s", err)
 	}
+{{ else -}}
+	// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
+	// To avoid diff, we need to set the value from the state not from API response.
+	schedulingMap, err := tpgresource.ConvertToMap(instance.Scheduling)
+	if err != nil {
+		return fmt.Errorf("Error converting scheduling: %s", err)
+	}
+	scheduling := flattenScheduling(schedulingMap)
+	if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
+		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
+		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
+		max_duration["nanos"] = int64(nanos.(int))
+
+		graceful_shutdown["max_duration"] = []interface{}{max_duration}
+		scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+	}
+	if err := d.Set("scheduling", scheduling); err != nil {
+		return fmt.Errorf("Error setting scheduling: %s", err)
+	}
+{{- end }}
+
 	if err := d.Set("guest_accelerator", flattenGuestAccelerators(guestAcceleratorsToInterface(instance.GuestAccelerators))); err != nil {
 		return fmt.Errorf("Error setting guest_accelerator: %s", err)
 	}
@@ -2516,7 +2545,11 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compu
 			return fmt.Errorf("Error setting confidential_instance_config: %s", err)
 		}
 	}
-	if err := d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)); err != nil {
+	amfMap, err := tpgresource.ConvertToMap(instance.AdvancedMachineFeatures)
+	if err != nil {
+		return fmt.Errorf("Error converting advanced_machine_features: %s", err)
+	}
+	if err := d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(amfMap)); err != nil {
 		return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 	}
 	if d.Get("desired_status") != "" {
@@ -2928,14 +2961,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	bootRequiredSchedulingChange := schedulingHasChangeRequiringReboot(d)
 	bootNotRequiredSchedulingChange := schedulingHasChangeWithoutReboot(d)
 	if bootNotRequiredSchedulingChange {
-		scheduling, err := expandScheduling(d.Get("scheduling"))
+		schedulingBody, err := expandScheduling(d.Get("scheduling"))
 		if err != nil {
 			return fmt.Errorf("Error creating request data to update scheduling: %s", err)
-		}
-
-		schedulingBody, err := tpgresource.ConvertToMap(scheduling)
-		if err != nil {
-			return fmt.Errorf("Error converting scheduling: %s", err)
 		}
 		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setScheduling")
 		if err != nil {
@@ -3965,14 +3993,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		if bootRequiredSchedulingChange {
-			scheduling, err := expandScheduling(d.Get("scheduling"))
+			schedulingBody, err := expandScheduling(d.Get("scheduling"))
 			if err != nil {
 				return fmt.Errorf("Error creating request data to update scheduling: %s", err)
-			}
-
-			schedulingBody, err := tpgresource.ConvertToMap(scheduling)
-			if err != nil {
-				return fmt.Errorf("Error converting scheduling: %s", err)
 			}
 			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setScheduling")
 			if err != nil {
@@ -4013,11 +4036,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 						return fmt.Errorf("Error retrieving instance: %s", err)
 					}
 
-					featuresMap, err := tpgresource.ConvertToMap(expandAdvancedMachineFeatures(d))
-					if err != nil {
-						return fmt.Errorf("Error converting advanced_machine_features: %s", err)
-					}
-					instMap["advancedMachineFeatures"] = featuresMap
+					instMap["advancedMachineFeatures"] = expandAdvancedMachineFeatures(d)
 
 					stripInitializeParams(instMap)
 
