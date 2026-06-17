@@ -198,6 +198,15 @@ properties:
           - 'ENCODING_UNSPECIFIED'
           - 'JSON'
           - 'BINARY'
+      - name: 'firstRevisionId'
+        type: String
+        description: |
+          The minimum (inclusive) revision allowed for validating messages. If empty or not present, allow any revision to be validated against last_revision or any revision created before.
+      - name: 'lastRevisionId'
+        type: String
+        description: |
+          The maximum (inclusive) revision allowed for validating messages. If empty or not present, allow any revision to be validated against first_revision or any revision created after.
+
   - name: 'messageRetentionDuration'
     type: String
     description: |

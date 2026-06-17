@@ -118,4 +118,3 @@ properties:
     type: String
     description: '[Output only] Update time stamp'
     output: true
-min_version: beta

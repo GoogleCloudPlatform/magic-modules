@@ -394,12 +394,17 @@ func attachStandardFunctionality(resource api.Resource) api.Resource {
 	resource.IdFormat = resource.SelfLink
 	resource.ImportFormat = []string{resource.SelfLink}
 
-	example := r.Examples{}
-	example.Name = "name_of_example_file"
-	example.PrimaryResourceId = "example"
-	example.Vars = map[string]string{"resource_name": "test-resource"}
+	sample := r.Sample{}
+	sample.Name = "name_of_sample_file"
+	sample.PrimaryResourceId = "example"
 
-	resource.Examples = []*r.Examples{&example}
+	step := r.Step{}
+	step.Name = "name_of_sample_file"
+	step.Vars = map[string]string{"resource_name": "test-resource"}
+
+	sample.Steps = []*r.Step{&step}
+
+	resource.Samples = []*r.Sample{&sample}
 
 	resourceNameBytes := []byte(resource.Name)
 	// Write the status as an encoded string to flag when a YAML file has been
@@ -630,7 +635,27 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		field.Immutable = true
 	}
 
+	if field.Output {
+		makeOutputOnly(&field)
+	}
+
 	return field
+}
+
+func makeOutputOnly(t *api.Type) {
+	if t == nil {
+		return
+	}
+	t.Output = true
+	for _, p := range t.Properties {
+		makeOutputOnly(p)
+	}
+	if t.ItemType != nil {
+		makeOutputOnly(t.ItemType)
+	}
+	if t.ValueType != nil {
+		makeOutputOnly(t.ValueType)
+	}
 }
 
 func buildProperties(props openapi3.Schemas, required []string, seenRefs map[string]bool, seenPointers map[*openapi3.Schema]bool) []*api.Type {

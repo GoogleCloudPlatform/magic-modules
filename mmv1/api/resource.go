@@ -13,6 +13,7 @@
 package api
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/fs"
 	"log"
@@ -608,10 +609,8 @@ func (r *Resource) Validate() (es []error) {
 		es = append(es, r.NestedQuery.Validate(r.Name)...)
 	}
 
-	for _, example := range r.Examples {
-		if err := example.Validate(r.Name); err != nil {
-			es = append(es, err)
-		}
+	if r.Examples != nil {
+		es = append(es, fmt.Errorf("Examples weren't converted to samples on %s; this should never happen.", r.Name))
 	}
 
 	for _, sample := range r.Samples {
@@ -668,13 +667,14 @@ func (r Resource) ServiceVersion() string {
 
 func extractVersionFromBaseUrl(baseUrl string) string {
 	parts := strings.Split(baseUrl, "/")
-	// starts with v...
-	if parts[0] != "" && parts[0][0] == 'v' {
-		return parts[0]
-	}
-	// starts with /v...
-	if parts[0] == "" && parts[1][0] == 'v' {
-		return parts[1]
+	// Do not check more than 3 parts
+	// This supports just enough for a prefix before the version
+	maxParts := min(3, len(parts))
+	for i := 0; i < maxParts-1; i++ {
+		part := parts[i]
+		if versionRegexp.MatchString(part) {
+			return part
+		}
 	}
 	return ""
 }
@@ -746,9 +746,15 @@ func (r Resource) ListResultDisplayNameKeyStrings() []string {
 	if slices.ContainsFunc(r.RootProperties(), func(p *Type) bool { return p.Name == "display_name" }) {
 		keys = append(keys, "display_name")
 	}
+	if slices.ContainsFunc(r.RootProperties(), func(p *Type) bool { return p.Name == "name" }) {
+		keys = append(keys, "name")
+	}
 	markers := regexp.MustCompile(`\{\{(\w+)\}\}`).FindAllStringSubmatch(r.IdFormat, -1)
 	if len(markers) > 0 {
-		keys = append(keys, markers[len(markers)-1][1])
+		tail := markers[len(markers)-1][1]
+		if !slices.Contains(keys, tail) {
+			keys = append(keys, tail)
+		}
 	}
 	return keys
 }
@@ -1385,6 +1391,21 @@ func (r Resource) TerraformName() string {
 	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
 }
 
+func (r Resource) AutogenVersion() int {
+	if r.AutogenStatus == "" {
+		return 0
+	}
+	decodedBytes, err := base64.StdEncoding.DecodeString(r.AutogenStatus)
+	if err != nil {
+		return 1
+	}
+	decoded := string(decodedBytes)
+	if strings.HasSuffix(decoded, "AutogenV2Agent") {
+		return 2
+	}
+	return 1
+}
+
 func (r Resource) ImportIdFormatsFromResource() []string {
 	return ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)
 }
@@ -1474,35 +1495,6 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 		return i == ""
 	})
 	return uniq
-}
-
-// IgnoreReadPropertiesLegacy is the legacy version of IgnoreReadProperties for Examples
-// IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
-// This is useful for downstream code that needs to iterate over these properties.
-func (r Resource) IgnoreReadPropertiesLegacy(e *resource.Examples) []string {
-	var props []string
-	for _, tp := range r.AllUserProperties() {
-		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
-			props = append(props, google.Underscore(tp.Name))
-		}
-	}
-	props = append(props, e.IgnoreReadExtra...)
-	props = append(props, r.IgnoreReadLabelsFields(r.PropertiesWithExcluded())...)
-	props = append(props, ignoreReadFields(r.AllUserProperties())...)
-
-	slices.Sort(props)
-	return props
-}
-
-// IgnoreReadPropertiesToStringLegacy is the legacy version of IgnoreReadPropertiesToString for Examples
-// IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
-// This is a wrapper around IgnoreReadProperties for backwards compatibility.
-func (r Resource) IgnoreReadPropertiesToStringLegacy(e *resource.Examples) string {
-	props := r.IgnoreReadPropertiesLegacy(e)
-	if len(props) > 0 {
-		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
-	}
-	return ""
 }
 
 // IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
@@ -1796,19 +1788,6 @@ func (r Resource) IamAttributes() []string {
 	return attributes
 }
 
-// Since most resources define a "basic" config as their first example,
-// we can reuse that config to create a resource to test IAM resources with.
-func (r Resource) FirstTestExample() *resource.Examples {
-	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
-		return e.ExcludeTest
-	})
-	examples = google.Reject(examples, func(e *resource.Examples) bool {
-		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
-	})
-
-	return examples[0]
-}
-
 // Use the first valid config to create datasource and IAM resource test
 func (r Resource) FirstTestConfig() TestConfig {
 	for _, sample := range r.Samples {
@@ -1825,22 +1804,6 @@ func (r Resource) FirstTestConfig() TestConfig {
 		}
 	}
 	return TestConfig{}
-}
-
-func (r Resource) ExamplePrimaryResourceId() string {
-	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
-		return e.ExcludeTest
-	})
-	examples = google.Reject(examples, func(e *resource.Examples) bool {
-		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
-	})
-
-	if len(examples) == 0 {
-		examples = google.Reject(r.Examples, func(e *resource.Examples) bool {
-			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
-		})
-	}
-	return examples[0].PrimaryResourceId
 }
 
 func (r Resource) SamplePrimaryResourceId() string {
@@ -1895,42 +1858,6 @@ func (r Resource) IamImportParams() []string {
 	importFormat := r.IamImportFormatTemplate()
 
 	return r.ExtractIdentifiers(importFormat)
-}
-
-func (r Resource) IamImportQualifiersForTest() string {
-	params := r.IamImportParams()
-	var importQualifiers []string
-	for i, param := range params {
-		if param == "project" {
-			if i != len(params)-1 {
-				// If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment
-				if r.IamPolicy.TestProjectName == "" {
-					importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
-				} else {
-					importQualifiers = append(importQualifiers, `context["project_id"]`)
-				}
-			}
-		} else if param == "zone" && r.IamPolicy.SubstituteZoneValue {
-			importQualifiers = append(importQualifiers, "envvar.GetTestZoneFromEnv()")
-		} else if param == "region" || param == "location" {
-			example := r.FirstTestExample()
-			if example.RegionOverride == "" {
-				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
-			} else {
-				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", example.RegionOverride))
-			}
-		} else if param == "universe_domain" {
-			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")
-		} else {
-			break
-		}
-	}
-
-	if len(importQualifiers) == 0 {
-		return ""
-	}
-
-	return strings.Join(importQualifiers, ", ")
 }
 
 func (r Resource) IamImportQualifiersForTestSample() string {
@@ -2155,14 +2082,6 @@ func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
 }
 
-func (r Resource) TestExamples() []*resource.Examples {
-	return google.Reject(google.Reject(r.Examples, func(e *resource.Examples) bool {
-		return e.ExcludeTest
-	}), func(e *resource.Examples) bool {
-		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
-	})
-}
-
 func (r Resource) TestSamples() []*resource.Sample {
 	return google.Reject(google.Reject(r.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest
@@ -2197,23 +2116,23 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 	}
 }
 
-// TestServiceDependencies returns a map of service names to import aliases that are required
+// TestDependencies returns a map of service names to import aliases that are required
 // by this resource's samples.
-func (r Resource) TestServiceDependencies() map[string]string {
+func (r Resource) TestDependencies() map[string]string {
 	deps := map[string]string{}
 	for _, s := range r.TestSamples() {
-		for service, alias := range s.TestServiceDependencies(r.Runtime.ResourcePrefixServiceMap) {
-			if depsAlias, ok := deps[service]; ok && alias != depsAlias {
+		for pkg, alias := range s.TestDependencies(r.Runtime.ResourcePrefixPkgMap) {
+			if depsAlias, ok := deps[pkg]; ok && alias != depsAlias {
 				if (alias == "_" && depsAlias == "") || (alias == "" && depsAlias == "_") {
-					deps[service] = ""
+					deps[pkg] = ""
 					continue
 				}
-				log.Fatalf("Conflicting aliases (%s vs %s) for service dependency %s for resource %s", depsAlias, alias, service, r.ApiName)
+				log.Fatalf("Conflicting aliases (%s vs %s) for pkg dependency %s for resource %s", depsAlias, alias, pkg, r.ApiName)
 			}
-			deps[service] = alias
+			deps[pkg] = alias
 		}
 	}
-	delete(deps, strings.ToLower(r.ProductMetadata.Name))
+	delete(deps, "services/"+strings.ToLower(r.ProductMetadata.Name))
 	return deps
 }
 
@@ -2642,16 +2561,8 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		}
 	}
 
-	if r.Samples != nil && r.Examples != nil {
-		log.Fatalf("Both Samples and Examples block exist in %v", r.Name)
-	}
-
 	if r.Examples != nil {
-		for _, e := range r.Examples {
-			for _, p := range e.IgnoreReadExtra {
-				props = append(props, strings.ReplaceAll(p, ".0.", "."))
-			}
-		}
+		log.Fatalf("Examples block exists in %v", r.Name)
 	}
 
 	if r.Samples != nil {

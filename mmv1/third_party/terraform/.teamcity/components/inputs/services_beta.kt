@@ -91,6 +91,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Biglake",
         "path" to "./google-beta/services/biglake"
     ),
+    "biglakehive" to mapOf(
+        "name" to "biglakehive",
+        "displayName" to "BiglakeHive",
+        "path" to "./google-beta/services/biglakehive"
+    ),
     "biglakeiceberg" to mapOf(
         "name" to "biglakeiceberg",
         "displayName" to "BiglakeIceberg",
@@ -570,6 +575,11 @@ var ServicesListBeta = mapOf(
         "name" to "kms",
         "displayName" to "Kms",
         "path" to "./google-beta/services/kms"
+    ),
+    "licensemanager" to mapOf(
+        "name" to "licensemanager",
+        "displayName" to "License Manager",
+        "path" to "./google/services/licensemanager"
     ),
     "logging" to mapOf(
         "name" to "logging",

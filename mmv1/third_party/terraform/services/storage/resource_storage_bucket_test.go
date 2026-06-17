@@ -2465,7 +2465,7 @@ resource "google_storage_bucket" "bucket" {
     }
     condition {
       matches_storage_class = []
-      age = 10
+      age                   = 10
     }
   }
   lifecycle_rule {
@@ -2536,6 +2536,17 @@ resource "google_storage_bucket" "bucket" {
     }
     condition {
       age = 1
+    }
+  }
+	lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+	   age              = 5
+       size_above_bytes = 100
+	   size_below_bytes = 500
     }
   }
 }
@@ -2627,6 +2638,17 @@ resource "google_storage_bucket" "bucket" {
     condition {
       matches_suffix = ["test"]
       age            = 2
+    }
+  }
+	lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+	  age              = 5
+      size_above_bytes = 200
+	  size_below_bytes = 1000
     }
   }
 }

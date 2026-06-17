@@ -196,6 +196,8 @@ for more information.
     See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison)
     for available features.
 
+* `ignore_node_count_changes` - (Optional) Whether to ignore external changes (drift) to the GKE node count (e.g. from GKE autoscaling). Setting this to `true` skips querying Compute Engine Instance Group Managers (IGMs) to determine the current node count on read, which can save API quota and speed up plans on large clusters. Unlike Terraform core's `lifecycle { ignore_changes = [node_count] }`, this allows configuration-driven scaling updates in your HCL while still ignoring runtime autoscaling drift.
+
 * `initial_node_count` - (Optional) The number of nodes to create in this
 cluster's default node pool. In regional or multi-zonal clusters, this is the
 number of nodes per zone. Must be set if `node_pool` is not set. If you're using
@@ -277,12 +279,14 @@ region are guaranteed to support the same version.
     manages the default node pool, which isn't recommended to be used with
     Terraform. Structure is [documented below](#nested_node_config).
 
-* `node_pool` - (Optional) List of node pools associated with this cluster.
-    See [google_container_node_pool](container_node_pool.html) for schema.
+* `node_pool` - (Optional) List of node pools associated with this cluster. Structure is [documented below](#nested_node_pool). See [google_container_node_pool](container_node_pool.html) for exact schema.
     **Warning:** node pools defined inside a cluster can't be changed (or added/removed) after
     cluster creation without deleting and recreating the entire cluster. Unless you absolutely need the ability
     to say "these are the _only_ node pools associated with this cluster", use the
     [google_container_node_pool](container_node_pool.html) resource instead of this property.
+    * `ignore_node_count_changes` - (Optional) Whether to ignore external changes (drift) to the node count (e.g. from GKE autoscaling). Setting this to `true` skips querying Compute Engine Instance Group Managers (IGMs) to determine the current node count on read, which can save API quota and speed up plans on large clusters. Unlike Terraform core's `lifecycle { ignore_changes = [node_count] }`, this allows configuration-driven scaling updates in your HCL while still ignoring runtime autoscaling drift.
+
+* `skip_node_pool_refresh` - (Optional) Whether to skip refreshing the GKE cluster's inline node pool list during read operations. Setting this to `true` prevents the provider from querying GKE API for node pools, resolving long plan times on clusters with a large number of node pools. **Warning:** When enabled, the cluster's `node_pool` attribute in the Terraform state will remain empty (`[]`), even if node pools exist externally. This flag cannot be set to `true` if you define inline `node_pool` blocks in your configuration; doing so will result in a validation error during plan.
 
 * `node_pool_auto_config` - (Optional) Node pool configs that apply to auto-provisioned node pools in
     [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters and
@@ -411,6 +415,8 @@ subnetwork in which the cluster's instances are launched.
 * `datapath_provider` - (Optional)
     The desired datapath provider for this cluster. This is set to `LEGACY_DATAPATH` by default, which uses the IPTables-based kube-proxy implementation. Set to `ADVANCED_DATAPATH` to enable Dataplane v2.
 
+* `dataplane_optimization_mode` - (Optional) The dataplane optimization mode for the cluster. Possible values: `SCALE_OPTIMIZED`.
+
 * `in_transit_encryption_config` - (Optional)
     Defines the config of in-transit encryption. Valid values are `IN_TRANSIT_ENCRYPTION_DISABLED` and `IN_TRANSIT_ENCRYPTION_INTER_NODE_TRANSPARENT`.
 
@@ -443,6 +449,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 
 * `anonymous_authentication_config` - (Optional)
   Configuration for [anonymous authentication restrictions](https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict-anon-access). Structure is [documented below](#anonymous_authentication_config).
+
+* `node_creation_config` - (Optional)
+  Configuration for [node creation config](https://clouddocs.devsite.corp.google.com/kubernetes-engine/security/control-plane-node-creation). Structure is [documented below](#node_creation_config).
 
 * `rbac_binding_config` - (Optional)
   RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created. Structure is [documented below](#nested_rbac_binding_config).
@@ -559,6 +568,11 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    * `disable_multi_nic` When set to true, this disables multi-NIC support for the Lustre CSI driver. By default, GKE enables multi-NIC support, which allows the Lustre CSI driver to automatically detect and configure all suitable network interfaces on a node to maximize I/O performance for demanding workloads.
 
 * `pod_snapshot_config` - (Optional) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
+
+* `slurm_operator_config` - (Optional) The status of the Slurm Operator addon,
+    which creates slurm related CRDs and KCP pods to manage them.
+    Defaults to disabled for Standard clusters; set `enabled = true` to enable.
+    It can not be enabled for Autopilot clusters.
 
 This example `addons_config` disables two addons:
 
@@ -717,7 +731,7 @@ This block also contains several computed attributes, documented below.
 <a name="nested_logging_config"></a>The `logging_config` block supports:
 
 *  `enable_components` - (Required) The GKE components exposing logs. Supported values include:
-`SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, `SCHEDULER`, and `WORKLOADS`.
+`SYSTEM_COMPONENTS`, `KCP_VPA`, `APISERVER`, `CONTROLLER_MANAGER`, `SCHEDULER`, and `WORKLOADS`.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
@@ -1107,6 +1121,8 @@ gvnic {
 
 * `storage_pools` - (Optional) The list of Storage Pools where boot disks are provisioned.
 
+* `taint_config` - (Optional) Taint configuration for the node pool. Structure is [documented below](#nested_taint_config).
+
 * `tags` - (Optional) The list of instance tags applied to all nodes. Tags are used to identify
     valid sources or targets for network firewalls.
 
@@ -1148,6 +1164,8 @@ windows_node_config {
 ```
 
 * `containerd_config` - (Optional) Parameters to customize containerd runtime. Structure is [documented below](#nested_containerd_config).
+
+* `node_image_config` - (Optional) The node image configuration to use for this node pool. Structure is [documented below](#nested_node_image_config).
 
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
 
@@ -1199,6 +1217,12 @@ sole_tenant_config {
 * `operator` (Required) - Specifies affinity or anti-affinity. Accepted values are `"IN"` or `"NOT_IN"`
 
 * `values` (Required) - List of node affinity label values as strings.
+
+<a name="nested_node_image_config"></a>The `node_image_config` block supports:
+
+* `image` (Optional) - The name of the image to use for this node.
+
+* `image_project` (Optional) - The project containing the image to use for this node.
 
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 
@@ -1284,6 +1308,18 @@ workload_identity_config {
   workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
 }
 ```
+
+<a name="nested_node_pool"></a>The `node_pool` block supports:
+
+* `node_config` - (Optional) The node configuration of the pool. Structure is [documented below](#nested_node_pool_node_config).
+
+<a name="nested_node_pool_node_config"></a>The `node_config` block supports:
+
+* `taint_config` - (Optional) Taint configuration for the node pool. Structure is [documented below](#nested_node_pool_node_config_taint_config).
+
+<a name="nested_node_pool_node_config_taint_config"></a>The `taint_config` block supports:
+
+* `architecture_taint_behavior` - (Optional) Specifies the behavior for applying architecture taints to node pool nodes. Valid values are `ARCHITECTURE_TAINT_BEHAVIOR_UNSPECIFIED`, `NONE`, or `ARM`.
 
 <a name="nested_node_pool_auto_config"></a>The `node_pool_auto_config` block supports:
 
@@ -1615,6 +1651,8 @@ those in the Guaranteed QoS class, by influencing NUMA affinity. Structure is [d
 
 * `eviction_minimum_reclaim` - (Optional) Defines a map of signal names to percentage that defines minimum reclaims. It describes the minimum amount of a given resource the kubelet will reclaim when performing a pod eviction. Structure is [documented below](#nested_eviction_minimum_reclaim).
 
+* `crash_loop_back_off` - (Optional) Contains configuration options to modify node-level parameters for container restart behavior. Structure is [documented below](#nested_crash_loop_back_off).
+
 <a name="nested_eviction_soft"></a>The `eviction_soft` block supports:
 
 * `memory_available` - (Optional) Defines quantity of soft eviction threshold for memory.available. The value must be a quantity, such as `"100Mi"`. The value must be greater than or equal to the GKE default hard eviction threshold of `"100Mi"` and less than 50% of machine memory.
@@ -1654,6 +1692,10 @@ those in the Guaranteed QoS class, by influencing NUMA affinity. Structure is [d
 * `policy` - (Optional) The [Memory
   Manager](https://kubernetes.io/docs/tasks/administer-cluster/memory-manager/)
   policy can be set to None (default) or Static. This policy dictates how memory alignment is handled on the node.  If unset (or set to the empty string `""`), the API will treat the field as if set to "None".  
+
+<a name="nested_crash_loop_back_off"></a>The `crash_loop_back_off` block supports:
+
+* `max_container_restart_period` - (Optional) The maximum duration the backoff delay can accrue to for container restarts. If not set, defaults to the internal crashloopbackoff maximum. The value must be a positive duration string no more than `"5m"` and no less than `"1s"`, such as `"30s"`, `"1m30s"`, `"2.5m"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". See [Configurable container restart delay](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#configurable-container-restart-delay) for more details.
 
 <a name="nested_linux_node_config"></a>The `linux_node_config` block supports:
 
@@ -1865,6 +1907,10 @@ registry_hosts {
 
 * `mode` - (Optional) Sets or removes authentication restrictions. Available options include `LIMITED` and `ENABLED`.
 
+<a name="node_creation_config"></a>The `node_creation_config` block supports:
+
+* `node_creation_mode` - (Required) Sets the node creation mode. Available options include `VIA_KUBELET` and `VIA_CONTROL_PLANE`.
+
 <a name="nested_rbac_binding_config"></a>The `rbac_binding_config` block supports:
 
 * `enable_insecure_binding_system_unauthenticated` - (Optional) Setting this to true will allow any ClusterRoleBinding and RoleBinding with subjects system:anonymous or system:unauthenticated.
@@ -1877,6 +1923,13 @@ registry_hosts {
 * `no_unsafe_webhooks` - (Optional) Whether to block unsafe webhooks in the cluster.
 * `no_standard_node_pools` - (Optional) Whether to block non autopilot managed node pools in the cluster.
 
+<a name="nested_taint_config"></a>The `taint_config` block supports:
+
+* `architecture_taint_behavior` - (Optional) The taint behavior to be applied to the nodes based on the architecture.
+    Accepted values are:
+    * `ARCHITECTURE_TAINT_BEHAVIOR_UNSPECIFIED`: Default value. This should not be used.
+    * `NONE`: Do not apply any taints based on architecture.
+    * `ARM`: Apply ARM taint to the nodes.
 
 ## Attributes Reference
 

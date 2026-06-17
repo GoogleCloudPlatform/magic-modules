@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/ces"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
 )
 
@@ -273,7 +274,7 @@ resource "google_ces_app" "ces_app_basic" {
   tool_execution_mode = "PARALLEL"
 
   language_settings {
-    default_language_code    = "en-ES"
+    default_language_code    = "en-US"
     supported_language_codes = ["en-US", "fr-FR", "es-ES"]
     enable_multilingual_support = false
     fallback_action          = "escalate"

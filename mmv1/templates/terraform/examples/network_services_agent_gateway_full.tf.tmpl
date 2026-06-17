@@ -1,3 +1,5 @@
+data "google_project" "project" {}
+
 resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "name"}}"
   location = "us-central1"
@@ -18,7 +20,55 @@ resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
 
   network_config {
     egress {
-      network_attachment = "projects/{{index $.TestEnvVars "project"}}/regions/us-central1/networkAttachments/my-network-attachment"
+      network_attachment = google_compute_network_attachment.default.id
+    }
+
+    dns_peering_config {
+      domains        = [google_dns_managed_zone.default.dns_name]
+      target_project = data.google_project.project.project_id
+      target_network = google_compute_network.default.id
+    }
+  }
+
+  depends_on = [google_project_service.agent_registry]
+}
+
+resource "google_project_service" "agent_registry" {
+  service            = "agentregistry.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_compute_network" "default" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "{{index $.Vars "subnetwork_name"}}"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+  ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_compute_network_attachment" "default" {
+  name                  = "{{index $.Vars "network_attachment_name"}}"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_MANUAL"
+
+  subnetworks = [
+    google_compute_subnetwork.default.id,
+  ]
+}
+
+resource "google_dns_managed_zone" "default" {
+  name        = "{{index $.Vars "dns_zone_name"}}"
+  dns_name    = "example.com."
+  description = "Private zone used by AgentGateway DNS peering"
+  visibility  = "private"
+
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.default.id
     }
   }
 }
