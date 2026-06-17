@@ -152,7 +152,11 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	err = d.Set("scheduling", flattenScheduling(instance.Scheduling))
+	schedulingMap, err := tpgresource.ConvertToMap(instance.Scheduling)
+	if err != nil {
+		return fmt.Errorf("Error converting scheduling: %s", err)
+	}
+	err = d.Set("scheduling", flattenScheduling(schedulingMap))
 	if err != nil {
 		return err
 	}
