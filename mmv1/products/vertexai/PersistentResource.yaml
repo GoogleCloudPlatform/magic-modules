@@ -65,7 +65,7 @@ properties:
     url_param_only: true
     required: true
     immutable: true
-  - name: display_name
+  - name: displayName
     type: String
     description: Optional. The display name of the PersistentResource. The name can be up to 128 characters long and can consist of any UTF-8 characters.
     default_from_api: true
