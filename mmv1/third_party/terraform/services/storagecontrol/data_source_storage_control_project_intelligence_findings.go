@@ -50,7 +50,6 @@ func DataSourceGoogleStorageControlProjectIntelligenceFindings() *schema.Resourc
 	}
 }
 
-
 func dataSourceGoogleStorageControlProjectIntelligenceFindingsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)

@@ -147,7 +147,6 @@ func flattenStorageControlIntelligenceFindingRevisionsList(v interface{}) []map[
 	return revisions
 }
 
-
 func init() {
 	registry.Schema{
 		Name:        "google_storage_control_project_intelligence_finding_revisions",
@@ -156,4 +155,3 @@ func init() {
 		Schema:      DataSourceGoogleStorageControlProjectIntelligenceFindingRevisions(),
 	}.Register()
 }
-
