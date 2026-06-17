@@ -21,20 +21,15 @@ resource "google_network_security_firewall_endpoint" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
   name     = "{{index $.ResourceIdVars "endpoint_name"}}"
-  project  = "{{index $.TestEnvVars "project"}}"
-  location = "us-central1"
+  location = "us-central1-a"
 
   parent = "organizations/{{index $.TestEnvVars "org_id"}}"
 
   billing_project_id = "{{index $.TestEnvVars "project"}}"
 
-  associated_networks = [
-    google_compute_network.default.id
-  ]
-
   wildfire_settings {
     enabled = true
-    wildfire_region = "us"
+    wildfire_region = "UNITED_STATES"
 
     wildfire_realtime_lookup_duration = "3s"
     wildfire_realtime_lookup_timeout_action = "{{index $.Vars "lookup_timeout_action"}}"
