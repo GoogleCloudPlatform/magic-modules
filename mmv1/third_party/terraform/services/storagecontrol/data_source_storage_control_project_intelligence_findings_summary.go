@@ -216,29 +216,6 @@ func flattenStorageControlSummaryDetails(v interface{}) []map[string]interface{}
 	return details
 }
 
-func flattenStorageControlFloat(v interface{}) float64 {
-	if v == nil {
-		return 0.0
-	}
-	if f, ok := v.(float64); ok {
-		return f
-	}
-	return 0.0
-}
-
-func flattenStorageControlInt(v interface{}) int {
-	if v == nil {
-		return 0
-	}
-	if i, ok := v.(int); ok {
-		return i
-	}
-	if f, ok := v.(float64); ok {
-		return int(f)
-	}
-	return 0
-}
-
 func init() {
 	registry.Schema{
 		Name:        "google_storage_control_project_intelligence_findings_summary",
