@@ -9,6 +9,8 @@ import (
 	{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	{{- end}}
+	"github.com/hashicorp/terraform-plugin-framework/list"
+	
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
