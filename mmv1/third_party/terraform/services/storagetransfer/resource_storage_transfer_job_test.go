@@ -29,6 +29,9 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_omitNotificationConfig(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
@@ -330,6 +333,9 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_basic(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
@@ -383,6 +389,9 @@ func TestAccStorageTransferJob_eventStream(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_basic(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
@@ -432,6 +441,9 @@ func TestAccStorageTransferJob_objectConditions(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_basic(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
@@ -499,6 +511,9 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_basic(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
@@ -813,9 +828,16 @@ resource "google_storage_transfer_job" "transfer_job" {
   }
 
   depends_on = [
+    time_sleep.wait_30_seconds,
+  ]
+}
+
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [
     google_storage_bucket_iam_member.data_source,
     google_storage_bucket_iam_member.data_sink,
   ]
+  create_duration = "30s"
 }
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
 }
@@ -983,9 +1005,16 @@ resource "google_storage_transfer_job" "transfer_job" {
   }
 
   depends_on = [
+    time_sleep.wait_30_seconds,
+  ]
+}
+
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [
     google_storage_bucket_iam_member.data_source,
     google_storage_bucket_iam_member.data_sink,
   ]
+  create_duration = "30s"
 }
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
 }
@@ -1090,10 +1119,17 @@ resource "google_storage_transfer_job" "transfer_job" {
   }
 
   depends_on = [
+    time_sleep.wait_30_seconds,
+  ]
+}
+
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [
     google_storage_bucket_iam_member.data_source,
     google_storage_bucket_iam_member.data_sink,
     google_pubsub_topic_iam_member.notification_config,
   ]
+  create_duration = "30s"
 }
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, pubsubTopicName, transferJobDescription, project)
 }

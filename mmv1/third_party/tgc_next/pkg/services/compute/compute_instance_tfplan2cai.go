@@ -25,13 +25,7 @@ func ComputeInstanceTfplan2caiConverter() cai.Tfplan2caiConverter {
 
 func GetComputeInstanceAndDisksCaiObjects(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
 	if instanceAsset, err := GetComputeInstanceCaiObject(d, config); err == nil {
-		assets := []caiasset.Asset{instanceAsset}
-		if diskAsset, err := GetComputeInstanceDiskCaiObject(d, config); err == nil {
-			assets = append(assets, diskAsset)
-			return assets, nil
-		} else {
-			return []caiasset.Asset{}, err
-		}
+		return []caiasset.Asset{instanceAsset}, nil
 	} else {
 		return []caiasset.Asset{}, err
 	}
@@ -174,6 +168,15 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
+	tagsMap := resourceInstanceTags(d)
+	var tags *compute.Tags
+	if tagsMap != nil {
+		tags = &compute.Tags{
+			Items:       tagsMap["items"].([]string),
+			Fingerprint: tagsMap["fingerprint"].(string),
+		}
+	}
+
 	// Create the instance information
 	instance := &compute.Instance{
 		CanIpForward:             d.Get("can_ip_forward").(bool),
@@ -185,7 +188,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Zone:                     d.Get("zone").(string),
 		NetworkInterfaces:        networkInterfaces,
 		NetworkPerformanceConfig: networkPerformanceConfig,
-		Tags:                     resourceInstanceTags(d),
+		Tags:                     tags,
 		Params:                   params,
 		Labels:                   tpgresource.ExpandLabels(d),
 		ServiceAccounts:          expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
@@ -195,7 +198,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		DeletionProtection:       d.Get("deletion_protection").(bool),
 		Hostname:                 d.Get("hostname").(string),
 		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
-		DisplayDevice:            expandDisplayDevice(d),
 		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:      reservationAffinity,
 		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
@@ -216,6 +218,13 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
+	if dd := expandDisplayDevice(d); dd != nil {
+		enabled, _ := dd["enableDisplay"].(bool)
+		instance.DisplayDevice = &compute.DisplayDevice{
+			EnableDisplay:   enabled,
+			ForceSendFields: []string{"EnableDisplay"},
+		}
+	}
 	return instance, nil
 }
 
@@ -334,8 +343,9 @@ func expandParams(d tpgresource.TerraformResourceData) (*compute.InstanceParams,
 
 func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.Config, project string) (*compute.AttachedDisk, error) {
 	disk := &compute.AttachedDisk{
-		AutoDelete: d.Get("boot_disk.0.auto_delete").(bool),
-		Boot:       true,
+		AutoDelete:      d.Get("boot_disk.0.auto_delete").(bool),
+		Boot:            true,
+		ForceSendFields: []string{"AutoDelete"},
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.device_name"); ok {
@@ -454,89 +464,6 @@ func expandStoragePool(v interface{}, d tpgresource.TerraformResourceData, confi
 	return nil, nil
 }
 
-func GetComputeInstanceDiskCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (caiasset.Asset, error) {
-	name, err := cai.AssetName(d, config, "//compute.googleapis.com/projects/{{project}}/zones/{{zone}}/disks/{{name}}")
-	if err != nil {
-		return caiasset.Asset{}, err
-	}
-	if data, err := GetComputeDiskData(d, config); err == nil {
-		location, _ := tpgresource.GetLocation(d, config)
-		return caiasset.Asset{
-			Name: name,
-			Type: ComputeDiskAssetType,
-			Resource: &caiasset.AssetResource{
-				Version:              "v1",
-				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
-				DiscoveryName:        "Disk",
-				Data:                 data,
-				Location:             location,
-			},
-		}, nil
-	} else {
-		return caiasset.Asset{}, err
-	}
-}
-
-func GetComputeDiskData(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	diskApiObj, err := expandBootDisk(d, config, project)
-	if err != nil {
-		return nil, err
-	}
-
-	diskDetails, err := cai.JsonMap(diskApiObj)
-	if err != nil {
-		return nil, err
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.type"); ok {
-		diskTypeName := v.(string)
-		diskType, err := readDiskType(config, d, diskTypeName)
-		if err != nil {
-			return nil, fmt.Errorf("Error loading disk type '%s': %s", diskTypeName, err)
-		}
-		diskDetails["DiskType"] = diskType.RelativeLink()
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.image"); ok {
-		diskDetails["SourceImage"] = v.(string)
-	}
-
-	if _, ok := d.GetOk("boot_disk.0.initialize_params.0.labels"); ok {
-		diskDetails["Labels"] = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.labels")
-	}
-
-	if _, ok := d.GetOk("boot_disk.0.initialize_params.0.resource_policies"); ok {
-		diskDetails["ResourcePolicies"] = tpgresource.ConvertStringArr(d.Get("boot_disk.0.initialize_params.0.resource_policies").([]interface{}))
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.provisioned_iops"); ok {
-		diskDetails["ProvisionedIops"] = int64(v.(int))
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.provisioned_throughput"); ok {
-		diskDetails["ProvisionedThroughput"] = int64(v.(int))
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.enable_confidential_compute"); ok {
-		diskDetails["EnableConfidentialCompute"] = v.(bool)
-	}
-
-	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.storage_pool"); ok {
-		storagePoolUrl, err := expandStoragePool(v, d, config)
-		if err != nil {
-			return nil, fmt.Errorf("Error resolving storage pool name '%s': '%s'", v.(string), err)
-		}
-		diskDetails["StoragePool"] = storagePoolUrl.(string)
-	}
-
-	return diskDetails, nil
-}
-
 func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.NetworkInterface, error) {
 	configs := d.Get("network_interface").([]interface{})
 	ifaces := make([]*compute.NetworkInterface, len(configs))
@@ -546,18 +473,35 @@ func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *tra
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
 
+		accessConfigs, err := expandAccessConfigsTyped(data["access_config"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		aliasIpRanges, err := expandAliasIpRangesTyped(data["alias_ip_range"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		ipv6AccessConfigs, err := expandIpv6AccessConfigsTyped(data["ipv6_access_config"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:                data["network_ip"].(string),
 			Network:                  network,
 			Subnetwork:               subnetwork,
-			AccessConfigs:            expandAccessConfigs(data["access_config"].([]interface{})),
-			AliasIpRanges:            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
+			AccessConfigs:            accessConfigs,
+			AliasIpRanges:            aliasIpRanges,
 			NicType:                  data["nic_type"].(string),
 			StackType:                data["stack_type"].(string),
 			QueueCount:               int64(data["queue_count"].(int)),
-			Ipv6AccessConfigs:        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
+			Ipv6AccessConfigs:        ipv6AccessConfigs,
 			Ipv6Address:              data["ipv6_address"].(string),
 			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
+			NetworkAttachment:        data["network_attachment"].(string),
+			ParentNicName:            data["parent_nic_name"].(string),
+			IgmpQuery:                data["igmp_query"].(string),
+			Vlan:                     int64(data["vlan"].(int)),
 		}
 	}
 	return ifaces, nil
@@ -653,7 +597,7 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 	}
 
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
-		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
+		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeoutTgc(v)
 		if err != nil {
 			return nil, err
 		}
@@ -691,4 +635,24 @@ func expandReservationAffinityTgc(d tpgresource.TerraformResourceData) (*compute
 	}
 
 	return affinity, nil
+}
+
+func expandComputeLocalSsdRecoveryTimeoutTgc(v interface{}) (*compute.Duration, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	duration := &compute.Duration{}
+
+	if val, ok := original["nanos"]; ok && val != nil {
+		duration.Nanos = int64(val.(int))
+		duration.ForceSendFields = append(duration.ForceSendFields, "Nanos")
+	}
+
+	if val, ok := original["seconds"]; ok && val != nil {
+		duration.Seconds = int64(val.(int))
+		duration.ForceSendFields = append(duration.ForceSendFields, "Seconds")
+	}
+	return duration, nil
 }

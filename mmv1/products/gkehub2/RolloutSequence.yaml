@@ -28,6 +28,8 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/global/rolloutSequences/{{rollout_sequence_id}}'
+custom_code:
+  constants: 'templates/terraform/constants/gke_hub_rollout_sequence.go.tmpl'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -129,7 +131,10 @@ properties:
         - name: 'soakDuration'
           type: String
           description: |
-            Soak time after upgrading all the clusters in the stage, specified in seconds.
+            Soak time after upgrading all the clusters in the stage.
+            Has to be specified in seconds, minutes, hours or days.
+          custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
+          diff_suppress_func: 'rolloutSequenceDurationDiffSuppress'
   - name: 'autoUpgradeConfig'
     type: NestedObject
     description: |
@@ -157,3 +162,23 @@ properties:
               Current valid values are `CONTROL_PLANE_MINOR`, `CONTROL_PLANE_PATCH`, `NODE_MINOR`, and `NODE_PATCH`.
             item_type:
               type: String
+samples:
+  - name: 'gke_hub_rollout_sequence_basic'
+    primary_resource_id: 'rollout_sequence'
+    min_version: beta
+    steps:
+      - name: 'gke_hub_rollout_sequence_create'
+        resource_id_vars:
+          rollout_sequence_id: 'rs-basic'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        ignore_read_extra:
+          - 'labels'
+          - 'rollout_sequence_id'
+        include_step_doc: true
+      - name: 'gke_hub_rollout_sequence_update'
+        resource_id_vars:
+          rollout_sequence_id: 'rs-basic'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        include_step_doc: true

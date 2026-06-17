@@ -67,6 +67,10 @@ var (
 					startDate: newDate(2025, 7, 1),
 					endDate:   newDate(2025, 7, 17),
 				},
+				{
+					startDate: newDate(2026, 6, 11),
+					endDate:   newDate(2026, 6, 14),
+				},
 			},
 		},
 		"c2thorn": {
@@ -152,7 +156,7 @@ var (
 			vacations: []Vacation{
 				{
 					startDate: newDate(2026, 4, 4),
-					endDate:   newDate(2026, 6, 13),
+					endDate:   newDate(2026, 7, 13),
 				},
 			},
 		},
