@@ -20,6 +20,7 @@ resource "google_vertex_ai_persistent_resource" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "name"}}"
   location = "us-central1"
   display_name = "example-resource"
+  
   labels = {
     env = "test"
   }
