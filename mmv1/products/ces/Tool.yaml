@@ -1536,6 +1536,26 @@ properties:
         description: |-
           The name of the system tool.
         output: true
+  - name: timeout
+    type: String
+    description: |-
+      The timeout for the tool execution. If not set, the default timeout is 30
+      seconds for SYNCHRONOUS tools and 60 seconds for ASYNCHRONOUS tools.
+  - name: toolFakeConfig
+    type: NestedObject
+    description: Configuration for tool behavior in fake mode.
+    properties:
+      - name: enableFakeMode
+        type: Boolean
+        description: Whether the tool is using fake mode.
+      - name: codeBlock
+        type: NestedObject
+        description: Code block which will be executed instead of a real tool call.
+        properties:
+          - name: pythonCode
+            type: String
+            required: true
+            description: Python code which will be invoked in tool fake mode.
   - name: widgetTool
     type: NestedObject
     description: Represents a widget tool that the agent can invoke.
