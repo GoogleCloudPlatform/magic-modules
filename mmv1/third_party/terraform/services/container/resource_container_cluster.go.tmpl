@@ -102,6 +102,7 @@ var (
 		"addons_config.0.lustre_csi_driver_config",
 		"addons_config.0.slice_controller_config",
 		"addons_config.0.pod_snapshot_config",
+		"addons_config.0.slurm_operator_config",
 	{{- if ne $.TargetVersionName "ga" }}
 		"addons_config.0.agent_sandbox_config",
 		"addons_config.0.istio_config",
@@ -680,6 +681,22 @@ func ResourceContainerCluster() *schema.Resource {
 												},
 											},
 										},
+									},
+								},
+							},
+						},
+						"slurm_operator_config": {
+							Type:          schema.TypeList,
+							Optional:      true,
+							Computed:      true,
+							AtLeastOneOf:  addonsConfigKeys,
+							MaxItems:      1,
+							Description:   `The status of the Slurm Operator addon, which creates slurm related CRDs and KCP pods to manage them. Defaults to disabled for Standard clusters; set enabled = true to enable. It can not be enabled for Autopilot clusters.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
 									},
 								},
 							},
@@ -2484,6 +2501,12 @@ func ResourceContainerCluster() *schema.Resource {
 				ValidateFunc:     validation.StringInSlice([]string{"DATAPATH_PROVIDER_UNSPECIFIED", "LEGACY_DATAPATH", "ADVANCED_DATAPATH"}, false),
 				DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("DATAPATH_PROVIDER_UNSPECIFIED"),
 			},
+			"dataplane_optimization_mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `The desired dataplane optimization mode.`,
+			},
 			"enable_cilium_clusterwide_network_policy": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -2830,6 +2853,26 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"node_creation_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `NodeCreationConfig defines the settings of node creation mode.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"node_creation_mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"VIA_KUBELET", "VIA_CONTROL_PLANE"}, false),
+							Description:  `NodeCreationMode defines the settings of node creation mode.
+ Accepted values are:
+* VIA_KUBELET: Kubelet registers itself.
+* VIA_CONTROL_PLANE: gcp-controller-manager automatically creates the node object after CSR approval.`,
+						},
+					},
+				},
+			},
 			"rbac_binding_config": {
 			  Type:        schema.TypeList,
 			  Optional:    true,
@@ -3067,6 +3110,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			EnableIntraNodeVisibility:            d.Get("enable_intranode_visibility").(bool),
 			DefaultSnatStatus:                    expandDefaultSnatStatus(d.Get("default_snat_status")),
 			DatapathProvider:                     d.Get("datapath_provider").(string),
+			DataplaneV2Config:                    expandDataplaneV2Config(d.Get("dataplane_optimization_mode")),
 			EnableCiliumClusterwideNetworkPolicy: d.Get("enable_cilium_clusterwide_network_policy").(bool),
 			PrivateIpv6GoogleAccess:              d.Get("private_ipv6_google_access").(string),
 			InTransitEncryptionConfig:            d.Get("in_transit_encryption_config").(string),
@@ -3241,6 +3285,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
   if v, ok := d.GetOk("anonymous_authentication_config"); ok {
       cluster.AnonymousAuthenticationConfig = expandAnonymousAuthenticationConfig(v)
+  }
+
+  if v, ok := d.GetOk("node_creation_config"); ok {
+      cluster.NodeCreationConfig = expandNodeCreationConfig(v)
   }
 
   if v, ok := d.GetOk("rbac_binding_config"); ok {
@@ -3679,6 +3727,11 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("datapath_provider", cluster.NetworkConfig.DatapathProvider); err != nil {
 		return fmt.Errorf("Error setting datapath_provider: %s", err)
 	}
+	if cluster.NetworkConfig.DataplaneV2Config != nil {
+		if err := d.Set("dataplane_optimization_mode", cluster.NetworkConfig.DataplaneV2Config.ScalabilityMode); err != nil {
+			return fmt.Errorf("Error setting dataplane_optimization_mode: %s", err)
+		}
+	}
 	if err := d.Set("enable_cilium_clusterwide_network_policy", cluster.NetworkConfig.EnableCiliumClusterwideNetworkPolicy); err != nil {
 		return fmt.Errorf("Error setting enable_cilium_clusterwide_network_policy: %s", err)
 	}
@@ -3867,6 +3920,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("anonymous_authentication_config", flattenAnonymousAuthenticationConfig(cluster.AnonymousAuthenticationConfig)); err != nil {
+		return err
+	}
+
+	if err := d.Set("node_creation_config", flattenNodeCreationConfig(cluster.NodeCreationConfig)); err != nil {
 		return err
 	}
 
@@ -5557,6 +5614,21 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
+	if d.HasChange("node_creation_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredNodeCreationConfig: expandNodeCreationConfig(
+					d.Get("node_creation_config"),
+				),
+			},
+		}
+		updateF := updateFunc(req, "updating node creation config")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+	}
+
   if d.HasChange("rbac_binding_config") {
     req := &container.UpdateClusterRequest{
       Update: &container.ClusterUpdate{
@@ -5953,6 +6025,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+	
+	if v, ok := config["slurm_operator_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.SlurmOperatorConfig = &container.SlurmOperatorConfig{
 			Enabled:         addon["enabled"].(bool),
 			ForceSendFields: []string{"Enabled"},
 		}
@@ -6553,6 +6633,15 @@ func flattenAnonymousAuthenticationConfig(aac *container.AnonymousAuthentication
 	return []map[string]interface{}{result}
 }
 
+func flattenNodeCreationConfig(ncc *container.NodeCreationConfig) []map[string]interface{} {
+	if ncc == nil {
+		return nil
+	}
+	result := make(map[string]interface{})
+	result["node_creation_mode"] = ncc.NodeCreationMode
+	return []map[string]interface{}{result}
+}
+
 func flattenAdditionalPodRangesConfig(ipAllocationPolicy *container.IPAllocationPolicy) []map[string]interface{} {
 	if ipAllocationPolicy == nil {
 		return nil
@@ -6692,6 +6781,23 @@ func expandAnonymousAuthenticationConfig(configured interface{}) *container.Anon
 	if v, ok := anonAuthConfig["mode"]; ok {
 		if mode, ok := v.(string); ok && mode != "" {
 			result.Mode = mode
+		}
+	}
+	return &result
+}
+
+func expandNodeCreationConfig(configured interface{}) *container.NodeCreationConfig {
+	l, ok := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil || !ok {
+		return nil
+	}
+
+	nodeCreationConfig := l[0].(map[string]interface{})
+	result := container.NodeCreationConfig{}
+
+	if v, ok := nodeCreationConfig["node_creation_mode"]; ok {
+		if mode, ok := v.(string); ok && mode != "" {
+			result.NodeCreationMode = mode
 		}
 	}
 	return &result
@@ -6970,6 +7076,19 @@ func expandDefaultSnatStatus(configured interface{}) *container.DefaultSnatStatu
 		ForceSendFields: []string{"Disabled"},
 	}
 
+}
+
+func expandDataplaneV2Config(v interface{}) *container.DataplaneV2Config {
+	if v == nil {
+		return nil
+	}
+	s := v.(string)
+	if s == "" {
+		return nil
+	}
+	return &container.DataplaneV2Config{
+		ScalabilityMode: s,
+	}
 }
 
 func expandWorkloadIdentityConfig(configured interface{}) *container.WorkloadIdentityConfig {
@@ -7671,6 +7790,14 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		result["pod_snapshot_config"] = []map[string]interface{}{
 			{
 				"enabled": c.PodSnapshotConfig.Enabled,
+			},
+		}
+	}
+
+	if c.SlurmOperatorConfig != nil {
+		result["slurm_operator_config"] = []map[string]interface{}{
+			{
+				"enabled": c.SlurmOperatorConfig.Enabled,
 			},
 		}
 	}
