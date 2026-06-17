@@ -152,6 +152,27 @@ func GetFolderIamPolicyByFolderName(folderName, userAgent string, config *transp
 
 	return v1Policy, nil
 }
+
+// NewFolderIamMemberListResource returns the list implementation for google_folder_iam_member
+func NewFolderIamMemberListResource() list.ListResource {
+	return tpgiamresource.NewIamMemberListResource(
+		"google_folder_iam_member",
+		tpgiamresource.ResourceIamMember(
+			IamFolderSchema,
+			NewFolderIamUpdater,
+			FolderIdParseFunc,
+			tpgiamresource.IamWithBatching,
+			tpgiamresource.IamWithParentResourceIdentity(FolderIamParentResourceIdentityParser),
+		),
+		NewFolderIamUpdater,
+		tpgiamresource.IamMemberListCallConfig{
+			ParentResourceField: "folder",
+			EnableRoleFilter:   true,
+  			EnableMemberFilter: true,
+		},
+	)
+}
+
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 
 func init() {
