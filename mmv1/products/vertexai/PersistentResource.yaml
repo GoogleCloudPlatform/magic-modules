@@ -45,12 +45,12 @@ examples:
   - name: vertex_ai_persistent_resource_basic
     primary_resource_id: persistent_resource
     vars:
-      name: persistent_resource
+      name: persistent-resource
   - name: vertex_ai_persistent_resource_full
     primary_resource_id: persistent_resource
     exclude_test: true
     vars:
-      name: persistent_resource
+      name: persistent-resource
 parameters:
   - name: location
     type: String
@@ -65,9 +65,10 @@ properties:
     url_param_only: true
     required: true
     immutable: true
-  - name: displayName
+  - name: display_name
     type: String
     description: Optional. The display name of the PersistentResource. The name can be up to 128 characters long and can consist of any UTF-8 characters.
+    default_from_api: true
   - name: resourcePools
     type: Array
     description: Required. The spec of the pools of different resources.
@@ -80,6 +81,7 @@ properties:
           type: String
           description: Immutable. The unique ID in a PersistentResource for referring to this resource pool. User can specify it if necessary. Otherwise, it's generated automatically.
           immutable: true
+          default_from_api: true
         - name: machineSpec
           type: NestedObject
           description: Required. Immutable. The specification of a single machine.
