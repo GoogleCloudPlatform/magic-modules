@@ -9,6 +9,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -151,8 +152,12 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	tagsMap := resourceInstanceTags(d)
 	var tags *compute.Tags
 	if tagsMap != nil {
+		b, err := json.Marshal(tagsMap)
+		if err != nil {
+			return nil, fmt.Errorf("Error converting tags: %s", err)
+		}
 		tags = &compute.Tags{}
-		if err := tpgresource.Convert(tagsMap, tags); err != nil {
+		if err := json.Unmarshal(b, tags); err != nil {
 			return nil, fmt.Errorf("Error converting tags: %s", err)
 		}
 	}
@@ -202,8 +207,12 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 }
 
 func expandNetworkInterfacesTyped(expanded []interface{}) ([]*compute.NetworkInterface, error) {
-	ifaces := make([]*compute.NetworkInterface, 0, len(expanded))
-	if err := tpgresource.Convert(expanded, &ifaces); err != nil {
+	b, err := json.Marshal(expanded)
+	if err != nil {
+		return nil, fmt.Errorf("Error converting network interfaces: %s", err)
+	}
+	var ifaces []*compute.NetworkInterface
+	if err := json.Unmarshal(b, &ifaces); err != nil {
 		return nil, fmt.Errorf("Error converting network interfaces: %s", err)
 	}
 	return ifaces, nil
@@ -227,8 +236,12 @@ func expandAdvancedMachineFeaturesForTGC(d tpgresource.TerraformResourceData) *c
 	if amfMap == nil {
 		return nil
 	}
+	b, err := json.Marshal(amfMap)
+	if err != nil {
+		return nil
+	}
 	typed := &compute.AdvancedMachineFeatures{}
-	if err := tpgresource.Convert(amfMap, typed); err != nil {
+	if err := json.Unmarshal(b, typed); err != nil {
 		return nil
 	}
 	return typed
