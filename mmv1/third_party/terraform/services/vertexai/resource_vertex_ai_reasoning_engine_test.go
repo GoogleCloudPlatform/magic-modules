@@ -305,7 +305,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   }
 
   traffic_config {
-    traffic_split_always_latest = {}
+    traffic_split_always_latest {}
   }
 
   spec {

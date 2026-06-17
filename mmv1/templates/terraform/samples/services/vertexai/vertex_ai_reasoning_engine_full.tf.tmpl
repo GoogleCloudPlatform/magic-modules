@@ -34,6 +34,15 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
     kms_key_name = "{{index $.ResourceIdVars "kms_key_name"}}"
   }
 
+  traffic_config {
+    traffic_split_manual {
+      targets {
+        runtime_revision_name = "test-revision-1"
+        percent               = 100
+      }
+    }
+  }
+
   spec {
     agent_framework = "google-adk"
     class_methods   = jsonencode(local.class_methods)
