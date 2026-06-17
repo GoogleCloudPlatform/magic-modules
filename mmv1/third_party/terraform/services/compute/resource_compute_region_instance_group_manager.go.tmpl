@@ -3,7 +3,9 @@ package compute
 import (
 	"fmt"
 	"log"
+{{- if ne $.TargetVersionName "ga" }}
 	"strconv"
+{{- end }}
 	"strings"
 	"time"
 
