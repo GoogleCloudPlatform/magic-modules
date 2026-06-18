@@ -1383,18 +1383,6 @@ func schemaNodePoolAutoConfigNodeKubeletConfig() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
-				"shutdown_grace_period_seconds": {
-					Type:        schema.TypeInt,
-					Optional:    true,
-					Computed:    true,
-					Description: `Controls the total duration of time (in seconds) the node delays shutdown.`,
-				},
-				"shutdown_grace_period_critical_pods_seconds": {
-					Type:        schema.TypeInt,
-					Optional:    true,
-					Computed:    true,
-					Description: `Controls the portion of total grace period (in seconds) that is specifically reserved for terminating critical pods.`,
-				},
 			},
 		},
 	}
@@ -3179,8 +3167,6 @@ func flattenNodePoolAutoConfigNodeKubeletConfig(v interface{}) []map[string]inte
 	transformed := map[string]interface{}{}
 	if c != nil {
 		transformed["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(c)
-		transformed["shutdown_grace_period_seconds"] = c["shutdownGracePeriodSeconds"]
-		transformed["shutdown_grace_period_critical_pods_seconds"] = c["shutdownGracePeriodCriticalPodsSeconds"]
 	}
 
 	return []map[string]interface{}{transformed}
