@@ -703,6 +703,22 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	return nested
 }
 
+// appendSynthesizedProviderDefaultFields appends synthesized Type entries for "project", "zone", and "region"
+// when they appear in the given scope (a list of identifier names) but are not already present in props.
+func (r Resource) appendSynthesizedProviderDefaultFields(props []*Type, scope []string) []*Type {
+	found := map[string]bool{}
+	for _, p := range props {
+		found[google.Underscore(p.Name)] = true
+	}
+	hasField := map[string]bool{"project": r.HasProject(), "zone": r.HasZone(), "region": r.HasRegion()}
+	for _, field := range []string{"project", "zone", "region"} {
+		if slices.Contains(scope, field) && !found[field] && hasField[field] {
+			props = append(props, &Type{Name: field, Type: "string"})
+		}
+	}
+	return props
+}
+
 func (r Resource) IdentityProperties() []*Type {
 	props := make([]*Type, 0)
 	identities := r.Identity
@@ -710,20 +726,13 @@ func (r Resource) IdentityProperties() []*Type {
 		identities = nil
 	}
 	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, identities, r.BaseUrl)[0])
-	optionalValues := map[string]bool{"project": false, "zone": false, "region": false}
 	for _, p := range r.AllProperties() {
 		if slices.Contains(importFormat, google.Underscore(p.Name)) {
 			props = append(props, p)
-			optionalValues[p.Name] = true
 		}
 	}
 
-	hasField := map[string]bool{"project": r.HasProject(), "zone": r.HasZone(), "region": r.HasRegion()}
-	for _, field := range []string{"project", "zone", "region"} { // prevents duplicates
-		if slices.Contains(importFormat, field) && !optionalValues[field] && hasField[field] {
-			props = append(props, &Type{Name: field, Type: "string"})
-		}
-	}
+	props = r.appendSynthesizedProviderDefaultFields(props, importFormat)
 
 	if len(r.CustomCode.CustomIdentity) > 0 {
 		for _, fieldName := range r.CustomCode.CustomIdentity {
@@ -736,9 +745,10 @@ func (r Resource) IdentityProperties() []*Type {
 
 func (r Resource) ListScopeProperties() []*Type {
 	scope := r.ExtractIdentifiers(r.CollectionUrl())
-	return google.Select(r.AllUserProperties(), func(p *Type) bool {
+	props := google.Select(r.AllUserProperties(), func(p *Type) bool {
 		return slices.Contains(scope, google.Underscore(p.Name))
 	})
+	return r.appendSynthesizedProviderDefaultFields(props, scope)
 }
 
 func (r Resource) ListResultDisplayNameKeyStrings() []string {
