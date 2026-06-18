@@ -1862,22 +1862,6 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		disks = append(disks, disk)
 	}
 
-	metadata, err := resourceInstanceMetadata(d)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating metadata: %s", err)
-	}
-
-	{{ if ne $.TargetVersionName `ga` -}}
-	partnerMetadataMap, err := resourceInstancePartnerMetadata(d)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating partner metadata: %s", err)
-	}
-	PartnerMetadata, err := convertPartnerMetadataToComputeTyped(partnerMetadataMap)
-	if err != nil {
-		return nil, fmt.Errorf("Error converting partner metadata: %s", err)
-	}
-	{{- end }}
-
 	networkInterfaces, err := expandNetworkInterfacesTyped(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
@@ -1934,10 +1918,6 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		Description:                d.Get("description").(string),
 		Disks:                      disks,
 		MachineType:                machineTypeUrl,
-		Metadata:                   metadata,
-		{{- if ne $.TargetVersionName "ga" }}
-		PartnerMetadata:            PartnerMetadata,
-		{{- end }}
 		Name:                       d.Get("name").(string),
 		NetworkInterfaces:          networkInterfaces,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
@@ -2130,6 +2110,20 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	} else if len(paramsBody) > 0 {
 		instanceBody["params"] = paramsBody
 	}
+	if metadataBody, err := resourceInstanceMetadata(d); err != nil {
+		return fmt.Errorf("Error expanding metadata: %s", err)
+	} else if len(metadataBody) > 0 {
+		instanceBody["metadata"] = metadataBody
+	}
+	{{- if ne $.TargetVersionName "ga" }}
+	if partnerMetadataRaw, err := resourceInstancePartnerMetadata(d); err != nil {
+		return fmt.Errorf("Error expanding partner metadata: %s", err)
+	} else if partnerMetadataBody, err := convertPartnerMetadataToCompute(partnerMetadataRaw); err != nil {
+		return fmt.Errorf("Error converting partner metadata: %s", err)
+	} else if len(partnerMetadataBody) > 0 {
+		instanceBody["partnerMetadata"] = partnerMetadataBody
+	}
+	{{- end }}
 	insertUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances")
 	if err != nil {
 		return fmt.Errorf("Error generating URL: %s", err)
