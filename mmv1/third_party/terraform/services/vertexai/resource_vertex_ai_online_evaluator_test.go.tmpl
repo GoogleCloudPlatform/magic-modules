@@ -47,7 +47,8 @@ func TestAccVertexAIOnlineEvaluator_update(t *testing.T) {
 func testAccVertexAIOnlineEvaluator_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_reasoning_engine" "engine" {
-  display_name = "re-%{random_suffix}"
+  provider     = google-beta
+  display_name = "tf-test-re-%{random_suffix}"
   description  = "A basic reasoning engine"
   labels       = {
     "key" = "value"
@@ -56,8 +57,9 @@ resource "google_vertex_ai_reasoning_engine" "engine" {
 }
 
 resource "google_vertex_ai_online_evaluator" "evaluator" {
+  provider       = google-beta
   region         = "us-central1"
-  display_name   = "eval-%{random_suffix}"
+  display_name   = "tf-test-eval-%{random_suffix}"
   
   agent_resource = google_vertex_ai_reasoning_engine.engine.id
 
@@ -103,7 +105,8 @@ resource "google_vertex_ai_online_evaluator" "evaluator" {
 func testAccVertexAIOnlineEvaluator_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_reasoning_engine" "engine" {
-  display_name = "re-%{random_suffix}"
+  provider     = google-beta
+  display_name = "tf-test-re-%{random_suffix}"
   description  = "A basic reasoning engine"
   labels       = {
     "key" = "value"
@@ -112,8 +115,9 @@ resource "google_vertex_ai_reasoning_engine" "engine" {
 }
 
 resource "google_vertex_ai_online_evaluator" "evaluator" {
+  provider       = google-beta
   region         = "us-central1"
-  display_name   = "eval-upd-%{random_suffix}"
+  display_name   = "tf-test-eval-upd-%{random_suffix}"
   
   agent_resource = google_vertex_ai_reasoning_engine.engine.id
 
