@@ -63,6 +63,7 @@ resource "google_network_services_lb_edge_extension" "{{$.PrimaryResourceId}}" {
       fail_open = false
       supported_events = ["REQUEST_HEADERS"]
       forward_headers  = ["custom-header"]
+      forward_attributes = ["request.host", "request.path"]
     }
   }
 
