@@ -173,6 +173,7 @@ properties:
     description: |
       The share setting for reservations.
     default_from_api: true
+    is_missing_in_cai: true
     properties:
       - name: 'shareType'
         type: Enum
