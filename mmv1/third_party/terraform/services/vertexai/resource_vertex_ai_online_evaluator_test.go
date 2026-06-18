@@ -29,6 +29,10 @@ import (
 func TestAccVertexAIOnlineEvaluator_update(t *testing.T) {
 	t.Parallel()
 
+	if len(acctest.ProtoV5ProviderBetaFactories(t)) == 0 {
+		t.Skip("Skipping beta-only resource test in GA")
+	}
+
 	randomSuffix := acctest.RandString(t, 10)
 
 	context := map[string]interface{}{

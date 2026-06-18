@@ -18,7 +18,7 @@ Provide the exact bash commands the agent should run to verify the prerequisites
 
 #### Example: Verify Directory
 ```bash
-pwd # Verify we are in /Users/camthornton/magic-modules
+pwd # Verify we are in the magic-modules root directory
 ```
 
 ### 2. The Core Commands
