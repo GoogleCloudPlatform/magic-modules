@@ -65,6 +65,7 @@ properties:
         type: NestedObject
         description: Configuration for data source following OpenTelemetry.
         immutable: true
+        ignore_read: true
         properties:
           - name: semconvVersion
             type: String
@@ -172,6 +173,7 @@ properties:
   - name: metricSources
     type: Array
     required: true
+    immutable: true
     description: 'A list of metric sources to be used for evaluating samples.
       At least one MetricSource must be provided.
       Right now, only predefined metrics and registered metrics are supported.

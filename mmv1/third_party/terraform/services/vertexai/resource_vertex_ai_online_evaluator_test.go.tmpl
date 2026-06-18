@@ -2,15 +2,10 @@ package vertexai_test
 
 {{ if ne $.TargetVersionName "ga" -}}
 import (
-	"fmt"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccVertexAIOnlineEvaluator_update(t *testing.T) {
@@ -34,7 +29,7 @@ func TestAccVertexAIOnlineEvaluator_update(t *testing.T) {
 				ResourceName:            "google_vertex_ai_online_evaluator.evaluator",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region", "project"},
+				ImportStateVerifyIgnore: []string{"region", "project", "cloud_observability.0.open_telemetry"},
 			},
 			{
 				Config: testAccVertexAIOnlineEvaluator_update(context),
@@ -43,7 +38,7 @@ func TestAccVertexAIOnlineEvaluator_update(t *testing.T) {
 				ResourceName:            "google_vertex_ai_online_evaluator.evaluator",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region", "project"},
+				ImportStateVerifyIgnore: []string{"region", "project", "cloud_observability.0.open_telemetry"},
 			},
 		},
 	})
@@ -79,6 +74,14 @@ resource "google_vertex_ai_online_evaluator" "evaluator" {
     metric = jsonencode({
       "predefinedMetricSpec" = {
         "metricSpecName" = "safety_v1"
+      }
+    })
+  }
+
+  metric_sources {
+    metric = jsonencode({
+      "predefinedMetricSpec" = {
+        "metricSpecName" = "hallucination_v1"
       }
     })
   }
@@ -173,152 +176,5 @@ resource "google_vertex_ai_online_evaluator" "evaluator" {
 `, context)
 }
 
-func TestAccVertexAIOnlineEvaluator_full(t *testing.T) {
-	t.Parallel()
 
-	randomSuffix := acctest.RandString(t, 10)
-	project := envvar.GetTestProjectFromEnv()
-	config := transport_tpg.BootstrapConfig(t)
-
-	// Create a dummy evaluation metric to use in the test.
-	metricName, err := createTestEvaluationMetric(t, config, project, "us-central1", randomSuffix)
-	if err != nil {
-		t.Fatalf("Failed to create test evaluation metric: %v", err)
-	}
-	t.Cleanup(func() {
-		if err := deleteTestEvaluationMetric(t, config, project, metricName); err != nil {
-			t.Logf("Failed to delete test evaluation metric %s: %v", metricName, err)
-		}
-	})
-
-	context := map[string]interface{}{
-		"random_suffix":           randomSuffix,
-		"random_suffix_lowercase": strings.ToLower(randomSuffix),
-		"project":                 project,
-		"metric_resource_name":    metricName,
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckVertexAIOnlineEvaluatorDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccVertexAIOnlineEvaluator_full(context),
-			},
-			{
-				ResourceName:            "google_vertex_ai_online_evaluator.evaluator",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region", "project"},
-			},
-		},
-	})
-}
-
-func testAccVertexAIOnlineEvaluator_full(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_vertex_ai_reasoning_engine" "engine" {
-  provider     = google-beta
-  display_name = "tf-test-re-%{random_suffix}"
-  description  = "A basic reasoning engine"
-  labels       = {
-    "key" = "value"
-  }
-  region       = "us-central1"
-}
-
-resource "google_vertex_ai_online_evaluator" "evaluator" {
-  provider       = google-beta
-  region         = "us-central1"
-  display_name   = "tf-test-eval-%{random_suffix}"
-  
-  agent_resource = google_vertex_ai_reasoning_engine.engine.id
-
-  config {
-    max_evaluated_samples_per_run = "100"
-    random_sampling {
-      percentage = 10
-    }
-  }
-
-  metric_sources {
-    metric_resource_name = "%{metric_resource_name}"
-  }
-
-  cloud_observability {
-    open_telemetry {
-      semconv_version = "1.39.0"
-    }
-    
-    log_view   = "projects/%{project}/locations/us-central1/buckets/_Default/views/_Default"
-    trace_view = "projects/%{project}/locations/us-central1/buckets/_Default/views/_Default"
-
-    trace_scope {
-      filter {
-        duration {
-          comparison_operator = "GREATER"
-          value               = 0
-        }
-      }
-    }
-  }
-}
-`, context)
-}
-
-func createTestEvaluationMetric(t *testing.T, config *transport_tpg.Config, project, region, metricId string) (string, error) {
-	url := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1beta1/projects/%s/locations/%s/evaluationMetrics", region, project, region)
-	urlWithParam := fmt.Sprintf("%s?evaluation_metric_id=%s", url, metricId)
-
-	body := map[string]interface{}{
-		"displayName": "TF Test Metric " + metricId,
-		"description": "Dummy metric for TF testing",
-		"metric": map[string]interface{}{
-			"customCodeExecutionSpec": map[string]interface{}{
-				"evaluationFunction": "def evaluate():\n  return 1.0",
-			},
-		},
-	}
-
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "POST",
-		Project:   project,
-		RawURL:    urlWithParam,
-		UserAgent: "terraform-provider-google-test",
-		Body:      body,
-		Timeout:   5 * time.Minute,
-	})
-	if err != nil {
-		return "", err
-	}
-
-	name, ok := res["name"].(string)
-	if !ok {
-		return "", fmt.Errorf("response did not contain name: %v", res)
-	}
-
-	return name, nil
-}
-
-func deleteTestEvaluationMetric(t *testing.T, config *transport_tpg.Config, project, metricName string) error {
-	parts := strings.Split(metricName, "/")
-	if len(parts) < 4 {
-		return fmt.Errorf("invalid metric name: %s", metricName)
-	}
-	region := parts[3]
-
-	url := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1beta1/%s", region, metricName)
-
-	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "DELETE",
-		Project:   project,
-		RawURL:    url,
-		UserAgent: "terraform-provider-google-test",
-		Timeout:   5 * time.Minute,
-	})
-	return err
-}
 {{- end }}

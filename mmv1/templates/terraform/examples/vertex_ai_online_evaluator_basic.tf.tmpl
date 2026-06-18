@@ -1,4 +1,5 @@
 resource "google_vertex_ai_reasoning_engine" "engine" {
+  provider     = google-beta
   display_name = "{{index $.Vars "engine_name"}}"
   description  = "A basic reasoning engine"
   labels       = {
@@ -8,6 +9,7 @@ resource "google_vertex_ai_reasoning_engine" "engine" {
 }
 
 resource "google_vertex_ai_online_evaluator" "evaluator" {
+  provider       = google-beta
   region         = "us-central1"
   display_name   = "{{index $.Vars "evaluator_name"}}"
   
