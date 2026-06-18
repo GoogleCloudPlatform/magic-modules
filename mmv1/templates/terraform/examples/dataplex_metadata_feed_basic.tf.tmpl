@@ -1,0 +1,37 @@
+resource "google_pubsub_topic" "test_topic" {
+  name = "{{index $.Vars "pubsub_topic_name"}}"
+}
+
+resource "google_project_service_identity" "dataplex_identity" {
+  project  = "{{index $.TestEnvVars "project_name"}}"
+  service  = "dataplex.googleapis.com"
+}
+
+resource "google_pubsub_topic_iam_member" "dataplex_publisher" {
+  topic  = google_pubsub_topic.test_topic.name
+  role   = "roles/pubsub.publisher"
+  member = "serviceAccount:${google_project_service_identity.dataplex_identity.email}"
+}
+
+resource "google_pubsub_topic_iam_member" "dataplex_viewer" {
+  topic  = google_pubsub_topic.test_topic.name
+  role   = "roles/pubsub.viewer"
+  member = "serviceAccount:${google_project_service_identity.dataplex_identity.email}"
+}
+
+resource "google_dataplex_metadata_feed" "{{$.PrimaryResourceId}}" {
+  metadata_feed_id = "{{index $.Vars "metadata_feed_id"}}"
+  project = "{{index $.TestEnvVars "project_name"}}"
+  location = "us-central1"
+  scope {
+    organization_level = true
+  }
+  pubsub_topic = google_pubsub_topic.test_topic.id
+
+  depends_on = [
+    google_pubsub_topic_iam_member.dataplex_publisher,
+    google_pubsub_topic_iam_member.dataplex_viewer,
+  ]
+}
+
+
