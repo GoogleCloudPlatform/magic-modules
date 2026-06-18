@@ -347,7 +347,9 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 			fakeGit := `#!/bin/bash
 if [ "$1" = "clone" ]; then
   mkdir -p "$3"
-fi`
+  exit 0
+fi
+exec /usr/bin/git "$@"`
 			sb.Runner.WriteFile("git", fakeGit)
 			sb.Runner.MustRun("chmod", []string{"+x", "git"}, nil)
 
@@ -426,7 +428,9 @@ func TestExecVCRCassetteUpdate_BuildFailure(t *testing.T) {
 	fakeGit := `#!/bin/bash
 		if [ "$1" = "clone" ]; then
 			mkdir -p "$3"
-		fi`
+			exit 0
+		fi
+		exec /usr/bin/git "$@"`
 	sb.Runner.WriteFile("git", fakeGit)
 	sb.Runner.MustRun("chmod", []string{"+x", "git"}, nil)
 
