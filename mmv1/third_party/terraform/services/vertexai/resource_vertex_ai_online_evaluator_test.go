@@ -1,6 +1,3 @@
-//go:build !ga
-// +build !ga
-
 // Copyright 2026 Google Inc.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +14,16 @@
 package vertexai_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/vertexai"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccVertexAIOnlineEvaluator_update(t *testing.T) {
@@ -35,7 +38,7 @@ func TestAccVertexAIOnlineEvaluator_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckVertexAIOnlineEvaluatorDestroyProducer(t),
+		CheckDestroy:             testAccCheckVertexAIOnlineEvaluatorDestroyHandwritten(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAIOnlineEvaluator_basic(context),
@@ -193,4 +196,42 @@ resource "google_vertex_ai_online_evaluator" "evaluator" {
   }
 }
 `, context)
+}
+
+func testAccCheckVertexAIOnlineEvaluatorDestroyHandwritten(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_vertex_ai_online_evaluator" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(vertexai.Product, config)+"projects/{{project}}/locations/{{region}}/onlineEvaluators/{{name}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err == nil {
+				return fmt.Errorf("VertexAIOnlineEvaluator still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
 }
