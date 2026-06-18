@@ -13,6 +13,8 @@
 
 ---
 name: DataProductDataAsset
+api_resource_type_kind: DataAsset
+cai_resource_kind: DataAsset
 description: |
   A data asset resource that can be packaged and shared via a data product.
 references:
