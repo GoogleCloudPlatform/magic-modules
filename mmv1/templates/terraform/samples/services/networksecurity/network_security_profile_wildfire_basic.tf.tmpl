@@ -105,6 +105,24 @@ resource "google_network_security_security_profile" "{{$.PrimaryResourceId}}" {
   description = "{{index $.Vars "profile_description"}}"
   location    = "global"
   type        = "THREAT_PREVENTION"
+
+  wildfire_analysis_profile {
+    wildfire_inline_cloud_analysis_rules {
+      action = "ALERT"
+      custom_file_types {
+        file_types = ["pdf", "executable"]
+      }
+      direction           = "INBOUND"
+      file_selection_mode = "CUSTOM_FILE_TYPES"
+    }
+    wildfire_submission_rules {
+      custom_file_types {
+        file_types = ["pdf", "executable"]
+      }
+      direction           = "OUTBOUND"
+      file_selection_mode = "CUSTOM_FILE_TYPES"
+    }
+  }
 }
 
 resource "google_network_security_authz_policy" "default" {
