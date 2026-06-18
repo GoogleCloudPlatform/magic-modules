@@ -208,6 +208,66 @@ func TestResourceServiceVersion(t *testing.T) {
 	}
 }
 
+func TestProviderDefaultFieldsAreSynthesizedAndDeduplicated(t *testing.T) {
+	t.Parallel()
+
+	t.Run("identity synthesizes project without duplication", func(t *testing.T) {
+		t.Parallel()
+
+		r := api.Resource{
+			BaseUrl: "projects/{{project}}/foos",
+			Parameters: []*api.Type{
+				{Name: "project", Type: "String"},
+			},
+		}
+
+		got := r.IdentityProperties()
+		projectCount := 0
+		for _, p := range got {
+			if p.Name == "project" {
+				projectCount++
+			}
+		}
+
+		if projectCount != 1 {
+			t.Fatalf("expected project exactly once in IdentityProperties, got %d", projectCount)
+		}
+	})
+
+	t.Run("list scope synthesizes missing defaults and deduplicates", func(t *testing.T) {
+		t.Parallel()
+
+		version := &product.Version{Name: "ga", BaseUrl: "https://example.googleapis.com/v1/"}
+		r := api.Resource{
+			BaseUrl: "projects/{{project}}/zones/{{zone}}/foos",
+			Parameters: []*api.Type{
+				{Name: "project", Type: "String"},
+				{Name: "zone", Type: "String", IgnoreRead: true, Exclude: true},
+			},
+			ProductMetadata: &api.Product{
+				Versions: []*product.Version{version},
+				Version:  version,
+			},
+		}
+
+		got := r.ListScopeProperties()
+		projectCount := 0
+		zoneCount := 0
+		for _, p := range got {
+			if p.Name == "project" {
+				projectCount++
+			}
+			if p.Name == "zone" {
+				zoneCount++
+			}
+		}
+
+		if projectCount != 1 || zoneCount != 1 {
+			t.Fatalf("expected exactly one project and one zone in ListScopeProperties, got project=%d zone=%d", projectCount, zoneCount)
+		}
+	})
+}
+
 // TestMagicianLocation verifies that the current package is being executed from within
 // the RELATIVE_MAGICIAN_LOCATION ("mmv1/") directory structure. This ensures that references
 // to files relative to this location will remain valid even if the repository structure
