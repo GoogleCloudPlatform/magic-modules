@@ -224,6 +224,13 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 			return fmt.Errorf("Error expanding scheduling: %s", err)
 		}
 		if schedulingBody != nil {
+			// Strip nil Duration fields so the source machine image values are inherited
+			// instead of being overridden with null.
+			for _, k := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "gracefulShutdown", "preemptionNoticeDuration"} {
+				if v, ok := schedulingBody[k]; ok && v == nil {
+					delete(schedulingBody, k)
+				}
+			}
 			instanceBody["scheduling"] = schedulingBody
 		}
 	} else if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
@@ -256,6 +263,16 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 	if amf := expandAdvancedMachineFeatures(d); amf != nil {
 		instanceBody["advancedMachineFeatures"] = amf
+	}
+
+	if partnerMetadataRaw, err := resourceInstancePartnerMetadata(d); err != nil {
+		return fmt.Errorf("Error expanding partner_metadata: %s", err)
+	} else if partnerMetadataBody, err := convertPartnerMetadataToCompute(partnerMetadataRaw); err != nil {
+		return fmt.Errorf("Error converting partner_metadata: %s", err)
+	} else if len(partnerMetadataBody) > 0 {
+		instanceBody["partnerMetadata"] = partnerMetadataBody
+	} else {
+		delete(instanceBody, "partnerMetadata")
 	}
 
 	log.Printf("[INFO] Requesting instance creation")
