@@ -736,16 +736,9 @@ func (r Resource) IdentityProperties() []*Type {
 
 func (r Resource) ListScopeProperties() []*Type {
 	scope := r.ExtractIdentifiers(r.CollectionUrl())
-	seen := make(map[string]bool)
-	var result []*Type
-	for _, p := range append(r.IdentityProperties(), r.AllProperties()...) {
-		key := google.Underscore(p.Name)
-		if slices.Contains(scope, key) && !seen[key] {
-			result = append(result, p)
-			seen[key] = true
-		}
-	}
-	return result
+	return google.Select(r.AllUserProperties(), func(p *Type) bool {
+		return slices.Contains(scope, google.Underscore(p.Name))
+	})
 }
 
 func (r Resource) ListResultDisplayNameKeyStrings() []string {
