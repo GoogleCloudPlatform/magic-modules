@@ -5367,7 +5367,7 @@ func TestAccComputeInstance_ServiceClassNetworkAttachment(t *testing.T) {
 	t.Parallel()
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
 	envRegion := envvar.GetTestRegionFromEnv()
-	var instance compute.Instance
+	var instance map[string]interface{}
 
 	providerVersion := "v1"
 
@@ -5380,8 +5380,9 @@ func TestAccComputeInstance_ServiceClassNetworkAttachment(t *testing.T) {
 		"suffix":                  (acctest.RandString(t, 10)),
 		"network_attachment_name": testNetworkAttachmentName,
 		"region":                  envRegion,
-    "org_id":                  envvar.GetTestOrgTargetFromEnv(t),
+		"org_id":                  envvar.GetTestOrgTargetFromEnv(t),
 		"billing_account":         envvar.GetTestBillingAccountFromEnv(t),
+    "service_class_id":        "gcp-tf-persistent-service-class-dev", //ToDo: version gate to reference different classes
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -13255,7 +13256,7 @@ resource "google_compute_instance" "foobar" {
 {{- if ne $.TargetVersionName "ga" }}
 func testAccComputeInstance_serviceClassNetworkAttachment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "accepted_producer_project1" {
+resource "google_project" "accepted_consumer_project1" {
   project_id      = "tf-test-prj-accept1-%{suffix}"
   name            = "tf-test-prj-accept1-%{suffix}"
   org_id          = "%{org_id}"
@@ -13264,7 +13265,7 @@ resource "google_project" "accepted_producer_project1" {
 }
 
 resource "google_project_service" "compute_service" {
-  project = google_project.accepted_producer_project1.project_id
+  project = google_project.accepted_consumer_project1.project_id
   service = "compute.googleapis.com"
 }
 
@@ -13274,62 +13275,67 @@ resource "time_sleep" "wait_300_seconds" {
 }
 
 resource "google_compute_network" "test-network"{
-	name = "tf-test-network-%{suffix}"
-	auto_create_subnetworks = false
+  project = google_project.accepted_consumer_project1.project_id
+  name = "tf-test-network-%{suffix}"
+  auto_create_subnetworks = false
+
+  depends_on = [google_project_service.compute_service]
 }
 
 resource "google_compute_subnetwork" "test-subnetwork" {
-	name          = "tf-test-compute-subnet-%{suffix}"
-	ip_cidr_range = "10.0.0.0/16"
-	region        = "us-central1"
-	network       = google_compute_network.test-network.id
+  project = google_project.accepted_consumer_project1.project_id
+  name          = "tf-test-compute-subnet-%{suffix}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.test-network.id
 }
 
 resource "google_compute_network_attachment" "test_network_attachment" {
-	name = "%{network_attachment_name}"
+  project = google_project.accepted_consumer_project1.project_id
+  name = "%{network_attachment_name}"
   region = "us-central1"
   description = "network attachment description"
   connection_preference = "ACCEPT_MANUAL"
-	producer_accept_lists = [
-    "gcp-memorystore-redis"		# ToDo: ServiceClass is not yet implemented"
+  producer_accept_lists = [
+    "%{service_class_id}"
   ]
 
   subnetworks = [
     google_compute_subnetwork.test-subnetwork.self_link
   ]
 
-	depends_on = [time_sleep.wait_300_seconds]
+  depends_on = [time_sleep.wait_300_seconds]
 }
 
 resource "google_compute_address" "producer_address" {
-  project = google_project.accepted_producer_project1.project_id
   name = "tf-test-basic-address%{suffix}"
-	network_attachment = google_compute_network_attachment.test_network_attachment.id
+  network_attachment = google_compute_network_attachment.test_network_attachment.id
 }
 
 resource "google_compute_instance" "foobar" {
+  project = google_project.accepted_consumer_project1.project_id
   name         = "tf-test-instance-%{suffix}"
   machine_type = "e2-medium"
   zone         = "%{region}-a"
-
-	boot_disk {
-		initialize_params {
-			image = data.google_compute_image.my_image.id
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-
-	network_interface {
-		network_attachment = google_compute_network_attachment.test_network_attachment.self_link
-		service_class_id = "gcp-memorystore-redis"		# ToDo: ServiceClass is not yet implemented
-	}
-
-	metadata = {
-		foo = "bar"
-	}
+  
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.id
+    }
+  }
+  
+  network_interface {
+    network = "default"
+  }
+  
+  network_interface {
+    network_attachment = google_compute_network_attachment.test_network_attachment.self_link
+    service_class_id = "%{service_class_id}"
+  }
+  
+  metadata = {
+    foo = "bar"
+  }
 }
 
 data "google_compute_image" "my_image" {
