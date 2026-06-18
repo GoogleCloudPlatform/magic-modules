@@ -5382,7 +5382,7 @@ func TestAccComputeInstance_ServiceClassNetworkAttachment(t *testing.T) {
 		"region":                  envRegion,
 		"org_id":                  envvar.GetTestOrgTargetFromEnv(t),
 		"billing_account":         envvar.GetTestBillingAccountFromEnv(t),
-    "service_class_id":        "gcp-tf-persistent-service-class-dev", //ToDo: version gate to reference different classes
+		"service_class_id":        "gcp-tf-persistent-service-class-dev", //ToDo: version gate to reference different classes
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
