@@ -853,6 +853,18 @@ func schemaNodeConfig() *schema.Schema {
 								Optional:    true,
 								Description: `Defines the maximum allowed grace period (in seconds) to use when terminating pods in response to a soft eviction threshold being met.`,
 							},
+							"shutdown_grace_period_seconds": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Computed:    true,
+								Description: `Controls the total duration of time (in seconds) the node delays shutdown.`,
+							},
+							"shutdown_grace_period_critical_pods_seconds": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Computed:    true,
+								Description: `Controls the portion of total grace period (in seconds) that is specifically reserved for terminating critical pods.`,
+							},
 							"eviction_soft": {
 								Type:        schema.TypeList,
 								Optional:    true,
@@ -1371,6 +1383,18 @@ func schemaNodePoolAutoConfigNodeKubeletConfig() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
+				"shutdown_grace_period_seconds": {
+					Type:        schema.TypeInt,
+					Optional:    true,
+					Computed:    true,
+					Description: `Controls the total duration of time (in seconds) the node delays shutdown.`,
+				},
+				"shutdown_grace_period_critical_pods_seconds": {
+					Type:        schema.TypeInt,
+					Optional:    true,
+					Computed:    true,
+					Description: `Controls the portion of total grace period (in seconds) that is specifically reserved for terminating critical pods.`,
+				},
 			},
 		},
 	}
@@ -1902,6 +1926,14 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	}
 	if evictionMaxPodGracePeriodSeconds, ok := cfg["eviction_max_pod_grace_period_seconds"]; ok {
 		kConfig.EvictionMaxPodGracePeriodSeconds = int64(evictionMaxPodGracePeriodSeconds.(int))
+	}
+	if shutdownGracePeriodSeconds, ok := cfg["shutdown_grace_period_seconds"]; ok {
+		kConfig.ShutdownGracePeriodSeconds = int64(shutdownGracePeriodSeconds.(int))
+		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+	}
+	if shutdownGracePeriodCriticalPodsSeconds, ok := cfg["shutdown_grace_period_critical_pods_seconds"]; ok {
+		kConfig.ShutdownGracePeriodCriticalPodsSeconds = int64(shutdownGracePeriodCriticalPodsSeconds.(int))
+		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
 	}
 	if v, ok := cfg["eviction_soft"]; ok && len(v.([]interface{})) > 0 {
 		es := v.([]interface{})[0].(map[string]interface{})
@@ -3058,27 +3090,29 @@ func flattenKubeletConfig(v interface{}) []map[string]interface{} {
 		return nil
 	}
 	transformed := map[string]interface{}{
-		"cpu_cfs_quota":                          c["cpuCfsQuota"],
-		"cpu_cfs_quota_period":                   c["cpuCfsQuotaPeriod"],
-		"cpu_manager_policy":                     c["cpuManagerPolicy"],
-		"memory_manager":                         flattenMemoryManager(c["memoryManager"]),
-		"topology_manager":                       flattenTopologyManager(c["topologyManager"]),
-		"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(v),
-		"pod_pids_limit":                         c["podPidsLimit"],
-		"container_log_max_size":                 c["containerLogMaxSize"],
-		"container_log_max_files":                c["containerLogMaxFiles"],
-		"image_gc_low_threshold_percent":         c["imageGcLowThresholdPercent"],
-		"image_gc_high_threshold_percent":        c["imageGcHighThresholdPercent"],
-		"image_minimum_gc_age":                   c["imageMinimumGcAge"],
-		"image_maximum_gc_age":                   c["imageMaximumGcAge"],
-		"allowed_unsafe_sysctls":                 c["allowedUnsafeSysctls"],
-		"single_process_oom_kill":                c["singleProcessOomKill"],
-		"max_parallel_image_pulls":               c["maxParallelImagePulls"],
-		"eviction_max_pod_grace_period_seconds":  c["evictionMaxPodGracePeriodSeconds"],
-		"eviction_soft":                          flattenEvictionSignals(c["evictionSoft"]),
-		"eviction_soft_grace_period":             flattenEvictionGracePeriod(c["evictionSoftGracePeriod"]),
-		"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c["evictionMinimumReclaim"]),
-		"crash_loop_back_off":                    flattenCrashLoopBackOffConfig(c["crashLoopBackOff"]),
+		"cpu_cfs_quota":                               c["cpuCfsQuota"],
+		"cpu_cfs_quota_period":                        c["cpuCfsQuotaPeriod"],
+		"cpu_manager_policy":                          c["cpuManagerPolicy"],
+		"memory_manager":                              flattenMemoryManager(c["memoryManager"]),
+		"topology_manager":                            flattenTopologyManager(c["topologyManager"]),
+		"insecure_kubelet_readonly_port_enabled":      flattenInsecureKubeletReadonlyPortEnabled(v),
+		"pod_pids_limit":                              c["podPidsLimit"],
+		"container_log_max_size":                      c["containerLogMaxSize"],
+		"container_log_max_files":                     c["containerLogMaxFiles"],
+		"image_gc_low_threshold_percent":              c["imageGcLowThresholdPercent"],
+		"image_gc_high_threshold_percent":             c["imageGcHighThresholdPercent"],
+		"image_minimum_gc_age":                        c["imageMinimumGcAge"],
+		"image_maximum_gc_age":                        c["imageMaximumGcAge"],
+		"allowed_unsafe_sysctls":                      c["allowedUnsafeSysctls"],
+		"single_process_oom_kill":                     c["singleProcessOomKill"],
+		"max_parallel_image_pulls":                    c["maxParallelImagePulls"],
+		"eviction_max_pod_grace_period_seconds":       c["evictionMaxPodGracePeriodSeconds"],
+		"shutdown_grace_period_seconds":               c["shutdownGracePeriodSeconds"],
+		"shutdown_grace_period_critical_pods_seconds": c["shutdownGracePeriodCriticalPodsSeconds"],
+		"eviction_soft":                               flattenEvictionSignals(c["evictionSoft"]),
+		"eviction_soft_grace_period":                  flattenEvictionGracePeriod(c["evictionSoftGracePeriod"]),
+		"eviction_minimum_reclaim":                    flattenEvictionMinimumReclaim(c["evictionMinimumReclaim"]),
+		"crash_loop_back_off":                         flattenCrashLoopBackOffConfig(c["crashLoopBackOff"]),
 	}
 
 	return []map[string]interface{}{transformed}
@@ -3145,6 +3179,8 @@ func flattenNodePoolAutoConfigNodeKubeletConfig(v interface{}) []map[string]inte
 	transformed := map[string]interface{}{}
 	if c != nil {
 		transformed["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(c)
+		transformed["shutdown_grace_period_seconds"] = c["shutdownGracePeriodSeconds"]
+		transformed["shutdown_grace_period_critical_pods_seconds"] = c["shutdownGracePeriodCriticalPodsSeconds"]
 	}
 
 	return []map[string]interface{}{transformed}
