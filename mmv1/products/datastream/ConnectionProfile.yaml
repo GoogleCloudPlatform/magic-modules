@@ -744,6 +744,12 @@ properties:
             immutable: true
             sensitive: true
             ignore_read: true
+      - name: additionalOptions
+        type: KeyValuePairs
+        description: |
+          A map of additional options for the MongoDB connection.
+          Keys are case-sensitive and should match the official
+          MongoDB connection string options: https://www.mongodb.com/docs/manual/reference/connection-string-options/
       - name: srvConnectionFormat
         type: NestedObject
         description: |

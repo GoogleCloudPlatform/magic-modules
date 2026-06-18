@@ -430,6 +430,7 @@ fields:
     api_field: 'nodeConfig.taints.key'
   - field: 'node_config.taint.value'
     api_field: 'nodeConfig.taints.value'
+  - api_field: 'nodeConfig.taintConfig.architectureTaintBehavior'
   - api_field: 'nodeConfig.windowsNodeConfig.osVersion'
     field: 'node_config.windows_node_config.osversion'
   - api_field: 'nodeConfig.workloadMetadataConfig.mode'
@@ -445,6 +446,8 @@ fields:
     api_field: 'nodePools.autoscaling.totalMaxNodeCount'
   - field: 'node_pool.autoscaling.total_min_node_count'
     api_field: 'nodePools.autoscaling.totalMinNodeCount'
+  - field: 'node_pool.ignore_node_count_changes'
+    provider_only: true
   - field: 'node_pool.initial_node_count'
     api_field: 'nodePools.initialNodeCount'
   - field: 'node_pool.instance_group_urls'
@@ -765,6 +768,8 @@ fields:
     api_field: 'nodePools.config.taints.key'
   - field: 'node_pool.node_config.taint.value'
     api_field: 'nodePools.config.taints.value'
+  - field: 'node_pool.node_config.taint_config.architecture_taint_behavior'
+    api_field: 'nodePools.config.taintConfig.architectureTaintBehavior'
   - field: 'node_pool.node_config.windows_node_config.osversion'
     api_field: 'nodePools.config.windowsNodeConfig.osVersion'
   - field: 'node_pool.node_config.workload_metadata_config.mode'
@@ -912,4 +917,8 @@ fields:
 {{- end }}
   - api_field: 'workloadIdentityConfig.workloadPool'
   - field: 'deletion_policy'
+    provider_only: true
+  - field: 'skip_node_pool_refresh'
+    provider_only: true
+  - field: 'ignore_node_count_changes'
     provider_only: true
