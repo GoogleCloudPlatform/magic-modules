@@ -181,10 +181,26 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		}
 	}
 
-	// when we make the original call to expandComputeInstance expandScheduling is called, which sets default values.
-	// However, we want the values to be read from the template instead.
+	// expandComputeInstance no longer sets Scheduling; handle it here so the user's
+	// scheduling overrides are applied. When no scheduling block is set, inherit from
+	// the instance template. When set, convert the map-based result from expandScheduling
+	// into the typed struct required by the API client.
 	if _, hasSchedule := d.GetOk("scheduling"); !hasSchedule {
 		instance.Scheduling = it.Properties.Scheduling
+	} else {
+		schedulingMap, err := expandScheduling(d.Get("scheduling"))
+		if err != nil {
+			return fmt.Errorf("Error expanding scheduling: %s", err)
+		}
+		schedulingBytes, err := json.Marshal(schedulingMap)
+		if err != nil {
+			return fmt.Errorf("Error marshaling scheduling: %s", err)
+		}
+		schedulingTyped := &compute.Scheduling{}
+		if err := json.Unmarshal(schedulingBytes, schedulingTyped); err != nil {
+			return fmt.Errorf("Error setting scheduling: %s", err)
+		}
+		instance.Scheduling = schedulingTyped
 	}
 
 	// Force send all top-level fields that have been set in case they're overridden to zero values.
