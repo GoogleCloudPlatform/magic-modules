@@ -421,3 +421,11 @@ func expandScratchDisks(d tpgresource.TerraformResourceData, config *transport_t
 
 	return scratchDisks, nil
 }
+
+func convertViaJSON(in, out interface{}) error {
+	b, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, out)
+}

@@ -722,10 +722,14 @@ func expandAdvancedMachineFeaturesTypedTgcNext(d tpgresource.TerraformResourceDa
 	return typed
 }
 
-func convertViaJSONTgcNext(in, out interface{}) error {
+func convertViaJSON(in, out interface{}) error {
 	b, err := json.Marshal(in)
 	if err != nil {
 		return err
 	}
 	return json.Unmarshal(b, out)
+}
+
+func convertViaJSONTgcNext(in, out interface{}) error {
+	return convertViaJSON(in, out)
 }
