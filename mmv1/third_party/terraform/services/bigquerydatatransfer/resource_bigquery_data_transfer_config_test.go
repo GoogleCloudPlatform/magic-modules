@@ -323,7 +323,7 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 		"booleanParam":                     testAccBigqueryDataTransferConfig_copy_booleanParam,
 		"update_params":                    testAccBigqueryDataTransferConfig_force_new_update_params,
 		"update_service_account":           testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account,
-		"schedule_options_v2":              testAccBigqueryDataTransferConfig_scheduleOptionsV2_timeBased,
+		"disable_auto_scheduling":          testAccBigqueryDataTransferConfig_disableAutoScheduling,
 		"schedule_options_v2_event_driven": testAccBigqueryDataTransferConfig_scheduleOptionsV2_eventDriven,
 		// Multiple connector.authentication.* fields have been deprecated and return 400 errors
 		// "salesforce":             testAccBigqueryDataTransferConfig_salesforce_basic,
@@ -342,12 +342,12 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
-	// Uses time.Now
-	acctest.SkipIfVcr(t)
 	random_suffix := acctest.RandString(t, 10)
-	now := time.Now().UTC()
-	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
-	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
+	// Use a static-but-future time so the test records/replays deterministically
+	// under VCR without needing SkipIfVcr.
+	base := time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10)
+	start_time := base.Format(time.RFC3339)
+	end_time := base.AddDate(0, 1, 0).Format(time.RFC3339)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -362,44 +362,6 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
-			},
-		},
-	})
-}
-
-func testAccBigqueryDataTransferConfig_scheduleOptionsV2_timeBased(t *testing.T) {
-	// Uses time.Now
-	acctest.SkipIfVcr(t)
-	random_suffix := acctest.RandString(t, 10)
-	now := time.Now().UTC()
-	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
-	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBigqueryDataTransferConfig_scheduleOptionsV2(random_suffix, "third", start_time, end_time),
-			},
-			{
-				// Update the time-based schedule in place and confirm the
-				// resource is updated rather than recreated.
-				Config: testAccBigqueryDataTransferConfig_scheduleOptionsV2(random_suffix, "first", start_time, end_time),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_bigquery_data_transfer_config.query_config", plancheck.ResourceActionUpdate),
-					},
-				},
-			},
-			{
-				ResourceName:      "google_bigquery_data_transfer_config.query_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-				// schedule_options_v2 uses ignore_read, so it is not populated on
-				// import and must be excluded from import verification.
-				ImportStateVerifyIgnore: []string{"location", "schedule_options_v2"},
 			},
 		},
 	})
@@ -427,26 +389,45 @@ func testAccBigqueryDataTransferConfig_scheduleOptionsV2_eventDriven(t *testing.
 				},
 			},
 			{
-				ResourceName:      "google_bigquery_data_transfer_config.event_driven_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-				// schedule_options_v2 uses ignore_read, so it is not populated on
-				// import and must be excluded from import verification.
-				ImportStateVerifyIgnore: []string{"location", "schedule_options_v2"},
+				ResourceName:            "google_bigquery_data_transfer_config.event_driven_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
+func testAccBigqueryDataTransferConfig_disableAutoScheduling(t *testing.T) {
+	random_suffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDataTransferConfig_disableAutoSchedulingConfig(random_suffix),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.query_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
-	// Uses time.Now
-	acctest.SkipIfVcr(t)
 	random_suffix := acctest.RandString(t, 10)
-	now := time.Now().UTC()
-	first_start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
-	first_end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
-	second_start_time := now.Add(2 * time.Hour).Format(time.RFC3339)
-	second_end_time := now.AddDate(0, 2, 0).Format(time.RFC3339)
+	// Use static-but-future times so the test records/replays deterministically
+	// under VCR without needing SkipIfVcr.
+	base := time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10)
+	first_start_time := base.Format(time.RFC3339)
+	first_end_time := base.AddDate(0, 1, 0).Format(time.RFC3339)
+	second_start_time := base.AddDate(0, 0, 1).Format(time.RFC3339)
+	second_end_time := base.AddDate(0, 2, 0).Format(time.RFC3339)
 	random_suffix2 := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -480,8 +461,6 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 }
 
 func testAccBigqueryDataTransferConfig_CMEK(t *testing.T) {
-	// Uses time.Now
-	acctest.SkipIfVcr(t)
 	random_suffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -503,12 +482,12 @@ func testAccBigqueryDataTransferConfig_CMEK(t *testing.T) {
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.T) {
-	// Uses time.Now
-	acctest.SkipIfVcr(t)
 	random_suffix := acctest.RandString(t, 10)
-	now := time.Now().UTC()
-	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
-	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
+	// Use a static-but-future time so the test records/replays deterministically
+	// under VCR without needing SkipIfVcr.
+	base := time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10)
+	start_time := base.Format(time.RFC3339)
+	end_time := base.AddDate(0, 1, 0).Format(time.RFC3339)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -761,49 +740,6 @@ resource "google_bigquery_data_transfer_config" "query_config" {
 `, random_suffix, random_suffix, random_suffix2, schedule, start_time, end_time, letter)
 }
 
-func testAccBigqueryDataTransferConfig_scheduleOptionsV2(random_suffix, schedule, start_time, end_time string) string {
-	return fmt.Sprintf(`
-resource "google_bigquery_dataset" "my_dataset" {
-  dataset_id    = "my_dataset%s"
-  friendly_name = "foo"
-  description   = "bar"
-  location      = "asia-northeast1"
-}
-
-resource "google_bigquery_table" "my_table" {
-  deletion_protection = false
-
-  dataset_id = google_bigquery_dataset.my_dataset.dataset_id
-  table_id   = "my_table"
-  schema     = <<EOF
-  [
-    { "name": "name", "type": "STRING" },
-    { "name": "x", "type": "INTEGER" }
-  ]
-  EOF
-}
-
-resource "google_bigquery_data_transfer_config" "query_config" {
-  display_name           = "my-query-%s"
-  location               = "asia-northeast1"
-  data_source_id         = "scheduled_query"
-  schedule_options_v2 {
-    time_based_schedule {
-      schedule   = "%s sunday of quarter 00:00"
-      start_time = "%s"
-      end_time   = "%s"
-    }
-  }
-  destination_dataset_id = google_bigquery_dataset.my_dataset.dataset_id
-  params = {
-    destination_table_name_template = google_bigquery_table.my_table.table_id
-    write_disposition               = "WRITE_APPEND"
-    query                           = "SELECT name FROM tabl WHERE x = 'y'"
-  }
-}
-`, random_suffix, random_suffix, schedule, start_time, end_time)
-}
-
 func testAccBigqueryDataTransferConfig_scheduleOptionsV2EventDriven(random_suffix, subscription string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "topic" {
@@ -867,6 +803,45 @@ resource "google_bigquery_data_transfer_config" "event_driven_config" {
   }
 }
 `, random_suffix, random_suffix, random_suffix, random_suffix, random_suffix, random_suffix, subscription)
+}
+
+func testAccBigqueryDataTransferConfig_disableAutoSchedulingConfig(random_suffix string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "my_dataset" {
+  dataset_id    = "my_dataset%s"
+  friendly_name = "foo"
+  description   = "bar"
+  location      = "asia-northeast1"
+}
+
+resource "google_bigquery_table" "my_table" {
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+  table_id   = "my_table"
+  schema     = <<EOF
+  [
+    { "name": "name", "type": "STRING" },
+    { "name": "x", "type": "INTEGER" }
+  ]
+  EOF
+}
+
+resource "google_bigquery_data_transfer_config" "query_config" {
+  display_name           = "my-query-%s"
+  location               = "asia-northeast1"
+  data_source_id         = "scheduled_query"
+  schedule_options {
+    disable_auto_scheduling = true
+  }
+  destination_dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+  params = {
+    destination_table_name_template = google_bigquery_table.my_table.table_id
+    write_disposition               = "WRITE_APPEND"
+    query                           = "SELECT name FROM tabl WHERE x = 'y'"
+  }
+}
+`, random_suffix, random_suffix)
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_service_account(random_suffix string) string {

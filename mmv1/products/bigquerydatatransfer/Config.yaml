@@ -76,8 +76,8 @@ examples:
       topic_name: 'my-topic'
       subscription_name: 'my-subscription'
     # Event-driven transfers need a configured Cloud Storage source and IAM that
-    # the generated test harness can't provision; schedule_options_v2 itself is
-    # covered by a handwritten time_based_schedule test instead.
+    # the generated test harness can't provision; schedule_options_v2 is covered
+    # by the handwritten event_driven_schedule test instead.
     exclude_test: true
 parameters:
   - name: 'location'
@@ -178,77 +178,23 @@ properties:
     type: NestedObject
     description: |
       Options customizing different types of data transfer schedule.
-      This field replaces "schedule" and "schedule_options". It cannot be used
-      together with either of them.
+      Only the event-driven schedule is exposed here; time-based and manual
+      scheduling are configured through the `schedule` and `schedule_options`
+      fields instead. `event_driven_schedule` cannot be used together with
+      `schedule` or `schedule_options`.
     # The API mirrors a legacy `schedule`/`scheduleOptions` value into
-    # scheduleOptionsV2 on read (and applies a data-source default when nothing
-    # is set), so a config that omits this block would otherwise see a permanent
-    # diff. We can't fix this with default_from_api (Optional+Computed): that
-    # would persist the server value and send it back on every update, but
-    # scheduleOptionsV2 "cannot be used together with" the legacy schedule /
-    # scheduleOptions fields, so re-sending it alongside a legacy schedule update
-    # is rejected by the API. Instead ignore_read makes the flattener return the
-    # configured value rather than the server response, suppressing the diff
-    # without persisting (or re-sending) a value.
-    ignore_read: true
+    # scheduleOptionsV2 (as timeBasedSchedule / manualSchedule) on read. Those
+    # sub-schedules are intentionally not modeled here because they duplicate the
+    # existing `schedule` / `schedule_options` fields, so the decoder
+    # (templates/terraform/decoders/bigquery_data_transfer.go.tmpl) drops the
+    # echoed scheduleOptionsV2 when it carries no eventDrivenSchedule, which
+    # avoids a permanent diff while still reading back a real event_driven_schedule.
     properties:
-      - name: 'timeBasedSchedule'
-        type: NestedObject
-        description: |
-          Time based transfer schedule options. This is the default schedule option.
-        exactly_one_of:
-          - 'schedule_options_v2.0.time_based_schedule'
-          - 'schedule_options_v2.0.manual_schedule'
-          - 'schedule_options_v2.0.event_driven_schedule'
-        properties:
-          - name: 'schedule'
-            type: String
-            description: |
-              Data transfer schedule. If the data source does not support a custom
-              schedule, this should be empty. If it is empty, the default value for
-              the data source will be used. The specified times are in UTC. Examples
-              of valid format: 1st,3rd monday of month 15:30, every wed,fri of jan,
-              jun 13:15, and first sunday of quarter 00:00. See more explanation
-              about the format here:
-              https://cloud.google.com/appengine/docs/flexible/python/scheduling-jobs-with-cron-yaml#the_schedule_format
-              NOTE: The minimum interval time between recurring transfers depends
-              on the data source; refer to the documentation for your data source.
-          - name: 'startTime'
-            type: Time
-            description: |
-              Specifies time to start scheduling transfer runs. The first run will
-              be scheduled at or after the start time according to a recurrence
-              pattern defined in the schedule string. The start time can be changed
-              at any moment.
-          - name: 'endTime'
-            type: Time
-            description: |
-              Defines time to stop scheduling transfer runs. A transfer run cannot
-              be scheduled at or after the end time. The end time can be changed at
-              any moment.
-      - name: 'manualSchedule'
-        type: NestedObject
-        description: |
-          Manual transfer schedule. If set, the transfer run will not be
-          auto-scheduled by the system, unless the client invokes
-          StartManualTransferRuns. This is equivalent to disabling the automatic
-          scheduling of the data transfer config.
-        send_empty_value: true
-        allow_empty_object: true
-        exactly_one_of:
-          - 'schedule_options_v2.0.time_based_schedule'
-          - 'schedule_options_v2.0.manual_schedule'
-          - 'schedule_options_v2.0.event_driven_schedule'
-        properties: []
       - name: 'eventDrivenSchedule'
         type: NestedObject
         description: |
           Event driven transfer schedule options. If set, the transfer will be
           scheduled upon events arrival.
-        exactly_one_of:
-          - 'schedule_options_v2.0.time_based_schedule'
-          - 'schedule_options_v2.0.manual_schedule'
-          - 'schedule_options_v2.0.event_driven_schedule'
         properties:
           - name: 'pubsubSubscription'
             type: String
