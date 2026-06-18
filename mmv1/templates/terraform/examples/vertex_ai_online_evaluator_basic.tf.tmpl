@@ -1,5 +1,5 @@
 resource "google_vertex_ai_reasoning_engine" "engine" {
-  display_name = "integration-test-engine"
+  display_name = "{{index $.Vars "engine_name"}}"
   description  = "A basic reasoning engine"
   labels       = {
     "key" = "value"
@@ -8,7 +8,6 @@ resource "google_vertex_ai_reasoning_engine" "engine" {
 }
 
 resource "google_vertex_ai_online_evaluator" "evaluator" {
-  project        = "my-project-name"
   region         = "us-central1"
   display_name   = "{{index $.Vars "evaluator_name"}}"
   

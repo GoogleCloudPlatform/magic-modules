@@ -1,0 +1,166 @@
+package vertexai_test
+
+{{ if ne $.TargetVersionName "ga" -}}
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccVertexAIOnlineEvaluator_update(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"random_suffix": randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckVertexAIOnlineEvaluatorDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIOnlineEvaluator_basic(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_online_evaluator.evaluator",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region", "project"},
+			},
+			{
+				Config: testAccVertexAIOnlineEvaluator_update(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_online_evaluator.evaluator",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region", "project"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIOnlineEvaluator_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "engine" {
+  display_name = "re-%{random_suffix}"
+  description  = "A basic reasoning engine"
+  labels       = {
+    "key" = "value"
+  }
+  region       = "us-central1"
+}
+
+resource "google_vertex_ai_online_evaluator" "evaluator" {
+  region         = "us-central1"
+  display_name   = "eval-%{random_suffix}"
+  
+  agent_resource = google_vertex_ai_reasoning_engine.engine.id
+
+  config {
+    max_evaluated_samples_per_run = "100"
+    random_sampling {
+      percentage = 10
+    }
+  }
+
+  metric_sources {
+    metric = jsonencode({
+      "predefinedMetricSpec" = {
+        "metricSpecName" = "safety_v1"
+      }
+    })
+  }
+
+  cloud_observability {
+    open_telemetry {
+      semconv_version = "1.39.0"
+    }
+    
+    trace_scope {
+      filter {
+        duration {
+          comparison_operator = "GREATER"
+          value               = 0
+        }
+      }
+      filter {
+        total_token_usage {
+          comparison_operator = "LESS"
+          value               = 1000
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccVertexAIOnlineEvaluator_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "engine" {
+  display_name = "re-%{random_suffix}"
+  description  = "A basic reasoning engine"
+  labels       = {
+    "key" = "value"
+  }
+  region       = "us-central1"
+}
+
+resource "google_vertex_ai_online_evaluator" "evaluator" {
+  region         = "us-central1"
+  display_name   = "eval-upd-%{random_suffix}"
+  
+  agent_resource = google_vertex_ai_reasoning_engine.engine.id
+
+  config {
+    max_evaluated_samples_per_run = "200"
+    random_sampling {
+      percentage = 20
+    }
+  }
+
+  metric_sources {
+    metric = jsonencode({
+      "predefinedMetricSpec" = {
+        "metricSpecName" = "safety_v1"
+      }
+    })
+  }
+
+  metric_sources {
+    metric = jsonencode({
+      "predefinedMetricSpec" = {
+        "metricSpecName" = "hallucination_v1"
+      }
+    })
+  }
+
+  cloud_observability {
+    open_telemetry {
+      semconv_version = "1.39.0"
+    }
+    
+    trace_scope {
+      filter {
+        duration {
+          comparison_operator = "GREATER"
+          value               = 0
+        }
+      }
+      filter {
+        total_token_usage {
+          comparison_operator = "LESS"
+          value               = 1000
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+{{- end }}

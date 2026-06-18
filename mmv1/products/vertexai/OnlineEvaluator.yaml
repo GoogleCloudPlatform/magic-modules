@@ -14,6 +14,7 @@
 name: OnlineEvaluator
 description: Description
 base_url: projects/{{project}}/locations/{{region}}/onlineEvaluators
+min_version: beta
 self_link: 'projects/{{project}}/locations/{{region}}/onlineEvaluators/{{name}}'
 create_url: projects/{{project}}/locations/{{region}}/onlineEvaluators
 update_mask: true
@@ -59,31 +60,37 @@ properties:
         type: String
         description: 'Optional log view that will be used to query logs.
           If empty, the `_Default` view will be used.'
+        immutable: true
       - name: openTelemetry
         type: NestedObject
         description: Configuration for data source following OpenTelemetry.
+        immutable: true
         properties:
           - name: semconvVersion
             type: String
             required: true
             description: 'Defines which version OTel Semantic Convention the data follows.
               Can be "1.39.0" or newer.'
+            immutable: true
       - name: traceScope
         type: NestedObject
         description: 'If chosen, the online evaluator will evaluate single traces matching
           specified `filter`.'
+        immutable: true
         properties:
           - name: filter
             type: Array
             description: 'A list of predicates to filter traces. Multiple predicates are
               combined using AND.
               The maximum number of predicates is 10.'
+            immutable: true
             item_type:
               type: NestedObject
               properties:
                 - name: duration
                   type: NestedObject
                   description: Defines a predicate for filtering based on a numeric value.
+                  immutable: true
                   properties:
                     - name: comparisonOperator
                       type: String
@@ -96,13 +103,16 @@ properties:
                         NOT_EQUAL
                         GREATER_OR_EQUAL
                         GREATER'
+                      immutable: true
                     - name: value
                       type: Double
                       required: true
                       description: The value to compare against.
+                      immutable: true
                 - name: totalTokenUsage
                   type: NestedObject
                   description: Defines a predicate for filtering based on a numeric value.
+                  immutable: true
                   properties:
                     - name: comparisonOperator
                       type: String
@@ -115,15 +125,18 @@ properties:
                         NOT_EQUAL
                         GREATER_OR_EQUAL
                         GREATER'
+                      immutable: true
                     - name: value
                       type: Double
                       required: true
                       description: The value to compare against.
+                      immutable: true
       - name: traceView
         type: String
         description: 'Optional trace view that will be used to query traces.
           If empty, the `_Default` view will be used.
           NOTE: This field is not supported yet and will be ignored if set.'
+        immutable: true
     required: true
     immutable: true
   - name: config
@@ -181,8 +194,8 @@ properties:
             - `multi_turn_task_success_v1`
             - `multi_turn_tool_use_quality_v1`
             - `multi_turn_trajectory_quality_v1`
-          custom_expand: 'templates/terraform/custom_expand/vertexai_online_evaluator_metric.go.tmpl'
-          custom_flatten: 'templates/terraform/custom_flatten/vertexai_online_evaluator_metric.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
         - name: metricResourceName
           type: String
           description: Resource name for registered metric.
@@ -224,4 +237,4 @@ examples:
     primary_resource_id: 'evaluator'
     vars:
       evaluator_name: 'my-evaluator'
-min_version: beta
+      engine_name: 'my-engine'
