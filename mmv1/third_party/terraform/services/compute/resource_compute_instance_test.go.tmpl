@@ -13310,6 +13310,7 @@ resource "google_compute_network_attachment" "test_network_attachment" {
 resource "google_compute_address" "producer_address" {
   name = "tf-test-basic-address%{suffix}"
   network_attachment = google_compute_network_attachment.test_network_attachment.id
+  service_class_id = "%{service_class_id}"
 }
 
 resource "google_compute_instance" "foobar" {
