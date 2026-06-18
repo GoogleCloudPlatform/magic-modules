@@ -21,4 +21,4 @@ In complex cases, it is better to mark the field `ForceNew` to ensure that users
 
 ## Safeguarding against deletion
 
-See [deletion policy]({{< ref "/best-practices/deletion-policy" >}}) for details on how to modify the `deletion_policy` field that can be used to control deletion behavior for most provider resources.
+See [Deletion policy]({{< ref "/best-practices/deletion-policy" >}}) for details on how to modify the `deletion_policy` field that can be used to control deletion behavior for most provider resources.
