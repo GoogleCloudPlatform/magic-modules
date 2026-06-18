@@ -9768,6 +9768,7 @@ resource "google_container_cluster" "with_node_config_kubelet_config_settings" {
     kubelet_config {
       pod_pids_limit                        = 1024
       container_log_max_files               = 4
+      container_max_log_workers             = 4
       single_process_oom_kill               = true
       max_parallel_image_pulls              = 5
       eviction_max_pod_grace_period_seconds = 200
@@ -9822,6 +9823,7 @@ resource "google_container_cluster" "with_node_config_kubelet_config_settings" {
       cpu_cfs_quota_period                   = "%s"
       insecure_kubelet_readonly_port_enabled = "%s"
       pod_pids_limit                         = %v
+      container_max_log_workers             = 6
       single_process_oom_kill                = true
       max_parallel_image_pulls               = 5
       eviction_max_pod_grace_period_seconds  = 200
@@ -9892,6 +9894,7 @@ resource "google_container_cluster" "with_node_config_kubelet_config_settings_in
       machine_type = "n1-standard-1"
       kubelet_config {
         max_parallel_image_pulls               = 5
+        container_max_log_workers             = 4
         eviction_max_pod_grace_period_seconds  = 200
         eviction_soft {
           memory_available = "200Mi"
