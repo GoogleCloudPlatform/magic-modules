@@ -1584,6 +1584,12 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	}
 	delete(res, "id")
 
+	var schedulingMapFromResponse map[string]interface{}
+	if propsMap, ok := res["properties"].(map[string]interface{}); ok {
+		schedulingMapFromResponse, _ = propsMap["scheduling"].(map[string]interface{})
+		delete(propsMap, "scheduling")
+	}
+
 	resBytes, err := json.Marshal(res)
 	if err != nil {
 		return fmt.Errorf("Error marshaling instance template response: %s", err)
@@ -1725,12 +1731,8 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			}
 		}
 	}
-	if instanceTemplate.Properties.Scheduling != nil {
-		schedulingMap, err := tpgresource.ConvertToMap(instanceTemplate.Properties.Scheduling)
-		if err != nil {
-			return fmt.Errorf("Error converting scheduling: %s", err)
-		}
-		scheduling := flattenScheduling(schedulingMap)
+	if schedulingMapFromResponse != nil {
+		scheduling := flattenScheduling(schedulingMapFromResponse)
 {{ if ne $.TargetVersionName `ga` }}
 		// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
 		// To avoid diff, we need to set the value from the state not from API response.
