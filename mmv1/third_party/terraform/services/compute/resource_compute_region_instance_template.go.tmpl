@@ -1399,7 +1399,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	if v := d.Get("key_revocation_action_type").(string); v != "" {
 		instanceProperties["keyRevocationActionType"] = v
 	}
-	if metadata != nil {
+	if len(metadata) > 0 {
 		instanceProperties["metadata"] = metadata
 	}
 	if networkPerformanceConfig != nil {
