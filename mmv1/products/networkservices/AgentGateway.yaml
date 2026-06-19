@@ -68,8 +68,9 @@ parameters:
     type: String
     description: |
       Name of the AgentGateway resource.
-    url_param_only: true
     required: true
+    ignore_read: true
+    custom_expand: 'templates/terraform/custom_expand/network_services_agent_gateway_name.go.tmpl'
   - name: 'location'
     type: String
     description: |

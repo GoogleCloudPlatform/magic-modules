@@ -572,6 +572,21 @@ properties:
             set in the session variables. See
             https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/tool/open-api#openapi-injection
             for more details.
+  - name: toolFakeConfig
+    type: NestedObject
+    description: Configuration for tools behavior in fake mode.
+    properties:
+      - name: enableFakeMode
+        type: Boolean
+        description: Whether the tool is using fake mode.
+      - name: codeBlock
+        type: NestedObject
+        description: Code block which will be executed instead of a real tool call.
+        properties:
+          - name: pythonCode
+            type: String
+            required: true
+            description: Python code which will be invoked in tool fake mode.
   - name: updateTime
     type: String
     description: Timestamp when the toolset was last updated.

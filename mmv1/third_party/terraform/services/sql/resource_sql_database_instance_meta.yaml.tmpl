@@ -149,6 +149,14 @@ fields:
   - api_field: 'settings.insightsConfig.recordApplicationTags'
   - api_field: 'settings.insightsConfig.recordClientAddress'
   - api_field: 'settings.insightsConfig.enhancedQueryInsightsEnabled'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'settings.performanceCaptureConfig.enabled'
+  - api_field: 'settings.performanceCaptureConfig.probeThreshold'
+  - api_field: 'settings.performanceCaptureConfig.probingIntervalSeconds'
+  - api_field: 'settings.performanceCaptureConfig.runningThreadsThreshold'
+  - api_field: 'settings.performanceCaptureConfig.secondsBehindSourceThreshold'
+  - api_field: 'settings.performanceCaptureConfig.transactionDurationThreshold'
+{{- end }}
   - api_field: 'settings.entraidConfig.applicationId'
   - api_field: 'settings.entraidConfig.tenantId'
   - api_field: 'settings.ipConfiguration.allocatedIpRange'
