@@ -2473,6 +2473,21 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 		expanded["onHostMaintenance"] = "TERMINATE"
 	}
 
+	for _, key := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "preemptionNoticeDuration"} {
+		if dur, ok := expanded[key].(map[string]interface{}); ok {
+			if sec, ok := dur["seconds"]; ok {
+				dur["seconds"] = strconv.FormatInt(getInt(sec), 10)
+			}
+		}
+	}
+	if gs, ok := expanded["gracefulShutdown"].(map[string]interface{}); ok {
+		if md, ok := gs["maxDuration"].(map[string]interface{}); ok {
+			if sec, ok := md["seconds"]; ok {
+				md["seconds"] = strconv.FormatInt(getInt(sec), 10)
+			}
+		}
+	}
+
 	schedulingTyped := &compute.Scheduling{}
 	if err := tpgresource.Convert(expanded, schedulingTyped); err != nil {
 		return nil, fmt.Errorf("Error converting scheduling: %s", err)
