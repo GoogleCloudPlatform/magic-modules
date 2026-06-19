@@ -46,14 +46,13 @@ func ResourceApigeeSharedFlowDeployment() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: `The Apigee Organization associated with the Apigee instance`,
-				// Normalize org_id by stripping the "organizations/" prefix. Users may
-				// pass google_apigee_organization.id ("organizations/<project-id>");
-				// after import the captured org_id has no prefix, so without
-				// normalization the config/state mismatch triggers a spurious
-				// ForceNew (destroy/recreate). StateFunc stores the normalized value
-				// so both forms match with no diff.
-				StateFunc: func(v interface{}) string {
-					return strings.TrimPrefix(v.(string), "organizations/")
+				// Users may pass google_apigee_organization.id
+				// ("organizations/<project-id>"); after import the captured org_id has
+				// no prefix. Suppress the diff when the two values are equal once the
+				// "organizations/" prefix is stripped, so the prefixed and bare forms
+				// don't trigger a spurious ForceNew (destroy/recreate).
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return strings.TrimPrefix(old, "organizations/") == strings.TrimPrefix(new, "organizations/")
 				},
 			},
 			"revision": {
