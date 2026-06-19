@@ -4231,7 +4231,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			log.Printf("[INFO] Updated labels for node pool %s", name)
 		}
 
-		if d.HasChange(prefix + "node_config.0.image_type") {
+		if d.HasChange(prefix + "node_config.0.image_type") && !d.HasChange(prefix + "node_config.0.node_image_config") {
 			req := &container.UpdateClusterRequest{
 				Update: &container.ClusterUpdate{
 					DesiredNodePoolId: name,
@@ -4471,6 +4471,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				Name: name,
 				Image: imageConfig.Image,
 				ImageProject: imageConfig.ImageProject,
+			}
+			if d.HasChange(prefix + "node_config.0.image_type") {
+				req.ImageType = d.Get(prefix + "node_config.0.image_type").(string)
 			}
 
 			updateF := func() error {
