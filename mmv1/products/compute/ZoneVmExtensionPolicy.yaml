@@ -110,4 +110,3 @@ properties:
     type: String
     description: 'Current state of the policy.'
     output: true
-
