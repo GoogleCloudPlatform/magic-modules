@@ -196,11 +196,13 @@ properties:
             - `multi_turn_task_success_v1`
             - `multi_turn_tool_use_quality_v1`
             - `multi_turn_trajectory_quality_v1`
+          immutable: true
           custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
           custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
         - name: metricResourceName
           type: String
           description: Resource name for registered metric.
+          immutable: true
   - name: name
     type: String
     description: 'Identifier. The resource name of the OnlineEvaluator.
