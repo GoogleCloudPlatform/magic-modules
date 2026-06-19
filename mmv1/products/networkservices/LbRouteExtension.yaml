@@ -219,6 +219,7 @@ properties:
                   are sent. Each element is a string indicating the attribute name.
                 item_type:
                   type: String
+                max_size: 16
               - name: 'supportedEvents'
                 type: Array
                 is_set: true
