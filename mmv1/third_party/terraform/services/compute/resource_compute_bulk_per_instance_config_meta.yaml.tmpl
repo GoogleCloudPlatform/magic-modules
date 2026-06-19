@@ -1,0 +1,20 @@
+resource: google_compute_bulk_per_instance_config
+generation_type: 'handwritten'
+api_service_name: compute.googleapis.com
+{{- if ne $.TargetVersionName "ga" }}
+api_version: 'beta'
+{{- else }}
+api_version: 'v1'
+{{- end }}
+api_resource_type_kind: InstanceGroupManager
+api_variant_patterns:
+    - projects/{project}/zones/{zone}/instanceGroupManagers/{instanceGroupManager}
+fields:
+    - field: instance_group_manager
+      provider_only: true
+    - api_field: name
+    - api_field: perInstanceConfigs.name
+    - field: zone
+      provider_only: true
+    - field: deletion_policy
+      provider_only: true
