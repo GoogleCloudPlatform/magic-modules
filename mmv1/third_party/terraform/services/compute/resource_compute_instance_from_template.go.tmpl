@@ -192,6 +192,20 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		if err != nil {
 			return fmt.Errorf("Error expanding scheduling: %s", err)
 		}
+		for _, key := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "preemptionNoticeDuration"} {
+			if dur, ok := schedulingMap[key].(map[string]interface{}); ok {
+				if sec, ok := dur["seconds"]; ok {
+					dur["seconds"] = fmt.Sprintf("%d", getInt(sec))
+				}
+			}
+		}
+		if gs, ok := schedulingMap["gracefulShutdown"].(map[string]interface{}); ok {
+			if md, ok := gs["maxDuration"].(map[string]interface{}); ok {
+				if sec, ok := md["seconds"]; ok {
+					md["seconds"] = fmt.Sprintf("%d", getInt(sec))
+				}
+			}
+		}
 		schedulingBytes, err := json.Marshal(schedulingMap)
 		if err != nil {
 			return fmt.Errorf("Error marshaling scheduling: %s", err)
@@ -202,6 +216,20 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		}
 		instance.Scheduling = schedulingTyped
 	}
+
+	{{- if ne $.TargetVersionName "ga" }}
+	if pm := d.Get("partner_metadata").(map[string]interface{}); len(pm) > 0 {
+		pmRaw, err := resourceInstancePartnerMetadata(d)
+		if err != nil {
+			return fmt.Errorf("Error expanding partner_metadata: %s", err)
+		}
+		partnerMetadataTyped, err := convertPartnerMetadataToComputeTyped(pmRaw)
+		if err != nil {
+			return fmt.Errorf("Error converting partner_metadata: %s", err)
+		}
+		instance.PartnerMetadata = partnerMetadataTyped
+	}
+	{{- end }}
 
 	// Force send all top-level fields that have been set in case they're overridden to zero values.
 	// Initialize ForceSendFields to empty so we don't get things that the instance resource
