@@ -201,4 +201,3 @@ properties:
     type: String
     description: 'Update timestamp in RFC3339 text format.'
     output: true
-
