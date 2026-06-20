@@ -8,5 +8,10 @@ resource "google_biglake_iceberg_catalog" "{{$.PrimaryResourceId}}" {
       catalog_name  = "my_catalog"
       instance_name = "1.1.gcp.databricks.com"
     }
+    refresh_options {
+      refresh_schedule {
+        refresh_interval = "300s"
+      }
+    }
   }
 }

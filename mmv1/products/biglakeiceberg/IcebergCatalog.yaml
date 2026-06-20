@@ -131,7 +131,11 @@ properties:
   - name: catalog_type
     api_name: catalog-type
     type: Enum
-    description: The catalog type of the IcebergCatalog. CATALOG_TYPE_GCS_BUCKET - Google Cloud Storage bucket catalog type. CATALOG_TYPE_BIGLAKE - BigLake catalog type. CATALOG_TYPE_FEDERATED - Federated catalog type, for integrating with external Iceberg REST Catalogs such as Databricks Unity Catalog or AWS Glue.
+    description: |
+      The catalog type of the IcebergCatalog.
+      * `CATALOG_TYPE_GCS_BUCKET`: Google Cloud Storage bucket catalog type.
+      * `CATALOG_TYPE_BIGLAKE`: BigLake catalog type.
+      * `CATALOG_TYPE_FEDERATED`: Federated catalog type, for integrating with external Iceberg REST Catalogs such as Databricks Unity Catalog or AWS Glue.
     required: true
     immutable: true
     output: false
