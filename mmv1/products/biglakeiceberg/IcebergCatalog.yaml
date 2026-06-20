@@ -39,9 +39,14 @@ iam_policy:
     - projects/{{project}}/catalogs/{{name}}
     - '{{name}}'
 supports_indirect_user_project_override: true
+virtual_fields:
+  - name: biglake_service_account_member
+    type: String
+    output: true
+    description: |
+      The Identity of the service account in the form `serviceAccount:{email}`. This value is often used to refer to the service account in order to grant IAM permissions.
 custom_code:
   custom_update: templates/terraform/custom_update/biglake_iceberg_catalog_update.go.tmpl
-  extra_schema_entry: templates/terraform/extra_schema_entry/biglake_iceberg_catalog.go.tmpl
   post_read: templates/terraform/post_read/biglake_iceberg_catalog.go.tmpl
 samples:
   - name: biglake_iceberg_catalog
