@@ -41,6 +41,8 @@ iam_policy:
 supports_indirect_user_project_override: true
 custom_code:
   custom_update: templates/terraform/custom_update/biglake_iceberg_catalog_update.go.tmpl
+  extra_schema_entry: templates/terraform/extra_schema_entry/biglake_iceberg_catalog.go.tmpl
+  post_read: templates/terraform/post_read/biglake_iceberg_catalog.go.tmpl
 samples:
   - name: biglake_iceberg_catalog
     primary_resource_id: my_iceberg_catalog
