@@ -52,6 +52,10 @@ samples:
         test_env_vars:
           project_name: PROJECT_NAME
 parameters:
+  - name: name
+    type: String
+    output: true
+    description: The relative resource name of the data asset.
   - name: location
     type: String
     required: true
