@@ -23,7 +23,7 @@ func TestAccDataplexDataProduct_update(t *testing.T) {
 			{
 				// STEP 1: Initial Creation
 				Config: testAccDataplexDataProduct_basic(context),
-                Check: resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_dataplex_data_product.example", "icon", "c29tZSBkYXRh"),
 				),
 			},
