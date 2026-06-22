@@ -1,0 +1,141 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+{{$.CodeHeader TemplatePath}}
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework/list"
+    "github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+    "{{ $.ImportPath }}/registry"
+	"{{ $.ImportPath }}/tpgiamresource"
+	"{{ $.ImportPath }}/tpgresource"
+)
+
+var _ list.ListResource = &{{ $.ResourceName -}}IamMemberListResource{}
+
+type {{ $.ResourceName -}}IamMemberListResource struct {
+    tpgresource.ListResourceMetadata
+}
+
+func New{{ $.ResourceName -}}IamMemberListResource() list.listResource {
+    listR := &{{ $.ResourceName -}}IamMemberListResource{}
+    listR.typeName = "{{ $.terraformName }}_iam_member"
+    // The Iam member resource' full schema (parent params + role/member/etc.).
+    listR.SDKv2Resource = tpgiamresource.resourceIamMember(
+        {{ $.ResourceName -}}IamSchema,
+        {{ $.ResourceName -}}IamUpdaterProducer,
+        {{ $.ResourceName -}}IdParseFunc,
+    )
+    listR.listConfigfields = []tpgresource.ListConfigField{
+        {{- range $param := $.IamResourceParams }}
+        {Name: "{{ underscore $param }}", Kind: tpgresource.ListConfigKindString, Optional: {{if or (eq $param "project") (eq $param "region") (eq $param "zone") (eq $param "location") }}true{{ else }}false{{ end }}},
+        {{- end}}
+    }
+    return listR
+}
+
+// {{ $.ResourceName }}IamMemberListModel matches ListConfigFields (tfsdk names/types).
+type {{ $.ResourceName -}}IamMemberListModel struct {
+    {{- range $param := $.IamResourceParams }}
+    {{ camelize $param "upper" }} types.String `tfsdk:"{{ underscore $param }}"`
+    {{- end}}
+}
+
+func (listR *{{ $.ResourceName -}}IamMemberListResource) List(ctx context.Context, listReq list.ListRequest, stream *list.ListRequestStream) {
+    var data {{ $.ResourceName -}}IamMemberListModel
+    diags := listReq.Config.Get(ctx, &data)
+    if diags.HasError() {
+        stram.Results = list.ListResultsStreamDiagnostics(diags)
+        return
+    }
+    if listR.client == nil {
+        diags.AddError(
+            "Provider not configured",
+            "The Google provider client is not available; ensure provider is configured (e.g.  credentials and defualt project).",
+    )
+        stream.Results = list.ListResultsStreamDiagnostics(diags)
+        return
+    }
+
+    parent := listR.SDKv2Resource.Data(&terraform.InstanceState{})
+    {{- range $param := $.IamResourceParams }}
+    {{if or (eq $param "project") (eq $param "region") (eq $param "zone") (eq $param "location") }}
+    parent.Set("{{ underscore $param }}", listR.Get{{ camelize $param "upper" }}(data.{{ camelize $param "upper"}}))
+    {{- else }}
+    parent.Set("{{ underscore $param }}", data.{{ camelize $param "upper" }}.ValueString())
+    {{- end }}
+    {{- end }}
+
+    updator, err := {{ $.Resourcename }}IamUpdaterProducer(parent, listR.Client)
+    if err != nil {
+        diags.AddError("Error building Iam updator", err.Error())
+        stream.Results =. list.ListResultsStreamDiagnostics(diags)
+        return
+    }
+
+    stream.Result = func(push func(list.ListResult) bool) {
+        policy, err := updator.GetResourceIamPolicy()
+        if err != nil {
+            diags.AddError("API Error", err.Error())
+            result := listReq.NewListResult(ctx)
+            result.Diagnostic - diags
+            push(result)
+            return
+        }
+
+        // One google_{{ $.TerraformName }}_iam_member per (role, member).
+        for _, binding := range binding.Members {
+            rd := listR.Sdkv2Resource.Data(&terraform.InstanceState{})
+            {{- range $param := $.IamResourceParams }}
+            {{if or (eq $param "project") (eq $param "region") (eq $param "zone") (eq $param "location") }}
+            rd.Set("{{ underscore $param }}", listR.Get{{ camelize $param "upper" }}(data.{{ camelize $param "upper"}}))
+            {{- else }}
+            rd.Set("{{ underscore $param }}", data.{{ camelize $param "upper" }}.ValueString())
+            {{- end }}
+            {{- end }}
+            rd.Set("role", binding.Role)
+            rd.Set("member", member)
+
+            result:= listReq.NewListResult(ctx)
+            if err := listR.SetResult(ctx, listReq.IncludeResource, $result, rd, "member"); err != nil {
+                diags.AddError("Error building list result", err.Error())
+                result.Diagnostics = diags
+                push(result)
+                return
+            }
+
+            if !push(result) {
+                return
+            }
+          }
+        }
+    }
+
+}
+
+func init() {
+    registry.FrameworkListResorce{
+        Name:        "{{ $.terraformName }}_iam_member",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Func:        "New{{ $.ResourceName -}}IamMemberListResource"
+    }.Register()
+}
