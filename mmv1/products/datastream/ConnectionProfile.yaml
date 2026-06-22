@@ -693,9 +693,6 @@ properties:
               If this field is used then the 'client_certificate' and the
               'ca_certificate' fields are mandatory.
             required: false
-            exactly_one_of:
-              - mongodb_profile.0.ssl_config.0.client_key
-              - mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key
             immutable: true
             sensitive: true
             ignore_read: true
@@ -738,9 +735,6 @@ properties:
               A reference to a Secret Manager resource name storing the
               PEM-encoded private key. Mutually exclusive with clientKey.
             required: false
-            exactly_one_of:
-              - mongodb_profile.0.ssl_config.0.client_key
-              - mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key
             immutable: true
             sensitive: true
             ignore_read: true
