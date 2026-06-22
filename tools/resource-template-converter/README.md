@@ -34,7 +34,10 @@ go build -o bin/convert-resource-template main.go
 1. `<path_to_repository_root>` (Required): Path to the root of the repository you want to process (e.g., `<path_to_magic_modules_repository>`).
 
 ### Flags
-* `-f, --file <path>` (Optional): Path to a single resource YAML file to convert (relative or absolute). If omitted, the tool walks and processes all YAML files in the `products/` directory.
+* `-f, --file <paths>` (Optional): Comma-separated list of resource YAML file paths to convert (relative or absolute). If omitted, the tool walks and processes all YAML files in the `products/` directory.
+* `-p, --product <product_names>` (Optional): Comma-separated list of product directories to convert (e.g., `vertexai` or `vertexai,pubsublite`). If specified, only YAML files under the matching product directories are walked and processed. Cannot be specified together with `--file`.
+* `-F, --skip-file <paths>` (Optional): Comma-separated list of resource YAML file paths to skip from migration.
+* `-P, --skip-product <product_names>` (Optional): Comma-separated list of product directories to skip from migration.
 * `--skip-open-pr` (Optional): Fetch open PRs updated in the last 2 months from GitHub. Any matching YAML files modified in those PRs will be skipped.
 
 ---
@@ -43,11 +46,11 @@ go build -o bin/convert-resource-template main.go
 
 All examples below are executed from the `tools/resource-template-converter` directory.
 
-### Example 1: Single File Migration
-To migrate a single resource YAML file:
+### Example 1: File Migration (Single or Multiple)
+To migrate one or more specific resource YAML files:
 ```bash
 go run main.go convert-resource-template \
-  -f mmv1/products/vertexai/Dataset.yaml \
+  -f mmv1/products/vertexai/Dataset.yaml,mmv1/products/pubsublite/Topic.yaml \
   <path_to_magic_modules_repository>
 ```
 
@@ -66,11 +69,28 @@ go run main.go convert-resource-template \
   Skipping single target file mmv1/products/hypercomputecluster/Cluster.yaml: modified in active open PR(s) [17678 17610 17522]
   ```
 
-### Example 3: Bulk Repository Conversion (Excluding Active PR Files)
+### Example 3: Product Directory Migration (Single or Multiple)
+To migrate all resource YAML files in one or more specific product directories (e.g., `pubsublite,essentialcontacts`):
+```bash
+go run main.go convert-resource-template \
+  -p pubsublite,essentialcontacts \
+  <path_to_magic_modules_repository>
+```
+
+### Example 4: Bulk Repository Conversion (Excluding Active PR Files)
 To safely bulk-migrate all product files in the repository:
 ```bash
 go run main.go convert-resource-template \
   --skip-open-pr \
+  <path_to_magic_modules_repository>
+```
+
+### Example 5: Bulk Conversion with Skip Filters
+To safely bulk-migrate the entire repository but exclude specific products (e.g. `compute`) and specific resource files (e.g. `mmv1/products/dns/ManagedZone.yaml`):
+```bash
+go run main.go convert-resource-template \
+  -P compute \
+  -F mmv1/products/dns/ManagedZone.yaml \
   <path_to_magic_modules_repository>
 ```
 

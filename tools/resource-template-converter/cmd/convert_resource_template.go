@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/resource-template-converter/copy"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/resource-template-converter/github"
@@ -16,6 +17,9 @@ import (
 var resourceFileRegex = regexp.MustCompile(`(?:mmv1/)?products/([^/]+)/([^/]+\.yaml)`)
 
 var filePath string
+var targetProduct string
+var skipFilesFlag string
+var skipProductsFlag string
 var skipOpenPR bool
 
 var convertResourceTemplateCmd = &cobra.Command{
@@ -39,6 +43,35 @@ var convertResourceTemplateCmd = &cobra.Command{
 }
 
 func exeCconvertResourceTemplate(basePath string, targetFile string) error {
+	if targetFile != "" && targetProduct != "" {
+		return fmt.Errorf("cannot specify both --file and --product")
+	}
+
+	skipProductsMap := make(map[string]bool)
+	if skipProductsFlag != "" {
+		for _, p := range strings.Split(skipProductsFlag, ",") {
+			p = strings.TrimSpace(p)
+			if p != "" {
+				skipProductsMap[p] = true
+			}
+		}
+	}
+
+	skipFilesMap := make(map[string]bool)
+	if skipFilesFlag != "" {
+		for _, f := range strings.Split(skipFilesFlag, ",") {
+			f = strings.TrimSpace(f)
+			if f == "" {
+				continue
+			}
+			resolved := f
+			if !filepath.IsAbs(resolved) {
+				resolved = filepath.Clean(filepath.Join(basePath, f))
+			}
+			skipFilesMap[resolved] = true
+		}
+	}
+
 	var productsPath, examplesSourceDir, samplesDestDir string
 
 	if _, err := os.Stat(filepath.Join(basePath, "mmv1")); err == nil {
@@ -56,6 +89,24 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 		log.Fatalf("Neither 'mmv1' nor 'products' directory structure found. Please ensure this tool is run from a magic-modules or magic-modules-private-overrides directory.")
 	}
 
+	var pathsToWalk []string
+	if targetProduct != "" {
+		products := strings.Split(targetProduct, ",")
+		for _, p := range products {
+			p = strings.TrimSpace(p)
+			if p == "" {
+				continue
+			}
+			productDir := filepath.Join(productsPath, p)
+			if _, err := os.Stat(productDir); os.IsNotExist(err) {
+				return fmt.Errorf("product directory does not exist: %s", productDir)
+			}
+			pathsToWalk = append(pathsToWalk, productDir)
+		}
+	} else {
+		pathsToWalk = []string{productsPath}
+	}
+
 	var touchedFiles map[string][]int
 	if skipOpenPR {
 		fmt.Println("Fetching open PRs updated in the last 2 months from GitHub...")
@@ -68,80 +119,131 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 	}
 
 	if targetFile != "" {
-		resolvedPath := targetFile
-		if !filepath.IsAbs(resolvedPath) {
-			resolvedPath = filepath.Clean(filepath.Join(basePath, targetFile))
+		type targetYAML struct {
+			resolvedPath string
+			serviceName  string
+			relPath      string
 		}
+		var targets []targetYAML
 
-		if _, err := os.Stat(resolvedPath); os.IsNotExist(err) {
-			return fmt.Errorf("target file does not exist: %s", resolvedPath)
-		}
-
-		matches := resourceFileRegex.FindStringSubmatch(resolvedPath)
-		if matches == nil {
-			return fmt.Errorf("file path %s does not match expected pattern mmv1/products/<service>/<resource>.yaml", resolvedPath)
-		}
-		serviceName := matches[1]
-
-		relPath, err := filepath.Rel(basePath, resolvedPath)
-		if err == nil && skipOpenPR {
-			normPath := github.NormalizePath(relPath)
-			if prs, touched := touchedFiles[normPath]; touched {
-				fmt.Printf("Skipping single target file %s: modified in active open PR(s) %v\n", targetFile, prs)
-				return nil
+		files := strings.Split(targetFile, ",")
+		for _, f := range files {
+			f = strings.TrimSpace(f)
+			if f == "" {
+				continue
 			}
+			resolvedPath := f
+			if !filepath.IsAbs(resolvedPath) {
+				resolvedPath = filepath.Clean(filepath.Join(basePath, f))
+			}
+
+			if _, err := os.Stat(resolvedPath); os.IsNotExist(err) {
+				return fmt.Errorf("target file does not exist: %s", resolvedPath)
+			}
+
+			matches := resourceFileRegex.FindStringSubmatch(resolvedPath)
+			if matches == nil {
+				return fmt.Errorf("file path %s does not match expected pattern mmv1/products/<service>/<resource>.yaml", resolvedPath)
+			}
+			serviceName := matches[1]
+
+			relPath, err := filepath.Rel(basePath, resolvedPath)
+			if err != nil {
+				return fmt.Errorf("failed to resolve relative path for %s: %w", resolvedPath, err)
+			}
+
+			targets = append(targets, targetYAML{
+				resolvedPath: resolvedPath,
+				serviceName:  serviceName,
+				relPath:      relPath,
+			})
 		}
 
-		fmt.Printf("Processing single product YAML file: %s (service: %s)\n", resolvedPath, serviceName)
+		for _, t := range targets {
+			if skipOpenPR {
+				normPath := github.NormalizePath(t.relPath)
+				if prs, touched := touchedFiles[normPath]; touched {
+					fmt.Printf("Skipping target file %s: modified in active open PR(s) %v\n", t.resolvedPath, prs)
+					continue
+				}
+			}
 
-		if err := copy.ProcessResourceFile(resolvedPath, serviceName, examplesSourceDir, samplesDestDir); err != nil {
-			return fmt.Errorf("error copying templates: %w", err)
-		}
-		if err := migrate.MigrateFile(resolvedPath, serviceName); err != nil {
-			return fmt.Errorf("failed to migrate file: %w", err)
+			if _, skip := skipFilesMap[t.resolvedPath]; skip {
+				fmt.Printf("Skipping target file %s: matched --skip-file filter\n", t.resolvedPath)
+				continue
+			}
+
+			if _, skip := skipProductsMap[t.serviceName]; skip {
+				fmt.Printf("Skipping target file %s: product %s matched --skip-product filter\n", t.resolvedPath, t.serviceName)
+				continue
+			}
+
+			fmt.Printf("Processing product YAML file: %s (service: %s)\n", t.resolvedPath, t.serviceName)
+
+			if err := copy.ProcessResourceFile(t.resolvedPath, t.serviceName, examplesSourceDir, samplesDestDir); err != nil {
+				return fmt.Errorf("error copying templates for %s: %w", t.resolvedPath, err)
+			}
+			if err := migrate.MigrateFile(t.resolvedPath, t.serviceName); err != nil {
+				return fmt.Errorf("failed to migrate file %s: %w", t.resolvedPath, err)
+			}
 		}
 
 		fmt.Println("Processing complete.")
 		return nil
 	}
 
-	fmt.Printf("Starting processing of product YAML files in: %s\n", productsPath)
+	for _, pPath := range pathsToWalk {
+		fmt.Printf("Starting processing of product YAML files in: %s\n", pPath)
 
-	err := filepath.Walk(productsPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && filepath.Ext(path) == ".yaml" {
-			matches := resourceFileRegex.FindStringSubmatch(path)
-			if matches == nil {
-				log.Printf("Skipping non-resource file: %s\n", path)
-				return nil
+		err := filepath.Walk(pPath, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
 			}
-			serviceName := matches[1]
-
-			relPath, err := filepath.Rel(basePath, path)
-			if err == nil && skipOpenPR {
-				normPath := github.NormalizePath(relPath)
-				if prs, touched := touchedFiles[normPath]; touched {
-					log.Printf("Skipping file %s: modified in active open PR(s) %v\n", path, prs)
+			if !info.IsDir() && filepath.Ext(path) == ".yaml" {
+				matches := resourceFileRegex.FindStringSubmatch(path)
+				if matches == nil {
+					log.Printf("Skipping non-resource file: %s\n", path)
 					return nil
 				}
-			}
+				serviceName := matches[1]
 
-			if err := copy.ProcessResourceFile(path, serviceName, examplesSourceDir, samplesDestDir); err != nil {
-				log.Printf("Error copying templates registered in file %s: %v\n", path, err)
-				// Continue processing other files even if one fails.
+				if _, skip := skipProductsMap[serviceName]; skip {
+					return nil
+				}
+
+				resolvedPath := path
+				if !filepath.IsAbs(resolvedPath) {
+					resolvedPath = filepath.Clean(filepath.Join(basePath, path))
+				}
+				if _, skip := skipFilesMap[resolvedPath]; skip {
+					log.Printf("Skipping file %s: matched --skip-file filter\n", path)
+					return nil
+				}
+
+				relPath, err := filepath.Rel(basePath, path)
+				if err == nil && skipOpenPR {
+					normPath := github.NormalizePath(relPath)
+					if prs, touched := touchedFiles[normPath]; touched {
+						log.Printf("Skipping file %s: modified in active open PR(s) %v\n", path, prs)
+						return nil
+					}
+				}
+
+				if err := copy.ProcessResourceFile(path, serviceName, examplesSourceDir, samplesDestDir); err != nil {
+					log.Printf("Error copying templates registered in file %s: %v\n", path, err)
+					// Continue processing other files even if one fails.
+				}
+				if err := migrate.MigrateFile(path, serviceName); err != nil {
+					log.Printf("Failed to migrate file %s: %v\n", path, err)
+					// Continue migrating other files even if one fails.
+				}
 			}
-			if err := migrate.MigrateFile(path, serviceName); err != nil {
-				log.Printf("Failed to migrate file %s: %v\n", path, err)
-				// Continue migrating other files even if one fails.
-			}
+			return nil
+		})
+
+		if err != nil {
+			log.Fatalf("Error walking the products path %q: %v\n", pPath, err)
 		}
-		return nil
-	})
-
-	if err != nil {
-		log.Fatalf("Error walking the products path %q: %v\n", productsPath, err)
 	}
 
 	fmt.Println("Processing complete.")
@@ -149,7 +251,10 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 }
 
 func init() {
-	convertResourceTemplateCmd.Flags().StringVarP(&filePath, "file", "f", "", "Path to a single resource yaml file to convert")
+	convertResourceTemplateCmd.Flags().StringVarP(&filePath, "file", "f", "", "Comma-separated list of resource yaml files to convert (e.g. mmv1/products/vertexai/Dataset.yaml)")
+	convertResourceTemplateCmd.Flags().StringVarP(&targetProduct, "product", "p", "", "Comma-separated list of product directories to convert (e.g. vertexai,pubsublite)")
+	convertResourceTemplateCmd.Flags().StringVarP(&skipFilesFlag, "skip-file", "F", "", "Comma-separated list of resource yaml files to skip from migration")
+	convertResourceTemplateCmd.Flags().StringVarP(&skipProductsFlag, "skip-product", "P", "", "Comma-separated list of product directories to skip from migration")
 	convertResourceTemplateCmd.Flags().BoolVar(&skipOpenPR, "skip-open-pr", false, "Skip files modified by active open PRs updated in the last 2 months")
 	rootCmd.AddCommand(convertResourceTemplateCmd)
 }
