@@ -27,9 +27,9 @@ examples:
     primary_resource_id: 'provider'
     vars:
       network_monitoring_provider_id: 'my-provider'
-base_url: 'projects/{{project}}/locations/{{location}}/networkMonitoringProviders'
-self_link: 'projects/{{project}}/locations/{{location}}/networkMonitoringProviders/{{network_monitoring_provider_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/networkMonitoringProviders?networkMonitoringProviderId={{network_monitoring_provider_id}}'
+base_url: '../v1/projects/{{project}}/locations/{{location}}/networkMonitoringProviders'
+self_link: '../v1/projects/{{project}}/locations/{{location}}/networkMonitoringProviders/{{network_monitoring_provider_id}}'
+create_url: '../v1/projects/{{project}}/locations/{{location}}/networkMonitoringProviders?networkMonitoringProviderId={{network_monitoring_provider_id}}'
 # No UpdateNetworkMonitoringProvider RPC exists; any field change requires recreation.
 immutable: true
 import_format:
