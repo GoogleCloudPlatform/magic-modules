@@ -99,6 +99,15 @@ samples:
       - name: certificate_manager_self_managed_certificate_write_only
         resource_id_vars:
           cert_name: self-managed-cert
+  - name: certificate_manager_self_managed_certificate_deprecated_fields
+    primary_resource_id: default
+    # Uses the deprecated certificate_pem/private_key_pem fields for test
+    # coverage only; not surfaced in docs to avoid promoting deprecated usage.
+    exclude_basic_doc: true
+    steps:
+      - name: certificate_manager_self_managed_certificate_deprecated_fields
+        resource_id_vars:
+          cert_name: self-managed-cert
   - name: certificate_manager_self_managed_certificate_regional
     primary_resource_id: default
     steps:
