@@ -2192,6 +2192,8 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
+	// Read from state before calling the helper, which will overwrite scheduling with the API
+	// response. The API doesn't persist nanos, so we restore it afterward to avoid a diff.
 	savedNanos, hadNanos := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos")
 	{{- end }}
 
@@ -2236,11 +2238,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	})
 
 	{{ if ne $.TargetVersionName `ga` -}}
-	// This block must stay here rather than in populateComputeInstanceResourceData because it
-	// patches the scheduling state written by the helper using a value read from prior state.
-	// The helper only has the API response, so it cannot perform this fixup itself.
-	// Workaround: the API doesn't persist scheduling.graceful_shutdown.max_duration.nanos,
-	// so we restore it from state to avoid a perpetual diff.
+	// Workaround: restore nanos from state since the API doesn't persist it (see comment above).
 	if hadNanos {
 		scheduling := flattenScheduling(instance.Scheduling)
 		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
