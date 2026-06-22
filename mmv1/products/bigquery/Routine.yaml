@@ -402,3 +402,9 @@ properties:
         type: String
         description: |
           Language runtime version. Example: `python-3.11`.
+      - name: 'containerRequestConcurrency'
+        type: String
+        description: |
+          Maximum number of concurrent requests per Python UDF container instance. For more
+          information, see [Configure container limits for Python
+          UDFs](https://cloud.google.com/bigquery/docs/user-defined-functions-python#configure-container-limits)
