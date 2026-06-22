@@ -54,6 +54,18 @@ func ResourceGoogleProject() *schema.Resource {
 			State: resourceProjectImportState,
 		},
 
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project_id": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Update: schema.DefaultTimeout(10 * time.Minute),
@@ -325,6 +337,43 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	// Explicitly set client-side fields to default values if unset
 
+	if err := populateGoogleProjectResourceData(d, p, pid, config); err != nil {                          
+      return err
+  	} 
+
+	var ba *cloudbilling.ProjectBillingInfo
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (reqErr error) {
+			ba, reqErr = tpgcloudbilling.NewClient(config, userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
+			return reqErr
+		},
+		Timeout: d.Timeout(schema.TimeoutRead),
+	})
+	// Read the billing account
+	if err != nil && !transport_tpg.IsApiNotEnabledError(err) {
+		return fmt.Errorf("Error reading billing account for project %q: %v", PrefixedProject(pid), err)
+	} else if transport_tpg.IsApiNotEnabledError(err) {
+		log.Printf("[WARN] Billing info API not enabled, please enable it to read billing info about project %q: %s", pid, err.Error())
+	} else if ba.BillingAccountName != "" {
+		// BillingAccountName is contains the resource name of the billing account
+		// associated with the project, if any. For example,
+		// `billingAccounts/012345-567890-ABCDEF`. We care about the ID and not
+		// the `billingAccounts/` prefix, so we need to remove that. If the
+		// prefix ever changes, we'll validate to make sure it's something we
+		// recognize.
+		_ba := strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/")
+		if ba.BillingAccountName == _ba {
+			return fmt.Errorf("Error parsing billing account for project %q. Expected value to begin with 'billingAccounts/' but got %s", PrefixedProject(pid), ba.BillingAccountName)
+		}
+		if err := d.Set("billing_account", _ba); err != nil {
+			return fmt.Errorf("Error setting billing_account: %s", err)
+		}
+	}
+
+	return nil
+}
+
+func populateGoogleProjectResourceData(d *schema.ResourceData, p *cloudresourcemanager.Project, pid string, config *transport_tpg.Config) error {
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "PREVENT"); err != nil {
 		return err
 	}
@@ -366,37 +415,9 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 	}
-
-	var ba *cloudbilling.ProjectBillingInfo
-	err = transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() (reqErr error) {
-			ba, reqErr = tpgcloudbilling.NewClient(config, userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
-			return reqErr
-		},
-		Timeout: d.Timeout(schema.TimeoutRead),
-	})
-	// Read the billing account
-	if err != nil && !transport_tpg.IsApiNotEnabledError(err) {
-		return fmt.Errorf("Error reading billing account for project %q: %v", PrefixedProject(pid), err)
-	} else if transport_tpg.IsApiNotEnabledError(err) {
-		log.Printf("[WARN] Billing info API not enabled, please enable it to read billing info about project %q: %s", pid, err.Error())
-	} else if ba.BillingAccountName != "" {
-		// BillingAccountName is contains the resource name of the billing account
-		// associated with the project, if any. For example,
-		// `billingAccounts/012345-567890-ABCDEF`. We care about the ID and not
-		// the `billingAccounts/` prefix, so we need to remove that. If the
-		// prefix ever changes, we'll validate to make sure it's something we
-		// recognize.
-		_ba := strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/")
-		if ba.BillingAccountName == _ba {
-			return fmt.Errorf("Error parsing billing account for project %q. Expected value to begin with 'billingAccounts/' but got %s", PrefixedProject(pid), ba.BillingAccountName)
-		}
-		if err := d.Set("billing_account", _ba); err != nil {
-			return fmt.Errorf("Error setting billing_account: %s", err)
-		}
-	}
-
-	return nil
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+          "project_id": pid,                                                                            
+    })
 }
 
 func PrefixedProject(pid string) string {
