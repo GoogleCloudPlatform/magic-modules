@@ -27,8 +27,19 @@ import (
 // if present. This allows users to pass either google_apigee_organization.id
 // (which returns "organizations/<project-id>") or a bare project ID without
 // producing a doubled "organizations/organizations/..." in the API URL.
-func apigeeSharedflowNormalizeOrgId(v interface{}) string {
-	return strings.TrimPrefix(v.(string), "organizations/")
+func apigeeSharedflowNormalizeOrgId(v string) string {
+	return strings.TrimPrefix(v, "organizations/")
+}
+
+// apigeeSharedflowCollapseOrgPrefix collapses a doubled "organizations/" segment
+// in a constructed URL/ID. org_id may be supplied either bare or fully-qualified
+// ("organizations/<id>", e.g. from google_apigee_organization.id); the URL
+// templates already prepend "organizations/", so the fully-qualified form would
+// otherwise yield "organizations/organizations/<id>". The stored org_id value is
+// left untouched (the diff is handled by DiffSuppressFunc), so existing
+// resources are never re-created.
+func apigeeSharedflowCollapseOrgPrefix(s string) string {
+	return strings.Replace(s, "organizations/organizations/", "organizations/", 1)
 }
 
 func ResourceApigeeSharedFlow() *schema.Resource {
@@ -73,11 +84,15 @@ func ResourceApigeeSharedFlow() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: `The Apigee Organization name associated with the Apigee instance.`,
-				// Normalize org_id by stripping the "organizations/" prefix so users
-				// may pass google_apigee_organization.id ("organizations/<project-id>")
-				// or a bare project ID. StateFunc stores the normalized value, so a
-				// config using either form matches state with no diff.
-				StateFunc: apigeeSharedflowNormalizeOrgId,
+				// Users may pass google_apigee_organization.id
+				// ("organizations/<project-id>") or a bare project ID. Suppress the
+				// diff when both forms normalize to the same value so the field does
+				// not trigger a spurious ForceNew. DiffSuppressFunc (rather than
+				// StateFunc) leaves the stored value untouched, so existing state is
+				// never rewritten and no resource is re-created on upgrade.
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return apigeeSharedflowNormalizeOrgId(old) == apigeeSharedflowNormalizeOrgId(new)
+				},
 			},
 			"latest_revision_id": {
 				Type:        schema.TypeString,
@@ -186,6 +201,9 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"organizations/{{org_id}}/sharedflows?name={{name}}&action=import")
+	if err == nil {
+		url = apigeeSharedflowCollapseOrgPrefix(url)
+	}
 	if err != nil {
 		return err
 	}
@@ -206,6 +224,9 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 
 	// Store the ID now
 	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/sharedflows/{{name}}")
+	if err == nil {
+		id = apigeeSharedflowCollapseOrgPrefix(id)
+	}
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -240,6 +261,9 @@ func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"organizations/{{org_id}}/sharedflows/{{name}}")
+	if err == nil {
+		url = apigeeSharedflowCollapseOrgPrefix(url)
+	}
 	if err != nil {
 		return err
 	}
@@ -328,6 +352,9 @@ func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) er
 	billingProject := ""
 
 	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"organizations/{{org_id}}/sharedflows/{{name}}")
+	if err == nil {
+		url = apigeeSharedflowCollapseOrgPrefix(url)
+	}
 	if err != nil {
 		return err
 	}
@@ -368,6 +395,9 @@ func resourceApigeeSharedFlowImport(d *schema.ResourceData, meta interface{}) ([
 
 	// Replace import id for the resource id
 	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/sharedflows/{{name}}")
+	if err == nil {
+		id = apigeeSharedflowCollapseOrgPrefix(id)
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
