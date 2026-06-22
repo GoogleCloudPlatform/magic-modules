@@ -194,6 +194,25 @@ func schemaContainerdConfig() *schema.Schema {
 	}
 }
 
+func schemaTaintConfig() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: `Taint configuration for this node.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"architecture_taint_behavior": {
+					Type:         schema.TypeString,
+					Required:     true,
+					Description:  `Architecture taint behavior. Controls, how we apply taints based on the node architecture.`,
+					ValidateFunc: validation.StringInSlice([]string{"ARCHITECTURE_TAINT_BEHAVIOR_UNSPECIFIED", "NONE", "ARM"}, false),
+				},
+			},
+		},
+	}
+}
+
 // Note: this is a bool internally, but implementing as an enum internally to
 // make it easier to accept API level defaults.
 func schemaInsecureKubeletReadonlyPortEnabled() *schema.Schema {
@@ -646,6 +665,8 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
+
+				"taint_config": schemaTaintConfig(),
 
 				"effective_taints": {
 					Type:        schema.TypeList,
@@ -1747,6 +1768,10 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 		nc.SoleTenantConfig = expandSoleTenantConfig(v)
 	}
 
+	if v, ok := nodeConfig["taint_config"]; ok {
+		nc.TaintConfig = expandTaintConfig(v)
+	}
+
 	if v, ok := nodeConfig["enable_confidential_storage"]; ok {
 		nc.EnableConfidentialStorage = v.(bool)
 	}
@@ -2292,6 +2317,27 @@ func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
 	return cc
 }
 
+func expandTaintConfig(v interface{}) *container.TaintConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.TaintConfig{}
+	}
+
+	cfg := ls[0].(map[string]interface{})
+
+	tc := &container.TaintConfig{}
+	if val, ok := cfg["architecture_taint_behavior"]; ok {
+		tc.ArchitectureTaintBehavior = val.(string)
+	}
+	return tc
+}
+
 func expandPrivateRegistryAccessConfig(v interface{}) *container.PrivateRegistryAccessConfig {
 	if v == nil {
 		return nil
@@ -2607,6 +2653,7 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"resource_manager_tags":       flattenResourceManagerTags(c["resourceManagerTags"]),
 		"enable_confidential_storage": c["enableConfidentialStorage"],
 		"local_ssd_encryption_mode":   c["localSsdEncryptionMode"],
+		"taint_config":                flattenTaintConfig(c["taintConfig"]),
 	}
 
 	// Suppress Default Value
@@ -3368,6 +3415,21 @@ func flattenNodeKernelModuleLoading(v interface{}) []map[string]interface{} {
 	r := make(map[string]interface{})
 	if val, ok := c["policy"]; ok {
 		r["policy"] = val
+	}
+	return []map[string]interface{}{r}
+}
+
+func flattenTaintConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := map[string]interface{}{}
+	if c["architectureTaintBehavior"] != nil {
+		r["architecture_taint_behavior"] = c["architectureTaintBehavior"]
 	}
 	return []map[string]interface{}{r}
 }
