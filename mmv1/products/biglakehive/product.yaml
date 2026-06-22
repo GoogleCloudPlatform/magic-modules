@@ -12,14 +12,14 @@
 # limitations under the License.
 
 ---
-name: 'BiglakeHive'
-legacy_name: 'biglake'
-display_name: 'BigLake Hive Metastore'
-versions:
-  - name: 'ga'
-    base_url: 'https://biglake.googleapis.com/'
-  - name: 'beta'
-    base_url: 'https://biglake.googleapis.com/'
+name: BiglakeHive
+legacy_name: biglake
+display_name: BigLake Hive Metastore
 scopes:
-  - 'https://www.googleapis.com/auth/bigquery'
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/bigquery
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://biglake.googleapis.com/
+  - name: beta
+    base_url: https://biglake.googleapis.com/

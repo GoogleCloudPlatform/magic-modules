@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Instance'
-description: 'A managed alloydb cluster instance.'
+name: Instance
+description: A managed alloydb cluster instance.
 references:
   guides:
-    'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
-  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.instances/create'
+    AlloyDB: https://cloud.google.com/alloydb/docs/
+  api: https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.instances/create
 docs:
   warning: |
     Deleting an instance with instanceType = SECONDARY does not delete the secondary instance, and abandons it instead.
@@ -25,100 +25,110 @@ docs:
     Users can undo the delete secondary instance action by importing the deleted secondary instance by calling terraform import.
 base_url: '{{cluster}}/instances?instanceId={{instance_id}}'
 self_link: '{{cluster}}/instances/{{instance_id}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/instances/{{instance_id}}'
+  - projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/instances/{{instance_id}}
 timeouts:
   insert_minutes: 120
   update_minutes: 120
   delete_minutes: 120
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-    timeouts:
-      insert_minutes: 120
-      update_minutes: 120
-      delete_minutes: 120
-  result:
-    resource_inside_response: false
-  include_project: true
-custom_code:
-  pre_create: 'templates/terraform/pre_create/alloydb_instance.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/alloydb_instance.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/alloydb_instance.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 # exluding resource_identity due to custom_import
 exclude_identity_generation: true
+async:
+  type: OpAsync
+  operation:
+    timeouts:
+      insert_minutes: 120
+      update_minutes: 120
+      delete_minutes: 120
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: false
+  include_project: true
+autogen_async: true
 include_in_tgc_next: true
 tgc_tests:
-  - name: 'TestAccAlloydbInstance_connectionPoolConfig'
-    skip: 'fix it after the next release, as connection_pool_config will be in the next release'
-examples:
-  - name: 'alloydb_instance_basic'
-    primary_resource_id: 'default'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      network_name: 'alloydb-network'
-    ignore_read_extra:
-      - 'reconciling'
-      - 'update_time'
+  - name: TestAccAlloydbInstance_connectionPoolConfig
+    skip: fix it after the next release, as connection_pool_config will be in the next release
+custom_code:
+  pre_create: templates/terraform/pre_create/alloydb_instance.go.tmpl
+  pre_delete: templates/terraform/pre_delete/alloydb_instance.go.tmpl
+  custom_import: templates/terraform/custom_import/alloydb_instance.go.tmpl
+samples:
+  - name: alloydb_instance_basic
+    primary_resource_id: default
     exclude_test: true
-  - name: 'alloydb_secondary_instance_basic'
-    primary_resource_id: 'secondary'
-    vars:
-      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
-      alloydb_primary_instance_name: 'alloydb-primary-instance'
-      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-      alloydb_secondary_instance_name: 'alloydb-secondary-instance'
-      network_name: 'alloydb-secondary-network'
-    ignore_read_extra:
-      - 'reconciling'
-      - 'update_time'
+    steps:
+      - name: alloydb_instance_basic
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster
+          alloydb_instance_name: alloydb-instance
+          network_name: alloydb-network
+        ignore_read_extra:
+          - reconciling
+          - update_time
+  - name: alloydb_secondary_instance_basic
+    primary_resource_id: secondary
     exclude_test: true
-  - name: 'alloydb_instance_basic_test'
-    primary_resource_id: 'default'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-    ignore_read_extra:
-      - 'reconciling'
-      - 'update_time'
-    exclude_docs: true
-  - name: 'alloydb_secondary_instance_basic_test'
-    primary_resource_id: 'secondary'
-    vars:
-      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
-      alloydb_primary_instance_name: 'alloydb-primary-instance'
-      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-      alloydb_secondary_instance_name: 'alloydb-secondary-instance'
-      network_name: 'alloydb-secondary-network'
-    test_vars_overrides:
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-    ignore_read_extra:
-      - 'reconciling'
-      - 'update_time'
-    exclude_docs: true
-  - name: 'alloydb_instance_psc_test'
-    primary_resource_id: 'default'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      network_name: 'alloydb-network'
-    ignore_read_extra:
-      - 'reconciling'
-      - 'update_time'
-    exclude_docs: true
+    steps:
+      - name: alloydb_secondary_instance_basic
+        resource_id_vars:
+          alloydb_primary_cluster_name: alloydb-primary-cluster
+          alloydb_primary_instance_name: alloydb-primary-instance
+          alloydb_secondary_cluster_name: alloydb-secondary-cluster
+          alloydb_secondary_instance_name: alloydb-secondary-instance
+          network_name: alloydb-secondary-network
+        ignore_read_extra:
+          - reconciling
+          - update_time
+  - name: alloydb_instance_basic_test
+    primary_resource_id: default
+    exclude_basic_doc: true
+    steps:
+      - name: alloydb_instance_basic_test
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster
+          alloydb_instance_name: alloydb-instance
+          network_name: alloydb-network
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+        ignore_read_extra:
+          - reconciling
+          - update_time
+  - name: alloydb_secondary_instance_basic_test
+    primary_resource_id: secondary
+    exclude_basic_doc: true
+    steps:
+      - name: alloydb_secondary_instance_basic_test
+        resource_id_vars:
+          alloydb_primary_cluster_name: alloydb-primary-cluster
+          alloydb_primary_instance_name: alloydb-primary-instance
+          alloydb_secondary_cluster_name: alloydb-secondary-cluster
+          alloydb_secondary_instance_name: alloydb-secondary-instance
+          network_name: alloydb-secondary-network
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+        ignore_read_extra:
+          - reconciling
+          - update_time
+  - name: alloydb_instance_psc_test
+    primary_resource_id: default
+    exclude_basic_doc: true
+    steps:
+      - name: alloydb_instance_psc_test
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster
+          alloydb_instance_name: alloydb-instance
+          network_name: alloydb-network
+        ignore_read_extra:
+          - reconciling
+          - update_time
 parameters:
-  - name: 'cluster'
+  - name: cluster
     type: ResourceRef
     description: |
       Identifies the alloydb cluster. Must be in the format
@@ -126,9 +136,9 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    resource: 'Cluster'
-    imports: 'name'
-  - name: 'instanceId'
+    resource: Cluster
+    imports: name
+  - name: instanceId
     type: String
     description: |
       The ID of the alloydb instance.
@@ -136,63 +146,56 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the instance resource.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Time the Instance was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the Instance was updated in UTC.
     output: true
-  - name: 'uid'
+  - name: uid
     type: String
     description: |
       The system-generated UID of the resource.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: 'User-defined labels for the alloydb instance.'
-  - name: 'annotations'
+    description: User-defined labels for the alloydb instance.
+  - name: annotations
     type: KeyValueAnnotations
-    description:
-      'Annotations to allow client tools to store small amount of arbitrary
-      data. This is distinct from labels.'
-  - name: 'state'
+    description: Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels.
+  - name: state
     type: String
     description: |
       The current state of the alloydb instance.
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       User-settable and human-readable display name for the Instance.
     ignore_read: true
-  - name: 'gceZone'
+  - name: gceZone
     type: String
     description: |
       The Compute Engine zone that the instance should serve from, per https://cloud.google.com/compute/docs/regions-zones This can ONLY be specified for ZONAL instances. If present for a REGIONAL instance, an error will be thrown. If this is absent for a ZONAL instance, instance is created in a random zone with available capacity.
-  - name: 'reconciling'
+  - name: reconciling
     type: Boolean
     description: |
       Set to true if the current state of Instance does not match the user's intended state, and the service is actively updating the resource to reconcile them. This can happen due to user-triggered updates or system actions like failover or maintenance.
     output: true
-  - name: 'databaseFlags'
+  - name: databaseFlags
     type: KeyValuePairs
-    description:
-      'Database flags. Set at instance level. * They are copied from primary
-      instance on read instance creation. * Read instances can set new or
-      override existing flags that are relevant for reads, e.g. for enabling
-      columnar cache on a read instance. Flags set on read instance may or may
-      not be present on primary.'
+    description: Database flags. Set at instance level. * They are copied from primary instance on read instance creation. * Read instances can set new or override existing flags that are relevant for reads, e.g. for enabling columnar cache on a read instance. Flags set on read instance may or may not be present on primary.
     default_from_api: true
-  - name: 'availabilityType'
+  - name: availabilityType
     type: Enum
     description: |
       'Availability type of an Instance. Defaults to REGIONAL for both primary and read instances.
@@ -203,10 +206,10 @@ properties:
       Possible values are: `AVAILABILITY_TYPE_UNSPECIFIED`, `ZONAL`, `REGIONAL`.'
     default_from_api: true
     enum_values:
-      - 'AVAILABILITY_TYPE_UNSPECIFIED'
-      - 'ZONAL'
-      - 'REGIONAL'
-  - name: 'activationPolicy'
+      - AVAILABILITY_TYPE_UNSPECIFIED
+      - ZONAL
+      - REGIONAL
+  - name: activationPolicy
     type: Enum
     description: |
       'Specifies whether an instance needs to spin up. Once the instance is
@@ -219,10 +222,10 @@ properties:
       Possible values are: `ACTIVATION_POLICY_UNSPECIFIED`, `ALWAYS`, `NEVER`.'
     default_from_api: true
     enum_values:
-      - 'ACTIVATION_POLICY_UNSPECIFIED'
-      - 'ALWAYS'
-      - 'NEVER'
-  - name: 'instanceType'
+      - ACTIVATION_POLICY_UNSPECIFIED
+      - ALWAYS
+      - NEVER
+  - name: instanceType
     type: Enum
     description: |
       The type of the instance.
@@ -235,155 +238,153 @@ properties:
     required: true
     immutable: true
     enum_values:
-      - 'PRIMARY'
-      - 'READ_POOL'
-      - 'SECONDARY'
-  - name: 'ipAddress'
+      - PRIMARY
+      - READ_POOL
+      - SECONDARY
+  - name: ipAddress
     type: String
     description: |
       The IP address for the Instance. This is the connection endpoint for an end-user application.
     output: true
-  - name: 'queryInsightsConfig'
+  - name: queryInsightsConfig
     type: NestedObject
-    description: 'Configuration for query insights.'
+    description: Configuration for query insights.
     default_from_api: true
     properties:
-      - name: 'queryStringLength'
+      - name: queryStringLength
         type: Integer
-        description: 'Query string length. The default value is 1024. Any integer between 256 and 4500 is considered valid.'
-      - name: 'recordApplicationTags'
+        description: Query string length. The default value is 1024. Any integer between 256 and 4500 is considered valid.
+      - name: recordApplicationTags
         type: Boolean
-        description: 'Record application tags for an instance. This flag is turned "on" by default.'
-        include_empty_value_in_cai: true  # Default value is false in CAI asset
-      - name: 'recordClientAddress'
+        description: Record application tags for an instance. This flag is turned "on" by default.
+        include_empty_value_in_cai: true # Default value is false in CAI asset
+      - name: recordClientAddress
         type: Boolean
-        description: 'Record client address for an instance. Client address is PII information. This flag is turned "on" by default.'
-        include_empty_value_in_cai: true  # Default value is false in CAI asset
-      - name: 'queryPlansPerMinute'
+        description: Record client address for an instance. Client address is PII information. This flag is turned "on" by default.
+        include_empty_value_in_cai: true # Default value is false in CAI asset
+      - name: queryPlansPerMinute
         type: Integer
-        description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.'
-  - name: 'observabilityConfig'
+        description: Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.
+  - name: observabilityConfig
     type: NestedObject
-    description: 'Configuration for enhanced query insights.'
-    min_version: 'beta'
+    description: Configuration for enhanced query insights.
+    min_version: beta
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/alloydb_instance_observability_config.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/alloydb_instance_observability_config.go.tmpl
     properties:
-      - name: 'enabled'
+      - name: enabled
         type: Boolean
-        description: 'Observability feature status for an instance.'
-        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        description: Observability feature status for an instance.
+        include_empty_value_in_cai: true # Default value is false in CAI asset
         send_empty_value: true
         default_from_api: true
-      - name: 'preserveComments'
+      - name: preserveComments
         type: Boolean
-        description: 'Preserve comments in the query string.'
-        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        description: Preserve comments in the query string.
+        include_empty_value_in_cai: true # Default value is false in CAI asset
         send_empty_value: true
         default_from_api: true
-      - name: 'trackWaitEvents'
+      - name: trackWaitEvents
         type: Boolean
-        description: 'Record wait events during query execution for an instance.'
+        description: Record wait events during query execution for an instance.
         send_empty_value: true
         default_from_api: true
-      - name: 'trackWaitEventTypes'
+      - name: trackWaitEventTypes
         type: Boolean
-        description: 'Record wait event types during query execution for an instance.'
+        description: Record wait event types during query execution for an instance.
         send_empty_value: true
         default_from_api: true
-      - name: 'maxQueryStringLength'
+      - name: maxQueryStringLength
         type: Integer
-        description: 'Query string length. The default value is 10240. Any integer between 1024 and 100000 is considered valid.'
+        description: Query string length. The default value is 10240. Any integer between 1024 and 100000 is considered valid.
         default_from_api: true
-      - name: 'recordApplicationTags'
+      - name: recordApplicationTags
         type: Boolean
-        description: 'Record application tags for an instance. This flag is turned "on" by default.'
-        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        description: Record application tags for an instance. This flag is turned "on" by default.
+        include_empty_value_in_cai: true # Default value is false in CAI asset
         send_empty_value: true
         default_from_api: true
-      - name: 'queryPlansPerMinute'
+      - name: queryPlansPerMinute
         type: Integer
-        description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 200 is considered valid.'
+        description: Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 200 is considered valid.
         default_from_api: true
-      - name: 'trackActiveQueries'
+      - name: trackActiveQueries
         type: Boolean
-        description: 'Track actively running queries. If not set, default value is "off".'
-        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        description: Track actively running queries. If not set, default value is "off".
+        include_empty_value_in_cai: true # Default value is false in CAI asset
         send_empty_value: true
         default_from_api: true
-      - name: 'trackClientAddress'
+      - name: trackClientAddress
         type: Boolean
-        description: 'Track client address for an instance. If not set, default value is "off".'
-        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        description: Track client address for an instance. If not set, default value is "off".
+        include_empty_value_in_cai: true # Default value is false in CAI asset
         send_empty_value: true
         default_from_api: true
-      - name: 'assistiveExperiencesEnabled'
+      - name: assistiveExperiencesEnabled
         type: Boolean
-        description: 'Whether assistive experiences are enabled for this AlloyDB instance.'
+        description: Whether assistive experiences are enabled for this AlloyDB instance.
         send_empty_value: true
         default_from_api: true
-  - name: 'readPoolConfig'
+  - name: readPoolConfig
     type: NestedObject
-    description: 'Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.'
+    description: Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.
     properties:
-      - name: 'nodeCount'
+      - name: nodeCount
         type: Integer
-        description:
-          'Read capacity, i.e. number of nodes in a read pool instance.'
-  - name: 'machineConfig'
+        description: Read capacity, i.e. number of nodes in a read pool instance.
+  - name: machineConfig
     type: NestedObject
-    description:
-      'Configurations for the machines that host the underlying database engine.'
+    description: Configurations for the machines that host the underlying database engine.
     default_from_api: true
     properties:
-      - name: 'cpuCount'
+      - name: cpuCount
         type: Integer
-        description: "The number of CPU's in the VM instance."
+        description: The number of CPU's in the VM instance.
         default_from_api: true
-      - name: 'machineType'
+      - name: machineType
         type: String
         description: |
           Machine type of the VM instance.
           E.g. "n2-highmem-4", "n2-highmem-8", "c4a-highmem-4-lssd".
           `cpu_count` must match the number of vCPUs in the machine type.
         default_from_api: true
-  - name: 'clientConnectionConfig'
+  - name: clientConnectionConfig
     type: NestedObject
     description: |
       Client connection specific configurations.
     default_from_api: true
     properties:
-      - name: 'requireConnectors'
+      - name: requireConnectors
         type: Boolean
         description: |
           Configuration to enforce connectors only (ex: AuthProxy) connections to the database.
-      - name: 'sslConfig'
+      - name: sslConfig
         type: NestedObject
         description: |
           SSL config option for this instance.
         default_from_api: true
         properties:
-          - name: 'sslMode'
+          - name: sslMode
             type: Enum
-            description: 'SSL mode. Specifies client-server SSL/TLS connection behavior.'
+            description: SSL mode. Specifies client-server SSL/TLS connection behavior.
             default_from_api: true
             enum_values:
-              - 'ENCRYPTED_ONLY'
-              - 'ALLOW_UNENCRYPTED_AND_ENCRYPTED'
-  - name: 'pscInstanceConfig'
+              - ENCRYPTED_ONLY
+              - ALLOW_UNENCRYPTED_AND_ENCRYPTED
+  - name: pscInstanceConfig
     type: NestedObject
     description: |
       Configuration for Private Service Connect (PSC) for the instance.
     default_from_api: true
     properties:
-      - name: 'serviceAttachmentLink'
+      - name: serviceAttachmentLink
         type: String
         description: |
           The service attachment created when Private Service Connect (PSC) is enabled for the instance.
           The name of the resource will be in the format of
           `projects/<alloydb-tenant-project-number>/regions/<region-name>/serviceAttachments/<service-attachment-name>`
         output: true
-      - name: 'allowedConsumerProjects'
+      - name: allowedConsumerProjects
         type: Array
         description: |
           List of consumer projects that are allowed to create PSC endpoints to service-attachments to this instance.
@@ -391,14 +392,14 @@ properties:
         item_type:
           type: String
         item_validation:
-          regex: '^\d+$'
-      - name: 'pscDnsName'
+          regex: ^\d+$
+      - name: pscDnsName
         type: String
         description: |
           The DNS name of the instance for PSC connectivity.
           Name convention: <uid>.<uid>.<region>.alloydb-psc.goog
         output: true
-      - name: 'pscInterfaceConfigs'
+      - name: pscInterfaceConfigs
         type: Array
         description: |
           Configurations for setting up PSC interfaces attached to the instance
@@ -406,26 +407,26 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'networkAttachmentResource'
+            - name: networkAttachmentResource
               type: String
               description: |
                 The network attachment resource created in the consumer project to which the PSC interface will be linked.
                 This is of the format: "projects/${CONSUMER_PROJECT}/regions/${REGION}/networkAttachments/${NETWORK_ATTACHMENT_NAME}".
                 The network attachment must be in the same region as the instance.
-      - name: 'pscAutoConnections'
+      - name: pscAutoConnections
         type: Array
         description: |
           Configurations for setting up PSC service automation.
         item_type:
           type: NestedObject
           properties:
-            - name: 'consumerProject'
+            - name: consumerProject
               type: String
               description: |
                 The consumer project to which the PSC service automation endpoint will
                 be created. The API expects the consumer project to be the project ID(
                 and not the project number).
-            - name: 'consumerNetwork'
+            - name: consumerNetwork
               type: String
               description: |
                 The consumer network for the PSC service automation, example:
@@ -433,66 +434,66 @@ properties:
                 The consumer network might be hosted a different project than the
                 consumer project. The API expects the consumer project specified to be
                 the project ID (and not the project number)
-            - name: 'ipAddress'
+            - name: ipAddress
               type: String
               description: |
                 The IP address of the PSC service automation endpoint.
               output: true
-            - name: 'status'
+            - name: status
               type: String
               description: |
                 The status of the PSC service automation connection.
               output: true
-            - name: 'consumerNetworkStatus'
+            - name: consumerNetworkStatus
               type: String
               description: |
                 The status of the service connection policy.
               output: true
-  - name: 'networkConfig'
+  - name: networkConfig
     type: NestedObject
     default_from_api: true
     description: |
       Instance level network configuration.
     properties:
-      - name: 'authorizedExternalNetworks'
+      - name: authorizedExternalNetworks
         type: Array
         description: |
           A list of external networks authorized to access this instance. This
           field is only allowed to be set when `enable_public_ip` is set to
           true.
         required_with:
-          - 'networkConfig.0.enablePublicIp'
+          - networkConfig.0.enablePublicIp
         item_type:
           type: NestedObject
           properties:
-            - name: 'cidrRange'
+            - name: cidrRange
               type: String
-              description: 'CIDR range for one authorized network of the instance.'
-      - name: 'enablePublicIp'
+              description: CIDR range for one authorized network of the instance.
+      - name: enablePublicIp
         type: Boolean
         description: |
           Enabling public ip for the instance. If a user wishes to disable this,
           please also clear the list of the authorized external networks set on
           the same instance.
-      - name: 'enableOutboundPublicIp'
+      - name: enableOutboundPublicIp
         type: Boolean
         description: |
           Enabling outbound public ip for the instance.
-      - name: 'allocatedIpRangeOverride'
+      - name: allocatedIpRangeOverride
         type: String
         immutable: true
         description: |
           Name of the allocated IP range for the private IP AlloyDB instance, for example: "google-managed-services-default".
           If set, the instance IPs will be created from this allocated range and will override the IP range used by the parent cluster.
           The range name must comply with RFC 1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
-  - name: 'publicIpAddress'
+  - name: publicIpAddress
     type: String
     description: |
       The public IP addresses for the Instance. This is available ONLY when
       networkConfig.enablePublicIp is set to true. This is the connection
       endpoint for an end-user application.
     output: true
-  - name: 'outboundPublicIpAddresses'
+  - name: outboundPublicIpAddresses
     type: Array
     description: |
       The outbound public IP addresses for the instance. This is available ONLY when
@@ -501,23 +502,23 @@ properties:
     output: true
     item_type:
       type: String
-  - name: 'connectionPoolConfig'
+  - name: connectionPoolConfig
     type: NestedObject
     description: |
       Configuration for Managed Connection Pool.
-    custom_flatten: 'templates/terraform/custom_flatten/alloydb_instance_connectionpoolconfig_flatten.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/alloydb_instance_connectionpoolconfig_flatten.go.tmpl
     properties:
-      - name: 'enabled'
+      - name: enabled
         type: Boolean
         description: |
           Whether to enabled Managed Connection Pool.
         required: true
-      - name: 'poolerCount'
+      - name: poolerCount
         type: Integer
         output: true
         description: |
           The number of running poolers per instance.
-      - name: 'flags'
+      - name: flags
         type: KeyValuePairs
         description: |
           Flags for configuring managed connection pooling when it is enabled.
