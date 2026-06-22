@@ -121,7 +121,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating params: %s", err)
 	}
 
-	metadata, err := resourceInstanceMetadata(d)
+	metadata, err := resourceInstanceMetadataTyped(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
