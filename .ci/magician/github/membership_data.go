@@ -164,12 +164,12 @@ var (
 
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
-		"bbasata":  struct{}{},
-		"tavasyag": struct{}{},
-		"hao-nan-li": struct{}{},
-		"NickElliot": struct{}{},
-		"shuyama1": struct{}{},
-		"trodge": struct{}{},
-		"zli82016": struct{}{},
+		"bbasata":    {},
+		"tavasyag":   {},
+		"hao-nan-li": {},
+		"NickElliot": {},
+		"shuyama1":   {},
+		"trodge":     {},
+		"zli82016":   {},
 	}
 )
