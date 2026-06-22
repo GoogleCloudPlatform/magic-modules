@@ -2236,17 +2236,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	})
 
 	{{ if ne $.TargetVersionName `ga` -}}
-	if instance.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instance.PartnerMetadata))
-		if err != nil {
-			return fmt.Errorf("Error parsing partner metadata: %s", err)
-		}
-		if err = d.Set("partner_metadata", partnerMetadata); err != nil {
-			return fmt.Errorf("Error setting partner metadata: %s", err)
-		}
-	}
-	// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
-	// To avoid diff, we need to set the value from the state not from API response.
+	// This block must stay here rather than in populateComputeInstanceResourceData because it
+	// patches the scheduling state written by the helper using a value read from prior state.
+	// The helper only has the API response, so it cannot perform this fixup itself.
+	// Workaround: the API doesn't persist scheduling.graceful_shutdown.max_duration.nanos,
+	// so we restore it from state to avoid a perpetual diff.
 	if hadNanos {
 		scheduling := flattenScheduling(instance.Scheduling)
 		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
@@ -2556,6 +2550,18 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compu
 	if err := d.Set("instance_encryption_key", flattenComputeInstanceEncryptionKey(instanceEncryptionKeyMap)); err != nil {
 		return fmt.Errorf("Error setting instance_encryption_key: %s", err)
 	}
+
+	{{- if ne $.TargetVersionName `ga` }}
+	if instance.PartnerMetadata != nil {
+		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instance.PartnerMetadata))
+		if err != nil {
+			return fmt.Errorf("Error parsing partner metadata: %s", err)
+		}
+		if err = d.Set("partner_metadata", partnerMetadata); err != nil {
+			return fmt.Errorf("Error setting partner metadata: %s", err)
+		}
+	}
+	{{- end }}
 
     {{- if ne $.TargetVersionName `ga` }}
 	// If not forced to false, upgrading to a new provider version and subsequently changing a vm property
