@@ -101,22 +101,20 @@ provider changes to the &lt;code&gt;google&lt;/code&gt; and &lt;code&gt;google-b
 &lt;/ul&gt;
 &lt;p&gt;By default, running a full &lt;code&gt;make provider&lt;/code&gt; command cleans the output directory (&lt;code&gt;OUTPUT_PATH&lt;/code&gt;) before generating code to prevent sync issues. This will override and delete any changes to that directory. See the &lt;a href="https://googlecloudplatform.github.io/magic-modules/reference/make-commands/"&gt;&lt;code&gt;make&lt;/code&gt; commands reference&lt;/a&gt; for details on advanced usage.&lt;/p&gt;</description></item><item><title>Client-side fields</title><link>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</guid><description>&lt;h1 id="client-side-fields"&gt;Client-side fields&lt;a class="anchor" href="#client-side-fields"&gt;#&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Client-side fields are most often used as flags to modify the behavior of a Terraform resource. Because they don&amp;rsquo;t correspond to an API field, there are some additional considerations in terms of how to implement them.&lt;/p&gt;
-&lt;p&gt;Common client-side fields include:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/#deletion_protection"&gt;&lt;code&gt;deletion_protection&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/#deletion_policy"&gt;&lt;code&gt;deletion_policy&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
 &lt;div class="book-tabs"&gt;
 &lt;input type="radio" class="toggle" name="tabs-schema" id="tabs-schema-0" checked="checked" /&gt;&lt;label for="tabs-schema-0"&gt;MMv1&lt;/label&gt;&lt;div class="book-tabs-content markdown-inner"&gt;
 &lt;h2 id="add-to-the-schema"&gt;Add to the schema&lt;a class="anchor" href="#add-to-the-schema"&gt;#&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Instead of adding the field in &lt;code&gt;parameters&lt;/code&gt; or &lt;code&gt;properties&lt;/code&gt;, use a section called &lt;code&gt;virtual_fields&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Example:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#ff6ac1"&gt;virtual_fields&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#ff6ac1"&gt;name&lt;/span&gt;: &lt;span style="color:#5af78e"&gt;&amp;#39;deletion_protection&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#ff6ac1"&gt;name&lt;/span&gt;: &lt;span style="color:#5af78e"&gt;&amp;#39;send_propagated_connection_limit_if_zero&amp;#39;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#ff6ac1"&gt;type&lt;/span&gt;: Boolean
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#ff6ac1"&gt;default_value&lt;/span&gt;: &lt;span style="color:#ff6ac1"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#ff6ac1"&gt;default_value&lt;/span&gt;: &lt;span style="color:#ff6ac1"&gt;false&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#ff6ac1"&gt;description&lt;/span&gt;: |&lt;span style="color:#5af78e"&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; Whether Terraform will be prevented from destroying the CertificateAuthority.
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; When the field is set to true or unset in Terraform state, a `terraform apply`
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; or `terraform destroy` that would delete the CertificateAuthority will fail.
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; When the field is set to false, deleting the CertificateAuthority is allowed.&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This will automatically ensure that the field works as users expect.&lt;/p&gt;</description></item></channel></rss>
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; Controls the behavior of propagated_connection_limit.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; When false, setting propagated_connection_limit to zero causes the provider to use to the API&amp;#39;s default value.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; When true, the provider will set propagated_connection_limit to zero.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; Defaults to false.&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;input type="radio" class="toggle" name="tabs-schema" id="tabs-schema-1" /&gt;&lt;label for="tabs-schema-1"&gt;Handwritten&lt;/label&gt;&lt;div class="book-tabs-content markdown-inner"&gt;
+&lt;h2 id="add-to-the-schema-1"&gt;Add to the schema&lt;a class="anchor" href="#add-to-the-schema-1"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Add the field to the schema as usual.&lt;/p&gt;</description></item></channel></rss>
