@@ -27,6 +27,8 @@ create_url: 'projects/{{project}}/databases/{{database}}/userCreds?userCredsId={
 autogen_async: false
 custom_code:
   post_create: templates/terraform/post_create/firestore_user_creds.go.tmpl
+error_retry_predicates:
+  - 'transport_tpg.FirestoreUserCreds409Retry'
 examples:
   - name: 'firestore_user_creds_basic'
     primary_resource_id: 'my-user-creds'
