@@ -85,14 +85,6 @@ var (
 				},
 			},
 		},
-		"hao-nan-li": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2026, 5, 15),
-					endDate:   newDate(2026, 5, 26),
-				},
-			},
-		},
 		"malhotrasagar2212": {
 			vacations: []Vacation{},
 		},
@@ -105,18 +97,6 @@ var (
 				{
 					startDate: newDate(2026, 4, 10),
 					endDate:   newDate(2026, 4, 12),
-				},
-			},
-		},
-		"NickElliot": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2025, 10, 22),
-					endDate:   newDate(2025, 10, 28),
-				},
-				{
-					startDate: newDate(2026, 04, 8),
-					endDate:   newDate(2026, 04, 14),
 				},
 			},
 		},
@@ -160,14 +140,6 @@ var (
 				},
 			},
 		},
-		"shuyama1": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2026, 05, 22),
-					endDate:   newDate(2026, 06, 01),
-				},
-			},
-		},
 		"SirGitsalot": {
 			vacations: []Vacation{
 				{
@@ -188,31 +160,16 @@ var (
 				},
 			},
 		},
-		"trodge": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2025, 8, 7),
-					endDate:   newDate(2025, 8, 10),
-				},
-				{
-					startDate: newDate(2025, 9, 18),
-					endDate:   newDate(2025, 9, 28),
-				},
-			},
-		},
-		"zli82016": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2025, 8, 27),
-					endDate:   newDate(2025, 9, 2),
-				},
-			},
-		},
 	}
 
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
 		"bbasata":  struct{}{},
 		"tavasyag": struct{}{},
+		"hao-nan-li": struct{}{},
+		"NickElliot": struct{}{},
+		"shuyama1": struct{}{},
+		"trodge": struct{}{},
+		"zli82016": struct{}{},
 	}
 )
