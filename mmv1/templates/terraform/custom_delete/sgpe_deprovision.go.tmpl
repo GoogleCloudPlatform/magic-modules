@@ -1,0 +1,57 @@
+// SemanticGovernancePolicyEngine custom delete via :deprovision.
+//
+// SGPE is a singleton resource per AIP-156: it has no standard Delete
+// RPC. Tear-down is performed via a custom :deprovision RPC that POSTs
+// to a sibling URL with an empty body. After deprovision completes, a
+// subsequent Get returns the singleton with state INACTIVE rather than
+// HTTP 404; this is the AIP-156 singleton contract.
+//
+// Errors from :deprovision are returned verbatim — we deliberately do
+// NOT wrap them with transport_tpg.HandleNotFoundError. The wrapping
+// pattern used by RagEngineConfig assumes 404-as-already-deleted is a
+// legitimate concurrent-delete race; for the SGPE singleton, a 404 from
+// :deprovision would indicate a URL bug, a permissions issue masquerading
+// as 404, or a backend regression breaking the AIP-156 contract — none
+// of which should be silently absorbed as "delete success." Loud failure
+// is preferred over silent coercion here.
+log.Printf("[DEBUG] Beginning custom_delete for SemanticGovernancePolicyEngine")
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for SemanticGovernancePolicyEngine: %s", err)
+}
+
+deprovisionUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/semanticGovernancePolicyEngine:deprovision")
+if err != nil {
+	return err
+}
+
+deprovisionHeaders := make(http.Header)
+deprovisionBody := map[string]interface{}{}
+
+log.Printf("[DEBUG] Deprovisioning SemanticGovernancePolicyEngine: %s", deprovisionUrl)
+deprovisionRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "POST",
+	Project:   project,
+	RawURL:    deprovisionUrl,
+	UserAgent: userAgent,
+	Body:      deprovisionBody,
+	Timeout:   d.Timeout(schema.TimeoutDelete),
+	Headers:   deprovisionHeaders,
+})
+if err != nil {
+	// Verbatim error return; NOT wrapped with
+	// transport_tpg.HandleNotFoundError — see file header for rationale.
+	return fmt.Errorf("Error deprovisioning SemanticGovernancePolicyEngine: %s", err)
+}
+
+err = VertexAIOperationWaitTime(
+	config, deprovisionRes, project, "Deprovisioning SemanticGovernancePolicyEngine", userAgent,
+	d.Timeout(schema.TimeoutDelete))
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Finished deprovisioning SemanticGovernancePolicyEngine: %#v", deprovisionRes)
+return nil

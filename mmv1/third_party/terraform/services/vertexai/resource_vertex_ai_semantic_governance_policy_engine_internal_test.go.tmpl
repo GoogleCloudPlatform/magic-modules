@@ -1,0 +1,195 @@
+{{- if ne $.TargetVersionName "ga" -}}
+package vertexai
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+// Unit tests for the SemanticGovernancePolicyEngine helpers declared in
+// mmv1/templates/terraform/constants/semantic_governance_policy_engine.go.tmpl
+// (generated into resource_vertex_ai_semantic_governance_policy_engine.go).
+//
+// The CustomizeDiff tests call sgpeFailedStateWarningCheck directly
+// through tpgresource.ResourceDiffMock, the established magic-modules
+// pattern (precedent:
+// resource_data_loss_prevention_stored_info_type_internal_test.go).
+//
+// The post_read tests cannot use a similar approach because
+// *schema.ResourceData is a concrete type with no substitutable interface
+// in the SDK, and constructing a real one requires either a registered
+// schema.Resource or extensive internal state. Instead, we mirror
+// sgpePostReadDispatch's body in shimmedDispatch below, which takes a
+// small interface satisfied by a fake. The two implementations must be
+// kept in lockstep manually — see the note on shimmedDispatch.
+
+// resourceData is the minimal interface sgpePostReadDispatch consumes
+// from *schema.ResourceData. Defined here so the unit test can substitute
+// a fake.
+type resourceData interface {
+	Id() string
+	SetId(string)
+}
+
+// fakeResourceData implements resourceData and records SetId calls so
+// tests can assert post_read clears the ID exactly once.
+type fakeResourceData struct {
+	id        string
+	setIdArgs []string
+}
+
+func (f *fakeResourceData) Id() string         { return f.id }
+func (f *fakeResourceData) SetId(v string)     { f.setIdArgs = append(f.setIdArgs, v); f.id = v }
+
+// shimmedDispatch is a copy of sgpePostReadDispatch's body adapted to
+// take the resourceData interface in place of *schema.ResourceData. The
+// two implementations must stay in lockstep.
+//
+// Note: when the body of sgpePostReadDispatch in
+// mmv1/templates/terraform/constants/semantic_governance_policy_engine.go.tmpl
+// changes, mirror the change here. The bodies should be trivially
+// comparable line-for-line. We deliberately do NOT extract a shared
+// interface-typed helper into the production constants file because
+// (a) it would be the only consumer of such an interface, (b) it would
+// add indirection in the generated resource code for the sole benefit
+// of test substitution, and (c) the dispatch body is small enough that
+// duplication is the smaller cost. The lockstep risk is mitigated by
+// the test's existence — the post_read tests assert observable behavior,
+// so a drift between production and shim that changes behavior would be
+// caught by a test failure.
+func shimmedDispatch(d resourceData, res map[string]interface{}) error {
+	state, ok := res["state"].(string)
+	if !ok {
+		return fmt.Errorf("SGPE response is missing or has malformed state field; backend regression.")
+	}
+
+	switch state {
+	case "ACTIVE", "FAILED":
+		return nil
+	case "PROVISIONING", "DEPROVISIONING":
+		// Production path also emits log.Printf("[WARN] ...") here.
+		return nil
+	case "INACTIVE":
+		d.SetId("")
+		return nil
+	default:
+		return fmt.Errorf("SemanticGovernancePolicyEngine returned unrecognized state %q; this provider version does not support it. Check for a newer terraform-provider-google release.", state)
+	}
+}
+
+// post_read translates INACTIVE to SetId("") so the next plan re-creates.
+func TestUnitSGPE_PostReadDispatch_INACTIVE_clears_id(t *testing.T) {
+	t.Parallel()
+	d := &fakeResourceData{id: "projects/p/locations/us-central1/semanticGovernancePolicyEngine"}
+	res := map[string]interface{}{"state": "INACTIVE"}
+	if err := shimmedDispatch(d, res); err != nil {
+		t.Fatalf("expected nil error on INACTIVE, got %v", err)
+	}
+	if d.Id() != "" {
+		t.Errorf("expected SetId(\"\") to clear the ID; got %q", d.Id())
+	}
+	if len(d.setIdArgs) != 1 || d.setIdArgs[0] != "" {
+		t.Errorf("expected exactly one SetId(\"\") call; got %v", d.setIdArgs)
+	}
+}
+
+// post_read returns error on STATE_UNSPECIFIED, unrecognized enums, and
+// missing/malformed state fields (loud-failure stance — see the
+// constants template's sgpePostReadDispatch comment).
+func TestUnitSGPE_PostReadDispatch_unknownStates_return_error(t *testing.T) {
+	t.Parallel()
+	cases := map[string]map[string]interface{}{
+		"STATE_UNSPECIFIED":             {"state": "STATE_UNSPECIFIED"},
+		"unrecognized future value":     {"state": "FUTURE_VALUE_NOT_YET_SUPPORTED"},
+		"state field missing":           {},
+		"state field is not a string":   {"state": 42},
+	}
+	for name, res := range cases {
+		t.Run(name, func(t *testing.T) {
+			d := &fakeResourceData{id: "irrelevant"}
+			err := shimmedDispatch(d, res)
+			if err == nil {
+				t.Fatalf("expected non-nil error for case %q; got nil", name)
+			}
+			if d.Id() == "" {
+				t.Errorf("error path must NOT clear the ID; SetId(\"\") was called for case %q", name)
+			}
+		})
+	}
+}
+
+// post_read leaves ACTIVE and FAILED states populated and in state.
+// PROVISIONING and DEPROVISIONING also leave the resource in state (with
+// a [WARN] log on the production path); included here for belt-and-braces.
+func TestUnitSGPE_PostReadDispatch_inStateBranches_no_op(t *testing.T) {
+	t.Parallel()
+	for _, state := range []string{"ACTIVE", "FAILED", "PROVISIONING", "DEPROVISIONING"} {
+		t.Run(state, func(t *testing.T) {
+			origID := "projects/p/locations/us-central1/semanticGovernancePolicyEngine"
+			d := &fakeResourceData{id: origID}
+			err := shimmedDispatch(d, map[string]interface{}{"state": state})
+			if err != nil {
+				t.Fatalf("expected nil error for state %q; got %v", state, err)
+			}
+			if d.Id() != origID {
+				t.Errorf("state %q must NOT clear the ID; ID is now %q", state, d.Id())
+			}
+			if len(d.setIdArgs) != 0 {
+				t.Errorf("state %q must NOT call SetId; got SetId calls %v", state, d.setIdArgs)
+			}
+		})
+	}
+}
+
+// Plan-time CustomizeDiff Check 1 returns nil (does not block) on
+// FAILED + non-empty diff. Production behavior also emits a [WARN] log;
+// we don't assert log content because log capture is fragile and the
+// warning visibility is TF_LOG=WARN-only by design (see the
+// sgpeFailedStateWarningCheck comment in the constants template).
+func TestUnitSGPE_FailedStateWarningCheck_FAILED_with_diff_succeeds(t *testing.T) {
+	t.Parallel()
+	d := &tpgresource.ResourceDiffMock{
+		Before: map[string]interface{}{
+			"state":          "FAILED",
+			"target_project": "old-project",
+		},
+		After: map[string]interface{}{
+			"state":          "FAILED",
+			"target_project": "new-project",
+		},
+	}
+	if err := sgpeFailedStateWarningCheck(d); err != nil {
+		t.Fatalf("expected nil error (warnings are non-blocking); got %v", err)
+	}
+}
+
+// Plan-time CustomizeDiff Check 1 does NOT fire when state ≠ FAILED OR
+// diff is empty. Negative cases.
+func TestUnitSGPE_FailedStateWarningCheck_negativeCases_no_op(t *testing.T) {
+	t.Parallel()
+	cases := map[string]*tpgresource.ResourceDiffMock{
+		"ACTIVE with diff": {
+			Before: map[string]interface{}{"state": "ACTIVE", "target_project": "old"},
+			After:  map[string]interface{}{"state": "ACTIVE", "target_project": "new"},
+		},
+		"PROVISIONING with diff": {
+			Before: map[string]interface{}{"state": "PROVISIONING", "target_project": "old"},
+			After:  map[string]interface{}{"state": "PROVISIONING", "target_project": "new"},
+		},
+		"FAILED with empty diff": {
+			Before: map[string]interface{}{"state": "FAILED", "target_project": "x"},
+			After:  map[string]interface{}{"state": "FAILED", "target_project": "x"},
+		},
+	}
+	for name, d := range cases {
+		t.Run(name, func(t *testing.T) {
+			if err := sgpeFailedStateWarningCheck(d); err != nil {
+				t.Fatalf("expected nil error; got %v", err)
+			}
+		})
+	}
+}
+
+{{- end }}

@@ -1,0 +1,163 @@
+// Constants and helper functions for the SemanticGovernancePolicyEngine
+// (SGPE) resource. This file is referenced from the resource YAML's
+// custom_code.constants key and is emitted into the generated Go above
+// the resource Schema function.
+//
+// Two groups of helpers live here:
+//
+//  1. sgpePostReadDispatch — the 6-way state translation invoked from
+//     the post_read template.
+//
+//  2. sgpeFailedStateWarningCheck + sgpeCustomizeDiff — the plan-time
+//     CustomizeDiff helpers invoked via the YAML's custom_diff: list.
+//
+// Both groups are split into "testable inner func" + "production wrapper"
+// following the Spanner template precedent
+// (mmv1/templates/terraform/constants/spanner_database.go.tmpl) so that
+// unit tests can exercise the logic directly via tpgresource.ResourceDiffMock
+// and direct invocation, rather than having to spin up a full
+// *schema.ResourceDiff.
+
+// ---------------------------------------------------------------------------
+// post_read state dispatch
+// ---------------------------------------------------------------------------
+
+// sgpePostReadDispatch implements the 6-way state translation for the
+// SemanticGovernancePolicyEngine Read flow. It runs after the standard
+// Read has fetched the engine and stored the response in `res`, but
+// before the schema fields are populated from `res` (per resource.go.tmpl
+// ordering).
+//
+// State -> behavior table:
+//
+//	ACTIVE, FAILED                  -> populate schema, return nil
+//	PROVISIONING, DEPROVISIONING    -> populate schema, emit [WARN], return nil
+//	INACTIVE                        -> SetId(""), emit [WARN], return nil
+//	STATE_UNSPECIFIED, unrecognized -> return error (loud failure)
+//
+// The function reads `res["state"]` directly because the standard schema
+// flatten has not yet populated d.Get("state") at the point post_read runs.
+func sgpePostReadDispatch(d *schema.ResourceData, res map[string]interface{}) error {
+	state, ok := res["state"].(string)
+	if !ok {
+		return fmt.Errorf("SGPE response is missing or has malformed state field; backend regression.")
+	}
+
+	switch state {
+	case "ACTIVE", "FAILED":
+		// Standard flatten will populate the schema below; nothing to do here.
+		return nil
+	case "PROVISIONING":
+		log.Printf("[WARN] SemanticGovernancePolicyEngine %q is in PROVISIONING state; treating as in-flight transient (continuing with current state)", d.Id())
+		return nil
+	case "DEPROVISIONING":
+		log.Printf("[WARN] SemanticGovernancePolicyEngine %q is in DEPROVISIONING state; treating as in-flight transient (continuing with current state)", d.Id())
+		return nil
+	case "INACTIVE":
+		log.Printf("[WARN] SemanticGovernancePolicyEngine %q is in INACTIVE state; treating as deleted; next apply will plan re-create", d.Id())
+		d.SetId("")
+		return nil
+	default:
+		// STATE_UNSPECIFIED or any unrecognized enum value. Loud-failure
+		// stance: silent coercion to INACTIVE was rejected because it
+		// would silently trigger destructive Terraform actions (re-create)
+		// when the backend introduces a new state the provider does not
+		// yet recognize.
+		return fmt.Errorf("SemanticGovernancePolicyEngine returned unrecognized state %q; this provider version does not support it. Check for a newer terraform-provider-google release.", state)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// CustomizeDiff helpers
+// ---------------------------------------------------------------------------
+
+// sgpeMutableFieldNames lists the schema field names that, when changed,
+// constitute a "non-empty diff" for the purposes of Check 1.
+//
+// The list is currently empty because the initial CL exposes only the
+// immutable `region` parameter plus output-only fields — there are no
+// user-settable mutable fields for Check 1 to guard. The Check 1
+// scaffolding is retained so subsequent fast-follow CLs that introduce
+// mutable user-facing surface (e.g. `target_project`, `gateway_config`)
+// can re-enable Check 1 by appending the new field name here, without
+// having to reintroduce the surrounding helpers and CustomizeDiff
+// plumbing.
+//
+// Output-only fields (state, name, create_time, update_time,
+// psc_service_attachment, ip_address, psc_forwarding_rule) MUST NOT
+// appear here — they change as the result of an apply, not as the cause
+// of one, and including them would make Check 1 fire on every
+// refresh-after-apply against a FAILED engine.
+//
+// Why an explicit list instead of diff.GetChangedKeysPrefix(""): the
+// tpgresource.TerraformResourceDiff interface used by unit tests does NOT
+// expose GetChangedKeysPrefix (only the concrete *schema.ResourceDiff does),
+// and we want unit tests to exercise the same code path as production. An
+// explicit list keeps the two paths identical at the cost of one line of
+// maintenance per mutable schema field added.
+var sgpeMutableFieldNames = []string{}
+
+// sgpeHasNonEmptyDiff returns true if any field in sgpeMutableFieldNames
+// has changed in the planned diff. Used by Check 1 to suppress the
+// FAILED-state warning when the user runs `terraform plan` against an
+// unchanged HCL.
+func sgpeHasNonEmptyDiff(diff tpgresource.TerraformResourceDiff) bool {
+	for _, field := range sgpeMutableFieldNames {
+		if diff.HasChange(field) {
+			return true
+		}
+	}
+	return false
+}
+
+// sgpeFailedStateWarningCheck warns the user when they attempt to apply
+// a change against an engine in FAILED state. It is the testable internal
+// entry point; the public YAML-facing wrapper is sgpeCustomizeDiff below.
+//
+// Behavior:
+//   - Reads the prior-state `state` value via diff.GetChange("state") (the
+//     "old" return). Because state is Computed: true and not user-settable
+//     in HCL, the prior value equals the most recent Read result.
+//   - Fires only when prior-state state == "FAILED" AND at least one
+//     mutable field has changed in the planned diff.
+//   - Emits a [WARN] log line via log.Printf and returns nil. Does NOT
+//     block the plan. Does NOT change what the provider sends on the wire.
+//   - Returns nil in all other cases (including PROVISIONING /
+//     DEPROVISIONING — those have a different correct user action and
+//     would be diluted by sharing this warning).
+//
+// Warning visibility: log.Printf("[WARN] ...") is the established
+// non-blocking CustomizeDiff warning pattern (see
+// mmv1/templates/terraform/constants/deployment_manager_deployment.go.tmpl).
+// Plugin SDK v2's CustomizeDiff signature returns error only — there is no
+// Diagnostics channel — so the warning is visible at TF_LOG=WARN or higher,
+// not in plain `terraform plan` output. This is a deliberate trade-off:
+// surfacing the warning at higher visibility would require either blocking
+// the plan (too aggressive — the change may legitimately want to proceed)
+// or upgrading to plugin-framework, which is a much larger migration.
+func sgpeFailedStateWarningCheck(diff tpgresource.TerraformResourceDiff) error {
+	priorStateRaw, _ := diff.GetChange("state")
+	priorState, ok := priorStateRaw.(string)
+	if !ok || priorState != "FAILED" {
+		return nil
+	}
+	if !sgpeHasNonEmptyDiff(diff) {
+		return nil
+	}
+	log.Printf("[WARN] This SemanticGovernancePolicyEngine is in FAILED state. " +
+		"Applying any change will trigger a full re-provision — equivalent to a " +
+		"`terraform destroy` followed by `terraform apply`. The values of " +
+		"output-only fields such as `psc_service_attachment`, `ip_address`, and " +
+		"`psc_forwarding_rule` are likely to change.")
+	return nil
+}
+
+// sgpeCustomizeDiff is the public CustomizeDiff entry point referenced from
+// the SemanticGovernancePolicyEngine.yaml `custom_diff:` list. It delegates
+// to sgpeFailedStateWarningCheck (Check 1).
+func sgpeCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if err := sgpeFailedStateWarningCheck(diff); err != nil {
+		return err
+	}
+	return nil
+}
