@@ -25,7 +25,7 @@ Lists IAM **member bindings** for a Google Cloud {{ $.Name}} for use with
 [`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query) and **`.tfquery.hcl`** files.
 
 Results correspond to existing
-[`{{ $.TerraformName}}_iam_member`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{$.TerraformName}}_iam)
+[`{{ $.TerraformName}}_iam_member`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{ replaceAll $.TerraformName "google_" ""}}_iam)
 managed resources.
 
 For how list resources work in this provider, file layout, Terraform version requirements, and 
@@ -55,6 +55,6 @@ Run `terraform query` from the directory that contains the `.tfquery.hcl` file.
 
 ## Results
 
-By default each result includes **resource identity** for [`{{$.TerraformName}}_iam_member`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{$.TerraformName}}_iam) (see [Resource identity](https://developer.hashicorp.com/terraform/language/resources/identities)).
+By default each result includes **resource identity** for [`{{$.TerraformName}}_iam_member`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{ replaceAll $.TerraformName "google_" ""}}_iam) (see [Resource identity](https://developer.hashicorp.com/terraform/language/resources/identities)).
 
-With `include_resource = true` on the `list` block, results also include the full resource-style attributes documented for the managed [`{{$.TerraformName}}_iam_member` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{$.TerraformName}}_iam#attributes-reference).
+With `include_resource = true` on the `list` block, results also include the full resource-style attributes documented for the managed [`{{$.TerraformName}}_iam_member` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{ replaceAll $.TerraformName "google_" ""}}_iam#attributes-reference).
