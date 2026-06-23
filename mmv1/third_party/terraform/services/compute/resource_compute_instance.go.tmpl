@@ -2191,38 +2191,85 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	md := flattenMetadataBeta(instance.Metadata)
+	{{ if ne $.TargetVersionName `ga` -}}
+	// Read from state before calling the helper, which will overwrite scheduling with the API
+	// response. The API doesn't persist nanos, so we restore it afterward to avoid a diff.
+	savedNanos, hadNanos := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos")
+	{{- end }}
+
+	zone := tpgresource.GetResourceNameFromSelfLink(instance.Zone)
+
+	if err := populateComputeInstanceResourceData(d, instance, project, zone, config); err != nil {
+		return err
+	}
 
 	// If the existing state contains "metadata_startup_script" instead of "metadata.startup-script",
 	// we should move the remote metadata.startup-script to metadata_startup_script to avoid
 	// specifying it in two places.
 	if _, ok := d.GetOk("metadata_startup_script"); ok {
+		md := d.Get("metadata").(map[string]interface{})
 		if err := d.Set("metadata_startup_script", md["startup-script"]); err != nil {
 			return fmt.Errorf("Error setting metadata_startup_script: %s", err)
 		}
-
 		delete(md, "startup-script")
+		if err := d.Set("metadata", md); err != nil {
+			return fmt.Errorf("Error setting metadata: %s", err)
+		}
 	}
 
-	if err = d.Set("metadata", md); err != nil {
+	// Fall back on internal ip if there is no external ip.  This makes sense in the situation where
+	// terraform is being used on a cloud instance and can therefore access the instances it creates
+	// via their internal ips.
+	networkInterfacesRaw, err := networkInterfacesToInterface(instance.NetworkInterfaces)
+	if err != nil {
+		return err
+	}
+	_, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
+	if err != nil {
+		return err
+	}
+	sshIP := externalIP
+	if sshIP == "" {
+		sshIP = internalIP
+	}
+	d.SetConnInfo(map[string]string{
+		"type": "ssh",
+		"host": sshIP,
+	})
+
+	{{ if ne $.TargetVersionName `ga` -}}
+	// Workaround: restore nanos from state since the API doesn't persist it (see comment above).
+	if hadNanos {
+		scheduling := flattenScheduling(instance.Scheduling)
+		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
+		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
+		max_duration["nanos"] = int64(savedNanos.(int))
+
+		graceful_shutdown["max_duration"] = []interface{}{max_duration}
+		scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+		if err := d.Set("scheduling", scheduling); err != nil {
+			return fmt.Errorf("Error setting scheduling: %s", err)
+		}
+	}
+	{{- end }}
+
+	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compute.Instance, project, zone string, config *transport_tpg.Config) error {
+	if err := d.Set("metadata", flattenMetadataBeta(instance.Metadata)); err != nil {
 		return fmt.Errorf("Error setting metadata: %s", err)
 	}
 
 	if err := d.Set("metadata_fingerprint", instance.Metadata.Fingerprint); err != nil {
 		return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
 	}
-
-	{{ if ne $.TargetVersionName `ga` -}}
-	if instance.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instance.PartnerMetadata))
-		if err != nil {
-			return fmt.Errorf("Error parsing partner metadata: %s", err)
-		}
-		if err = d.Set("partner_metadata", partnerMetadata); err != nil {
-			return fmt.Errorf("Error setting partner metadata: %s", err)
-		}
-	}
-	{{- end }}
 
 	if err := d.Set("can_ip_forward", instance.CanIpForward); err != nil {
 		return fmt.Errorf("Error setting can_ip_forward: %s", err)
@@ -2242,32 +2289,17 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 	// Set the networks
-	// Use the first external IP found for the default connection info.
 	networkInterfacesRaw, err := networkInterfacesToInterface(instance.NetworkInterfaces)
 	if err != nil {
 		return err
 	}
-	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
+	networkInterfaces, _, _, _, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
 	if err != nil {
 		return err
 	}
 	if err := d.Set("network_interface", networkInterfaces); err != nil {
 		return err
 	}
-
-	// Fall back on internal ip if there is no external ip.  This makes sense in the situation where
-	// terraform is being used on a cloud instance and can therefore access the instances it creates
-	// via their internal ips.
-	sshIP := externalIP
-	if sshIP == "" {
-		sshIP = internalIP
-	}
-
-	// Initialize the connection info
-	d.SetConnInfo(map[string]string{
-		"type": "ssh",
-		"host": sshIP,
-	})
 
 	// Set the tags fingerprint if there is one.
 	if instance.Tags != nil {
@@ -2399,14 +2431,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	// Remove nils from map in case there were disks in the config that were not present on read;
 	// i.e. a disk was detached out of band
 	ads := []map[string]interface{}{}
-	for _, d := range attachedDisks {
-		if d != nil {
-			ads = append(ads, d)
+	for _, ad := range attachedDisks {
+		if ad != nil {
+			ads = append(ads, ad)
 		}
 	}
-
-	zone := tpgresource.GetResourceNameFromSelfLink(instance.Zone)
-
 	if err := d.Set("service_account", flattenServiceAccounts(serviceAccountsToInterface(instance.ServiceAccounts))); err != nil {
 		return fmt.Errorf("Error setting service_account: %s", err)
 	}
@@ -2417,27 +2446,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error setting scratch_disk: %s", err)
 	}
 
-{{ if eq $.TargetVersionName `ga` -}}
 	if err := d.Set("scheduling", flattenScheduling(instance.Scheduling)); err != nil {
 		return fmt.Errorf("Error setting scheduling: %s", err)
 	}
-{{ else -}}
-	// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
-	// To avoid diff, we need to set the value from the state not from API response.
-	scheduling := flattenScheduling(instance.Scheduling)
-	if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
-		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
-		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
-		max_duration["nanos"] = int64(nanos.(int))
-
-		graceful_shutdown["max_duration"] = []interface{}{max_duration}
-		scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
-	}
-	if err := d.Set("scheduling", scheduling); err != nil {
-		return fmt.Errorf("Error setting scheduling: %s", err)
-	}
-{{- end }}
-
 	if err := d.Set("guest_accelerator", flattenGuestAccelerators(guestAcceleratorsToInterface(instance.GuestAccelerators))); err != nil {
 		return fmt.Errorf("Error setting guest_accelerator: %s", err)
 	}
@@ -2538,6 +2549,18 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error setting instance_encryption_key: %s", err)
 	}
 
+	{{- if ne $.TargetVersionName `ga` }}
+	if instance.PartnerMetadata != nil {
+		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instance.PartnerMetadata))
+		if err != nil {
+			return fmt.Errorf("Error parsing partner metadata: %s", err)
+		}
+		if err = d.Set("partner_metadata", partnerMetadata); err != nil {
+			return fmt.Errorf("Error setting partner metadata: %s", err)
+		}
+	}
+	{{- end }}
+
     {{- if ne $.TargetVersionName `ga` }}
 	// If not forced to false, upgrading to a new provider version and subsequently changing a vm property
     // will trigger replacement when erase_windows_vss_signature = null in state is changed to false as part of a refresh
@@ -2548,13 +2571,6 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
     }
     {{- end }}
 
-	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
-
-                
-    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-        return err
-    }
-    
 	return nil
 }
 
