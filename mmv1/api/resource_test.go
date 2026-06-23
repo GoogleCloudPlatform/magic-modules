@@ -211,61 +211,67 @@ func TestResourceServiceVersion(t *testing.T) {
 func TestProviderDefaultFieldsAreSynthesizedAndDeduplicated(t *testing.T) {
 	t.Parallel()
 
-	t.Run("identity synthesizes project without duplication", func(t *testing.T) {
-		t.Parallel()
+	version := &product.Version{Name: "ga", BaseUrl: "https://example.googleapis.com/v1/"}
 
-		r := api.Resource{
-			BaseUrl: "projects/{{project}}/foos",
-			Parameters: []*api.Type{
-				{Name: "project", Type: "String"},
+	cases := []struct {
+		description  string
+		obj          api.Resource
+		listScope    bool
+		expectedName map[string]int
+	}{
+		{
+			description: "identity synthesizes project without duplication",
+			obj: api.Resource{
+				BaseUrl: "projects/{{project}}/foos",
+				Parameters: []*api.Type{
+					{Name: "project", Type: "String"},
+				},
 			},
-		}
-
-		got := r.IdentityProperties()
-		projectCount := 0
-		for _, p := range got {
-			if p.Name == "project" {
-				projectCount++
-			}
-		}
-
-		if projectCount != 1 {
-			t.Fatalf("expected project exactly once in IdentityProperties, got %d", projectCount)
-		}
-	})
-
-	t.Run("list scope synthesizes missing defaults and deduplicates", func(t *testing.T) {
-		t.Parallel()
-
-		version := &product.Version{Name: "ga", BaseUrl: "https://example.googleapis.com/v1/"}
-		r := api.Resource{
-			BaseUrl: "projects/{{project}}/zones/{{zone}}/foos",
-			Parameters: []*api.Type{
-				{Name: "project", Type: "String"},
-				{Name: "zone", Type: "String", IgnoreRead: true, Exclude: true},
+			expectedName: map[string]int{"project": 1},
+		},
+		{
+			description: "list scope synthesizes missing defaults and deduplicates",
+			obj: api.Resource{
+				BaseUrl: "projects/{{project}}/zones/{{zone}}/foos",
+				Parameters: []*api.Type{
+					{Name: "project", Type: "String"},
+					{Name: "zone", Type: "String", IgnoreRead: true, Exclude: true},
+				},
+				ProductMetadata: &api.Product{
+					Versions: []*product.Version{version},
+					Version:  version,
+				},
 			},
-			ProductMetadata: &api.Product{
-				Versions: []*product.Version{version},
-				Version:  version,
-			},
-		}
+			listScope:    true,
+			expectedName: map[string]int{"project": 1, "zone": 1},
+		},
+	}
 
-		got := r.ListScopeProperties()
-		projectCount := 0
-		zoneCount := 0
-		for _, p := range got {
-			if p.Name == "project" {
-				projectCount++
-			}
-			if p.Name == "zone" {
-				zoneCount++
-			}
-		}
+	for _, tc := range cases {
+		tc := tc
 
-		if projectCount != 1 || zoneCount != 1 {
-			t.Fatalf("expected exactly one project and one zone in ListScopeProperties, got project=%d zone=%d", projectCount, zoneCount)
-		}
-	})
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+
+			var got []*api.Type
+			if tc.listScope {
+				got = tc.obj.ListScopeProperties()
+			} else {
+				got = tc.obj.IdentityProperties()
+			}
+
+			counts := map[string]int{}
+			for _, p := range got {
+				counts[p.Name]++
+			}
+
+			for name, want := range tc.expectedName {
+				if gotCount := counts[name]; gotCount != want {
+					t.Fatalf("expected %s exactly %d time(s), got %d", name, want, gotCount)
+				}
+			}
+		})
+	}
 }
 
 // TestMagicianLocation verifies that the current package is being executed from within
