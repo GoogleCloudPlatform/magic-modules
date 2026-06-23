@@ -34,15 +34,6 @@ async:
     resource_inside_response: false
 custom_code:
 samples:
-  - name: "region_network_policy_full"
-    primary_resource_id: "policy"
-    min_version: beta
-    steps:
-      - name: "region_network_policy_full"
-        resource_id_vars:
-          policy_name: "region-np-full"
-        vars:
-          description_field: "Terraform test"
   - name: "region_network_policy_update"
     primary_resource_id: "policy"
     min_version: beta
