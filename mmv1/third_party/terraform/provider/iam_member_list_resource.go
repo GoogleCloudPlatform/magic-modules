@@ -8,5 +8,6 @@ import (
 func IamMemberListResources() []func() list.ListResource {
 	return []func() list.ListResource{
 		resourcemanager.NewProjectIamMemberListResource,
+		resourcemanager.NewFolderIamMemberListResource,
 	}
 }
