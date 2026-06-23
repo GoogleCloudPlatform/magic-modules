@@ -136,6 +136,10 @@ type IamPolicy struct {
 
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
+
+	// [Optional] Generate a list resources (terraform query) for the mmv1 generated
+	// IAM member resources
+	GenerateListResource bool `yaml:"generate_list_resource,omitempty"`
 }
 
 // newIamPolicyWithDefaults returns an IamPolicy object with default values set.

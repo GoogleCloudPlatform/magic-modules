@@ -1,0 +1,129 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+{{$.CodeHeader TemplatePath}}
+
+package {{ lower $.ProductMetadata.Name }}_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+
+	"{{ $.ImportPath }}/acctest"
+	"{{ $.ImportPath }}/envvar"
+)
+
+var (
+	_ = envvar.TestEnvVar
+)
+
+{{ $sample := $.FirstTestConfig.Sample }}
+{{ $step := $.FirstTestConfig.Step }}
+
+func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
+	t.Parallel()
+
+	{{- if $sample.SkipVcr }}
+	acctest.SkipIfVcr(t)
+	{{- end }}
+    {{- if $sample.BootstrapIam }}
+    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+        {{- range $iam := $sample.BootstrapIam }}
+        {Member: "{{ $iam.Member}}", Role: "{{ $iam.Role }}"},
+        {{- end}}
+    })
+    {{- end}}
+
+    randomSuffix := acctest.RandString(t, 10)
+    context := map[string]interface{}{
+	{{- template "EnvVarContext" dict "TestEnvVars" $step.TestEnvVars "ImportPath" $.ImportPath }}
+	{{- range $varKey, $varVal := $step.TestContextVars }}
+		"{{$varKey}}": {{$varVal}},
+	{{- end }}
+    {{- if not (index $step.TestContextVars "project") }}
+    "project": envvar.GetTestProjectFromEnv(),
+    {{- end }}
+	"random_suffix": randomSuffix,
+    "iam_member": "user:admin@hashicorptest.com",
+	}
+
+	var listScope acctest.ListScopeCapture
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+{{- if $.VersionedProvider $sample.MinVersion }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+{{- else }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+{{- end }}
+{{- if not $.ExcludeDelete }}
+		CheckDestroy: testAccCheck{{ $.ResourceName }}DestroyProducer(t),
+{{- end }}
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc{{ $.ResourceName }}IamMemberListQuery_create(context),
+				Check: resource.ComposeTestCheckFunc(
+					listScope.Capture(map[string]string{
+                        "{{ underscore $.IamPolicy.ParentResourceAttribute}}": "{{ $.TerraformName }}.{{$sample.PrimaryResourceId }}",
+					}),
+				),
+			},
+			{
+				Query:  true,
+				Config: testAcc{{ $.ResourceName }}IamMemberListQuery_list(context),
+				ConfigVariables: listScope.AsConfigVariables(),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("{{ $.TerraformName }}_iam_member.members", 1),
+				},
+			},
+		},
+	})
+}
+
+func testAcc{{ $.ResourceName }}IamMemberListQuery_create(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+{{ $step.TestHCLText }}
+
+resource "{{ $.TerraformName }}_iam_member" "member" {
+    {{ $.IamPolicy.ParentResourceAttribute}} = {{ $.TerraformName }}.{{$sample.PrimaryResourceId }}.{{ $.IamPolicy.ParentResourceAttribute}}
+    role = "{{ $.IamPolicy.AllowedIamRole }}"
+    member = "%{iam_member}"
+} 
+`, context)
+}
+
+func testAcc{{ $.ResourceName }}IamMemberListQuery_list(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+variable "{{ underscore $.IamPolicy.ParentResourceAttribute }}" { type = string }
+
+
+list "{{ $.TerraformName }}_iam_member" "members" {
+    provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
+	limit = 10000
+    config {
+        {{ underscore $.IamPolicy.ParentResourceAttribute }} =  var.{{ underscore $.IamPolicy.ParentResourceAttribute }}
+    }
+}
+`, context)
+}

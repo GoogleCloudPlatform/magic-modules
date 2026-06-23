@@ -190,6 +190,26 @@ func (t *Terraform) GenerateListResource(object api.Resource, templateData Templ
 	}
 }
 
+// GenerateIamListResource emits list_iam_<>resource.go for IAM member
+// list-resource generation when iam_policy.generate_list_resource is set.
+func (t *Terraform) GenerateIamListResource(object api.Resource, templateData TemplateData, targetFolder string) {
+	if object.IamPolicy == nil || !object.IamPolicy.GenerateListResource {
+		return
+	}
+
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s.go", t.ResourceGoFilename(object)))
+	templateData.GenerateFile(
+		targetFilePath,
+		"templates/terraform/iam_member_list_resource.go.tmpl",
+		object,
+		true,
+		"templates/terraform/iam_member_list_resource.go.tmpl",
+	)
+
+	t.GenerateIamListResourceQueryTest(object, templateData, targetFolder)
+
+}
+
 // GenerateResourceFile is the Bazel counterpart to GenerateResource(), generating *only() the .go file and
 // taking the full path to the output file to generate rather than implicitly generating the path.
 func (t *Terraform) GenerateResourceFile(object api.Resource, targetFilePath string) {
@@ -258,6 +278,21 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s_generated_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateQueryTestFile(targetFilePath, object)
+}
+
+// GenrateIamListResqourceQueryTest emits list_iam_<resource>_generated_test.go.
+func (t *Terraform) GenerateIamListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder string) {
+	if object.IamPolicy == nil || !object.IamPolicy.GenerateListResource {
+		return
+	}
+	samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
+		return s.ExcludeTest
+	})
+	if len(samples) == 0 {
+		return
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateIamQueryTestFile(targetFilePath, object)
 }
 
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
@@ -376,6 +411,9 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
+
+		// New: Iam member list resource (terraform query support)
+		t.GenerateIamListResource(object, templateData, targetFolder)
 
 		// Only generate test if testable example configs exist.
 		samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
