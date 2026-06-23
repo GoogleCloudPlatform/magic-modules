@@ -98,7 +98,7 @@ func flattenProjectListItem(res map[string]interface{}, d *schema.ResourceData, 
 		return fmt.Errorf("error converting project list response: %w", err)
 	}
 	if p.ProjectId == "" {
-		return fmt.Errorf("missing name in project list response")
+		return fmt.Errorf("missing projectId in project list response")
 	}
 	d.SetId(fmt.Sprintf("projects/%s", p.ProjectId))
 	return populateGoogleProjectResourceData(d, &p, p.ProjectId, config)
@@ -115,7 +115,10 @@ func ListProjects(config *transport_tpg.Config, filter string, callback func(rd 
 		return err
 	}
 
-	domain := transport_tpg.GenerateUniverseDomainFromMeta(config)
+	domain := config.UniverseDomain
+	if domain == "" {
+		domain = "googleapis.com"
+	}
 	url := fmt.Sprintf("https://cloudresourcemanager.%s/v1/projects", domain)
 
 	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
