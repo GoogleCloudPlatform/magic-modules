@@ -51,6 +51,23 @@ resource "google_compute_region_network_firewall_policy_with_rules" "{{$.Primary
       }
       disabled = true
     }
+
+  rule {
+    description = "internal managed lb rule"
+    priority    = 3000
+    action      = "allow"
+    direction   = "INGRESS"
+
+    target_type = "INTERNAL_MANAGED_LB"
+
+    match {
+      src_ip_ranges = ["10.0.0.0/8"]
+
+      layer4_config {
+        ip_protocol = "tcp"
+      }
+    }
+  }
 }
 
 resource "google_network_security_address_group" "address_group_1" {

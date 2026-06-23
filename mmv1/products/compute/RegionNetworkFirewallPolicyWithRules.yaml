@@ -356,6 +356,26 @@ properties:
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
           min_version: 'beta'
+        - name: 'targetType'
+          type: Enum
+          description: |
+            Target types of the firewall policy rule.
+            Default value is INSTANCES.
+            When target_type is INTERNAL_MANAGED_LB, target_forwarding_rules must be set.
+          required: false
+          default_from_api: true
+          enum_values:
+            - 'INSTANCES'
+            - 'INTERNAL_MANAGED_LB'
+        - name: 'targetForwardingRules'
+          type: Array
+          required: false
+          description: |
+            A list of forwarding rules to which this rule applies.
+            This field allows you to control which load balancers get this rule.
+            This can only be specified when the target_type is INTERNAL_MANAGED_LB.
+          item_type:
+            type: String
   - name: 'predefinedRules'
     type: Array
     description: A list of firewall policy pre-defined rules.
@@ -649,6 +669,21 @@ properties:
             enabled.
           min_version: 'beta'
           output: true
+        - name: 'targetType'
+          type: Enum
+          description: |
+            Target types of the firewall policy rule.
+          output: true
+          enum_values:
+            - 'INSTANCES'
+            - 'INTERNAL_MANAGED_LB'
+        - name: 'targetForwardingRules'
+          type: Array
+          description: |
+            A list of forwarding rules to which this rule applies.
+          output: true
+          item_type:
+            type: String
   - name: 'fingerprint'
     type: Fingerprint
     description: Fingerprint of the resource. This field is used internally during updates of this resource.
