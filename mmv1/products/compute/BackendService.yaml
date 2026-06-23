@@ -161,6 +161,11 @@ examples:
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
+  - name: 'backend_service_max_session_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      backend_service_name: 'backend-service-max-session'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -201,6 +206,24 @@ properties:
             - 'CONNECTION'
             - 'CUSTOM_METRICS'
             - 'IN_FLIGHT'
+        - name: 'maxSession'
+          type: Integer
+          description: |
+            Defines a maximum number of long-lived sessions.
+            Not available if backend's balancing mode is RATE or CONNECTION
+          min_version: 'beta'
+        - name: 'maxSessionPerEndpoint'
+          type: Integer
+          description: |
+            Defines a maximum number of endpoint per sessions.
+            Not available if backend's balancing mode is RATE or CONNECTION
+          min_version: 'beta'
+        - name: 'maxSessionPerInstance'
+          type: Integer
+          description: |
+            Defines a maximum number of instance sessions.
+            Not available if backend's balancing mode is RATE or CONNECTION
+          min_version: 'beta'
         - name: 'capacityScaler'
           type: Double
           description: |
