@@ -733,7 +733,6 @@ properties:
             description: |
               A reference to a Secret Manager resource name storing the
               PEM-encoded private key. Mutually exclusive with clientKey.
-            required: false
             immutable: true
             sensitive: true
             ignore_read: true
