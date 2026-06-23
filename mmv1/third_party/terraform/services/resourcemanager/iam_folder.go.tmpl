@@ -205,7 +205,7 @@ func init() {
 	registry.FrameworkListResource{
 		Name:        "google_folder_iam_member",
 		ProductName: "resourcemanager",
-		Func: 		 NewFolderIamMemberListResource(),
+		Func: 		 NewFolderIamMemberListResource,
 	}.Register()
 	registry.Schema{
 		Name:        "google_folder_iam_policy",
