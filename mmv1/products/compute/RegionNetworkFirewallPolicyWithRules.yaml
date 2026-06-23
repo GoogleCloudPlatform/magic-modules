@@ -252,6 +252,7 @@ properties:
                       This value can either be one of the following well
                       known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
                       or the IP protocol number.
+                    required: true
                   - name: 'ports'
                     type: Array
                     description: |
