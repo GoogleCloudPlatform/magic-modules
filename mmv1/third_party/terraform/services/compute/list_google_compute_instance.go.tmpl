@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package compute
 
 import (
@@ -96,7 +93,7 @@ func (listR *GoogleComputeInstanceListResource) List(ctx context.Context, listRe
 	}
 }
 
-func flattenComputeInstanceListItem(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+func flattenComputeInstanceListItem(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config, project string) error {
 	var instance compute.Instance
 	if err := tpgresource.Convert(res, &instance); err != nil {
 		return fmt.Errorf("error converting compute instance list response: %w", err)
@@ -105,7 +102,6 @@ func flattenComputeInstanceListItem(res map[string]interface{}, d *schema.Resour
 		return fmt.Errorf("missing name in compute instance list response")
 	}
 
-	project := d.Get("project").(string)
 	zone := tpgresource.GetResourceNameFromSelfLink(instance.Zone)
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
@@ -150,8 +146,10 @@ func ListComputeInstances(config *transport_tpg.Config, project, zone string, ca
 		ListURL:        url,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
-		ItemName:       "items",
-		Flattener:      flattenComputeInstanceListItem,
-		Callback:       callback,
+		ItemName: "items",
+		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+			return flattenComputeInstanceListItem(res, d, config, project)
+		},
+		Callback: callback,
 	})
 }
