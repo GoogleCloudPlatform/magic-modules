@@ -50,9 +50,18 @@ async:
     resource_inside_response: false
 custom_code:
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
-examples:
+samples:
   - name: 'artifact_registry_project_config'
     primary_resource_id: 'my-config'
+    steps:
+      # Step 1 -> create test
+      - name: 'artifact_registry_project_config'
+        vars:
+          severity_level: 'INFO'
+      # Step 2 -> update test (in-place update of severity_level)
+      - name: 'artifact_registry_project_config'
+        vars:
+          severity_level: 'WARNING'
 parameters:
   - name: 'location'
     type: String

@@ -2,6 +2,6 @@ resource "google_artifact_registry_project_config" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   platform_logs_config {
     logging_state  = "ENABLED"
-    severity_level = "INFO"
+    severity_level = "{{index $.Vars "severity_level"}}"
   }
 }
