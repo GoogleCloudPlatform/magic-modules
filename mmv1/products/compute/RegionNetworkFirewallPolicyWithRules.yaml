@@ -369,7 +369,6 @@ properties:
             the firewall policy rule is not enforced and traffic behaves as if it did
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
-          min_version: 'beta'
         - name: 'targetType'
           type: Enum
           description: |
