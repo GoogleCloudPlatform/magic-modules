@@ -12,144 +12,151 @@
 # limitations under the License.
 
 ---
-name: 'BackupPlan'
-base_url: projects/{{project}}/locations/{{location}}/backupPlans
-create_url: projects/{{project}}/locations/{{location}}/backupPlans/?backup_plan_id={{backup_plan_id}}
-self_link: projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}
-update_verb: 'PATCH'
-update_mask: true
+name: BackupPlan
 description: A backup plan defines when and how to back up a resource, including the backup's schedule, retention, and location.
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}'
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
-  api: 'https://cloud.google.com/backup-disaster-recovery/docs/reference/rest'
-autogen_async: true
+    Official Documentation: https://cloud.google.com/backup-disaster-recovery/docs
+  api: https://cloud.google.com/backup-disaster-recovery/docs/reference/rest
+base_url: projects/{{project}}/locations/{{location}}/backupPlans
+self_link: projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}
+create_url: projects/{{project}}/locations/{{location}}/backupPlans/?backup_plan_id={{backup_plan_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}
 timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
-custom_code:
-  tgc_decoder: 'templates/tgc_next/decoders/backup_dr_backup_plan.go.tmpl'
+autogen_async: true
 include_in_tgc_next: true
-examples:
-  - name: 'backup_dr_backup_plan_simple'
-    primary_resource_id: 'my-backup-plan-1'
-    vars:
-      backup_vault_id: 'backup-vault-simple-test'
-      backup_plan_id: 'backup-plan-simple-test'
-    test_env_vars:
-      project: :PROJECT_NAME
-  - name: 'backup_dr_backup_plan_for_disk_resource'
-    primary_resource_id: 'my-disk-backup-plan-1'
-    vars:
-      backup_vault_id: 'backup-vault-disk-test'
-      backup_plan_id: 'backup-plan-disk-test'
-    test_env_vars:
-      project: :PROJECT_NAME
-  - name: 'backup_dr_backup_plan_for_csql_resource'
-    primary_resource_id: 'my-csql-backup-plan-1'
-    vars:
-      backup_vault_id: 'backup-vault-csql-test'
-      backup_plan_id: 'backup-plan-csql-test'
-    test_env_vars:
-      project: :PROJECT_NAME
-  - name: 'backup_dr_backup_plan_for_filestore_resource'
-    primary_resource_id: 'my-filestore-backup-plan-1'
-    vars:
-      backup_vault_id: 'backup-vault-filestore-test'
-      backup_plan_id: 'backup-plan-filestore-test'
-    test_env_vars:
-      project: :PROJECT_NAME
+custom_code:
+  tgc_decoder: templates/tgc_next/decoders/backup_dr_backup_plan.go.tmpl
+samples:
+  - name: backup_dr_backup_plan_simple
+    primary_resource_id: my-backup-plan-1
+    steps:
+      - name: backup_dr_backup_plan_simple
+        resource_id_vars:
+          backup_vault_id: backup-vault-simple-test
+          backup_plan_id: backup-plan-simple-test
+        test_env_vars:
+          project: :PROJECT_NAME
+  - name: backup_dr_backup_plan_for_disk_resource
+    primary_resource_id: my-disk-backup-plan-1
+    steps:
+      - name: backup_dr_backup_plan_for_disk_resource
+        resource_id_vars:
+          backup_vault_id: backup-vault-disk-test
+          backup_plan_id: backup-plan-disk-test
+        test_env_vars:
+          project: :PROJECT_NAME
+  - name: backup_dr_backup_plan_for_csql_resource
+    primary_resource_id: my-csql-backup-plan-1
+    steps:
+      - name: backup_dr_backup_plan_for_csql_resource
+        resource_id_vars:
+          backup_vault_id: backup-vault-csql-test
+          backup_plan_id: backup-plan-csql-test
+        test_env_vars:
+          project: :PROJECT_NAME
+  - name: backup_dr_backup_plan_for_filestore_resource
+    primary_resource_id: my-filestore-backup-plan-1
+    steps:
+      - name: backup_dr_backup_plan_for_filestore_resource
+        resource_id_vars:
+          backup_vault_id: backup-vault-filestore-test
+          backup_plan_id: backup-plan-filestore-test
+        test_env_vars:
+          project: :PROJECT_NAME
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     url_param_only: true
     immutable: true
     description: |
       The location for the backup plan
-  - name: 'backup_plan_id'
+  - name: backup_plan_id
     type: String
     required: true
     url_param_only: true
     immutable: true
-    description: |-
-      The ID of the backup plan
+    description: The ID of the backup plan
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of backup plan resource created
     output: true
-  - name: 'description'
+  - name: description
     type: String
     default_value: ""
     send_empty_value: true
     description: |
       The description allows for additional details about `BackupPlan` and its use cases to be provided.
-  - name: 'backupVault'
+  - name: backupVault
     type: String
     description: |
       Backup vault where the backups gets stored using this Backup plan.
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-  - name: 'backupVaultServiceAccount'
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+  - name: backupVaultServiceAccount
     type: String
     description: |
       The Google Cloud Platform Service Account to be used by the BackupVault for taking backups.
     output: true
-  - name: 'supportedResourceTypes'
+  - name: supportedResourceTypes
     type: Array
     description: |
       The list of all resource types to which the `BackupPlan` can be applied.
     item_type:
       type: String
     output: true
-  - name: 'resourceType'
+  - name: resourceType
     type: String
     description: |
       The resource type to which the `BackupPlan` will be applied.
       Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "sqladmin.googleapis.com/Instance", "alloydb.googleapis.com/Cluster", "file.googleapis.com/Instance" and "storage.googleapis.com/Bucket".
     required: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       When the `BackupPlan` was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       When the `BackupPlan` was last updated.
     output: true
-  - name: 'maxCustomOnDemandRetentionDays'
+  - name: maxCustomOnDemandRetentionDays
     type: Integer
     description: |
       The maximum number of days for which an on-demand backup taken with custom retention can be retained.
-  - name: 'backupRules'
+  - name: backupRules
     type: Array
     description: |
       The backup rules for this `BackupPlan`.
     item_type:
       type: NestedObject
       properties:
-        - name: 'ruleId'
+        - name: ruleId
           type: String
           description: The unique ID of this `BackupRule`. The `rule_id` is unique per `BackupPlan`.
           required: true
-        - name: 'backupRetentionDays'
+        - name: backupRetentionDays
           type: Integer
           description: |
             Configures the duration for which backup data will be kept. The value should be greater than or equal to minimum enforced retention of the backup vault.
           required: true
-        - name: 'standardSchedule'
+        - name: standardSchedule
           type: NestedObject
           description: StandardSchedule defines a schedule that runs within the confines of a defined window of days.
           required: true
           properties:
-            - name: 'recurrenceType'
+            - name: recurrenceType
               type: Enum
               description: RecurrenceType enumerates the applicable periodicity for the schedule.
               enum_values:
@@ -159,18 +166,18 @@ properties:
                 - MONTHLY
                 - YEARLY
               required: true
-            - name: 'hourlyFrequency'
+            - name: hourlyFrequency
               type: Integer
               description: |
                 Specifies frequency for hourly backups. An hourly frequency of 2 means jobs will run every 2 hours from start time till end time defined.
                 This is required for `recurrence_type`, `HOURLY` and is not applicable otherwise.
-            - name: 'daysOfWeek'
+            - name: daysOfWeek
               type: Array
-              description: 'Specifies days of week like MONDAY or TUESDAY, on which jobs will run. This is required for `recurrence_type`, `WEEKLY` and is not applicable otherwise.'
+              description: Specifies days of week like MONDAY or TUESDAY, on which jobs will run. This is required for `recurrence_type`, `WEEKLY` and is not applicable otherwise.
               item_type:
                 type: Enum
-                name: 'DayOfWeekEnum'
-                description: 'Specifies day of week'
+                name: DayOfWeekEnum
+                description: Specifies day of week
                 enum_values:
                   - DAY_OF_WEEK_UNSPECIFIED
                   - MONDAY
@@ -180,18 +187,18 @@ properties:
                   - FRIDAY
                   - SATURDAY
                   - SUNDAY
-            - name: 'daysOfMonth'
-              type: 'Array'
-              description: 'Specifies days of months like 1, 5, or 14 on which jobs will run.'
+            - name: daysOfMonth
+              type: Array
+              description: Specifies days of months like 1, 5, or 14 on which jobs will run.
               item_type:
                 type: Integer
-            - name: 'weekDayOfMonth'
+            - name: weekDayOfMonth
               type: NestedObject
-              description: 'Specifies a week day of the month like FIRST SUNDAY or LAST MONDAY, on which jobs will run.'
+              description: Specifies a week day of the month like FIRST SUNDAY or LAST MONDAY, on which jobs will run.
               properties:
-                - name: 'weekOfMonth'
+                - name: weekOfMonth
                   type: Enum
-                  description: 'WeekOfMonth enumerates possible weeks in the month, e.g. the first, third, or last week of the month.'
+                  description: WeekOfMonth enumerates possible weeks in the month, e.g. the first, third, or last week of the month.
                   enum_values:
                     - WEEK_OF_MONTH_UNSPECIFIED
                     - FIRST
@@ -200,9 +207,9 @@ properties:
                     - FOURTH
                     - LAST
                   required: true
-                - name: 'dayOfWeek'
+                - name: dayOfWeek
                   type: Enum
-                  description: 'Specifies the day of the week.'
+                  description: Specifies the day of the week.
                   enum_values:
                     - DAY_OF_WEEK_UNSPECIFIED
                     - MONDAY
@@ -213,13 +220,13 @@ properties:
                     - SATURDAY
                     - SUNDAY
                   required: true
-            - name: 'months'
+            - name: months
               type: Array
-              description: 'Specifies values of months'
+              description: Specifies values of months
               item_type:
                 type: Enum
-                name: 'MonthEnum'
-                description: 'Specifies the months of the year, like `FEBRUARY` and/or `MAY`, on which jobs will run.'
+                name: MonthEnum
+                description: Specifies the months of the year, like `FEBRUARY` and/or `MAY`, on which jobs will run.
                 enum_values:
                   - MONTH_UNSPECIFIED
                   - JANUARY
@@ -238,36 +245,36 @@ properties:
               type: String
               description: The time zone to be used when interpreting the schedule.
               required: true
-            - name: 'backupWindow'
+            - name: backupWindow
               type: NestedObject
               description: |
                 A BackupWindow defines the window of the day during which backup jobs will run. Jobs are queued at the beginning of the window and will be marked as
                 `NOT_RUN` if they do not start by the end of the window.
               properties:
-                - name: 'startHourOfDay'
+                - name: startHourOfDay
                   type: Integer
                   send_empty_value: true
                   description: |
                     The hour of the day (0-23) when the window starts, for example, if the value of the start hour of the day is 6, that means the backup window starts at 6:00.
                   required: true
-                - name: 'endHourOfDay'
+                - name: endHourOfDay
                   type: Integer
                   description: |
                     The hour of the day (1-24) when the window ends, for example, if the value of end hour of the day is 10, that means the backup window end time is 10:00.
                     The end hour of the day should be greater than the start
-  - name: 'logRetentionDays'
+  - name: logRetentionDays
     type: Integer
     immutable: true
     description: |
       This is only applicable for CloudSql resource. Days for which logs will be stored. This value should be greater than or equal to minimum enforced log retention duration of the backup vault.
-  - name: 'diskBackupPlanProperties'
+  - name: diskBackupPlanProperties
     type: NestedObject
     update_mask_fields:
-      - 'disk_backup_plan_properties.guest_flush'
+      - disk_backup_plan_properties.guest_flush
     description: |
       Defines optional disk related properties for backups generated by this plan.
     properties:
-      - name: 'guestFlush'
+      - name: guestFlush
         type: Boolean
         required: true
         description: |
@@ -275,14 +282,14 @@ properties:
           backup. When set to true, the system will attempt to ensure
           application-consistent backups. When set to false, the system will
           create crash-consistent backups.
-  - name: 'computeInstanceBackupPlanProperties'
+  - name: computeInstanceBackupPlanProperties
     type: NestedObject
     update_mask_fields:
-      - 'compute_instance_backup_plan_properties.guest_flush'
+      - compute_instance_backup_plan_properties.guest_flush
     description: |
       Defines optional compute instance related properties for backups generated by this plan.
     properties:
-      - name: 'guestFlush'
+      - name: guestFlush
         type: Boolean
         required: true
         description: |
