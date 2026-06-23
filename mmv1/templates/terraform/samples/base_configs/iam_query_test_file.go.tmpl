@@ -44,6 +44,13 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 	{{- if $sample.SkipVcr }}
 	acctest.SkipIfVcr(t)
 	{{- end }}
+    {{- if $sample.BootstrapIam }}
+    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+        {{- range $iam := $sample.BootstrapIam }}
+        {Member: "{{ $iam.Member}}", Role: "{{ $iam.Role }}"},
+        {{- end}}
+    })
+    {{- end}}
 
     randonSuffix := acctest.RandString(t, 10)
     context := map[string]interface{}{
@@ -51,14 +58,11 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 	{{- range $varKey, $varVal := $step.TestContextVars }}
 		"{{$varKey}}": {{$varVal}},
 	{{- end }}
-	{{- range $param := $.IamResourceParams }}
-	{{- if eq $param "project"}}
+    {{- if not (index $step.TestContextVars "project") }}
     "project": envvar.GetTestProjectFromEnv(),
-    {{- end }}
     {{- end }}
 	"random_suffix": randomSuffix,
 	}
-
 
 	var listScope acctest.ListScopeCapture
 
@@ -81,10 +85,8 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					listScope.Capture(map[string]string{
 					{{- range $param := $.IamResourceParams }}
-						{{- if $.IsInIamResourceParams "project" | and (eq $param "project") | not }}
-						"{{ underscore $param }}": google_{{ $.TerraformName }}_iam_member.foo,
+						"{{ underscore $param }}": google_{{ $.TerraformName }}.{{ $sample.PrimaryResourceId }}",
 						{{- end }}
-					    {{- end }}
 					}),
 				),
 			},
@@ -106,10 +108,9 @@ func testAcc{{ $.ResourceName }}IamMemberListQueryConfig(context map[string]inte
 variable "{{ underscore $param }}" { type = string }
 {{- end }}
 
-{{ $sample.ResourceType $.TerraformName }}
+{{ $step.TestHCLText }}
 
-
-list "google_{{ $.TerraformName }}_iam_member" "member" {
+list "google_{{ $.TerraformName }}_iam_member" "members" {
     provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
 	limit = 10000
     config {
