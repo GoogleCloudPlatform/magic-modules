@@ -29,7 +29,6 @@ func init() {
 	}.Register()
 }
 
-
 type GoogleProjectListResource struct {
 	tpgresource.ListResourceMetadata
 }
@@ -122,16 +121,14 @@ func ListProjects(config *transport_tpg.Config, filter string, callback func(rd 
 	url := fmt.Sprintf("https://cloudresourcemanager.%s/v1/projects", domain)
 
 	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
-		Config:         config,
-		TempData:       d,
-		Resource:       ResourceGoogleProject(),
-		ListURL:        url,
-		Filter:         filter,
-		ItemName:       "projects",
-		UserAgent:      userAgent,
-		Flattener:      flattenProjectListItem,
-		Callback:       callback,
+		Config:    config,
+		TempData:  d,
+		Resource:  ResourceGoogleProject(),
+		ListURL:   url,
+		Filter:    filter,
+		ItemName:  "projects",
+		UserAgent: userAgent,
+		Flattener: flattenProjectListItem,
+		Callback:  callback,
 	})
 }
-
-

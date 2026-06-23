@@ -337,9 +337,9 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	// Explicitly set client-side fields to default values if unset
 
-	if err := populateGoogleProjectResourceData(d, p, pid, config); err != nil {                          
-      return err
-  	} 
+	if err := populateGoogleProjectResourceData(d, p, pid, config); err != nil {
+		return err
+	}
 
 	var ba *cloudbilling.ProjectBillingInfo
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -416,8 +416,8 @@ func populateGoogleProjectResourceData(d *schema.ResourceData, p *cloudresourcem
 		}
 	}
 	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
-          "project_id": pid,                                                                            
-    })
+		"project_id": pid,
+	})
 }
 
 func PrefixedProject(pid string) string {
