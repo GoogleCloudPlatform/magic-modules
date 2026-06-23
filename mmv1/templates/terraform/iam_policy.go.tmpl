@@ -60,7 +60,7 @@ func init() {
     }.Register()
 {{- if and $.IamPolicy $.IamPolicy.GenerateListResource }}
     registry.FrameworkListResource{
-        Name:        "google_{{ $.TerraformName }}_iam_member",
+        Name:        "{{ $.TerraformName }}_iam_member",
         ProductName: "{{ $.ProductMetadata.Name }}",
         Func:        New{{ $.ResourceName -}}IamMemberListResource,
     }.Register()

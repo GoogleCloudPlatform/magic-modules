@@ -61,6 +61,7 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
     "project": envvar.GetTestProjectFromEnv(),
     {{- end }}
 	"random_suffix": randomSuffix,
+    "iam_member": "user:admin@hashicorptest.com",
 	}
 
 	var listScope acctest.ListScopeCapture
@@ -83,9 +84,7 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 				Config: testAcc{{ $.ResourceName }}IamMemberListQuery_create(context),
 				Check: resource.ComposeTestCheckFunc(
 					listScope.Capture(map[string]string{
-                    {{- range $param := $.IamResourceParams }}
-                        "{{ underscore $param }}": "{{ $.TerraformName }}.{{$sample.PrimaryResourceId }}",
-                    {{- end }}
+                        "{{ underscore $.IamPolicy.ParentResourceAttribute}}": "{{ $.TerraformName }}.{{$sample.PrimaryResourceId }}",
 					}),
 				),
 			},
@@ -104,22 +103,26 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 func testAcc{{ $.ResourceName }}IamMemberListQuery_create(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 {{ $step.TestHCLText }}
+
+resource "{{ $.TerraformName }}_iam_member" "member" {
+    {{ $.IamPolicy.ParentResourceAttribute}} = {{ $.TerraformName }}.{{$sample.PrimaryResourceId }}.{{ $.IamPolicy.ParentResourceAttribute}}
+    role = "{{ $.IamPolicy.AllowedIamRole }}"
+    member = "%{iam_member}"
+} 
 `, context)
 }
 
 func testAcc{{ $.ResourceName }}IamMemberListQuery_list(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-{{- range $param := $.IamResourceParams }}
-variable "{{ underscore $param }}" { type = string }
-{{- end }}
+
+variable "{{ underscore $.IamPolicy.ParentResourceAttribute }}" { type = string }
+
 
 list "{{ $.TerraformName }}_iam_member" "members" {
     provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
 	limit = 10000
     config {
-        {{- range $param := $.IamResourceParams}}
-        {{ underscore $param }} =  var.{{ underscore $param }}
-        {{- end }}
+        {{ underscore $.IamPolicy.ParentResourceAttribute }} =  var.{{ underscore $.IamPolicy.ParentResourceAttribute }}
     }
 }
 `, context)

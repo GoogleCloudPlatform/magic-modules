@@ -35,7 +35,7 @@ func New{{ $.ResourceName }}IamMemberResource() *schema.Resource {
 
 func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
     return tpgiamresource.NewIamMemberListResource(
-        "google_{{ $.TerraformName }}_iam_member",
+        "{{ $.TerraformName }}_iam_member",
         New{{ $.ResourceName }}IamMemberResource(),
         {{ $.ResourceName }}IamUpdaterProducer,
         tpgiamresource.IamMemberListCallConfig{ 
