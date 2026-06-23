@@ -1,0 +1,122 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+{{$.CodeHeader TemplatePath}}
+
+package {{ lower $.ProductMetadata.Name }}_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+
+	"{{ $.ImportPath }}/acctest"
+	"{{ $.ImportPath }}/envvar"
+)
+
+var (
+	_ = envvar.TestEnvVar
+)
+
+{{ $sample := $.FirstTestConfig.Sample }}
+{{ $step := $.FirstTestConfig.Step }}
+
+func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
+	t.Parallel()
+
+	{{- if $sample.SkipVcr }}
+	acctest.SkipIfVcr(t)
+	{{- end }}
+
+    randonSuffix := acctest.RandString(t, 10)
+    context := map[string]interface{}{
+	{{- template "EnvVarContext" dict "TestEnvVars" $step.TestEnvVars "ImportPath" $.ImportPath }}
+	{{- range $varKey, $varVal := $step.TestContextVars }}
+		"{{$varKey}}": {{$varVal}},
+	{{- end }}
+	{{- range $param := $.IamResourceParams }}
+	{{- if eq $param "project"}}
+    "project": envvar.GetTestProjectFromEnv(),
+    {{- end }}
+    {{- end }}
+	"random_suffix": randomSuffix,
+	}
+
+
+	var listScope acctest.ListScopeCapture
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+{{- if $.VersionedProvider $sample.MinVersion }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+{{- else }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+{{- end }}
+{{- if not $.ExcludeDelete }}
+		CheckDestroy: testAccCheck{{ $.ResourceName }}DestroyProducer(t),
+{{- end }}
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc{{ $.ResourceName }}IamMemberListQueryConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					listScope.Capture(map[string]string{
+					{{- range $param := $.IamResourceParams }}
+						{{- if $.IsInIamResourceParams "project" | and (eq $param "project") | not }}
+						"{{ underscore $param }}": google_{{ $.TerraformName }}_iam_member.foo,
+						{{- end }}
+					    {{- end }}
+					}),
+				),
+			},
+			{
+				Query:  true,
+				Config: testAcc{ $.ResourceName }}IamMemberListQueryConfig(context),
+				ConfigVariables: listScope.ConfigVariables(),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("google_{{ $.TerraformName }}_iam_member.members", 1),
+				},
+			},
+		},
+	})
+}
+
+func testAcc{{ $.ResourceName }}IamMemberListQueryConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+{{- range $param := $.IamResourceParams }}
+variable "{{ underscore $param }}" { type = string }
+{{- end }}
+
+{{ $sample.ResourceType $.TerraformName }}
+
+
+list "google_{{ $.TerraformName }}_iam_member" "member" {
+    provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
+	limit = 10000
+    config {
+        {{- range $param := $.IamResourceParams}}
+        {{ underscore $param }} =  var.{{ underscore $param }}
+        {{- end }}
+    }
+}
+`, context)
+}

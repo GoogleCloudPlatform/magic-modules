@@ -38,7 +38,7 @@ type {{ $.ResourceName -}}IamMemberListResource struct {
 
 func New{{ $.ResourceName -}}IamMemberListResource() list.listResource {
     listR := &{{ $.ResourceName -}}IamMemberListResource{}
-    listR.typeName = "{{ $.terraformName }}_iam_member"
+    listR.typeName = "{{ $.TerraformName }}_iam_member"
     // The Iam member resource' full schema (parent params + role/member/etc.).
     listR.SDKv2Resource = tpgiamresource.resourceIamMember(
         {{ $.ResourceName -}}IamSchema,
@@ -85,10 +85,10 @@ func (listR *{{ $.ResourceName -}}IamMemberListResource) List(ctx context.Contex
     {{- end }}
     {{- end }}
 
-    updator, err := {{ $.Resourcename }}IamUpdaterProducer(parent, listR.Client)
+    updator, err := {{ $.ResourceName }}IamUpdaterProducer(parent, listR.Client)
     if err != nil {
         diags.AddError("Error building Iam updator", err.Error())
-        stream.Results =. list.ListResultsStreamDiagnostics(diags)
+        stream.Results = list.ListResultsStreamDiagnostics(diags)
         return
     }
 
@@ -134,7 +134,7 @@ func (listR *{{ $.ResourceName -}}IamMemberListResource) List(ctx context.Contex
 
 func init() {
     registry.FrameworkListResorce{
-        Name:        "{{ $.terraformName }}_iam_member",
+        Name:        "{{ $.TerraformName }}_iam_member",
         ProductName: "{{ $.ProductMetadata.Name }}",
         Func:        "New{{ $.ResourceName -}}IamMemberListResource"
     }.Register()
