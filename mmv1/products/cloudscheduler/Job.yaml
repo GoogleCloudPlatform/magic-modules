@@ -31,7 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 error_retry_predicates:
-  - is409SyncMutateCannotBeQueuedError
+  - transport_tpg.Is409SyncMutateCannotBeQueuedError
 custom_code:
   constants: 'templates/terraform/constants/scheduler.tmpl'
   encoder: 'templates/terraform/encoders/cloud_scheduler.go.tmpl'
