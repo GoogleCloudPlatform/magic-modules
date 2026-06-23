@@ -102,7 +102,9 @@ func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) erro
 	continue_on_errorProp, err := expandApigeeFlowhookContinueOnError(d.Get("continue_on_error"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("continue_on_error"); !tpgresource.IsEmptyValue(reflect.ValueOf(continue_on_errorProp)) && (ok || !reflect.DeepEqual(v, continue_on_errorProp)) {
+	} else if continueOnErrorRaw := d.GetRawConfig().GetAttr("continue_on_error"); !continueOnErrorRaw.IsNull() {
+		// Only send continue_on_error when explicitly set, so a configured `false`
+		// is preserved instead of being dropped by the IsEmptyValue() guard.
 		obj["continueOnError"] = continue_on_errorProp
 	}
 
