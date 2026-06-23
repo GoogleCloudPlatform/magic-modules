@@ -19575,11 +19575,15 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1"
   enable_autopilot   = true
-  min_master_version = data.google_container_engine_versions.central1.release_channel_default_version["STABLE"]
+  min_master_version = data.google_container_engine_versions.central1.release_channel_default_version["REGULAR"]
   deletion_protection = false
   network    = "%s"
   subnetwork = "%s"
   ip_allocation_policy {}
+
+  release_channel {
+    channel = "RAPID"
+  }
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -19598,6 +19602,10 @@ resource "google_container_cluster" "primary" {
   network    = "%s"
   subnetwork = "%s"
   ip_allocation_policy {}
+
+  release_channel {
+    channel = "RAPID"
+  }
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -19616,6 +19624,10 @@ resource "google_container_cluster" "primary" {
   network    = "%s"
   subnetwork = "%s"
   ip_allocation_policy {}
+
+  release_channel {
+    channel = "RAPID"
+  }
 
   desired_emulated_version = regex("^[0-9]+\\.[0-9]+", data.google_container_engine_versions.central1.release_channel_latest_version["RAPID"])
 }

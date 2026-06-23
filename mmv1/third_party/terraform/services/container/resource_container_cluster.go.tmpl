@@ -4715,18 +4715,20 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 {{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("desired_emulated_version") {
 		emulatedVersion := d.Get("desired_emulated_version").(string)
-		req := &container.UpdateClusterRequest{
-			Update: &container.ClusterUpdate{
-				DesiredEmulatedVersion: emulatedVersion,
-			},
-		}
+		if emulatedVersion != "" {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredEmulatedVersion: emulatedVersion,
+				},
+			}
 
-		updateF := updateFunc(req, "updating GKE master emulated version")
-		// Call update serially.
-		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			return err
+			updateF := updateFunc(req, "updating GKE master emulated version")
+			// Call update serially.
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+			log.Printf("[INFO] GKE cluster %s: master emulated version has been updated to %s", d.Id(), emulatedVersion)
 		}
-		log.Printf("[INFO] GKE cluster %s: master emulated version has been updated to %s", d.Id(), emulatedVersion)
 	}
 {{- end }}
 

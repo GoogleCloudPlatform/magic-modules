@@ -255,7 +255,7 @@ to the datasource. A region can have a different set of supported versions than 
 region are guaranteed to support the same version.
 
 {{- if ne $.TargetVersionName "ga" }}
-* `desired_emulated_version` - (Optional) The desired emulated version for the cluster.
+* `desired_emulated_version` - (Beta) (Optional) The desired emulated version for the cluster. Used to complete a rollback-safe upgrade after a soak period. Must be in major.minor format (e.g., "1.31"). To complete the upgrade declaratively, set this field to the target minor version. Removing this field from your configuration will not trigger completion.
 {{- end }}
 
 * `monitoring_config` - (Optional) Monitoring configuration for the cluster.
@@ -2063,7 +2063,7 @@ exported:
 * `enterprise_config.0.cluster_tier` - The effective tier of the cluster.
 
 {{- if ne $.TargetVersionName "ga" }}
-* `emulated_version` - The current emulated version of the cluster.
+* `emulated_version` - (Beta) The current emulated version of the cluster.
 {{- end }}
 
 ## Timeouts
