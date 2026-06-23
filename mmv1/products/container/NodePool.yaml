@@ -127,6 +127,18 @@ properties:
               type: String
               description: The effect of the taint.
               ignore_read: true
+      - name: taintConfig
+        type: NestedObject
+        api_name: taintConfig
+        description: Taint configuration for this node.
+        ignore_read: true
+        properties:
+          - name: architectureTaintBehavior
+            type: String
+            api_name: architectureTaintBehavior
+            description: Architecture taint behavior.
+            is_missing_in_cai: true
+
   - name: networkConfig
     type: NestedObject
     description: Networking configuration for this NodePool.
@@ -139,3 +151,6 @@ properties:
         type: String
         description: Accelerator network profile for this NodePool.
         is_missing_in_cai: true
+  - name: ignoreNodeCountChanges
+    type: Boolean
+    client_side: true
