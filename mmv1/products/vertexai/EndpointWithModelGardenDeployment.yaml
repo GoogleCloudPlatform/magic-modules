@@ -985,7 +985,7 @@ properties:
                 immutable: true
               - name: acceleratorType
                 type: String
-                description: |2-
+                description: |-
                   Possible values:
                   ACCELERATOR_TYPE_UNSPECIFIED
                   NVIDIA_TESLA_K80

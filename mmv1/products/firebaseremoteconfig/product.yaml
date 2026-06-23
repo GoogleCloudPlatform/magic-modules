@@ -15,7 +15,7 @@
 name: FirebaseRemoteConfig
 display_name: Firebase Remote Config
 scopes:
-    - https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
-    - base_url: https://firebaseremoteconfig.googleapis.com/v1/
-      name: ga
+  - base_url: https://firebaseremoteconfig.googleapis.com/v1/
+    name: ga

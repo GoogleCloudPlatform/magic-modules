@@ -95,8 +95,14 @@ func FlattenMetadata(metadata *compute.Metadata) map[string]interface{} {
 	return metadataMap
 }
 
-func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (*compute.Metadata, error) {
-	m := &compute.Metadata{}
+// resourceInstanceMetadata builds the instance metadata as a JSON-shaped
+// map[string]interface{} mirroring the compute.Metadata API type (camelCase
+// keys: "items" -> [{"key", "value"}], "fingerprint"). Empty values are omitted
+// to mirror the Apiary struct's omitempty tags, so the marshaled request body is
+// byte-identical whether the map is sent directly or round-tripped through the
+// typed struct via resourceInstanceMetadataTyped.
+func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (map[string]interface{}, error) {
+	m := map[string]interface{}{}
 	mdMap := d.Get("metadata").(map[string]interface{})
 	if v, ok := d.GetOk("metadata_startup_script"); ok && v.(string) != "" {
 		if w, ok := mdMap["startup-script"]; ok {
@@ -108,7 +114,7 @@ func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (*compute.Met
 		mdMap["startup-script"] = v
 	}
 	if len(mdMap) > 0 {
-		m.Items = make([]*compute.MetadataItems, 0, len(mdMap))
+		items := make([]interface{}, 0, len(mdMap))
 		var keys []string
 		for k := range mdMap {
 			keys = append(keys, k)
@@ -116,17 +122,36 @@ func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (*compute.Met
 		sort.Strings(keys)
 		for _, k := range keys {
 			v := mdMap[k].(string)
-			m.Items = append(m.Items, &compute.MetadataItems{
-				Key:   k,
-				Value: &v,
+			items = append(items, map[string]interface{}{
+				"key":   k,
+				"value": v,
 			})
 		}
+		m["items"] = items
 
 		// Set the fingerprint. If the metadata has never been set before
-		// then this will just be blank.
-		m.Fingerprint = d.Get("metadata_fingerprint").(string)
+		// then this will just be blank, in which case we omit it to mirror
+		// the compute.Metadata omitempty behaviour.
+		if fp := d.Get("metadata_fingerprint").(string); fp != "" {
+			m["fingerprint"] = fp
+		}
 	}
 
+	return m, nil
+}
+
+// resourceInstanceMetadataTyped adapts the map-based resourceInstanceMetadata
+// output to the typed *compute.Metadata still required by callers that build
+// Apiary request structs directly.
+func resourceInstanceMetadataTyped(d tpgresource.TerraformResourceData) (*compute.Metadata, error) {
+	mdMap, err := resourceInstanceMetadata(d)
+	if err != nil {
+		return nil, err
+	}
+	m := &compute.Metadata{}
+	if err := convertViaJSON(mdMap, m); err != nil {
+		return nil, err
+	}
 	return m, nil
 }
 {{- if ne $.TargetVersionName "ga" }}
@@ -169,22 +194,35 @@ func flattenPartnerMetadata(partnerMetadata map[string]interface{}) (map[string]
 	return partnerMetadataMap, nil
 }
 
-func convertPartnerMetadataToCompute(pm map[string]interface{}) (map[string]compute.StructuredEntries, error) {
-	result := make(map[string]compute.StructuredEntries)
+// convertPartnerMetadataToCompute builds the partner metadata as a JSON-shaped
+// map[string]interface{} mirroring the compute.StructuredEntries API type (each
+// value is the parsed entries object, or an empty object for nil). The typed
+// adapter convertPartnerMetadataToComputeTyped round-trips this through
+// map[string]compute.StructuredEntries for callers that build Apiary structs.
+func convertPartnerMetadataToCompute(pm map[string]interface{}) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
 	for key, value := range pm {
 		if value == nil {
-			result[key] = compute.StructuredEntries{}
+			result[key] = map[string]interface{}{}
 			continue
 		}
-		seBytes, err := json.Marshal(value)
-		if err != nil {
-			return nil, err
-		}
-		var se compute.StructuredEntries
-		if err := json.Unmarshal(seBytes, &se); err != nil {
-			return nil, err
-		}
-		result[key] = se
+		result[key] = value
+	}
+	return result, nil
+}
+
+// convertPartnerMetadataToComputeTyped adapts the map-based
+// convertPartnerMetadataToCompute output to the typed
+// map[string]compute.StructuredEntries still required by callers that build
+// Apiary request structs directly.
+func convertPartnerMetadataToComputeTyped(pm map[string]interface{}) (map[string]compute.StructuredEntries, error) {
+	pmMap, err := convertPartnerMetadataToCompute(pm)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[string]compute.StructuredEntries)
+	if err := convertViaJSON(pmMap, &result); err != nil {
+		return nil, err
 	}
 	return result, nil
 }

@@ -726,7 +726,21 @@ func (r Resource) IdentityProperties() []*Type {
 		identities = nil
 	}
 	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, identities, r.BaseUrl)[0])
+	optionalValues := map[string]bool{"project": false, "zone": false, "region": false}
+
+	// Collapse any nested objects marked with flatten_object so that identifiers
+	// nested under them (e.g. datasetReference.datasetId -> dataset_id) are
+	// matched against the import format.
+	allProps := make([]*Type, 0)
 	for _, p := range r.AllProperties() {
+		if p.FlattenObject {
+			allProps = google.Concat(allProps, p.RootProperties())
+		} else {
+			allProps = append(allProps, p)
+		}
+	}
+
+	for _, p := range allProps {
 		if slices.Contains(importFormat, google.Underscore(p.Name)) {
 			props = append(props, p)
 		}

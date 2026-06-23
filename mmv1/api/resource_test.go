@@ -950,3 +950,43 @@ func TestResource_TestDependencies(t *testing.T) {
 		})
 	}
 }
+
+// TestIdentityPropertiesFlattenObject ensures that identifiers nested under a
+// property marked with flatten_object (e.g. datasetReference.datasetId ->
+// dataset_id) are collapsed and included in the identity schema. Without this,
+// importing by resource identity panics because the identifier is missing from
+// the generated identity schema.
+func TestIdentityPropertiesFlattenObject(t *testing.T) {
+	t.Parallel()
+
+	res := &api.Resource{
+		Name:            "Dataset",
+		BaseUrl:         "projects/{{project}}/datasets",
+		ImportFormat:    []string{"projects/{{project}}/datasets/{{dataset_id}}"},
+		ProductMetadata: &api.Product{Name: "BigQuery"},
+	}
+	res.Properties = []*api.Type{
+		{
+			Name:             "datasetReference",
+			Type:             "NestedObject",
+			FlattenObject:    true,
+			ResourceMetadata: res,
+			Properties: []*api.Type{
+				{
+					Name:     "datasetId",
+					Type:     "String",
+					Required: true,
+				},
+			},
+		},
+	}
+
+	got := make([]string, 0)
+	for _, p := range res.IdentityProperties() {
+		got = append(got, p.Name)
+	}
+
+	if !slices.Contains(got, "datasetId") {
+		t.Errorf("expected IdentityProperties to include flattened identifier \"datasetId\", got %v", got)
+	}
+}

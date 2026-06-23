@@ -1,0 +1,26 @@
+resource "google_firestore_database" "database" {
+  project     = "{{index $.TestEnvVars "project_id"}}"
+  name        = "{{index $.ResourceIdVars "database_id"}}"
+  location_id = "nam5"
+  type        = "FIRESTORE_NATIVE"
+
+  delete_protection_state = "{{index $.ResourceIdVars "delete_protection_state"}}"
+  deletion_policy         = "DELETE"
+}
+
+resource "google_firestore_field" "{{$.PrimaryResourceId}}" {
+  project    = "{{index $.TestEnvVars "project_id"}}"
+  database   = google_firestore_database.database.name
+  collection = "chatrooms"
+  field      = "timestamp"
+
+  # Enable a TTL policy with no expiration offset for the collection based on
+  # timestamp values in this field.
+  ttl_config {}
+
+  # Disable all built-in single field indexes for the field.
+  #
+  # Omit this block for Enterprise Edition databases, which do not
+  # have built-in single field indexes.
+  index_config {}
+}
