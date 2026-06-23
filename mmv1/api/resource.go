@@ -726,8 +726,6 @@ func (r Resource) IdentityProperties() []*Type {
 		identities = nil
 	}
 	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, identities, r.BaseUrl)[0])
-	optionalValues := map[string]bool{"project": false, "zone": false, "region": false}
-
 	// Collapse any nested objects marked with flatten_object so that identifiers
 	// nested under them (e.g. datasetReference.datasetId -> dataset_id) are
 	// matched against the import format.
