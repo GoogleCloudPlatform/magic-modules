@@ -93,10 +93,7 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				Config: testAccRegionInstanceGroupManager_update(template1, target1, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "DO_NOTHING"),
-
-					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "DO_NOTHING"),
-					{{- end }}
 
 					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.force_update_on_repair", "NO"),
@@ -115,10 +112,7 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				Config: testAccRegionInstanceGroupManager_update2(template1, target1, target2, template2, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
-
-					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
-					{{- end }}
 
 					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.force_update_on_repair", "YES"),
@@ -137,10 +131,7 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				Config: testAccRegionInstanceGroupManager_update3(template1, target1, target2, template2, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
-
-					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
-					{{- end }}
 
 					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.force_update_on_repair", "YES"),
@@ -819,10 +810,7 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
     {{- end }}
 
     default_action_on_failure = "DO_NOTHING"
-
-    {{- if ne $.TargetVersionName "ga" }}
     on_failed_health_check = "DO_NOTHING"
-    {{- end }}
   }
 }
 `, template, target, igm)
@@ -930,10 +918,7 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
 
   instance_lifecycle_policy {
     default_action_on_failure = "REPAIR"
-
-    {{- if ne $.TargetVersionName "ga" }}
     on_failed_health_check = "REPAIR"
-    {{- end }}
 
     {{- if ne $.TargetVersionName "ga" }}
     force_update_on_repair = "YES"
