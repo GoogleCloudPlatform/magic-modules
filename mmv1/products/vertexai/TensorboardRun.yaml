@@ -14,11 +14,15 @@
 ---
 name: TensorboardRun
 description: A TensorboardRun is a single execution of a training job.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/vertex-ai/docs
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.tensorboards.experiments.runs
 base_url: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{experiment}}/runs
 self_link: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{experiment}}/runs/{{tensorboard_run_id}}
 create_url: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{experiment}}/runs?tensorboardRunId={{tensorboard_run_id}}
-update_verb: PATCH
 update_mask: true
+update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{experiment}}/runs/{{tensorboard_run_id}}
 async:
@@ -29,24 +33,20 @@ async:
   result:
     resource_inside_response: true
 autogen_status: VGVuc29yYm9hcmRSdW5BdXRvZ2VuVjJBZ2VudA==
-references:
-  guides:
-    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.tensorboards.experiments.runs'
 samples:
-  - name: "vertex_ai_tensorboard_run"
-    primary_resource_id: "tensorboard_run"
+  - name: vertex_ai_tensorboard_run
+    primary_resource_id: tensorboard_run
     steps:
-      - name: "vertex_ai_tensorboard_run_basic"
+      - name: vertex_ai_tensorboard_run_basic
         resource_id_vars:
-          tensorboardRunId: "run"
-          tensorboardExperimentId: "experiment"
-          tensorboard: "tensorboard"
-      - name: "vertex_ai_tensorboard_run_update"
+          tensorboardRunId: run
+          tensorboardExperimentId: experiment
+          tensorboard: tensorboard
+      - name: vertex_ai_tensorboard_run_update
         resource_id_vars:
-          tensorboardRunId: "run"
-          tensorboardExperimentId: "experiment"
-          tensorboard: "tensorboard"
+          tensorboardRunId: run
+          tensorboardExperimentId: experiment
+          tensorboard: tensorboard
 parameters:
   - name: location
     type: String

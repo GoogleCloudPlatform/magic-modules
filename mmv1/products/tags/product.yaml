@@ -12,18 +12,18 @@
 # limitations under the License.
 
 ---
-name: 'Tags'
-display_name: 'Tags'
-versions:
-  - name: 'ga'
-    base_url: 'https://cloudresourcemanager.googleapis.com/v3/'
-  - name: 'beta'
-    base_url: 'https://cloudresourcemanager.googleapis.com/v3/'
-scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+name: Tags
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+display_name: Tags
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://cloudresourcemanager.googleapis.com/v3/
+  - name: beta
+    base_url: https://cloudresourcemanager.googleapis.com/v3/

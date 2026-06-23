@@ -35,19 +35,23 @@ async:
 custom_code:
   encoder: templates/terraform/encoders/sql_source_representation_instance.go.tmpl
   decoder: templates/terraform/decoders/sql_source_representation_instance.go.tmpl
-examples:
+samples:
   - name: sql_source_representation_instance_basic
     primary_resource_id: instance
-    ignore_read_extra:
-      - password
-    vars:
-      name: my-instance
+    steps:
+      - name: sql_source_representation_instance_basic
+        ignore_read_extra:
+          - password
+        resource_id_vars:
+          name: my-instance
   - name: sql_source_representation_instance_postgres
     primary_resource_id: instance
-    ignore_read_extra:
-      - password
-    vars:
-      name: my-instance
+    steps:
+      - name: sql_source_representation_instance_postgres
+        ignore_read_extra:
+          - password
+        resource_id_vars:
+          name: my-instance
 properties:
   - name: name
     type: String

@@ -15,65 +15,71 @@
 name: DefaultDomain
 description: A domain name that is associated with a backend.
 base_url: projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains/{{domain_id}}
 create_url: projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains/{{domain_id}}?update_mask=disabled
+update_mask: true
 create_verb: PATCH
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains/{{domain_id}}
-# The default domain can't be deleted, only disabled
-exclude_delete: true
-exclude_sweeper: true
 import_format:
   - projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains/{{domain_id}}
-  - "{{project}}/{{location}}/{{backend}}/{{domain_id}}"
-  - "{{location}}/{{backend}}/{{domain_id}}"
-examples:
-  - name: firebase_app_hosting_default_domain_minimal
-    primary_resource_id: example
-    vars:
-      backend_id: 'dd-mini'
-      service_act_id: 'service-account'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-dd-mi"'
-  - name: firebase_app_hosting_default_domain_full
-    primary_resource_id: example
-    vars:
-      backend_id: 'dd-full'
-      service_act_id: 'service-account'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-dd-full"'
-  - name: firebase_app_hosting_default_domain_disabled
-    primary_resource_id: example
-    vars:
-      backend_id: 'dd-disabled'
-      service_act_id: 'service-account'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-dd-disabled"'
-autogen_async: true
+  - '{{project}}/{{location}}/{{backend}}/{{domain_id}}'
+  - '{{location}}/{{backend}}/{{domain_id}}'
+exclude_sweeper: true
 async:
+  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 20
       update_minutes: 20
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   actions:
     - create
     - update
-  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
+# The default domain can't be deleted, only disabled
+exclude_delete: true
 autogen_status: RG9tYWlu
+autogen_async: true
+samples:
+  - name: firebase_app_hosting_default_domain_minimal
+    primary_resource_id: example
+    steps:
+      - name: firebase_app_hosting_default_domain_minimal
+        resource_id_vars:
+          backend_id: dd-mini
+          service_act_id: service-account
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          # prevent tests from colliding with each other
+          service_act_id: '"tf-test-dd-mi"'
+  - name: firebase_app_hosting_default_domain_full
+    primary_resource_id: example
+    steps:
+      - name: firebase_app_hosting_default_domain_full
+        resource_id_vars:
+          backend_id: dd-full
+          service_act_id: service-account
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          # prevent tests from colliding with each other
+          service_act_id: '"tf-test-dd-full"'
+  - name: firebase_app_hosting_default_domain_disabled
+    primary_resource_id: example
+    steps:
+      - name: firebase_app_hosting_default_domain_disabled
+        resource_id_vars:
+          backend_id: dd-disabled
+          service_act_id: service-account
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          # prevent tests from colliding with each other
+          service_act_id: '"tf-test-dd-disabled"'
 parameters:
   - name: location
     type: String
@@ -89,8 +95,7 @@ parameters:
     required: true
   - name: domainId
     type: String
-    description: |-
-      Id of the domain. For default domain, it should be {{backend}}--{{project_id}}.{{location}}.hosted.app
+    description: Id of the domain. For default domain, it should be {{backend}}--{{project_id}}.{{location}}.hosted.app
     immutable: true
     url_param_only: true
     required: true

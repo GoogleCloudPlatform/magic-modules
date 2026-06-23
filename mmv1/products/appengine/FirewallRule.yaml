@@ -12,46 +12,48 @@
 # limitations under the License.
 
 ---
-name: 'FirewallRule'
+name: FirewallRule
 description: |
   A single firewall rule that is evaluated against incoming traffic
   and provides an action to take on matched requests.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/appengine/docs/standard/python/creating-firewalls#creating_firewall_rules'
-  api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.firewall.ingressRules'
+    Official Documentation: https://cloud.google.com/appengine/docs/standard/python/creating-firewalls#creating_firewall_rules
+  api: https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.firewall.ingressRules
 docs:
-base_url: 'apps/{{project}}/firewall/ingressRules'
-self_link: 'apps/{{project}}/firewall/ingressRules/{{priority}}'
-update_verb: 'PATCH'
+base_url: apps/{{project}}/firewall/ingressRules
+self_link: apps/{{project}}/firewall/ingressRules/{{priority}}
 update_mask: true
-mutex: 'apps/{{project}}'
+update_verb: PATCH
+collection_url_key: ingressRules
 import_format:
-  - 'apps/{{project}}/firewall/ingressRules/{{priority}}'
+  - apps/{{project}}/firewall/ingressRules/{{priority}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+mutex: apps/{{project}}
+exclude_sweeper: true
 async:
-  type: 'PollAsync'
-  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  type: PollAsync
+  actions: [create]
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
   suppress_error: false
   target_occurrences: 1
-  actions: ['create']
-collection_url_key: 'ingressRules'
 custom_code:
-exclude_sweeper: true
-examples:
-  - name: 'app_engine_firewall_rule_basic'
-    primary_resource_id: 'rule'
-    vars:
-      project_id: 'ae-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+samples:
+  - name: app_engine_firewall_rule_basic
+    primary_resource_id: rule
+    steps:
+      - name: app_engine_firewall_rule_basic
+        resource_id_vars:
+          project_id: ae-project
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
 parameters:
-  - name: 'priority'
+  - name: priority
     type: Integer
     description: |
       A positive integer that defines the order of rule evaluation.
@@ -61,22 +63,22 @@ parameters:
       IPv6 traffic when no previous rule matches. Only the action of
       this rule can be modified by the user.
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional string description of this rule.
     required: false
-  - name: 'sourceRange'
+  - name: sourceRange
     type: String
     description: |
       IP address or range, defined using CIDR notation, of requests that this rule applies to.
     required: true
-  - name: 'action'
+  - name: action
     type: Enum
     description: |
       The action to take if this rule matches.
     required: true
     enum_values:
-      - 'UNSPECIFIED_ACTION'
-      - 'ALLOW'
-      - 'DENY'
+      - UNSPECIFIED_ACTION
+      - ALLOW
+      - DENY

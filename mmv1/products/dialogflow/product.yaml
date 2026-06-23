@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Dialogflow'
-display_name: 'Dialogflow'
-versions:
-  - name: 'beta'
-    base_url: 'https://dialogflow.googleapis.com/v2beta1/'
-  - name: 'ga'
-    base_url: 'https://dialogflow.googleapis.com/v2/'
+name: Dialogflow
+display_name: Dialogflow
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: beta
+    base_url: https://dialogflow.googleapis.com/v2beta1/
+  - name: ga
+    base_url: https://dialogflow.googleapis.com/v2/
