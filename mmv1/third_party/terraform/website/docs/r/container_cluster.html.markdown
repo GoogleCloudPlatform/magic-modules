@@ -254,7 +254,9 @@ Structure is [documented below](#nested_master_auth).
 to the datasource. A region can have a different set of supported versions than its corresponding zones, and not all zones in a
 region are guaranteed to support the same version.
 
+{{- if ne $.TargetVersionName "ga" }}
 * `desired_emulated_version` - (Optional) The desired emulated version for the cluster.
+{{- end }}
 
 * `monitoring_config` - (Optional) Monitoring configuration for the cluster.
     Structure is [documented below](#nested_monitoring_config).
@@ -1983,6 +1985,10 @@ exported:
 * `fleet.0.membership_location` - The location of the fleet membership,  extracted from `fleet.0.membership`. You can use this field to configure `membership_location` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
 
 * `enterprise_config.0.cluster_tier` - The effective tier of the cluster.
+
+{{- if ne $.TargetVersionName "ga" }}
+* `emulated_version` - The current emulated version of the cluster.
+{{- end }}
 
 ## Timeouts
 
