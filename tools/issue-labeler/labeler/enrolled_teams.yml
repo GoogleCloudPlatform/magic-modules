@@ -10,7 +10,6 @@ service/accesscontextmanager:
 service/aiplatform-agent-engine:
   resources:
   - google_vertex_ai_reasoning_engine.*
-  - google_vertex_ai_online_evaluator
 service/aiplatform-colab-enterprise:
   resources:
   - google_colab_.*
