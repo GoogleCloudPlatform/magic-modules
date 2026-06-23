@@ -1,7 +1,9 @@
 package compute
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"strconv"
 
@@ -41,19 +43,26 @@ func instanceSchedulingNodeAffinitiesElemSchema() *schema.Resource {
 	}
 }
 
-func expandAliasIpRanges(ranges []interface{}) []*compute.AliasIpRange {
-	ipRanges := make([]*compute.AliasIpRange, 0, len(ranges))
+func expandAliasIpRanges(ranges []interface{}) []interface{} {
+	ipRanges := make([]interface{}, 0, len(ranges))
 	for _, raw := range ranges {
 		data := raw.(map[string]interface{})
-		ipRanges = append(ipRanges, &compute.AliasIpRange{
-			IpCidrRange:         data["ip_cidr_range"].(string),
-			SubnetworkRangeName: data["subnetwork_range_name"].(string),
-		})
+		// Build the map with the API JSON field names, omitting empty values to
+		// mirror the omitempty semantics of the compute.AliasIpRange struct so the
+		// serialized request body is byte-identical.
+		ipRange := map[string]interface{}{}
+		if v := data["ip_cidr_range"].(string); v != "" {
+			ipRange["ipCidrRange"] = v
+		}
+		if v := data["subnetwork_range_name"].(string); v != "" {
+			ipRange["subnetworkRangeName"] = v
+		}
+		ipRanges = append(ipRanges, ipRange)
 	}
 	return ipRanges
 }
 
-func flattenAliasIpRange(d *schema.ResourceData, ranges []*compute.AliasIpRange, i int) []map[string]interface{} {
+func flattenAliasIpRange(d *schema.ResourceData, ranges []interface{}, i int) []map[string]interface{} {
 	prefix := fmt.Sprintf("network_interface.%d", i)
 
 	configData := []map[string]interface{}{}
@@ -62,10 +71,22 @@ func flattenAliasIpRange(d *schema.ResourceData, ranges []*compute.AliasIpRange,
 	}
 
 	apiData := make([]map[string]interface{}, 0, len(ranges))
-	for _, ipRange := range ranges {
+	for _, raw := range ranges {
+		ipRange, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		ipCidrRange, ok := ipRange["ipCidrRange"].(string)
+		if !ok && ipRange["ipCidrRange"] != nil {
+			log.Printf("[WARN] flattenAliasIpRange: unexpected type for ipCidrRange: %T", ipRange["ipCidrRange"])
+		}
+		subnetworkRangeName, ok := ipRange["subnetworkRangeName"].(string)
+		if !ok && ipRange["subnetworkRangeName"] != nil {
+			log.Printf("[WARN] flattenAliasIpRange: unexpected type for subnetworkRangeName: %T", ipRange["subnetworkRangeName"])
+		}
 		apiData = append(apiData, map[string]interface{}{
-			"ip_cidr_range":         ipRange.IpCidrRange,
-			"subnetwork_range_name": ipRange.SubnetworkRangeName,
+			"ip_cidr_range":         ipCidrRange,
+			"subnetwork_range_name": subnetworkRangeName,
 		})
 	}
 
@@ -78,7 +99,7 @@ func flattenAliasIpRange(d *schema.ResourceData, ranges []*compute.AliasIpRange,
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func flattenIpv6AliasRange(d *schema.ResourceData, ranges []*compute.AliasIpRange, i int) []map[string]interface{} {
+func flattenIpv6AliasRange(d *schema.ResourceData, ranges []interface{}, i int) []map[string]interface{} {
 	prefix := fmt.Sprintf("network_interface.%d", i)
 
 	configData := []map[string]interface{}{}
@@ -87,10 +108,22 @@ func flattenIpv6AliasRange(d *schema.ResourceData, ranges []*compute.AliasIpRang
 	}
 
 	apiData := make([]map[string]interface{}, 0, len(ranges))
-	for _, ipRange := range ranges {
+	for _, raw := range ranges {
+		ipRange, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		ipCidrRange, ok := ipRange["ipCidrRange"].(string)
+		if !ok && ipRange["ipCidrRange"] != nil {
+			log.Printf("[WARN] flattenIpv6AliasRange: unexpected type for ipCidrRange: %T", ipRange["ipCidrRange"])
+		}
+		subnetworkRangeName, ok := ipRange["subnetworkRangeName"].(string)
+		if !ok && ipRange["subnetworkRangeName"] != nil {
+			log.Printf("[WARN] flattenIpv6AliasRange: unexpected type for subnetworkRangeName: %T", ipRange["subnetworkRangeName"])
+		}
 		apiData = append(apiData, map[string]interface{}{
-			"ip_cidr_range":         ipRange.IpCidrRange,
-			"subnetwork_range_name": ipRange.SubnetworkRangeName,
+			"ip_cidr_range":         ipCidrRange,
+			"subnetwork_range_name": subnetworkRangeName,
 		})
 	}
 
@@ -520,168 +553,349 @@ func flattenComputePreemptionNoticeDuration(v *compute.Duration) []interface{} {
 }
 {{- end }}
 
-func flattenAccessConfigs(accessConfigs []*compute.AccessConfig) ([]map[string]interface{}, string) {
-	flattened := make([]map[string]interface{}, len(accessConfigs))
+func flattenAccessConfigs(accessConfigs []interface{}) ([]map[string]interface{}, string) {
+	flattened := make([]map[string]interface{}, 0, len(accessConfigs))
 	natIP := ""
-	for i, ac := range accessConfigs {
-		flattened[i] = map[string]interface{}{
-			"nat_ip":       ac.NatIP,
-			"network_tier": ac.NetworkTier,
+	for _, raw := range accessConfigs {
+		ac, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
 		}
-		if ac.SetPublicPtr {
-			flattened[i]["public_ptr_domain_name"] = ac.PublicPtrDomainName
+		natIPVal, ok := ac["natIP"].(string)
+		if !ok && ac["natIP"] != nil {
+			log.Printf("[WARN] flattenAccessConfigs: unexpected type for natIP: %T", ac["natIP"])
+		}
+		networkTier, ok := ac["networkTier"].(string)
+		if !ok && ac["networkTier"] != nil {
+			log.Printf("[WARN] flattenAccessConfigs: unexpected type for networkTier: %T", ac["networkTier"])
+		}
+		entry := map[string]interface{}{
+			"nat_ip":       natIPVal,
+			"network_tier": networkTier,
+		}
+		if setPublicPtr, ok := ac["setPublicPtr"].(bool); ok && setPublicPtr {
+			entry["public_ptr_domain_name"] = ac["publicPtrDomainName"]
+		} else if !ok && ac["setPublicPtr"] != nil {
+			log.Printf("[WARN] flattenAccessConfigs: unexpected type for setPublicPtr: %T", ac["setPublicPtr"])
 		}
 		if natIP == "" {
-			natIP = ac.NatIP
+			natIP = natIPVal
 		}
 		{{- if ne $.TargetVersionName "ga" }}
-		if ac.SecurityPolicy != "" {
-			flattened[i]["security_policy"] = ac.SecurityPolicy
+		if sp, ok := ac["securityPolicy"].(string); ok && sp != "" {
+			entry["security_policy"] = sp
+		} else if !ok && ac["securityPolicy"] != nil {
+			log.Printf("[WARN] flattenAccessConfigs: unexpected type for securityPolicy: %T", ac["securityPolicy"])
 		}
 		{{- end }}
+		flattened = append(flattened, entry)
 	}
 	return flattened, natIP
 }
 
-func flattenIpv6AccessConfigs(ipv6AccessConfigs []*compute.AccessConfig) []map[string]interface{} {
-	flattened := make([]map[string]interface{}, len(ipv6AccessConfigs))
-	for i, ac := range ipv6AccessConfigs {
-		flattened[i] = map[string]interface{}{
-			"network_tier": ac.NetworkTier,
+func flattenIpv6AccessConfigs(ipv6AccessConfigs []interface{}) []map[string]interface{} {
+	flattened := make([]map[string]interface{}, 0, len(ipv6AccessConfigs))
+	for _, raw := range ipv6AccessConfigs {
+		ac, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
 		}
-		flattened[i]["public_ptr_domain_name"] = ac.PublicPtrDomainName
-		flattened[i]["external_ipv6"] = ac.ExternalIpv6
-		flattened[i]["external_ipv6_prefix_length"] = strconv.FormatInt(ac.ExternalIpv6PrefixLength, 10)
-		flattened[i]["name"] = ac.Name
+		networkTier, ok := ac["networkTier"].(string)
+		if !ok && ac["networkTier"] != nil {
+			log.Printf("[WARN] flattenIpv6AccessConfigs: unexpected type for networkTier: %T", ac["networkTier"])
+		}
+		publicPtrDomainName, ok := ac["publicPtrDomainName"].(string)
+		if !ok && ac["publicPtrDomainName"] != nil {
+			log.Printf("[WARN] flattenIpv6AccessConfigs: unexpected type for publicPtrDomainName: %T", ac["publicPtrDomainName"])
+		}
+		externalIpv6, ok := ac["externalIpv6"].(string)
+		if !ok && ac["externalIpv6"] != nil {
+			log.Printf("[WARN] flattenIpv6AccessConfigs: unexpected type for externalIpv6: %T", ac["externalIpv6"])
+		}
+		name, ok := ac["name"].(string)
+		if !ok && ac["name"] != nil {
+			log.Printf("[WARN] flattenIpv6AccessConfigs: unexpected type for name: %T", ac["name"])
+		}
+		entry := map[string]interface{}{
+			"network_tier": networkTier,
+		}
+		entry["public_ptr_domain_name"] = publicPtrDomainName
+		entry["external_ipv6"] = externalIpv6
+		entry["external_ipv6_prefix_length"] = strconv.FormatInt(flattenNetworkInterfaceInt64(ac["externalIpv6PrefixLength"]), 10)
+		entry["name"] = name
 		{{- if ne $.TargetVersionName "ga" }}
-		if ac.SecurityPolicy != "" {
-			flattened[i]["security_policy"] = ac.SecurityPolicy
+		if sp, ok := ac["securityPolicy"].(string); ok && sp != "" {
+			entry["security_policy"] = sp
+		} else if !ok && ac["securityPolicy"] != nil {
+			log.Printf("[WARN] flattenIpv6AccessConfigs: unexpected type for securityPolicy: %T", ac["securityPolicy"])
 		}
 		{{- end }}
+		flattened = append(flattened, entry)
 	}
 	return flattened
 }
 
-func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Config, networkInterfaces []*compute.NetworkInterface) ([]map[string]interface{}, string, string, string, error) {
+// flattenNetworkInterfaceInt64 coerces a numeric value decoded from a JSON
+// response (typically float64) into an int64. It tolerates the int variants in
+// case the value originated from a typed struct converted via ConvertToMap.
+func flattenNetworkInterfaceInt64(v interface{}) int64 {
+	switch t := v.(type) {
+	case float64:
+		return int64(t)
+	case int64:
+		return t
+	case int:
+		return int64(t)
+	}
+	return 0
+}
+
+func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Config, networkInterfaces []interface{}) ([]map[string]interface{}, string, string, string, error) {
 	flattened := make([]map[string]interface{}, len(networkInterfaces))
 	var region, internalIP, externalIP string
 
-	for i, iface := range networkInterfaces {
-		var ac []map[string]interface{}
-		ac, externalIP = flattenAccessConfigs(iface.AccessConfigs)
+	for i, raw := range networkInterfaces {
+		iface, ok := raw.(map[string]interface{})
+		if !ok {
+			return nil, "", "", "", fmt.Errorf("expected map[string]interface{} for network interface element at index %d, got %T", i, raw)
+		}
 
-		subnet, err := tpgresource.ParseSubnetworkFieldValue(iface.Subnetwork, d, config)
+		accessConfigs, ok := iface["accessConfigs"].([]interface{})
+		if !ok && iface["accessConfigs"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for accessConfigs at index %d: %T", i, iface["accessConfigs"])
+		}
+		if accessConfigs == nil {
+			accessConfigs = []interface{}{}
+		}
+		ipv6AccessConfigs, ok := iface["ipv6AccessConfigs"].([]interface{})
+		if !ok && iface["ipv6AccessConfigs"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for ipv6AccessConfigs at index %d: %T", i, iface["ipv6AccessConfigs"])
+		}
+		if ipv6AccessConfigs == nil {
+			ipv6AccessConfigs = []interface{}{}
+		}
+		aliasIpRanges, ok := iface["aliasIpRanges"].([]interface{})
+		if !ok && iface["aliasIpRanges"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for aliasIpRanges at index %d: %T", i, iface["aliasIpRanges"])
+		}
+		if aliasIpRanges == nil {
+			aliasIpRanges = []interface{}{}
+		}
+
+		var ac []map[string]interface{}
+		ac, externalIP = flattenAccessConfigs(accessConfigs)
+
+		networkIP, ok := iface["networkIP"].(string)
+		if !ok && iface["networkIP"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for networkIP at index %d: %T", i, iface["networkIP"])
+		}
+		network, ok := iface["network"].(string)
+		if !ok && iface["network"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for network at index %d: %T", i, iface["network"])
+		}
+		subnetwork, ok := iface["subnetwork"].(string)
+		if !ok && iface["subnetwork"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for subnetwork at index %d: %T", i, iface["subnetwork"])
+		}
+		parentNicName, ok := iface["parentNicName"].(string)
+		if !ok && iface["parentNicName"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for parentNicName at index %d: %T", i, iface["parentNicName"])
+		}
+		nicType, ok := iface["nicType"].(string)
+		if !ok && iface["nicType"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for nicType at index %d: %T", i, iface["nicType"])
+		}
+		stackType, ok := iface["stackType"].(string)
+		if !ok && iface["stackType"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for stackType at index %d: %T", i, iface["stackType"])
+		}
+		ipv6Address, ok := iface["ipv6Address"].(string)
+		if !ok && iface["ipv6Address"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for ipv6Address at index %d: %T", i, iface["ipv6Address"])
+		}
+		igmpQuery, ok := iface["igmpQuery"].(string)
+		if !ok && iface["igmpQuery"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for igmpQuery at index %d: %T", i, iface["igmpQuery"])
+		}
+
+		subnet, err := tpgresource.ParseSubnetworkFieldValue(subnetwork, d, config)
 		if err != nil {
 			return nil, "", "", "", err
 		}
 		region = subnet.Region
 
 		flattened[i] = map[string]interface{}{
-			"network_ip":          iface.NetworkIP,
-			"network":             tpgresource.ConvertSelfLinkToV1(iface.Network),
-			"parent_nic_name":     iface.ParentNicName,
-			"vlan":                iface.Vlan,
-			"subnetwork":          tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
+			"network_ip":          networkIP,
+			"network":             tpgresource.ConvertSelfLinkToV1(network),
+			"parent_nic_name":     parentNicName,
+			"vlan":                flattenNetworkInterfaceInt64(iface["vlan"]),
+			"subnetwork":          tpgresource.ConvertSelfLinkToV1(subnetwork),
 			"subnetwork_project":  subnet.Project,
 			"access_config":       ac,
-			"alias_ip_range":      flattenAliasIpRange(d, iface.AliasIpRanges, i),
+			"alias_ip_range":      flattenAliasIpRange(d, aliasIpRanges, i),
 			{{ if ne $.TargetVersionName `ga` -}}
-			"alias_ipv6_range":     flattenIpv6AliasRange(d, iface.AliasIpv6Ranges, i),
+			"alias_ipv6_range":     flattenIpv6AliasRange(d, getInterfaceSlice(iface["aliasIpv6Ranges"]), i),
 			{{- end }}
-			"nic_type":            iface.NicType,
-			"stack_type":          iface.StackType,
-			"ipv6_access_config": flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
-			"ipv6_address":        iface.Ipv6Address,
-			"queue_count":         iface.QueueCount,
-			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
-			"igmp_query":          iface.IgmpQuery,
+			"nic_type":            nicType,
+			"stack_type":          stackType,
+			"ipv6_access_config": flattenIpv6AccessConfigs(ipv6AccessConfigs),
+			"ipv6_address":        ipv6Address,
+			"queue_count":         flattenNetworkInterfaceInt64(iface["queueCount"]),
+			"internal_ipv6_prefix_length": flattenNetworkInterfaceInt64(iface["internalIpv6PrefixLength"]),
+			"igmp_query":          igmpQuery,
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
 		// same flattening code for both resource types, so we avoid trying to
 		// set the name field when it's not set at the GCE end.
-		if iface.Name != "" {
-			flattened[i]["name"] = iface.Name
+		if name, ok := iface["name"].(string); ok && name != "" {
+			flattened[i]["name"] = name
+		} else if !ok && iface["name"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for name at index %d: %T", i, iface["name"])
 		}
 		{{- if ne $.TargetVersionName "ga" }}
-		if iface.MacAddress != "" {
-			flattened[i]["mac_address"] = iface.MacAddress
+		if macAddress, ok := iface["macAddress"].(string); ok && macAddress != "" {
+			flattened[i]["mac_address"] = macAddress
+		} else if !ok && iface["macAddress"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for macAddress at index %d: %T", i, iface["macAddress"])
 		}
 		{{- end }}
 		if internalIP == "" {
-			internalIP = iface.NetworkIP
+			internalIP = networkIP
 		}
 
-		if iface.NetworkAttachment != "" {
-			networkAttachment, err := tpgresource.GetRelativePath(iface.NetworkAttachment)
+		if networkAttachment, ok := iface["networkAttachment"].(string); ok && networkAttachment != "" {
+			relativeNetworkAttachment, err := tpgresource.GetRelativePath(networkAttachment)
 			if err != nil {
 				return nil, "", "", "", err
 			}
-			flattened[i]["network_attachment"] = networkAttachment
+			flattened[i]["network_attachment"] = relativeNetworkAttachment
+		} else if !ok && iface["networkAttachment"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for networkAttachment at index %d: %T", i, iface["networkAttachment"])
 		}
 
 		{{ if ne $.TargetVersionName `ga` -}}
 		// the security_policy for a network_interface is found in one of its accessConfigs.
-		if len(iface.AccessConfigs) > 0 && iface.AccessConfigs[0].SecurityPolicy != "" {
-			flattened[i]["security_policy"] = iface.AccessConfigs[0].SecurityPolicy
-		} else if len(iface.Ipv6AccessConfigs) > 0 && iface.Ipv6AccessConfigs[0].SecurityPolicy != "" {
-			flattened[i]["security_policy"] = iface.Ipv6AccessConfigs[0].SecurityPolicy
+		if sp := firstAccessConfigSecurityPolicy(accessConfigs); sp != "" {
+			flattened[i]["security_policy"] = sp
+		} else if sp := firstAccessConfigSecurityPolicy(ipv6AccessConfigs); sp != "" {
+			flattened[i]["security_policy"] = sp
 		}
 		{{- end }}
 	}
 	return flattened, region, internalIP, externalIP, nil
 }
 
-func expandAccessConfigs(configs []interface{}) []*compute.AccessConfig {
-	acs := make([]*compute.AccessConfig, len(configs))
+// getInterfaceSlice safely extracts a []interface{} from a value decoded from a
+// JSON response, returning nil when the value is absent or of another type.
+func getInterfaceSlice(v interface{}) []interface{} {
+	s, _ := v.([]interface{})
+	return s
+}
+
+{{ if ne $.TargetVersionName `ga` -}}
+// firstAccessConfigSecurityPolicy returns the securityPolicy of the first
+// access config in the list, or "" if absent.
+func firstAccessConfigSecurityPolicy(accessConfigs []interface{}) string {
+	if len(accessConfigs) == 0 {
+		return ""
+	}
+	ac, ok := accessConfigs[0].(map[string]interface{})
+	if !ok {
+		return ""
+	}
+	sp, ok := ac["securityPolicy"].(string)
+	if !ok && ac["securityPolicy"] != nil {
+		log.Printf("[WARN] firstAccessConfigSecurityPolicy: unexpected type for securityPolicy: %T", ac["securityPolicy"])
+	}
+	return sp
+}
+{{- end }}
+
+// networkInterfacesToInterface converts a slice of typed Apiary network
+// interface structs into the []interface{} of JSON-shaped maps expected by
+// flattenNetworkInterfaces. This bridges callers that still read the instance
+// via the typed compute client; once those reads migrate to SendRequest the
+// response is already in this shape and the adapter can be dropped.
+func networkInterfacesToInterface(networkInterfaces []*compute.NetworkInterface) ([]interface{}, error) {
+	result := make([]interface{}, 0, len(networkInterfaces))
+	for _, ni := range networkInterfaces {
+		b, err := json.Marshal(ni)
+		if err != nil {
+			return nil, err
+		}
+		var m map[string]interface{}
+		if err := json.Unmarshal(b, &m); err != nil {
+			return nil, err
+		}
+		result = append(result, m)
+	}
+	return result, nil
+}
+
+func expandAccessConfigs(configs []interface{}) []interface{} {
+	acs := make([]interface{}, len(configs))
 	for i, raw := range configs {
-		acs[i] = &compute.AccessConfig{}
-		acs[i].Type = "ONE_TO_ONE_NAT"
+		// Build a map keyed by the API JSON field names, omitting empty/zero values
+		// to mirror the omitempty semantics of the compute.AccessConfig struct.
+		ac := map[string]interface{}{
+			"type": "ONE_TO_ONE_NAT",
+		}
 		if raw != nil {
 			data := raw.(map[string]interface{})
-			acs[i].NatIP = data["nat_ip"].(string)
-			acs[i].NetworkTier = data["network_tier"].(string)
+			if v := data["nat_ip"].(string); v != "" {
+				ac["natIP"] = v
+			}
+			if v := data["network_tier"].(string); v != "" {
+				ac["networkTier"] = v
+			}
 			if ptr, ok := data["public_ptr_domain_name"]; ok && ptr != "" {
-				acs[i].SetPublicPtr = true
-				acs[i].PublicPtrDomainName = ptr.(string)
+				ac["setPublicPtr"] = true
+				ac["publicPtrDomainName"] = ptr.(string)
 			}
 		}
+		acs[i] = ac
 	}
 	return acs
 }
 
-func expandIpv6AccessConfigs(configs []interface{}) []*compute.AccessConfig {
-	iacs := make([]*compute.AccessConfig, len(configs))
+func expandIpv6AccessConfigs(configs []interface{}) []interface{} {
+	iacs := make([]interface{}, len(configs))
 	for i, raw := range configs {
-		iacs[i] = &compute.AccessConfig{}
+		// Build a map keyed by the API JSON field names, omitting empty/zero values
+		// to mirror the omitempty semantics of the compute.AccessConfig struct.
+		iac := map[string]interface{}{}
 		if raw != nil {
 			data := raw.(map[string]interface{})
-			iacs[i].NetworkTier = data["network_tier"].(string)
+			if v := data["network_tier"].(string); v != "" {
+				iac["networkTier"] = v
+			}
 			if ptr, ok := data["public_ptr_domain_name"]; ok && ptr != "" {
-				iacs[i].PublicPtrDomainName = ptr.(string)
+				iac["publicPtrDomainName"] = ptr.(string)
 			}
 			if eip, ok := data["external_ipv6"]; ok && eip != "" {
-				iacs[i].ExternalIpv6 = eip.(string)
+				iac["externalIpv6"] = eip.(string)
 			}
 			if eipl, ok := data["external_ipv6_prefix_length"]; ok && eipl != "" {
 				if strVal, ok := eipl.(string); ok {
-					if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
-						iacs[i].ExternalIpv6PrefixLength = intVal
+					if intVal, err := tpgresource.StringToFixed64(strVal); err == nil && intVal != 0 {
+						iac["externalIpv6PrefixLength"] = intVal
 					}
 				}
 			}
 			if name, ok := data["name"]; ok && name != "" {
-				iacs[i].Name = name.(string)
+				iac["name"] = name.(string)
 			}
-			iacs[i].Type = "DIRECT_IPV6" // Currently only type supported
+			iac["type"] = "DIRECT_IPV6" // Currently only type supported
 		}
+		iacs[i] = iac
 	}
 	return iacs
 }
 
-func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.NetworkInterface, error) {
+func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]interface{}, error) {
 	configs := d.Get("network_interface").([]interface{})
-	ifaces := make([]*compute.NetworkInterface, len(configs))
+	ifaces := make([]interface{}, len(configs))
 	for i, raw := range configs {
 		data := raw.(map[string]interface{})
 
@@ -714,30 +928,119 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		}
 		{{- end }}
 
-		ifaces[i] = &compute.NetworkInterface{
-			NetworkIP:         data["network_ip"].(string),
-			Network:           nf.RelativeLink(),
-			NetworkAttachment: networkAttachment,
-			Vlan:              int64(data["vlan"].(int)),
-			Subnetwork:        sf.RelativeLink(),
-			AccessConfigs:     expandAccessConfigs(data["access_config"].([]interface{})),
-			AliasIpRanges:     expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
-			{{ if ne $.TargetVersionName `ga` -}}
-			AliasIpv6Ranges:   expandAliasIpRanges(data["alias_ipv6_range"].([]interface{})),
-			{{- end }}
-			NicType:           data["nic_type"].(string),
-			StackType:         data["stack_type"].(string),
-			QueueCount:        int64(data["queue_count"].(int)),
-			Ipv6AccessConfigs: expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
-			Ipv6Address:       data["ipv6_address"].(string),
-			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
-			IgmpQuery:         data["igmp_query"].(string),
-			{{- if ne $.TargetVersionName "ga" }}
-			MacAddress: macAddress,
-			{{- end }}
+		// Build a map keyed by the API JSON field names, omitting empty/zero values
+		// to mirror the omitempty semantics of the compute.NetworkInterface struct.
+		iface := map[string]interface{}{}
+		if v := data["network_ip"].(string); v != "" {
+			iface["networkIP"] = v
 		}
+		if v := nf.RelativeLink(); v != "" {
+			iface["network"] = v
+		}
+		if networkAttachment != "" {
+			iface["networkAttachment"] = networkAttachment
+		}
+		if v := int64(data["vlan"].(int)); v != 0 {
+			iface["vlan"] = v
+		}
+		if v := sf.RelativeLink(); v != "" {
+			iface["subnetwork"] = v
+		}
+		if acs := expandAccessConfigs(data["access_config"].([]interface{})); len(acs) > 0 {
+			iface["accessConfigs"] = acs
+		}
+		if air := expandAliasIpRanges(data["alias_ip_range"].([]interface{})); len(air) > 0 {
+			iface["aliasIpRanges"] = air
+		}
+		{{ if ne $.TargetVersionName `ga` -}}
+		if air6 := expandAliasIpRanges(data["alias_ipv6_range"].([]interface{})); len(air6) > 0 {
+			iface["aliasIpv6Ranges"] = air6
+		}
+		{{- end }}
+		if v := data["nic_type"].(string); v != "" {
+			iface["nicType"] = v
+		}
+		if v := data["stack_type"].(string); v != "" {
+			iface["stackType"] = v
+		}
+		if v := int64(data["queue_count"].(int)); v != 0 {
+			iface["queueCount"] = v
+		}
+		if iacs := expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})); len(iacs) > 0 {
+			iface["ipv6AccessConfigs"] = iacs
+		}
+		if v := data["ipv6_address"].(string); v != "" {
+			iface["ipv6Address"] = v
+		}
+		if v := int64(data["internal_ipv6_prefix_length"].(int)); v != 0 {
+			iface["internalIpv6PrefixLength"] = v
+		}
+		if v := data["igmp_query"].(string); v != "" {
+			iface["igmpQuery"] = v
+		}
+		{{- if ne $.TargetVersionName "ga" }}
+		if macAddress != "" {
+			iface["macAddress"] = macAddress
+		}
+		{{- end }}
+		ifaces[i] = iface
 	}
 	return ifaces, nil
+}
+
+// convertViaJSON marshals a map-based representation and unmarshals it into the
+// typed Apiary struct (slice). Used by the typed adapters below so the shared
+// helpers file does not depend on tpgresource.Convert, which is not available in
+// the tgc/tgc_next tpgresource packages.
+func convertViaJSON(in, out interface{}) error {
+	bytes, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bytes, out)
+}
+
+// expandNetworkInterfacesTyped adapts the map-based expandNetworkInterfaces
+// output to the typed []*compute.NetworkInterface still required by callers that
+// build Apiary request structs directly or read typed fields.
+func expandNetworkInterfacesTyped(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.NetworkInterface, error) {
+	expanded, err := expandNetworkInterfaces(d, config)
+	if err != nil {
+		return nil, err
+	}
+	ifaces := make([]*compute.NetworkInterface, 0, len(expanded))
+	if err := convertViaJSON(expanded, &ifaces); err != nil {
+		return nil, fmt.Errorf("Error converting network interfaces: %s", err)
+	}
+	return ifaces, nil
+}
+
+// expandAccessConfigsTyped / expandIpv6AccessConfigsTyped / expandAliasIpRangesTyped
+// adapt the map-based expanders back to the typed Apiary slices still required by
+// callers that build compute structs field-by-field.
+func expandAccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
+	return accessConfigsToTyped(expandAccessConfigs(configs))
+}
+
+func expandIpv6AccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
+	return accessConfigsToTyped(expandIpv6AccessConfigs(configs))
+}
+
+func accessConfigsToTyped(expanded []interface{}) ([]*compute.AccessConfig, error) {
+	acs := make([]*compute.AccessConfig, 0, len(expanded))
+	if err := convertViaJSON(expanded, &acs); err != nil {
+		return nil, fmt.Errorf("Error converting access configs: %s", err)
+	}
+	return acs, nil
+}
+
+func expandAliasIpRangesTyped(ranges []interface{}) ([]*compute.AliasIpRange, error) {
+	expanded := expandAliasIpRanges(ranges)
+	out := make([]*compute.AliasIpRange, 0, len(expanded))
+	if err := convertViaJSON(expanded, &out); err != nil {
+		return nil, fmt.Errorf("Error converting alias ip ranges: %s", err)
+	}
+	return out, nil
 }
 
 func flattenServiceAccounts(serviceAccounts []interface{}) []map[string]interface{} {
@@ -803,68 +1106,84 @@ func serviceAccountsToInterface(serviceAccounts []*compute.ServiceAccount) []int
 	return result
 }
 
-func flattenGuestAccelerators(accelerators []*compute.AcceleratorConfig) []map[string]interface{} {
-	acceleratorsSchema := make([]map[string]interface{}, len(accelerators))
-	for i, accelerator := range accelerators {
-		acceleratorsSchema[i] = map[string]interface{}{
-			"count": accelerator.AcceleratorCount,
-			"type":  accelerator.AcceleratorType,
+func flattenGuestAccelerators(accelerators []interface{}) []map[string]interface{} {
+	acceleratorsSchema := make([]map[string]interface{}, 0, len(accelerators))
+	for _, raw := range accelerators {
+		accelerator, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
 		}
+		acceleratorsSchema = append(acceleratorsSchema, map[string]interface{}{
+			"count": accelerator["acceleratorCount"],
+			"type":  accelerator["acceleratorType"],
+		})
 	}
 	return acceleratorsSchema
 }
 
-func resourceInstanceTags(d tpgresource.TerraformResourceData) *compute.Tags {
-	// Calculate the tags
-	var tags *compute.Tags
-	if v := d.Get("tags"); v != nil {
-		vs := v.(*schema.Set)
-		tags = new(compute.Tags)
-		tags.Items = make([]string, vs.Len())
-		for i, v := range vs.List() {
-			tags.Items[i] = v.(string)
+// guestAcceleratorsToInterface adapts typed []*compute.AcceleratorConfig decoded
+// from an Apiary response into the []interface{} form accepted by
+// flattenGuestAccelerators.
+func guestAcceleratorsToInterface(accelerators []*compute.AcceleratorConfig) []interface{} {
+	result := make([]interface{}, len(accelerators))
+	for i, a := range accelerators {
+		result[i] = map[string]interface{}{
+			"acceleratorCount": a.AcceleratorCount,
+			"acceleratorType":  a.AcceleratorType,
 		}
-
-		tags.Fingerprint = d.Get("tags_fingerprint").(string)
 	}
-
-	return tags
+	return result
 }
 
-func expandShieldedVmConfigs(d tpgresource.TerraformResourceData) *compute.ShieldedInstanceConfig {
+func resourceInstanceTags(d tpgresource.TerraformResourceData) map[string]interface{} {
+	v := d.Get("tags")
+	if v == nil {
+		return nil
+	}
+	vs := v.(*schema.Set)
+	items := make([]string, vs.Len())
+	for i, v := range vs.List() {
+		items[i] = v.(string)
+	}
+	return map[string]interface{}{
+		"items":       items,
+		"fingerprint": d.Get("tags_fingerprint").(string),
+	}
+}
+
+func expandShieldedVmConfigs(d tpgresource.TerraformResourceData) map[string]interface{} {
 	if _, ok := d.GetOk("shielded_instance_config"); !ok {
 		return nil
 	}
 
 	prefix := "shielded_instance_config.0"
-	return &compute.ShieldedInstanceConfig{
-		EnableSecureBoot:          d.Get(prefix + ".enable_secure_boot").(bool),
-		EnableVtpm:                d.Get(prefix + ".enable_vtpm").(bool),
-		EnableIntegrityMonitoring: d.Get(prefix + ".enable_integrity_monitoring").(bool),
-		ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
+	return map[string]interface{}{
+		"enableSecureBoot":          d.Get(prefix + ".enable_secure_boot").(bool),
+		"enableVtpm":                d.Get(prefix + ".enable_vtpm").(bool),
+		"enableIntegrityMonitoring": d.Get(prefix + ".enable_integrity_monitoring").(bool),
 	}
 }
 
-func expandConfidentialInstanceConfig(d tpgresource.TerraformResourceData) *compute.ConfidentialInstanceConfig {
+func expandConfidentialInstanceConfig(d tpgresource.TerraformResourceData) map[string]interface{} {
 	if _, ok := d.GetOk("confidential_instance_config"); !ok {
 		return nil
 	}
 
 	prefix := "confidential_instance_config.0"
-	return &compute.ConfidentialInstanceConfig{
-		EnableConfidentialCompute: d.Get(prefix + ".enable_confidential_compute").(bool),
-		ConfidentialInstanceType: d.Get(prefix + ".confidential_instance_type").(string),
+	return map[string]interface{}{
+		"enableConfidentialCompute": d.Get(prefix + ".enable_confidential_compute").(bool),
+		"confidentialInstanceType":  d.Get(prefix + ".confidential_instance_type").(string),
 	}
 }
 
-func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *compute.ConfidentialInstanceConfig) []map[string]interface{} {
+func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig map[string]interface{}) []map[string]interface{} {
 	if ConfidentialInstanceConfig == nil {
 		return nil
 	}
 
 	return []map[string]interface{}{{"{{"}}
-		"enable_confidential_compute": ConfidentialInstanceConfig.EnableConfidentialCompute,
-		"confidential_instance_type": ConfidentialInstanceConfig.ConfidentialInstanceType,
+		"enable_confidential_compute": ConfidentialInstanceConfig["enableConfidentialCompute"],
+		"confidential_instance_type":  ConfidentialInstanceConfig["confidentialInstanceType"],
 	{{"}}"}}
 }
 
@@ -898,34 +1217,33 @@ func flattenAdvancedMachineFeatures(AdvancedMachineFeatures *compute.AdvancedMac
 	{{"}}"}}
 }
 
-func flattenShieldedVmConfig(shieldedVmConfig *compute.ShieldedInstanceConfig) []map[string]bool {
+func flattenShieldedVmConfig(shieldedVmConfig map[string]interface{}) []map[string]bool {
 	if shieldedVmConfig == nil {
 		return nil
 	}
 
 	return []map[string]bool{{"{{"}}
-		"enable_secure_boot":          shieldedVmConfig.EnableSecureBoot,
-		"enable_vtpm":                 shieldedVmConfig.EnableVtpm,
-		"enable_integrity_monitoring": shieldedVmConfig.EnableIntegrityMonitoring,
+		"enable_secure_boot":          shieldedVmConfig["enableSecureBoot"].(bool),
+		"enable_vtpm":                 shieldedVmConfig["enableVtpm"].(bool),
+		"enable_integrity_monitoring": shieldedVmConfig["enableIntegrityMonitoring"].(bool),
 	{{"}}"}}
 }
 
-func expandDisplayDevice(d tpgresource.TerraformResourceData) *compute.DisplayDevice {
+func expandDisplayDevice(d tpgresource.TerraformResourceData) map[string]interface{} {
 	if _, ok := d.GetOk("enable_display"); !ok {
 		return nil
 	}
-	return &compute.DisplayDevice{
-		EnableDisplay:   d.Get("enable_display").(bool),
-		ForceSendFields: []string{"EnableDisplay"},
+	return map[string]interface{}{
+		"enableDisplay": d.Get("enable_display").(bool),
 	}
 }
 
-func flattenEnableDisplay(displayDevice *compute.DisplayDevice) interface{} {
+func flattenEnableDisplay(displayDevice map[string]interface{}) interface{} {
 	if displayDevice == nil {
 		return nil
 	}
 
-	return displayDevice.EnableDisplay
+	return displayDevice["enableDisplay"]
 }
 
 // Node affinity updates require a reboot
@@ -1121,7 +1439,7 @@ func hasNodeAffinitiesChanged(oScheduling, newScheduling map[string]interface{})
 	return false
 }
 
-func expandReservationAffinity(d tpgresource.TerraformResourceData) (*compute.ReservationAffinity, error) {
+func expandReservationAffinity(d tpgresource.TerraformResourceData) (map[string]interface{}, error) {
 	_, ok := d.GetOk("reservation_affinity")
 	if !ok {
 		return nil, nil
@@ -1130,9 +1448,8 @@ func expandReservationAffinity(d tpgresource.TerraformResourceData) (*compute.Re
 	prefix := "reservation_affinity.0"
 	reservationAffinityType := d.Get(prefix + ".type").(string)
 
-	affinity := compute.ReservationAffinity{
-		ConsumeReservationType: reservationAffinityType,
-		ForceSendFields:        []string{"ConsumeReservationType"},
+	affinity := map[string]interface{}{
+		"consumeReservationType": reservationAffinityType,
 	}
 
 	_, hasSpecificReservation := d.GetOk(prefix + ".specific_reservation")
@@ -1142,30 +1459,38 @@ func expandReservationAffinity(d tpgresource.TerraformResourceData) (*compute.Re
 
 	prefix = prefix + ".specific_reservation.0"
 	if hasSpecificReservation {
-		affinity.Key = d.Get(prefix + ".key").(string)
-		affinity.ForceSendFields = append(affinity.ForceSendFields, "Key", "Values")
-
+		affinity["key"] = d.Get(prefix + ".key").(string)
+		values := []interface{}{}
 		for _, v := range d.Get(prefix + ".values").([]interface{}) {
-			affinity.Values = append(affinity.Values, v.(string))
+			values = append(values, v.(string))
 		}
+		affinity["values"] = values
 	}
 
-	return &affinity, nil
+	return affinity, nil
 }
 
-func flattenReservationAffinity(affinity *compute.ReservationAffinity) []map[string]interface{} {
+func flattenReservationAffinity(affinity map[string]interface{}) []map[string]interface{} {
 	if affinity == nil {
 		return nil
 	}
 
+	consumeType, ok := affinity["consumeReservationType"].(string)
+	if !ok && affinity["consumeReservationType"] != nil {
+		log.Printf("[WARN] flattenReservationAffinity: unexpected type for consumeReservationType: %T", affinity["consumeReservationType"])
+	}
 	flattened := map[string]interface{}{
-		"type": affinity.ConsumeReservationType,
+		"type": consumeType,
 	}
 
-	if affinity.ConsumeReservationType == "SPECIFIC_RESERVATION" {
+	if consumeType == "SPECIFIC_RESERVATION" {
+		key, ok := affinity["key"].(string)
+		if !ok && affinity["key"] != nil {
+			log.Printf("[WARN] flattenReservationAffinity: unexpected type for key: %T", affinity["key"])
+		}
 		flattened["specific_reservation"] = []map[string]interface{}{{"{{"}}
-			"key":    affinity.Key,
-			"values": affinity.Values,
+			"key":    key,
+			"values": affinity["values"],
 		{{"}}"}}
 	}
 
@@ -1196,26 +1521,28 @@ func flattenComputeInstanceGuestOsFeatures(v interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
-	features, ok := v.([]*compute.GuestOsFeature)
+	features, ok := v.([]interface{})
 	if !ok {
 		return nil
 	}
 	var result []interface{}
-	for _, feature := range features {
-		if feature != nil && feature.Type != "" {
-			result = append(result, feature.Type)
+	for _, raw := range features {
+		if m, ok := raw.(map[string]interface{}); ok {
+			if t, ok := m["type"].(string); ok && t != "" {
+				result = append(result, t)
+			}
 		}
 	}
 	return result
 }
 
-func expandComputeInstanceGuestOsFeatures(v interface{}) []*compute.GuestOsFeature {
+func expandComputeInstanceGuestOsFeatures(v interface{}) []interface{} {
 	if v == nil {
 		return nil
 	}
-	var result []*compute.GuestOsFeature
+	var result []interface{}
 	for _, feature := range v.([]interface{}) {
-		result = append(result, &compute.GuestOsFeature{Type: feature.(string)})
+		result = append(result, map[string]interface{}{"type": feature.(string)})
 	}
 	return result
 }
@@ -1288,3 +1615,14 @@ func flattenComputeInstanceSourceEncryptionKey(v map[string]interface{}) []map[s
 		},
 	}
 }
+
+func stripInitializeParams(instanceMap map[string]interface{}) {
+	if disks, ok := instanceMap["disks"].([]interface{}); ok {
+		for _, rawDisk := range disks {
+			if disk, ok := rawDisk.(map[string]interface{}); ok {
+				delete(disk, "initializeParams")
+			}
+		}
+	}
+}
+

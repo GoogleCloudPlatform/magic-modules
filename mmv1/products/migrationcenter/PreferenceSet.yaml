@@ -32,19 +32,25 @@ async:
     resource_inside_response: true
 autogen_status: UHJlZmVyZW5jZVNldA==
 autogen_async: true
-examples:
+samples:
   - name: preference_set_basic
     primary_resource_id: default
-    vars:
-      set_name: preference-set-test
+    steps:
+      - name: preference_set_basic
+        resource_id_vars:
+          set_name: preference-set-test
   - name: preference_set_full
     primary_resource_id: default
-    vars:
-      set_name: preference-set-test
+    steps:
+      - name: preference_set_full
+        resource_id_vars:
+          set_name: preference-set-test
   - name: preference_set_compute_engine_preferences_disk_type
     primary_resource_id: default
-    vars:
-      set_name: preference-set-test
+    steps:
+      - name: preference_set_compute_engine_preferences_disk_type
+        resource_id_vars:
+          set_name: preference-set-test
 parameters:
   - name: location
     type: String

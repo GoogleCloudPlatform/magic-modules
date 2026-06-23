@@ -48,6 +48,7 @@ collection_url_key: 'items'
 include_in_tgc_next: true
 cai_resource_kind: 'Reservation'
 custom_code:
+  decoder: templates/terraform/decoders/compute_reservation_share_settings_decoder.go.tmpl
   tgc_decoder: 'templates/tgc_next/decoders/reservation.go.tmpl'
   constants: 'templates/terraform/constants/reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
@@ -90,6 +91,8 @@ examples:
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
     external_providers: ["time"]
+    ignore_read_extra:
+      - share_settings.0.project_map
   - name: 'shared_reservation_beta'
     primary_resource_id: 'gce_reservation'
     vars:
@@ -101,6 +104,8 @@ examples:
     exclude_docs: true
     min_version: 'beta'
     external_providers: ["time"]
+    ignore_read_extra:
+      - share_settings.0.projects
 virtual_fields:
   - name: 'block_names'
     type: Array
@@ -167,8 +172,8 @@ properties:
     type: NestedObject
     description: |
       The share setting for reservations.
-    ignore_read: true
     default_from_api: true
+    is_missing_in_cai: true
     properties:
       - name: 'shareType'
         type: Enum
@@ -184,6 +189,7 @@ properties:
         description: |
           A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
         key_name: 'id'
+        diff_suppress_func: 'computeReservationProjectMapDiffSuppress'
         value_type:
           type: NestedObject
           properties:
@@ -195,6 +201,7 @@ properties:
         type: Array
         description: |
           List of project IDs with which the reservation is shared.
+        diff_suppress_func: 'computeReservationProjectsDiffSuppress'
         item_type:
           type: String
         min_version: 'beta'
@@ -553,3 +560,18 @@ properties:
             description: |
               The number of reservation blocks that are degraded.
             output: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the reservation. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true

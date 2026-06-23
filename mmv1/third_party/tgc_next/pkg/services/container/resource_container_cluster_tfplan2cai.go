@@ -304,6 +304,10 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		cluster.AnonymousAuthenticationConfig = expandAnonymousAuthenticationConfig(v)
 	}
 
+	if v, ok := d.GetOk("node_creation_config"); ok {
+		cluster.NodeCreationConfig = expandNodeCreationConfig(v)
+	}
+
 	if v, ok := d.GetOk("rbac_binding_config"); ok {
 		cluster.RbacBindingConfig = expandRBACBindingConfig(v)
 	}
@@ -486,6 +490,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
+	if v, ok := config["slurm_operator_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.SlurmOperatorConfig = &container.SlurmOperatorConfig{
 			Enabled:         addon["enabled"].(bool),
 			ForceSendFields: []string{"Enabled"},
 		}
@@ -1682,5 +1694,19 @@ func expandPrivilegedAdmissionConfig(v interface{}) *container.PrivilegedAdmissi
 	}
 	return &container.PrivilegedAdmissionConfig{
 		AllowlistPaths: paths,
+	}
+}
+
+func expandNodeCreationConfig(v interface{}) *container.NodeCreationConfig {
+	if v == nil {
+		return nil
+	}
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.NodeCreationConfig{
+		NodeCreationMode: config["node_creation_mode"].(string),
 	}
 }

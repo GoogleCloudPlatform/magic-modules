@@ -136,7 +136,7 @@ properties:
   # --- Target Environments (oneof target_environment) ---
   - name: 'computeInstanceTargetEnvironment'
     type: NestedObject
-    description: 'Optional. The destination environment for GCE VM restoration.'
+    description: 'The destination environment for GCE VM restoration.'
     properties:
       - name: 'project'
         type: String
@@ -146,9 +146,12 @@ properties:
         type: String
         required: true
         description: 'Required. The zone of the Compute Engine instance.'
+      - name: 'useProjectServiceAccount'
+        type: Boolean
+        description: 'If true, use the BackupDR P4SA credentials for same-project restores. Default is false.'
   - name: 'diskTargetEnvironment'
     type: NestedObject
-    description: 'Optional. The destination environment for zonal disk restoration.'
+    description: 'The destination environment for zonal disk restoration.'
     properties:
       - name: 'project'
         type: String
@@ -158,9 +161,12 @@ properties:
         type: String
         required: true
         description: 'Required. Target zone for the disk.'
+      - name: 'useProjectServiceAccount'
+        type: Boolean
+        description: 'If true, use the BackupDR P4SA credentials for same-project restores. Default is false.'
   - name: 'regionDiskTargetEnvironment'
     type: NestedObject
-    description: 'Optional. The destination environment for regional disk restoration.'
+    description: 'The destination environment for regional disk restoration.'
     properties:
       - name: 'project'
         type: String
@@ -176,6 +182,9 @@ properties:
           type: String
         required: true
         description: 'Required. Target URLs of the replica zones for the disk.'
+      - name: 'useProjectServiceAccount'
+        type: Boolean
+        description: 'If true, use the BackupDR P4SA credentials for same-project restores. Default is false.'
   # --- Restore Properties (oneof instance_properties) ---
   - name: 'computeInstanceRestoreProperties'
     type: NestedObject
@@ -424,6 +433,7 @@ properties:
               description: 'Optional. The URL of the Subnetwork resource for this instance.'
             - name: 'ipAddress'
               type: String
+              api_name: 'networkIP'
               description: 'Optional. An IPv4 internal IP address to assign to the instance.'
             - name: 'ipv6Address'
               type: String
@@ -448,6 +458,7 @@ properties:
                     description: 'Optional. The name of this access configuration.'
                   - name: 'externalIp'
                     type: String
+                    api_name: 'natIP'
                   - name: 'externalIpv6'
                     type: String
                   - name: 'externalIpv6PrefixLength'
@@ -479,6 +490,7 @@ properties:
                     description: 'Optional. The name of this access configuration.'
                   - name: 'externalIp'
                     type: String
+                    api_name: 'natIP'
                   - name: 'externalIpv6'
                     type: String
                   - name: 'externalIpv6PrefixLength'
@@ -556,10 +568,12 @@ properties:
           - 'ENABLE_BIDIRECTIONAL_ACCESS_TO_GOOGLE'
       - name: 'allocationAffinity'
         type: NestedObject
+        api_name: 'reservationAffinity'
         description: 'Optional. Specifies the reservations that this instance can consume from.'
         properties:
           - name: 'consumeAllocationType'
             type: Enum
+            api_name: 'consumeReservationType'
             enum_values:
               - 'TYPE_UNSPECIFIED'
               - 'NO_RESERVATION'

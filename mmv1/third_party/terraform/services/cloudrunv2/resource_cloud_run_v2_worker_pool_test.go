@@ -68,6 +68,8 @@ resource "google_cloud_run_v2_worker_pool" "default" {
     annotations = {
       generated-by = "magic-modules"
     }
+    client = "template-client"
+    client_version = "template-client-version"
     containers {
       name = "container-1"
       image = "us-docker.pkg.dev/cloudrun/container/worker-pool"
@@ -126,6 +128,8 @@ resource "google_cloud_run_v2_worker_pool" "default" {
     annotations = {
       generated-by = "magic-modules"
     }
+    client = "tempplate-client-update"
+    client_version = "template-client-version-update"
     containers {
       name = "container-update"
       image = "us-docker.pkg.dev/cloudrun/container/worker-pool"
@@ -143,6 +147,25 @@ resource "google_cloud_run_v2_worker_pool" "default" {
         limits = {
           cpu = "2"
           memory = "8Gi"
+        }
+      }
+      startup_probe {
+        initial_delay_seconds = 0
+        timeout_seconds       = 1
+        period_seconds        = 3
+        failure_threshold     = 3
+
+        http_get {
+          path = "/"
+          port = 8080
+          http_headers {
+            name = "TEST-HEADER-1"
+            value = "test-value-1"
+          }
+          http_headers {
+            name = "TEST-HEADER-2"
+            value = "test-value-2"
+          }
         }
       }
       working_dir = "/home"

@@ -123,6 +123,17 @@ var (
 		"settings.0.insights_config.0.enhanced_query_insights_enabled",
 	}
 
+{{- if ne $.TargetVersionName "ga" }}
+    performanceCaptureConfigKeys = []string{
+		"settings.0.performance_capture_config.0.enabled",
+		"settings.0.performance_capture_config.0.probing_interval_seconds",
+		"settings.0.performance_capture_config.0.probe_threshold",
+		"settings.0.performance_capture_config.0.running_threads_threshold",
+		"settings.0.performance_capture_config.0.seconds_behind_source_threshold",
+		"settings.0.performance_capture_config.0.transaction_duration_threshold",
+	}
+{{- end }}
+
 	sqlServerAuditConfigurationKeys = []string{
 		"settings.0.sql_server_audit_config.0.bucket",
 		"settings.0.sql_server_audit_config.0.retention_interval",
@@ -234,6 +245,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			pitrSupportDbCustomizeDiff,
 			nodeCountCustomDiff,
 			autoUpgradeEnabledCustomizeDiff,
+			activeDirectoryCustomizeDiff,
 			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
@@ -329,6 +341,28 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 										Type:        schema.TypeString,
 										Required:    true,
 										Description: `Domain name of the Active Directory for SQL Server (e.g., mydomain.com).`,
+									},
+									"mode": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"MANAGED_ACTIVE_DIRECTORY", "CUSTOMER_MANAGED_ACTIVE_DIRECTORY"}, false),
+										Description:  `The mode of the Active Directory configuration. Can be MANAGED_ACTIVE_DIRECTORY or CUSTOMER_MANAGED_ACTIVE_DIRECTORY.`,
+									},
+									"dns_servers": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: `Domain controller IPv4 addresses used to bootstrap Active Directory.`,
+									},
+									"admin_credential_secret_name": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The secret manager key storing the administrator credential. (e.g., projects/{project}/secrets/{secret}).`,
+									},
+									"organizational_unit": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The organizational unit distinguished name. This is the full hierarchical path to the organizational unit.`,
 									},
 								},
 							},
@@ -631,6 +665,18 @@ API (for read pools, effective_availability_type may differ from availability_ty
 													Optional:    true,
 													Description: `Whether PSC connectivity is enabled for this instance.`,
 												},
+												"psc_auto_dns_enabled": {
+												        Type:        schema.TypeBool,
+												        Optional:    true,
+												        Computed:    true,
+												        Description: `Whether PSC auto DNS is enabled for this instance.`,
+												},
+												"psc_write_endpoint_dns_enabled": {
+												        Type:        schema.TypeBool,
+												        Optional:    true,
+												        Computed:    true,
+												        Description: `Whether PSC write endpoint DNS is enabled for this instance.`,
+												},
 												"allowed_consumer_projects": {
 													Type:     schema.TypeSet,
 													Optional: true,
@@ -846,6 +892,61 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							},
 							Description: `Configuration of Query Insights.`,
 						},
+{{- if ne $.TargetVersionName "ga" }}
+						"performance_capture_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `Enable or disable the Performance Capture.`,
+									},
+									"probing_interval_seconds": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The time interval in seconds between any two probes.`,
+									},
+									"probe_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of consecutive readings above threshold that triggers instance state capture.`,
+									},
+									"running_threads_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of server threads running to trigger the capture on primary.`,
+									},
+									"seconds_behind_source_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of seconds replica must be lagging behind primary to trigger capture on replica.`,
+									},
+									"transaction_duration_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The amount of time in seconds that a transaction needs to have been open before getting recorded.`,
+									},
+								},
+							},
+							Description: `Configuration of Performance Capture.`,
+						},
+{{- end }}
 						"entraid_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1532,6 +1633,25 @@ func autoUpgradeEnabledCustomizeDiff(_ context.Context, d *schema.ResourceDiff, 
 	return nil
 }
 
+func activeDirectoryCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if v, ok := d.GetOk("settings.0.active_directory_config"); ok {
+		l := v.([]interface{})
+		if len(l) > 0 && l[0] != nil {
+			config := l[0].(map[string]interface{})
+			if mode, ok := config["mode"].(string); ok && mode == "CUSTOMER_MANAGED_ACTIVE_DIRECTORY" {
+				dnsServers, _ := config["dns_servers"].([]interface{})
+				secretName, _ := config["admin_credential_secret_name"].(string)
+				ou, _ := config["organizational_unit"].(string)
+
+				if len(dnsServers) == 0 || secretName == "" || ou == "" {
+					return fmt.Errorf("dns_servers, admin_credential_secret_name, and organizational_unit must all be provided when mode is CUSTOMER_MANAGED_ACTIVE_DIRECTORY")
+				}
+			}
+		}
+	}
+	return nil
+}
+
 // helper function to see if string within list contains a particular substring
 func stringContainsSlice(arr []string, str string) bool {
 	for _, i := range arr {
@@ -1861,6 +1981,9 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		InsightsConfig:                expandInsightsConfig(_settings["insights_config"].([]interface{})),
 		PasswordValidationPolicy:      expandPasswordValidationPolicy(_settings["password_validation_policy"].([]interface{})),
 		ConnectionPoolConfig:          expandConnectionPoolConfig(_settings["connection_pool_config"].(*schema.Set).List()),
+{{- if ne $.TargetVersionName "ga" }}
+		PerformanceCaptureConfig:      expandPerformanceCaptureConfig(_settings["performance_capture_config"].([]interface{})),
+{{- end }}
 		ReadPoolAutoScaleConfig:       expandReadPoolAutoScaleConfig(_settings["read_pool_auto_scale_config"].([]interface{})),
 	}
 
@@ -2011,8 +2134,10 @@ func expandPscConfig(configured []interface{}) *sqladmin.PscConfig {
 	for _, _pscConfig := range configured {
 		_entry := _pscConfig.(map[string]interface{})
 		return &sqladmin.PscConfig{
-			PscEnabled:              _entry["psc_enabled"].(bool),
-			AllowedConsumerProjects: tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
+			PscEnabled:                 _entry["psc_enabled"].(bool),
+			PscAutoDnsEnabled:          _entry["psc_auto_dns_enabled"].(bool),
+			PscWriteEndpointDnsEnabled: _entry["psc_write_endpoint_dns_enabled"].(bool),
+			AllowedConsumerProjects:    tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
 			NetworkAttachmentUri:    _entry["network_attachment_uri"].(string),
 			PscAutoConnections:      expandPscAutoConnectionConfig(_entry["psc_auto_connections"].([]interface{})),
 		}
@@ -2137,14 +2262,29 @@ func expandBackupRetentionSettings(configured interface{}) *sqladmin.BackupReten
 
 func expandActiveDirectoryConfig(configured interface{}) *sqladmin.SqlActiveDirectoryConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 
 	config := l[0].(map[string]interface{})
-	return &sqladmin.SqlActiveDirectoryConfig{
+	adConfig := &sqladmin.SqlActiveDirectoryConfig{
 		Domain: config["domain"].(string),
 	}
+
+	if v, ok := config["mode"].(string); ok && v != "" {
+		adConfig.Mode = v
+	}
+	if v, ok := config["dns_servers"].([]interface{}); ok && len(v) > 0 {
+		adConfig.DnsServers = tpgresource.ConvertStringArr(v)
+	}
+	if v, ok := config["admin_credential_secret_name"].(string); ok && v != "" {
+		adConfig.AdminCredentialSecretName = v
+	}
+	if v, ok := config["organizational_unit"].(string); ok && v != "" {
+		adConfig.OrganizationalUnit = v
+	}
+
+	return adConfig
 }
 
 func expandDenyMaintenancePeriod(configured []interface{}) []*sqladmin.DenyMaintenancePeriod {
@@ -2227,6 +2367,25 @@ func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 		ForceSendFields: []string{"EnhancedQueryInsightsEnabled"},
 	}
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func expandPerformanceCaptureConfig(configured []interface{}) *sqladmin.PerformanceCaptureConfig {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_performanceCaptureConfig := configured[0].(map[string]interface{})
+	return &sqladmin.PerformanceCaptureConfig{
+		Enabled:                      _performanceCaptureConfig["enabled"].(bool),
+		ProbingIntervalSeconds:       int64(_performanceCaptureConfig["probing_interval_seconds"].(int)),
+		ProbeThreshold:               int64(_performanceCaptureConfig["probe_threshold"].(int)),
+		RunningThreadsThreshold:      int64(_performanceCaptureConfig["running_threads_threshold"].(int)),
+		SecondsBehindSourceThreshold: int64(_performanceCaptureConfig["seconds_behind_source_threshold"].(int)),
+		TransactionDurationThreshold: int64(_performanceCaptureConfig["transaction_duration_threshold"].(int)),
+		ForceSendFields:              []string{"Enabled"},
+	}
+}
+{{- end }}
 
 func expandPasswordValidationPolicy(configured []interface{}) *sqladmin.PasswordValidationPolicy {
 	if len(configured) == 0 || configured[0] == nil {
@@ -3081,7 +3240,10 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		data["database_flags"] = flattenDatabaseFlags(settings.DatabaseFlags)
 	}
 
-	if settings.ConnectionPoolConfig != nil {
+	// When connection_pooling_enabled=false the API returns nil for ConnectionPoolConfig.
+	// We still need to flatten if the user has configured the block to avoid a permadiff.
+	poolConfigSet, _ := d.Get("settings.0.connection_pool_config").(*schema.Set)
+	if settings.ConnectionPoolConfig != nil || (poolConfigSet != nil && poolConfigSet.Len() > 0) {
 		data["connection_pool_config"] = flattenConnectionPoolConfig(settings.ConnectionPoolConfig)
 	}
 
@@ -3100,6 +3262,12 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 	if settings.InsightsConfig != nil {
 		data["insights_config"] = flattenInsightsConfig(settings.InsightsConfig)
 	}
+
+{{- if ne $.TargetVersionName "ga" }}
+	if settings.PerformanceCaptureConfig != nil {
+		data["performance_capture_config"] = flattenPerformanceCaptureConfig(settings.PerformanceCaptureConfig)
+	}
+{{- end }}
 
 	if settings.ReadPoolAutoScaleConfig != nil {
 		data["read_pool_auto_scale_config"] = flattenReadPoolAutoScaleConfig(settings.ReadPoolAutoScaleConfig)
@@ -3203,7 +3371,11 @@ func flattenActiveDirectoryConfig(sqlActiveDirectoryConfig *sqladmin.SqlActiveDi
 	}
 	return []map[string]interface{}{
 		{
-			"domain": sqlActiveDirectoryConfig.Domain,
+			"domain":                       sqlActiveDirectoryConfig.Domain,
+			"mode":                         sqlActiveDirectoryConfig.Mode,
+			"dns_servers":                  sqlActiveDirectoryConfig.DnsServers,
+			"admin_credential_secret_name": sqlActiveDirectoryConfig.AdminCredentialSecretName,
+			"organizational_unit":          sqlActiveDirectoryConfig.OrganizationalUnit,
 		},
 	}
 }
@@ -3371,8 +3543,10 @@ func flattenPscAutoConnections(pscAutoConnections []*sqladmin.PscAutoConnectionC
 
 func flattenPscConfigs(pscConfig *sqladmin.PscConfig) interface{} {
 	data := map[string]interface{}{
-		"psc_enabled":               pscConfig.PscEnabled,
-		"allowed_consumer_projects": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(pscConfig.AllowedConsumerProjects)),
+		"psc_enabled":                    pscConfig.PscEnabled,
+		"psc_auto_dns_enabled":           pscConfig.PscAutoDnsEnabled,
+		"psc_write_endpoint_dns_enabled": pscConfig.PscWriteEndpointDnsEnabled,
+		"allowed_consumer_projects":      schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(pscConfig.AllowedConsumerProjects)),
 		"network_attachment_uri":    pscConfig.NetworkAttachmentUri,
 		"psc_auto_connections":      flattenPscAutoConnections(pscConfig.PscAutoConnections),
 	}
@@ -3510,6 +3684,21 @@ func flattenInsightsConfig(insightsConfig *sqladmin.InsightsConfig) interface{} 
 
 	return []map[string]interface{}{data}
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func flattenPerformanceCaptureConfig(performanceCaptureConfig *sqladmin.PerformanceCaptureConfig) interface{} {
+	data := map[string]interface{}{
+		"enabled":                         performanceCaptureConfig.Enabled,
+		"probing_interval_seconds":        performanceCaptureConfig.ProbingIntervalSeconds,
+		"probe_threshold":                 performanceCaptureConfig.ProbeThreshold,
+		"running_threads_threshold":       performanceCaptureConfig.RunningThreadsThreshold,
+		"seconds_behind_source_threshold": performanceCaptureConfig.SecondsBehindSourceThreshold,
+		"transaction_duration_threshold":  performanceCaptureConfig.TransactionDurationThreshold,
+	}
+
+	return []map[string]interface{}{data}
+}
+{{- end }}
 
 func flattenTargetMetrics(targetMetrics []*sqladmin.TargetMetric) []interface{} {
 	if len(targetMetrics) == 0 { // Handles nil or empty slice

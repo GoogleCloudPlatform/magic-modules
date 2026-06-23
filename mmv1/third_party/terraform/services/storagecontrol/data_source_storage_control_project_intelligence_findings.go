@@ -1,0 +1,150 @@
+package storagecontrol
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceGoogleStorageControlProjectIntelligenceFindings() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourceGoogleStorageControlProjectIntelligenceFindingsRead,
+		Schema: map[string]*schema.Schema{
+			"filter": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The filter expression to apply. Supports filtering by type and associated_resources.`,
+			},
+			"page_size": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     100,
+				Description: `The maximum number of IntelligenceFinding resources to return. The maximum value is 100; values greater than 100 become 100. The default value is 100.`,
+			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "global",
+				Description: `The location of the intelligence findings. Currently default value is global and users cannot use for input for now.`,
+			},
+			"project": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
+			},
+			"findings": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: `The list of intelligence findings.`,
+				Elem: &schema.Resource{
+					Schema: storageControlIntelligenceFindingSchema(),
+				},
+			},
+		},
+	}
+}
+
+func dataSourceGoogleStorageControlProjectIntelligenceFindingsRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for intelligence findings: %s", err)
+	}
+	location := d.Get("location").(string)
+
+	params := make(map[string]string)
+	if v, ok := d.GetOk("filter"); ok {
+		params["filter"] = v.(string)
+	}
+	if v, ok := d.GetOk("page_size"); ok {
+		params["pageSize"] = strconv.Itoa(v.(int))
+	}
+
+	findings := make([]map[string]interface{}, 0)
+
+	for {
+		url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"projects/%s/locations/%s/intelligenceFindings", project, location))
+		if err != nil {
+			return fmt.Errorf("Error formatting url for intelligence findings: %s", err)
+		}
+
+		url, err = transport_tpg.AddQueryParams(url, params)
+		if err != nil {
+			return err
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("Error retrieving intelligence findings: %s", err)
+		}
+
+		var items interface{}
+		if v, ok := res["intelligenceFindings"]; ok {
+			items = v
+		} else if v, ok := res["findings"]; ok {
+			items = v
+		}
+
+		pageFindings := flattenStorageControlIntelligenceFindingsList(items)
+		findings = append(findings, pageFindings...)
+
+		pToken, ok := res["nextPageToken"]
+		if ok && pToken != nil && pToken.(string) != "" {
+			params["pageToken"] = pToken.(string)
+		} else {
+			break
+		}
+	}
+
+	if err := d.Set("findings", findings); err != nil {
+		return fmt.Errorf("Error setting findings: %s", err)
+	}
+
+	d.SetId(fmt.Sprintf("projects/%s/locations/%s/intelligenceFindings", project, location))
+
+	return nil
+}
+func flattenStorageControlIntelligenceFindingsList(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return make([]map[string]interface{}, 0)
+	}
+
+	ls, ok := v.([]interface{})
+	if !ok {
+		return make([]map[string]interface{}, 0)
+	}
+	findings := make([]map[string]interface{}, 0, len(ls))
+	for _, raw := range ls {
+		flatFinding := flattenStorageControlIntelligenceFinding(raw)
+		if flatFinding != nil {
+			findings = append(findings, flatFinding)
+		}
+	}
+
+	return findings
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_control_project_intelligence_findings",
+		ProductName: "storagecontrol",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageControlProjectIntelligenceFindings(),
+	}.Register()
+}
