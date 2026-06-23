@@ -86,6 +86,9 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 	}
 
 	hclData["service_account"] = flattenServiceAccountsTgcNext(data["serviceAccounts"])
+	if options != nil && options.AreNewResources {
+		hclData["labels"] = data["labels"]
+	}
 	hclData["resource_policies"] = data["resourcePolicies"]
 
 	instanceName, _ := data["name"].(string)

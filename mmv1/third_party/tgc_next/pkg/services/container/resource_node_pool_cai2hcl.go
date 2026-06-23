@@ -62,7 +62,7 @@ func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.A
 	an := strings.Replace(asset.Name, "/zones/", "/locations/", 1)
 	utils.ParseUrlParamValuesFromAssetName(an, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}", outputFields, hclData)
 
-	npMap, err := flattenNodePool(d, config, asset.Resource.Data, "")
+	npMap, err := flattenNodePool(d, config, asset.Resource.Data, "", options)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func flattenNodePoolNodeDrainConfig(v interface{}) []map[string]interface{} {
 	return []map[string]interface{}{nodeDrainConfig}
 }
 
-func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[string]interface{}, prefix string) (map[string]interface{}, error) {
+func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[string]interface{}, prefix string, options *models.ResourceConverterOptions) (map[string]interface{}, error) {
 	// Node pools don't expose the current node count in their API, so read the
 	// instance groups instead. They should all have the same size, but in case a resize
 	// failed or something else strange happened, we'll just use the average size.
@@ -201,7 +201,7 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[st
 		"name":               np["name"],
 		"initial_node_count": np["initialNodeCount"],
 		"node_locations":     np["locations"],
-		"node_config":        flattenNodeConfig(np["config"], d.Get(prefix+"node_config")),
+		"node_config":        flattenNodeConfig(np["config"], d.Get(prefix+"node_config"), options),
 		"version":            np["version"],
 		"network_config":     flattenNodeNetworkConfig(np["networkConfig"], d, prefix),
 	}
