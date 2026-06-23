@@ -130,6 +130,14 @@ func (td *TemplateData) GenerateListResourceDocumentationFile(filePath string, r
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
+func (td *TemplateData) GenerateIamListResourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/iam_member_list_resource.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
 func (td *TemplateData) GenerateDataSourceDocumentationFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/datasource.html.markdown.tmpl"
 	templates := []string{

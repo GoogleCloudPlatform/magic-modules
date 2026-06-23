@@ -415,6 +415,11 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 		// New: Iam member list resource (terraform query support)
 		t.GenerateIamListResource(object, templateData, targetFolder)
 
+		if generateDocs && object.IamPolicy != nil && object.IamPolicy.GenerateListResource {
+			listDocFolder := t.makeFolder(outputFolder, "website", "docs", "list-resources")
+			listDocFilePath := path.Join(listDocFolder, fmt.Sprintf("%s_iam_member.html.markdown", object.TerraformName()))
+			templateData.GenerateIamListResourceDocumentationFile(listDocFilePath, object)
+		}
 		// Only generate test if testable example configs exist.
 		samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
 			return s.ExcludeTest
