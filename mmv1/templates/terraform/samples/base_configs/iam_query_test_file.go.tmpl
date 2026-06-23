@@ -24,7 +24,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
-	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"{{ $.ImportPath }}/acctest"
@@ -52,7 +51,7 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
     })
     {{- end}}
 
-    randonSuffix := acctest.RandString(t, 10)
+    randomSuffix := acctest.RandString(t, 10)
     context := map[string]interface{}{
 	{{- template "EnvVarContext" dict "TestEnvVars" $step.TestEnvVars "ImportPath" $.ImportPath }}
 	{{- range $varKey, $varVal := $step.TestContextVars }}
@@ -81,36 +80,40 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 {{- end }}
 		Steps: []resource.TestStep{
 			{
-				Config: testAcc{{ $.ResourceName }}IamMemberListQueryConfig(context),
+				Config: testAcc{{ $.ResourceName }}IamMemberListQuery_create(context),
 				Check: resource.ComposeTestCheckFunc(
 					listScope.Capture(map[string]string{
-					{{- range $param := $.IamResourceParams }}
-						"{{ underscore $param }}": google_{{ $.TerraformName }}.{{ $sample.PrimaryResourceId }}",
-						{{- end }}
+                    {{- range $param := $.IamResourceParams }}
+                        "{{ underscore $param }}": "{{ $.TerraformName }}.{{$sample.PrimaryResourceId }}",
+                    {{- end }}
 					}),
 				),
 			},
 			{
 				Query:  true,
-				Config: testAcc{ $.ResourceName }}IamMemberListQueryConfig(context),
-				ConfigVariables: listScope.ConfigVariables(),
+				Config: testAcc{{ $.ResourceName }}IamMemberListQuery_list(context),
+				ConfigVariables: listScope.AsConfigVariables(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLength("google_{{ $.TerraformName }}_iam_member.members", 1),
+					querycheck.ExpectLength("{{ $.TerraformName }}_iam_member.members", 1),
 				},
 			},
 		},
 	})
 }
 
-func testAcc{{ $.ResourceName }}IamMemberListQueryConfig(context map[string]interface{}) string {
+func testAcc{{ $.ResourceName }}IamMemberListQuery_create(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+{{ $step.TestHCLText }}
+`, context)
+}
+
+func testAcc{{ $.ResourceName }}IamMemberListQuery_list(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 {{- range $param := $.IamResourceParams }}
 variable "{{ underscore $param }}" { type = string }
 {{- end }}
 
-{{ $step.TestHCLText }}
-
-list "google_{{ $.TerraformName }}_iam_member" "members" {
+list "{{ $.TerraformName }}_iam_member" "members" {
     provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
 	limit = 10000
     config {
