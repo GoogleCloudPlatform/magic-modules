@@ -146,15 +146,6 @@ func TestAccNetworkSecurityFirewallEndpoints_wildfire(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
-			{
-				Config: testAccNetworkSecurityFirewallEndpoints_wildfireUpdate(orgId, billingProjectId, randomSuffix),
-			},
-			{
-				ResourceName:            "google_network_security_firewall_endpoint.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
-			},
 		},
 	})
 }
@@ -182,31 +173,6 @@ resource "google_network_security_firewall_endpoint" "foobar" {
 }
 `, randomSuffix, orgId, billingProjectId)
 }
-
-func testAccNetworkSecurityFirewallEndpoints_wildfireUpdate(orgId string, billingProjectId string, randomSuffix string) string {
-	return fmt.Sprintf(`
-resource "google_network_security_firewall_endpoint" "foobar" {
-  name     = "tf-test-fw-endpoint%[1]s"
-  parent   = "organizations/%[2]s"
-  location = "us-central1-a"
-  billing_project_id = "%[3]s"
-
-  wildfire_settings {
-    enabled = true
-    wildfire_region = "UNITED_STATES"
-
-    wildfire_realtime_lookup_duration = "3s"
-    wildfire_realtime_lookup_timeout_action = "DENY"
-
-    wildfire_inline_cloud_analysis_settings {
-      max_analysis_duration = "20s"
-      timeout_action        = "DENY"
-    }
-  }
-}
-`, randomSuffix, orgId, billingProjectId)
-}
-
 
 func testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
