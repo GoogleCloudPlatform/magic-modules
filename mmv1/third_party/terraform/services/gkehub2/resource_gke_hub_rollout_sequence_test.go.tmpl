@@ -1,7 +1,5 @@
 package gkehub2
 
-{{ if ne $.TargetVersionName "ga" }}
-
 import (
 	"testing"
 )
@@ -39,5 +37,3 @@ func TestRolloutSequenceDurationDiffSuppress(t *testing.T) {
 		}
 	}
 }
-
-{{ end }}
