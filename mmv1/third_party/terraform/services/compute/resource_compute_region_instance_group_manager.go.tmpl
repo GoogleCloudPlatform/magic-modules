@@ -602,7 +602,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 							Description:  `Specifies whether to apply the group's latest configuration when repairing a VM. Valid options are: YES, NO. If YES and you updated the group's instance template or per-instance configurations after the VM was created, then these changes are applied when VM is repaired. If NO (default), then updates are applied in accordance with the group's update policy type.`,
 						},
 
-						{{- if ne $.TargetVersionName `ga` }}
 						"on_repair": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -621,7 +620,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 								},
 							},
 						},
-						{{- end }}
 
 					},
 				},
@@ -2258,12 +2256,10 @@ func flattenRegionInstanceLifecyclePolicy(raw interface{}) []map[string]interfac
 		"default_action_on_failure": ilp["defaultActionOnFailure"],
 		"on_failed_health_check": ilp["onFailedHealthCheck"],
 	}
-{{- if ne $.TargetVersionName "ga" }}
 	if onRepair, ok := ilp["onRepair"].(map[string]interface{}); ok && onRepair != nil {
 		onRepairEntry := map[string]any{"allow_changing_zone": onRepair["allowChangingZone"]}
 		entry["on_repair"] = []map[string]any{onRepairEntry}
 	}
-{{- end }}
 	return append(results, entry)
 }
 
