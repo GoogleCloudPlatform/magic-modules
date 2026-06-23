@@ -1,9 +1,4 @@
 resource "google_vertex_ai_model_garden_enable_model" "{{$.PrimaryResourceId}}" {
   provider             = google-beta
-  project              = data.google_project.project.project_id
   publisher_model_name = "{{index $.Vars "publisher_model_name"}}"
-}
-
-data "google_project" "project" {
-  provider = google-beta
 }
