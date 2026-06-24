@@ -67,6 +67,18 @@ examples:
       display_name: 'my-salesforce-config'
       dataset_id: 'my_dataset'
     exclude_test: true
+  - name: 'bigquerydatatransfer_config_schedule_options_v2'
+    primary_resource_id: 'event_driven_config'
+    vars:
+      display_name: 'my-event-driven-config'
+      dataset_id: 'my_dataset'
+      bucket_name: 'my-bucket'
+      topic_name: 'my-topic'
+      subscription_name: 'my-subscription'
+    # Event-driven transfers need a configured Cloud Storage source and IAM that
+    # the generated test harness can't provision; schedule_options_v2 is covered
+    # by the handwritten event_driven_schedule test instead.
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
@@ -162,6 +174,34 @@ properties:
           - 'schedule_options.0.disable_auto_scheduling'
           - 'schedule_options.0.start_time'
           - 'schedule_options.0.end_time'
+  - name: 'scheduleOptionsV2'
+    type: NestedObject
+    description: |
+      Options customizing different types of data transfer schedule.
+      Only the event-driven schedule is exposed here; time-based and manual
+      scheduling are configured through the `schedule` and `schedule_options`
+      fields instead. `event_driven_schedule` cannot be used together with
+      `schedule` or `schedule_options`.
+    # The API mirrors a legacy `schedule`/`scheduleOptions` value into
+    # scheduleOptionsV2 (as timeBasedSchedule / manualSchedule) on read. Those
+    # sub-schedules are intentionally not modeled here because they duplicate the
+    # existing `schedule` / `schedule_options` fields, so the decoder
+    # (templates/terraform/decoders/bigquery_data_transfer.go.tmpl) drops the
+    # echoed scheduleOptionsV2 when it carries no eventDrivenSchedule, which
+    # avoids a permanent diff while still reading back a real event_driven_schedule.
+    properties:
+      - name: 'eventDrivenSchedule'
+        type: NestedObject
+        description: |
+          Event driven transfer schedule options. If set, the transfer will be
+          scheduled upon events arrival.
+        properties:
+          - name: 'pubsubSubscription'
+            type: String
+            description: |
+              Pub/Sub subscription name used to receive events. Only Google Cloud
+              Storage data source support this option. Format:
+              projects/{project}/subscriptions/{subscription}
   - name: 'emailPreferences'
     type: NestedObject
     description: |

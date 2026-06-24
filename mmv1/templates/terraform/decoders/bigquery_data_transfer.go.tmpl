@@ -38,4 +38,19 @@ if paramMap, ok := res["params"]; ok {
 	res["params"] = params
 }
 
+// The API mirrors the legacy schedule / schedule_options fields into
+// scheduleOptionsV2 (as timeBasedSchedule / manualSchedule) on read. Those
+// sub-schedules are not modeled in the schema because they duplicate the
+// existing schedule / schedule_options fields, so drop the echoed
+// scheduleOptionsV2 when it carries no eventDrivenSchedule. This avoids a
+// permanent diff for configs that use the legacy fields while still reading
+// back a real event_driven_schedule normally.
+if v, ok := res["scheduleOptionsV2"]; ok {
+	if scheduleOptionsV2, ok := v.(map[string]interface{}); ok {
+		if _, hasEventDriven := scheduleOptionsV2["eventDrivenSchedule"]; !hasEventDriven {
+			delete(res, "scheduleOptionsV2")
+		}
+	}
+}
+
 return res, nil
