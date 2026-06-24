@@ -366,7 +366,7 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 		// Wait for the operation to complete
 		waitErr := LoggingOperationWaitTimeWithResponse(config, res, &opRes, "Updating Bucket with analytics", userAgent, d.Timeout(schema.TimeoutCreate))
 		if waitErr != nil {
-			return fmt.Errorf("Error updating Logging Bucket Config %q: %s", d.Id(), err)
+			return fmt.Errorf("Error updating Logging Bucket Config %q: %s", d.Id(), waitErr)
 		}
 	}
 
