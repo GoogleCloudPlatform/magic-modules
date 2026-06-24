@@ -57,13 +57,15 @@ func ResourceTagsTagBindingCollection() *schema.Resource {
 				Description: `A map of tag keys to values directly bound to this resource, specified in namespaced format.
 For example:
   "123/environment": "production"
-This field is non-authoritative. Terraform will only manage the tags present in this map.`,
+Keys must be namespaced names of TagKeys, and values must be short names of TagValues.
+This field is non-authoritative. Terraform will only manage the precise tags present in this map.`,
 				Elem: &schema.Schema{Type: schema.TypeString},
 			},
 			"active_tags": {
 				Type:     schema.TypeMap,
 				Computed: true,
-				Description: `(Output) The most recent state of all direct tags on the resource, as reported by the API.`,
+				Description: `(Output) The most recent state of all direct tags on the resource, as reported by the API.
+This includes the tags configured through Terraform, Google system tags, and tags attached by other clients.`,
 				Elem: &schema.Schema{Type: schema.TypeString},
 			},
 			"name": {

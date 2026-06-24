@@ -69,7 +69,7 @@ The following arguments are supported:
 
 * `tags` -
   (Required)
-  A map of tag keys to values directly bound to this resource, specified in namespaced name format. E.g. `"123/environment": "production"`. This field is non-authoritative. Terraform will only manage the precise tags present in this map.
+  A map of tag keys to values directly bound to this resource, specified in namespaced name format. E.g. `"123/environment": "production"`. Keys must be namespaced names of TagKeys, and values must be short names of TagValues. This field is non-authoritative. Terraform will only manage the precise tags present in this map.
 
 * `location` -
   (Optional)
@@ -90,7 +90,7 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `active_tags` -
   The most recent state of all direct tags on the resource, as reported by the API. 
-  This includes the tags configured through Terraform, the system, and other clients.
+  This includes the tags configured through Terraform, Google system tags, and tags attached by other clients.
 
 
 ## Timeouts

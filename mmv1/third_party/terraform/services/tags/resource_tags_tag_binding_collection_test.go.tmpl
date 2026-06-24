@@ -1643,5 +1643,178 @@ func testAccCheckBindingValueViaAPI_VM(t *testing.T, contextMap map[string]inter
 	}
 }
 
+func TestAccTagsTagBindingCollection_nonAuthoritative(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	context := map[string]interface{}{
+		"org_id":        orgId,
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"instance_name": "tf-test-vm-nonauth-" + acctest.RandString(t, 10),
+		"zone":          "us-central1-a",
+		"key_1_short":   "tf-test-k1-" + acctest.RandString(t, 6),
+		"val_1_short":   "tf-test-v1-" + acctest.RandString(t, 6), // Managed by TF
+		"key_2_short":   "tf-test-k2-" + acctest.RandString(t, 6),
+		"val_2_short":   "tf-test-v2-" + acctest.RandString(t, 6), // Attached externally
+	}
+
+	key1Namespaced := fmt.Sprintf("%s/%s", orgId, context["key_1_short"])
+	key2Namespaced := fmt.Sprintf("%s/%s", orgId, context["key_2_short"])
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create the collection with 1 managed tag (key_1 = val_1)
+			{
+				Config: testAccTagsTagBindingCollection_nonAuthoritativeConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_nonauth", "tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_nonauth", "active_tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_nonauth", fmt.Sprintf("tags.%s", key1Namespaced), context["val_1_short"].(string)),
+				),
+			},
+			// Step 2: Intermediate PlanOnly step that attaches key_2 = val_2 externally (out-of-band)
+			{
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+				Config:             testAccTagsTagBindingCollection_nonAuthoritativeConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBindingAddedExternally_VM(t, context, "google_tags_tag_value.key_2_val_2"),
+					testAccCheckBindingValueViaAPI_VM(t, context, key2Namespaced, context["val_2_short"].(string)),
+				),
+			},
+			// Step 3: Run plan again. It should show NO CHANGES (empty plan),
+			// proving that Terraform does not attempt to delete the externally attached key_2!
+			{
+				Config:             testAccTagsTagBindingCollection_nonAuthoritativeConfig(context),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+				Check: resource.ComposeTestCheckFunc(
+					// active_tags should now show both tags (managed + external)
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_nonauth", "active_tags.%", "2"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_nonauth", fmt.Sprintf("active_tags.%s", key1Namespaced), context["val_1_short"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_nonauth", fmt.Sprintf("active_tags.%s", key2Namespaced), context["val_2_short"].(string)),
+					// tags should still only show the 1 managed tag
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_nonauth", "tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test_nonauth", fmt.Sprintf("tags.%s", key1Namespaced), context["val_1_short"].(string)),
+				),
+			},
+		},
+	})
+}
+
+func testAccTagsTagBindingCollection_nonAuthoritativeConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-11"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance" "instance" {
+  provider     = google-beta
+  name         = "%{instance_name}"
+  machine_type = "e2-micro"
+  zone         = "%{zone}"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_tags_tag_key" "key_1" {
+  provider    = google-beta
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{key_1_short}"
+}
+
+resource "google_tags_tag_value" "key_1_val_1" {
+  provider    = google-beta
+  parent      = google_tags_tag_key.key_1.id
+  short_name  = "%{val_1_short}"
+}
+
+resource "google_tags_tag_key" "key_2" {
+  provider    = google-beta
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{key_2_short}"
+}
+
+resource "google_tags_tag_value" "key_2_val_2" {
+  provider    = google-beta
+  parent      = google_tags_tag_key.key_2.id
+  short_name  = "%{val_2_short}"
+}
+
+resource "google_tags_tag_binding_collection" "test_nonauth" {
+  provider             = google-beta
+  full_resource_name   = "//compute.googleapis.com/projects/%{project_id}/zones/%{zone}/instances/${google_compute_instance.instance.instance_id}"
+  location             = "us-central1-a"
+
+  tags = {
+    "${google_tags_tag_key.key_1.namespaced_name}" = google_tags_tag_value.key_1_val_1.short_name
+  }
+
+  depends_on = [
+    google_tags_tag_value.key_1_val_1,
+    google_tags_tag_value.key_2_val_2,
+  ]
+}
+`, context)
+}
+
+// testAccCheckBindingAddedExternally_VM performs an out-of-band API call to create an individual TagBinding.
+// This simulates another client attaching a tag to the same resource.
+func testAccCheckBindingAddedExternally_VM(t *testing.T, contextMap map[string]interface{}, tagValueResourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		// Resolve tag value ID from state
+		tagValueRes, ok := s.RootModule().Resources[tagValueResourceName]
+		if !ok {
+			return fmt.Errorf("Resource %q not found in state", tagValueResourceName)
+		}
+		tagValueId := tagValueRes.Primary.ID // This is "tagValues/12345"
+
+		vmResource := s.RootModule().Resources["google_compute_instance.instance"]
+		if vmResource == nil {
+			return fmt.Errorf("Resource 'google_compute_instance.instance' not found in state")
+		}
+		instanceId := vmResource.Primary.Attributes["instance_id"]
+		projectId := contextMap["project_id"].(string)
+		zone := contextMap["zone"].(string)
+
+		resourceName := fmt.Sprintf("//compute.googleapis.com/projects/%s/zones/%s/instances/%s", projectId, zone, instanceId)
+
+		// Create a single TagBinding via the API
+		apiURL := "https://cloudresourcemanager.googleapis.com/v3/tagBindings"
+		body := map[string]interface{}{
+			"parent":    resourceName,
+			"tagValue":  tagValueId,
+		}
+
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:  config,
+			Method:  "POST",
+			RawURL:  apiURL,
+			Body:    body,
+			Headers: make(http.Header),
+		})
+
+		if err != nil {
+			return fmt.Errorf("Error creating external TagBinding via API: %s", err)
+		}
+		t.Logf("Successfully created external binding for %s to %s via API", resourceName, tagValueId)
+		return nil
+	}
+}
+
 {{- end }}
 
