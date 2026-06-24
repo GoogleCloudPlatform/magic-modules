@@ -55,6 +55,7 @@ resource "google_app_engine_standard_app_version" "{{$.PrimaryResourceId}}" {
 # Testing the app_engine_bundled_services field
   app_engine_bundled_services = ["BUNDLED_SERVICE_TYPE_MAIL", "BUNDLED_SERVICE_TYPE_DATASTORE_V3"]
 
+  delete_service_on_destroy = true
   service_account = google_service_account.service_account.email
 
   depends_on = [

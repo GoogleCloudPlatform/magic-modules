@@ -83,6 +83,8 @@ samples:
           service_id: bundled-service
           bucket_name: tf-test-gae-bkt-bundled
           sa_email: gae-sa
+        ignore_read_extra:
+          - delete_service_on_destroy
 virtual_fields:
   - name: noop_on_destroy
     description: |
@@ -463,6 +465,7 @@ properties:
      Cannot specify both `app_engine_apis` and 'app_engine_bundled_services` together.
     is_set: true
     immutable: true
+    ignore_read: true
     item_type:
       type: Enum
       enum_values:
