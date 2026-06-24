@@ -70,11 +70,9 @@ func TestAccProject_importBlockWithResourceIdentity(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_project.acceptance",
-				ImportState:             true,
-				ImportStateKind:         resource.ImportBlockWithResourceIdentity,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_policy"},
+				ResourceName:    "google_project.acceptance",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
