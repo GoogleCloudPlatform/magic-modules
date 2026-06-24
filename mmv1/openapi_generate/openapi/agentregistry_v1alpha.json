@@ -1,0 +1,3004 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Agent Registry API",
+    "description": "Agent Registry is a centralized, unified catalog that lets you store, discover, and govern Model Context Protocol (MCP) servers, tools, and AI agents within Google Cloud.",
+    "version": "v1alpha",
+    "contact": {},
+    "termsOfService": "https://docs.cloud.google.com/agent-registry/overview"
+  },
+  "servers": [
+    {
+      "url": "https://agentregistry.googleapis.com",
+      "description": "agentregistry v1alpha API"
+    }
+  ],
+  "paths": {
+    "/v1alpha/projects/{projectsId}/locations": {
+      "get": {
+        "operationId": "ListLocation",
+        "summary": "Lists information about the supported locations for this service. This method lists locations based on the resource scope provided in the ListLocationsRequest.name field: * **Global locations**: If `name` is empty, the method lists the public locations available to all projects. * **Project-specific locations**: If `name` follows the format `projects/{project}`, the method lists locations visible to that specific project. This includes public, private, or other project-specific locations enabled for the project. For gRPC and client library implementations, the resource name is passed as the `name` field. For direct service calls, the resource name is incorporated into the request path based on the specific service implementation and version.",
+        "description": "Lists information about the supported locations for this service. This method lists locations based on the resource scope provided in the ListLocationsRequest.name field: * **Global locations**: If `name` is empty, the method lists the public locations available to all projects. * **Project-specific locations**: If `name` follows the format `projects/{project}`, the method lists locations visible to that specific project. This includes public, private, or other project-specific locations enabled for the project. For gRPC and client library implementations, the resource name is passed as the `name` field. For direct service calls, the resource name is incorporated into the request path based on the specific service implementation and version.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The resource that owns the locations collection, if applicable.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+$"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "A filter to narrow down results to a preferred subset. The filtering language accepts strings like `\"displayName=tokyo\"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The maximum number of results to return. If not set, the service selects a default.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "A page token received from the `next_page_token` field in the response. Send that page token to receive the subsequent page.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "extraLocationTypes",
+            "in": "query",
+            "description": "Optional. Do not use this field unless explicitly documented otherwise. This is primarily for internal usage.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListLocationsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}": {
+      "get": {
+        "operationId": "GetLocation",
+        "summary": "Gets information about a location.",
+        "description": "Gets information about a location.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Resource name for the location.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Location"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/operations": {
+      "get": {
+        "operationId": "ListOperation",
+        "summary": "Lists operations that match the specified filter in the request. If the server doesn't support this method, it returns `UNIMPLEMENTED`.",
+        "description": "Lists operations that match the specified filter in the request. If the server doesn't support this method, it returns `UNIMPLEMENTED`.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The name of the operation's parent resource.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "The standard list filter.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The standard list page size.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "The standard list page token.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "returnPartialSuccess",
+            "in": "query",
+            "description": "When set to `true`, operations that are reachable are returned as normal, and those that are unreachable are returned in the ListOperationsResponse.unreachable field. This can only be `true` when reading across collections. For example, when `parent` is set to `\"projects/example/locations/-\"`. This field is not supported by default and will result in an `UNIMPLEMENTED` error if set unless explicitly documented otherwise in service or product specific documentation.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOperationsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+      "get": {
+        "operationId": "GetOperation",
+        "summary": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
+        "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The name of the operation resource.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteOperation",
+        "summary": "Deletes a long-running operation. This method indicates that the client is no longer interested in the operation result. It does not cancel the operation. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`.",
+        "description": "Deletes a long-running operation. This method indicates that the client is no longer interested in the operation result. It does not cancel the operation. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The name of the operation resource to be deleted.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}:cancel": {
+      "post": {
+        "operationId": "CancelOperation",
+        "summary": "Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the operation, but success is not guaranteed. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether the cancellation succeeded or whether the operation completed despite cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
+        "description": "Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the operation, but success is not guaranteed. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether the cancellation succeeded or whether the operation completed despite cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The name of the operation resource to be cancelled.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "description": "Request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelOperationRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/agents": {
+      "get": {
+        "operationId": "ListAgent",
+        "summary": "Lists Agents in a given project and location.",
+        "description": "Lists Agents in a given project and location.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "description": "Required. Parent value for ListAgentsRequest",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Optional. Requested page size. Server may return fewer items than requested. If unspecified, server will pick an appropriate default.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "Optional. A token identifying a page of results the server should return.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Optional. Filtering results",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "description": "Optional. Hint for how to order the results",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAgentsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/agents:search": {
+      "post": {
+        "operationId": "SearchAgent",
+        "summary": "Searches Agents in a given project and location.",
+        "description": "Searches Agents in a given project and location.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "description": "Required. Parent value for SearchAgentsRequest. Format: `projects/{project}/locations/{location}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchAgentsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "description": "Request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchAgentsRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/agents/{agentsId}": {
+      "get": {
+        "operationId": "GetAgent",
+        "summary": "Gets details of a single Agent.",
+        "description": "Gets details of a single Agent.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agentsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Required. Name of the resource",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/agents/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Agent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/endpoints": {
+      "get": {
+        "operationId": "ListEndpoint",
+        "summary": "Lists Endpoints in a given project and location.",
+        "description": "Lists Endpoints in a given project and location.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "description": "Required. The project and location to list endpoints in. Expected format: `projects/{project}/locations/{location}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Optional. Requested page size. Server may return fewer items than requested. If unspecified, server will pick an appropriate default.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "Optional. A token identifying a page of results the server should return.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Optional. A query string used to filter the list of endpoints returned. The filter expression must follow AIP-160 syntax. Filtering is supported on the `name`, `display_name`, `description`, `version`, and `interfaces` fields. Some examples: * `name = \"projects/p1/locations/l1/endpoints/e1\"` * `display_name = \"my-endpoint\"` * `description = \"my-endpoint-description\"` * `version = \"v1\"` * `interfaces.transport = \"HTTP_JSON\"`",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListEndpointsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/endpoints/{endpointsId}": {
+      "get": {
+        "operationId": "GetEndpoint",
+        "summary": "Gets details of a single Endpoint.",
+        "description": "Gets details of a single Endpoint.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endpointsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Required. The name of the endpoint to retrieve. Format: `projects/{project}/locations/{location}/endpoints/{endpoint}`",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/endpoints/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Endpoint"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/mcpServers": {
+      "get": {
+        "operationId": "ListMcpServer",
+        "summary": "Lists McpServers in a given project and location.",
+        "description": "Lists McpServers in a given project and location.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "description": "Required. Parent value for ListMcpServersRequest. Format: `projects/{project}/locations/{location}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Optional. Requested page size. Server may return fewer items than requested. If unspecified, server will pick an appropriate default.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "Optional. A token identifying a page of results the server should return.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Optional. Filtering results",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "description": "Optional. Hint for how to order the results",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListMcpServersResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/mcpServers:search": {
+      "post": {
+        "operationId": "SearchMcpServer",
+        "summary": "Searches McpServers in a given project and location.",
+        "description": "Searches McpServers in a given project and location.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "description": "Required. Parent value for SearchMcpServersRequest. Format: `projects/{project}/locations/{location}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchMcpServersResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "description": "Request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchMcpServersRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/mcpServers/{mcpServersId}": {
+      "get": {
+        "operationId": "GetMcpServer",
+        "summary": "Gets details of a single McpServer.",
+        "description": "Gets details of a single McpServer.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mcpServersId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Required. Name of the resource",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/mcpServers/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/services": {
+      "get": {
+        "operationId": "ListService",
+        "summary": "Lists Services in a given project and location.",
+        "description": "Lists Services in a given project and location.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "description": "Required. The project and location to list services in. Expected format: `projects/{project}/locations/{location}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Optional. Requested page size. Server may return fewer items than requested. If unspecified, server will pick an appropriate default.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "Optional. A token identifying a page of results the server should return.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Optional. A query string used to filter the list of services returned. The filter expression must follow AIP-160 syntax. Filtering is supported on the `name`, `display_name`, `description`, and `labels` fields. Some examples: * `name = \"projects/p1/locations/l1/services/s1\"` * `display_name = \"my-service\"` * `description : \"myservice description\"` * `labels.env = \"prod\"`",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListServicesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateService",
+        "summary": "Creates a new Service in a given project and location.",
+        "description": "Creates a new Service in a given project and location.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "description": "Required. The project and location to create the Service in. Expected format: `projects/{project}/locations/{location}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          },
+          {
+            "name": "serviceId",
+            "in": "query",
+            "description": "Required. The ID to use for the service, which will become the final component of the service's resource name. This value should be 4-63 characters, and valid characters are `/a-z-/`.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "description": "Request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Service"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/services/{servicesId}": {
+      "get": {
+        "operationId": "GetService",
+        "summary": "Gets details of a single Service.",
+        "description": "Gets details of a single Service.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "servicesId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Required. The name of the Service. Format: `projects/{project}/locations/{location}/services/{service}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/services/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateService",
+        "summary": "Updates the parameters of a single Service.",
+        "description": "Updates the parameters of a single Service.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "servicesId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Identifier. The resource name of the Service. Format: `projects/{project}/locations/{location}/services/{service}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/services/[^/]+$"
+            }
+          },
+          {
+            "name": "updateMask",
+            "in": "query",
+            "description": "Optional. Field mask is used to specify the fields to be overwritten in the Service resource by the update. The fields specified in the update_mask are relative to the resource, not the full request. A field will be overwritten if it is in the mask. If the user does not provide a mask then all fields present in the request will be overwritten.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "google-fieldmask"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "description": "Request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Service"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "delete": {
+        "operationId": "DeleteService",
+        "summary": "Deletes a single Service.",
+        "description": "Deletes a single Service.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "servicesId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Required. The name of the Service. Format: `projects/{project}/locations/{location}/services/{service}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/services/[^/]+$"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes after the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/bindings": {
+      "get": {
+        "operationId": "ListBinding",
+        "summary": "Lists Bindings in a given project and location.",
+        "description": "Lists Bindings in a given project and location.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "description": "Required. The project and location to list bindings in. Expected format: `projects/{project}/locations/{location}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Optional. Requested page size. Server may return fewer items than requested. Page size is 500 if unspecified and is capped at `500` even if a larger value is given.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "Optional. A token identifying a page of results the server should return.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Optional. A query string used to filter the list of bindings returned. The filter expression must follow AIP-160 syntax.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "description": "Optional. Hint for how to order the results",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListBindingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateBinding",
+        "summary": "Creates a new Binding in a given project and location.",
+        "description": "Creates a new Binding in a given project and location.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "description": "Required. The project and location to create the Binding in. Expected format: `projects/{project}/locations/{location}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          },
+          {
+            "name": "bindingId",
+            "in": "query",
+            "description": "Required. The ID to use for the binding, which will become the final component of the binding's resource name. This value should be 4-63 characters, and must conform to RFC-1034. Specifically, it must match the regular expression `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "description": "Request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Binding"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/bindings/{bindingsId}": {
+      "get": {
+        "operationId": "GetBinding",
+        "summary": "Gets details of a single Binding.",
+        "description": "Gets details of a single Binding.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bindingsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Required. The name of the Binding. Format: `projects/{project}/locations/{location}/bindings/{binding}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/bindings/[^/]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Binding"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateBinding",
+        "summary": "Updates the parameters of a single Binding.",
+        "description": "Updates the parameters of a single Binding.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bindingsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Required. Identifier. The resource name of the Binding. Format: `projects/{project}/locations/{location}/bindings/{binding}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/bindings/[^/]+$"
+            }
+          },
+          {
+            "name": "updateMask",
+            "in": "query",
+            "description": "Optional. Field mask is used to specify the fields to be overwritten in the Binding resource by the update. The fields specified in the update_mask are relative to the resource, not the full request. A field will be overwritten if it is in the mask. If the user does not provide a mask then all fields present in the request will be overwritten.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "google-fieldmask"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "description": "Request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Binding"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "delete": {
+        "operationId": "DeleteBinding",
+        "summary": "Deletes a single Binding.",
+        "description": "Deletes a single Binding.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bindingsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Required. The name of the Binding. Format: `projects/{project}/locations/{location}/bindings/{binding}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+/bindings/[^/]+$"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes after the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/v1alpha/projects/{projectsId}/locations/{locationsId}/bindings:fetchAvailable": {
+      "get": {
+        "operationId": "FetchavailableBinding",
+        "summary": "Fetches available Bindings.",
+        "description": "Fetches available Bindings.",
+        "parameters": [
+          {
+            "name": "projectsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "description": "Required. The parent, in the format `projects/{project}/locations/{location}`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^projects/[^/]+/locations/[^/]+$"
+            }
+          },
+          {
+            "name": "sourceIdentifier",
+            "in": "query",
+            "description": "The identifier of the source Agent. Format: * `urn:agent:{publisher}:{namespace}:{name}`",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetIdentifier",
+            "in": "query",
+            "description": "Optional. The identifier of the target Agent, MCP Server, or Endpoint. Format: * `urn:agent:{publisher}:{namespace}:{name}` * `urn:mcp:{publisher}:{namespace}:{name}` * `urn:endpoint:{publisher}:{namespace}:{name}`",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Optional. Requested page size. Server may return fewer items than requested. Page size is 500 if unspecified and is capped at `500` even if a larger value is given.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "Optional. A token identifying a page of results the server should return.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchAvailableBindingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ListOperationsResponse": {
+        "type": "object",
+        "properties": {
+          "operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Operation"
+            },
+            "description": "A list of operations that matches the specified filter in the request."
+          },
+          "nextPageToken": {
+            "type": "string",
+            "description": "The standard List next-page token."
+          },
+          "unreachable": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Unordered list. Unreachable resources. Populated when the request sets `ListOperationsRequest.return_partial_success` and reads across collections. For example, when attempting to list all resources across all supported locations."
+          }
+        },
+        "description": "The response message for Operations.ListOperations."
+      },
+      "Operation": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any."
+          },
+          "done": {
+            "type": "boolean",
+            "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available."
+          },
+          "error": {
+            "$ref": "#/components/schemas/Status",
+            "description": "The error result of the operation in case of failure or cancellation."
+          },
+          "response": {
+            "type": "object",
+            "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`."
+          }
+        },
+        "description": "This resource represents a long-running operation that is the result of a network API call."
+      },
+      "Status": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The status code, which should be an enum value of google.rpc.Code."
+          },
+          "message": {
+            "type": "string",
+            "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client."
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use."
+          }
+        },
+        "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors)."
+      },
+      "Empty": {
+        "type": "object",
+        "properties": {},
+        "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }"
+      },
+      "CancelOperationRequest": {
+        "type": "object",
+        "properties": {},
+        "description": "The request message for Operations.CancelOperation."
+      },
+      "ListAgentsResponse": {
+        "type": "object",
+        "properties": {
+          "agents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Agent"
+            },
+            "description": "The list of Agents."
+          },
+          "nextPageToken": {
+            "type": "string",
+            "description": "A token identifying a page of results the server should return."
+          }
+        },
+        "description": "Message for response to listing Agents"
+      },
+      "Agent": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Identifier. The resource name of an Agent. Format: `projects/{project}/locations/{location}/agents/{agent}`."
+          },
+          "agentId": {
+            "type": "string",
+            "description": "Output only. A stable, globally unique identifier for agents.",
+            "readOnly": true
+          },
+          "location": {
+            "type": "string",
+            "description": "Output only. The location where agent is hosted. The value is defined by the hosting environment (i.e. cloud provider).",
+            "readOnly": true
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Output only. The display name of the agent, often obtained from the A2A Agent Card.",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Output only. The description of the Agent, often obtained from the A2A Agent Card. Empty if Agent Card has no description.",
+            "readOnly": true
+          },
+          "version": {
+            "type": "string",
+            "description": "Output only. The version of the Agent, often obtained from the A2A Agent Card. Empty if Agent Card has no version or agent is not an A2A Agent.",
+            "readOnly": true
+          },
+          "protocols": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Protocol"
+            },
+            "description": "Output only. The connection details for the Agent.",
+            "readOnly": true
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/A2ASkill"
+            },
+            "description": "Output only. Skills the agent possesses, often obtained from the A2A Agent Card.",
+            "readOnly": true
+          },
+          "uid": {
+            "type": "string",
+            "description": "Output only. A universally unique identifier for the Agent.",
+            "readOnly": true
+          },
+          "createTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. Create time.",
+            "readOnly": true
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. Update time.",
+            "readOnly": true
+          },
+          "attributes": {
+            "type": "object",
+            "description": "Output only. Attributes of the Agent. Valid values: * `agentregistry.googleapis.com/system/Framework`: {\"framework\": \"google-adk\"} - the agent framework used to develop the Agent. Example values: \"google-adk\", \"langchain\", \"custom\". * `agentregistry.googleapis.com/system/RuntimeIdentity`: {\"principal\": \"principal://...\"} - the runtime identity associated with the Agent. * `agentregistry.googleapis.com/system/RuntimeReference`: {\"uri\": \"//...\"} - the URI of the underlying resource hosting the Agent, for example, the Reasoning Engine URI.",
+            "readOnly": true
+          },
+          "card": {
+            "$ref": "#/components/schemas/Card",
+            "description": "Output only. Full Agent Card payload, when available.",
+            "readOnly": true
+          }
+        },
+        "description": "Represents an Agent. \"A2A\" below refers to the Agent-to-Agent protocol."
+      },
+      "Protocol": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "TYPE_UNSPECIFIED",
+              "A2A_AGENT",
+              "CUSTOM"
+            ],
+            "description": "Output only. The type of the protocol.",
+            "readOnly": true
+          },
+          "protocolVersion": {
+            "type": "string",
+            "description": "Output only. The version of the protocol, for example, the A2A Agent Card version.",
+            "readOnly": true
+          },
+          "interfaces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Interface"
+            },
+            "description": "Output only. The connection details for the Agent.",
+            "readOnly": true
+          }
+        },
+        "description": "Represents the protocol of an Agent."
+      },
+      "Interface": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Required. The destination URL."
+          },
+          "protocolBinding": {
+            "type": "string",
+            "enum": [
+              "PROTOCOL_BINDING_UNSPECIFIED",
+              "JSONRPC",
+              "GRPC",
+              "HTTP_JSON"
+            ],
+            "description": "Required. The protocol binding of the interface."
+          }
+        },
+        "description": "Represents the connection details for an Agent or MCP Server."
+      },
+      "A2ASkill": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Output only. A unique identifier for the agent's skill.",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "description": "Output only. A human-readable name for the agent's skill.",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Output only. A more detailed description of the skill.",
+            "readOnly": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Output only. Keywords describing the skill.",
+            "readOnly": true
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Output only. Example prompts or scenarios this skill can handle.",
+            "readOnly": true
+          }
+        },
+        "description": "Represents the skills of an Agent."
+      },
+      "Card": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "TYPE_UNSPECIFIED",
+              "A2A_AGENT_CARD"
+            ],
+            "description": "Output only. The type of agent card.",
+            "readOnly": true
+          },
+          "content": {
+            "type": "object",
+            "description": "Output only. The content of the agent card.",
+            "readOnly": true
+          }
+        },
+        "description": "Full Agent Card payload, often obtained from the A2A Agent Card."
+      },
+      "SearchAgentsRequest": {
+        "type": "object",
+        "properties": {
+          "searchString": {
+            "type": "string",
+            "description": "Optional. Search criteria used to select the Agents to return. If no search criteria is specified then all accessible Agents will be returned. Search expressions can be used to restrict results based upon searchable fields, where the operators can be used along with the suffix wildcard symbol `*`. See [instructions](https://docs.cloud.google.com/agent-registry/search-agents-and-tools) for more details. Allowed operators: `=`, `:`, `NOT`, `AND`, `OR`, and `()`. Searchable fields: | Field | `=` | `:` | `*` | Keyword Search | |--------------------|-----|-----|-----|----------------| | agentId | Yes | Yes | Yes | Included | | name | No | Yes | Yes | Included | | displayName | No | Yes | Yes | Included | | description | No | Yes | No | Included | | skills | No | Yes | No | Included | | skills.id | No | Yes | No | Included | | skills.name | No | Yes | No | Included | | skills.description | No | Yes | No | Included | | skills.tags | No | Yes | No | Included | | skills.examples | No | Yes | No | Included | Examples: * `agentId=\"urn:agent:projects-123:projects:123:locations:us-central1:reasoningEngines:1234\"` to find the agent with the specified agent ID. * `name:important` to find agents whose name contains `important` as a word. * `displayName:works*` to find agents whose display name contains words that start with `works`. * `skills.tags:test` to find agents whose skills tags contain `test`. * `planner OR booking` to find agents whose metadata contains the words `planner` or `booking`."
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Optional. The maximum number of search results to return per page. The page size is capped at `100`, even if a larger value is specified. A negative value will result in an `INVALID_ARGUMENT` error. If unspecified or set to `0`, a default value of `20` will be used. The server may return fewer results than requested."
+          },
+          "pageToken": {
+            "type": "string",
+            "description": "Optional. If present, retrieve the next batch of results from the preceding call to this method. `page_token` must be the value of `next_page_token` from the previous response. The values of all other method parameters, must be identical to those in the previous call."
+          }
+        },
+        "description": "Message for searching Agents"
+      },
+      "SearchAgentsResponse": {
+        "type": "object",
+        "properties": {
+          "agents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Agent"
+            },
+            "description": "A list of Agents that match the `search_string`."
+          },
+          "nextPageToken": {
+            "type": "string",
+            "description": "If there are more results than those appearing in this response, then `next_page_token` is included. To get the next set of results, call this method again using the value of `next_page_token` as `page_token`."
+          }
+        },
+        "description": "Message for response to searching Agents"
+      },
+      "ListEndpointsResponse": {
+        "type": "object",
+        "properties": {
+          "endpoints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Endpoint"
+            },
+            "description": "The list of Endpoint resources matching the parent and filter criteria in the request. Each Endpoint resource follows the format: `projects/{project}/locations/{location}/endpoints/{endpoint}`."
+          },
+          "nextPageToken": {
+            "type": "string",
+            "description": "A token identifying a page of results the server should return. Used in page_token."
+          }
+        },
+        "description": "Message for response to listing Endpoints"
+      },
+      "Endpoint": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Identifier. The resource name of the Endpoint. Format: `projects/{project}/locations/{location}/endpoints/{endpoint}`."
+          },
+          "endpointId": {
+            "type": "string",
+            "description": "Output only. A stable, globally unique identifier for Endpoint.",
+            "readOnly": true
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Output only. Display name for the Endpoint.",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Output only. Description of an Endpoint.",
+            "readOnly": true
+          },
+          "interfaces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Interface"
+            },
+            "description": "Required. The connection details for the Endpoint."
+          },
+          "createTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. Create time.",
+            "readOnly": true
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. Update time.",
+            "readOnly": true
+          },
+          "attributes": {
+            "type": "object",
+            "description": "Output only. Attributes of the Endpoint. Valid values: * `agentregistry.googleapis.com/system/RuntimeReference`: {\"uri\": \"//...\"} - the URI of the underlying resource hosting the Endpoint, for example, the GKE Deployment.",
+            "readOnly": true
+          }
+        },
+        "description": "Represents an Endpoint."
+      },
+      "ListMcpServersResponse": {
+        "type": "object",
+        "properties": {
+          "mcpServers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McpServer"
+            },
+            "description": "The list of McpServers."
+          },
+          "nextPageToken": {
+            "type": "string",
+            "description": "A token identifying a page of results the server should return."
+          }
+        },
+        "description": "Message for response to listing McpServers"
+      },
+      "McpServer": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Identifier. The resource name of the MCP Server. Format: `projects/{project}/locations/{location}/mcpServers/{mcp_server}`."
+          },
+          "mcpServerId": {
+            "type": "string",
+            "description": "Output only. A stable, globally unique identifier for MCP Servers.",
+            "readOnly": true
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Output only. The display name of the MCP Server.",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Output only. The description of the MCP Server.",
+            "readOnly": true
+          },
+          "interfaces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Interface"
+            },
+            "description": "Output only. The connection details for the MCP Server.",
+            "readOnly": true
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tool"
+            },
+            "description": "Output only. Tools provided by the MCP Server.",
+            "readOnly": true
+          },
+          "createTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. Create time.",
+            "readOnly": true
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. Update time.",
+            "readOnly": true
+          },
+          "attributes": {
+            "type": "object",
+            "description": "Output only. Attributes of the MCP Server. Valid values: * `agentregistry.googleapis.com/system/RuntimeIdentity`: {\"principal\": \"principal://...\"} - the runtime identity associated with the MCP Server. * `agentregistry.googleapis.com/system/RuntimeReference`: {\"uri\": \"//...\"} - the URI of the underlying resource hosting the MCP Server, for example, the GKE Deployment.",
+            "readOnly": true
+          }
+        },
+        "description": "Represents an MCP (Model Context Protocol) Server."
+      },
+      "Tool": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Output only. Human-readable name of the tool.",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Output only. Description of what the tool does.",
+            "readOnly": true
+          },
+          "annotations": {
+            "$ref": "#/components/schemas/Annotations",
+            "description": "Output only. Annotations associated with the tool.",
+            "readOnly": true
+          }
+        },
+        "description": "Represents a single tool provided by an MCP Server."
+      },
+      "Annotations": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Output only. A human-readable title for the tool.",
+            "readOnly": true
+          },
+          "destructiveHint": {
+            "type": "boolean",
+            "description": "Output only. If true, the tool may perform destructive updates to its environment. If false, the tool performs only additive updates. NOTE: This property is meaningful only when `read_only_hint == false` Default: true",
+            "readOnly": true
+          },
+          "idempotentHint": {
+            "type": "boolean",
+            "description": "Output only. If true, calling the tool repeatedly with the same arguments will have no additional effect on its environment. NOTE: This property is meaningful only when `read_only_hint == false` Default: false",
+            "readOnly": true
+          },
+          "openWorldHint": {
+            "type": "boolean",
+            "description": "Output only. If true, this tool may interact with an \"open world\" of external entities. If false, the tool's domain of interaction is closed. For example, the world of a web search tool is open, whereas that of a memory tool is not. Default: true",
+            "readOnly": true
+          },
+          "readOnlyHint": {
+            "type": "boolean",
+            "description": "Output only. If true, the tool does not modify its environment. Default: false",
+            "readOnly": true
+          }
+        },
+        "description": "Annotations describing the characteristics and behavior of a tool or operation."
+      },
+      "SearchMcpServersRequest": {
+        "type": "object",
+        "properties": {
+          "searchString": {
+            "type": "string",
+            "description": "Optional. Search criteria used to select the MCP Servers to return. If no search criteria is specified then all accessible MCP Servers will be returned. Search expressions can be used to restrict results based upon searchable fields, where the operators can be used along with the suffix wildcard symbol `*`. See [instructions](https://docs.cloud.google.com/agent-registry/search-agents-and-tools) for more details. Allowed operators: `=`, `:`, `NOT`, `AND`, `OR`, and `()`. Searchable fields: | Field | `=` | `:` | `*` | Keyword Search | |--------------------|-----|-----|-----|----------------| | mcpServerId | Yes | Yes | Yes | Included | | name | No | Yes | Yes | Included | | displayName | No | Yes | Yes | Included | Examples: * `mcpServerId=\"urn:mcp:projects-123:projects:123:locations:us-central1:agentregistry:services:service-id\"` to find the MCP Server with the specified MCP Server ID. * `name:important` to find MCP Servers whose name contains `important` as a word. * `displayName:works*` to find MCP Servers whose display name contains words that start with `works`. * `planner OR booking` to find MCP Servers whose metadata contains the words `planner` or `booking`. * `mcpServerId:service-id AND (displayName:planner OR displayName:booking)` to find MCP Servers whose MCP Server ID contains `service-id` and whose display name contains `planner` or `booking`."
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Optional. The maximum number of search results to return per page. The page size is capped at `100`, even if a larger value is specified. A negative value will result in an `INVALID_ARGUMENT` error. If unspecified or set to `0`, a default value of `20` will be used. The server may return fewer results than requested."
+          },
+          "pageToken": {
+            "type": "string",
+            "description": "Optional. If present, retrieve the next batch of results from the preceding call to this method. `page_token` must be the value of `next_page_token` from the previous response. The values of all other method parameters, must be identical to those in the previous call."
+          }
+        },
+        "description": "Message for searching MCP Servers"
+      },
+      "SearchMcpServersResponse": {
+        "type": "object",
+        "properties": {
+          "mcpServers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McpServer"
+            },
+            "description": "A list of McpServers that match the `search_string`."
+          },
+          "nextPageToken": {
+            "type": "string",
+            "description": "If there are more results than those appearing in this response, then `next_page_token` is included. To get the next set of results, call this method again using the value of `next_page_token` as `page_token`."
+          }
+        },
+        "description": "Message for response to searching MCP Servers"
+      },
+      "ListServicesResponse": {
+        "type": "object",
+        "properties": {
+          "services": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Service"
+            },
+            "description": "The list of Service resources matching the parent and filter criteria in the request. Each Service resource follows the format: `projects/{project}/locations/{location}/services/{service}`."
+          },
+          "nextPageToken": {
+            "type": "string",
+            "description": "A token identifying a page of results the server should return. Used in page_token."
+          }
+        },
+        "description": "Message for response to listing Services"
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "agentSpec": {
+            "$ref": "#/components/schemas/AgentSpec",
+            "description": "Optional. The spec of the Agent. When `agent_spec` is set, the type of the service is Agent."
+          },
+          "mcpServerSpec": {
+            "$ref": "#/components/schemas/McpServerSpec",
+            "description": "Optional. The spec of the MCP Server. When `mcp_server_spec` is set, the type of the service is MCP Server."
+          },
+          "endpointSpec": {
+            "$ref": "#/components/schemas/EndpointSpec",
+            "description": "Optional. The spec of the Endpoint. When `endpoint_spec` is set, the type of the service is Endpoint."
+          },
+          "name": {
+            "type": "string",
+            "description": "Identifier. The resource name of the Service. Format: `projects/{project}/locations/{location}/services/{service}`."
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Optional. User-defined display name for the Service. Can have a maximum length of `63` characters."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional. User-defined description of an Service. Can have a maximum length of `2048` characters."
+          },
+          "interfaces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Interface"
+            },
+            "description": "Optional. The connection details for the Service."
+          },
+          "registryResource": {
+            "type": "string",
+            "description": "Output only. The resource name of the resulting Agent, MCP Server, or Endpoint. Format: * `projects/{project}/locations/{location}/mcpServers/{mcp_server}` * `projects/{project}/locations/{location}/agents/{agent}` * `projects/{project}/locations/{location}/endpoints/{endpoint}`",
+            "readOnly": true
+          },
+          "createTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. Create time.",
+            "readOnly": true
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. Update time.",
+            "readOnly": true
+          }
+        },
+        "description": "Represents a user-defined Service."
+      },
+      "AgentSpec": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "TYPE_UNSPECIFIED",
+              "NO_SPEC",
+              "A2A_AGENT_CARD"
+            ],
+            "description": "Required. The type of the agent spec content."
+          },
+          "content": {
+            "type": "object",
+            "description": "Optional. The content of the Agent spec in the JSON format. This payload is validated against the schema for the specified type. The content size is limited to `10KB`."
+          }
+        },
+        "description": "The spec of the agent."
+      },
+      "McpServerSpec": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "TYPE_UNSPECIFIED",
+              "NO_SPEC",
+              "TOOL_SPEC"
+            ],
+            "description": "Required. The type of the MCP Server spec content."
+          },
+          "content": {
+            "type": "object",
+            "description": "Optional. The content of the MCP Server spec. This payload is validated against the schema for the specified type. The content size is limited to `10KB`."
+          }
+        },
+        "description": "The spec of the MCP Server."
+      },
+      "EndpointSpec": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "TYPE_UNSPECIFIED",
+              "NO_SPEC"
+            ],
+            "description": "Required. The type of the endpoint spec content."
+          },
+          "content": {
+            "type": "object",
+            "description": "Optional. The content of the endpoint spec. Reserved for future use."
+          }
+        },
+        "description": "The spec of the endpoint."
+      },
+      "ListBindingsResponse": {
+        "type": "object",
+        "properties": {
+          "bindings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Binding"
+            },
+            "description": "The list of Binding resources matching the parent and filter criteria in the request. Each Binding resource follows the format: `projects/{project}/locations/{location}/bindings/{binding}`."
+          },
+          "nextPageToken": {
+            "type": "string",
+            "description": "A token identifying a page of results the server should return. Used in page_token."
+          }
+        },
+        "description": "Message for response to listing Bindings"
+      },
+      "Binding": {
+        "type": "object",
+        "properties": {
+          "authProviderBinding": {
+            "$ref": "#/components/schemas/AuthProviderBinding",
+            "description": "The binding for AuthProvider."
+          },
+          "name": {
+            "type": "string",
+            "description": "Required. Identifier. The resource name of the Binding. Format: `projects/{project}/locations/{location}/bindings/{binding}`."
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Optional. User-defined display name for the Binding. Can have a maximum length of `63` characters."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional. User-defined description of a Binding. Can have a maximum length of `2048` characters."
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source",
+            "description": "Required. The target Agent of the Binding."
+          },
+          "target": {
+            "$ref": "#/components/schemas/Target",
+            "description": "Required. The target Agent Registry Resource of the Binding."
+          },
+          "createTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. Timestamp when this binding was created.",
+            "readOnly": true
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. Timestamp when this binding was last updated.",
+            "readOnly": true
+          }
+        },
+        "description": "Represents a user-defined Binding."
+      },
+      "AuthProviderBinding": {
+        "type": "object",
+        "properties": {
+          "authProvider": {
+            "type": "string",
+            "description": "Required. The resource name of the target AuthProvider. Format: * `projects/{project}/locations/{location}/authProviders/{auth_provider}`"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional. The list of OAuth2 scopes of the AuthProvider."
+          },
+          "continueUri": {
+            "type": "string",
+            "description": "Optional. The continue URI of the AuthProvider. The URI is used to reauthenticate the user and finalize the managed OAuth flow."
+          }
+        },
+        "description": "The AuthProvider of the Binding."
+      },
+      "Source": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The identifier of the source Agent. Format: * `urn:agent:{publisher}:{namespace}:{name}`"
+          }
+        },
+        "description": "The source of the Binding."
+      },
+      "Target": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The identifier of the target Agent, MCP Server, or Endpoint. Format: * `urn:agent:{publisher}:{namespace}:{name}` * `urn:mcp:{publisher}:{namespace}:{name}` * `urn:endpoint:{publisher}:{namespace}:{name}`"
+          }
+        },
+        "description": "The target of the Binding."
+      },
+      "FetchAvailableBindingsResponse": {
+        "type": "object",
+        "properties": {
+          "bindings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Binding"
+            },
+            "description": "The list of Bindings."
+          },
+          "nextPageToken": {
+            "type": "string",
+            "description": "A token identifying a page of results the server should return."
+          }
+        },
+        "description": "Message for response to fetching available Bindings."
+      },
+      "ListLocationsResponse": {
+        "type": "object",
+        "properties": {
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Location"
+            },
+            "description": "A list of locations that matches the specified filter in the request."
+          },
+          "nextPageToken": {
+            "type": "string",
+            "description": "The standard List next-page token."
+          }
+        },
+        "description": "The response message for Locations.ListLocations."
+      },
+      "Location": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Resource name for the location, which may vary between implementations. For example: `\"projects/example-project/locations/us-east1\"`"
+          },
+          "locationId": {
+            "type": "string",
+            "description": "The canonical id for this location. For example: `\"us-east1\"`."
+          },
+          "displayName": {
+            "type": "string",
+            "description": "The friendly name for this location, typically a nearby city name. For example, \"Tokyo\"."
+          },
+          "labels": {
+            "type": "object",
+            "description": "Cross-service attributes for the location. For example {\"cloud.googleapis.com/region\": \"us-east1\"}"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Service-specific metadata. For example the available capacity at the given location."
+          }
+        },
+        "description": "A resource that represents a Google Cloud location."
+      },
+      "OperationMetadata": {
+        "type": "object",
+        "properties": {
+          "createTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. The time the operation was created.",
+            "readOnly": true
+          },
+          "endTime": {
+            "type": "string",
+            "format": "google-datetime",
+            "description": "Output only. The time the operation finished running.",
+            "readOnly": true
+          },
+          "target": {
+            "type": "string",
+            "description": "Output only. Server-defined resource path for the target of the operation.",
+            "readOnly": true
+          },
+          "verb": {
+            "type": "string",
+            "description": "Output only. Name of the verb executed by the operation.",
+            "readOnly": true
+          },
+          "statusMessage": {
+            "type": "string",
+            "description": "Output only. Human-readable status of the operation, if any.",
+            "readOnly": true
+          },
+          "requestedCancellation": {
+            "type": "boolean",
+            "description": "Output only. Identifies whether the user has requested cancellation of the operation. Operations that have been cancelled successfully have google.longrunning.Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
+            "readOnly": true
+          },
+          "apiVersion": {
+            "type": "string",
+            "description": "Output only. API version used to start the operation.",
+            "readOnly": true
+          }
+        },
+        "description": "Represents the metadata of the long-running operation."
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "description": "OAuth 2.0 authentication",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+            "tokenUrl": "https://oauth2.googleapis.com/token",
+            "scopes": {
+              "https://www.googleapis.com/auth/agentregistry.read-only": "See your Google Cloud Agent Registry data and the email address of your Google Account",
+              "https://www.googleapis.com/auth/agentregistry.read-write": "See, edit, configure, and delete your Google Cloud Agent Registry data and see the email address for your Google Account",
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account.",
+              "https://www.googleapis.com/auth/cloud-platform.read-only": "View your data across Google Cloud services and see the email address of your Google Account"
+            }
+          }
+        }
+      },
+      "apiKey": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "key",
+        "description": "API key for accessing this API"
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "API Documentation",
+    "url": "https://docs.cloud.google.com/agent-registry/overview"
+  },
+  "security": [
+    {
+      "oauth2": [
+        "https://www.googleapis.com/auth/agentregistry.read-only",
+        "https://www.googleapis.com/auth/agentregistry.read-write",
+        "https://www.googleapis.com/auth/cloud-platform",
+        "https://www.googleapis.com/auth/cloud-platform.read-only"
+      ]
+    },
+    {
+      "apiKey": []
+    }
+  ]
+}
