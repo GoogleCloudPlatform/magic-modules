@@ -70,9 +70,10 @@ func TestAccProject_importBlockWithResourceIdentity(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:    "google_project.acceptance",
-				ImportState:     true,
-				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				ResourceName:            "google_project.acceptance",
+				ImportState:             true,
+				ImportStateKind:         resource.ImportBlockWithResourceIdentity,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "terraform_labels"},
 			},
 		},
 	})
