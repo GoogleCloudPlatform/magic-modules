@@ -83,6 +83,8 @@ samples:
           service_id: bundled-service
           bucket_name: tf-test-gae-bkt-bundled
           sa_email: gae-sa
+        ignore_read_extra:
+          - delete_service_on_destroy
 virtual_fields:
   - name: noop_on_destroy
     description: |
@@ -458,11 +460,16 @@ properties:
         required: true
   - name: 'appEngineBundledServices'
     type: Array
+    # Developer Note: This field is write-only because the App Engine GET Admin API
+    # does not return it in the response (we use ignore_read: true to prevent state drift to null).
+    # It is marked is_set: true to represent the list as a set in Terraform so configuration
+    # ordering differences do not trigger spurious plans.
     description: |
-     A list of legacy bundled services to enable for this version on an App Engine second-generation runtime.
-     Cannot specify both `app_engine_apis` and 'app_engine_bundled_services` together.
+      A list of legacy bundled services to enable for this version on an App Engine second-generation runtime.
+      Cannot specify both `app_engine_apis` and `app_engine_bundled_services` together.
     is_set: true
     immutable: true
+    ignore_read: true
     item_type:
       type: Enum
       enum_values:
