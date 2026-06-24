@@ -1,0 +1,16 @@
+resource "google_agent_registry_mcp_server" "{{$.PrimaryResourceId}}" {
+  provider      = google-beta
+  mcp_server_id = "{{index $.Vars "mcp_server_id"}}"
+  location      = "global"
+  display_name  = "My MCP Server"
+  description   = "An MCP Server registered in Agent Registry"
+
+  interfaces {
+    url              = "https://mymcp.com"
+    protocol_binding = "JSONRPC"
+  }
+
+  mcp_server_spec {
+    type    = "NO_SPEC"
+  }
+}
