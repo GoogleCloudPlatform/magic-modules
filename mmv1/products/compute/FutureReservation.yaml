@@ -80,6 +80,7 @@ examples:
     skip_vcr: true
   - name: 'shared_future_reservation'
     primary_resource_id: 'gce_future_reservation'
+    external_providers: ["time"]
     vars:
       future_reservation_name: 'gce-shared-future-reservation'
       start_time: '2025-08-01T00:00:00Z'
@@ -160,6 +161,8 @@ properties:
     type: NestedObject
     description: |
       Settings for sharing the future reservation
+    ignore_read: true
+    default_from_api: true
     properties:
       - name: 'shareType'
         type: Enum
