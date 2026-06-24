@@ -2063,7 +2063,7 @@ exported:
 * `enterprise_config.0.cluster_tier` - The effective tier of the cluster.
 
 {{- if ne $.TargetVersionName "ga" }}
-* `emulated_version` - (Beta) The current emulated version of the cluster.
+* `emulated_version` - ([Beta](../guides/provider_versions.html.markdown)) The current emulated version of the cluster.
 {{- end }}
 
 ## Timeouts
