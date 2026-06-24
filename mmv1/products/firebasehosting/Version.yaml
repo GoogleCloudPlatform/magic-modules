@@ -12,222 +12,225 @@
 # limitations under the License.
 
 ---
-name: 'Version'
+name: Version
 description: |
   A `Version` is a configuration which determine how a site is displayed. Static files are not supported at the moment.
-min_version: 'beta'
 references:
   guides:
-    'Official Documentation': 'https://firebase.google.com/docs/hosting'
-  api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.versions'
+    Official Documentation: https://firebase.google.com/docs/hosting
+  api: https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.versions
 docs:
-base_url: 'sites/{{site_id}}/versions'
-self_link: 'sites/{{site_id}}/versions/{{version_id}}'
-create_url: 'sites/{{site_id}}/versions'
-exclude_delete: true
+base_url: sites/{{site_id}}/versions
+min_version: beta
 # not updatable
 immutable: true
+self_link: sites/{{site_id}}/versions/{{version_id}}
+create_url: sites/{{site_id}}/versions
 import_format:
-  - 'sites/{{site_id}}/versions/{{version_id}}'
+  - sites/{{site_id}}/versions/{{version_id}}
   - '{{site_id}}/{{version_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  post_create: 'templates/terraform/post_create/firebasehosting_version_immediate_finalize.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'firebasehosting_version_redirect'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_version_headers'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_version_headers_regex'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_version_path'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_version_cloud_run'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-      cloud_run_service_id: 'cloud-run-service-via-hosting'
-      deletion_protection: 'true'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'firebasehosting_version_cloud_functions'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-      cloud_function_id: 'cloud-function-via-hosting'
-      zip_path: 'function-source.zip'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/function-source.zip"'
+exclude_delete: true
+custom_code:
+  post_create: templates/terraform/post_create/firebasehosting_version_immediate_finalize.tmpl
+samples:
+  - name: firebasehosting_version_redirect
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: firebasehosting_version_redirect
+        min_version: beta
+        resource_id_vars:
+          site_id: site-id
+        test_env_vars:
+          project_id: PROJECT_NAME
+  - name: firebasehosting_version_headers
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: firebasehosting_version_headers
+        min_version: beta
+        resource_id_vars:
+          site_id: site-id
+        test_env_vars:
+          project_id: PROJECT_NAME
+  - name: firebasehosting_version_headers_regex
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: firebasehosting_version_headers_regex
+        min_version: beta
+        resource_id_vars:
+          site_id: site-id
+        test_env_vars:
+          project_id: PROJECT_NAME
+  - name: firebasehosting_version_path
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: firebasehosting_version_path
+        min_version: beta
+        resource_id_vars:
+          site_id: site-id
+        test_env_vars:
+          project_id: PROJECT_NAME
+  - name: firebasehosting_version_cloud_run
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: firebasehosting_version_cloud_run
+        min_version: beta
+        resource_id_vars:
+          site_id: site-id
+          cloud_run_service_id: cloud-run-service-via-hosting
+          deletion_protection: "true"
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - deletion_protection
+  - name: firebasehosting_version_cloud_functions
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: firebasehosting_version_cloud_functions
+        min_version: beta
+        resource_id_vars:
+          site_id: site-id
+          cloud_function_id: cloud-function-via-hosting
+          zip_path: function-source.zip
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          zip_path: '"./test-fixtures/function-source.zip"'
 parameters:
-  - name: 'site_id'
+  - name: site_id
     type: String
     description: |
       Required. The ID of the site in which to create this Version.
-    min_version: 'beta'
+    min_version: beta
     url_param_only: true
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The fully-qualified resource name for the version, in the format:
       sites/SITE_ID/versions/VERSION_ID
-    min_version: 'beta'
+    min_version: beta
     output: true
-  - name: 'version_id'
-    api_name: 'name'
+  - name: version_id
+    api_name: name
     type: String
     description: The ID for the version as in sites/SITE_ID/versions/VERSION_ID
-    min_version: 'beta'
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    min_version: beta
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
     output: true
-  - name: 'config'
+  - name: config
     type: NestedObject
-    description:
-      The configuration for the behavior of the site. This configuration exists
-      in the `firebase.json` file.
-    min_version: 'beta'
+    description: The configuration for the behavior of the site. This configuration exists in the `firebase.json` file.
+    min_version: beta
     properties:
-      - name: 'rewrites'
+      - name: rewrites
         type: Array
         description: |
           An array of objects (called rewrite rules), where each rule specifies a URL pattern that, if matched to the
           request URL path, triggers Hosting to respond as if the service were given the specified destination URL.
-        min_version: 'beta'
+        min_version: beta
         item_type:
           description: |
             A Rewrite specifies a URL pattern that, if matched to the request URL path, triggers Hosting to respond as
             if the service were given the specified destination URL.
           type: NestedObject
           properties:
-            - name: 'glob'
+            - name: glob
               type: String
-              description:
-                The user-supplied glob to match against the request URL path.
-              min_version: 'beta'
+              description: The user-supplied glob to match against the request URL path.
+              min_version: beta
               # exactly_one_of:
               #   - 'glob'
               #   - 'regex'
-            - name: 'regex'
+            - name: regex
               type: String
-              description:
-                The user-supplied RE2 regular expression to match against the
-                request URL path.
-              min_version: 'beta'
+              description: The user-supplied RE2 regular expression to match against the request URL path.
+              min_version: beta
               # exactly_one_of:
               #   - 'glob'
               #   - 'regex'
-            - name: 'path'
+            - name: path
               type: String
-              description:
-                The URL path to rewrite the request to.
-              min_version: 'beta'
+              description: The URL path to rewrite the request to.
+              min_version: beta
               # exactly_one_of:
               #   - 'path'
               #   - 'function'
               #   - 'run'
-            - name: 'function'
+            - name: function
               type: String
-              description:
-                The function to proxy requests to. Must match the exported
-                function name exactly.
-              min_version: 'beta'
+              description: The function to proxy requests to. Must match the exported function name exactly.
+              min_version: beta
               # exactly_one_of:
               #   - 'path'
               #   - 'function'
               #   - 'run'
-            - name: 'run'
+            - name: run
               type: NestedObject
               description: The request will be forwarded to Cloud Run.
-              min_version: 'beta'
+              min_version: beta
               # exactly_one_of:
               #   - 'path'
               #   - 'function'
               #   - 'run'
               properties:
-                - name: 'serviceId'
+                - name: serviceId
                   type: String
                   description: User-defined ID of the Cloud Run service.
-                  min_version: 'beta'
+                  min_version: beta
                   required: true
-                - name: 'region'
+                - name: region
                   type: String
-                  description:
-                    Optional. User-provided region where the Cloud Run service
-                    is hosted. Defaults to `us-central1` if not supplied.
-                  min_version: 'beta'
-      - name: 'redirects'
+                  description: Optional. User-provided region where the Cloud Run service is hosted. Defaults to `us-central1` if not supplied.
+                  min_version: beta
+      - name: redirects
         type: Array
         description: |
           An array of objects (called redirect rules), where each rule specifies a URL pattern that, if matched to the request URL path,
           triggers Hosting to respond with a redirect to the specified destination path.
-        min_version: 'beta'
+        min_version: beta
         item_type:
           description: |
             A Redirect specifies a URL pattern that, if matched to the request URL path, triggers Hosting to
             respond with a redirect to the specified destination path.
           type: NestedObject
           properties:
-            - name: 'glob'
+            - name: glob
               type: String
-              description:
-                The user-supplied glob to match against the request URL path.
-              min_version: 'beta'
+              description: The user-supplied glob to match against the request URL path.
+              min_version: beta
               # exactly_one_of:
               #   - 'glob'
               #   - 'regex'
-            - name: 'regex'
+            - name: regex
               type: String
-              description:
-                The user-supplied RE2 regular expression to match against the
-                request URL path.
-              min_version: 'beta'
+              description: The user-supplied RE2 regular expression to match against the request URL path.
+              min_version: beta
               # exactly_one_of:
               #   - 'glob'
               #   - 'regex'
-            - name: 'statusCode'
+            - name: statusCode
               type: Integer
-              description:
-                The status HTTP code to return in the response. It must be a
-                valid 3xx status code.
-              min_version: 'beta'
+              description: The status HTTP code to return in the response. It must be a valid 3xx status code.
+              min_version: beta
               required: true
-            - name: 'location'
+            - name: location
               type: String
               description: |
                 The value to put in the HTTP location header of the response.
@@ -241,35 +244,32 @@ properties:
                   location = "https://example.com/foo/:capture"
                 }
                 ```
-              min_version: 'beta'
+              min_version: beta
               required: true
-      - name: 'headers'
+      - name: headers
         type: Array
         description: |
-         An array of objects, where each object specifies a URL pattern that, if matched to the request URL path,
-         triggers Hosting to apply the specified custom response headers.
+          An array of objects, where each object specifies a URL pattern that, if matched to the request URL path,
+          triggers Hosting to apply the specified custom response headers.
         item_type:
           description: |
             A Header specifies a URL pattern that, if matched to the request URL path, triggers Hosting
             to apply the specified custom response headers.
           type: NestedObject
           properties:
-            - name: 'glob'
+            - name: glob
               type: String
-              description:
-                The user-supplied glob to match against the request URL path.
+              description: The user-supplied glob to match against the request URL path.
             # exactly_one_of:
             #   - 'glob'
             #   - 'regex'
-            - name: 'regex'
+            - name: regex
               type: String
-              description:
-                The user-supplied RE2 regular expression to match against the
-                request URL path.
+              description: The user-supplied RE2 regular expression to match against the request URL path.
             # exactly_one_of:
             #   - 'glob'
             #   - 'regex'
-            - name: 'headers'
+            - name: headers
               type: KeyValuePairs
               description: |
                 The additional headers to add to the response. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.

@@ -42,6 +42,8 @@ examples:
     primary_resource_id: 'policy'
     vars:
       policy_name: 'rnf-policy'
+iam_policy:
+  parent_resource_attribute: 'name'
 parameters:
   - name: 'region'
     type: String

@@ -14,11 +14,15 @@
 ---
 name: TensorboardExperiment
 description: A TensorboardExperiment is a group of TensorboardRuns that are logically grouped together.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/vertex-ai/docs
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.tensorboards.experiments
 base_url: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments
 self_link: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{tensorboard_experiment_id}}
 create_url: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments?tensorboardExperimentId={{tensorboard_experiment_id}}
-update_verb: PATCH
 update_mask: true
+update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{tensorboard_experiment_id}}
 async:
@@ -29,22 +33,18 @@ async:
   result:
     resource_inside_response: true
 autogen_status: VGVuc29yYm9hcmRFeHBlcmltZW50QXV0b2dlblYyQWdlbnQ=
-references:
-  guides:
-    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.tensorboards.experiments'
 samples:
-  - name: "vertex_ai_tensorboard_experiment"
-    primary_resource_id: "tensorboard_experiment"
+  - name: vertex_ai_tensorboard_experiment
+    primary_resource_id: tensorboard_experiment
     steps:
-      - name: "vertex_ai_tensorboard_experiment_basic"
+      - name: vertex_ai_tensorboard_experiment_basic
         resource_id_vars:
-          tensorboardExperimentId: "experiment"
-          tensorboard: "tensorboard"
-      - name: "vertex_ai_tensorboard_experiment_update"
+          tensorboardExperimentId: experiment
+          tensorboard: tensorboard
+      - name: vertex_ai_tensorboard_experiment_update
         resource_id_vars:
-          tensorboardExperimentId: "experiment"
-          tensorboard: "tensorboard"
+          tensorboardExperimentId: experiment
+          tensorboard: tensorboard
 parameters:
   - name: location
     type: String

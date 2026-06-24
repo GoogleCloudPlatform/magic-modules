@@ -51,6 +51,8 @@ examples:
       policy_name: 'my-policy'
     test_env_vars:
       org_id: 'ORG_ID'
+iam_policy:
+  parent_resource_attribute: 'name'
 parameters:
 properties:
   - name: 'creationTimestamp'
