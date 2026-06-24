@@ -1522,3 +1522,147 @@ resource "google_ces_toolset" "primary" {
 }
 `, context)
 }
+
+func TestAccCESToolset_connectorToolset_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESToolsetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESToolset_connectorToolset_update_step1(context),
+			},
+			{
+				ResourceName:            "google_ces_toolset.ces_toolset_update_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+			{
+				Config: testAccCESToolset_connectorToolset_update_step2(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_toolset.ces_toolset_update_test", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_toolset.ces_toolset_update_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+			{
+				Config: testAccCESToolset_connectorToolset_update_step3(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_toolset.ces_toolset_update_test", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_toolset.ces_toolset_update_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+		},
+	})
+}
+
+func testAccCESToolset_connectorToolset_update_base(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "test_project" {}
+
+resource "google_service_account" "connector_sa" {
+  account_id   = "tf-test-sa-%{random_suffix}"
+  display_name = "Service Account for Connector"
+}
+
+resource "google_integration_connectors_connection" "connector_toolset_connection" {
+  name     = "tf-test-conn-%{random_suffix}"
+  location = "us-central1"
+  connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/gcp/connectors/pubsub/versions/1"
+  description       = "Pub/Sub connector"
+  service_account   = google_service_account.connector_sa.email
+
+  config_variable {
+      key = "project_id"
+      string_value = data.google_project.test_project.project_id
+  }
+  config_variable {
+      key = "topic_id"
+      string_value = "test-topic"
+  }
+}
+
+resource "google_ces_app" "ces_app_for_toolset" {
+  app_id = "tf-test-app-id%{random_suffix}"
+  location = "us"
+  description = "App used as parent for CES Toolset example"
+  display_name = "tf-test-my-app%{random_suffix}"
+
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+`, context)
+}
+
+func testAccCESToolset_connectorToolset_update_step1(context map[string]interface{}) string {
+	return testAccCESToolset_connectorToolset_update_base(context) + acctest.Nprintf(`
+resource "google_ces_toolset" "ces_toolset_update_test" {
+  toolset_id = "toolset1%{random_suffix}"
+  location = "us"
+  app      = google_ces_app.ces_app_for_toolset.app_id
+  display_name = "Toolset with Connector"
+
+  connector_toolset {
+    connection = google_integration_connectors_connection.connector_toolset_connection.id
+    connector_actions {
+      connection_action_id = "publishMessage"
+    }
+  }
+}
+`, context)
+}
+
+func testAccCESToolset_connectorToolset_update_step2(context map[string]interface{}) string {
+	return testAccCESToolset_connectorToolset_update_base(context) + acctest.Nprintf(`
+resource "google_ces_toolset" "ces_toolset_update_test" {
+  toolset_id = "toolset1%{random_suffix}"
+  location = "us"
+  app      = google_ces_app.ces_app_for_toolset.app_id
+  display_name = "Toolset with OpenAPI"
+
+  open_api_toolset {
+    open_api_schema = <<-EOT
+      openapi: 3.0.0
+      info:
+        title: My Sample API
+        version: 1.0.0
+        description: A simple API example
+      servers:
+        - url: https://api.example.com/v1
+      paths: {}
+    EOT
+  }
+}
+`, context)
+}
+
+func testAccCESToolset_connectorToolset_update_step3(context map[string]interface{}) string {
+	return testAccCESToolset_connectorToolset_update_step1(context)
+}
