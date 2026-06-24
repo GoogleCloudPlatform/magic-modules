@@ -40,7 +40,7 @@ func TestAccBigqueryDatasetIamMemberListResource_queryIdentity(t *testing.T) {
 			},
 			{
 				Query:  true,
-				Config: testAccBigqueryDatasetIamMemberListQueryWithFilters(project, dataset, role, member),
+				Config: testAccBigqueryDatasetIamMemberListQueryWithFilters(dataset, role, member),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("google_bigquery_dataset_iam_member.test", 1),
 					querycheck.ExpectIdentity("google_bigquery_dataset_iam_member.test", map[string]knownvalue.Check{
@@ -56,18 +56,17 @@ func TestAccBigqueryDatasetIamMemberListResource_queryIdentity(t *testing.T) {
 	})
 }
 
-func testAccBigqueryDatasetIamMemberListQueryWithFilters(project, datasetID, role, member string) string {
+func testAccBigqueryDatasetIamMemberListQueryWithFilters(datasetID, role, member string) string {
 	return fmt.Sprintf(`
 list "google_bigquery_dataset_iam_member" "test" {
   provider = google
   include_resource = true
 
   config {
-    project    = %q
     dataset_id = %q
     role       = %q
     member     = %q
   }
 }
-`, project, datasetID, role, member)
+`, datasetID, role, member)
 }
