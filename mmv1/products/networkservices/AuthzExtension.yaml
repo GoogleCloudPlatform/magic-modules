@@ -148,6 +148,40 @@ properties:
       The metadata provided here is included as part of the metadata_context (of type google.protobuf.Struct) in the ProcessingRequest message sent to the extension server. The metadata is available under the namespace com.google.authz_extension.<resourceName>. The following variables are supported in the metadata Struct:
 
       {forwarding_rule_id} - substituted with the forwarding rule's fully qualified resource name.
+  - name: 'forwardAttributes'
+    type: Array
+    description: |
+      List of request and connection attributes to forward to the extension. You can (only) specify this
+      property for plugin and callout extensions.
+      Further information can be found at https://docs.cloud.google.com/service-extensions/docs/attributes.
+    item_type:
+      type: Enum
+      description: Request or connection attribute to forward that are applicable to authorization extensions
+      enum_values:
+        - 'connection.client_cert_chain'
+        - 'connection.client_cert_chain_verified'
+        - 'connection.client_cert_dnsname_sans'
+        - 'connection.client_cert_error'
+        - 'connection.client_cert_issuer_dn'
+        - 'connection.client_cert_leaf'
+        - 'connection.client_cert_present'
+        - 'connection.client_cert_serial_number'
+        - 'connection.client_cert_spiffe_id'
+        - 'connection.client_cert_subject_dn'
+        - 'connection.client_cert_uri_sans'
+        - 'connection.client_cert_valid_not_after'
+        - 'connection.client_cert_valid_not_before'
+        - 'connection.sha256_peer_certificate_digest'
+        - 'connection.sni'
+        - 'request.backend_service_name'
+        - 'request.backend_service_project_number'
+        - 'request.host'
+        - 'request.mcp_method'
+        - 'request.mcp_param'
+        - 'request.method'
+        - 'request.path'
+        - 'request.query'
+        - 'request.scheme'
   - name: 'forwardHeaders'
     type: Array
     description: |

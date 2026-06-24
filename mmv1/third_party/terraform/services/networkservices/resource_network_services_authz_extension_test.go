@@ -161,6 +161,7 @@ resource "google_network_services_authz_extension" "default" {
   service               = google_compute_region_backend_service.default.self_link
   timeout               = "0.1s"
   fail_open             = false
+  forward_attributes    = ["connection.client_cert_chain"]
   forward_headers       = ["Authorization"]
 }
 `, context)
@@ -280,6 +281,7 @@ resource "google_network_services_authz_extension" "default" {
   service               = google_compute_region_backend_service.updated.self_link
   timeout               = "0.1s"
   fail_open             = false
+  forward_attributes    = ["connection.client_cert_chain", "connection.sni"]
   forward_headers       = ["Authorization"]
 
   metadata = {
