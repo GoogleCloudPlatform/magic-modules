@@ -157,7 +157,6 @@ resource "google_compute_region_network_firewall_policy_with_rules" "region-netw
     match {
       layer4_config {
         ip_protocol = "tcp"
-        ports       = [8080, 7070]
       }
       src_ip_ranges = ["11.100.0.1/32"]
     }
