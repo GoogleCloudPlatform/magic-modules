@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
@@ -259,7 +260,7 @@ func clearCryptoKeyVersions(cryptoKeyId *KmsCryptoKeyId, userAgent string, confi
 	return nil
 }
 
-func deleteCryptoKeyVersions(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schema.ResourceData, userAgent string, config *transport_tpg.Config) error {
+func destroyCryptoKeyVersion(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schema.ResourceData, userAgent string, config *transport_tpg.Config) error {
 	versionsClient := NewClient(config, userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
 	request := &cloudkms.DestroyCryptoKeyVersionRequest{}
 	destroyCall := versionsClient.Destroy(cryptoKeyVersionId.Name, request)
@@ -269,6 +270,90 @@ func deleteCryptoKeyVersions(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schem
 	_, err := destroyCall.Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ID %s", cryptoKeyVersionId.Name))
+	}
+
+	return nil
+}
+
+func deleteCryptoKeyVersion(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schema.ResourceData, userAgent string, config *transport_tpg.Config) error {
+	// GET the resource to check its state before attempting to delete.
+	versionsClient := NewClient(config, userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
+	getCkvCall := versionsClient.Get(cryptoKeyVersionId.Name)
+	if config.UserProjectOverride {
+		getCkvCall.Header().Set("X-Goog-User-Project", cryptoKeyVersionId.CryptoKeyId.KeyRingId.Project)
+	}
+	ckvResponse, err := getCkvCall.Do()
+	if err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("CryptoKeyVersion %q", d.Id()))
+	}
+
+	// Check if the resource is in a state that allows for permanent deletion.
+	switch ckvResponse.State {
+	case "DESTROYED", "GENERATION_FAILED", "IMPORT_FAILED":
+		// Proceed with the "DELETE" (hard-delete) workflow
+		deleteUrl := transport_tpg.BaseUrl(registry.GetProduct("kms"), config) + cryptoKeyVersionId.Name
+
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "DELETE",
+			Project:   cryptoKeyVersionId.CryptoKeyId.KeyRingId.Project,
+			RawURL:    deleteUrl,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+				return nil
+			}
+			return fmt.Errorf("Error deleting CryptoKeyVersion: %s", err)
+		}
+		return nil
+	case "DESTROY_SCHEDULED":
+		return fmt.Errorf("CryptoKeyVersion %q is scheduled for destruction. Please wait for the destruction period to complete before removing the resource from your configuration.", d.Id())
+	default:
+		return fmt.Errorf(
+			"CryptoKeyVersion %q cannot be deleted directly because it is in state %q. "+
+				"Please follow the two-step deletion process: first, set the 'state' "+
+				"field of the resource to 'DESTROY_SCHEDULED' and wait for the scheduled "+
+				"destruction period to complete before removing the resource from your configuration.",
+			d.Id(), ckvResponse.State)
+	}
+}
+
+func checkCryptoKeyVersionsEmpty(cryptoKeyId *KmsCryptoKeyId, userAgent string, config *transport_tpg.Config) error {
+	versionsClient := NewClient(config, userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
+	listCall := versionsClient.List(cryptoKeyId.CryptoKeyId()).PageSize(1)
+	if config.UserProjectOverride {
+		listCall.Header().Set("X-Goog-User-Project", cryptoKeyId.KeyRingId.Project)
+	}
+	versionsResponse, err := listCall.Do()
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			return nil
+		}
+		return err
+	}
+
+	if len(versionsResponse.CryptoKeyVersions) > 0 || versionsResponse.NextPageToken != "" {
+		return fmt.Errorf("CryptoKey cannot be deleted because it still contains CryptoKeyVersions. All versions must be permanently deleted first.")
+	}
+	return nil
+}
+
+func deleteCryptoKey(cryptoKeyId *KmsCryptoKeyId, d *schema.ResourceData, userAgent string, config *transport_tpg.Config) error {
+	deleteUrl := transport_tpg.BaseUrl(registry.GetProduct("kms"), config) + cryptoKeyId.CryptoKeyId()
+
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   cryptoKeyId.KeyRingId.Project,
+		RawURL:    deleteUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			return nil
+		}
+		return fmt.Errorf("Error deleting CryptoKey: %s", err)
 	}
 
 	return nil

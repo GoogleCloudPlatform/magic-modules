@@ -12,6 +12,37 @@ if d.HasChange("external_protection_level_options") {
 		newUpdateMask = append(newUpdateMask, "externalProtectionLevelOptions.ekmConnectionKeyPath")
 	}
 }
+
+// Intercept state change to DESTROY_SCHEDULED or handle invalid restore
+if d.HasChange("state") {
+	oldState, newState := d.GetChange("state")
+	oldStateStr, ok1 := oldState.(string)
+	newStateStr, ok2 := newState.(string)
+	
+	if ok1 && ok2 {
+		if newStateStr == "DESTROY_SCHEDULED" {
+			if len(newUpdateMask) > 1 {
+				return fmt.Errorf("Cannot combine state change to DESTROY_SCHEDULED with updates to other fields: %v", newUpdateMask)
+			}
+			
+			ckvId, err := parseKmsCryptoKeyVersionId(d.Id(), config)
+			if err != nil {
+				return err
+			}
+			if err := destroyCryptoKeyVersion(ckvId, d, userAgent, config); err != nil {
+				return err
+			}
+			
+			// Return Read to update state after destroy (Fix state refresh)
+			return resourceKMSCryptoKeyVersionRead(d, meta)
+		}
+		
+		if oldStateStr == "DESTROY_SCHEDULED" && (newStateStr == "ENABLED" || newStateStr == "DISABLED") {
+			return fmt.Errorf("Restoring a CryptoKeyVersion from DESTROY_SCHEDULED via state change is not supported in this version. Please use the gcloud CLI or Cloud Console to restore.")
+		}
+	}
+}
+
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
