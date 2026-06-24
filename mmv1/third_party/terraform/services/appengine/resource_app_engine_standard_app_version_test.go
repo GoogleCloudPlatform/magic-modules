@@ -86,7 +86,7 @@ resource "google_app_engine_standard_app_version" "foo" {
   project    = google_project_service.project.project
   version_id = "v1"
   service    = "default"
-  runtime    = "python38"
+  runtime    = "python310"
 
   entrypoint {
     shell = "gunicorn -b :$PORT main:app"
@@ -203,7 +203,7 @@ resource "google_app_engine_standard_app_version" "foo" {
   project    = google_project_service.project.project
   version_id = "v1"
   service    = "default"
-  runtime    = "python38"
+  runtime    = "python310"
 
   vpc_access_connector {
     name           = "${google_vpc_access_connector.bar.id}"
@@ -296,7 +296,7 @@ resource "google_app_engine_standard_app_version" "foo" {
   project    = google_project_service.project.project
   version_id = "v1"
   service    = "default"
-  runtime    = "python38"
+  runtime    = "python310"
 
   entrypoint {
     shell = "gunicorn -b :$PORT main:app"
