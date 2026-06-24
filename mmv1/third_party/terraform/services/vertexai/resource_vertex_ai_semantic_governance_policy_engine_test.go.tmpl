@@ -82,10 +82,18 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 }
 
 func testAccVertexAISemanticGovernancePolicyEngine_basic(context map[string]interface{}) string {
+	// NOTE: deliberately no `provider = google-beta` here. This test runs in
+	// the beta provider binary, where acctest.ProtoV5ProviderFactories
+	// registers the muxed beta provider under the default name "google".
+	// Adding `provider = google-beta` would reference a provider name that is
+	// not in the in-process factory map, forcing Terraform to install
+	// hashicorp/google-beta from the registry and failing CI with
+	// "Inconsistent dependency lock file ... google-beta ... no version is
+	// selected". The example .tf (docs) keeps `provider = google-beta` because
+	// that is the correct user-facing pattern for a beta-only resource.
 	return acctest.Nprintf(`
 resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
-  region   = "us-central1"
-  provider = google-beta
+  region = "us-central1"
 }
 `, context)
 }
