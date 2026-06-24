@@ -361,6 +361,9 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 			Body:      obj,
 			Timeout:   d.Timeout(schema.TimeoutUpdate),
 		})
+		if err != nil {
+			return err
+		}
 
 		var opRes map[string]interface{}
 		// Wait for the operation to complete
