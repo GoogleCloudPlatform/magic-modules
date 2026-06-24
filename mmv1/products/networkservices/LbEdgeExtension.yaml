@@ -12,58 +12,60 @@
 # limitations under the License.
 
 ---
-name: 'LbEdgeExtension'
+name: LbEdgeExtension
 description: |
   LbEdgeExtension is a resource that lets the extension service influence the selection of backend services and Cloud CDN cache keys by modifying request headers.
 references:
   guides:
-    'Configure a edge extension': 'https://cloud.google.com/service-extensions/docs/configure-edge-extensions'
-  api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1beta1/projects.locations.lbEdgeExtensions'
+    Configure a edge extension: https://cloud.google.com/service-extensions/docs/configure-edge-extensions
+  api: https://cloud.google.com/service-extensions/docs/reference/rest/v1beta1/projects.locations.lbEdgeExtensions
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/lbEdgeExtensions'
-self_link: 'projects/{{project}}/locations/{{location}}/lbEdgeExtensions/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/lbEdgeExtensions?lbEdgeExtensionId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/lbEdgeExtensions
+self_link: projects/{{project}}/locations/{{location}}/lbEdgeExtensions/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/lbEdgeExtensions?lbEdgeExtensionId={{name}}
 update_mask: true
+update_verb: PATCH
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
-custom_code:
 sweeper:
   url_substitutions:
-    - location: 'global'
-examples:
-  - name: 'network_services_lb_edge_extension_basic'
-    primary_resource_id: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    vars:
-      forwarding_rule_name: 'elb-forwarding-rule'
-      target_http_proxy_name: 'elb-target-http-proxy'
-      url_map_name: 'elb-url-map'
-      backend_service_name: 'elb-backend-subnet'
-      lb_edge_extension_name: 'elb-edge-ext'
-      wasm_plugin_name: 'elb-wasm-plugin-data'
-      repository_name: 'repository-standard'
+    - location: global
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: false
+autogen_async: true
+custom_code:
+samples:
+  - name: network_services_lb_edge_extension_basic
+    primary_resource_id: default
     exclude_test: true
+    steps:
+      - name: network_services_lb_edge_extension_basic
+        test_env_vars:
+          project: PROJECT_NAME
+        resource_id_vars:
+          forwarding_rule_name: elb-forwarding-rule
+          target_http_proxy_name: elb-target-http-proxy
+          url_map_name: elb-url-map
+          backend_service_name: elb-backend-subnet
+          lb_edge_extension_name: elb-edge-ext
+          wasm_plugin_name: elb-wasm-plugin-data
+          repository_name: repository-standard
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the edge extension
     url_param_only: true
     required: true
     immutable: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the LbEdgeExtension resource in the following format: projects/{project}/locations/{location}/lbEdgeExtensions/{lbEdgeExtensions}
@@ -71,23 +73,23 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A human-readable description of the resource.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: 'Set of labels associated with the LbEdgeExtension resource.'
-  - name: 'forwardingRules'
+    description: Set of labels associated with the LbEdgeExtension resource.
+  - name: forwardingRules
     type: Array
     description: |
       A list of references to the forwarding rules to which this service extension is attached.
       At least one forwarding rule is required. Only one LbEdgeExtension resource can be associated with a forwarding rule.
     required: true
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
     item_type:
       type: String
-  - name: 'extensionChains'
+  - name: extensionChains
     type: Array
     description: |
       A set of ordered extension chains that contain the match conditions and extensions to execute.
@@ -98,7 +100,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: String
           description: |
             The name for this extension chain. The name is logged as part of the HTTP request logs.
@@ -106,18 +108,18 @@ properties:
             and can have a maximum length of 63 characters. Additionally, the first character must be a letter
             and the last character must be a letter or a number.
           required: true
-        - name: 'matchCondition'
+        - name: matchCondition
           type: NestedObject
           description: |
-             Conditions under which this chain is invoked for a request.
+            Conditions under which this chain is invoked for a request.
           required: true
           properties:
-            - name: 'celExpression'
+            - name: celExpression
               type: String
               description: |
                 A Common Expression Language (CEL) expression that is used to match requests for which the extension chain is executed.
               required: true
-        - name: 'extensions'
+        - name: extensions
           type: Array
           description: |
             A set of extensions to execute for the matching request.
@@ -127,7 +129,7 @@ properties:
           item_type:
             type: NestedObject
             properties:
-              - name: 'name'
+              - name: name
                 type: String
                 description: |
                   The name for this extension. The name is logged as part of the HTTP request logs.
@@ -135,7 +137,7 @@ properties:
                   and can have a maximum length of 63 characters. Additionally, the first character must be a letter
                   and the last a letter or a number.
                 required: true
-              - name: 'service'
+              - name: service
                 type: String
                 description: |
                   The reference to the service that runs the extension.
@@ -143,17 +145,17 @@ properties:
                   * To configure a callout extension, service must be a fully-qualified reference to a backend service.
                   * To configure a plugin extension, service must be a reference to a WasmPlugin resource.
                 required: true
-                diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-              - name: 'failOpen'
+                diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+              - name: failOpen
                 type: Boolean
                 description: |
-                   Determines how the proxy behaves if the call to the extension fails or times out.
-                   When set to TRUE, request or response processing continues without error.
-                   Any subsequent extensions in the extension chain are also executed.
-                   When set to FALSE: * If response headers have not been delivered to the downstream client,
-                   a generic 500 error is returned to the client. The error response can be tailored by
-                   configuring a custom error response in the load balancer.
-              - name: 'supportedEvents'
+                  Determines how the proxy behaves if the call to the extension fails or times out.
+                  When set to TRUE, request or response processing continues without error.
+                  Any subsequent extensions in the extension chain are also executed.
+                  When set to FALSE: * If response headers have not been delivered to the downstream client,
+                  a generic 500 error is returned to the client. The error response can be tailored by
+                  configuring a custom error response in the load balancer.
+              - name: supportedEvents
                 type: Array
                 description: |
                   A set of events during request or response processing for which this extension is called.
@@ -161,14 +163,14 @@ properties:
                 item_type:
                   type: String
                 min_size: 1
-              - name: 'forwardHeaders'
+              - name: forwardHeaders
                 type: Array
                 description: |
                   List of the HTTP headers to forward to the extension (from the client or backend).
                   If omitted, all headers are sent. Each element is a string indicating the header name.
                 item_type:
                   type: String
-              - name: 'forwardAttributes'
+              - name: forwardAttributes
                 type: Array
                 description: |
                   List of the Envoy attributes to forward to the extension server. The attributes
@@ -180,11 +182,11 @@ properties:
                 item_type:
                   type: String
                 max_size: 16
-  - name: 'loadBalancingScheme'
+  - name: loadBalancingScheme
     type: Enum
     description: |
       All forwarding rules referenced by this extension must share the same load balancing scheme.
     required: true
     immutable: true
     enum_values:
-      - 'EXTERNAL_MANAGED'
+      - EXTERNAL_MANAGED

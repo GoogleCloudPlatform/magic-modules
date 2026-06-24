@@ -12,82 +12,96 @@
 # limitations under the License.
 
 ---
-name: 'DataStore'
+name: DataStore
 api_variant_patterns:
-  - 'projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}'
+  - projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}
 description: |
   Data store is a collection of websites and documents used to find answers for
   end-user's questions in Discovery Engine (a.k.a. Vertex AI Search and
   Conversation).
 references:
   guides:
-    'Create a search data store': 'https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es'
-  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores'
+    Create a search data store: https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es
+  api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores'
-self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}&createAdvancedSiteSearch={{create_advanced_site_search}}&skipDefaultSchemaCreation={{skip_default_schema_creation}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores
+self_link: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}
+create_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}&createAdvancedSiteSearch={{create_advanced_site_search}}&skipDefaultSchemaCreation={{skip_default_schema_creation}}
+delete_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}
 update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
+  - projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: false
+sweeper:
+  url_substitutions:
+    - region: eu
+    - region: global
+  dependencies:
+    - google_discovery_engine_chat_engine
 async:
-  actions: ['create', 'delete']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete]
   result:
     resource_inside_response: false
+autogen_async: false
 custom_code:
-sweeper:
-  dependencies:
-    - 'google_discovery_engine_chat_engine'
-  url_substitutions:
-    - region: "eu"
-    - region: "global"
-examples:
-  - name: 'discoveryengine_datastore_basic'
-    primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
-  - name: 'discoveryengine_datastore_kms_key_name'
-    primary_resource_id: 'kms_key_name'
-    vars:
-      data_store_id: 'data-store-id'
-      kms_key_name: 'kms-key'
-    test_vars_overrides:
-      kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
-  - name: 'discoveryengine_datastore_document_processing_config'
-    primary_resource_id: 'document_processing_config'
-    vars:
-      data_store_id: 'data-store-id'
-  - name: 'discoveryengine_datastore_document_processing_config_ocr'
-    primary_resource_id: 'document_processing_config_ocr'
-    vars:
-      data_store_id: 'data-store-id'
-    exclude_docs: true
-  - name: 'discoveryengine_datastore_document_processing_config_layout'
-    primary_resource_id: 'document_processing_config_layout'
-    vars:
-      data_store_id: 'data-store-id'
-    exclude_docs: true
-  - name: 'discoveryengine_datastore_document_processing_config_layout_full'
-    primary_resource_id: 'document_processing_config_layout_full'
-    vars:
-      data_store_id: 'data-store-id'
-    exclude_docs: true
-  - name: 'discoveryengine_datastore_advanced_site_search_config'
-    primary_resource_id: 'advanced_site_search_config'
-    vars:
-      data_store_id: 'data-store-id'
+samples:
+  - name: discoveryengine_datastore_basic
+    primary_resource_id: basic
+    steps:
+      - name: discoveryengine_datastore_basic
+        resource_id_vars:
+          data_store_id: data-store-id
+  - name: discoveryengine_datastore_kms_key_name
+    primary_resource_id: kms_key_name
+    steps:
+      - name: discoveryengine_datastore_kms_key_name
+        resource_id_vars:
+          data_store_id: data-store-id
+          kms_key_name: kms-key
+        test_vars_overrides:
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name
+  - name: discoveryengine_datastore_document_processing_config
+    primary_resource_id: document_processing_config
+    steps:
+      - name: discoveryengine_datastore_document_processing_config
+        resource_id_vars:
+          data_store_id: data-store-id
+  - name: discoveryengine_datastore_document_processing_config_ocr
+    primary_resource_id: document_processing_config_ocr
+    exclude_basic_doc: true
+    steps:
+      - name: discoveryengine_datastore_document_processing_config_ocr
+        resource_id_vars:
+          data_store_id: data-store-id
+  - name: discoveryengine_datastore_document_processing_config_layout
+    primary_resource_id: document_processing_config_layout
+    exclude_basic_doc: true
+    steps:
+      - name: discoveryengine_datastore_document_processing_config_layout
+        resource_id_vars:
+          data_store_id: data-store-id
+  - name: discoveryengine_datastore_document_processing_config_layout_full
+    primary_resource_id: document_processing_config_layout_full
+    exclude_basic_doc: true
+    steps:
+      - name: discoveryengine_datastore_document_processing_config_layout_full
+        resource_id_vars:
+          data_store_id: data-store-id
+  - name: discoveryengine_datastore_advanced_site_search_config
+    primary_resource_id: advanced_site_search_config
+    steps:
+      - name: discoveryengine_datastore_advanced_site_search_config
+        resource_id_vars:
+          data_store_id: data-store-id
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The geographic location where the data store should reside. The value can
@@ -95,14 +109,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'dataStoreId'
+  - name: dataStoreId
     type: String
     description: |
       The unique id of the data store.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'createAdvancedSiteSearch'
+  - name: createAdvancedSiteSearch
     type: Boolean
     description: |
       If true, an advanced data store for site search will be created. If the
@@ -110,7 +124,7 @@ parameters:
       PUBLIC_WEBSITE contentConfig), this flag will be ignored.
     url_param_only: true
     default_value: false
-  - name: 'skipDefaultSchemaCreation'
+  - name: skipDefaultSchemaCreation
     type: Boolean
     description: |
       A boolean flag indicating whether to skip the default schema creation for
@@ -120,11 +134,10 @@ parameters:
       before any documents can be ingested.
       This flag cannot be specified if `data_store.starting_schema` is
       specified.
-
     url_param_only: true
     default_value: false
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The unique full resource name of the data store. Values are of the format
@@ -132,23 +145,23 @@ properties:
       This field must be a UTF-8 encoded string with a length limit of 1024
       characters.
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       The display name of the data store. This field must be a UTF-8 encoded
       string with a length limit of 128 characters.
     required: true
-  - name: 'industryVertical'
+  - name: industryVertical
     type: Enum
     description: |
       The industry vertical that the data store registers.
     required: true
     immutable: true
     enum_values:
-      - 'GENERIC'
-      - 'MEDIA'
-      - 'HEALTHCARE_FHIR'
-  - name: 'solutionTypes'
+      - GENERIC
+      - MEDIA
+      - HEALTHCARE_FHIR
+  - name: solutionTypes
     type: Array
     description: |
       The solutions that the data store enrolls.
@@ -158,41 +171,41 @@ properties:
       description: |
         The type of solution.
       enum_values:
-        - 'SOLUTION_TYPE_RECOMMENDATION'
-        - 'SOLUTION_TYPE_SEARCH'
-        - 'SOLUTION_TYPE_CHAT'
-        - 'SOLUTION_TYPE_GENERATIVE_CHAT'
-  - name: 'defaultSchemaId'
+        - SOLUTION_TYPE_RECOMMENDATION
+        - SOLUTION_TYPE_SEARCH
+        - SOLUTION_TYPE_CHAT
+        - SOLUTION_TYPE_GENERATIVE_CHAT
+  - name: defaultSchemaId
     type: String
     description: |
       The id of the default Schema associated with this data store.
     output: true
-  - name: 'contentConfig'
+  - name: contentConfig
     type: Enum
     description: |
       The content config of the data store.
     required: false
     immutable: true
     enum_values:
-      - 'NO_CONTENT'
-      - 'CONTENT_REQUIRED'
-      - 'PUBLIC_WEBSITE'
-  - name: 'advancedSiteSearchConfig'
+      - NO_CONTENT
+      - CONTENT_REQUIRED
+      - PUBLIC_WEBSITE
+  - name: advancedSiteSearchConfig
     type: NestedObject
     description: |
       Configuration data for advance site search.
     default_from_api: true
     immutable: true
     properties:
-      - name: 'disableInitialIndex'
+      - name: disableInitialIndex
         type: Boolean
         description: If set true, initial indexing is disabled for the DataStore.
         required: false
-      - name: 'disableAutomaticRefresh'
+      - name: disableAutomaticRefresh
         type: Boolean
         description: If set true, automatic refresh is disabled for the DataStore.
         required: false
-  - name: 'kmsKeyName'
+  - name: kmsKeyName
     type: String
     description: |
       KMS key resource name which will be used to encrypt resources:
@@ -203,27 +216,27 @@ properties:
       protected by the KMS key, as indicated in the cmek_config field.
     required: false
     ignore_read: true
-  - name: 'documentProcessingConfig'
+  - name: documentProcessingConfig
     type: NestedObject
     description: |
       Configuration for Document understanding and enrichment.
     required: false
     immutable: true
     properties:
-      - name: 'name'
+      - name: name
         type: String
         description: |
           The full resource name of the Document Processing Config. Format:
           `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/documentProcessingConfig`.
         required: false
         output: true
-      - name: 'chunkingConfig'
+      - name: chunkingConfig
         type: NestedObject
         description: |
           Whether chunking mode is enabled.
         required: false
         properties:
-          - name: 'layoutBasedChunkingConfig'
+          - name: layoutBasedChunkingConfig
             type: NestedObject
             description: |
               Configuration for the layout based chunking.
@@ -231,20 +244,19 @@ properties:
             send_empty_value: true
             allow_empty_object: true
             properties:
-              - name: 'chunkSize'
+              - name: chunkSize
                 type: Integer
                 description: |
                   The token size limit for each chunk.
                   Supported values: 100-500 (inclusive). Default value: 500.
                 required: false
-              - name: 'includeAncestorHeadings'
+              - name: includeAncestorHeadings
                 type: Boolean
                 description: |
                   Whether to include appending different levels of headings to chunks from the middle of the document to prevent context loss.
                   Default value: False.
-
                 required: false
-      - name: 'defaultParsingConfig'
+      - name: defaultParsingConfig
         type: NestedObject
         description: |
           Configurations for default Document parser. If not specified, this resource
@@ -252,7 +264,7 @@ properties:
           config will be applied to all file types for Document parsing.
         required: false
         properties:
-          - name: 'digitalParsingConfig'
+          - name: digitalParsingConfig
             type: NestedObject
             description: |
               Configurations applied to digital parser.
@@ -260,27 +272,26 @@ properties:
             send_empty_value: true
             allow_empty_object: true
             exactly_one_of:
-              - 'default_parsing_config.0.digital_parsing_config'
-              - 'default_parsing_config.0.ocr_parsing_config'
-              - 'default_parsing_config.0.layout_parsing_config'
-            properties:
-              []
-          - name: 'ocrParsingConfig'
+              - default_parsing_config.0.digital_parsing_config
+              - default_parsing_config.0.ocr_parsing_config
+              - default_parsing_config.0.layout_parsing_config
+            properties: []
+          - name: ocrParsingConfig
             type: NestedObject
             description: |
               Configurations applied to OCR parser. Currently it only applies to PDFs.
             required: false
             exactly_one_of:
-              - 'default_parsing_config.0.digital_parsing_config'
-              - 'default_parsing_config.0.ocr_parsing_config'
-              - 'default_parsing_config.0.layout_parsing_config'
+              - default_parsing_config.0.digital_parsing_config
+              - default_parsing_config.0.ocr_parsing_config
+              - default_parsing_config.0.layout_parsing_config
             properties:
-              - name: 'useNativeText'
+              - name: useNativeText
                 type: Boolean
                 description: |
                   If true, will use native text instead of OCR text on pages containing native text.
                 required: false
-          - name: 'layoutParsingConfig'
+          - name: layoutParsingConfig
             type: NestedObject
             description: |
               Configurations applied to layout parser.
@@ -288,60 +299,60 @@ properties:
             send_empty_value: true
             allow_empty_object: true
             exactly_one_of:
-              - 'default_parsing_config.0.digital_parsing_config'
-              - 'default_parsing_config.0.ocr_parsing_config'
-              - 'default_parsing_config.0.layout_parsing_config'
+              - default_parsing_config.0.digital_parsing_config
+              - default_parsing_config.0.ocr_parsing_config
+              - default_parsing_config.0.layout_parsing_config
             properties:
-              - name: 'enableTableAnnotation'
+              - name: enableTableAnnotation
                 type: Boolean
                 description: |
                   If true, the LLM based annotation is added to the table during parsing.
                 required: false
-              - name: 'enableImageAnnotation'
+              - name: enableImageAnnotation
                 type: Boolean
                 description: |
                   If true, the LLM based annotation is added to the image during parsing.
                 required: false
-              - name: 'structuredContentTypes'
+              - name: structuredContentTypes
                 type: Array
                 description: |
                   Contains the required structure types to extract from the document. Supported values: `shareholder-structure`.
                 required: false
                 item_type:
                   type: String
-              - name: 'excludeHtmlElements'
+              - name: excludeHtmlElements
                 type: Array
                 description: |
                   List of HTML elements to exclude from the parsed content.
                 required: false
                 item_type:
                   type: String
-              - name: 'excludeHtmlClasses'
+              - name: excludeHtmlClasses
                 type: Array
                 description: |
                   List of HTML classes to exclude from the parsed content.
                 required: false
                 item_type:
                   type: String
-              - name: 'excludeHtmlIds'
+              - name: excludeHtmlIds
                 type: Array
                 description: |
                   List of HTML ids to exclude from the parsed content.
                 required: false
                 item_type:
                   type: String
-      - name: 'parsingConfigOverrides'
+      - name: parsingConfigOverrides
         type: Map
         description: |
           Map from file type to override the default parsing configuration based on the file type. Supported keys:
             * `pdf`: Override parsing config for PDF files, either digital parsing, ocr parsing or layout parsing is supported.
             * `html`: Override parsing config for HTML files, only digital parsing and or layout parsing are supported.
             * `docx`: Override parsing config for DOCX files, only digital parsing and or layout parsing are supported.
-        key_name: 'file_type'
+        key_name: file_type
         value_type:
           type: NestedObject
           properties:
-            - name: 'digitalParsingConfig'
+            - name: digitalParsingConfig
               type: NestedObject
               description: |
                 Configurations applied to digital parser.
@@ -349,27 +360,26 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               exactly_one_of:
-                - 'default_parsing_config.0.digital_parsing_config'
-                - 'default_parsing_config.0.ocr_parsing_config'
-                - 'default_parsing_config.0.layout_parsing_config'
-              properties:
-                []
-            - name: 'ocrParsingConfig'
+                - default_parsing_config.0.digital_parsing_config
+                - default_parsing_config.0.ocr_parsing_config
+                - default_parsing_config.0.layout_parsing_config
+              properties: []
+            - name: ocrParsingConfig
               type: NestedObject
               description: |
                 Configurations applied to OCR parser. Currently it only applies to PDFs.
               required: false
               exactly_one_of:
-                - 'default_parsing_config.0.digital_parsing_config'
-                - 'default_parsing_config.0.ocr_parsing_config'
-                - 'default_parsing_config.0.layout_parsing_config'
+                - default_parsing_config.0.digital_parsing_config
+                - default_parsing_config.0.ocr_parsing_config
+                - default_parsing_config.0.layout_parsing_config
               properties:
-                - name: 'useNativeText'
+                - name: useNativeText
                   type: Boolean
                   description: |
                     If true, will use native text instead of OCR text on pages containing native text.
                   required: false
-            - name: 'layoutParsingConfig'
+            - name: layoutParsingConfig
               type: NestedObject
               description: |
                 Configurations applied to layout parser.
@@ -377,49 +387,49 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               exactly_one_of:
-                - 'default_parsing_config.0.digital_parsing_config'
-                - 'default_parsing_config.0.ocr_parsing_config'
-                - 'default_parsing_config.0.layout_parsing_config'
+                - default_parsing_config.0.digital_parsing_config
+                - default_parsing_config.0.ocr_parsing_config
+                - default_parsing_config.0.layout_parsing_config
               properties:
-                - name: 'enableTableAnnotation'
+                - name: enableTableAnnotation
                   type: Boolean
                   description: |
                     If true, the LLM based annotation is added to the table during parsing.
                   required: false
-                - name: 'enableImageAnnotation'
+                - name: enableImageAnnotation
                   type: Boolean
                   description: |
                     If true, the LLM based annotation is added to the image during parsing.
                   required: false
-                - name: 'structuredContentTypes'
+                - name: structuredContentTypes
                   type: Array
                   description: |
                     Contains the required structure types to extract from the document. Supported values: `shareholder-structure`.
                   required: false
                   item_type:
                     type: String
-                - name: 'excludeHtmlElements'
+                - name: excludeHtmlElements
                   type: Array
                   description: |
                     List of HTML elements to exclude from the parsed content.
                   required: false
                   item_type:
                     type: String
-                - name: 'excludeHtmlClasses'
+                - name: excludeHtmlClasses
                   type: Array
                   description: |
                     List of HTML classes to exclude from the parsed content.
                   required: false
                   item_type:
                     type: String
-                - name: 'excludeHtmlIds'
+                - name: excludeHtmlIds
                   type: Array
                   description: |
                     List of HTML ids to exclude from the parsed content.
                   required: false
                   item_type:
                     type: String
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Timestamp when the DataStore was created.

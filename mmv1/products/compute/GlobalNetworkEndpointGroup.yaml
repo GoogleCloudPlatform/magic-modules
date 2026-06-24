@@ -12,9 +12,8 @@
 # limitations under the License.
 
 ---
-name: 'GlobalNetworkEndpointGroup'
+name: GlobalNetworkEndpointGroup
 api_resource_type_kind: NetworkEndpointGroup
-kind: 'compute#networkEndpointGroup'
 description: |
   A global network endpoint group contains endpoints that reside outside of Google Cloud.
   Currently a global network endpoint group can only support a single endpoint.
@@ -24,39 +23,44 @@ description: |
   to avoid this type of error.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
+    Official Documentation: https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts
+  api: https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups
 docs:
-base_url: 'projects/{{project}}/global/networkEndpointGroups'
-has_self_link: true
+base_url: projects/{{project}}/global/networkEndpointGroups
 immutable: true
-generate_list_resource: true
+has_self_link: true
+collection_url_key: items
+kind: compute#networkEndpointGroup
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+generate_list_resource: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
-collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
-examples:
-  - name: 'global_network_endpoint_group'
-    primary_resource_id: 'neg'
-    vars:
-      neg_name: 'my-lb-neg'
-  - name: 'global_network_endpoint_group_ip_address'
-    primary_resource_id: 'neg'
-    vars:
-      neg_name: 'my-lb-neg'
+samples:
+  - name: global_network_endpoint_group
+    primary_resource_id: neg
+    steps:
+      - name: global_network_endpoint_group
+        resource_id_vars:
+          neg_name: my-lb-neg
+  - name: global_network_endpoint_group_ip_address
+    primary_resource_id: neg
+    steps:
+      - name: global_network_endpoint_group_ip_address
+        resource_id_vars:
+          neg_name: my-lb-neg
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource; provided by the client when the resource is
@@ -68,21 +72,21 @@ properties:
       character, which cannot be a dash.
     required: true
     validation:
-      function: 'verify.ValidateGCEName'
-  - name: 'description'
+      function: verify.ValidateGCEName
+  - name: description
     type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - name: 'networkEndpointType'
+  - name: networkEndpointType
     type: Enum
     description: |
       Type of network endpoints in this network endpoint group.
     required: true
     enum_values:
-      - 'INTERNET_IP_PORT'
-      - 'INTERNET_FQDN_PORT'
-  - name: 'defaultPort'
+      - INTERNET_IP_PORT
+      - INTERNET_FQDN_PORT
+  - name: defaultPort
     type: Integer
     description: |
       The default port used if the port number is not specified in the

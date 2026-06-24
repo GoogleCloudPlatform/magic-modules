@@ -12,60 +12,64 @@
 # limitations under the License.
 
 ---
-name: 'FirewallPolicyAssociation'
+name: FirewallPolicyAssociation
 api_resource_type_kind: FirewallPolicy
-api_resource_field: 'associations'
-kind: 'compute#firewallPolicyAssociation'
+api_resource_field: associations
 description: |
   Allows associating hierarchical firewall policies with the target where they are applied. This allows creating policies and rules in a different location than they are applied.
   For more information on applying hierarchical firewall policies see the [official documentation](https://cloud.google.com/firewall/docs/firewall-policies#managing_hierarchical_firewall_policy_resources)
 references:
   guides:
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/firewallPolicies/addAssociation'
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/firewallPolicies/addAssociation
 docs:
-id_format: 'locations/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
-base_url: 'locations/global/firewallPolicies/{{firewall_policy}}'
-self_link: 'locations/global/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}'
-create_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addAssociation'
-delete_url: 'locations/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
-delete_verb: 'POST'
-update_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addAssociation?replaceExistingAssociation=true'
-update_verb: 'POST'
+base_url: locations/global/firewallPolicies/{{firewall_policy}}
+self_link: locations/global/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}
+create_url: locations/global/firewallPolicies/{{firewall_policy}}/addAssociation
+delete_url: locations/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}
+update_url: locations/global/firewallPolicies/{{firewall_policy}}/addAssociation?replaceExistingAssociation=true
+update_verb: POST
+delete_verb: POST
+kind: compute#firewallPolicyAssociation
+id_format: locations/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}
 import_format:
-  - 'locations/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
+  - locations/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}
   - '{{firewall_policy}}/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  custom_update: 'templates/terraform/custom_update/firewall_policy_association_update.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/compute_firewall_policy_association.go.tmpl'
-  post_create: 'templates/terraform/post_create/compute_firewall_policy_association_operation.go.tmpl'
-  post_delete: 'templates/terraform/post_delete/compute_firewall_policy_association_operation.go.tmpl'
 custom_diff:
-  - 'tpgresource.DefaultProviderProject'
-examples:
-  - name: 'firewall_policy_association'
-    primary_resource_id: 'default'
-    vars:
-      policy_name: 'my-policy'
-      association_name: 'my-association'
-      folder_name: 'folder-fpa'
-    test_env_vars:
-      org_id: 'ORG_ID'
+  - tpgresource.DefaultProviderProject
+custom_code:
+  post_create: templates/terraform/post_create/compute_firewall_policy_association_operation.go.tmpl
+  pre_read: templates/terraform/pre_read/compute_firewall_policy_association.go.tmpl
+  custom_update: templates/terraform/custom_update/firewall_policy_association_update.go.tmpl
+  post_delete: templates/terraform/post_delete/compute_firewall_policy_association_operation.go.tmpl
+samples:
+  - name: firewall_policy_association
+    primary_resource_id: default
     exclude_test: true
-  - name: 'firewall_policy_association_swapover'
-    primary_resource_id: 'default'
-    vars:
-      policy_name: 'my-policy'
-      association_name: 'my-association'
-      folder_name: 'folder-fpas'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: firewall_policy_association
+        resource_id_vars:
+          policy_name: my-policy
+          association_name: my-association
+          folder_name: folder-fpa
+        test_env_vars:
+          org_id: ORG_ID
+  - name: firewall_policy_association_swapover
+    primary_resource_id: default
     exclude_test: true
+    steps:
+      - name: firewall_policy_association_swapover
+        resource_id_vars:
+          policy_name: my-policy
+          association_name: my-association
+          folder_name: folder-fpas
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
-  - name: 'firewallPolicy'
+  - name: firewallPolicy
     type: ResourceRef
     description: |
       The firewall policy of the resource.
@@ -77,25 +81,25 @@ parameters:
       on your exisiting firewall policy so as to prevent a situation where your attachment target has no associated policy.
     ignore_read: true
     required: true
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
-    custom_expand: 'templates/terraform/custom_expand/compute_firewall_policy_association.go.tmpl'
-    resource: 'FirewallPolicy'
-    imports: 'name'
+    diff_suppress_func: tpgresource.CompareResourceNames
+    custom_expand: templates/terraform/custom_expand/compute_firewall_policy_association.go.tmpl
+    resource: FirewallPolicy
+    imports: name
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name for an association.
     required: true
     immutable: true
-  - name: 'attachmentTarget'
+  - name: attachmentTarget
     type: String
     description: |
       The target that the firewall policy is attached to.
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - name: 'shortName'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+  - name: shortName
     type: String
     description: |
       The short name of the firewall policy of the association.

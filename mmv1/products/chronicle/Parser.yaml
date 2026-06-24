@@ -18,8 +18,8 @@ description: |-
   Chronicle supports both customer-created custom parsers and Google-provided prebuilt parsers.
 references:
   guides:
-    'Custom parsers overview': 'https://cloud.google.com/chronicle/docs/detection/custom-parsers-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.logTypes.parsers'
+    Custom parsers overview: https://cloud.google.com/chronicle/docs/detection/custom-parsers-overview
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.logTypes.parsers
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parsers
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parsers/{{parser}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parsers
@@ -30,31 +30,30 @@ import_format:
 autogen_status: UGFyc2Vy
 autogen_async: false
 samples:
-  - name: 'chronicle_parser_basic'
-    primary_resource_id: 'example'
+  - name: chronicle_parser_basic
+    primary_resource_id: example
     steps:
-      - name: 'chronicle_parser_basic'
+      - name: chronicle_parser_basic
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         ignore_read_extra:
-          - 'state'
-          - 'validation_report'
-          - 'validation_stage'
-          - 'validated_on_empty_logs'
-  - name: 'chronicle_parser_full'
-    primary_resource_id: 'example'
+          - state
+          - validation_report
+          - validation_stage
+          - validated_on_empty_logs
+  - name: chronicle_parser_full
+    primary_resource_id: example
     steps:
-      - name: 'chronicle_parser_full'
+      - name: chronicle_parser_full
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         ignore_read_extra:
-          - 'state'
-          - 'validation_report'
-          - 'validation_stage'
-          - 'validated_on_empty_logs'
-          - 'low_code.0.field_extractors.0.append_repeated_fields'
-          - 'version_info'
-
+          - state
+          - validation_report
+          - validation_stage
+          - validated_on_empty_logs
+          - low_code.0.field_extractors.0.append_repeated_fields
+          - version_info
 parameters:
   - name: location
     type: String
@@ -77,7 +76,7 @@ parameters:
   - name: parser
     type: String
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
     description: Output only. The server-generated ID of the parser.
 properties:
   - name: cbn
@@ -320,12 +319,12 @@ properties:
     output: true
   - name: versionInfo
     type: NestedObject
-    custom_flatten: 'templates/terraform/custom_flatten/chronicle_parser_version_info.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/chronicle_parser_version_info.go.tmpl
     description: |-
       ParserVersionInfo gives the version information of the parser and related
       properties like pinned etc.
     update_mask_fields:
-      - 'version_info.auto_upgrade_disabled'
+      - version_info.auto_upgrade_disabled
     properties:
       - name: autoUpgradeDisabled
         type: Boolean

@@ -138,7 +138,6 @@ properties:
             api_name: architectureTaintBehavior
             description: Architecture taint behavior.
             is_missing_in_cai: true
-
   - name: networkConfig
     type: NestedObject
     description: Networking configuration for this NodePool.

@@ -16,43 +16,40 @@ name: FindingsRefinementDeployment
 description: The FindingsRefinementDeployment resource represents the deployment state of a findings refinement.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/FindingsRefinementDeployment'
-min_version: 'beta'
-
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/FindingsRefinementDeployment
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment?updateMask=*
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
-import_format:
-  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
 update_mask: true
 create_verb: PATCH
 update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
 # The API does not support deletion of FindingsRefinementsDeployment resources.
 exclude_delete: true
 autogen_status: RmluZGluZ3NSZWZpbmVtZW50RGVwbG95bWVudA==
-
 samples:
-  - name: 'chronicle_findings_refinement_deployment_update'
-    primary_resource_id: 'example'
-    min_version: 'beta'
+  - name: chronicle_findings_refinement_deployment_update
+    primary_resource_id: example
+    min_version: beta
     steps:
-      - name: 'chronicle_findings_refinement_deployment_full'
+      - name: chronicle_findings_refinement_deployment_full
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         resource_id_vars:
           display_name: findings_refinement_display_name
         vars:
           enabled: true
-      - name: 'chronicle_findings_refinement_deployment_update'
+      - name: chronicle_findings_refinement_deployment_update
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         resource_id_vars:
           display_name: findings_refinement_display_name
         vars:
           enabled: false
-
 parameters:
   - name: location
     type: String

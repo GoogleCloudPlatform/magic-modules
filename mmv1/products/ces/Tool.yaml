@@ -24,83 +24,90 @@ docs:
 
     Consequently, blocks like `open_api_tool`, `mcp_tool`, `connector_tool`, `remote_agent_tool`, and `system_tool` are marked as **read-only (output-only)** in this resource. They are populated by the server for reference purposes only (e.g., after importing an existing tool into your state) and **cannot** be configured in your Terraform HCL configuration.
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/tools
+self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/tools?toolId={{tool_id}}
 update_mask: true
-self_link:
-  projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
-create_url:
-  projects/{{project}}/locations/{{location}}/apps/{{app}}/tools?toolId={{tool_id}}
 update_verb: PATCH
-id_format:
-  projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
+id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
-examples:
-  - name: "ces_tool_client_function_basic"
-    primary_resource_id: "ces_tool_client_function_basic"
-    vars:
-      tool_display_name: 'ces_tool_client_function_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic1'
-      app_id: 'app-id'
-  - name: "ces_tool_data_store_tool_engine_source_basic"
-    primary_resource_id: "ces_tool_data_store_tool_engine_source_basic"
-    vars:
-      tool_display_name: 'ces_tool_data_store_tool_engine_source_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic2'
-      app_id: 'app-id'
-      data_store_id: "tool_data_store_id"
-      engine_id: "tool_engine_id"
-  - name: "ces_tool_google_search_tool_basic"
-    primary_resource_id: "ces_tool_google_search_tool_basic"
-    vars:
-      tool_display_name: 'ces_tool_google_search_tool_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic3'
-      app_id: 'app-id'
-  - name: "ces_tool_python_function_basic"
-    primary_resource_id: "ces_tool_python_function_basic"
-    vars:
-      tool_display_name: 'ces_tool_python_function_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic4'
-      app_id: 'app-id'
-  - name: "ces_tool_agent_basic"
-    primary_resource_id: "ces_tool_agent_basic"
-    vars:
-      tool_display_name: 'ces_tool_agent_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic5'
-      app_id: 'app-id'
-  - name: "ces_tool_file_search_basic"
-    primary_resource_id: "ces_tool_file_search_basic"
-    vars:
-      tool_display_name: 'ces_tool_file_search_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic6'
-      app_id: 'app-id'
-  - name: "ces_tool_widget_basic"
-    primary_resource_id: "ces_tool_widget_basic"
-    vars:
-      tool_display_name: 'ces_tool_widget_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic7'
-      app_id: 'app-id'
 autogen_status: VG9vbA==
+samples:
+  - name: ces_tool_client_function_basic
+    primary_resource_id: ces_tool_client_function_basic
+    steps:
+      - name: ces_tool_client_function_basic
+        resource_id_vars:
+          tool_display_name: ces_tool_client_function_basic
+          app_display_name: my-app
+          tool_id: ces_tool_basic1
+          app_id: app-id
+  - name: ces_tool_data_store_tool_engine_source_basic
+    primary_resource_id: ces_tool_data_store_tool_engine_source_basic
+    steps:
+      - name: ces_tool_data_store_tool_engine_source_basic
+        resource_id_vars:
+          tool_display_name: ces_tool_data_store_tool_engine_source_basic
+          app_display_name: my-app
+          tool_id: ces_tool_basic2
+          app_id: app-id
+          data_store_id: tool_data_store_id
+          engine_id: tool_engine_id
+  - name: ces_tool_google_search_tool_basic
+    primary_resource_id: ces_tool_google_search_tool_basic
+    steps:
+      - name: ces_tool_google_search_tool_basic
+        resource_id_vars:
+          tool_display_name: ces_tool_google_search_tool_basic
+          app_display_name: my-app
+          tool_id: ces_tool_basic3
+          app_id: app-id
+  - name: ces_tool_python_function_basic
+    primary_resource_id: ces_tool_python_function_basic
+    steps:
+      - name: ces_tool_python_function_basic
+        resource_id_vars:
+          tool_display_name: ces_tool_python_function_basic
+          app_display_name: my-app
+          tool_id: ces_tool_basic4
+          app_id: app-id
+  - name: ces_tool_agent_basic
+    primary_resource_id: ces_tool_agent_basic
+    steps:
+      - name: ces_tool_agent_basic
+        resource_id_vars:
+          tool_display_name: ces_tool_agent_basic
+          app_display_name: my-app
+          tool_id: ces_tool_basic5
+          app_id: app-id
+  - name: ces_tool_file_search_basic
+    primary_resource_id: ces_tool_file_search_basic
+    steps:
+      - name: ces_tool_file_search_basic
+        resource_id_vars:
+          tool_display_name: ces_tool_file_search_basic
+          app_display_name: my-app
+          tool_id: ces_tool_basic6
+          app_id: app-id
+  - name: ces_tool_widget_basic
+    primary_resource_id: ces_tool_widget_basic
+    steps:
+      - name: ces_tool_widget_basic
+        resource_id_vars:
+          tool_display_name: ces_tool_widget_basic
+          app_display_name: my-app
+          tool_id: ces_tool_basic7
+          app_id: app-id
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the
-      resource within its parent collection as described in
-      https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
   - name: app
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the
-      resource within its parent collection as described in
-      https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
@@ -155,20 +162,19 @@ properties:
               Defines the schema for additional properties allowed in an object.
               The value must be a valid JSON string representing the Schema object.
               (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: anyOf
             type: String
-            description: The instance value should be valid against at least
-              one of the schemas in this list.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            description: The instance value should be valid against at least one of the schemas in this list.
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: default
             type: String
             description: |-
@@ -178,13 +184,12 @@ properties:
               with the defined 'type' and other schema constraints.
           - name: defs
             type: String
-            description: A map of definitions for use by ref. Only allowed at the root
-              of the schema.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: description
             type: String
             description: The description of the data.
@@ -202,11 +207,11 @@ properties:
           - name: items
             type: String
             description: Schema of the elements of Type.ARRAY.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: maxItems
             type: Integer
             description: Maximum number of the elements for Type.ARRAY. (int64 format)
@@ -225,19 +230,19 @@ properties:
           - name: prefixItems
             type: String
             description: Schemas of initial elements of Type.ARRAY.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: properties
             type: String
             description: Properties of Type.OBJECT.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: ref
             type: String
             description: |-
@@ -281,8 +286,7 @@ properties:
             required: true
           - name: uniqueItems
             type: Boolean
-            description: Indicate the items in the array must be unique. Only applies
-              to TYPE.ARRAY.
+            description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
       - name: response
         type: NestedObject
         description: Represents a select subset of an OpenAPI 3.0 schema object.
@@ -293,20 +297,19 @@ properties:
               Defines the schema for additional properties allowed in an object.
               The value must be a valid JSON string representing the Schema object.
               (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: anyOf
             type: String
-            description: The instance value should be valid against at least
-              one of the schemas in this list.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            description: The instance value should be valid against at least one of the schemas in this list.
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: default
             type: String
             description: |-
@@ -316,13 +319,12 @@ properties:
               with the defined 'type' and other schema constraints.
           - name: defs
             type: String
-            description: A map of definitions for use by ref. Only allowed at the root
-              of the schema.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: description
             type: String
             description: The description of the data.
@@ -340,11 +342,11 @@ properties:
           - name: items
             type: String
             description: Schema of the elements of Type.ARRAY.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: maxItems
             type: Integer
             description: Maximum number of the elements for Type.ARRAY. (int64 format)
@@ -363,19 +365,19 @@ properties:
           - name: prefixItems
             type: String
             description: Schemas of initial elements of Type.ARRAY.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: properties
             type: String
             description: Properties of Type.OBJECT.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: ref
             type: String
             description: |-
@@ -419,8 +421,7 @@ properties:
             required: true
           - name: uniqueItems
             type: Boolean
-            description: Indicate the items in the array must be unique. Only applies
-              to TYPE.ARRAY.
+            description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
   - name: connectorTool
     type: NestedObject
     description: A ConnectorTool allows connections to different integrations.
@@ -428,8 +429,7 @@ properties:
     properties:
       - name: connection
         type: String
-        description: |-
-          The full resource name of the referenced Integration Connectors Connection. Format: projects/{project}/locations/{location}/connections/{connection}
+        description: 'The full resource name of the referenced Integration Connectors Connection. Format: projects/{project}/locations/{location}/connections/{connection}'
         output: true
       - name: action
         type: NestedObject
@@ -475,10 +475,9 @@ properties:
                 output: true
       - name: authConfig
         type: String
-        description: |-
-          Configures how authentication is handled in Integration Connectors. By default, an admin authentication is passed in the Integration Connectors API requests. You can override it with a different end-user authentication config. Note: The Connection must have authentication override enabled in order to specify an EUC configuration here - otherwise, the ConnectorTool creation will fail. See https://cloud.google.com/application-integration/docs/configure-connectors-task#configure-authentication-override for details. Represents a JSON object.
+        description: 'Configures how authentication is handled in Integration Connectors. By default, an admin authentication is passed in the Integration Connectors API requests. You can override it with a different end-user authentication config. Note: The Connection must have authentication override enabled in order to specify an EUC configuration here - otherwise, the ConnectorTool creation will fail. See https://cloud.google.com/application-integration/docs/configure-connectors-task#configure-authentication-override for details. Represents a JSON object.'
         output: true
-        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
       - name: name
         type: String
         description: The name of the tool that can be used by the Agent to decide whether to call this ConnectorTool.
@@ -700,13 +699,11 @@ properties:
                       properties:
                         - name: collection
                           type: String
-                          description: Resource name of the collection the data store
-                            belongs to.
+                          description: Resource name of the collection the data store belongs to.
                           output: true
                         - name: collectionDisplayName
                           type: String
-                          description: Display name of the collection the data store belongs
-                            to.
+                          description: Display name of the collection the data store belongs to.
                           output: true
                         - name: dataSource
                           type: String
@@ -778,9 +775,9 @@ properties:
           ALWAYS_INCLUDE
           NEVER_INCLUDE
         enum_values:
-          - 'FILTER_PARAMETER_BEHAVIOR_UNSPECIFIED'
-          - 'ALWAYS_INCLUDE'
-          - 'NEVER_INCLUDE'
+          - FILTER_PARAMETER_BEHAVIOR_UNSPECIFIED
+          - ALWAYS_INCLUDE
+          - NEVER_INCLUDE
       - name: maxResults
         type: Integer
         description: |-
@@ -827,8 +824,7 @@ properties:
                   description: Whether the rewriter is disabled.
                 - name: modelSettings
                   type: NestedObject
-                  description: Model settings contains various configurations for the
-                    LLM model.
+                  description: Model settings contains various configurations for the LLM model.
                   required: true
                   properties:
                     - name: model
@@ -845,8 +841,7 @@ properties:
                         responses that are more creative.
                 - name: prompt
                   type: String
-                  description: The prompt definition. If not set, default prompt will be
-                    used.
+                  description: The prompt definition. If not set, default prompt will be used.
             - name: summarizationConfig
               type: NestedObject
               description: Summarization configuration.
@@ -856,8 +851,7 @@ properties:
                   description: Whether summarization is disabled.
                 - name: modelSettings
                   type: NestedObject
-                  description: Model settings contains various configurations for the
-                    LLM model.
+                  description: Model settings contains various configurations for the LLM model.
                   properties:
                     - name: model
                       type: String
@@ -873,8 +867,7 @@ properties:
                         responses that are more creative.
                 - name: prompt
                   type: String
-                  description: The prompt definition. If not set, default prompt will be
-                    used.
+                  description: The prompt definition. If not set, default prompt will be used.
       - name: name
         type: String
         description: The data store tool name.
@@ -914,9 +907,9 @@ properties:
           USER_OWNED
           FULLY_MANAGED
         enum_values:
-          - 'CORPUS_TYPE_UNSPECIFIED'
-          - 'USER_OWNED'
-          - 'FULLY_MANAGED'
+          - CORPUS_TYPE_UNSPECIFIED
+          - USER_OWNED
+          - FULLY_MANAGED
       - name: name
         type: String
         description: Required. The tool name.
@@ -1014,16 +1007,15 @@ properties:
         type: String
         description: The schema of the input arguments of the MCP tool. Represents a JSON object.
         output: true
-        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
       - name: outputSchema
         type: String
         description: The schema of the output arguments of the MCP tool. Represents a JSON object.
         output: true
-        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
       - name: serverAddress
         type: String
-        description: |-
-          The server address of the MCP server, e.g., "https://example.com/mcp/". If the server is built with the MCP SDK, the url should be suffixed with "/mcp/". Only Streamable HTTP transport based servers are supported. This is the same as the serverAddress in the McpToolset.
+        description: The server address of the MCP server, e.g., "https://example.com/mcp/". If the server is built with the MCP SDK, the url should be suffixed with "/mcp/". Only Streamable HTTP transport based servers are supported. This is the same as the serverAddress in the McpToolset.
         output: true
       - name: apiAuthentication
         type: NestedObject
@@ -1101,8 +1093,7 @@ properties:
                   type: String
               - name: tokenEndpoint
                 type: String
-                description: The token endpoint in the OAuth provider to exchange for an
-                  access token.
+                description: The token endpoint in the OAuth provider to exchange for an access token.
                 output: true
           - name: serviceAccountAuthConfig
             type: NestedObject
@@ -1175,8 +1166,7 @@ properties:
             output: true
       - name: customHeaders
         type: KeyValuePairs
-        description: |-
-          The custom headers to send in the request to the MCP server. The values must be in the format `$context.variables.<name_of_variable>` and can be set in the session variables.
+        description: The custom headers to send in the request to the MCP server. The values must be in the format `$context.variables.<name_of_variable>` and can be set in the session variables.
         output: true
       - name: state
         type: String
@@ -1195,7 +1185,7 @@ properties:
       Format:
       `projects/{project}/locations/{location}/apps/{app}/tools/{tool}`
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: openApiTool
     type: NestedObject
     description: A remote API tool defined by an OpenAPI schema.
@@ -1277,13 +1267,11 @@ properties:
                   type: String
               - name: tokenEndpoint
                 type: String
-                description: The token endpoint in the OAuth provider to exchange for an
-                  access token.
+                description: The token endpoint in the OAuth provider to exchange for an access token.
                 output: true
           - name: serviceAccountAuthConfig
             type: NestedObject
-            description: Configurations for authentication using a custom service
-              account.
+            description: Configurations for authentication using a custom service account.
             output: true
             properties:
               - name: serviceAccount
@@ -1306,7 +1294,7 @@ properties:
             allow_empty_object: true
             send_empty_value: true
             output: true
-            properties: []  # Explicitly show no properties
+            properties: [] # Explicitly show no properties
       - name: description
         type: String
         description: |-
@@ -1316,8 +1304,7 @@ properties:
         output: true
       - name: ignoreUnknownFields
         type: Boolean
-        description: If true, the agent will ignore unknown fields in the API
-          response.
+        description: If true, the agent will ignore unknown fields in the API response.
         output: true
       - name: name
         type: String
@@ -1528,13 +1515,11 @@ properties:
     properties:
       - name: description
         type: String
-        description: |-
-          The description of the system tool.
+        description: The description of the system tool.
         output: true
       - name: name
         type: String
-        description: |-
-          The name of the system tool.
+        description: The name of the system tool.
         output: true
   - name: timeout
     type: String
@@ -1586,27 +1571,27 @@ properties:
           APPOINTMENT_SCHEDULER
           CONTACT_FORM
         enum_values:
-          - 'WIDGET_TYPE_UNSPECIFIED'
-          - 'CUSTOM'
-          - 'PRODUCT_CAROUSEL'
-          - 'PRODUCT_DETAILS'
-          - 'QUICK_ACTIONS'
-          - 'PRODUCT_COMPARISON'
-          - 'ADVANCED_PRODUCT_DETAILS'
-          - 'SHORT_FORM'
-          - 'OVERALL_SATISFACTION'
-          - 'ORDER_SUMMARY'
-          - 'APPOINTMENT_DETAILS'
-          - 'APPOINTMENT_SCHEDULER'
-          - 'CONTACT_FORM'
+          - WIDGET_TYPE_UNSPECIFIED
+          - CUSTOM
+          - PRODUCT_CAROUSEL
+          - PRODUCT_DETAILS
+          - QUICK_ACTIONS
+          - PRODUCT_COMPARISON
+          - ADVANCED_PRODUCT_DETAILS
+          - SHORT_FORM
+          - OVERALL_SATISFACTION
+          - ORDER_SUMMARY
+          - APPOINTMENT_DETAILS
+          - APPOINTMENT_SCHEDULER
+          - CONTACT_FORM
       - name: uiConfig
         type: String
         description: Optional. Configuration for rendering the widget. Represents a JSON object.
-        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
         validation:
-          function: 'validation.StringIsJSON'
-        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          function: validation.StringIsJSON
+        custom_expand: templates/terraform/custom_expand/json_value.tmpl
+        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
       - name: dataMapping
         type: NestedObject
         description: |-
@@ -1653,9 +1638,9 @@ properties:
               FIELD_MAPPING
               PYTHON_SCRIPT
             enum_values:
-              - 'MODE_UNSPECIFIED'
-              - 'FIELD_MAPPING'
-              - 'PYTHON_SCRIPT'
+              - MODE_UNSPECIFIED
+              - FIELD_MAPPING
+              - PYTHON_SCRIPT
       - name: textResponseConfig
         type: NestedObject
         description: Optional. Configuration for always-included text responses.
@@ -1670,10 +1655,10 @@ properties:
               LLM_GENERATED
               STATIC
             enum_values:
-              - 'TYPE_UNSPECIFIED'
-              - 'NONE'
-              - 'LLM_GENERATED'
-              - 'STATIC'
+              - TYPE_UNSPECIFIED
+              - NONE
+              - LLM_GENERATED
+              - STATIC
           - name: staticText
             type: String
             description: Optional. The static text response to return when type is STATIC.
@@ -1692,20 +1677,19 @@ properties:
               Defines the schema for additional properties allowed in an object.
               The value must be a valid JSON string representing the Schema object.
               (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: anyOf
             type: String
-            description: The instance value should be valid against at least
-              one of the schemas in this list.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            description: The instance value should be valid against at least one of the schemas in this list.
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: default
             type: String
             description: |-
@@ -1713,20 +1697,19 @@ properties:
               which can be either null, a number, a string, a boolean, a struct,
               or a list of values. The provided default value must be compatible
               with the defined 'type' and other schema constraints.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: defs
             type: String
-            description: A map of definitions for use by ref. Only allowed at the root
-              of the schema.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: description
             type: String
             description: The description of the data.
@@ -1744,11 +1727,11 @@ properties:
           - name: items
             type: String
             description: Schema of the elements of Type.ARRAY.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: maxItems
             type: Integer
             description: Maximum number of the elements for Type.ARRAY. (int64 format)
@@ -1767,19 +1750,19 @@ properties:
           - name: prefixItems
             type: String
             description: Schemas of initial elements of Type.ARRAY.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: properties
             type: String
             description: Properties of Type.OBJECT.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
-              function: 'validation.StringIsJSON'
+              function: validation.StringIsJSON
           - name: ref
             type: String
             description: |-
@@ -1823,5 +1806,4 @@ properties:
             required: true
           - name: uniqueItems
             type: Boolean
-            description: Indicate the items in the array must be unique. Only applies
-              to TYPE.ARRAY.
+            description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.

@@ -12,33 +12,35 @@
 # limitations under the License.
 
 ---
-name: 'SecuritySettings'
+name: SecuritySettings
 description: |
   Security settings for a location in Customer Engagement Suite.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/customer-engagement-ai/docs'
-  api: 'https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rest/v1beta/SecuritySettings'
-base_url: 'projects/{{project}}/locations/{{location}}/securitySettings'
-self_link: 'projects/{{project}}/locations/{{location}}/securitySettings'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
+    Official Documentation: https://cloud.google.com/customer-engagement-ai/docs
+  api: https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/rest/v1beta/SecuritySettings
+base_url: projects/{{project}}/locations/{{location}}/securitySettings
+min_version: beta
+self_link: projects/{{project}}/locations/{{location}}/securitySettings
 update_mask: true
+create_verb: PATCH
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/securitySettings'
+  - projects/{{project}}/locations/{{location}}/securitySettings
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-exclude_delete: true
 exclude_sweeper: true
-min_version: beta
-examples:
-  - name: 'ces_security_settings_basic'
-    primary_resource_id: 'security_settings'
+exclude_delete: true
+samples:
+  - name: ces_security_settings_basic
+    primary_resource_id: security_settings
     exclude_test: true
+    steps:
+      - name: ces_security_settings_basic
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     description: |
@@ -46,42 +48,42 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Identifier. The unique identifier of the security settings.
       Format: projects/{project}/locations/{location}/securitySettings
     output: true
-  - name: 'endpointControlPolicy'
+  - name: endpointControlPolicy
     type: NestedObject
     description: |
       Optional. Endpoint control related settings.
     properties:
-      - name: 'enforcementScope'
+      - name: enforcementScope
         type: Enum
         description: |
           Optional. The scope in which this policy's allowedOrigins list is enforced.
         enum_values:
-          - 'ENFORCEMENT_SCOPE_UNSPECIFIED'
-          - 'VPCSC_ONLY'
-          - 'ALWAYS'
-      - name: 'allowedOrigins'
+          - ENFORCEMENT_SCOPE_UNSPECIFIED
+          - VPCSC_ONLY
+          - ALWAYS
+      - name: allowedOrigins
         type: Array
         description: |
           Optional. The allowed HTTP(s) origins that tools in the App are able to directly call.
         item_type:
           type: String
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       Output only. Timestamp when the security settings were created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       Output only. Timestamp when the security settings were last updated.
     output: true
-  - name: 'etag'
+  - name: etag
     type: String
     description: |
       Output only. Etag of the resource.

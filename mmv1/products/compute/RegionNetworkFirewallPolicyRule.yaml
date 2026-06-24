@@ -12,27 +12,26 @@
 # limitations under the License.
 
 ---
-name: 'RegionNetworkFirewallPolicyRule'
+name: RegionNetworkFirewallPolicyRule
 api_resource_type_kind: FirewallPolicy
-api_resource_field: 'rules'
-kind: 'compute#firewallPolicyRule'
+api_resource_field: rules
 description: |
   Represents a rule that describes one or more match conditions along with the action to be taken when traffic matches this condition (allow or deny).
 references:
   guides:
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionNetworkFirewallPolicies/addRule'
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/regionNetworkFirewallPolicies/addRule
 docs:
-id_format: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/{{priority}}'
-base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}'
-self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getRule?priority={{priority}}'
-create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/addRule'
-update_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/patchRule?priority={{priority}}'
-update_verb: 'POST'
-delete_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}'
-delete_verb: 'POST'
-legacy_long_form_project: true
+base_url: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}
+self_link: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getRule?priority={{priority}}
+create_url: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/addRule
+delete_url: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}
+update_url: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/patchRule?priority={{priority}}
+update_verb: POST
+delete_verb: POST
+kind: compute#firewallPolicyRule
+id_format: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/{{priority}}
 import_format:
-  - 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/{{priority}}'
+  - projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/{{priority}}
   - '{{project}}/{{region}}/{{firewall_policy}}/{{priority}}'
   - '{{region}}/{{firewall_policy}}/{{priority}}'
   - '{{firewall_policy}}/{{priority}}'
@@ -40,123 +39,139 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_diff:
+  - tpgresource.DefaultProviderRegion
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
+legacy_long_form_project: true
 custom_code:
-  update_encoder: 'templates/terraform/update_encoder/compute_region_network_firewall_policy_rule.go.tmpl'
-custom_diff:
-  - 'tpgresource.DefaultProviderRegion'
-examples:
-  - name: 'region_network_firewall_policy_rule'
-    primary_resource_id: 'primary'
-    vars:
-      address_group: 'address-group'
-      fw_policy: 'fw-policy'
-      network: 'network'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_vars_overrides:
-      # for backward compatible
-      network: '"network" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
-      service_acct: 'SERVICE_ACCT'
-  - name: 'region_network_firewall_policy_rule_network_scope_egress'
-    primary_resource_id: 'primary'
-    vars:
-      fw_policy: 'fw-policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
+  update_encoder: templates/terraform/update_encoder/compute_region_network_firewall_policy_rule.go.tmpl
+samples:
+  - name: region_network_firewall_policy_rule
+    primary_resource_id: primary
+    steps:
+      - name: region_network_firewall_policy_rule
+        resource_id_vars:
+          address_group: address-group
+          fw_policy: fw-policy
+          network: network
+          tag_key: tag-key
+          tag_value: tag-value
+        test_vars_overrides:
+          # for backward compatible
+          network: '"network" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
+          project_name: PROJECT_NAME
+          region: REGION
+          service_acct: SERVICE_ACCT
+  - name: region_network_firewall_policy_rule_network_scope_egress
+    primary_resource_id: primary
     min_version: beta
-  - name: 'region_network_firewall_policy_rule_network_scope_ingress'
-    primary_resource_id: 'primary'
-    vars:
-      fw_policy: 'fw-policy'
-      network: 'network'
-    test_vars_overrides:
-      # for backward compatible
-      network: '"network" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
+    steps:
+      - name: region_network_firewall_policy_rule_network_scope_egress
+        resource_id_vars:
+          fw_policy: fw-policy
+        test_env_vars:
+          org_id: ORG_ID
+          project_name: PROJECT_NAME
+          region: REGION
+        min_version: beta
+  - name: region_network_firewall_policy_rule_network_scope_ingress
+    primary_resource_id: primary
     min_version: beta
-  - name: 'region_network_firewall_policy_rule_network_context_egress'
-    primary_resource_id: 'primary'
-    vars:
-      fw_policy: 'fw-policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
-  - name: 'region_network_firewall_policy_rule_network_context_ingress'
-    primary_resource_id: 'primary'
-    vars:
-      fw_policy: 'fw-policy'
-      network: 'network'
-    test_vars_overrides:
-      # for backward compatible
-      network: '"network" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
-  - name: 'firewall_policy_rule_target_type_internal_managed_lb_instance_regional'
-    primary_resource_id: 'internal_managed_lb_rule'
-    min_version: "beta"
-    vars:
-      folder: 'folder'
-      fw_policy: 'fw-policy'
-    test_vars_overrides:
-      # for backward compatible
-      folder: '"folder" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: region_network_firewall_policy_rule_network_scope_ingress
+        resource_id_vars:
+          fw_policy: fw-policy
+          network: network
+        test_vars_overrides:
+          # for backward compatible
+          network: '"network" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
+          project_name: PROJECT_NAME
+          region: REGION
+        min_version: beta
+  - name: region_network_firewall_policy_rule_network_context_egress
+    primary_resource_id: primary
+    steps:
+      - name: region_network_firewall_policy_rule_network_context_egress
+        resource_id_vars:
+          fw_policy: fw-policy
+        test_env_vars:
+          org_id: ORG_ID
+          project_name: PROJECT_NAME
+          region: REGION
+  - name: region_network_firewall_policy_rule_network_context_ingress
+    primary_resource_id: primary
+    steps:
+      - name: region_network_firewall_policy_rule_network_context_ingress
+        resource_id_vars:
+          fw_policy: fw-policy
+          network: network
+        test_vars_overrides:
+          # for backward compatible
+          network: '"network" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
+          project_name: PROJECT_NAME
+          region: REGION
+  - name: firewall_policy_rule_target_type_internal_managed_lb_instance_regional
+    primary_resource_id: internal_managed_lb_rule
+    min_version: beta
+    steps:
+      - name: firewall_policy_rule_target_type_internal_managed_lb_instance_regional
+        min_version: beta
+        resource_id_vars:
+          folder: folder
+          fw_policy: fw-policy
+        test_vars_overrides:
+          # for backward compatible
+          folder: '"folder" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
-  - name: 'firewallPolicy'
+  - name: firewallPolicy
     type: ResourceRef
     description: |
       The firewall policy of the resource.
     url_param_only: true
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
-    resource: 'RegionNetworkFirewallPolicy'
-    imports: 'name'
-  - name: 'region'
+    diff_suppress_func: tpgresource.CompareResourceNames
+    resource: RegionNetworkFirewallPolicy
+    imports: name
+  - name: region
     type: String
-    description: 'The location of this resource.'
+    description: The location of this resource.
     url_param_only: true
     immutable: true
     default_from_api: true
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: String
     description: |
       Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'kind'
+  - name: kind
     type: String
     description: |
       Type of the resource. Always `compute#firewallPolicyRule` for firewall policy rules
     output: true
-  - name: 'ruleName'
+  - name: ruleName
     type: String
     description: |
       An optional name for the rule. This field is not a unique identifier and can be updated.
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description for this resource.'
-  - name: 'priority'
+    description: An optional description for this resource.
+  - name: priority
     type: Integer
     immutable: true
     description: |
@@ -164,41 +179,41 @@ properties:
       The priority must be a positive value between 0 and 2147483647.
       Rules are evaluated from highest to lowest priority where 0 is the highest priority and 2147483647 is the lowest prority.
     required: true
-  - name: 'match'
+  - name: match
     type: NestedObject
     description: |
       A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
     required: true
     properties:
-      - name: 'srcIpRanges'
+      - name: srcIpRanges
         type: Array
         send_empty_value: true
         description: |
           CIDR IP address range. Maximum number of source CIDR IP ranges allowed is 5000.
         item_type:
           type: String
-      - name: 'destIpRanges'
+      - name: destIpRanges
         type: Array
         send_empty_value: true
         description: |
           CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
         item_type:
           type: String
-      - name: 'srcNetworkScope'
+      - name: srcNetworkScope
         type: Enum
         description: |
           Network scope of the traffic source.
         min_version: beta
         default_from_api: true
         enum_values:
-          - 'UNSPECIFIED'
-          - 'INTERNET'
-          - 'INTRA_VPC'
-          - 'NON_INTERNET'
-          - 'VPC_NETWORKS'
+          - UNSPECIFIED
+          - INTERNET
+          - INTRA_VPC
+          - NON_INTERNET
+          - VPC_NETWORKS
         conflicts:
           - match.0.src_network_context
-      - name: 'srcNetworkContext'
+      - name: srcNetworkContext
         conflicts:
           - match.0.src_network_scope
         type: Enum
@@ -206,45 +221,45 @@ properties:
         description: |
           Network context of the traffic source.
         enum_values:
-          - 'UNSPECIFIED'
-          - 'INTERNET'
-          - 'INTRA_VPC'
-          - 'NON_INTERNET'
-          - 'VPC_NETWORKS'
-      - name: 'srcNetworks'
+          - UNSPECIFIED
+          - INTERNET
+          - INTRA_VPC
+          - NON_INTERNET
+          - VPC_NETWORKS
+      - name: srcNetworks
         type: Array
         description: |
           Networks of the traffic source. It can be either a full or partial url.
         item_type:
           type: String
-      - name: 'destNetworkScope'
+      - name: destNetworkScope
         type: Enum
         description: |
           Network scope of the traffic destination.
         min_version: beta
         default_from_api: true
         enum_values:
-          - 'UNSPECIFIED'
-          - 'INTERNET'
-          - 'INTRA_VPC'
-          - 'NON_INTERNET'
-          - 'VPC_NETWORKS'
+          - UNSPECIFIED
+          - INTERNET
+          - INTRA_VPC
+          - NON_INTERNET
+          - VPC_NETWORKS
         conflicts:
           - match.0.src_network_context
-      - name: 'destNetworkContext'
+      - name: destNetworkContext
         type: Enum
         default_from_api: true
         description: |
           Network context of the traffic destination.
         enum_values:
-          - 'UNSPECIFIED'
-          - 'INTERNET'
-          - 'INTRA_VPC'
-          - 'NON_INTERNET'
-          - 'VPC_NETWORKS'
+          - UNSPECIFIED
+          - INTERNET
+          - INTRA_VPC
+          - NON_INTERNET
+          - VPC_NETWORKS
         conflicts:
           - match.0.src_network_scope
-      - name: 'layer4Configs'
+      - name: layer4Configs
         type: Array
         send_empty_value: true
         description: |
@@ -253,20 +268,20 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'ipProtocol'
+            - name: ipProtocol
               type: String
               description: |
                 The IP protocol to which this rule applies. The protocol type is required when creating a firewall rule.
                 This value can either be one of the following well known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp), or the IP protocol number.
               required: true
-            - name: 'ports'
+            - name: ports
               type: Array
               description: |
                 An optional list of ports to which this rule applies. This field is only applicable for UDP or TCP protocol. Each entry must be either an integer or a range. If not specified, this rule applies to connections through any port.
                 Example inputs include: ["22"], ["80","443"], and ["12345-12349"].
               item_type:
                 type: String
-      - name: 'srcSecureTags'
+      - name: srcSecureTags
         type: Array
         send_empty_value: true
         description: |
@@ -274,80 +289,80 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'name'
+            - name: name
               type: String
               description: |
                 Name of the secure tag, created with TagManager's TagValue API.
-              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-            - name: 'state'
+              diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+            - name: state
               type: Enum
               description: |
                 State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
               output: true
               enum_values:
-                - 'EFFECTIVE'
-                - 'INEFFECTIVE'
-      - name: 'destAddressGroups'
+                - EFFECTIVE
+                - INEFFECTIVE
+      - name: destAddressGroups
         type: Array
         send_empty_value: true
         description: |
           Address groups which should be matched against the traffic destination. Maximum number of destination address groups is 10.
         item_type:
           type: String
-      - name: 'srcAddressGroups'
+      - name: srcAddressGroups
         type: Array
         send_empty_value: true
         description: |
           Address groups which should be matched against the traffic source. Maximum number of source address groups is 10.
         item_type:
           type: String
-      - name: 'srcFqdns'
+      - name: srcFqdns
         type: Array
         send_empty_value: true
         description: |
           Fully Qualified Domain Name (FQDN) which should be matched against traffic source. Maximum number of source fqdn allowed is 100.
         item_type:
           type: String
-      - name: 'destFqdns'
+      - name: destFqdns
         type: Array
         send_empty_value: true
         description: |
           Fully Qualified Domain Name (FQDN) which should be matched against traffic destination. Maximum number of destination fqdn allowed is 100.
         item_type:
           type: String
-      - name: 'srcRegionCodes'
+      - name: srcRegionCodes
         type: Array
         send_empty_value: true
         description: |
           Region codes whose IP addresses will be used to match for source of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of source region codes allowed is 5000.
         item_type:
           type: String
-      - name: 'destRegionCodes'
+      - name: destRegionCodes
         type: Array
         send_empty_value: true
         description: |
           Region codes whose IP addresses will be used to match for destination of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of dest region codes allowed is 5000.
         item_type:
           type: String
-      - name: 'destThreatIntelligences'
+      - name: destThreatIntelligences
         type: Array
         send_empty_value: true
         description: |
           Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic destination.
         item_type:
           type: String
-      - name: 'srcThreatIntelligences'
+      - name: srcThreatIntelligences
         type: Array
         send_empty_value: true
         description: |
           Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic source.
         item_type:
           type: String
-  - name: 'action'
+  - name: action
     type: String
-    description: 'The Action to perform when the client connection triggers the rule. Valid actions are "allow", "deny", "goto_next" and "apply_security_profile_group".'
+    description: The Action to perform when the client connection triggers the rule. Valid actions are "allow", "deny", "goto_next" and "apply_security_profile_group".
     required: true
-  - name: 'securityProfileGroup'
+  - name: securityProfileGroup
     type: String
     description: |
       A fully-qualified URL of a SecurityProfile resource instance.
@@ -355,20 +370,20 @@ properties:
       Must be specified if action = 'apply_security_profile_group' and cannot be specified for other actions.
 
       Security Profile Group and Firewall Policy Rule must be in the same scope.
-  - name: 'tlsInspect'
+  - name: tlsInspect
     type: Boolean
     description: |
       Boolean flag indicating if the traffic should be TLS decrypted.
       Can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
-  - name: 'direction'
+  - name: direction
     type: Enum
     description: |
       The direction in which this rule applies.
     required: true
     enum_values:
-      - 'INGRESS'
-      - 'EGRESS'
-  - name: 'enableLogging'
+      - INGRESS
+      - EGRESS
+  - name: enableLogging
     type: Boolean
     send_empty_value: true
     description: |
@@ -376,19 +391,19 @@ properties:
       If logging is enabled, logs will be exported to the configured export destination in Stackdriver.
       Logs may be exported to BigQuery or Pub/Sub.
       Note: you cannot enable logging on "goto_next" rules.
-  - name: 'ruleTupleCount'
+  - name: ruleTupleCount
     type: Integer
     description: |
       Calculation of the complexity of a single firewall policy rule.
     output: true
-  - name: 'targetServiceAccounts'
+  - name: targetServiceAccounts
     type: Array
     send_empty_value: true
     description: |
       A list of service accounts indicating the sets of instances that are applied with this rule.
     item_type:
       type: String
-  - name: 'targetSecureTags'
+  - name: targetSecureTags
     type: Array
     send_empty_value: true
     description: |
@@ -398,26 +413,26 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: String
           description: |
             Name of the secure tag, created with TagManager's TagValue API.
-          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        - name: 'state'
+          diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+        - name: state
           type: Enum
           description: |
             State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
           output: true
           enum_values:
-            - 'EFFECTIVE'
-            - 'INEFFECTIVE'
-  - name: 'disabled'
+            - EFFECTIVE
+            - INEFFECTIVE
+  - name: disabled
     type: Boolean
     description: |
       Denotes whether the firewall policy rule is disabled.
       When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.
       If this is unspecified, the firewall policy rule will be enabled.
-  - name: 'targetType'
+  - name: targetType
     type: Enum
     description: |
       Target types of the firewall policy rule.
@@ -426,9 +441,9 @@ properties:
     required: false
     default_from_api: true
     enum_values:
-      - 'INSTANCES'
-      - 'INTERNAL_MANAGED_LB'
-  - name: 'targetForwardingRules'
+      - INSTANCES
+      - INTERNAL_MANAGED_LB
+  - name: targetForwardingRules
     type: Array
     required: false
     description: |
@@ -441,4 +456,4 @@ properties:
       - projects/project/regions/region/forwardingRules/forwardingRule
     item_type:
       type: String
-    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+    diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths

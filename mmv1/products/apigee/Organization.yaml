@@ -12,140 +12,174 @@
 # limitations under the License.
 
 ---
-name: 'Organization'
+name: Organization
 description: |
   An `Organization` is the top-level container in Apigee.
 references:
   guides:
-    'Creating an API organization': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
-    'Setting a custom endpoint (required for data residency)': 'https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#advanced-settings-configuration'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations'
+    Creating an API organization: https://cloud.google.com/apigee/docs/api-platform/get-started/create-org
+    Setting a custom endpoint (required for data residency): https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#advanced-settings-configuration
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations
 docs:
-base_url: 'organizations'
-self_link: 'organizations/{{name}}'
-create_url: 'organizations?parent=projects/{{project_id}}'
-delete_url: 'organizations/{{name}}?retention={{retention}}'
+base_url: organizations
+self_link: organizations/{{name}}
+create_url: organizations?parent=projects/{{project_id}}
+delete_url: organizations/{{name}}?retention={{retention}}
 timeouts:
   insert_minutes: 45
   update_minutes: 45
   delete_minutes: 45
-autogen_async: true
+sweeper:
+  identifier_field: organization
 async:
-  # b/242358013 blocks adding delete operation support. Once that's resolved, we can also remove sleep-after-delete from tests.
-  actions: ['create']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
-    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 45
       update_minutes: 45
       delete_minutes: 45
+    base_url: '{{op_id}}'
+  # b/242358013 blocks adding delete operation support. Once that's resolved, we can also remove sleep-after-delete from tests.
+  actions: [create]
   result:
     resource_inside_response: true
-sweeper:
-  identifier_field: "organization"
+autogen_async: true
 custom_code:
-  encoder: 'templates/terraform/encoders/apigee_organization.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/apigee_organization.go.tmpl'
-examples:
-  - name: 'apigee_organization_cloud_basic'
+  encoder: templates/terraform/encoders/apigee_organization.go.tmpl
+  custom_import: templates/terraform/custom_import/apigee_organization.go.tmpl
+samples:
+  - name: apigee_organization_cloud_basic
     exclude_test: true
+    steps:
+      - name: apigee_organization_cloud_basic
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
-  - name: 'apigee_organization_cloud_basic_test'
-    primary_resource_id: 'org'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'properties'
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: 'apigee_organization_cloud_basic_disable_vpc_peering'
+  - name: apigee_organization_cloud_basic_test
+    primary_resource_id: org
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: apigee_organization_cloud_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        ignore_read_extra:
+          - properties
+  - name: apigee_organization_cloud_basic_disable_vpc_peering
     exclude_test: true
+    steps:
+      - name: apigee_organization_cloud_basic_disable_vpc_peering
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
-  - name: 'apigee_organization_cloud_basic_disable_vpc_peering_test'
-    primary_resource_id: 'org'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'properties'
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: 'apigee_organization_cloud_basic_data_residency'
+  - name: apigee_organization_cloud_basic_disable_vpc_peering_test
+    primary_resource_id: org
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: apigee_organization_cloud_basic_disable_vpc_peering_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        ignore_read_extra:
+          - properties
+  - name: apigee_organization_cloud_basic_data_residency
     exclude_test: true
+    steps:
+      - name: apigee_organization_cloud_basic_data_residency
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
-  - name: 'apigee_organization_cloud_basic_data_residency_test'
-    primary_resource_id: 'org'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'properties'
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: 'apigee_organization_cloud_full'
+  - name: apigee_organization_cloud_basic_data_residency_test
+    primary_resource_id: org
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: apigee_organization_cloud_basic_data_residency_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        ignore_read_extra:
+          - properties
+  - name: apigee_organization_cloud_full
     exclude_test: true
+    steps:
+      - name: apigee_organization_cloud_full
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
-  - name: 'apigee_organization_cloud_full_test'
-    primary_resource_id: 'org'
+  - name: apigee_organization_cloud_full_test
+    primary_resource_id: org
     # While all Apigee resources in this test are in the GA API, we
     # depend on a service identity resource which is only available
     # in the beta provider.
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'properties'
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: 'apigee_organization_cloud_full_disable_vpc_peering'
+    min_version: beta
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: apigee_organization_cloud_full_test
+        # While all Apigee resources in this test are in the GA API, we
+        # depend on a service identity resource which is only available
+        # in the beta provider.
+        min_version: beta
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        ignore_read_extra:
+          - properties
+  - name: apigee_organization_cloud_full_disable_vpc_peering
     exclude_test: true
+    steps:
+      - name: apigee_organization_cloud_full_disable_vpc_peering
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
-  - name: 'apigee_organization_cloud_full_disable_vpc_peering_test'
-    primary_resource_id: 'org'
+  - name: apigee_organization_cloud_full_disable_vpc_peering_test
+    primary_resource_id: org
     # While all Apigee resources in this test are in the GA API, we
     # depend on a service identity resource which is only available
     # in the beta provider.
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'properties'
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: 'apigee_organization_retention_test'
-    primary_resource_id: 'org'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: 'apigee_organization_drz_test'
-    primary_resource_id: 'org'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
+    min_version: beta
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: apigee_organization_cloud_full_disable_vpc_peering_test
+        # While all Apigee resources in this test are in the GA API, we
+        # depend on a service identity resource which is only available
+        # in the beta provider.
+        min_version: beta
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        ignore_read_extra:
+          - properties
+  - name: apigee_organization_retention_test
+    primary_resource_id: org
+    min_version: beta
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: apigee_organization_retention_test
+        min_version: beta
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  - name: apigee_organization_drz_test
+    primary_resource_id: org
+    min_version: beta
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: apigee_organization_drz_test
+        min_version: beta
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
 parameters:
-  - name: 'projectId'
+  - name: projectId
     type: String
     description: |
       The project ID associated with the Apigee organization.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'retention'
+  - name: retention
     type: Enum
     description: |
       Optional. This setting is applicable only for organizations that are soft-deleted (i.e., BillingType
@@ -154,54 +188,54 @@ parameters:
       After this period, the Organization will no longer be able to be restored.
     url_param_only: true
     required: false
-    default_value: "DELETION_RETENTION_UNSPECIFIED"
+    default_value: DELETION_RETENTION_UNSPECIFIED
     enum_values:
-      - 'DELETION_RETENTION_UNSPECIFIED'
-      - 'MINIMUM'
+      - DELETION_RETENTION_UNSPECIFIED
+      - MINIMUM
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Output only. Name of the Apigee organization.
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       The display name of the Apigee organization.
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description of the Apigee organization.
-  - name: 'analyticsRegion'
+  - name: analyticsRegion
     type: String
     description: |
       Primary GCP region for analytics data storage. For valid values, see [Create an Apigee organization](https://cloud.google.com/apigee/docs/api-platform/get-started/create-org).
     immutable: true
-  - name: 'apiConsumerDataLocation'
+  - name: apiConsumerDataLocation
     type: String
     description: |
       This field is needed only for customers using non-default data residency regions.
       Apigee stores some control plane data only in single region.
       This field determines which single region Apigee should use.
     immutable: true
-  - name: 'apiConsumerDataEncryptionKeyName'
+  - name: apiConsumerDataEncryptionKeyName
     type: String
     description: |
       Cloud KMS key name used for encrypting API consumer data.
     immutable: true
-  - name: 'controlPlaneEncryptionKeyName'
+  - name: controlPlaneEncryptionKeyName
     type: String
     description: |
       Cloud KMS key name used for encrypting control plane data that is stored in a multi region.
       Only used for the data residency region "US" or "EU".
     immutable: true
-  - name: 'authorizedNetwork'
+  - name: authorizedNetwork
     type: String
     description: |
       Compute Engine network used for Service Networking to be peered with Apigee runtime instances.
       See [Getting started with the Service Networking API](https://cloud.google.com/service-infrastructure/docs/service-networking/getting-started).
       Valid only when `RuntimeType` is set to CLOUD. The value can be updated only when there are no runtime instances. For example: "default".
-  - name: 'disableVpcPeering'
+  - name: disableVpcPeering
     type: Boolean
     description: |
       Flag that specifies whether the VPC Peering through Private Google Access should be
@@ -209,34 +243,34 @@ properties:
       on the consumer project is not provided, in which case the flag should be set to `true`.
       Valid only when `RuntimeType` is set to CLOUD. The value must be set before the creation
       of any Apigee runtime instance and can be updated only when there are no runtime instances.
-  - name: 'runtimeType'
+  - name: runtimeType
     type: Enum
     description: |
       Runtime type of the Apigee organization based on the Apigee subscription purchased.
     immutable: true
-    default_value: "CLOUD"
+    default_value: CLOUD
     enum_values:
-      - 'CLOUD'
-      - 'HYBRID'
-  - name: 'subscriptionType'
+      - CLOUD
+      - HYBRID
+  - name: subscriptionType
     type: String
     description: |
       Output only. Subscription type of the Apigee organization.
       Valid values include trial (free, limited, and for evaluation purposes only) or paid (full subscription has been purchased).
     output: true
-  - name: 'billingType'
+  - name: billingType
     type: String
     description: |
       Billing type of the Apigee organization. See [Apigee pricing](https://cloud.google.com/apigee/pricing).
     immutable: true
     default_from_api: true
-  - name: 'caCertificate'
+  - name: caCertificate
     type: String
     description: |
       Output only. Base64-encoded public certificate for the root CA of the Apigee organization.
       Valid only when `RuntimeType` is CLOUD. A base64-encoded string.
     output: true
-  - name: 'runtimeDatabaseEncryptionKeyName'
+  - name: runtimeDatabaseEncryptionKeyName
     type: String
     description: |
       Cloud KMS key name used for encrypting the data that is stored and replicated across runtime instances.
@@ -244,25 +278,25 @@ properties:
       If not specified, a Google-Managed encryption key will be used.
       Valid only when `RuntimeType` is CLOUD. For example: `projects/foo/locations/us/keyRings/bar/cryptoKeys/baz`.
     immutable: true
-  - name: 'properties'
+  - name: properties
     type: NestedObject
     description: Properties defined in the Apigee organization profile.
     default_from_api: true
     properties:
-      - name: 'property'
+      - name: property
         type: Array
         description: List of all properties in the object.
-        custom_flatten: 'templates/terraform/custom_flatten/apigee_organization_property.go.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/apigee_organization_property.go.tmpl
         item_type:
           type: NestedObject
           properties:
-            - name: 'name'
+            - name: name
               type: String
               description: Name of the property.
-            - name: 'value'
+            - name: value
               type: String
               description: Value of the property.
-  - name: 'apigeeProjectId'
+  - name: apigeeProjectId
     type: String
     description: |
       Output only. Project ID of the Apigee Tenant Project.

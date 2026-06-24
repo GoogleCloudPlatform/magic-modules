@@ -12,100 +12,111 @@
 # limitations under the License.
 
 ---
-name: 'TargetHttpsProxy'
-kind: 'compute#targetHttpsProxy'
+name: TargetHttpsProxy
 description: |
   Represents a TargetHttpsProxy resource, which is used by one or more
   global forwarding rule to route incoming HTTPS requests to a URL map.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
-  api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpsProxies'
+    Official Documentation: https://cloud.google.com/compute/docs/load-balancing/http/target-proxies
+  api: https://cloud.google.com/compute/docs/reference/v1/targetHttpsProxies
 docs:
-base_url: 'projects/{{project}}/global/targetHttpsProxies'
-has_self_link: true
+base_url: projects/{{project}}/global/targetHttpsProxies
 immutable: true
-datasource_experimental:
-  generate: true
+has_self_link: true
+collection_url_key: items
+kind: compute#targetHttpsProxy
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+datasource_experimental:
+  generate: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
-collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
-  encoder: 'templates/terraform/encoders/compute_target_https_proxy.go.tmpl'
+  encoder: templates/terraform/encoders/compute_target_https_proxy.go.tmpl
   # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource
   # is marked to be immutable, but we have a field specific update that overrides it (e.g certifiacteManagerCertificates).
   # This causes the encoder logic to not be applied during update.
-  update_encoder: 'templates/terraform/encoders/compute_target_https_proxy.go.tmpl'
-  decoder: 'templates/terraform/decoders/compute_target_https_proxy.go.tmpl'
-examples:
-  - name: 'target_https_proxy_basic'
-    primary_resource_id: 'default'
-    vars:
-      target_https_proxy_name: 'test-proxy'
-      ssl_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-  - name: 'target_https_proxy_http_keep_alive_timeout'
-    primary_resource_id: 'default'
-    vars:
-      target_https_proxy_name: 'test-http-keep-alive-timeout-proxy'
-      ssl_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-  - name: 'target_https_proxy_mtls'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      target_https_proxy_name: 'test-mtls-proxy'
-      ssl_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-      server_tls_policy_name: 'my-tls-policy'
-      trust_config_name: 'my-trust-config'
-  - name: 'target_https_proxy_certificate_manager_certificate'
-    primary_resource_id: 'default'
-    vars:
-      target_https_proxy_name: 'target-http-proxy'
-      certificate_manager_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-  - name: 'target_https_proxy_fingerprint'
-    primary_resource_id: 'default'
-    vars:
-      target_https_proxy_name: 'test-fingerprint-proxy'
-      ssl_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
+  update_encoder: templates/terraform/encoders/compute_target_https_proxy.go.tmpl
+  decoder: templates/terraform/decoders/compute_target_https_proxy.go.tmpl
+samples:
+  - name: target_https_proxy_basic
+    primary_resource_id: default
+    steps:
+      - name: target_https_proxy_basic
+        resource_id_vars:
+          target_https_proxy_name: test-proxy
+          ssl_certificate_name: my-certificate
+          url_map_name: url-map
+          backend_service_name: backend-service
+          http_health_check_name: http-health-check
+  - name: target_https_proxy_http_keep_alive_timeout
+    primary_resource_id: default
+    steps:
+      - name: target_https_proxy_http_keep_alive_timeout
+        resource_id_vars:
+          target_https_proxy_name: test-http-keep-alive-timeout-proxy
+          ssl_certificate_name: my-certificate
+          url_map_name: url-map
+          backend_service_name: backend-service
+          http_health_check_name: http-health-check
+  - name: target_https_proxy_mtls
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: target_https_proxy_mtls
+        min_version: beta
+        resource_id_vars:
+          target_https_proxy_name: test-mtls-proxy
+          ssl_certificate_name: my-certificate
+          url_map_name: url-map
+          backend_service_name: backend-service
+          http_health_check_name: http-health-check
+          server_tls_policy_name: my-tls-policy
+          trust_config_name: my-trust-config
+  - name: target_https_proxy_certificate_manager_certificate
+    primary_resource_id: default
+    steps:
+      - name: target_https_proxy_certificate_manager_certificate
+        resource_id_vars:
+          target_https_proxy_name: target-http-proxy
+          certificate_manager_certificate_name: my-certificate
+          url_map_name: url-map
+          backend_service_name: backend-service
+  - name: target_https_proxy_fingerprint
+    primary_resource_id: default
+    steps:
+      - name: target_https_proxy_fingerprint
+        resource_id_vars:
+          target_https_proxy_name: test-fingerprint-proxy
+          ssl_certificate_name: my-certificate
+          url_map_name: url-map
+          backend_service_name: backend-service
+          http_health_check_name: http-health-check
 parameters:
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     immutable: true
-  - name: 'proxyId'
+  - name: proxyId
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     api_name: id
     output: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -117,22 +128,22 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'quicOverride'
+  - name: quicOverride
     type: Enum
     description: |
       Specifies the QUIC override policy for this resource. This determines
       whether the load balancer will attempt to negotiate QUIC with clients
       or not. Can specify one of NONE, ENABLE, or DISABLE. If NONE is
       specified, Google manages whether QUIC is used.
-    update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setQuicOverride'
-    update_verb: 'POST'
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-    default_value: "NONE"
+    update_url: projects/{{project}}/global/targetHttpsProxies/{{name}}/setQuicOverride
+    update_verb: POST
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
+    default_value: NONE
     enum_values:
-      - 'NONE'
-      - 'ENABLE'
-      - 'DISABLE'
-  - name: 'tlsEarlyData'
+      - NONE
+      - ENABLE
+      - DISABLE
+  - name: tlsEarlyData
     type: Enum
     description: |
       Specifies whether TLS 1.3 0-RTT Data (“Early Data”) should be accepted for this service.
@@ -141,11 +152,11 @@ properties:
       This applies to TLS 1.3 connections over TCP (HTTP/2) as well as over UDP (QUIC/h3).
     default_from_api: true
     enum_values:
-      - 'STRICT'
-      - 'PERMISSIVE'
-      - 'UNRESTRICTED'
-      - 'DISABLED'
-  - name: 'certificateManagerCertificates'
+      - STRICT
+      - PERMISSIVE
+      - UNRESTRICTED
+      - DISABLED
+  - name: certificateManagerCertificates
     type: Array
     description: |
       URLs to certificate manager certificate resources that are used to authenticate connections between users and the load balancer.
@@ -153,69 +164,69 @@ properties:
       For EXTERNAL and EXTERNAL_MANAGED, use certificate_map instead.
       sslCertificates and certificateManagerCertificates fields can not be defined together.
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificates/{resourceName}` or just the self_link `projects/{project}/locations/{location}/certificates/{resourceName}`
-    update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
-    update_verb: 'POST'
+    update_url: projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates
+    update_verb: POST
     conflicts:
       - ssl_certificates
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
-    custom_expand: 'templates/terraform/custom_expand/certificate_manager_certificate_construct_full_url.go.tmpl'
+    diff_suppress_func: tpgresource.CompareResourceNames
+    custom_expand: templates/terraform/custom_expand/certificate_manager_certificate_construct_full_url.go.tmpl
     item_type:
       type: String
-  - name: 'sslCertificates'
+  - name: sslCertificates
     type: Array
     description: |
       URLs to SslCertificate resources that are used to authenticate connections between users and the load balancer.
       Currently, you may specify up to 15 SSL certificates. sslCertificates do not apply when the load balancing scheme is set to INTERNAL_SELF_MANAGED.
       sslCertificates and certificateManagerCertificates can not be defined together.
-    update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
-    update_verb: 'POST'
+    update_url: projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates
+    update_verb: POST
     conflicts:
       - certificate_manager_certificates
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'sslCertificate'
+      name: sslCertificate
       type: ResourceRef
-      description: 'The SSL certificate URL used by this TargetHttpsProxy'
-      resource: 'SslCertificate'
-      imports: 'selfLink'
-  - name: 'certificateMap'
+      description: The SSL certificate URL used by this TargetHttpsProxy
+      resource: SslCertificate
+      imports: selfLink
+  - name: certificateMap
     type: String
     description: |
       A reference to the CertificateMap resource uri that identifies a certificate map
       associated with the given target proxy. This field is only supported for EXTERNAL and EXTERNAL_MANAGED load balancing schemes.
       For INTERNAL_MANAGED, use certificate_manager_certificates instead.
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
-    update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setCertificateMap'
-    update_verb: 'POST'
-  - name: 'sslPolicy'
+    update_url: projects/{{project}}/global/targetHttpsProxies/{{name}}/setCertificateMap
+    update_verb: POST
+  - name: sslPolicy
     type: ResourceRef
     description: |
       A reference to the SslPolicy resource that will be associated with
       the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
       resource will not have any SSL policy configured.
-    update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setSslPolicy'
-    update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'SslPolicy'
-    imports: 'selfLink'
-  - name: 'urlMap'
+    update_url: projects/{{project}}/global/targetHttpsProxies/{{name}}/setSslPolicy
+    update_verb: POST
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: SslPolicy
+    imports: selfLink
+  - name: urlMap
     type: ResourceRef
     description: |
       A reference to the UrlMap resource that defines the mapping from URL
       to the BackendService.
     required: true
-    update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
-    update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'UrlMap'
-    imports: 'selfLink'
-  - name: 'proxyBind'
+    update_url: projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap
+    update_verb: POST
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: UrlMap
+    imports: selfLink
+  - name: proxyBind
     type: Boolean
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
-  - name: 'httpKeepAliveTimeoutSec'
+  - name: httpKeepAliveTimeoutSec
     type: Integer
     description: |
       Specifies how long to keep a connection open, after completing a response,
@@ -227,7 +238,7 @@ properties:
       value is 600 seconds, the minimum allowed value is 5 seconds, and the
       maximum allowed value is 600 seconds. For Global external HTTP(S) load
       balancer (classic), this option is not available publicly.
-  - name: 'serverTlsPolicy'
+  - name: serverTlsPolicy
     type: ResourceRef
     description: |
       A URL referring to a networksecurity.ServerTlsPolicy
@@ -244,12 +255,12 @@ properties:
       deleting or recreating a referenced ServerTlsPolicy resource, you will
       receive a resourceInUseByAnotherResource error. Use lifecycle.create_before_destroy
       within the ServerTlsPolicy resource to avoid this.
-    update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}'
-    update_verb: 'PATCH'
-    fingerprint_name: 'fingerprint'
-    resource: 'ServerTlsPolicy'
-    imports: 'selfLink'
-  - name: 'fingerprint'
+    update_url: projects/{{project}}/global/targetHttpsProxies/{{name}}
+    update_verb: PATCH
+    fingerprint_name: fingerprint
+    resource: ServerTlsPolicy
+    imports: selfLink
+  - name: fingerprint
     type: Fingerprint
     description: |
       Fingerprint of this resource. A hash of the contents stored in this object. This field is used in optimistic locking.

@@ -12,59 +12,63 @@
 # limitations under the License.
 
 ---
-name: 'SslPolicy'
+name: SslPolicy
 description: |
   Represents a SSL policy. SSL policies give you the ability to control the
   features of SSL that your SSL proxy or HTTPS load balancer negotiates.
 references:
   guides:
-    'Using SSL Policies': 'https://cloud.google.com/compute/docs/load-balancing/ssl-policies'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslPolicies'
+    Using SSL Policies: https://cloud.google.com/compute/docs/load-balancing/ssl-policies
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/sslPolicies
 docs:
-base_url: 'projects/{{project}}/global/sslPolicies'
+base_url: projects/{{project}}/global/sslPolicies
 has_self_link: true
-update_verb: 'PATCH'
-collection_url_key: 'items'
-kind: 'compute#sslPolicy'
+update_verb: PATCH
+collection_url_key: items
+kind: compute#sslPolicy
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_diff:
-  - 'sslPolicyCustomizeDiff'
+  - sslPolicyCustomizeDiff
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
 include_in_tgc_next: true
 custom_code:
-  constants: 'templates/terraform/constants/ssl_policy.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/ssl_policy.tmpl'
-examples:
-  - name: 'ssl_policy_basic'
-    primary_resource_id: 'prod-ssl-policy'
-    vars:
-      production_ssl_policy_name: 'production-ssl-policy'
-      nonprod_ssl_policy_name: 'nonprod-ssl-policy'
-      custom_ssl_policy_name: 'custom-ssl-policy'
-  - name: 'ssl_policy_post_quantum'
-    primary_resource_id: 'post-quantum-ssl-policy'
-    vars:
-      post_quantum_ssl_policy_name: 'post-quantum-ssl-policy'
+  update_encoder: templates/terraform/update_encoder/ssl_policy.tmpl
+  constants: templates/terraform/constants/ssl_policy.tmpl
+samples:
+  - name: ssl_policy_basic
+    primary_resource_id: prod-ssl-policy
+    steps:
+      - name: ssl_policy_basic
+        resource_id_vars:
+          production_ssl_policy_name: production-ssl-policy
+          nonprod_ssl_policy_name: nonprod-ssl-policy
+          custom_ssl_policy_name: custom-ssl-policy
+  - name: ssl_policy_post_quantum
+    primary_resource_id: post-quantum-ssl-policy
+    steps:
+      - name: ssl_policy_post_quantum
+        resource_id_vars:
+          post_quantum_ssl_policy_name: post-quantum-ssl-policy
 parameters:
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     immutable: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -77,7 +81,7 @@ properties:
     required: true
     immutable: true
     # TODO: profile, minTlsVersion, enabledFeatures, customFeatures, fingerprint, warnings, kind
-  - name: 'profile'
+  - name: profile
     type: Enum
     description: |
       Profile specifies the set of SSL features that can be used by the
@@ -90,33 +94,33 @@ properties:
       `CUSTOM` is used, the `custom_features` attribute **must be set**.
       If set to `FIPS_202205`, `minTlsVersion` must also be set to
       `TLS_1_2`.
-    default_value: "COMPATIBLE"
+    default_value: COMPATIBLE
     enum_values:
-      - 'COMPATIBLE'
-      - 'MODERN'
-      - 'RESTRICTED'
-      - 'CUSTOM'
-      - 'FIPS_202205'
-  - name: 'minTlsVersion'
+      - COMPATIBLE
+      - MODERN
+      - RESTRICTED
+      - CUSTOM
+      - FIPS_202205
+  - name: minTlsVersion
     type: Enum
     description: |
       The minimum version of SSL protocol that can be used by the clients
       to establish a connection with the load balancer. When set to`
       TLS_1_3`, the profile field must be set to `RESTRICTED`.
-    default_value: "TLS_1_0"
+    default_value: TLS_1_0
     enum_values:
-      - 'TLS_1_0'
-      - 'TLS_1_1'
-      - 'TLS_1_2'
-      - 'TLS_1_3'
-  - name: 'enabledFeatures'
+      - TLS_1_0
+      - TLS_1_1
+      - TLS_1_2
+      - TLS_1_3
+  - name: enabledFeatures
     type: Array
-    description: 'The list of features enabled in the SSL policy.'
+    description: The list of features enabled in the SSL policy.
     is_set: true
     output: true
     item_type:
       type: String
-  - name: 'customFeatures'
+  - name: customFeatures
     type: Array
     description: |
       Profile specifies the set of SSL features that can be used by the
@@ -132,7 +136,7 @@ properties:
     is_set: true
     item_type:
       type: String
-  - name: 'postQuantumKeyExchange'
+  - name: postQuantumKeyExchange
     type: Enum
     is_missing_in_cai: true
     description: |
@@ -146,10 +150,10 @@ properties:
       disallows X25519MLKEM768 key exchange until October 2027, and allows
       it afterward.
     enum_values:
-      - 'DEFAULT'
-      - 'ENABLED'
-      - 'DEFERRED'
-  - name: 'fingerprint'
+      - DEFAULT
+      - ENABLED
+      - DEFERRED
+  - name: fingerprint
     type: String
     description: |
       Fingerprint of this resource. A hash of the contents stored in this

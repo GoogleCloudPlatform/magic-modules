@@ -16,56 +16,53 @@ name: FindingsRefinement
 description: Represents a set of logic conditions used to refine various types of findings such as curated rule detections.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.findingsRefinements'
-min_version: 'beta'
-
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.findingsRefinements
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{name}}
 update_mask: true
 update_verb: PATCH
-# The API does not support deletion of FindingsRefinements.
-exclude_delete: true
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{name}}
+# The API does not support deletion of FindingsRefinements.
+exclude_delete: true
 autogen_status: RmluZGluZ3NSZWZpbmVtZW50
-
-examples:
-  - name: 'chronicle_findings_refinement_basic'
-    primary_resource_id: 'findings_refinement_example'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    vars:
-      display_name: findings_refinement_display_name
-
 samples:
-  - name: 'chronicle_findings_refinement_update'
-    primary_resource_id: 'findings_refinement_example'
+  - name: chronicle_findings_refinement_basic
+    primary_resource_id: findings_refinement_example
+    steps:
+      - name: chronicle_findings_refinement_basic
+        test_env_vars:
+          chronicle_id: CHRONICLE_ID
+        resource_id_vars:
+          display_name: findings_refinement_display_name
+  - name: chronicle_findings_refinement_update
+    primary_resource_id: findings_refinement_example
     min_version: beta
     steps:
-      - name: 'chronicle_findings_refinement_full'
+      - name: chronicle_findings_refinement_full
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         resource_id_vars:
           display_name: findings_refinement_display_name
         vars:
-          query: "network.dns.response = true"
-          outcome_variable: "risk_score"
-          outcome_filter_operator: "EQUAL"
-          outcome_value: "value1"
-      - name: 'chronicle_findings_refinement_full'
+          query: network.dns.response = true
+          outcome_variable: risk_score
+          outcome_filter_operator: EQUAL
+          outcome_value: value1
+      - name: chronicle_findings_refinement_full
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         resource_id_vars:
           display_name: findings_refinement_display_name
         vars:
-          query: "network.dns.response = true"
-          outcome_variable: "risk_score"
-          outcome_filter_operator: "CONTAINS"
-          outcome_value: "value2"
-
+          query: network.dns.response = true
+          outcome_variable: risk_score
+          outcome_filter_operator: CONTAINS
+          outcome_value: value2
 parameters:
   - name: location
     type: String
@@ -90,7 +87,7 @@ properties:
   - name: name
     type: String
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
     description: |-
       Full resource name for the findings refinement.
       Format:

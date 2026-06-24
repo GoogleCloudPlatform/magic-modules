@@ -12,58 +12,58 @@
 # limitations under the License.
 
 ---
-name: 'ProjectConfig'
+name: ProjectConfig
 description: |-
   The Artifact Registry project config, used to configure platform logs that
   apply to a project.
 references:
   guides:
-    'Access and use platform logs': 'https://cloud.google.com/artifact-registry/docs/platform-logs'
-  api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations/getProjectConfig'
+    Access and use platform logs: https://cloud.google.com/artifact-registry/docs/platform-logs
+  api: https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations/getProjectConfig
 docs:
   note: |-
     A project config is automatically created for a given location. Creating a
     resource of this type will acquire and update the resource that already
     exists at the location. Deleting this resource will remove the config from
     your Terraform state but leave the resource as is.
-id_format: 'projects/{{project}}/locations/{{location}}/projectConfig'
-base_url: 'projects/{{project}}/locations/{{location}}/projectConfig'
-self_link: 'projects/{{project}}/locations/{{location}}/projectConfig'
+base_url: projects/{{project}}/locations/{{location}}/projectConfig
+self_link: projects/{{project}}/locations/{{location}}/projectConfig
+create_url: projects/{{project}}/locations/{{location}}/projectConfig?updateMask=platformLogsConfig
+update_url: projects/{{project}}/locations/{{location}}/projectConfig?updateMask=platformLogsConfig
+create_verb: PATCH
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/projectConfig
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/projectConfig'
-create_url: 'projects/{{project}}/locations/{{location}}/projectConfig?updateMask=platformLogsConfig'
-create_verb: 'PATCH'
-update_url: 'projects/{{project}}/locations/{{location}}/projectConfig?updateMask=platformLogsConfig'
-update_verb: 'PATCH'
-exclude_delete: true
+  - projects/{{project}}/locations/{{location}}/projectConfig
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['']
-  type: 'OpAsync'
+  type: OpAsync
   # necessary to compile
   operation:
     base_url: '{{op_id}}'
+  actions: [""]
   result:
     resource_inside_response: false
+exclude_delete: true
 custom_code:
-  encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
+  encoder: templates/terraform/encoders/location_from_region.go.tmpl
 samples:
-  - name: 'artifact_registry_project_config'
-    primary_resource_id: 'my-config'
+  - name: artifact_registry_project_config
+    primary_resource_id: my-config
     steps:
       # Step 1 -> create test
-      - name: 'artifact_registry_project_config'
+      - name: artifact_registry_project_config
         vars:
-          severity_level: 'INFO'
+          severity_level: INFO
       # Step 2 -> update test (in-place update of severity_level)
-      - name: 'artifact_registry_project_config'
+      - name: artifact_registry_project_config
         vars:
-          severity_level: 'WARNING'
+          severity_level: WARNING
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The name of the location this config is located in.
@@ -71,36 +71,34 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
-  - name: 'name'
+  - name: name
     type: String
     description: |-
       The name of the project's config.
       Always of the form: projects/{project}/locations/{location}/projectConfig
     output: true
 properties:
-  - name: 'platformLogsConfig'
+  - name: platformLogsConfig
     type: NestedObject
-    description: |-
-      Configuration for platform logs.
+    description: Configuration for platform logs.
     properties:
-      - name: 'loggingState'
+      - name: loggingState
         type: Enum
-        description: |-
-          The state of the platform logs: enabled or disabled.
+        description: 'The state of the platform logs: enabled or disabled.'
         enum_values:
-          - 'ENABLED'
-          - 'DISABLED'
-      - name: 'severityLevel'
+          - ENABLED
+          - DISABLED
+      - name: severityLevel
         type: Enum
         description: |-
           The severity level for the logs. Logs will be generated if their
           severity level is >= than the value of the severity level mentioned here.
         enum_values:
-          - 'DEBUG'
-          - 'INFO'
-          - 'NOTICE'
-          - 'WARNING'
-          - 'ERROR'
-          - 'CRITICAL'
-          - 'ALERT'
-          - 'EMERGENCY'
+          - DEBUG
+          - INFO
+          - NOTICE
+          - WARNING
+          - ERROR
+          - CRITICAL
+          - ALERT
+          - EMERGENCY

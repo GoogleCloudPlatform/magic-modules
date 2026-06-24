@@ -12,19 +12,19 @@
 # limitations under the License.
 
 ---
-name: 'Envgroup'
+name: Envgroup
 api_resource_type_kind: EnvironmentGroup
 description: |
   An `Environment group` in Apigee.
 references:
   guides:
-    'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups/create'
+    Creating an environment: https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups/create
 docs:
 base_url: '{{org_id}}/envgroups'
 self_link: '{{org_id}}/envgroups/{{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
 import_format:
   - '{{org_id}}/envgroups/{{name}}'
   - '{{org_id}}/{{name}}'
@@ -32,35 +32,39 @@ timeouts:
   insert_minutes: 30
   update_minutes: 20
   delete_minutes: 30
-autogen_async: true
+exclude_sweeper: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
+autogen_async: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/apigee_environment_group.go.tmpl'
-exclude_sweeper: true
-examples:
-  - name: 'apigee_environment_group_basic'
-    vars:
-      envgroup_name: 'my-envgroup'
+  custom_import: templates/terraform/custom_import/apigee_environment_group.go.tmpl
+samples:
+  - name: apigee_environment_group_basic
     exclude_test: true
+    steps:
+      - name: apigee_environment_group_basic
+        resource_id_vars:
+          envgroup_name: my-envgroup
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
-  - name: 'apigee_environment_group_basic_test'
-    primary_resource_id: 'apigee_environment_group'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+  - name: apigee_environment_group_basic_test
+    primary_resource_id: apigee_environment_group
+    exclude_basic_doc: true
     # Resource creation race
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers: [time]
+    steps:
+      - name: apigee_environment_group_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee environment group,
@@ -69,13 +73,13 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource ID of the environment group.
     required: true
     immutable: true
-  - name: 'hostnames'
+  - name: hostnames
     type: Array
     description: |
       Hostnames of the environment group.

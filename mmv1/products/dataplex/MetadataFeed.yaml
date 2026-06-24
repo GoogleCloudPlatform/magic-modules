@@ -40,14 +40,14 @@ samples:
         resource_id_vars:
           metadata_feed_id: tf-test-feed
         vars:
-          label_val: 'bar'
+          label_val: bar
         test_env_vars:
           project_name: PROJECT_NAME
       - name: dataplex_metadata_feed_basic
         resource_id_vars:
           metadata_feed_id: tf-test-feed
         vars:
-          label_val: 'baz'
+          label_val: baz
         test_env_vars:
           project_name: PROJECT_NAME
   - name: dataplex_metadata_feed_projects
@@ -58,14 +58,14 @@ samples:
         resource_id_vars:
           metadata_feed_id: tf-test-feed
         vars:
-          label_val: 'bar'
+          label_val: bar
         test_env_vars:
           project_name: PROJECT_NAME
       - name: dataplex_metadata_feed_projects
         resource_id_vars:
           metadata_feed_id: tf-test-feed
         vars:
-          label_val: 'baz'
+          label_val: baz
         test_env_vars:
           project_name: PROJECT_NAME
 parameters:

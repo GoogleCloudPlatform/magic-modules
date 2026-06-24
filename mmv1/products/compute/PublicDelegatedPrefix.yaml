@@ -12,89 +12,97 @@
 # limitations under the License.
 
 ---
-name: 'PublicDelegatedPrefix'
+name: PublicDelegatedPrefix
 description: |
   Represents a PublicDelegatedPrefix for use with bring your own IP addresses (BYOIP).
 references:
   guides:
-    'Using bring your own IP': 'https://cloud.google.com/vpc/docs/using-bring-your-own-ip'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/publicDelegatedPrefixes'
+    Using bring your own IP: https://cloud.google.com/vpc/docs/using-bring-your-own-ip
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/publicDelegatedPrefixes
 docs:
-base_url: 'projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes'
-has_self_link: true
+base_url: projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes
 immutable: true
-generate_list_resource: true
+has_self_link: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+generate_list_resource: true
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-west1
+    - region: us-east1
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
 custom_code:
-sweeper:
-  url_substitutions:
-    - region: "us-central1"
-    - region: "us-west1"
-    - region: "us-east1"
-examples:
-  - name: 'public_delegated_prefixes_basic'
-    primary_resource_id: 'prefixes'
-    vars:
-      prefixes_name: 'my-prefix'
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
+samples:
+  - name: public_delegated_prefixes_basic
+    primary_resource_id: prefixes
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
-  - name: 'public_delegated_prefixes_ipv6'
-    vars:
-      pap_name: "ipv6-pap"
-      root_pdp_name: "ipv6-root-pdp"
-      sub_pdp_name: "ipv6-sub-pdp"
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
+    steps:
+      - name: public_delegated_prefixes_basic
+        resource_id_vars:
+          prefixes_name: my-prefix
+        test_env_vars:
+          desc: PAP_DESCRIPTION
+  - name: public_delegated_prefixes_ipv6
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
-  - name: 'public_delegated_prefix_ipv6_subnet_mode'
-    vars:
-      pap_name: "ipv6-pap"
-      root_pdp_name: "ipv6-root-pdp"
-      sub_pdp_name: "ipv6-sub-pdp"
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
+    steps:
+      - name: public_delegated_prefixes_ipv6
+        resource_id_vars:
+          pap_name: ipv6-pap
+          root_pdp_name: ipv6-root-pdp
+          sub_pdp_name: ipv6-sub-pdp
+        test_env_vars:
+          desc: PAP_DESCRIPTION
+  - name: public_delegated_prefix_ipv6_subnet_mode
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
-  - name: 'public_delegated_prefix_internal_ipv6_subnet_mode'
-    vars:
-      pap_name: "ipv6-pap"
-      root_pdp_name: "ipv6-root-pdp"
-      sub_pdp_name: "ipv6-sub-pdp"
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
+    steps:
+      - name: public_delegated_prefix_ipv6_subnet_mode
+        resource_id_vars:
+          pap_name: ipv6-pap
+          root_pdp_name: ipv6-root-pdp
+          sub_pdp_name: ipv6-sub-pdp
+        test_env_vars:
+          desc: PAP_DESCRIPTION
+  - name: public_delegated_prefix_internal_ipv6_subnet_mode
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
+    steps:
+      - name: public_delegated_prefix_internal_ipv6_subnet_mode
+        resource_id_vars:
+          pap_name: ipv6-pap
+          root_pdp_name: ipv6-root-pdp
+          sub_pdp_name: ipv6-sub-pdp
+        test_env_vars:
+          desc: PAP_DESCRIPTION
 parameters:
 properties:
-  - name: 'region'
+  - name: region
     type: String
-    description: 'A region where the prefix will reside.'
+    description: A region where the prefix will reside.
     url_param_only: true
     required: true
-  - name: 'description'
+  - name: description
     type: String
     description: An optional description of this resource.
-  - name: 'isLiveMigration'
+  - name: isLiveMigration
     type: Boolean
     description: If true, the prefix will be live migrated.
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. The name must be 1-63 characters long, and
@@ -104,14 +112,12 @@ properties:
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
     required: true
-  - name: 'parentPrefix'
+  - name: parentPrefix
     type: String
-    description:
-      The URL of parent prefix. Either PublicAdvertisedPrefix or
-      PublicDelegatedPrefix.
+    description: The URL of parent prefix. Either PublicAdvertisedPrefix or PublicDelegatedPrefix.
     required: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - name: 'mode'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+  - name: mode
     type: Enum
     description: |
       Specifies the mode of this IPv6 PDP. MODE must be one of:
@@ -120,24 +126,19 @@ properties:
         * EXTERNAL_IPV6_SUBNETWORK_CREATION
         * INTERNAL_IPV6_SUBNETWORK_CREATION
     enum_values:
-      - 'DELEGATION'
-      - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
-      - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
-      - 'INTERNAL_IPV6_SUBNETWORK_CREATION'
-  - name: 'allocatablePrefixLength'
+      - DELEGATION
+      - EXTERNAL_IPV6_FORWARDING_RULE_CREATION
+      - EXTERNAL_IPV6_SUBNETWORK_CREATION
+      - INTERNAL_IPV6_SUBNETWORK_CREATION
+  - name: allocatablePrefixLength
     type: Integer
     default_from_api: true
-    description:
-      The allocatable prefix length supported by this public delegated prefix.
-      This field is optional and cannot be set for prefixes in DELEGATION mode.
-      It cannot be set for IPv4 prefixes either, and it always defaults to 32.
-  - name: 'ipCidrRange'
+    description: The allocatable prefix length supported by this public delegated prefix. This field is optional and cannot be set for prefixes in DELEGATION mode. It cannot be set for IPv4 prefixes either, and it always defaults to 32.
+  - name: ipCidrRange
     type: String
-    description:
-      The IP address range, in CIDR format, represented by this public
-      delegated prefix.
+    description: The IP address range, in CIDR format, represented by this public delegated prefix.
     required: true
-  - name: 'ipv6AccessType'
+  - name: ipv6AccessType
     type: Enum
     description: |
       The internet access type for IPv6 Public Delegated Prefixes. Inherited
@@ -149,15 +150,15 @@ properties:
         access type as INTERNAL.
     output: true
     enum_values:
-      - 'EXTERNAL'
-      - 'INTERNAL'
-  - name: 'enableEnhancedIpv4Allocation'
+      - EXTERNAL
+      - INTERNAL
+  - name: enableEnhancedIpv4Allocation
     type: Boolean
     description: |
       Whether this PublicDelegatedPrefix supports enhanced IPv4 allocations.
       Applicable for IPv4 PDPs only.
     output: true
-  - name: 'publicDelegatedSubPrefixs'
+  - name: publicDelegatedSubPrefixs
     type: Array
     output: true
     description: |
@@ -167,49 +168,49 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: String
           description: |
             The name of the sub public delegated prefix.
-        - name: 'description'
+        - name: description
           type: String
           description: |
             An optional description of this sub public delegated prefix.
-        - name: 'region'
+        - name: region
           type: String
           description: |
             Output-only. The region of the sub public delegated prefix if it is regional. If absent, the sub prefix is global.
-        - name: 'status'
+        - name: status
           type: Enum
           description: |
             The status of the sub public delegated prefix.
           enum_values:
-            - 'INITIALIZING'
-            - 'READY_TO_ANNOUNCE'
-            - 'ANNOUNCED'
-            - 'DELETING'
-        - name: 'ipCidrRange'
+            - INITIALIZING
+            - READY_TO_ANNOUNCE
+            - ANNOUNCED
+            - DELETING
+        - name: ipCidrRange
           type: String
           description: |
             The IP address range in the CIDR format represented by this sub prefix.
-        - name: 'isAddress'
+        - name: isAddress
           type: Boolean
           description: |
             Whether the sub prefix is delegated for address creation.
-        - name: 'mode'
+        - name: mode
           type: Enum
           description: |
             The PublicDelegatedSubPrefix mode for IPv6 only.
           enum_values:
-            - 'DELEGATION'
-            - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
-            - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
-            - 'INTERNAL_IPV6_SUBNETWORK_CREATION'
-        - name: 'allocatablePrefixLength'
+            - DELEGATION
+            - EXTERNAL_IPV6_FORWARDING_RULE_CREATION
+            - EXTERNAL_IPV6_SUBNETWORK_CREATION
+            - INTERNAL_IPV6_SUBNETWORK_CREATION
+        - name: allocatablePrefixLength
           type: Integer
           description: |
             The allocatable prefix length supported by this PublicDelegatedSubPrefix.
-        - name: 'ipv6AccessType'
+        - name: ipv6AccessType
           type: Enum
           description: |
             The internet access type for IPv6 Public Delegated Prefixes. Inherited
@@ -221,15 +222,15 @@ properties:
               access type as INTERNAL.
           output: true
           enum_values:
-            - 'EXTERNAL'
-            - 'INTERNAL'
-        - name: 'enableEnhancedIpv4Allocation'
+            - EXTERNAL
+            - INTERNAL
+        - name: enableEnhancedIpv4Allocation
           type: Boolean
           description: |
             Whether this PublicDelegatedSubPrefix supports enhanced IPv4 allocations.
             Applicable for IPv4 sub-PDPs only.
           output: true
-        - name: 'delegateeProject'
+        - name: delegateeProject
           type: String
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.

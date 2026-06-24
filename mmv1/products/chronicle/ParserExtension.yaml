@@ -18,8 +18,8 @@ description: |-
   It enables extracting additional fields from raw logs without modifying the base parser.
 references:
   guides:
-    'Custom parsers overview': 'https://cloud.google.com/chronicle/docs/detection/custom-parsers-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.logTypes.parserExtensions'
+    Custom parsers overview: https://cloud.google.com/chronicle/docs/detection/custom-parsers-overview
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.logTypes.parserExtensions
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{log_type}}/parserExtensions
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{log_type}}/parserExtensions/{{parserextension}}
@@ -29,39 +29,39 @@ import_format:
 autogen_status: UGFyc2VyRXh0ZW5zaW9u
 autogen_async: false
 samples:
-  - name: 'chronicle_parserextension_basic'
-    primary_resource_id: 'example'
+  - name: chronicle_parserextension_basic
+    primary_resource_id: example
     steps:
-      - name: 'chronicle_parserextension_basic'
+      - name: chronicle_parserextension_basic
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         ignore_read_extra:
-          - 'state'
-          - 'state_last_changed_time'
-          - 'validation_report'
-          - 'extension_validation_report'
-  - name: 'chronicle_parserextension_full'
-    primary_resource_id: 'example'
+          - state
+          - state_last_changed_time
+          - validation_report
+          - extension_validation_report
+  - name: chronicle_parserextension_full
+    primary_resource_id: example
     steps:
-      - name: 'chronicle_parserextension_full'
+      - name: chronicle_parserextension_full
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         ignore_read_extra:
-          - 'state'
-          - 'state_last_changed_time'
-          - 'validation_report'
-          - 'extension_validation_report'
-  - name: 'chronicle_parserextension_dynamic'
-    primary_resource_id: 'example'
+          - state
+          - state_last_changed_time
+          - validation_report
+          - extension_validation_report
+  - name: chronicle_parserextension_dynamic
+    primary_resource_id: example
     steps:
-      - name: 'chronicle_parserextension_dynamic'
+      - name: chronicle_parserextension_dynamic
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         ignore_read_extra:
-          - 'state'
-          - 'state_last_changed_time'
-          - 'validation_report'
-          - 'extension_validation_report'
+          - state
+          - state_last_changed_time
+          - validation_report
+          - extension_validation_report
 parameters:
   - name: location
     type: String
@@ -84,14 +84,14 @@ parameters:
   - name: parserextension
     type: String
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
     description: Output only. The server-generated ID of the parser extension.
 properties:
   - name: cbnSnippet
     type: String
     conflicts:
-      - 'field_extractors'
-      - 'dynamic_parsing'
+      - field_extractors
+      - dynamic_parsing
     description: Parser config could be a cbn snippet.
   - name: createTime
     type: String
@@ -100,8 +100,8 @@ properties:
   - name: dynamicParsing
     type: NestedObject
     conflicts:
-      - 'cbn_snippet'
-      - 'field_extractors'
+      - cbn_snippet
+      - field_extractors
     description: A representation of a parser extension as dynamic parsing config.
     properties:
       - name: optedFields
@@ -125,8 +125,8 @@ properties:
   - name: fieldExtractors
     type: NestedObject
     conflicts:
-      - 'cbn_snippet'
-      - 'dynamic_parsing'
+      - cbn_snippet
+      - dynamic_parsing
     description: A representation of a parser extension as a set of field extractors.
     properties:
       - name: appendRepeatedFields

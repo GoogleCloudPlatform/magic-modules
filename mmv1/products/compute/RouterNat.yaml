@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'RouterNat'
+name: RouterNat
 api_resource_type_kind: Router
 description: |
   A NAT service created in a router.
@@ -21,31 +21,18 @@ description: |
   Use `lifecycle.create_before_destroy` on this address resource to avoid this type of error as shown in the Manual Ips example.
 references:
   guides:
-    'Google Cloud Router': 'https://cloud.google.com/router/docs/'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
+    Google Cloud Router: https://cloud.google.com/router/docs/
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/routers
 docs:
-id_format: '{{project}}/{{region}}/{{router}}/{{name}}'
-base_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
-self_link: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
-create_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
-create_verb: 'PATCH'
-update_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
-update_verb: 'PATCH'
-delete_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
-delete_verb: 'PATCH'
-mutex: 'router/{{region}}/{{router}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
-collection_url_key: 'nats'
+base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+self_link: projects/{{project}}/regions/{{region}}/routers/{{router}}
+create_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+delete_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+update_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+create_verb: PATCH
+update_verb: PATCH
+delete_verb: PATCH
+collection_url_key: nats
 identity:
   - name
 nested_query:
@@ -53,79 +40,100 @@ nested_query:
     - nats
   is_list_of_ids: false
   modify_by_patch: true
-custom_code:
-  constants: 'templates/terraform/constants/router_nat.go.tmpl'
-  encoder: 'templates/terraform/encoders/router_nat_set_initial_nat_ips.go.tmpl'
-  pre_create: 'templates/terraform/constants/router_nat_validate_action_active_range.go.tmpl'
-  pre_update: 'templates/terraform/constants/router_nat_validate_action_active_range.go.tmpl'
+id_format: '{{project}}/{{region}}/{{router}}/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 custom_diff:
-  - 'resourceComputeRouterNatDrainNatIpsCustomDiff'
+  - resourceComputeRouterNatDrainNatIpsCustomDiff
+mutex: router/{{region}}/{{router}}
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: false
 exclude_tgc: true
-examples:
+custom_code:
+  encoder: templates/terraform/encoders/router_nat_set_initial_nat_ips.go.tmpl
+  constants: templates/terraform/constants/router_nat.go.tmpl
+  pre_create: templates/terraform/constants/router_nat_validate_action_active_range.go.tmpl
+  pre_update: templates/terraform/constants/router_nat_validate_action_active_range.go.tmpl
+samples:
   # These examples are not used to autogenerate tests, as fine-grained
   # resources do not fit the normal test flow - we need to test deletion
   # in a test step while parent resource still exists vs in CheckDestroy
   # when all resources have been deleted.
-  - name: 'router_nat_basic'
-    primary_resource_id: 'nat'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
+  - name: router_nat_basic
+    primary_resource_id: nat
     exclude_test: true
-  - name: 'router_nat_manual_ips'
-    primary_resource_id: 'nat_manual'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      address_name: 'nat-manual-ip'
+    steps:
+      - name: router_nat_basic
+        resource_id_vars:
+          router_name: my-router
+          nat_name: my-router-nat
+          network_name: my-network
+          subnet_name: my-subnetwork
+  - name: router_nat_manual_ips
+    primary_resource_id: nat_manual
     exclude_test: true
-  - name: 'router_nat_rules'
-    primary_resource_id: 'nat_rules'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      address_name1: 'nat-address1'
-      address_name2: 'nat-address2'
-      address_name3: 'nat-address3'
+    steps:
+      - name: router_nat_manual_ips
+        resource_id_vars:
+          router_name: my-router
+          nat_name: my-router-nat
+          network_name: my-network
+          subnet_name: my-subnetwork
+          address_name: nat-manual-ip
+  - name: router_nat_rules
+    primary_resource_id: nat_rules
     exclude_test: true
-  - name: 'router_nat_private'
-    primary_resource_id: 'nat_type'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      hub_name: 'my-hub'
-      spoke_name: 'my-spoke'
+    steps:
+      - name: router_nat_rules
+        resource_id_vars:
+          router_name: my-router
+          nat_name: my-router-nat
+          network_name: my-network
+          subnet_name: my-subnetwork
+          address_name1: nat-address1
+          address_name2: nat-address2
+          address_name3: nat-address3
+  - name: router_nat_private
+    primary_resource_id: nat_type
     exclude_test: true
+    steps:
+      - name: router_nat_private
+        resource_id_vars:
+          router_name: my-router
+          nat_name: my-router-nat
+          network_name: my-network
+          subnet_name: my-subnetwork
+          hub_name: my-hub
+          spoke_name: my-spoke
 parameters:
-  - name: 'router'
+  - name: router
     type: ResourceRef
     description: |
       The name of the Cloud Router in which this NAT will be configured.
     url_param_only: true
     required: true
     immutable: true
-    resource: 'Router'
-    imports: 'name'
-  - name: 'region'
+    resource: Router
+    imports: name
+  - name: region
     type: ResourceRef
     description: Region where the router and NAT reside.
     url_param_only: true
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    resource: Region
+    imports: name
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the NAT service. The name must be 1-63 characters long and
@@ -133,8 +141,8 @@ properties:
     required: true
     immutable: true
     validation:
-      function: 'verify.ValidateRFC1035Name(2, 63)'
-  - name: 'natIpAllocateOption'
+      function: verify.ValidateRFC1035Name(2, 63)
+  - name: natIpAllocateOption
     type: Enum
     description: |
       How external IPs should be allocated for this NAT. Valid values are
@@ -142,9 +150,9 @@ properties:
       Platform, or `MANUAL_ONLY` for only user-allocated NAT IP addresses.
     required: false
     enum_values:
-      - 'MANUAL_ONLY'
-      - 'AUTO_ONLY'
-  - name: 'initialNatIps'
+      - MANUAL_ONLY
+      - AUTO_ONLY
+  - name: initialNatIps
     type: Array
     description: |
       Self-links of NAT IPs to be used as initial value for creation alongside a RouterNatAddress resource.
@@ -157,14 +165,14 @@ properties:
       - natIps
       - drainNatIps
     set_hash_func: computeRouterNatIPsHash
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'address'
+      name: address
       type: ResourceRef
-      description: 'A reference to an address associated with this NAT'
-      resource: 'Address'
-      imports: 'selfLink'
-  - name: 'natIps'
+      description: A reference to an address associated with this NAT
+      resource: Address
+      imports: selfLink
+  - name: natIps
     type: Array
     description: |
       Self-links of NAT IPs. Only valid if natIpAllocateOption
@@ -176,14 +184,14 @@ properties:
     default_from_api: true
     send_empty_value: true
     set_hash_func: computeRouterNatIPsHash
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'address'
+      name: address
       type: ResourceRef
-      description: 'A reference to an address associated with this NAT'
-      resource: 'Address'
-      imports: 'selfLink'
-  - name: 'drainNatIps'
+      description: A reference to an address associated with this NAT
+      resource: Address
+      imports: selfLink
+  - name: drainNatIps
     type: Array
     description: |
       A list of URLs of the IP resources to be drained. These IPs must be
@@ -191,14 +199,14 @@ properties:
     is_set: true
     default_from_api: true
     send_empty_value: true
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'address'
+      name: address
       type: ResourceRef
-      description: 'A reference to an address associated with this NAT'
-      resource: 'Address'
-      imports: 'selfLink'
-  - name: 'sourceSubnetworkIpRangesToNat'
+      description: A reference to an address associated with this NAT
+      resource: Address
+      imports: selfLink
+  - name: sourceSubnetworkIpRangesToNat
     type: Enum
     description: |
       How NAT should be configured per Subnetwork.
@@ -213,10 +221,10 @@ properties:
       other RouterNat section in any Router for this network in this region.
     required: true
     enum_values:
-      - 'ALL_SUBNETWORKS_ALL_IP_RANGES'
-      - 'ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES'
-      - 'LIST_OF_SUBNETWORKS'
-  - name: 'subnetwork'
+      - ALL_SUBNETWORKS_ALL_IP_RANGES
+      - ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES
+      - LIST_OF_SUBNETWORKS
+  - name: subnetwork
     type: Array
     description: |
       One or more subnetwork NAT configurations. Only used if
@@ -228,14 +236,14 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: ResourceRef
-          description: 'Self-link of subnetwork to NAT'
+          description: Self-link of subnetwork to NAT
           required: true
-          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-          resource: 'Subnetwork'
-          imports: 'selfLink'
-        - name: 'sourceIpRangesToNat'
+          custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+          resource: Subnetwork
+          imports: selfLink
+        - name: sourceIpRangesToNat
           type: Array
           description: |
             List of options for which source IPs in the subnetwork
@@ -247,7 +255,7 @@ properties:
           item_type:
             type: String
           min_size: 1
-        - name: 'secondaryIpRangeNames'
+        - name: secondaryIpRangeNames
           type: Array
           description: |
             List of the secondary ranges of the subnetwork that are allowed
@@ -257,7 +265,7 @@ properties:
           is_set: true
           item_type:
             type: String
-  - name: 'sourceSubnetworkIpRangesToNat64'
+  - name: sourceSubnetworkIpRangesToNat64
     type: Enum
     description: |
       Specify the Nat option for NAT64, which can take one of the following values:
@@ -266,9 +274,9 @@ properties:
       Note that if this field contains NAT64_ALL_V6_SUBNETWORKS no other Router.Nat section in this region can also enable NAT64 for any Subnetworks in this network.
       Other Router.Nat sections can still be present to enable NAT44 only.
     enum_values:
-      - 'ALL_IPV6_SUBNETWORKS'
-      - 'LIST_OF_IPV6_SUBNETWORKS'
-  - name: 'nat64Subnetwork'
+      - ALL_IPV6_SUBNETWORKS
+      - LIST_OF_IPV6_SUBNETWORKS
+  - name: nat64Subnetwork
     type: Array
     description: |
       One or more subnetwork NAT configurations whose traffic should be translated by NAT64 Gateway.
@@ -280,24 +288,24 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: ResourceRef
-          description: 'Self-link of the subnetwork resource that will use NAT64'
+          description: Self-link of the subnetwork resource that will use NAT64
           required: true
-          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-          resource: 'Subnetwork'
-          imports: 'selfLink'
-  - name: 'minPortsPerVm'
+          custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+          resource: Subnetwork
+          imports: selfLink
+  - name: minPortsPerVm
     type: Integer
     description: |
       Minimum number of ports allocated to a VM from this NAT. Defaults to 64 for static port allocation and 32 dynamic port allocation if not set.
     default_from_api: true
-  - name: 'maxPortsPerVm'
+  - name: maxPortsPerVm
     type: Integer
     description: |
       Maximum number of ports allocated to a VM from this NAT.
       This field can only be set when enableDynamicPortAllocation is enabled.
-  - name: 'enableDynamicPortAllocation'
+  - name: enableDynamicPortAllocation
     type: Boolean
     description: |
       Enable Dynamic Port Allocation.
@@ -309,60 +317,60 @@ properties:
       Mutually exclusive with enableEndpointIndependentMapping.
     default_from_api: true
     send_empty_value: true
-  - name: 'udpIdleTimeoutSec'
+  - name: udpIdleTimeoutSec
     type: Integer
     description: |
       Timeout (in seconds) for UDP connections. Defaults to 30s if not set.
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
     default_value: 30
-  - name: 'icmpIdleTimeoutSec'
+  - name: icmpIdleTimeoutSec
     type: Integer
     description: |
       Timeout (in seconds) for ICMP connections. Defaults to 30s if not set.
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
     default_value: 30
-  - name: 'tcpEstablishedIdleTimeoutSec'
+  - name: tcpEstablishedIdleTimeoutSec
     type: Integer
     description: |
       Timeout (in seconds) for TCP established connections.
       Defaults to 1200s if not set.
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
     default_value: 1200
-  - name: 'tcpTransitoryIdleTimeoutSec'
+  - name: tcpTransitoryIdleTimeoutSec
     type: Integer
     description: |
       Timeout (in seconds) for TCP transitory connections.
       Defaults to 30s if not set.
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
     default_value: 30
-  - name: 'tcpTimeWaitTimeoutSec'
+  - name: tcpTimeWaitTimeoutSec
     type: Integer
     description: |
       Timeout (in seconds) for TCP connections that are in TIME_WAIT state.
       Defaults to 120s if not set.
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
     default_value: 120
-  - name: 'logConfig'
+  - name: logConfig
     type: NestedObject
     description: |
       Configuration for logging on NAT
     send_empty_value: true
     properties:
-      - name: 'enable'
+      - name: enable
         type: Boolean
         description: |
           Indicates whether or not to export logs.
         required: true
-      - name: 'filter'
+      - name: filter
         type: Enum
         description: |
           Specifies the desired filtering of logs on this NAT.
         required: true
         enum_values:
-          - 'ERRORS_ONLY'
-          - 'TRANSLATIONS_ONLY'
-          - 'ALL'
-  - name: 'endpointTypes'
+          - ERRORS_ONLY
+          - TRANSLATIONS_ONLY
+          - ALL
+  - name: endpointTypes
     type: Array
     description: |
       Specifies the endpoint Types supported by the NAT Gateway.
@@ -374,16 +382,16 @@ properties:
     item_type:
       type: String
     min_size: 1
-  - name: 'rules'
+  - name: rules
     type: Array
-    description: 'A list of rules associated with this NAT.'
+    description: A list of rules associated with this NAT.
     is_set: true
     send_empty_value: true
     set_hash_func: computeRouterNatRulesHash
     item_type:
       type: NestedObject
       properties:
-        - name: 'ruleNumber'
+        - name: ruleNumber
           type: Integer
           description: |
             An integer uniquely identifying a rule in the list.
@@ -391,11 +399,11 @@ properties:
           required: true
           send_empty_value: true
           validation:
-            function: 'validation.IntBetween(0, 65000)'
-        - name: 'description'
+            function: validation.IntBetween(0, 65000)
+        - name: description
           type: String
-          description: 'An optional description of this rule.'
-        - name: 'match'
+          description: An optional description of this rule.
+        - name: match
           type: String
           description: |
             CEL expression that specifies the match condition that egress traffic from a VM is evaluated against.
@@ -411,13 +419,12 @@ properties:
 
             "nexthop.hub == 'https://networkconnectivity.googleapis.com/v1alpha1/projects/my-project/global/hub/hub-1'"
           required: true
-        - name: 'action'
+        - name: action
           type: NestedObject
-          description:
-            'The action to be enforced for traffic that matches this rule.'
+          description: The action to be enforced for traffic that matches this rule.
           default_from_api: true
           properties:
-            - name: 'sourceNatActiveIps'
+            - name: sourceNatActiveIps
               type: Array
               description: |
                 A list of URLs of the IP resources used for this NAT rule.
@@ -425,16 +432,15 @@ properties:
                 This field is used for public NAT.
               is_set: true
               set_hash_func: computeRouterNatIPsHash
-              custom_flatten: 'templates/terraform/custom_flatten/nat_rules_ip_set.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+              custom_flatten: templates/terraform/custom_flatten/nat_rules_ip_set.tmpl
+              custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
               item_type:
-                name: 'address'
+                name: address
                 type: ResourceRef
-                description:
-                  'A reference to an address associated with this NAT'
-                resource: 'Address'
-                imports: 'selfLink'
-            - name: 'sourceNatDrainIps'
+                description: A reference to an address associated with this NAT
+                resource: Address
+                imports: selfLink
+            - name: sourceNatDrainIps
               type: Array
               description: |
                 A list of URLs of the IP resources to be drained.
@@ -443,33 +449,31 @@ properties:
                 This field is used for public NAT.
               is_set: true
               set_hash_func: computeRouterNatIPsHash
-              custom_flatten: 'templates/terraform/custom_flatten/nat_rules_ip_set.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+              custom_flatten: templates/terraform/custom_flatten/nat_rules_ip_set.tmpl
+              custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
               item_type:
-                name: 'address'
+                name: address
                 type: ResourceRef
-                description:
-                  'A reference to an address associated with this NAT'
-                resource: 'Address'
-                imports: 'selfLink'
-            - name: 'sourceNatActiveRanges'
+                description: A reference to an address associated with this NAT
+                resource: Address
+                imports: selfLink
+            - name: sourceNatActiveRanges
               type: Array
               description: |
-                  A list of URLs of the subnetworks used as source ranges for this NAT Rule.
-                  These subnetworks must have purpose set to PRIVATE_NAT.
-                  This field is used for private NAT.
+                A list of URLs of the subnetworks used as source ranges for this NAT Rule.
+                These subnetworks must have purpose set to PRIVATE_NAT.
+                This field is used for private NAT.
               is_set: true
               set_hash_func: computeRouterNatRulesSubnetHash
-              custom_flatten: 'templates/terraform/custom_flatten/nat_rules_subnets_set.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+              custom_flatten: templates/terraform/custom_flatten/nat_rules_subnets_set.tmpl
+              custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
               item_type:
-                name: 'subnet'
+                name: subnet
                 type: ResourceRef
-                description:
-                  'A reference to a subnetwork address associated with this NAT'
-                resource: 'Subnetwork'
-                imports: 'selfLink'
-            - name: 'sourceNatDrainRanges'
+                description: A reference to a subnetwork address associated with this NAT
+                resource: Subnetwork
+                imports: selfLink
+            - name: sourceNatDrainRanges
               type: Array
               description: |
                 A list of URLs of subnetworks representing source ranges to be drained.
@@ -477,23 +481,22 @@ properties:
                 This field is used for private NAT.
               is_set: true
               set_hash_func: computeRouterNatRulesSubnetHash
-              custom_flatten: 'templates/terraform/custom_flatten/nat_rules_subnets_set.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+              custom_flatten: templates/terraform/custom_flatten/nat_rules_subnets_set.tmpl
+              custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
               item_type:
-                name: 'subnet'
+                name: subnet
                 type: ResourceRef
-                description:
-                  'A reference to a subnetwork address associated with this NAT'
-                resource: 'Subnetwork'
-                imports: 'selfLink'
-  - name: 'enableEndpointIndependentMapping'
+                description: A reference to a subnetwork address associated with this NAT
+                resource: Subnetwork
+                imports: selfLink
+  - name: enableEndpointIndependentMapping
     type: Boolean
     description: |
       Enable endpoint independent mapping.
       For more information see the [official documentation](https://docs.cloud.google.com/nat/docs/public-nat#specs-rfcs).
     default_from_api: true
     send_empty_value: true
-  - name: 'type'
+  - name: type
     type: Enum
     description: |
       Indicates whether this NAT is used for public or private IP translation.
@@ -501,11 +504,11 @@ properties:
       If `PUBLIC` NAT used for public IP translation.
       If `PRIVATE` NAT used for private IP translation.
     immutable: true
-    default_value: "PUBLIC"
+    default_value: PUBLIC
     enum_values:
-      - 'PUBLIC'
-      - 'PRIVATE'
-  - name: 'autoNetworkTier'
+      - PUBLIC
+      - PRIVATE
+  - name: autoNetworkTier
     type: Enum
     description: |
       The network tier to use when automatically reserving NAT IP addresses.
@@ -514,5 +517,5 @@ properties:
     default_from_api: true
     ignore_read: true
     enum_values:
-      - 'PREMIUM'
-      - 'STANDARD'
+      - PREMIUM
+      - STANDARD

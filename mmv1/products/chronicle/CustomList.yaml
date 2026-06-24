@@ -13,35 +13,32 @@
 
 ---
 name: CustomList
-description: >
+description: |
   The custom list is a list of objects, that can be saved as a shared resource, and can be used by playbooks.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.customLists'
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.customLists
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists/{{custom_list_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists/{{custom_list_id}}
 update_mask: true
 update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists/{{custom_list_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists/{{custom_list_id}}
-
 autogen_status: Q3VzdG9tTGlzdA==
-
 samples:
   - name: chronicle_customlist_update
     primary_resource_id: sample
     min_version: beta
     steps:
-      - name: "chronicle_customlist_basic"
+      - name: chronicle_customlist_basic
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
-      - name: "chronicle_customlist_full"
+          chronicle_id: CHRONICLE_ID
+      - name: chronicle_customlist_full
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
-
+          chronicle_id: CHRONICLE_ID
 parameters:
   - name: location
     type: String
@@ -58,9 +55,8 @@ parameters:
   - name: customListId
     type: String
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-    description: |-
-      Id of the Custom List record.
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
+    description: Id of the Custom List record.
 properties:
   - name: category
     type: String

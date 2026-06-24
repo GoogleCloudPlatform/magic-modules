@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'HttpsHealthCheck'
-kind: 'compute#httpsHealthCheck'
+name: HttpsHealthCheck
 description: |
   An HttpsHealthCheck resource. This resource defines a template for how
   individual VMs should be checked for health, via HTTPS.
@@ -25,61 +24,64 @@ description: |
   which still require the legacy version.
 references:
   guides:
-    'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
-  api: 'https://cloud.google.com/compute/docs/reference/v1/httpsHealthChecks'
+    Adding Health Checks: https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks
+  api: https://cloud.google.com/compute/docs/reference/v1/httpsHealthChecks
 docs:
-base_url: 'projects/{{project}}/global/httpsHealthChecks'
+base_url: projects/{{project}}/global/httpsHealthChecks
 has_self_link: true
-generate_list_resource: true
+collection_url_key: items
+kind: compute#httpsHealthCheck
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+generate_list_resource: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
-collection_url_key: 'items'
-custom_code:
 include_in_tgc_next: true
-examples:
-  - name: 'https_health_check_basic'
-    primary_resource_id: 'default'
-    vars:
-      https_health_check_name: 'authentication-health-check'
+custom_code:
+samples:
+  - name: https_health_check_basic
+    primary_resource_id: default
+    steps:
+      - name: https_health_check_basic
+        resource_id_vars:
+          https_health_check_name: authentication-health-check
 parameters:
 properties:
-  - name: 'checkIntervalSec'
+  - name: checkIntervalSec
     type: Integer
     description: |
       How often (in seconds) to send a health check. The default value is 5
       seconds.
     default_value: 5
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - name: 'healthyThreshold'
+  - name: healthyThreshold
     type: Integer
     description: |
       A so-far unhealthy instance will be marked healthy after this many
       consecutive successes. The default value is 2.
     default_value: 2
-  - name: 'host'
+  - name: host
     type: String
     description: |
       The value of the host header in the HTTPS health check request. If
       left empty (default value), the public IP on behalf of which this
       health check is performed will be used.
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -91,26 +93,26 @@ properties:
       last character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'port'
+  - name: port
     type: Integer
     description: |
       The TCP port number for the HTTPS health check request.
       The default value is 443.
     default_value: 443
-  - name: 'requestPath'
+  - name: requestPath
     type: String
     description: |
       The request path of the HTTPS health check request.
       The default value is /.
-    default_value: "/"
-  - name: 'timeoutSec'
+    default_value: /
+  - name: timeoutSec
     type: Integer
     description: |
       How long (in seconds) to wait before claiming failure.
       The default value is 5 seconds.  It is invalid for timeoutSec to have
       greater value than checkIntervalSec.
     default_value: 5
-  - name: 'unhealthyThreshold'
+  - name: unhealthyThreshold
     type: Integer
     description: |
       A so-far healthy instance will be marked unhealthy after this many

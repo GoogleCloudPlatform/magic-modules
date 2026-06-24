@@ -39,74 +39,89 @@ legacy_long_form_project: true
 custom_code:
   update_encoder: templates/terraform/update_encoder/compute_network_firewall_policy_rule.go.tmpl
   constants: templates/terraform/constants/network_firewall_policy_rule.go.tmpl
-examples:
+samples:
   - name: network_firewall_policy_rule
     primary_resource_id: primary
-    vars:
-      address_group: address-group
-      fw_policy: fw-policy
-      network: network
-      tag_key: tag-key
-      tag_value: tag-value
-    test_vars_overrides:
-      # for backward compatible
-      network: '"network" + randomSuffix'
-    test_env_vars:
-      org_id: ORG_ID
-      project_name: PROJECT_NAME
-      service_acct: SERVICE_ACCT
+    steps:
+      - name: network_firewall_policy_rule
+        resource_id_vars:
+          address_group: address-group
+          fw_policy: fw-policy
+          network: network
+          tag_key: tag-key
+          tag_value: tag-value
+        test_vars_overrides:
+          # for backward compatible
+          network: '"network" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
+          project_name: PROJECT_NAME
+          service_acct: SERVICE_ACCT
   - name: network_firewall_policy_rule_network_scope_egress
     primary_resource_id: primary
     min_version: beta
-    vars:
-      fw_policy: fw-policy
-    test_env_vars:
-      project_name: PROJECT_NAME
+    steps:
+      - name: network_firewall_policy_rule_network_scope_egress
+        min_version: beta
+        resource_id_vars:
+          fw_policy: fw-policy
+        test_env_vars:
+          project_name: PROJECT_NAME
   - name: network_firewall_policy_rule_network_scope_ingress
     primary_resource_id: primary
     min_version: beta
-    vars:
-      fw_policy: fw-policy
-      network: network
-    test_vars_overrides:
-      # for backward compatible
-      network: '"network" + randomSuffix'
-    test_env_vars:
-      project_name: PROJECT_NAME
+    steps:
+      - name: network_firewall_policy_rule_network_scope_ingress
+        min_version: beta
+        resource_id_vars:
+          fw_policy: fw-policy
+          network: network
+        test_vars_overrides:
+          # for backward compatible
+          network: '"network" + randomSuffix'
+        test_env_vars:
+          project_name: PROJECT_NAME
   - name: network_firewall_policy_rule_network_context_egress
     primary_resource_id: primary
-    vars:
-      fw_policy: fw-policy
-    test_env_vars:
-      project_name: PROJECT_NAME
+    steps:
+      - name: network_firewall_policy_rule_network_context_egress
+        resource_id_vars:
+          fw_policy: fw-policy
+        test_env_vars:
+          project_name: PROJECT_NAME
   - name: network_firewall_policy_rule_network_context_ingress
     primary_resource_id: primary
-    vars:
-      fw_policy: fw-policy
-      network: network
-    test_vars_overrides:
-      # for backward compatible
-      network: '"network" + randomSuffix'
-    test_env_vars:
-      project_name: PROJECT_NAME
-  - name: 'network_firewall_policy_rule_target_type_internal_managed_lb'
-    primary_resource_id: 'primary'
-    min_version: "beta"
-    vars:
-      fw_policy: 'fw-policy'
-      network: 'network'
-      backend_subnet: 'backend-subnet'
-      proxy_subnet: 'proxy-subnet'
-      hc: 'health-check'
-      backend_service: 'backend-service'
-      url_map: 'url-map'
-      target_proxy: 'target-http-proxy'
-      forwarding_rule: 'forwarding-rule'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_name: PROJECT_NAME
-    test_vars_overrides:
-      network: '"network" + randomSuffix'
+    steps:
+      - name: network_firewall_policy_rule_network_context_ingress
+        resource_id_vars:
+          fw_policy: fw-policy
+          network: network
+        test_vars_overrides:
+          # for backward compatible
+          network: '"network" + randomSuffix'
+        test_env_vars:
+          project_name: PROJECT_NAME
+  - name: network_firewall_policy_rule_target_type_internal_managed_lb
+    primary_resource_id: primary
+    min_version: beta
+    steps:
+      - name: network_firewall_policy_rule_target_type_internal_managed_lb
+        min_version: beta
+        resource_id_vars:
+          fw_policy: fw-policy
+          network: network
+          backend_subnet: backend-subnet
+          proxy_subnet: proxy-subnet
+          hc: health-check
+          backend_service: backend-service
+          url_map: url-map
+          target_proxy: target-http-proxy
+          forwarding_rule: forwarding-rule
+        test_env_vars:
+          org_id: ORG_ID
+          project_name: PROJECT_NAME
+        test_vars_overrides:
+          network: '"network" + randomSuffix'
 parameters:
   - name: firewallPolicy
     type: ResourceRef
@@ -399,7 +414,7 @@ properties:
       When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.
       If this is unspecified, the firewall policy rule will be enabled.
     send_empty_value: true
-  - name: 'targetType'
+  - name: targetType
     type: Enum
     description: |
       Target types of the firewall policy rule.
@@ -408,9 +423,9 @@ properties:
     required: false
     default_from_api: true
     enum_values:
-      - 'INSTANCES'
-      - 'INTERNAL_MANAGED_LB'
-  - name: 'targetForwardingRules'
+      - INSTANCES
+      - INTERNAL_MANAGED_LB
+  - name: targetForwardingRules
     type: Array
     required: false
     description: |
@@ -423,4 +438,4 @@ properties:
       - projects/project/regions/region/forwardingRules/forwardingRule
     item_type:
       type: String
-    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+    diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths

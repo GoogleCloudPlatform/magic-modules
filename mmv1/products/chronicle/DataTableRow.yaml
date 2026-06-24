@@ -14,29 +14,28 @@
 ---
 name: DataTableRow
 description: Represents a single row in a data table.
+references:
+  guides:
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataTables.dataTableRows
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows
-create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows/{{data_table_row}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows
+update_mask: true
+update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows/{{data_table_row}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows/{{data_table_row}}
-
-update_verb: PATCH
-update_mask: true
-
-references:
-  guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataTables.dataTableRows'
-examples:
-  - name: 'chronicle_data_table_row_basic'
-    config_path: 'templates/terraform/examples/chronicle_data_table_row_basic.tf.tmpl'
-    primary_resource_id: 'example_row'
-    test_env_vars:
-      instance_id: 'CHRONICLE_ID'
-    vars:
-      data_table_id: 'terraform_test'
 autogen_status: RGF0YVRhYmxlUm93
+samples:
+  - name: chronicle_data_table_row_basic
+    primary_resource_id: example_row
+    steps:
+      - name: chronicle_data_table_row_basic
+        test_env_vars:
+          instance_id: CHRONICLE_ID
+        resource_id_vars:
+          data_table_id: terraform_test
 parameters:
   - name: location
     type: String
@@ -61,8 +60,7 @@ parameters:
     description: The ID of the DataTable Row.
     immutable: true
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
 properties:
   - name: createTime
     type: String

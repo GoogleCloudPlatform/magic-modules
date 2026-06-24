@@ -12,104 +12,117 @@
 # limitations under the License.
 
 ---
-name: 'SecurityProfile'
+name: SecurityProfile
 description: |
   A security profile defines the behavior associated to a profile type.
 references:
   guides:
-    'Create and manage security profiles': 'https://cloud.google.com/firewall/docs/configure-security-profiles'
-  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/organizations.locations.securityProfiles'
+    Create and manage security profiles: https://cloud.google.com/firewall/docs/configure-security-profiles
+  api: https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/organizations.locations.securityProfiles
 docs:
 base_url: '{{parent}}/locations/{{location}}/securityProfiles'
 self_link: '{{parent}}/locations/{{location}}/securityProfiles/{{name}}'
 create_url: '{{parent}}/locations/{{location}}/securityProfiles?securityProfileId={{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
 import_format:
   - '{{%parent}}/locations/{{location}}/securityProfiles/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  url_substitutions:
+    - parent: organizations/${ORG_ID}
+      region: global
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
   include_project: true
-custom_code:
 include_in_tgc_next: true
-sweeper:
-  url_substitutions:
-    - parent: "organizations/${ORG_ID}"
-      region: "global"
-examples:
-  - name: 'network_security_security_profile_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_overrides'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_mirroring'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-      network_name: 'my-network'
-      deployment_group_id: 'my-dg'
-      endpoint_group_id: 'my-eg'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_intercept'
-    min_version: 'beta'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-      network_name: 'my-network'
-      deployment_group_id: 'my-dg'
-      endpoint_group_id: 'my-eg'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_url_filtering'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
+custom_code:
+samples:
+  - name: network_security_security_profile_basic
+    primary_resource_id: default
+    steps:
+      - name: network_security_security_profile_basic
+        resource_id_vars:
+          resource_name: my-security-profile
+        test_env_vars:
+          org_id: ORG_ID
+  - name: network_security_security_profile_overrides
+    primary_resource_id: default
+    steps:
+      - name: network_security_security_profile_overrides
+        resource_id_vars:
+          resource_name: my-security-profile
+        test_env_vars:
+          org_id: ORG_ID
+  - name: network_security_security_profile_mirroring
+    primary_resource_id: default
+    steps:
+      - name: network_security_security_profile_mirroring
+        resource_id_vars:
+          resource_name: my-security-profile
+          network_name: my-network
+          deployment_group_id: my-dg
+          endpoint_group_id: my-eg
+        test_env_vars:
+          org_id: ORG_ID
+  - name: network_security_security_profile_intercept
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: network_security_security_profile_intercept
+        min_version: beta
+        resource_id_vars:
+          resource_name: my-security-profile
+          network_name: my-network
+          deployment_group_id: my-dg
+          endpoint_group_id: my-eg
+        test_env_vars:
+          org_id: ORG_ID
+  - name: network_security_security_profile_url_filtering
+    primary_resource_id: default
     tgc_skip_test: The ENUM value URL_FILTERING in type field is transformed to UNKNOWN_ENUM_VALUE_ProfileType_5 in CAI asset. The reason could be that URL_FILTERING is not supported in CAI yet. Will check if the value in CAI assets will be correct later.
+    steps:
+      - name: network_security_security_profile_url_filtering
+        resource_id_vars:
+          resource_name: my-security-profile
+        test_env_vars:
+          org_id: ORG_ID
   - name: network_security_security_profile_broker
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-      network_name: 'my-network'
-      deployment_group_id: 'my-dg'
-      endpoint_group_id: 'my-eg'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    primary_resource_id: default
+    steps:
+      - name: network_security_security_profile_broker
+        resource_id_vars:
+          resource_name: my-security-profile
+          network_name: my-network
+          deployment_group_id: my-dg
+          endpoint_group_id: my-eg
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the security profile resource.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the security profile.
       The default value is `global`.
     url_param_only: true
     immutable: true
-    default_value: "global"
-  - name: 'parent'
+    default_value: global
+  - name: parent
     type: String
     description: |
       The name of the parent this security profile belongs to.
@@ -117,65 +130,65 @@ parameters:
     url_param_only: true
     immutable: true
 properties:
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: |
       Server-defined URL of this resource.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: Time the security profile was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: Time the security profile was updated in UTC.
     output: true
-  - name: 'etag'
+  - name: etag
     type: String
     description: |
       This checksum is computed by the server based on the value of other fields,
       and may be sent on update and delete requests to ensure the client has an up-to-date
       value before proceeding.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional description of the security profile. The Max length is 512 characters.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       A map of key/value label pairs to assign to the resource.
-  - name: 'threatPreventionProfile'
+  - name: threatPreventionProfile
     type: NestedObject
     description: The threat prevention configuration for the security profile.
     properties:
-      - name: 'severityOverrides'
+      - name: severityOverrides
         type: Array
         is_set: true
         description: The configuration for overriding threats actions by severity match.
         item_type:
           type: NestedObject
           properties:
-            - name: 'action'
+            - name: action
               type: Enum
               description: Threat action override.
               required: true
               enum_values:
-                - 'ALERT'
-                - 'ALLOW'
-                - 'DEFAULT_ACTION'
-                - 'DENY'
-            - name: 'severity'
+                - ALERT
+                - ALLOW
+                - DEFAULT_ACTION
+                - DENY
+            - name: severity
               type: Enum
               description: Severity level to match.
               required: true
               enum_values:
-                - 'CRITICAL'
-                - 'HIGH'
-                - 'INFORMATIONAL'
-                - 'LOW'
-                - 'MEDIUM'
-      - name: 'threatOverrides'
+                - CRITICAL
+                - HIGH
+                - INFORMATIONAL
+                - LOW
+                - MEDIUM
+      - name: threatOverrides
         type: Array
         is_set: true
         description: |
@@ -185,30 +198,30 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'action'
+            - name: action
               type: Enum
               description: Threat action.
               required: true
               enum_values:
-                - 'ALERT'
-                - 'ALLOW'
-                - 'DEFAULT_ACTION'
-                - 'DENY'
-            - name: 'threatId'
+                - ALERT
+                - ALLOW
+                - DEFAULT_ACTION
+                - DENY
+            - name: threatId
               type: String
               description: Vendor-specific ID of a threat to override.
               required: true
-            - name: 'type'
+            - name: type
               type: Enum
               description: Type of threat.
               output: true
               enum_values:
-                - 'ANTIVIRUS'
-                - 'DNS'
-                - 'UNKNOWN'
-                - 'VULNERABILITY'
-                - 'SPYWARE'
-      - name: 'antivirusOverrides'
+                - ANTIVIRUS
+                - DNS
+                - UNKNOWN
+                - VULNERABILITY
+                - SPYWARE
+      - name: antivirusOverrides
         type: Array
         is_set: true
         description: |
@@ -216,38 +229,38 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'protocol'
+            - name: protocol
               type: Enum
               description: Required protocol to match.
               required: true
               enum_values:
-                - 'SMTP'
-                - 'SMB'
-                - 'POP3'
-                - 'IMAP'
-                - 'HTTP2'
-                - 'HTTP'
-                - 'FTP'
-            - name: 'action'
+                - SMTP
+                - SMB
+                - POP3
+                - IMAP
+                - HTTP2
+                - HTTP
+                - FTP
+            - name: action
               type: Enum
               description: Threat action override. For some threat types, only a subset of actions applies.
               required: true
               enum_values:
-                - 'ALERT'
-                - 'ALLOW'
-                - 'DEFAULT_ACTION'
-                - 'DENY'
+                - ALERT
+                - ALLOW
+                - DEFAULT_ACTION
+                - DENY
     conflicts:
-      - 'urlFilteringProfile'
-      - 'customMirroringProfile'
-      - 'customInterceptProfile'
-  - name: 'urlFilteringProfile'
+      - urlFilteringProfile
+      - customMirroringProfile
+      - customInterceptProfile
+  - name: urlFilteringProfile
     type: NestedObject
     is_missing_in_cai: true
     description: The url filtering configuration for the security profile.
-    custom_flatten: 'templates/terraform/custom_flatten/network_security_security_profile_url_filters_flatten.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/network_security_security_profile_url_filters_flatten.go.tmpl
     properties:
-      - name: 'urlFilters'
+      - name: urlFilters
         type: Array
         is_set: true
         description: |
@@ -257,21 +270,21 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'filteringAction'
+            - name: filteringAction
               type: Enum
               description: The action to take when the filter is applied.
               required: true
               enum_values:
-                - 'ALLOW'
-                - 'DENY'
-            - name: 'urls'
+                - ALLOW
+                - DENY
+            - name: urls
               type: Array
               description: |
                 A list of domain matcher strings that a domain name gets compared with to determine if the filter is applicable.
                 A domain name must match with at least one of the strings in the list for a filter to be applicable.
               item_type:
                 type: String
-            - name: 'priority'
+            - name: priority
               type: Integer
               description: |
                 The priority of the filter within the URL filtering profile.
@@ -279,10 +292,10 @@ properties:
                 The priority of a filter must be unique within a URL filtering profile.
               required: true
     conflicts:
-      - 'threatPreventionProfile'
-      - 'customMirroringProfile'
-      - 'customInterceptProfile'
-  - name: 'customMirroringProfile'
+      - threatPreventionProfile
+      - customMirroringProfile
+      - customInterceptProfile
+  - name: customMirroringProfile
     type: NestedObject
     description: |
       The configuration for defining the Mirroring Endpoint Group used to
@@ -306,7 +319,7 @@ properties:
           This field is used for Packet Broker mirroring endpoint groups to specify
           the deployment groups that the packet should be mirrored to by the broker.
           Format: projects/{project_id}/locations/global/mirroringDeploymentGroups/{deployment_group_id}
-      - name: 'mirroringEndpointGroupType'
+      - name: mirroringEndpointGroupType
         type: String
         description: |-
           The type of the mirroring endpoint group this profile is attached to.
@@ -315,10 +328,10 @@ properties:
           BROKER
         output: true
     conflicts:
-      - 'threatPreventionProfile'
-      - 'urlFilteringProfile'
-      - 'customInterceptProfile'
-  - name: 'customInterceptProfile'
+      - threatPreventionProfile
+      - urlFilteringProfile
+      - customInterceptProfile
+  - name: customInterceptProfile
     type: NestedObject
     description: |
       The configuration for defining the Intercept Endpoint Group used to
@@ -331,16 +344,16 @@ properties:
           Format: projects/{project_id}/locations/global/interceptEndpointGroups/{endpoint_group_id}
         required: true
     conflicts:
-      - 'threatPreventionProfile'
-      - 'urlFilteringProfile'
-      - 'customMirroringProfile'
-  - name: 'type'
+      - threatPreventionProfile
+      - urlFilteringProfile
+      - customMirroringProfile
+  - name: type
     type: Enum
     description: The type of security profile.
     required: true
     immutable: true
     enum_values:
-      - 'THREAT_PREVENTION'
-      - 'URL_FILTERING'
-      - 'CUSTOM_MIRRORING'
-      - 'CUSTOM_INTERCEPT'
+      - THREAT_PREVENTION
+      - URL_FILTERING
+      - CUSTOM_MIRRORING
+      - CUSTOM_INTERCEPT

@@ -12,77 +12,86 @@
 # limitations under the License.
 
 ---
-name: 'RegionTargetHttpsProxy'
+name: RegionTargetHttpsProxy
 api_resource_type_kind: TargetHttpsProxy
 description: |
   Represents a RegionTargetHttpsProxy resource, which is used by one or more
   forwarding rules to route incoming HTTPS requests to a URL map.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetHttpsProxies'
+    Official Documentation: https://cloud.google.com/compute/docs/load-balancing/http/target-proxies
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetHttpsProxies
 docs:
-base_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies'
-has_self_link: true
+base_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies
 immutable: true
-datasource_experimental:
-  generate: true
+has_self_link: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+datasource_experimental:
+  generate: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
 include_in_tgc_next: true
 custom_code:
-  encoder: 'templates/terraform/encoders/compute_region_target_https_proxy.go.tmpl'
+  encoder: templates/terraform/encoders/compute_region_target_https_proxy.go.tmpl
   # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource
   # is marked to be immutable, but we have a field specific update that overrides it (e.g certifiacteManagerCertificates).
   # This causes the encoder logic to not be applied during update.
-  update_encoder: 'templates/terraform/encoders/compute_region_target_https_proxy.go.tmpl'
-  decoder: 'templates/terraform/decoders/compute_region_target_https_proxy.go.tmpl'
-examples:
-  - name: 'region_target_https_proxy_basic'
-    primary_resource_id: 'default'
-    vars:
-      region_target_https_proxy_name: 'test-proxy'
-      region_ssl_certificate_name: 'my-certificate'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
-      region_health_check_name: 'http-health-check'
-  - name: 'region_target_https_proxy_http_keep_alive_timeout'
-    primary_resource_id: 'default'
-    vars:
-      region_target_https_proxy_name: 'test-http-keep-alive-timeout-proxy'
-      region_ssl_certificate_name: 'my-certificate'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
-      region_health_check_name: 'http-health-check'
-  - name: 'region_target_https_proxy_mtls'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      target_https_proxy_name: 'test-mtls-proxy'
-      ssl_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-      server_tls_policy_name: 'my-tls-policy'
-      trust_config_name: 'my-trust-config'
-  - name: 'region_target_https_proxy_certificate_manager_certificate'
-    primary_resource_id: 'default'
-    vars:
-      region_target_https_proxy_name: 'target-http-proxy'
-      certificate_manager_certificate_name: 'my-certificate'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
+  update_encoder: templates/terraform/encoders/compute_region_target_https_proxy.go.tmpl
+  decoder: templates/terraform/decoders/compute_region_target_https_proxy.go.tmpl
+samples:
+  - name: region_target_https_proxy_basic
+    primary_resource_id: default
+    steps:
+      - name: region_target_https_proxy_basic
+        resource_id_vars:
+          region_target_https_proxy_name: test-proxy
+          region_ssl_certificate_name: my-certificate
+          region_url_map_name: url-map
+          region_backend_service_name: backend-service
+          region_health_check_name: http-health-check
+  - name: region_target_https_proxy_http_keep_alive_timeout
+    primary_resource_id: default
+    steps:
+      - name: region_target_https_proxy_http_keep_alive_timeout
+        resource_id_vars:
+          region_target_https_proxy_name: test-http-keep-alive-timeout-proxy
+          region_ssl_certificate_name: my-certificate
+          region_url_map_name: url-map
+          region_backend_service_name: backend-service
+          region_health_check_name: http-health-check
+  - name: region_target_https_proxy_mtls
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: region_target_https_proxy_mtls
+        min_version: beta
+        resource_id_vars:
+          target_https_proxy_name: test-mtls-proxy
+          ssl_certificate_name: my-certificate
+          url_map_name: url-map
+          backend_service_name: backend-service
+          http_health_check_name: http-health-check
+          server_tls_policy_name: my-tls-policy
+          trust_config_name: my-trust-config
+  - name: region_target_https_proxy_certificate_manager_certificate
+    primary_resource_id: default
+    steps:
+      - name: region_target_https_proxy_certificate_manager_certificate
+        resource_id_vars:
+          region_target_https_proxy_name: target-http-proxy
+          certificate_manager_certificate_name: my-certificate
+          region_url_map_name: url-map
+          region_backend_service_name: backend-service
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
     description: |
       The Region in which the created target https proxy should reside.
@@ -90,25 +99,25 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: Region
+    imports: name
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
+    description: An optional description of this resource.
     immutable: true
-  - name: 'proxyId'
+  - name: proxyId
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     api_name: id
     output: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -139,62 +148,62 @@ properties:
   #   update_verb: :POST
   #   update_url:
   #     'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setQuicOverride'
-  - name: 'certificateManagerCertificates'
+  - name: certificateManagerCertificates
     type: Array
     description: |
       URLs to certificate manager certificate resources that are used to authenticate connections between users and the load balancer.
       sslCertificates and certificateManagerCertificates can't be defined together.
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificates/{resourceName}` or just the self_link `projects/{project}/locations/{location}/certificates/{resourceName}`
-    update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates'
-    update_verb: 'POST'
+    update_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates
+    update_verb: POST
     conflicts:
       - ssl_certificates
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
-    custom_expand: 'templates/terraform/custom_expand/certificate_manager_certificate_construct_full_url.go.tmpl'
+    diff_suppress_func: tpgresource.CompareResourceNames
+    custom_expand: templates/terraform/custom_expand/certificate_manager_certificate_construct_full_url.go.tmpl
     item_type:
       type: String
-  - name: 'sslCertificates'
+  - name: sslCertificates
     type: Array
     description: |
       URLs to SslCertificate resources that are used to authenticate connections between users and the load balancer.
       At least one SSL certificate must be specified. Currently, you may specify up to 15 SSL certificates.
       sslCertificates do not apply when the load balancing scheme is set to INTERNAL_SELF_MANAGED.
-    update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates'
-    update_verb: 'POST'
+    update_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates
+    update_verb: POST
     conflicts:
       - certificate_manager_certificates
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl
     item_type:
-      name: 'sslCertificate'
+      name: sslCertificate
       type: ResourceRef
-      description: 'The SSL certificates used by this TargetHttpsProxy'
-      resource: 'RegionSslCertificate'
-      imports: 'selfLink'
-  - name: 'sslPolicy'
+      description: The SSL certificates used by this TargetHttpsProxy
+      resource: RegionSslCertificate
+      imports: selfLink
+  - name: sslPolicy
     type: ResourceRef
     description: |
       A reference to the Region SslPolicy resource that will be associated with
       the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
       resource will not have any SSL policy configured.
-    update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}'
-    update_verb: 'PATCH'
-    update_id: 'sslPolicy'
-    fingerprint_name: 'fingerprint'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'RegionSslPolicy'
-    imports: 'selfLink'
-  - name: 'urlMap'
+    update_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}
+    update_verb: PATCH
+    update_id: sslPolicy
+    fingerprint_name: fingerprint
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: RegionSslPolicy
+    imports: selfLink
+  - name: urlMap
     type: ResourceRef
     description: |
       A reference to the RegionUrlMap resource that defines the mapping from URL
       to the RegionBackendService.
     required: true
-    update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'
-    update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'RegionUrlMap'
-    imports: 'selfLink'
-  - name: 'httpKeepAliveTimeoutSec'
+    update_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap
+    update_verb: POST
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: RegionUrlMap
+    imports: selfLink
+  - name: httpKeepAliveTimeoutSec
     type: Integer
     description: |
       Specifies how long to keep a connection open, after completing a response,
@@ -202,7 +211,7 @@ properties:
       not specified, a default value (600 seconds) will be used. For Regioanl
       HTTP(S) load balancer, the minimum allowed value is 5 seconds and the
       maximum allowed value is 600 seconds.
-  - name: 'serverTlsPolicy'
+  - name: serverTlsPolicy
     type: ResourceRef
     description: |
       A URL referring to a networksecurity.ServerTlsPolicy
@@ -219,9 +228,9 @@ properties:
       deleting or recreating a referenced ServerTlsPolicy resource, you will
       receive a resourceInUseByAnotherResource error. Use lifecycle.create_before_destroy
       within the ServerTlsPolicy resource to avoid this.
-    update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}'
-    update_verb: 'PATCH'
-    update_id: 'serverTlsPolicy'
-    fingerprint_name: 'fingerprint'
-    resource: 'SslPolicy'
-    imports: 'selfLink'
+    update_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}
+    update_verb: PATCH
+    update_id: serverTlsPolicy
+    fingerprint_name: fingerprint
+    resource: SslPolicy
+    imports: selfLink

@@ -12,77 +12,85 @@
 # limitations under the License.
 
 ---
-name: 'TargetHttpProxy'
-kind: 'compute#targetHttpProxy'
+name: TargetHttpProxy
 description: |
   Represents a TargetHttpProxy resource, which is used by one or more global
   forwarding rule to route incoming HTTP requests to a URL map.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
-  api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpProxies'
+    Official Documentation: https://cloud.google.com/compute/docs/load-balancing/http/target-proxies
+  api: https://cloud.google.com/compute/docs/reference/v1/targetHttpProxies
 docs:
-base_url: 'projects/{{project}}/global/targetHttpProxies'
-has_self_link: true
+base_url: projects/{{project}}/global/targetHttpProxies
 immutable: true
-datasource_experimental:
-  generate: true
+has_self_link: true
+collection_url_key: items
+kind: compute#targetHttpProxy
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+datasource_experimental:
+  generate: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
-collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
-examples:
-  - name: 'target_http_proxy_basic'
-    primary_resource_id: 'default'
-    vars:
-      target_http_proxy_name: 'test-proxy'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-  - name: 'target_http_proxy_http_keep_alive_timeout'
-    primary_resource_id: 'default'
-    vars:
-      target_http_proxy_name: 'test-http-keep-alive-timeout-proxy'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-  - name: 'target_http_proxy_https_redirect'
-    primary_resource_id: 'default'
-    vars:
-      target_http_proxy_name: 'test-https-redirect-proxy'
-      url_map_name: 'url-map'
-  - name: 'target_http_proxy_fingerprint'
-    primary_resource_id: 'default'
-    vars:
-      target_http_proxy_name: 'test-fingerprint-proxy'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
+samples:
+  - name: target_http_proxy_basic
+    primary_resource_id: default
+    steps:
+      - name: target_http_proxy_basic
+        resource_id_vars:
+          target_http_proxy_name: test-proxy
+          url_map_name: url-map
+          backend_service_name: backend-service
+          http_health_check_name: http-health-check
+  - name: target_http_proxy_http_keep_alive_timeout
+    primary_resource_id: default
+    steps:
+      - name: target_http_proxy_http_keep_alive_timeout
+        resource_id_vars:
+          target_http_proxy_name: test-http-keep-alive-timeout-proxy
+          url_map_name: url-map
+          backend_service_name: backend-service
+          http_health_check_name: http-health-check
+  - name: target_http_proxy_https_redirect
+    primary_resource_id: default
+    steps:
+      - name: target_http_proxy_https_redirect
+        resource_id_vars:
+          target_http_proxy_name: test-https-redirect-proxy
+          url_map_name: url-map
+  - name: target_http_proxy_fingerprint
+    primary_resource_id: default
+    steps:
+      - name: target_http_proxy_fingerprint
+        resource_id_vars:
+          target_http_proxy_name: test-fingerprint-proxy
+          url_map_name: url-map
+          backend_service_name: backend-service
+          http_health_check_name: http-health-check
 parameters:
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
-    description: 'An optional description of this resource.'
-  - name: 'proxyId'
+    description: An optional description of this resource.
+  - name: proxyId
     type: Integer
-    description: 'The unique identifier for the resource.'
+    description: The unique identifier for the resource.
     api_name: id
     output: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is
@@ -93,24 +101,24 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-  - name: 'urlMap'
+  - name: urlMap
     type: ResourceRef
     description: |
       A reference to the UrlMap resource that defines the mapping from URL
       to the BackendService.
     required: true
-    update_url: 'projects/{{project}}/targetHttpProxies/{{name}}/setUrlMap'
-    update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'UrlMap'
-    imports: 'selfLink'
-  - name: 'proxyBind'
+    update_url: projects/{{project}}/targetHttpProxies/{{name}}/setUrlMap
+    update_verb: POST
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    resource: UrlMap
+    imports: selfLink
+  - name: proxyBind
     type: Boolean
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
-  - name: 'httpKeepAliveTimeoutSec'
+  - name: httpKeepAliveTimeoutSec
     type: Integer
     description: |
       Specifies how long to keep a connection open, after completing a response,
@@ -122,7 +130,7 @@ properties:
       value is 600 seconds, the minimum allowed value is 5 seconds, and the
       maximum allowed value is 600 seconds. For Global external HTTP(S) load
       balancer (classic), this option is not available publicly.
-  - name: 'fingerprint'
+  - name: fingerprint
     type: Fingerprint
     description: |
       Fingerprint of this resource. A hash of the contents stored in this object. This field is used in optimistic locking.

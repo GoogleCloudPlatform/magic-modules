@@ -13,37 +13,33 @@
 
 ---
 name: SoarNetwork
-description: >
-  Manage networks in the platform using the Classless Inter-Domain Routing (CIDR) format.
-  The system identifies network subnets to help Google Security Operations recognize internal assets and consider network sensitivity during playbook execution.
-min_version: 'beta'
+description: |
+  Manage networks in the platform using the Classless Inter-Domain Routing (CIDR) format. The system identifies network subnets to help Google Security Operations recognize internal assets and consider network sensitivity during playbook execution.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.soarNetworks'
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.soarNetworks
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks/{{soar_network_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks/{{soar_network_id}}
 update_mask: true
 update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks/{{soar_network_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks/{{soar_network_id}}
-
 autogen_status: U29hck5ldHdvcms=
-
 samples:
   - name: chronicle_soarnetwork_update
     primary_resource_id: sample
     min_version: beta
     steps:
-      - name: "chronicle_soarnetwork_basic"
+      - name: chronicle_soarnetwork_basic
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
-      - name: "chronicle_soarnetwork_full"
+          chronicle_id: CHRONICLE_ID
+      - name: chronicle_soarnetwork_full
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
-
+          chronicle_id: CHRONICLE_ID
 parameters:
   - name: location
     type: String
@@ -60,9 +56,8 @@ parameters:
   - name: soarNetworkId
     type: String
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-    description: |-
-      Id of the soarNetwork record.
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
+    description: Id of the soarNetwork record.
 properties:
   - name: address
     type: String

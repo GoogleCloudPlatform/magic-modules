@@ -15,48 +15,54 @@
 name: Framework
 description: Frameworks allow you to monitor and enforce compliance and security requirements. Manage compliance by assigning built-in or custom frameworks to resources.
 references:
-  api: "https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworks"
+  api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworks
 base_url: '{{parent}}/locations/{{location}}/frameworks'
-update_mask: true
 self_link: '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
 create_url: '{{parent}}/locations/{{location}}/frameworks?frameworkId={{framework_id}}'
+update_mask: true
 update_verb: PATCH
 id_format: '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
 import_format:
-  - 'organizations/{{%organization}}/locations/{{location}}/frameworks/{{framework_id}}'
-  - "{{%parent}}/locations/{{location}}/frameworks/{{framework_id}}"
-examples:
-  - name: "cloudsecuritycompliance_framework_org_basic"
-    primary_resource_id: "example"
-    vars:
-      framework_name: "example-framework"
-    test_env_vars:
-      org_id: "ORG_ID"
-  - name: "cloudsecuritycompliance_framework_project_basic"
-    primary_resource_id: "example"
-    vars:
-      framework_name: "example-framework"
-    test_env_vars:
-      project_number: "PROJECT_NUMBER"
-  - name: "cloudsecuritycompliance_framework_org_basic_backward"
-    primary_resource_id: "example"
-    vars:
-      framework_name: "example-framework"
-    test_env_vars:
-      org_id: "ORG_ID"
+  - organizations/{{%organization}}/locations/{{location}}/frameworks/{{framework_id}}
+  - '{{%parent}}/locations/{{location}}/frameworks/{{framework_id}}'
 identity_schema_version: 2
 identity_upgraders: true
 autogen_status: RnJhbWV3b3Jr
 custom_code:
+  encoder: templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl
+  pre_create: templates/terraform/pre_create/cloudsecuritycompliance_pre_create.go.tmpl
+  pre_read: templates/terraform/pre_read/cloudsecuritycompliance_pre_read.go.tmpl
+  pre_update: templates/terraform/pre_update/cloudsecuritycompliance_pre_update.go.tmpl
+  pre_delete: templates/terraform/pre_delete/cloudsecuritycompliance_pre_delete.go.tmpl
+  custom_import: templates/terraform/custom_import/cloudsecuritycompliance_framework.go.tmpl
   custom_identity:
     - parent
-  encoder: "templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl"
-  pre_create: "templates/terraform/pre_create/cloudsecuritycompliance_pre_create.go.tmpl"
-  pre_read: "templates/terraform/pre_read/cloudsecuritycompliance_pre_read.go.tmpl"
-  pre_update: "templates/terraform/pre_update/cloudsecuritycompliance_pre_update.go.tmpl"
-  pre_delete: "templates/terraform/pre_delete/cloudsecuritycompliance_pre_delete.go.tmpl"
-  post_import: "templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl"
-  custom_import: "templates/terraform/custom_import/cloudsecuritycompliance_framework.go.tmpl"
+  post_import: templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl
+samples:
+  - name: cloudsecuritycompliance_framework_org_basic
+    primary_resource_id: example
+    steps:
+      - name: cloudsecuritycompliance_framework_org_basic
+        resource_id_vars:
+          framework_name: example-framework
+        test_env_vars:
+          org_id: ORG_ID
+  - name: cloudsecuritycompliance_framework_project_basic
+    primary_resource_id: example
+    steps:
+      - name: cloudsecuritycompliance_framework_project_basic
+        resource_id_vars:
+          framework_name: example-framework
+        test_env_vars:
+          project_number: PROJECT_NUMBER
+  - name: cloudsecuritycompliance_framework_org_basic_backward
+    primary_resource_id: example
+    steps:
+      - name: cloudsecuritycompliance_framework_org_basic_backward
+        resource_id_vars:
+          framework_name: example-framework
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
   - name: parent
     type: String
@@ -78,7 +84,7 @@ parameters:
     immutable: true
     url_param_only: true
     default_from_api: true
-    deprecation_message: "Use `parent` instead."
+    deprecation_message: Use `parent` instead.
     exactly_one_of:
       - parent
       - organization

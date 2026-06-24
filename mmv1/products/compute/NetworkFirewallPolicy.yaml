@@ -12,55 +12,57 @@
 # limitations under the License.
 
 ---
-name: 'NetworkFirewallPolicy'
+name: NetworkFirewallPolicy
 api_resource_type_kind: FirewallPolicy
-description: "The Compute NetworkFirewallPolicy resource"
+description: The Compute NetworkFirewallPolicy resource
 docs:
-base_url: 'projects/{{project}}/global/firewallPolicies'
-self_link: 'projects/{{project}}/global/firewallPolicies/{{name}}'
-create_url: 'projects/{{project}}/global/firewallPolicies'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/global/firewallPolicies
+self_link: projects/{{project}}/global/firewallPolicies/{{name}}
+create_url: projects/{{project}}/global/firewallPolicies
+update_verb: PATCH
+iam_policy:
+  parent_resource_attribute: name
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
+legacy_long_form_project: true
 include_in_tgc_next: true
 custom_code:
-legacy_long_form_project: true
-examples:
-  - name: 'network_firewall_policy_full'
-    primary_resource_id: 'policy'
-    vars:
-      policy_name: 'tf-test-policy'
-iam_policy:
-  parent_resource_attribute: 'name'
+samples:
+  - name: network_firewall_policy_full
+    primary_resource_id: policy
+    steps:
+      - name: network_firewall_policy_full
+        resource_id_vars:
+          policy_name: tf-test-policy
 parameters:
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: String
     description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'name'
+  - name: name
     type: String
     description: User-provided name of the Network firewall policy. The name should be unique in the project in which the firewall policy is created. The name must be 1-63 characters long, and comply with RFC1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which means the first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash.
     required: true
     immutable: true
-  - name: 'networkFirewallPolicyId'
+  - name: networkFirewallPolicyId
     type: String
     description: The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: An optional description of this resource. Provide this property when you create the resource.
-  - name: 'policyType'
+  - name: policyType
     type: Enum
     immutable: true
     description: |
@@ -69,20 +71,20 @@ properties:
       Different policy types may support some of the Firewall Rules features.
     default_from_api: true
     enum_values:
-      - 'VPC_POLICY'
-  - name: 'fingerprint'
+      - VPC_POLICY
+  - name: fingerprint
     type: Fingerprint
     description: Fingerprint of the resource. This field is used internally during updates of this resource.
     output: true
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: Server-defined URL for the resource.
     output: true
-  - name: 'selfLinkWithId'
+  - name: selfLinkWithId
     type: String
     description: Server-defined URL for this resource with the resource id.
     output: true
-  - name: 'ruleTupleCount'
+  - name: ruleTupleCount
     type: Integer
     description: Total count of all firewall policy rule tuples. A firewall policy can not exceed a set number of tuples.
     output: true

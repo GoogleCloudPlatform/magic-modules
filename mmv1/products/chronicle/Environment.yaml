@@ -13,56 +13,44 @@
 
 ---
 name: Environment
-description: >
-  An environment is logical container for different networks or customers that are managed by the SOC or MSSP.
-  This is useful for SOCs who provide services to several different networks, customers or business units within the organization.
-  The Platform comes with a predefined environment named Default Environment.
-min_version: 'beta'
+description: |
+  An environment is logical container for different networks or customers that are managed by the SOC or MSSP. This is useful for SOCs who provide services to several different networks, customers or business units within the organization. The Platform comes with a predefined environment named Default Environment.
 references:
   guides:
-    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.environments'
+    Google SecOps Guides: https://cloud.google.com/chronicle/docs/secops/secops-overview
+  api: https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.environments
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments/{{environment_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments/{{environment_id}}
 update_mask: true
 update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments/{{environment_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments/{{environment_id}}
-
-custom_code:
-  pre_delete: 'templates/terraform/pre_delete/chronicle_environment.go.tmpl'
-
 autogen_status: RW52aXJvbm1lbnQ=
-
+custom_code:
+  pre_delete: templates/terraform/pre_delete/chronicle_environment.go.tmpl
 samples:
   - name: chronicle_environment_update
     primary_resource_id: sample
     min_version: beta
     steps:
-      - name: "chronicle_environment_basic"
+      - name: chronicle_environment_basic
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         ignore_read_extra:
-          - 'deletion_protection'
-      - name: "chronicle_environment_full"
+          - deletion_protection
+      - name: chronicle_environment_full
         test_env_vars:
-          chronicle_id: 'CHRONICLE_ID'
+          chronicle_id: CHRONICLE_ID
         ignore_read_extra:
-          - 'deletion_protection'
-
+          - deletion_protection
 virtual_fields:
-  - name: 'deletion_protection'
+  - name: deletion_protection
     type: Boolean
     default_value: true
-    description: 'Whether Terraform will be prevented from destroying the environment.
-      Deleting an environment will remove all its data and all playbooks, environments,
-      integrations instances, reports and agents related to the environment.
-      Once you delete an environment, it cannot be reversed.
-      Deleting environments via terraform destroy or terraform apply will only
-      succeed if this field is false in the Terraform state.'
-
+    description: Whether Terraform will be prevented from destroying the environment. Deleting an environment will remove all its data and all playbooks, environments, integrations instances, reports and agents related to the environment. Once you delete an environment, it cannot be reversed. Deleting environments via terraform destroy or terraform apply will only succeed if this field is false in the Terraform state.
 parameters:
   - name: location
     type: String
@@ -79,9 +67,8 @@ parameters:
   - name: environmentId
     type: String
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-    description: |-
-      Id of the environment record.
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
+    description: Id of the environment record.
 properties:
   - name: displayName
     type: String
