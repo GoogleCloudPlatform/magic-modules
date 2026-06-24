@@ -103,8 +103,8 @@ var (
 		"addons_config.0.slice_controller_config",
 		"addons_config.0.pod_snapshot_config",
 		"addons_config.0.slurm_operator_config",
-	{{- if ne $.TargetVersionName "ga" }}
 		"addons_config.0.agent_sandbox_config",
+	{{- if ne $.TargetVersionName "ga" }}
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
 	{{- end }}
@@ -702,7 +702,6 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-						{{- if ne $.TargetVersionName "ga" }}
 						"agent_sandbox_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -720,7 +719,6 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-						{{- end }}
 					},
 				},
 			},
@@ -6050,7 +6048,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := config["agent_sandbox_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.AgentSandboxConfig = &container.AgentSandboxConfig{
@@ -6058,7 +6055,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			ForceSendFields: []string{"Enabled"},
 		}
 	}
-{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
@@ -7814,7 +7810,6 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		}
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if c.AgentSandboxConfig != nil {
 		result["agent_sandbox_config"] = []map[string]interface{}{
 			{
@@ -7822,7 +7817,6 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 			},
 		}
 	}
-{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if c.IstioConfig != nil {
@@ -9335,7 +9329,6 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 	return nil
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandAgentSandboxConfig(v interface{}) *container.AgentSandboxConfig {
     l := v.([]interface{})
     if len(l) == 0 || l[0] == nil {
@@ -9357,7 +9350,6 @@ func flattenAgentSandboxConfig(v *container.AgentSandboxConfig) []interface{} {
         },
     }
 }
-{{- end }}
 
 func init() {
 	registry.Schema{

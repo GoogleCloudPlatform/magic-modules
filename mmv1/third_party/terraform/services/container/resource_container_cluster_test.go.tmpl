@@ -291,7 +291,6 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_agentSandbox(t *testing.T) {
 	t.Parallel()
 
@@ -351,7 +350,6 @@ resource "google_container_cluster" "primary" {
 }
 `, clusterName, networkName, subnetworkName, enabled)
 }
-{{- end }}
 
 func TestAccContainerCluster_withDeletionProtection(t *testing.T) {
 	t.Parallel()
