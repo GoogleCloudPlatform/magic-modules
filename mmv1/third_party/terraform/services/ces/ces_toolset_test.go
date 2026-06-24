@@ -1453,76 +1453,6 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
 `, context)
 }
 
-func TestAccCESToolset_connectorToolsetAdvanced(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckCESToolsetDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccCESToolset_connectorToolsetAdvanced_config(context),
-				ExpectError: regexp.MustCompile("(?i)(not found|permission denied|invalid|error)"),
-			},
-		},
-	})
-}
-
-func testAccCESToolset_connectorToolsetAdvanced_config(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_ces_app" "ces_app_for_toolset" {
-  app_id = "tf-test-app-id%{random_suffix}"
-  location = "us"
-  description = "App used as parent for CES Toolset example"
-  display_name = "tf-test-my-app%{random_suffix}"
-
-  language_settings {
-    default_language_code    = "en-US"
-    supported_language_codes = ["es-ES", "fr-FR"]
-    enable_multilingual_support = true
-    fallback_action          = "escalate"
-  }
-  time_zone_settings {
-    time_zone = "America/Los_Angeles"
-  }
-}
-
-resource "google_ces_toolset" "primary" {
-  toolset_id = "toolset1%{random_suffix}"
-  location = "us"
-  app      = google_ces_app.ces_app_for_toolset.app_id
-  display_name = "Advanced toolset display name"
-
-  connector_toolset {
-    connection = "projects/fake-project/locations/us-central1/connections/fake-connection"
-    auth_config {
-      oauth2_auth_code_config {
-        oauth_token = "$context.variables.token"
-      }
-      oauth2_jwt_bearer_config {
-        client_key = "$context.variables.client_key"
-        issuer     = "$context.variables.issuer"
-        subject    = "$context.variables.subject"
-      }
-    }
-    connector_actions {
-      entity_operation {
-        entity_id = "some_entity"
-        operation = "CREATE"
-      }
-      input_fields  = ["a", "b"]
-      output_fields = ["c", "d"]
-    }
-  }
-}
-`, context)
-}
-
 func TestAccCESToolset_connectorToolset_update(t *testing.T) {
 	t.Parallel()
 
@@ -1536,6 +1466,7 @@ func TestAccCESToolset_connectorToolset_update(t *testing.T) {
 		CheckDestroy:             testAccCheckCESToolsetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				// Step 1: Create with basic connector_toolset (succeeds)
 				Config: testAccCESToolset_connectorToolset_update_step1(context),
 			},
 			{
@@ -1545,6 +1476,7 @@ func TestAccCESToolset_connectorToolset_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"app_id"},
 			},
 			{
+				// Step 2: Update to open_api_toolset (succeeds, removes connector_toolset)
 				Config: testAccCESToolset_connectorToolset_update_step2(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
@@ -1559,6 +1491,7 @@ func TestAccCESToolset_connectorToolset_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"app_id"},
 			},
 			{
+				// Step 3: Update back to basic connector_toolset (succeeds, removes open_api_toolset)
 				Config: testAccCESToolset_connectorToolset_update_step3(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
@@ -1571,6 +1504,11 @@ func TestAccCESToolset_connectorToolset_update(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+			{
+				// Step 4: Try to apply unsupported advanced fields on the real connection (expects API rejection)
+				Config:      testAccCESToolset_connectorToolset_update_step4(context),
+				ExpectError: regexp.MustCompile("(?i)(invalid|not supported|error|failed)"),
 			},
 		},
 	})
@@ -1665,4 +1603,37 @@ resource "google_ces_toolset" "ces_toolset_update_test" {
 
 func testAccCESToolset_connectorToolset_update_step3(context map[string]interface{}) string {
 	return testAccCESToolset_connectorToolset_update_step1(context)
+}
+
+func testAccCESToolset_connectorToolset_update_step4(context map[string]interface{}) string {
+	return testAccCESToolset_connectorToolset_update_base(context) + acctest.Nprintf(`
+resource "google_ces_toolset" "ces_toolset_update_test" {
+  toolset_id = "toolset1%{random_suffix}"
+  location = "us"
+  app      = google_ces_app.ces_app_for_toolset.app_id
+  display_name = "Toolset with Connector Advanced"
+
+  connector_toolset {
+    connection = google_integration_connectors_connection.connector_toolset_connection.id
+    auth_config {
+      oauth2_auth_code_config {
+        oauth_token = "$context.variables.token"
+      }
+      oauth2_jwt_bearer_config {
+        client_key = "$context.variables.client_key"
+        issuer     = "$context.variables.issuer"
+        subject    = "$context.variables.subject"
+      }
+    }
+    connector_actions {
+      entity_operation {
+        entity_id = "some_entity"
+        operation = "CREATE"
+      }
+      input_fields  = ["a", "b"]
+      output_fields = ["c", "d"]
+    }
+  }
+}
+`, context)
 }
