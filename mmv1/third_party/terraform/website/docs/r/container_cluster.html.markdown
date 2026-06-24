@@ -1645,6 +1645,10 @@ those in the Guaranteed QoS class, by influencing NUMA affinity. Structure is [d
 
 * `eviction_max_pod_grace_period_seconds` - (Optional) Defines the maximum allowed grace period (in seconds) to use when terminating pods in response to a soft eviction threshold being met. The integer must be positive and not exceed 300.
 
+* `shutdown_grace_period_seconds` - (Optional) Total duration in seconds that the node delays shutting down in order to gracefully terminate Pods. Only valid for Spot VMs. Allowed values: `0`, `30`, `120`. Set to `0` to disable graceful node shutdown. See the [graceful node shutdown documentation](https://kubernetes.io/docs/concepts/cluster-administration/node-shutdown/) for more details.
+
+* `shutdown_grace_period_critical_pods_seconds` - (Optional) Duration in seconds (`0` to `120`) reserved for terminating critical pods during graceful node shutdown. Only valid for Spot VMs, and only meaningful when `shutdown_grace_period_seconds` is set. Must be less than or equal to `shutdown_grace_period_seconds`.
+
 * `eviction_soft` - (Optional) Defines a map of signal names to quantities or percentage that defines soft eviction thresholds. Structure is [documented below](#nested_eviction_soft).
 
 * `eviction_soft_grace_period` - (Optional) Defines a map of signal names to durations that defines grace periods for soft eviction thresholds. Each soft eviction threshold must have a corresponding grace period. Structure is [documented below](#nested_eviction_soft_grace_period).
