@@ -149,7 +149,7 @@ resource "google_compute_region_network_firewall_policy_with_rules" "region-netw
     priority       = 1000
     enable_logging = false
     action         = "allow"
-    direction      = "EGRESS"
+    direction      = "INGRESS"
     target_type    = "INTERNAL_MANAGED_LB"
     target_forwarding_rules = [
       google_compute_forwarding_rule.target_forwarding_rule.self_link,
@@ -159,7 +159,7 @@ resource "google_compute_region_network_firewall_policy_with_rules" "region-netw
         ip_protocol = "tcp"
         ports       = [8080, 7070]
       }
-      dest_ip_ranges = ["11.100.0.1/32"]
+      src_ip_ranges = ["11.100.0.1/32"]
     }
   }
   rule {
