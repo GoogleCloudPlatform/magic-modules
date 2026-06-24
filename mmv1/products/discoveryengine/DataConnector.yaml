@@ -58,6 +58,14 @@ examples:
     primary_resource_id: 'jira-with-actions'
     vars:
       collection_id: 'collection-id'
+  - name: 'discoveryengine_dataconnector_jira_eua'
+    primary_resource_id: 'jira-eua'
+    vars:
+      collection_id: 'collection-id'
+  - name: 'discoveryengine_dataconnector_jira_eua_json_auth'
+    primary_resource_id: 'jira-eua-json-auth'
+    vars:
+      collection_id: 'collection-id'
 parameters:
   - name: 'location'
     type: String
@@ -438,6 +446,81 @@ properties:
       'EUA', 'FEDERATED_AND_EUA'.
     item_type:
       type: String
+  - name: 'endUserConfig'
+    type: NestedObject
+    description: |
+      Optional. Any params and credentials used specifically for EUA connectors.
+    properties:
+      - name: 'authParams'
+        type: String
+        description: |
+          Optional. Any authentication parameters specific to EUA connectors.
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation:
+          function: 'validation.StringIsJSON'
+      - name: 'jsonAuthParams'
+        type: String
+        description: |
+          Optional. Any authentication parameters specific to EUA connectors in json string format.
+      - name: 'additionalParams'
+        type: String
+        description: |
+          Optional. Any additional parameters needed for EUA.
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation:
+          function: 'validation.StringIsJSON'
+      - name: 'tenant'
+        type: NestedObject
+        description: |
+          Optional. The tenant project the connector is connected to.
+        properties:
+          - name: 'id'
+            type: String
+            description: |
+              The tenant's instance ID. Examples: Jira ("8594f221-9797-5f78-1fa4-485e198d7cd0"), Slack ("T123456").
+          - name: 'uri'
+            type: String
+            description: |
+              The URI of the tenant, if applicable. For example, the URI of a Jira instance is https://my-jira-instance.atlassian.net, and a Slack tenant does not have a URI.
+          - name: 'displayName'
+            type: String
+            description: |
+              Optional display name for the tenant, e.g. "My Slack Team".
+  - name: 'federatedConfig'
+    type: NestedObject
+    description: |
+      Optional. Any params and credentials used specifically for hybrid connectors supporting FEDERATED mode. This field should only be set if the connector is a hybrid connector and we want to enable FEDERATED mode.
+    properties:
+      - name: 'authParams'
+        type: String
+        description: |
+          Optional. Any authentication parameters specific to FEDERATED connectors.
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation:
+          function: 'validation.StringIsJSON'
+      - name: 'jsonAuthParams'
+        type: String
+        description: |
+          Optional. Any authentication parameters specific to FEDERATED connectors in json string format.
+      - name: 'additionalParams'
+        type: String
+        description: |
+          Optional. Any additional parameters needed for FEDERATED.
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation:
+          function: 'validation.StringIsJSON'
+  - name: 'createEuaSaas'
+    type: Boolean
+    description: |
+      Optional. Whether the END USER AUTHENTICATION connector is created in SaaS.
   - name: 'syncMode'
     type: String
     description: |

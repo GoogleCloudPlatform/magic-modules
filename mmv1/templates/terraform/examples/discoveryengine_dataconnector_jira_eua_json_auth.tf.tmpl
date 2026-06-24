@@ -1,0 +1,62 @@
+resource "google_discovery_engine_data_connector" "jira-eua-json-auth" {
+  location                = "global"
+  collection_id           = "{{index $.Vars "collection_id"}}"
+  collection_display_name = "Jira EUA JSON Auth"
+  data_source             = "jira"
+  data_source_version     = 3
+  params = {
+    instance_uri  = "https://example.atlassian.net"
+    instance_id   = "SECRET_MANAGER_RESOURCE_NAME"
+    client_id     = "SECRET_MANAGER_RESOURCE_NAME"
+    client_secret = "SECRET_MANAGER_RESOURCE_NAME"
+    auth_type     = "OAUTH"
+  }
+  refresh_interval = "86400s"
+  entities {
+    entity_name = "project"
+  }
+  entities {
+    entity_name = "issue"
+  }
+  static_ip_enabled = false
+  destination_configs {
+    key = "url"
+    destinations {
+      host = "https://example.atlassian.net"
+    }
+  }
+  connector_modes = ["FEDERATED_AND_EUA"]
+  sync_mode       = "PERIODIC"
+
+  end_user_config {
+    json_auth_params = jsonencode({
+      authorization_uri = "https://auth.atlassian.com/authorize"
+      client_id         = "SECRET_MANAGER_RESOURCE_NAME"
+      client_secret     = "SECRET_MANAGER_RESOURCE_NAME"
+      token_uri         = "https://auth.atlassian.com/oauth/token"
+    })
+    additional_params = jsonencode({
+      scopes = [
+        "read:jira-work",
+        "write:jira-work",
+      ]
+    })
+    tenant {
+      id           = "8594f221-9797-5f78-1fa4-485e198d7cd0"
+      uri          = "https://example.atlassian.net"
+      display_name = "Example Jira"
+    }
+  }
+
+  federated_config {
+    json_auth_params = jsonencode({
+      client_id     = "SECRET_MANAGER_RESOURCE_NAME"
+      client_secret = "SECRET_MANAGER_RESOURCE_NAME"
+    })
+    additional_params = jsonencode({
+      instance_uri = "https://example.atlassian.net"
+    })
+  }
+
+  create_eua_saas = true
+}
