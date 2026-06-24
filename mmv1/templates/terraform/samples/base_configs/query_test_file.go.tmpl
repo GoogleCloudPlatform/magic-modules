@@ -147,6 +147,7 @@ variable "{{ $n }}" { type = string }
 {{- end }}
 list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
     provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
+	limit = 10000
     config {
 {{- range $scope := $.ListScopeProperties }}
         {{- if $scope.Required }}

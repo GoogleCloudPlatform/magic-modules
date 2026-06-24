@@ -12,48 +12,50 @@
 # limitations under the License.
 
 ---
-name: 'Schema'
+name: Schema
 api_variant_patterns:
-  - 'projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}/schemas/{schema}'
+  - projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}/schemas/{schema}
 description: |
   Schema defines the structure and layout of a type of document data.
 references:
   guides:
-    'Provide a schema for your data store': 'https://cloud.google.com/generative-ai-app-builder/docs/provide-schema'
-  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.schemas'
+    Provide a schema for your data store: https://cloud.google.com/generative-ai-app-builder/docs/provide-schema
+  api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.schemas
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas'
-self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas?schemaId={{schema_id}}'
-delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
+base_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas
 immutable: true
+self_link: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}
+create_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas?schemaId={{schema_id}}
+delete_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
+  - projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}
 timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
-autogen_async: false
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
-    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
+autogen_async: false
 custom_code:
-examples:
-  - name: 'discoveryengine_schema_basic'
-    primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
-      schema_id: 'schema-id'
+samples:
+  - name: discoveryengine_schema_basic
+    primary_resource_id: basic
+    steps:
+      - name: discoveryengine_schema_basic
+        resource_id_vars:
+          data_store_id: data-store-id
+          schema_id: schema-id
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The geographic location where the data store should reside. The value can
@@ -61,23 +63,22 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'dataStoreId'
+  - name: dataStoreId
     type: String
     description: |
       The unique id of the data store.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'schemaId'
+  - name: schemaId
     type: String
     description: |
       The unique id of the schema.
-
     url_param_only: true
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The unique full resource name of the schema. Values are of the format
@@ -85,14 +86,14 @@ properties:
       This field must be a UTF-8 encoded string with a length limit of 1024
       characters.
     output: true
-  - name: 'jsonSchema'
+  - name: jsonSchema
     type: String
     description: |
       The JSON representation of the schema.
     immutable: true
     exactly_one_of:
-      - 'json_schema'
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/discoveryengine_schema_json_schema.go.tmpl'
+      - json_schema
+    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+    custom_flatten: templates/terraform/custom_flatten/discoveryengine_schema_json_schema.go.tmpl
     validation:
-      function: 'validation.StringIsJSON'
+      function: validation.StringIsJSON

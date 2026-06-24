@@ -121,7 +121,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating params: %s", err)
 	}
 
-	metadata, err := resourceInstanceMetadata(d)
+	metadata, err := resourceInstanceMetadataTyped(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
@@ -168,6 +168,15 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
+	tagsMap := resourceInstanceTags(d)
+	var tags *compute.Tags
+	if tagsMap != nil {
+		tags = &compute.Tags{
+			Items:       tagsMap["items"].([]string),
+			Fingerprint: tagsMap["fingerprint"].(string),
+		}
+	}
+
 	// Create the instance information
 	instance := &compute.Instance{
 		CanIpForward:             d.Get("can_ip_forward").(bool),
@@ -179,7 +188,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Zone:                     d.Get("zone").(string),
 		NetworkInterfaces:        networkInterfaces,
 		NetworkPerformanceConfig: networkPerformanceConfig,
-		Tags:                     resourceInstanceTags(d),
+		Tags:                     tags,
 		Params:                   params,
 		Labels:                   tpgresource.ExpandLabels(d),
 		ServiceAccounts:          expandServiceAccountsTyped(d.Get("service_account").([]interface{})),

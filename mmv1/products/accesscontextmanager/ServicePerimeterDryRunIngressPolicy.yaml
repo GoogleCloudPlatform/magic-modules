@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'ServicePerimeterDryRunIngressPolicy'
+name: ServicePerimeterDryRunIngressPolicy
 api_resource_type_kind: ServicePerimeter
 description: |
   Manage a single IngressPolicy in the spec (dry-run) configuration for a service perimeter.
@@ -33,33 +33,16 @@ description: |
   they don't fight over which ingress rules should be in the policy.
 references:
   guides:
-    'Guide to Ingress and Egress Rules': 'https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules'
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#ingresspolicy'
+    Guide to Ingress and Egress Rules: https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules
+  api: https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#ingresspolicy
 docs:
-id_format: '{{perimeter}}'
-base_url: ''
+base_url: ""
+immutable: true
 self_link: '{{perimeter}}'
 create_url: '{{perimeter}}'
-create_verb: 'PATCH'
 update_mask: true
-delete_verb: 'PATCH'
-immutable: true
-mutex: '{{access_policy_id}}'
-import_format:
-  - '{{perimeter}}'
-exclude_import: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
+create_verb: PATCH
+delete_verb: PATCH
 identity:
   - ingressFrom
   - ingressTo
@@ -70,61 +53,81 @@ nested_query:
     - ingressPolicies
   is_list_of_ids: false
   modify_by_patch: true
-custom_code:
-  constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
-  encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_dry_run_egress_policy.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_ingress_policy.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/access_context_manager_service_perimeter_dry_run_ingress_policy.go.tmpl'
-  post_read: 'templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
-exclude_tgc: true
+id_format: '{{perimeter}}'
+import_format:
+  - '{{perimeter}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+mutex: '{{access_policy_id}}'
+exclude_import: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
-# Exclude tests for examples becauses tests run in parallel and will conflict when trying to create the org level access policy
-examples:
-  - name: 'access_context_manager_service_perimeter_dry_run_ingress_policy'
-    vars:
-      ingress_policy_title: 'ingress policy title'
-    test_vars_overrides:
-      # for backward compatible
-      ingress_policy_title: '"ingress policy title" + randomSuffix'
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: true
+autogen_async: true
+exclude_tgc: true
+custom_code:
+  encoder: templates/terraform/encoders/access_context_manager_service_perimeter_dry_run_egress_policy.go.tmpl
+  constants: templates/terraform/constants/access_context_manager.go.tmpl
+  pre_create: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_ingress_policy.go.tmpl
+  post_read: templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl
+  pre_update: templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl
+  pre_delete: templates/terraform/pre_delete/access_context_manager_service_perimeter_dry_run_ingress_policy.go.tmpl
+  custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl
+samples:
+  - name: access_context_manager_service_perimeter_dry_run_ingress_policy
     exclude_test: true
-  - name: 'access_context_manager_service_perimeter_dry_run_ingress_policy_granular_controls'
-    vars:
-      ingress_policy_title: 'granular controls ingress policy title'
-    test_vars_overrides:
-      # for backward compatible
-      ingress_policy_title: '"granular controls ingress policy title" + randomSuffix'
+    steps:
+      - name: access_context_manager_service_perimeter_dry_run_ingress_policy
+        resource_id_vars:
+          ingress_policy_title: ingress policy title
+        test_vars_overrides:
+          # for backward compatible
+          ingress_policy_title: '"ingress policy title" + randomSuffix'
+  - name: access_context_manager_service_perimeter_dry_run_ingress_policy_granular_controls
     exclude_test: true
+    steps:
+      - name: access_context_manager_service_perimeter_dry_run_ingress_policy_granular_controls
+        resource_id_vars:
+          ingress_policy_title: granular controls ingress policy title
+        test_vars_overrides:
+          # for backward compatible
+          ingress_policy_title: '"granular controls ingress policy title" + randomSuffix'
 parameters:
-  - name: 'perimeter'
+  - name: perimeter
     type: ResourceRef
     description: |
       The name of the Service Perimeter to add this resource to.
     url_param_only: true
     required: true
-    resource: 'ServicePerimeter'
-    imports: 'name'
+    resource: ServicePerimeter
+    imports: name
 properties:
-  - name: 'ingressFrom'
+  - name: ingressFrom
     type: NestedObject
     description: |
       Defines the conditions on the source of a request causing this `IngressPolicy`
       to apply.
     properties:
-      - name: 'identityType'
+      - name: identityType
         type: Enum
         description: |
           Specifies the type of identities that are allowed access from outside the
           perimeter. If left unspecified, then members of `identities` field will be
           allowed access.
         enum_values:
-          - 'ANY_IDENTITY'
-          - 'ANY_USER_ACCOUNT'
-          - 'ANY_SERVICE_ACCOUNT'
+          - ANY_IDENTITY
+          - ANY_USER_ACCOUNT
+          - ANY_SERVICE_ACCOUNT
         diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
-      - name: 'identities'
+      - name: identities
         type: Array
         description: |
           Identities can be an individual user, service account, Google group,
@@ -136,14 +139,14 @@ properties:
           type: String
         diff_suppress_func: AccessContextManagerServicePerimeterDryRunIngressPolicyIngressFromIdentitiesDiffSuppressFunc
         custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_from_identities_custom_flatten.go.tmpl
-      - name: 'sources'
+      - name: sources
         type: Array
         description: |
           Sources that this `IngressPolicy` authorizes access from.
         item_type:
           type: NestedObject
           properties:
-            - name: 'accessLevel'
+            - name: accessLevel
               type: String
               description: |
                 An `AccessLevel` resource name that allow resources within the
@@ -154,7 +157,7 @@ properties:
                 with request origins within the perimeter.
                 Example `accessPolicies/MY_POLICY/accessLevels/MY_LEVEL.`
                 If * is specified, then all IngressSources will be allowed.
-            - name: 'resource'
+            - name: resource
               type: String
               description: |
                 A Google Cloud resource that is allowed to ingress the perimeter.
@@ -163,13 +166,13 @@ properties:
                 The project may be in any Google Cloud organization, not just the
                 organization that the perimeter is defined in. `*` is not allowed, the case
                 of allowing all Google Cloud resources only is not supported.
-  - name: 'ingressTo'
+  - name: ingressTo
     type: NestedObject
     description: |
       Defines the conditions on the `ApiOperation` and request destination that cause
       this `IngressPolicy` to apply.
     properties:
-      - name: 'resources'
+      - name: resources
         type: Array
         description: |
           A list of resources, currently only projects in the form
@@ -184,7 +187,7 @@ properties:
         diff_suppress_func: AccessContextManagerServicePerimeterDryRunIngressPolicyIngressToResourcesDiffSuppressFunc
         item_type:
           type: String
-      - name: 'roles'
+      - name: roles
         type: Array
         item_type:
           type: String
@@ -192,7 +195,7 @@ properties:
           A list of IAM roles that represent the set of operations that the sources
           specified in the corresponding `IngressFrom`
           are allowed to perform.
-      - name: 'operations'
+      - name: operations
         type: Array
         description: |
           A list of `ApiOperations` the sources specified in corresponding `IngressFrom`
@@ -200,13 +203,13 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'serviceName'
+            - name: serviceName
               type: String
               description: |
                 The name of the API whose methods or permissions the `IngressPolicy` or
                 `EgressPolicy` want to allow. A single `ApiOperation` with `serviceName`
                 field set to `*` will allow all methods AND permissions for all services.
-            - name: 'methodSelectors'
+            - name: methodSelectors
               type: Array
               description: |
                 API methods or permissions to allow. Method or permission must belong to
@@ -216,29 +219,29 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
-                  - name: 'method'
+                  - name: method
                     type: String
                     description: |
                       Value for method should be a valid method name for the corresponding
                       serviceName in `ApiOperation`. If `*` used as value for `method`, then
                       ALL methods and permissions are allowed.
-                  - name: 'permission'
+                  - name: permission
                     type: String
                     description: |
                       Value for permission should be a valid Cloud IAM permission for the
                       corresponding `serviceName` in `ApiOperation`.
-  - name: 'title'
+  - name: title
     type: String
     description: |
       Human readable title. Must be unique within the perimeter. Does not affect behavior.
-  - name: 'accessPolicyId'
+  - name: accessPolicyId
     type: String
     description: |
       The name of the Access Policy this resource belongs to.
     ignore_read: true
     output: true
     client_side: true
-  - name: 'etag'
+  - name: etag
     type: String
     output: true
     description: |
