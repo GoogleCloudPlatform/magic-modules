@@ -43,6 +43,7 @@ custom_code:
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
 custom_diff:
   - 'customCollationDiff'
+generate_list_resource: true
 exclude_sweeper: true
 examples:
   - name: 'bigquery_dataset_basic'
