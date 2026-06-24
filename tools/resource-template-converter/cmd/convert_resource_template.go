@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/resource-template-converter/cache"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/resource-template-converter/copy"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/resource-template-converter/github"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/resource-template-converter/migrate"
@@ -16,6 +18,7 @@ import (
 var resourceFileRegex = regexp.MustCompile(`(?:mmv1/)?products/([^/]+)/([^/]+\.yaml)`)
 
 var filePath string
+var cachePath string
 var skipOpenPR bool
 
 var convertResourceTemplateCmd = &cobra.Command{
@@ -34,11 +37,11 @@ var convertResourceTemplateCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		root := args[0]
-		return exeCconvertResourceTemplate(root, filePath)
+		return exeCconvertResourceTemplate(root, filePath, cachePath)
 	},
 }
 
-func exeCconvertResourceTemplate(basePath string, targetFile string) error {
+func exeCconvertResourceTemplate(basePath, targetFile, cachePath string) error {
 	var productsPath, examplesSourceDir, samplesDestDir string
 
 	if _, err := os.Stat(filepath.Join(basePath, "mmv1")); err == nil {
@@ -58,13 +61,32 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 
 	var touchedFiles map[string][]int
 	if skipOpenPR {
-		fmt.Println("Fetching open PRs updated in the last 2 months from GitHub...")
-		var err error
-		touchedFiles, err = github.GetFilesTouchedByOpenPRs()
-		if err != nil {
-			return fmt.Errorf("failed to get touched files from open PRs: %w", err)
+		if cachePath != "" {
+			fmt.Printf("Fetching open PRs from cache at %s\n", cachePath)
+			var err error
+			touchedFiles, err = cache.ReadCache(cachePath)
+			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					fmt.Println("Cache file not found, creating")
+				} else {
+					return fmt.Errorf("failed to read touched files cache: %w", err)
+				}
+			}
 		}
-		fmt.Printf("Successfully fetched open PRs. Found %d modified files in open PRs.\n", len(touchedFiles))
+		if len(touchedFiles) == 0 {
+			fmt.Println("Fetching open PRs updated in the last 2 months from GitHub...")
+			var err error
+			touchedFiles, err = github.GetFilesTouchedByOpenPRs()
+			if err != nil {
+				return fmt.Errorf("failed to get touched files from open PRs: %w", err)
+			}
+			fmt.Printf("Successfully fetched open PRs. Found %d modified files in open PRs.\n", len(touchedFiles))
+			if cachePath != "" {
+				if err := cache.WriteCache(cachePath, touchedFiles); err != nil {
+					return fmt.Errorf("error writing cache file: %w", err)
+				}
+			}
+		}
 	}
 
 	if targetFile != "" {
@@ -150,6 +172,7 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 
 func init() {
 	convertResourceTemplateCmd.Flags().StringVarP(&filePath, "file", "f", "", "Path to a single resource yaml file to convert")
+	convertResourceTemplateCmd.Flags().StringVarP(&cachePath, "cache", "c", "", "Path to a cache file for open PR data")
 	convertResourceTemplateCmd.Flags().BoolVar(&skipOpenPR, "skip-open-pr", false, "Skip files modified by active open PRs updated in the last 2 months")
 	rootCmd.AddCommand(convertResourceTemplateCmd)
 }
