@@ -213,7 +213,8 @@ properties:
           peer's hold time value as the hold time for the BGP connection
           between the two peers. If set, this value must be between 20 and 60.
           The default is 20.
-        default_from_api: true
+        default_value: 20
+        custom_flatten: 'templates/terraform/custom_flatten/compute_router_bgp_keepalive_interval.go.tmpl'
       - name: 'identifierRange'
         type: String
         description: |

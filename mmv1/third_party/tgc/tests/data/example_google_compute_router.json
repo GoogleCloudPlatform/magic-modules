@@ -43,7 +43,8 @@
                             "range": "6.7.0.0/16"
                         }
                     ],
-                    "asn": 64514
+                    "asn": 64514,
+                    "keepaliveInterval": 20
                 },
                 "description": "",
                 "name": "my-router",
