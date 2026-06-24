@@ -42,6 +42,7 @@ samples:
     primary_resource_id: default
     steps:
       - name: backend_service_basic
+        config_path: templates/terraform/samples/services/compute/backend_service_basic.tf.tmpl
         resource_id_vars:
           backend_service_name: backend-service
           http_health_check_name: health-check
