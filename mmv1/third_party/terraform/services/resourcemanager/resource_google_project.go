@@ -211,6 +211,12 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 	d.SetId(fmt.Sprintf("projects/%s", pid))
 
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project_id": pid,
+	}); err != nil {
+		return err
+	}
+
 	// Wait for the operation to complete
 	opAsMap, err := tpgresource.ConvertToMap(op)
 	if err != nil {
@@ -520,6 +526,11 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	d.Partial(false)
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project_id": pid,
+	}); err != nil {
+		return err
+	}
 	return resourceGoogleProjectRead(d, meta)
 }
 
@@ -570,6 +581,25 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	// Handle identity-based import (Terraform 1.12+ import blocks with resource identity).
+	// In this case d.Id() is empty and project_id is available via the identity block.
+	if d.Id() == "" {
+		identity, err := d.Identity()
+		if err != nil || identity == nil {
+			return nil, fmt.Errorf("Error getting identity for import: %v", err)
+		}
+		pidVal, ok := identity.GetOk("project_id")
+		if !ok {
+			return nil, fmt.Errorf("project_id must be set in the identity block for import")
+		}
+		pid := pidVal.(string)
+		d.SetId(fmt.Sprintf("projects/%s", pid))
+		if err := d.Set("auto_create_network", true); err != nil {
+			return nil, fmt.Errorf("Error setting auto_create_network: %s", err)
+		}
+		return []*schema.ResourceData{d}, nil
+	}
+
 	parts := strings.Split(d.Id(), "/")
 	pid := parts[len(parts)-1]
 	// Prevent importing via project number, this will cause issues later
