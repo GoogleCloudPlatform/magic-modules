@@ -183,8 +183,24 @@ func (u *StorageBucketIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("storage bucket %q", u.GetResourceId())
 }
 
+// StorageBucketIamParentResourceIdentityParser resolves the parent bucket id from import identity.
+func StorageBucketIamParentResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, config *transport_tpg.Config) (string, error) {
+	return tpgiamresource.ParseIamResourceIdentity(d, identity, config, tpgiamresource.IamResourceIdentityConfig{
+		Params: []tpgiamresource.IamIdentityParam{
+			{Key: "bucket", IdentityKey: "bucket"},
+		},
+		UriFormat: "b/%s",
+	})
+}
+
 func StorageBucketIamMemberResource() *schema.Resource {
-	return tpgiamresource.ResourceIamMember(StorageBucketIamSchema, StorageBucketIamUpdaterProducer, StorageBucketIdParseFunc, tpgiamresource.IamCreateTimeOut(20))
+	return tpgiamresource.ResourceIamMember(
+		StorageBucketIamSchema,
+		StorageBucketIamUpdaterProducer,
+		StorageBucketIdParseFunc,
+		tpgiamresource.IamCreateTimeOut(20),
+		tpgiamresource.IamWithParentResourceIdentity(StorageBucketIamParentResourceIdentityParser),
+	)
 }
 
 // NewStorageBucketIamMemberListResource returns the list implementation for google_storage_bucket_iam_member.
