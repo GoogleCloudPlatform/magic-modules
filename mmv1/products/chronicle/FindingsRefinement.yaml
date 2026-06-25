@@ -17,8 +17,7 @@ description: Represents a set of logic conditions used to refine various types o
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.findingsRefinements'
-min_version: 'beta'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.findingsRefinements'
 
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{name}}
@@ -43,7 +42,6 @@ examples:
 samples:
   - name: 'chronicle_findings_refinement_update'
     primary_resource_id: 'findings_refinement_example'
-    min_version: beta
     steps:
       - name: 'chronicle_findings_refinement_full'
         test_env_vars:
