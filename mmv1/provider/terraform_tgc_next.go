@@ -179,7 +179,7 @@ func (tgc *TerraformGoogleConversionNext) GenerateProduct(outputFolder string) {
 	tgc.replaceImportPath(targetFolder, "product.go")
 }
 
-func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
+func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, productsToGenerate []string, overridePath string) {
 	tgc.generateResourcesForVersion(products)
 
 	resourceConverters := map[string]string{
@@ -238,7 +238,7 @@ func (tgc TerraformGoogleConversionNext) CompileFileList(outputFolder string, fi
 	}
 }
 
-func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, productsToGenerate []string, generateCode, generateDocs bool) {
 	if !generateCode {
 		return
 	}

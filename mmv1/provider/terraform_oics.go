@@ -123,10 +123,10 @@ func (toics TerraformOiCS) GenerateResource(object api.Resource, templateData Te
 	}
 }
 
-func (toics TerraformOiCS) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
+func (toics TerraformOiCS) CompileCommonFiles(outputFolder string, products []*api.Product, productsToGenerate []string, overridePath string) {
 
 }
 
-func (toics TerraformOiCS) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
+func (toics TerraformOiCS) CopyCommonFiles(outputFolder string, productsToGenerate []string, generateCode, generateDocs bool) {
 
 }
