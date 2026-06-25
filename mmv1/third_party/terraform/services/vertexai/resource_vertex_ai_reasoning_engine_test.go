@@ -842,5 +842,163 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     time_sleep.wait_5_minutes
   ]
 }
+
+resource "time_sleep" "wait_5_minutes" {
+  create_duration = "5m"
+
+  depends_on = [
+    google_project_iam_member.sa_iam_ai_platform_user_new,
+    google_project_iam_member.sa_iam_object_viewer_new,
+    google_project_iam_member.sa_iam_viewer_new,
+    google_secret_manager_secret_iam_member.secret_access_new,
+    google_secret_manager_secret_iam_member.secret_new_access,
+    google_secret_manager_secret_version.secret_new_version_2,
+    google_secret_manager_secret_version.secret_version
+  ]
+}
+
+resource "google_secret_manager_secret" "secret" {
+  secret_id = "tf-test-secret-%{random_suffix}"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret_version" {
+  secret      = google_secret_manager_secret.secret.id
+  secret_data = "test"
+}
+
+resource "google_secret_manager_secret_iam_member" "secret_access" {
+  secret_id  = google_secret_manager_secret.secret.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = google_service_account.service_account.member
+}
+
+resource "google_secret_manager_secret_iam_member" "secret_access_new" {
+  secret_id  = google_secret_manager_secret.secret.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = google_service_account.service_account_new.member
+
+  depends_on = [google_secret_manager_secret_iam_member.secret_access]
+}
+
+resource "google_secret_manager_secret" "secret_new" {
+  secret_id = "tf-test-secret-new-%{random_suffix}"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret_new_version_1" {
+  secret      = google_secret_manager_secret.secret_new.id
+  secret_data = "test"
+}
+
+resource "google_secret_manager_secret_version" "secret_new_version_2" {
+  secret      = google_secret_manager_secret.secret_new.id
+  secret_data = "test update"
+
+  depends_on = [
+    google_secret_manager_secret_version.secret_new_version_1
+  ]
+}
+
+resource "google_secret_manager_secret_iam_member" "secret_new_access" {
+  secret_id  = google_secret_manager_secret.secret_new.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = google_service_account.service_account_new.member
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "%{bucket_name}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_object" "bucket_obj_requirements_adk" {
+  name   = "requirements_adk.txt"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/requirements_adk.txt"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_pickle_adk" {
+  name   = "pickle_adk.pkl"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/pickle_adk.pkl"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_dependencies_adk" {
+  name   = "dependencies_adk.tar.gz"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/dependencies_adk.tar.gz"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_requirements_langchain" {
+  name   = "requirements_langchain.txt"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/requirements_langchain.txt"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_pickle_langchain" {
+  name   = "pickle_langchain.pkl"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/pickle_langchain.pkl"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_dependencies_langchain" {
+  name   = "dependencies_langchain.tar.gz"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/dependencies_langchain.tar.gz"
+}
+
+resource "google_service_account" "service_account" {
+  account_id = "tf-test-re-sa-%{random_suffix}"
+}
+
+resource "google_project_iam_member" "sa_iam_object_viewer" {
+  role    = "roles/storage.objectViewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "sa_iam_ai_platform_user" {
+  role    = "roles/aiplatform.user"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "sa_iam_viewer" {
+  role    = "roles/viewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_service_account" "service_account_new" {
+  account_id = "tf-test-re-sa-new-%{random_suffix}"
+}
+
+resource "google_project_iam_member" "sa_iam_object_viewer_new" {
+  role    = "roles/storage.objectViewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
+
+resource "google_project_iam_member" "sa_iam_ai_platform_user_new" {
+  role    = "roles/aiplatform.user"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
+
+resource "google_project_iam_member" "sa_iam_viewer_new" {
+  role    = "roles/viewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
+
+data "google_project" "project" {}
 `, context)
 }
