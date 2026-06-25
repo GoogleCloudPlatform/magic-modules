@@ -20,17 +20,9 @@ func TestAccPubsubSubscriptionIamMemberListResource_queryIdentity(t *testing.T) 
 	suffix := acctest.RandString(t, 10)
 	topic := "tf-test-topic-" + suffix
 	subscription := "tf-test-sub-" + suffix
-	subscriptionId := fmt.Sprintf("projects/%s/subscriptions/%s", project, subscription)
 	account := "tf-test-pubsub-iam-" + suffix
 	role := "roles/pubsub.viewer"
 	member := "serviceAccount:" + envvar.ServiceAccountCanonicalEmail(account)
-
-	fmt.Printf("\n[Expected------]\n")
-	fmt.Printf("project=%q\n", project)
-	fmt.Printf("subscription=%q\n", subscription)
-	fmt.Printf("role=%q\n", role)
-	fmt.Printf("member=%q\n", member)
-	fmt.Printf("condition_title=<null>\n\n")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -53,7 +45,7 @@ func TestAccPubsubSubscriptionIamMemberListResource_queryIdentity(t *testing.T) 
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("google_pubsub_subscription_iam_member.test", 1),
 					querycheck.ExpectIdentity("google_pubsub_subscription_iam_member.test", map[string]knownvalue.Check{
-						"subscription":    knownvalue.StringExact(subscriptionId),
+						"subscription":    knownvalue.StringExact(subscription),
 						"role":            knownvalue.StringExact(role),
 						"member":          knownvalue.StringExact(member),
 						"project":         knownvalue.StringExact(project),
