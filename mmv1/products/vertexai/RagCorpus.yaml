@@ -1,0 +1,253 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: RagCorpus
+description: A RagCorpus is a RagFile container and a project can have multiple RagCorpora.
+base_url: projects/{{project}}/locations/{{region}}/ragCorpora
+self_link: projects/{{project}}/locations/{{region}}/ragCorpora/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/ragCorpora
+immutable: true
+import_format:
+  - projects/{{project}}/locations/{{region}}/ragCorpora/{{name}}
+async:
+  actions:
+    - create
+    - delete
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+autogen_status: UmFnQ29ycHVz
+samples:
+  - name: "vertex_ai_rag_corpus_basic"
+    primary_resource_id: "default"
+    steps:
+      - name: "vertex_ai_rag_corpus_basic"
+        vars:
+          description: "basic description"
+          leaf_count: 500
+          tree_depth: 2
+        resource_id_vars:
+          display_name: "rag-corpus"
+  - name: "vertex_ai_rag_corpus_full"
+    primary_resource_id: "default"
+    steps:
+      - name: "vertex_ai_rag_corpus_full"
+        vars:
+          description: "full description"
+          leaf_count: 500
+          tree_depth: 2
+          kms_key_name: "kms-name"
+        test_env_vars:
+          project: "PROJECT_NAME"
+          project_number: "PROJECT_NUMBER"
+        test_vars_overrides:
+          'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-west1").CryptoKey.Name'
+        resource_id_vars:
+          display_name: "rag-corpus-full"
+  - name: "vertex_ai_rag_corpus_pinecone"
+    primary_resource_id: "default"
+    steps:
+      - name: "vertex_ai_rag_corpus_pinecone"
+        vars:
+          description: "pinecone backend"
+        resource_id_vars:
+          display_name: "rag-corpus-pinecone"
+  - name: "vertex_ai_rag_corpus_search_config"
+    primary_resource_id: "default"
+    steps:
+      - name: "vertex_ai_rag_corpus_search_config"
+        vars:
+          description: "vertex ai search config backend"
+        test_env_vars:
+          project: "PROJECT_NAME"
+        resource_id_vars:
+          display_name: "rag-corpus-search-config"
+parameters:
+  - name: region
+    type: String
+    description: The region of the RAG corpus.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: corpusStatus
+    type: NestedObject
+    description: RagCorpus status.
+    output: true
+    properties:
+      - name: errorStatus
+        type: String
+        description: Only when the `state` field is ERROR.
+        output: true
+      - name: state
+        type: String
+        description: |-
+          RagCorpus life state.
+          Possible values:
+          UNKNOWN
+          INITIALIZED
+          ACTIVE
+          ERROR
+        output: true
+  - name: createTime
+    type: String
+    description: Timestamp when this RagCorpus was created.
+    output: true
+  - name: description
+    type: String
+    immutable: true
+    description: The description of the RagCorpus.
+  - name: displayName
+    type: String
+    required: true
+    immutable: true
+    description: |-
+      The display name of the RagCorpus.
+      The name can be up to 128 characters long and can consist of any UTF-8
+      characters.
+  - name: encryptionSpec
+    type: NestedObject
+    immutable: true
+    description: |-
+      Represents a customer-managed encryption key specification that can be
+      applied to a Vertex AI resource.
+    properties:
+      - name: kmsKeyName
+        type: String
+        required: true
+        description: |-
+          Resource name of the Cloud KMS key used to protect the resource.
+
+          The Cloud KMS key must be in the same region as the resource. It must have
+          the format
+          `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+  - name: name
+    type: String
+    description: The resource name of the RagCorpus.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: updateTime
+    type: String
+    description: Timestamp when this RagCorpus was last updated.
+    output: true
+  - name: vectorDbConfig
+    type: NestedObject
+    immutable: true
+    description: Config for the Vector DB to use for RAG.
+    default_from_api: true
+    properties:
+      - name: pinecone
+        type: NestedObject
+        description: The config for the Pinecone.
+        properties:
+          - name: indexName
+            type: String
+            description: |-
+              Pinecone index name.
+              This value cannot be changed after it's set.
+      - name: ragEmbeddingModelConfig
+        type: NestedObject
+        default_from_api: true
+        description: Config for the embedding model to use for RAG.
+        properties:
+          - name: vertexPredictionEndpoint
+            type: NestedObject
+            description: Config representing a model hosted on Vertex Prediction Endpoint.
+            properties:
+              - name: endpoint
+                type: String
+                required: true
+                description: |-
+                  The endpoint resource name.
+                  Format:
+                  `projects/{project}/locations/{location}/publishers/{publisher}/models/{model}`
+                  or
+                  `projects/{project}/locations/{location}/endpoints/{endpoint}`
+              - name: model
+                type: String
+                description: |-
+                  The resource name of the model that is deployed on the endpoint.
+                  Present only when the endpoint is not a publisher model.
+                  Pattern:
+                  `projects/{project}/locations/{location}/models/{model}`
+                output: true
+              - name: modelVersionId
+                type: String
+                description: |-
+                  Version ID of the model that is deployed on the endpoint.
+                  Present only when the endpoint is not a publisher model.
+                output: true
+      - name: ragManagedDb
+        type: NestedObject
+        default_from_api: true
+        description: The config for the default RAG-managed Vector DB.
+        properties:
+          - name: ann
+            type: NestedObject
+            description: |-
+              Config for ANN search.
+
+              RagManagedDb uses a tree-based structure to partition data and
+              facilitate faster searches. As a tradeoff, it requires longer indexing
+              time and manual triggering of index rebuild via the ImportRagFiles and
+              UpdateRagCorpus API.
+            properties:
+              - name: leafCount
+                type: Integer
+                description: |-
+                  Number of leaf nodes in the tree-based structure. Each leaf node
+                  contains groups of closely related vectors along with their
+                  corresponding centroid.
+
+                  Recommended value is 10 * sqrt(num of RagFiles in your RagCorpus).
+
+                  Default value is 500.
+              - name: treeDepth
+                type: Integer
+                description: |-
+                  The depth of the tree-based structure. Only depth values of 2 and 3 are
+                  supported.
+
+                  Recommended value is 2 if you have if you have O(10K) files in the
+                  RagCorpus and set this to 3 if more than that.
+
+                  Default value is 2.
+      - name: vertexVectorSearch
+        type: NestedObject
+        description: The config for the Vertex Vector Search.
+        properties:
+          - name: index
+            type: String
+            description: |-
+              The resource name of the Index.
+              Format:
+              `projects/{project}/locations/{location}/indexes/{index}`
+          - name: indexEndpoint
+            type: String
+            description: |-
+              The resource name of the Index Endpoint.
+              Format:
+              `projects/{project}/locations/{location}/indexEndpoints/{index_endpoint}`
+  - name: vertexAiSearchConfig
+    type: NestedObject
+    description: Config for the Vertex AI Search.
+    properties:
+      - name: servingConfig
+        type: String
+        description: |-
+          Vertex AI Search Serving Config resource full name. For example,
+          `projects/{project}/locations/{location}/collections/{collection}/engines/{engine}/servingConfigs/{serving_config}`
+          or
+          `projects/{project}/locations/{location}/collections/{collection}/dataStores/{data_store}/servingConfigs/{serving_config}`.

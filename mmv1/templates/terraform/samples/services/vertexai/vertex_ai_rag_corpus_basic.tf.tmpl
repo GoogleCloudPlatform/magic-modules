@@ -1,0 +1,13 @@
+resource "google_vertex_ai_rag_corpus" "{{$.PrimaryResourceId}}" {
+  region       = "us-west1"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  description  = "{{index $.Vars "description"}}"
+  vector_db_config {
+    rag_managed_db {
+      ann {
+        leaf_count = {{index $.Vars "leaf_count"}}
+        tree_depth = {{index $.Vars "tree_depth"}}
+      }
+    }
+  }
+}
