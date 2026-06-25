@@ -783,6 +783,22 @@ func getInterfaceSlice(v interface{}) []interface{} {
 	return s
 }
 
+func getInt(v interface{}) int64 {
+	switch t := v.(type) {
+	case int:
+		return int64(t)
+	case int64:
+		return t
+	case float64:
+		return int64(t)
+	case string:
+		i, _ := strconv.ParseInt(t, 10, 64)
+		return i
+	default:
+		return 0
+	}
+}
+
 {{ if ne $.TargetVersionName `ga` -}}
 // firstAccessConfigSecurityPolicy returns the securityPolicy of the first
 // access config in the list, or "" if absent.
@@ -1097,36 +1113,6 @@ func flattenAdvancedMachineFeatures(AdvancedMachineFeatures map[string]interface
 		"visible_core_count":           getInt(AdvancedMachineFeatures["visibleCoreCount"]),
 		"performance_monitoring_unit":  AdvancedMachineFeatures["performanceMonitoringUnit"],
 		"enable_uefi_networking":       AdvancedMachineFeatures["enableUefiNetworking"],
-	{{"}}"}}
-}
-
-func expandAdvancedMachineFeaturesTyped(d tpgresource.TerraformResourceData) *compute.AdvancedMachineFeatures {
-	if _, ok := d.GetOk("advanced_machine_features"); !ok {
-		return nil
-	}
-
-	prefix := "advanced_machine_features.0"
-	return &compute.AdvancedMachineFeatures{
-		EnableNestedVirtualization: d.Get(prefix + ".enable_nested_virtualization").(bool),
-		ThreadsPerCore:             int64(d.Get(prefix + ".threads_per_core").(int)),
-		TurboMode:                  d.Get(prefix + ".turbo_mode").(string),
-		VisibleCoreCount:           int64(d.Get(prefix + ".visible_core_count").(int)),
-		PerformanceMonitoringUnit:  d.Get(prefix + ".performance_monitoring_unit").(string),
-		EnableUefiNetworking:       d.Get(prefix + ".enable_uefi_networking").(bool),
-	}
-}
-
-func flattenAdvancedMachineFeaturesTyped(AdvancedMachineFeatures *compute.AdvancedMachineFeatures) []map[string]interface{} {
-	if AdvancedMachineFeatures == nil {
-		return nil
-	}
-	return []map[string]interface{}{{"{{"}}
-		"enable_nested_virtualization": AdvancedMachineFeatures.EnableNestedVirtualization,
-		"threads_per_core":             AdvancedMachineFeatures.ThreadsPerCore,
-		"turbo_mode":                   AdvancedMachineFeatures.TurboMode,
-		"visible_core_count":           AdvancedMachineFeatures.VisibleCoreCount,
-		"performance_monitoring_unit":  AdvancedMachineFeatures.PerformanceMonitoringUnit,
-		"enable_uefi_networking":       AdvancedMachineFeatures.EnableUefiNetworking,
 	{{"}}"}}
 }
 
