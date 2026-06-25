@@ -723,29 +723,14 @@ func flattenAdvancedMachineFeaturesTgcNext(v interface{}) []map[string]interface
 	if !ok {
 		return nil
 	}
-	result := map[string]interface{}{}
-	if val, ok := resp["enableNestedVirtualization"]; ok && val != nil {
-		result["enable_nested_virtualization"] = val
-	}
-	if val, ok := resp["threadsPerCore"]; ok && val != nil {
-		result["threads_per_core"] = val
-	}
-	if val, ok := resp["visibleCoreCount"]; ok && val != nil {
-		result["visible_core_count"] = val
-	}
-	if val, ok := resp["performanceMonitoringUnit"]; ok && val != nil && val != "" {
-		result["performance_monitoring_unit"] = val
-	}
-	if val, ok := resp["enableUefiNetworking"]; ok && val != nil {
-		result["enable_uefi_networking"] = val
-	}
-	if val, ok := resp["turboMode"]; ok && val != nil && val != "" {
-		result["turbo_mode"] = val
-	}
-	if len(result) == 0 {
-		return nil
-	}
-	return []map[string]interface{}{result}
+	return []map[string]interface{}{{
+		"enable_nested_virtualization": resp["enableNestedVirtualization"],
+		"threads_per_core":             resp["threadsPerCore"],
+		"visible_core_count":           resp["visibleCoreCount"],
+		"performance_monitoring_unit":  resp["performanceMonitoringUnit"],
+		"enable_uefi_networking":       resp["enableUefiNetworking"],
+		"turbo_mode":                   resp["turboMode"],
+	}}
 }
 
 func flattenReservationAffinityTgcNext(v interface{}) []map[string]interface{} {
