@@ -1,5 +1,4 @@
 resource "google_project" "project" {
-  provider   = google-beta
   project_id = "tf-test%{random_suffix}"
   name       = "tf-test%{random_suffix}"
   org_id     = "%{org_id}"
@@ -13,7 +12,6 @@ resource "time_sleep" "wait_60_seconds" {
 }
 
 resource "google_project_service" "project_service" {
-  provider   = google-beta
   project    = google_project.project.project_id
   service    = "iap.googleapis.com"
 

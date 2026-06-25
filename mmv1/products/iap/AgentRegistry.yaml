@@ -16,7 +16,6 @@ description: |
   Only used to generate IAM resources
 docs:
 base_url: projects/{{project}}/locations/{{location}}/iap_web/agentRegistry
-min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/iap_web/agentRegistry
 iam_policy:
   method_name_separator: ':'
@@ -41,11 +40,11 @@ timeouts:
   delete_minutes: 20
 exclude_tgc: true
 samples:
-  - name: iap_project_beta
+  - name: project
     primary_resource_id: project_service
     external_providers: [time]
     steps:
-      - name: iap_project_beta
+      - name: project
         test_env_vars:
           org_id: ORG_ID
 parameters:
