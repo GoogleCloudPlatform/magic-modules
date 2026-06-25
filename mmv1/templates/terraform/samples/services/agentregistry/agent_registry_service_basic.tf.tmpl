@@ -1,11 +1,11 @@
 resource "google_agent_registry_service" "{{$.PrimaryResourceId}}" {
   location     = "us-central1"
-  service_id   = "{{index $.Vars "service"}}"
+  service_id   = "{{index $.ResourceIdVars "service"}}"
   description  = "My basic agent registry service"
   display_name = "My Service"
 
   interfaces {
-    url              = "https://www.google.com/{{index $.Vars "service"}}"
+    url              = "https://www.google.com/{{index $.ResourceIdVars "service"}}"
     protocol_binding = "GRPC"
   }
 

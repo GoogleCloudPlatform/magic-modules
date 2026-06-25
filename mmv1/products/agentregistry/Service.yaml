@@ -13,36 +13,40 @@
 
 ---
 name: Service
+description: |
+  Service manages a service in a management boundary
 base_url: projects/{{project}}/locations/{{location}}/services
 self_link: projects/{{project}}/locations/{{location}}/services/{{service_id}}
 create_url: projects/{{project}}/locations/{{location}}/services?serviceId={{service_id}}
-update_verb: PATCH
 update_mask: true
-description: |
-  Service manages a service in a management boundary
+update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/services/{{service_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/services/{{service_id}}
-autogen_async: true
 async:
   type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
   actions:
     - create
     - delete
     - update
-  operation:
-    base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
+autogen_async: true
+samples:
   - name: agent_registry_service_basic
     primary_resource_id: default
-    vars:
-      service: service
+    steps:
+      - name: agent_registry_service_basic
+        resource_id_vars:
+          service: service
   - name: agent_registry_service_mcp_server
     primary_resource_id: default
-    vars:
-      service: service
+    steps:
+      - name: agent_registry_service_mcp_server
+        resource_id_vars:
+          service: service
 parameters:
   - name: location
     type: String
@@ -105,8 +109,7 @@ properties:
           The type of the Agent spec content.
       - name: content
         type: String
-        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-          return s }
+        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
         custom_expand: templates/terraform/custom_expand/json_schema.tmpl
         custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
         validation:
@@ -132,8 +135,7 @@ properties:
           The type of the MCP Server spec content.
       - name: content
         type: String
-        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-          return s }
+        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
         custom_expand: templates/terraform/custom_expand/json_schema.tmpl
         custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
         validation:

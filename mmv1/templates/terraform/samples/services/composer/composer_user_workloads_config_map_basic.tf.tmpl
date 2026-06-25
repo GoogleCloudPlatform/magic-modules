@@ -1,7 +1,7 @@
 data "google_project" "project" {}
 
 resource "google_service_account" "test" {
-  account_id   = "{{index $.Vars "service_account_name"}}"
+  account_id   = "{{index $.ResourceIdVars "service_account_name"}}"
   display_name = "Test Service Account for Composer Environment"
 }
 
@@ -12,7 +12,7 @@ resource "google_project_iam_member" "composer-worker" {
 }
 
 resource "google_composer_environment" "environment" {
-  name   = "{{index $.Vars "environment_name"}}"
+  name   = "{{index $.ResourceIdVars "environment_name"}}"
   region = "us-central1"
   config {
     software_config {
@@ -26,7 +26,7 @@ resource "google_composer_environment" "environment" {
 }
 
 resource "google_composer_user_workloads_config_map" "{{$.PrimaryResourceId}}" {
-  name = "{{index $.Vars "config_map_name"}}"
+  name = "{{index $.ResourceIdVars "config_map_name"}}"
   region = "us-central1"
   environment = google_composer_environment.environment.name
   data = {
