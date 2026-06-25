@@ -41,28 +41,30 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west1"
-examples:
+samples:
   - name: 'network_services_lb_traffic_extension_basic'
     primary_resource_id: 'default'
-    vars:
-      ilb_network_name: 'l7-ilb-network'
-      proxy_subnet_name: 'l7-ilb-proxy-subnet'
-      backend_subnet_name: 'l7-ilb-subnet'
-      forwarding_rule_name: 'l7-ilb-forwarding-rule'
-      target_http_proxy_name: 'l7-ilb-target-http-proxy'
-      regional_url_map_name: 'l7-ilb-regional-url-map'
-      backend_service_name: 'l7-ilb-backend-subnet'
-      mig_template_name: 'l7-ilb-mig-template'
-      hc_name: 'l7-ilb-hc'
-      mig_name: 'l7-ilb-mig1'
-      fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
-      fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
-      vm_test_name: 'l7-ilb-test-vm'
-      lb_traffic_extension_name: 'l7-ilb-traffic-ext'
-      callouts_instance_name: 'l7-ilb-callouts-ins'
-      callouts_instance_group: 'l7-ilb-callouts-ins-group'
-      callouts_hc_name: 'l7-ilb-callouts-hc'
-      callouts_backend_name: 'l7-ilb-callouts-backend'
+    steps:
+      - name: 'network_services_lb_traffic_extension_basic'
+        resource_id_vars:
+          ilb_network_name: 'l7-ilb-network'
+          proxy_subnet_name: 'l7-ilb-proxy-subnet'
+          backend_subnet_name: 'l7-ilb-subnet'
+          forwarding_rule_name: 'l7-ilb-forwarding-rule'
+          target_http_proxy_name: 'l7-ilb-target-http-proxy'
+          regional_url_map_name: 'l7-ilb-regional-url-map'
+          backend_service_name: 'l7-ilb-backend-subnet'
+          mig_template_name: 'l7-ilb-mig-template'
+          hc_name: 'l7-ilb-hc'
+          mig_name: 'l7-ilb-mig1'
+          fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
+          fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
+          vm_test_name: 'l7-ilb-test-vm'
+          lb_traffic_extension_name: 'l7-ilb-traffic-ext'
+          callouts_instance_name: 'l7-ilb-callouts-ins'
+          callouts_instance_group: 'l7-ilb-callouts-ins-group'
+          callouts_hc_name: 'l7-ilb-callouts-hc'
+          callouts_backend_name: 'l7-ilb-callouts-backend'
 parameters:
   - name: 'location'
     type: String
@@ -118,7 +120,7 @@ properties:
         - name: 'matchCondition'
           type: NestedObject
           description: |
-             Conditions under which this chain is invoked for a request.
+            Conditions under which this chain is invoked for a request.
           required: true
           properties:
             - name: 'celExpression'
@@ -167,12 +169,12 @@ properties:
               - name: 'failOpen'
                 type: Boolean
                 description: |
-                   Determines how the proxy behaves if the call to the extension fails or times out.
-                   When set to TRUE, request or response processing continues without error.
-                   Any subsequent extensions in the extension chain are also executed.
-                   When set to FALSE: * If response headers have not been delivered to the downstream client,
-                   a generic 500 error is returned to the client. The error response can be tailored by
-                   configuring a custom error response in the load balancer.
+                  Determines how the proxy behaves if the call to the extension fails or times out.
+                  When set to TRUE, request or response processing continues without error.
+                  Any subsequent extensions in the extension chain are also executed.
+                  When set to FALSE: * If response headers have not been delivered to the downstream client,
+                  a generic 500 error is returned to the client. The error response can be tailored by
+                  configuring a custom error response in the load balancer.
               - name: 'forwardHeaders'
                 type: Array
                 description: |
@@ -208,7 +210,6 @@ properties:
                   Metadata associated with the extension. This field is used to pass metadata to the extension service.
                   You can set up key value pairs for metadata as you like and need.
                   f.e. {"key": "value", "key2": "value2"}.
-
   - name: 'loadBalancingScheme'
     type: Enum
     description: |

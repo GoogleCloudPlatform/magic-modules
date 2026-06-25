@@ -37,12 +37,14 @@ iam_policy:
   iam_conditions_request_type: 'REQUEST_BODY'
   parent_is_resource_id: true
 custom_code:
-examples:
+samples:
   - name: 'iap_project'
     primary_resource_id: 'project_service'
-    test_env_vars:
-      org_id: 'ORG_ID'
     external_providers: ["random", "time"]
+    steps:
+      - name: 'iap_project'
+        test_env_vars:
+          org_id: 'ORG_ID'
 parameters:
 properties:
   - name: 'project'

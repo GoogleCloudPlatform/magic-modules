@@ -37,12 +37,14 @@ iam_policy:
   iam_conditions_request_type: 'REQUEST_BODY'
 custom_code:
 exclude_tgc: true
-examples:
+samples:
   - name: 'backend_service_basic'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_basic'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          http_health_check_name: 'health-check'
 parameters:
 properties:
   - name: 'name'

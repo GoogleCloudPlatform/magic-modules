@@ -54,7 +54,6 @@ samples:
           - 'validated_on_empty_logs'
           - 'low_code.0.field_extractors.0.append_repeated_fields'
           - 'version_info'
-
 parameters:
   - name: location
     type: String

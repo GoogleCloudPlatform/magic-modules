@@ -18,7 +18,6 @@ references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
   api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.findingsRefinements'
-
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements
@@ -30,16 +29,15 @@ exclude_delete: true
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{name}}
 autogen_status: RmluZGluZ3NSZWZpbmVtZW50
-
-examples:
+samples:
   - name: 'chronicle_findings_refinement_basic'
     primary_resource_id: 'findings_refinement_example'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    vars:
-      display_name: findings_refinement_display_name
-
-samples:
+    steps:
+      - name: 'chronicle_findings_refinement_basic'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        resource_id_vars:
+          display_name: findings_refinement_display_name
   - name: 'chronicle_findings_refinement_update'
     primary_resource_id: 'findings_refinement_example'
     steps:
@@ -63,7 +61,6 @@ samples:
           outcome_variable: "risk_score"
           outcome_filter_operator: "CONTAINS"
           outcome_value: "value2"
-
 parameters:
   - name: location
     type: String
