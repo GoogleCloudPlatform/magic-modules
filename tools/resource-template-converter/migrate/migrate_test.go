@@ -53,7 +53,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "accesscontextmanager")
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -122,7 +122,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "accesscontextmanager")
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -187,7 +187,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "accesscontextmanager")
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -249,7 +249,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "datacatalog")
+	err = MigrateFile(yamlPath, "datacatalog", false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -305,7 +305,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "artifactregistry")
+	err = MigrateFile(yamlPath, "artifactregistry", false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -319,5 +319,98 @@ examples:
 
 	if strings.Contains(updatedYaml, "exclude_from_docs") {
 		t.Errorf("expected exclude_from_docs to be discarded, but it was present in the migrated YAML:\n%s", updatedYaml)
+	}
+}
+
+func TestMigrateFile_OnlyMigration(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("", "mm-only-migration-test")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	productsDir := filepath.Join(tmpDir, "mmv1", "products", "accesscontextmanager")
+	os.MkdirAll(productsDir, 0755)
+
+	examplesDir := filepath.Join(tmpDir, "mmv1", "templates", "terraform", "examples")
+	os.MkdirAll(examplesDir, 0755)
+
+	// Create resource YAML file with unordered keys and quotes
+	yamlPath := filepath.Join(productsDir, "AccessLevel.yaml")
+	yamlContent := `---
+# Access level yaml
+name: "AccessLevel"
+description: "An AccessLevel is a label."
+examples:
+  - name: access_context_manager_access_level_basic
+    primary_resource_id: access-level
+    vars:
+      access_level_name: chromeos_no_lock
+    exclude_test: true
+`
+	ioutil.WriteFile(yamlPath, []byte(yamlContent), 0644)
+
+	tmplPath := filepath.Join(examplesDir, "access_context_manager_access_level_basic.tf.tmpl")
+	ioutil.WriteFile(tmplPath, []byte(`resource "google" "test" {}`), 0644)
+
+	// Run migration only
+	err = MigrateFile(yamlPath, "accesscontextmanager", true, false)
+	if err != nil {
+		t.Fatalf("MigrateFile failed: %v", err)
+	}
+
+	updatedYamlBytes, _ := ioutil.ReadFile(yamlPath)
+	updatedYaml := string(updatedYamlBytes)
+
+	// Migration should happen:
+	if !strings.Contains(updatedYaml, "samples:") {
+		t.Errorf("expected samples block, got: %s", updatedYaml)
+	}
+	// Formatting should NOT happen (quotes should remain):
+	if !strings.Contains(updatedYaml, `"AccessLevel"`) {
+		t.Errorf("expected string quotes to be preserved under only-migration, got: %s", updatedYaml)
+	}
+}
+
+func TestMigrateFile_OnlyFormat(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("", "mm-only-format-test")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	productsDir := filepath.Join(tmpDir, "mmv1", "products", "accesscontextmanager")
+	os.MkdirAll(productsDir, 0755)
+
+	yamlPath := filepath.Join(productsDir, "AccessLevel.yaml")
+	yamlContent := `---
+# Access level yaml
+examples:
+  - name: access_context_manager_access_level_basic
+    primary_resource_id: access-level
+name: "AccessLevel"
+description: "An AccessLevel is a label."
+`
+	ioutil.WriteFile(yamlPath, []byte(yamlContent), 0644)
+
+	// Run formatting only
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, true)
+	if err != nil {
+		t.Fatalf("MigrateFile failed: %v", err)
+	}
+
+	updatedYamlBytes, _ := ioutil.ReadFile(yamlPath)
+	updatedYaml := string(updatedYamlBytes)
+
+	// Migration should NOT happen:
+	if strings.Contains(updatedYaml, "samples:") {
+		t.Errorf("expected samples block to NOT be created, got: %s", updatedYaml)
+	}
+	if !strings.Contains(updatedYaml, "examples:") {
+		t.Errorf("expected examples block to remain, got: %s", updatedYaml)
+	}
+	// Formatting should happen (quotes stripped):
+	if strings.Contains(updatedYaml, `"AccessLevel"`) {
+		t.Errorf("expected string quotes to be stripped under only-format, got: %s", updatedYaml)
 	}
 }
