@@ -2,6 +2,7 @@ resource "google_compute_future_reservation" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   name     = "{{index $.Vars "future_reservation_name"}}"
   project  = "{{index $.TestEnvVars "project"}}"
+  zone     = "us-central1-a"
   auto_delete_auto_created_reservations = true
   planning_status = "DRAFT"
   name_prefix = "fr-basic"
