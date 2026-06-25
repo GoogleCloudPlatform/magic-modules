@@ -45,53 +45,61 @@ include_in_tgc_next: true
 custom_code:
 schema_version: 1
 state_upgraders: true
-examples:
+samples:
   - name: 'ha_vpn_gateway_basic'
     primary_resource_id: 'ha_gateway1'
-    vars:
-      ha_vpn_gateway1_name: 'ha-vpn-1'
-      network1_name: 'network1'
-    test_vars_overrides:
-      # for backward compatible
-      network1_name: '"network1" + randomSuffix'
+    steps:
+      - name: 'ha_vpn_gateway_basic'
+        resource_id_vars:
+          ha_vpn_gateway1_name: 'ha-vpn-1'
+          network1_name: 'network1'
+        test_vars_overrides:
+          # for backward compatible
+          network1_name: '"network1" + randomSuffix'
   - name: 'ha_vpn_gateway_ipv6'
     primary_resource_id: 'ha_gateway1'
-    vars:
-      ha_vpn_gateway1_name: 'ha-vpn-1'
-      network1_name: 'network1'
-    test_vars_overrides:
-      # for backward compatible
-      network1_name: '"network1" + randomSuffix'
+    steps:
+      - name: 'ha_vpn_gateway_ipv6'
+        resource_id_vars:
+          ha_vpn_gateway1_name: 'ha-vpn-1'
+          network1_name: 'network1'
+        test_vars_overrides:
+          # for backward compatible
+          network1_name: '"network1" + randomSuffix'
   - name: 'ha_vpn_gateway_gcp_to_gcp'
     primary_resource_id: 'ha_gateway1'
-    vars:
-      ha_vpn_gateway1_name: 'ha-vpn-1'
-      network1_name: 'network1'
-      router1_name: 'ha-vpn-router1'
-      ha_vpn_gateway2_name: 'ha-vpn-2'
-      network2_name: 'network2'
-      router2_name: 'ha-vpn-router2'
-    test_vars_overrides:
-      # for backward compatible
-      network1_name: '"network1" + randomSuffix'
-      # for backward compatible
-      network2_name: '"network2" + randomSuffix'
     exclude_test: true
-    exclude_docs: true
+    exclude_basic_doc: true
     # Multiple fine-grained resources
     skip_vcr: true
+    steps:
+      - name: 'ha_vpn_gateway_gcp_to_gcp'
+        resource_id_vars:
+          ha_vpn_gateway1_name: 'ha-vpn-1'
+          network1_name: 'network1'
+          router1_name: 'ha-vpn-router1'
+          ha_vpn_gateway2_name: 'ha-vpn-2'
+          network2_name: 'network2'
+          router2_name: 'ha-vpn-router2'
+        test_vars_overrides:
+          # for backward compatible
+          network1_name: '"network1" + randomSuffix'
+          # for backward compatible
+          network2_name: '"network2" + randomSuffix'
   - name: 'compute_ha_vpn_gateway_encrypted_interconnect'
     primary_resource_id: 'vpn-gateway'
-    vars:
-      ha_vpn_gateway_name: 'test-ha-vpngw'
-      interconnect_attachment1_name: 'test-interconnect-attachment1'
-      interconnect_attachment2_name: 'test-interconnect-attachment2'
-      address1_name: 'test-address1'
-      address2_name: 'test-address2'
-      router_name: 'test-router'
-      network_name: 'test-network'
-      # TODO: https://github.com/hashicorp/terraform-provider-google/issues/11504
     exclude_test: true
+    steps:
+      - name: 'compute_ha_vpn_gateway_encrypted_interconnect'
+        resource_id_vars:
+          ha_vpn_gateway_name: 'test-ha-vpngw'
+          interconnect_attachment1_name: 'test-interconnect-attachment1'
+          interconnect_attachment2_name: 'test-interconnect-attachment2'
+          address1_name: 'test-address1'
+          address2_name: 'test-address2'
+          router_name: 'test-router'
+          network_name: 'test-network'
+          # TODO: https://github.com/hashicorp/terraform-provider-google/issues/11504
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -205,7 +213,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs

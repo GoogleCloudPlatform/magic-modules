@@ -1,3 +1,4 @@
+---
 # Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
 name: Example
 description: An example represents a sample conversation between the user and the agent(s).
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/examples
@@ -21,17 +21,19 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/examples/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/examples/{{name}}
-examples:
+samples:
   - name: "ces_example_basic"
     primary_resource_id: "my-example"
-    vars:
-      example_display_name: 'my-example'
-      app_display_name: 'my-app'
-      example_id: 'example-id'
-      app_id: 'app-id'
-      base_agent_id: 'base-agent-id'
-      child_agent_id: 'child-agent-id'
-      toolset_id: 'toolset-id'
+    steps:
+      - name: "ces_example_basic"
+        resource_id_vars:
+          example_display_name: 'my-example'
+          app_display_name: 'my-app'
+          example_id: 'example-id'
+          app_id: 'app-id'
+          base_agent_id: 'base-agent-id'
+          child_agent_id: 'child-agent-id'
+          toolset_id: 'toolset-id'
 autogen_status: RXhhbXBsZQ==
 parameters:
   - name: location

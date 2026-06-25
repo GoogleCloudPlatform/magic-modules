@@ -123,7 +123,7 @@ properties:
         description: The uri of the externally hosted documentation.
   - name: pluginCategory
     type: String
-    description: |2-
+    description: |-
       Possible values:
       PLUGIN_CATEGORY_UNSPECIFIED
       API_GATEWAY

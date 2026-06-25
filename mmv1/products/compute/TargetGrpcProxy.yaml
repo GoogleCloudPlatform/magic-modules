@@ -41,23 +41,25 @@ async:
 collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
-examples:
+samples:
   - name: 'target_grpc_proxy_basic'
     primary_resource_id: 'default'
-    vars:
-      proxy_name: 'proxy'
-      urlmap_name: 'urlmap'
-      backend_name: 'backend'
-      healthcheck_name: 'healthcheck'
-    test_vars_overrides:
-      # for backward compatible
-      proxy_name: '"proxy" + randomSuffix'
-      # for backward compatible
-      urlmap_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      backend_name: '"backend" + randomSuffix'
-      # for backward compatible
-      healthcheck_name: '"healthcheck" + randomSuffix'
+    steps:
+      - name: 'target_grpc_proxy_basic'
+        resource_id_vars:
+          proxy_name: 'proxy'
+          urlmap_name: 'urlmap'
+          backend_name: 'backend'
+          healthcheck_name: 'healthcheck'
+        test_vars_overrides:
+          # for backward compatible
+          proxy_name: '"proxy" + randomSuffix'
+          # for backward compatible
+          urlmap_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          backend_name: '"backend" + randomSuffix'
+          # for backward compatible
+          healthcheck_name: '"healthcheck" + randomSuffix'
 parameters:
 properties:
   - name: 'creationTimestamp'

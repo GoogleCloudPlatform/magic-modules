@@ -26,7 +26,6 @@ self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases/{{na
 create_url: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases?hiveDatabaseId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
-
 # The IAM policy is shared with Iceberg Catalog (biglakeiceberg).
 iam_policy:
   method_name_separator: ':'
@@ -38,7 +37,6 @@ iam_policy:
   import_format:
     - projects/{{project}}/catalogs/{{catalog}}/namespaces/{{name}}
     - '{{name}}'
-
 samples:
   - name: 'biglake_hive_database'
     primary_resource_id: 'my_hive_database'
@@ -66,7 +64,6 @@ samples:
         test_env_vars:
           GOOGLE_BILLING_PROJECT: 'PROJECT'
           USER_PROJECT_OVERRIDE: 'true'
-
 parameters:
   - name: 'catalog'
     type: String
@@ -82,7 +79,6 @@ parameters:
     url_param_only: true
     description: |
       Database to create.
-
 properties:
   - name: 'location_uri'
     api_name: 'locationUri'
