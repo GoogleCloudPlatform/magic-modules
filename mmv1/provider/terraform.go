@@ -462,6 +462,9 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 
 	// Case 0: If we're generating a specific product, only copy files for that product.
 	if t.Product != nil {
+		if !generateCode {
+			return commonCopyFiles
+		}
 		googleDir := "google"
 		if versionName != "ga" {
 			googleDir = fmt.Sprintf("google-%s", versionName)
