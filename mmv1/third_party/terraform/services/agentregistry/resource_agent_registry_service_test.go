@@ -37,7 +37,7 @@ func TestAccAgentRegistryService_update(t *testing.T) {
 	randomSuffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"random_suffix": randomSuffix,
-		"service":       "service" + randomSuffix,
+		"service":       "tf-test-service-" + randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
