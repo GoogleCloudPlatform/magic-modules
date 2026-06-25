@@ -40,7 +40,8 @@ go build -o bin/convert-resource-template main.go
 * `-P, --skip-product <product_names>` (Optional): Comma-separated list of product directories to skip from migration.
 * `--only-migration` (Optional): Run only the migration steps (examples -> samples conversion, copy and migrate templates). Do not sort keys or format string quotes. Cannot be combined with `--only-format`.
 * `--only-format` (Optional): Run only the formatting steps (sort keys, strip string quotes). Do not migrate examples to samples or copy templates. Cannot be combined with `--only-migration`.
-* `--skip-open-pr` (Optional): Fetch open PRs updated in the last 2 months from GitHub. Any matching YAML files modified in those PRs will be skipped.
+* `--skip-open-pr` (Optional): Skip files modified by active open PRs updated in the last N days (configured by `--skip-open-pr-days`).
+* `--skip-open-pr-days <days>` (Optional): Number of days of open PR history to verify when checking open PRs (defaults to `60`).
 
 ---
 
@@ -57,16 +58,17 @@ go run main.go convert-resource-template \
 ```
 
 ### Example 2: Single File Migration with PR Verification
-To migrate a single public product YAML file safely only if there is no active PR updated in the last 2 months touching it:
+To migrate a single public product YAML file safely only if there is no active PR updated in the last 30 days touching it:
 ```bash
 go run main.go convert-resource-template \
   --skip-open-pr \
+  --skip-open-pr-days 30 \
   -f mmv1/products/hypercomputecluster/Cluster.yaml \
   <path_to_magic_modules_repository>
 ```
 * **Output**:
   ```
-  Fetching open PRs updated in the last 2 months from GitHub...
+  Fetching open PRs updated in the last 30 days from GitHub...
   Successfully fetched open PRs. Found 835 modified files in open PRs.
   Skipping single target file mmv1/products/hypercomputecluster/Cluster.yaml: modified in active open PR(s) [17678 17610 17522]
   ```

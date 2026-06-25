@@ -23,6 +23,7 @@ var skipProductsFlag string
 var onlyMigration bool
 var onlyFormat bool
 var skipOpenPR bool
+var skipOpenPRDays int
 
 var convertResourceTemplateCmd = &cobra.Command{
 	Use:   "convert-resource-template",
@@ -40,6 +41,9 @@ var convertResourceTemplateCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		root := args[0]
+		if cmd.Flags().Changed("skip-open-pr-days") {
+			skipOpenPR = true
+		}
 		return exeCconvertResourceTemplate(root, filePath)
 	},
 }
@@ -114,9 +118,9 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 
 	var touchedFiles map[string][]int
 	if skipOpenPR {
-		fmt.Println("Fetching open PRs updated in the last 2 months from GitHub...")
+		fmt.Printf("Fetching open PRs updated in the last %d days from GitHub...\n", skipOpenPRDays)
 		var err error
-		touchedFiles, err = github.GetFilesTouchedByOpenPRs()
+		touchedFiles, err = github.GetFilesTouchedByOpenPRs(skipOpenPRDays)
 		if err != nil {
 			return fmt.Errorf("failed to get touched files from open PRs: %w", err)
 		}
@@ -266,6 +270,7 @@ func init() {
 	convertResourceTemplateCmd.Flags().StringVarP(&skipProductsFlag, "skip-product", "P", "", "Comma-separated list of product directories to skip from migration")
 	convertResourceTemplateCmd.Flags().BoolVar(&onlyMigration, "only-migration", false, "Only run migration steps (examples -> samples, copy templates), skip formatting")
 	convertResourceTemplateCmd.Flags().BoolVar(&onlyFormat, "only-format", false, "Only run formatting steps (sort keys, strip quotes), skip migration")
-	convertResourceTemplateCmd.Flags().BoolVar(&skipOpenPR, "skip-open-pr", false, "Skip files modified by active open PRs updated in the last 2 months")
+	convertResourceTemplateCmd.Flags().BoolVar(&skipOpenPR, "skip-open-pr", false, "Skip files modified by active open PRs updated in the last N days (configured by --skip-open-pr-days)")
+	convertResourceTemplateCmd.Flags().IntVar(&skipOpenPRDays, "skip-open-pr-days", 60, "Number of days of open PR history to verify when checking open PRs")
 	rootCmd.AddCommand(convertResourceTemplateCmd)
 }
