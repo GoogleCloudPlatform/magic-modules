@@ -37,7 +37,15 @@
 //
 // The function reads `res["state"]` directly because the standard schema
 // flatten has not yet populated d.Get("state") at the point post_read runs.
-func sgpePostReadDispatch(d *schema.ResourceData, res map[string]interface{}) error {
+//
+// It accepts the minimal sgpeResourceID interface rather than
+// *schema.ResourceData so that unit tests can substitute a fake.
+type sgpeResourceID interface {
+	Id() string
+	SetId(string)
+}
+
+func sgpePostReadDispatch(d sgpeResourceID, res map[string]interface{}) error {
 	state, ok := res["state"].(string)
 	if !ok {
 		return fmt.Errorf("SGPE response is missing or has malformed state field; backend regression.")
