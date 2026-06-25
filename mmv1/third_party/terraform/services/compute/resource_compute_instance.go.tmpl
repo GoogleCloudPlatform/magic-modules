@@ -2237,7 +2237,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	{{ if ne $.TargetVersionName `ga` -}}
 	// Workaround: restore nanos from state since the API doesn't persist it (see comment above).
 	if hadNanos {
-		scheduling := flattenScheduling(instance.Scheduling)
+		schedulingMap, err := tpgresource.ConvertToMap(instance.Scheduling)
+		if err != nil {
+			return fmt.Errorf("Error converting scheduling for nanos workaround: %s", err)
+		}
+		scheduling := flattenScheduling(schedulingMap)
 		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
 		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
 		max_duration["nanos"] = int64(savedNanos.(int))
