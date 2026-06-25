@@ -17,7 +17,6 @@ description: 'A Global VM Extension Policy.'
 base_url: 'projects/{{project}}/global/vmExtensionPolicies'
 self_link: 'projects/{{project}}/global/vmExtensionPolicies/{{name}}'
 update_verb: 'PATCH'
-update_mask: true
 custom_code:
   pre_update: 'templates/terraform/pre_update/vm_extension_policy_name.go.tmpl'
   test_check_destroy: 'templates/terraform/test_check_destroy/global_vm_extension_policy.go.tmpl'
@@ -32,6 +31,11 @@ samples:
         ignore_read_extra:
           - 'rollout_operation'
       - name: 'compute_global_vm_extension_policy_update'
+        vars:
+          policy_name: 'global-ops-agent-policy'
+        ignore_read_extra:
+          - 'rollout_operation'
+      - name: 'compute_global_vm_extension_policy_update_rollout'
         vars:
           policy_name: 'global-ops-agent-policy'
         ignore_read_extra:
@@ -51,7 +55,9 @@ properties:
     required: true
     immutable: true
     description: |-
-      Name of the resource. Provided by the client when the resource is created.
+      Name of the resource. Provided by the client when the resource is created. The name must be 1-63 characters long and match the regular expression '^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$' to comply with RFC1035.
+    validation:
+      regex: '^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$'
   - name: 'description'
     type: String
     description: 'An optional description of this resource.'
@@ -103,12 +109,18 @@ properties:
           - name: 'name'
             type: String
             description: 'The name of the rollout plan.'
+            exactly_one_of:
+              - 'rollout_operation.0.rollout_input.0.name'
+              - 'rollout_operation.0.rollout_input.0.predefined_rollout_plan'
           - name: 'predefinedRolloutPlan'
             type: String
             description: 'Specifies the predefined rollout plan for the policy.'
+            exactly_one_of:
+              - 'rollout_operation.0.rollout_input.0.name'
+              - 'rollout_operation.0.rollout_input.0.predefined_rollout_plan'
           - name: 'retryUuid'
             type: String
-            description: 'The UUID that identifies a policy rollout retry attempt.'
+            description: 'The UUID that identifies a policy rollout retry attempt. It should only be set when retrying an existing rollout. Updating this field along with other policy fields (description, extension_policies, instance_selectors, priority) in the same plan will return an error.'
       - name: 'rolloutStatus'
         type: NestedObject
         description: 'Rollout status.'
