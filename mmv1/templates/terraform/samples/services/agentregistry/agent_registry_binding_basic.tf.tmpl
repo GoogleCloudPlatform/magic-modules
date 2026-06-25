@@ -1,6 +1,6 @@
 resource "google_agent_registry_binding" "{{$.PrimaryResourceId}}" {
   location     = "us-central1"
-  binding_id   = "{{index $.Vars "binding"}}"
+  binding_id   = "{{index $.ResourceIdVars "binding"}}"
   display_name = "My Binding"
   description  = "My GA agent registry binding"
 
@@ -28,7 +28,7 @@ data "google_agent_registry_agent" "default" {
 
 resource "google_iam_connectors_connector" "default" {
   location       = "us-central1"
-  connector_id   = "{{index $.Vars "binding"}}"
+  connector_id   = "{{index $.ResourceIdVars "binding"}}"
 
   connector_type_params {
     connector_version = "projects/{{index $.TestEnvVars "project"}}/locations/global/providers/gcp/connectors/pubsub/versions/1"

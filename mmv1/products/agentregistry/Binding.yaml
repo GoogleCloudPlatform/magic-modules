@@ -13,35 +13,37 @@
 
 ---
 name: Binding
+description: |
+  Represents a user-defined Binding.
 base_url: projects/{{project}}/locations/{{location}}/bindings
 self_link: projects/{{project}}/locations/{{location}}/bindings/{{binding_id}}
 create_url: projects/{{project}}/locations/{{location}}/bindings?bindingId={{binding_id}}
-update_verb: PATCH
 update_mask: true
-description: |
-  Represents a user-defined Binding.
+update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/bindings/{{binding_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/bindings/{{binding_id}}
-autogen_async: true
 async:
   type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
   actions:
     - create
     - delete
     - update
-  operation:
-    base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
+autogen_async: true
+samples:
   - name: agent_registry_binding_basic
     primary_resource_id: default
     skip_func: acctest.SkipTestUntil(t, "2026-09-30") # Wait for google_iam_connectors_connector to graduate from tpg-nightly
-    vars:
-      binding: ar-binding
-    test_env_vars:
-      project: PROJECT_NAME
+    steps:
+      - name: agent_registry_binding_basic
+        resource_id_vars:
+          binding: ar-binding
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
