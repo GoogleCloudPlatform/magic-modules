@@ -56,6 +56,15 @@ func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(t *testing.T) 
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels"},
 			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineManualTraffic(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "traffic_config"},
+			},
 		},
 	})
 }
@@ -716,6 +725,122 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
       }
     }
   }
+}
+`, context)
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineManualTraffic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+locals {
+  class_methods = [
+    {
+      api_mode = "async"
+      description = null
+      name = "async_query"
+      parameters = {
+        type     = "object"
+        required = []
+        properties = {}
+      }
+    }
+  ]
+  class_methods_new = [
+    {
+      api_mode    = "async"
+      description = null
+      name        = "async_query"
+      parameters = {
+        type       = "object"
+        required   = []
+        properties = {}
+      }
+    },
+    {
+      api_mode    = "async_stream"
+      description = null
+      name        = "async_query_2"
+      parameters = {
+        type       = "object"
+        required   = []
+        properties = {}
+      }
+    }
+  ]
+}
+
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "sample-reasoning-engine-updated"
+  description  = "A sample reasoning engine updated"
+  labels       = {
+    "key" = "updated"
+  }
+  region       = "us-central1"
+
+  encryption_spec {
+    kms_key_name = "%{kms_key_name}"
+  }
+
+  traffic_config {
+    traffic_split_manual {
+      targets {
+        runtime_revision_name = "test-revision-1"
+        percent               = 100
+      }
+    }
+  }
+
+  spec {
+    agent_framework = "langchain"
+    class_methods   = jsonencode(local.class_methods_new)
+    service_account = google_service_account.service_account_new.email
+
+    deployment_spec {
+      min_instances         = 2
+      max_instances         = 4
+      container_concurrency = 6
+
+      agent_server_mode     = "EXPERIMENTAL"
+
+      resource_limits = {
+        cpu    = "4"
+        memory = "4Gi"
+      }
+
+      env {
+        name  = "var_1"
+        value = "value_1b"
+      }
+
+      env {
+        name  = "var_2"
+        value = "value_2b"
+      }
+
+      secret_env {
+        name = "secret_var_1"
+
+        secret_ref {
+          secret  = google_secret_manager_secret.secret.secret_id
+          version = "latest"
+        }
+      }
+    }
+
+    package_spec {
+      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_adk.name}"
+      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pickle_adk.name}"
+      python_version           = "3.11"
+      requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_adk.name}"
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [traffic_config]
+  }
+
+  depends_on = [
+    time_sleep.wait_5_minutes
+  ]
 }
 `, context)
 }
