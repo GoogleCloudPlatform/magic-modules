@@ -186,7 +186,7 @@ properties:
             required: true
       - name: authType
         type: String
-        description: |2-
+        description: |-
           Possible values:
           AUTH_TYPE_UNSPECIFIED
           NO_AUTH
@@ -321,7 +321,7 @@ properties:
             - name: curationType
               type: String
               default_from_api: true
-              description: |2-
+              description: |-
                 Possible values:
                 CURATION_TYPE_UNSPECIFIED
                 DEFAULT_CURATION_FOR_API_METADATA

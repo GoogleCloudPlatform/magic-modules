@@ -44,15 +44,17 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
+samples:
   - name: 'network_firewall_policy_association'
     primary_resource_id: 'default'
-    vars:
-      policy_name: 'my-policy'
-      association_name: 'my-association'
-      network_name: 'my-network'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+    steps:
+      - name: 'network_firewall_policy_association'
+        resource_id_vars:
+          policy_name: 'my-policy'
+          association_name: 'my-association'
+          network_name: 'my-network'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef

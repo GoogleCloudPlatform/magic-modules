@@ -41,58 +41,77 @@ iam_policy:
     - 'projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}'
     - '{{routine_id}}'
 custom_code:
-examples:
+samples:
   - name: 'bigquery_routine_basic'
     primary_resource_id: 'sproc'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_basic'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_json'
     primary_resource_id: 'sproc'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_json'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_tvf'
     primary_resource_id: 'sproc'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_tvf'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_pyspark'
     primary_resource_id: 'pyspark'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_pyspark'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          connection_id: 'connection_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_pyspark_mainfile'
     primary_resource_id: 'pyspark_mainfile'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_pyspark_mainfile'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          connection_id: 'connection_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_spark_jar'
     primary_resource_id: 'spark_jar'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_spark_jar'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          connection_id: 'connection_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_data_governance_type'
     primary_resource_id: 'custom_masking_routine'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_data_governance_type'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_remote_function'
     primary_resource_id: 'remote_function'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
     exclude_test: true
+    steps:
+      - name: 'bigquery_routine_remote_function'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          connection_id: 'connection_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_python_function'
     primary_resource_id: 'python_function'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
     min_version: beta
+    steps:
+      - name: 'bigquery_routine_python_function'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
+        min_version: beta
 parameters:
 properties:
   - name: 'routineReference'
@@ -109,10 +128,7 @@ properties:
         immutable: true
       - name: 'routineId'
         type: String
-        description:
-          The ID of the the routine. The ID must contain only letters (a-z,
-          A-Z), numbers (0-9), or underscores (_). The maximum length is 256
-          characters.
+        description: The ID of the the routine. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum length is 256 characters.
         required: true
         immutable: true
   - name: 'routineType'

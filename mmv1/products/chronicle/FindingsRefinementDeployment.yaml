@@ -19,7 +19,6 @@ references:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
   api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/FindingsRefinementDeployment'
 min_version: 'beta'
-
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment?updateMask=*
@@ -32,7 +31,6 @@ update_verb: PATCH
 # The API does not support deletion of FindingsRefinementsDeployment resources.
 exclude_delete: true
 autogen_status: RmluZGluZ3NSZWZpbmVtZW50RGVwbG95bWVudA==
-
 samples:
   - name: 'chronicle_findings_refinement_deployment_update'
     primary_resource_id: 'example'
@@ -52,7 +50,6 @@ samples:
           display_name: findings_refinement_display_name
         vars:
           enabled: false
-
 parameters:
   - name: location
     type: String

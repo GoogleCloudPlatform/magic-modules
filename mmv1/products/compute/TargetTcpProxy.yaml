@@ -31,33 +31,44 @@ async:
   operation:
     base_url: '{{op_id}}'
 include_in_tgc_next: true
-examples:
+samples:
   - name: target_tcp_proxy_basic
     primary_resource_id: default
-    vars:
-      backend_service_name: backend-service
-      health_check_name: health-check
-      target_tcp_proxy_name: test-proxy
+    steps:
+      - name: target_tcp_proxy_basic
+        resource_id_vars:
+          backend_service_name: backend-service
+          health_check_name: health-check
+          target_tcp_proxy_name: test-proxy
   - name: target_tcp_proxy_basic_beta
     primary_resource_id: default
     min_version: beta
-    vars:
-      backend_service_name: backend-service
-      health_check_name: health-check
-      target_tcp_proxy_name: test-proxy
+    steps:
+      - name: target_tcp_proxy_basic_beta
+        min_version: beta
+        resource_id_vars:
+          backend_service_name: backend-service
+          health_check_name: health-check
+          target_tcp_proxy_name: test-proxy
   - name: target_tcp_proxy_backendless
     min_version: beta
     primary_resource_id: default
-    vars:
-      target_tcp_proxy_name: test-proxy
+    steps:
+      - name: target_tcp_proxy_backendless
+        min_version: beta
+        resource_id_vars:
+          target_tcp_proxy_name: test-proxy
   - name: target_tcp_proxy_tls_route
     min_version: beta
     primary_resource_id: default
-    vars:
-      backend_service_name: backend-service
-      health_check_name: health-check
-      target_tcp_proxy_name: test-proxy
-      tls_route_name: tls-route-check
+    steps:
+      - name: target_tcp_proxy_tls_route
+        min_version: beta
+        resource_id_vars:
+          backend_service_name: backend-service
+          health_check_name: health-check
+          target_tcp_proxy_name: test-proxy
+          tls_route_name: tls-route-check
 properties:
   - name: creationTimestamp
     type: Time

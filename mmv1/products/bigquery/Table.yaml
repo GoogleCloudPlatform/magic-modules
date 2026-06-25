@@ -36,12 +36,14 @@ iam_policy:
   parent_resource_attribute: 'table_id'
   iam_policy_version: '1'
 custom_code:
-examples:
+samples:
   - name: 'bigquery_bigquery_table'
     primary_resource_id: 'test'
-    vars:
-      dataset_id: 'dataset_id'
-      table_id: 'table_id'
+    steps:
+      - name: 'bigquery_bigquery_table'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          table_id: 'table_id'
 parameters:
   # TODO: Remove once we have support for placing
   # nested object fields in URL
@@ -363,8 +365,7 @@ properties:
           type: String
       - name: 'schema'
         type: NestedObject
-        description:
-          'The schema for the data. Schema is required for CSV and JSON formats'
+        description: 'The schema for the data. Schema is required for CSV and JSON formats'
         properties:
           - name: 'fields'
             type: Array
@@ -407,8 +408,7 @@ properties:
                     - 'RECORD'
       - name: 'googleSheetsOptions'
         type: NestedObject
-        description:
-          'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
+        description: 'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
         properties:
           - name: 'skipLeadingRows'
             type: Integer
@@ -441,8 +441,7 @@ properties:
             description: 'The separator for fields in a CSV file'
           - name: 'quote'
             type: String
-            description:
-              'The value that is used to quote data sections in a CSV file'
+            description: 'The value that is used to quote data sections in a CSV file'
           - name: 'skipLeadingRows'
             type: Integer
             description: |
@@ -481,8 +480,7 @@ properties:
                     properties:
                       - name: 'encoding'
                         type: Enum
-                        description:
-                          The encoding of the values when the type is not STRING
+                        description: The encoding of the values when the type is not STRING
                         enum_values:
                           - 'TEXT'
                           - 'BINARY'
@@ -503,8 +501,7 @@ properties:
                         required: true
                       - name: 'type'
                         type: Enum
-                        description:
-                          The type to convert the value in cells of this column
+                        description: The type to convert the value in cells of this column
                         enum_values:
                           - 'BYTES'
                           - 'STRING'
@@ -513,8 +510,7 @@ properties:
                           - 'BOOLEAN'
                 - name: 'encoding'
                   type: Enum
-                  description:
-                    The encoding of the values when the type is not STRING
+                  description: The encoding of the values when the type is not STRING
                   enum_values:
                     - 'TEXT'
                     - 'BINARY'
@@ -528,8 +524,7 @@ properties:
                     exposed for all columns in this column family
                 - name: 'type'
                   type: Enum
-                  description:
-                    The type to convert the value in cells of this column family
+                  description: The type to convert the value in cells of this column family
                   enum_values:
                     - 'BYTES'
                     - 'STRING'

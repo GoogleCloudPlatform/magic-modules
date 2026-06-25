@@ -54,89 +54,113 @@ custom_code:
   custom_create: 'templates/terraform/custom_create/firestore_index.go.tmpl'
 error_retry_predicates:
   - 'transport_tpg.FirestoreIndex409Retry'
-examples:
+samples:
   - name: 'firestore_index_basic'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
     external_providers: ["random", "time"]
+    steps:
+      - name: 'firestore_index_basic'
+        resource_id_vars:
+          database_id: 'database-id'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_datastore_mode'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-dm'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_datastore_mode'
+        resource_id_vars:
+          database_id: 'database-id-dm'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_vector'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-vector'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_vector'
+        resource_id_vars:
+          database_id: 'database-id-vector'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_name_descending'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_name_descending'
+        resource_id_vars:
+          database_id: 'database-id'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_mongodb_compatible_scope'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-mongodb-compatible'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_mongodb_compatible_scope'
+        resource_id_vars:
+          database_id: 'database-id-mongodb-compatible'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_sparse_any'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-sparse-any'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_sparse_any'
+        resource_id_vars:
+          database_id: 'database-id-sparse-any'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_unique'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-unique'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_unique'
+        resource_id_vars:
+          database_id: 'database-id-unique'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_skip_wait'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-skip-wait'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'skip_wait'
+    steps:
+      - name: 'firestore_index_skip_wait'
+        resource_id_vars:
+          database_id: 'database-id-skip-wait'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        ignore_read_extra:
+          - 'skip_wait'
   - name: 'firestore_index_deletion_policy'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-deletion-policy'
-      deletion_policy: '"PREVENT"'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    # Example will show delete_protection as true, but in test we will actually set to false
-    # so the test can cleanup after itself.
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: 'firestore_index_deletion_policy'
+        resource_id_vars:
+          database_id: 'database-id-deletion-policy'
+          deletion_policy: '"PREVENT"'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        # Example will show delete_protection as true, but in test we will actually set to false
+        # so the test can cleanup after itself.
+        test_vars_overrides:
+          'deletion_policy': '"DELETE"'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'firestore_index_text_search'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'text-search-database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_text_search'
+        resource_id_vars:
+          database_id: 'text-search-database-id'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_suppress_geojson_indexing'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'suppress-geojson-indexing-database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_suppress_geojson_indexing'
+        resource_id_vars:
+          database_id: 'suppress-geojson-indexing-database-id'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_geo_search'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'geo-search-database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_geo_search'
+        resource_id_vars:
+          database_id: 'geo-search-database-id'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
 virtual_fields:
   - name: "skip_wait"
     type: Boolean
@@ -196,20 +220,11 @@ properties:
   - name: 'multikey'
     type: Boolean
     default_value: false
-    description:
-      Optional. Whether the index is multikey. By default, the index
-      is not multikey. For non-multikey indexes, none of the paths in the
-      index definition reach or traverse an array, except via an explicit
-      array index. For multikey indexes, at most one of the paths in the index
-      definition reach or traverse an array, except via an explicit array
-      index. Violations will result in errors. Note this field only applies to
-      indexes with MONGODB_COMPATIBLE_API ApiScope.
+    description: Optional. Whether the index is multikey. By default, the index is not multikey. For non-multikey indexes, none of the paths in the index definition reach or traverse an array, except via an explicit array index. For multikey indexes, at most one of the paths in the index definition reach or traverse an array, except via an explicit array index. Violations will result in errors. Note this field only applies to indexes with MONGODB_COMPATIBLE_API ApiScope.
   - name: 'unique'
     type: Boolean
     default_from_api: true
-    description:
-      Whether it is an unique index. Unique index ensures all values for the
-      indexed field(s) are unique across documents.
+    description: Whether it is an unique index. Unique index ensures all values for the indexed field(s) are unique across documents.
   - name: 'fields'
     type: Array
     description: |
@@ -305,9 +320,8 @@ properties:
                 Indicates the vector index is a flat index.
               send_empty_value: true
               allow_empty_object: true
-              properties:
-                # Meant to be an empty object with no properties.
-                []
+              properties: []
+              # Meant to be an empty object with no properties.
     # Most composite indexes require at least two fields, but it is possible
     # for a user to require a single field index such as `__name__ DESC`.
     min_size: 1

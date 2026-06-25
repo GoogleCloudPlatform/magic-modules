@@ -58,76 +58,90 @@ sweeper:
     - region: "us-west1-a"
 custom_diff:
   - 'workbenchMetadataCustomizeDiff'
-examples:
+samples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
     region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-    ignore_read_extra:
-      - 'update_time'
+    steps:
+      - name: 'workbench_instance_basic'
+        resource_id_vars:
+          instance_name: 'workbench-instance'
+        ignore_read_extra:
+          - 'update_time'
   - name: 'workbench_instance_basic_container'
     primary_resource_id: 'instance'
     region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-    ignore_read_extra:
-      - 'update_time'
+    steps:
+      - name: 'workbench_instance_basic_container'
+        resource_id_vars:
+          instance_name: 'workbench-instance'
+        ignore_read_extra:
+          - 'update_time'
   - name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
     region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-      reservation_name: 'wbi-reservation'
-    ignore_read_extra:
-      - 'gce_setup.0.vm_image'
-      - 'update_time'
+    steps:
+      - name: 'workbench_instance_basic_gpu'
+        resource_id_vars:
+          instance_name: 'workbench-instance'
+          reservation_name: 'wbi-reservation'
+        ignore_read_extra:
+          - 'gce_setup.0.vm_image'
+          - 'update_time'
   - name: 'workbench_instance_labels_stopped'
     primary_resource_id: 'instance'
     region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-      network_name: 'wbi-test-default'
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-    ignore_read_extra:
-      - 'desired_state'
-      - 'update_time'
+    steps:
+      - name: 'workbench_instance_labels_stopped'
+        resource_id_vars:
+          instance_name: 'workbench-instance'
+          network_name: 'wbi-test-default'
+        test_env_vars:
+          service_account: 'SERVICE_ACCT'
+        ignore_read_extra:
+          - 'desired_state'
+          - 'update_time'
   - name: 'workbench_instance_full'
     primary_resource_id: 'instance'
     region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-      network_name: 'wbi-test-default'
-      reservation_name: 'wbi-reservation'
-      key_name: 'my-crypto-key'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-    test_vars_overrides:
-      'key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'gce_setup.0.vm_image'
-      - 'gce_setup.0.boot_disk.0.disk_type'
-      - 'gce_setup.0.data_disks.0.disk_type'
-      - 'update_time'
+    steps:
+      - name: 'workbench_instance_full'
+        resource_id_vars:
+          instance_name: 'workbench-instance'
+          network_name: 'wbi-test-default'
+          reservation_name: 'wbi-reservation'
+          key_name: 'my-crypto-key'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+          service_account: 'SERVICE_ACCT'
+        test_vars_overrides:
+          'key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        ignore_read_extra:
+          - 'gce_setup.0.vm_image'
+          - 'gce_setup.0.boot_disk.0.disk_type'
+          - 'gce_setup.0.data_disks.0.disk_type'
+          - 'update_time'
   - name: 'workbench_instance_confidential_compute'
     primary_resource_id: 'instance'
     region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-    ignore_read_extra:
-      - 'update_time'
+    steps:
+      - name: 'workbench_instance_confidential_compute'
+        resource_id_vars:
+          instance_name: 'workbench-instance'
+        ignore_read_extra:
+          - 'update_time'
   - name: 'workbench_instance_euc'
     primary_resource_id: 'instance'
     region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      project_number: 'PROJECT_NUMBER'
-    ignore_read_extra:
-      - 'update_time'
+    steps:
+      - name: 'workbench_instance_euc'
+        resource_id_vars:
+          instance_name: 'workbench-instance'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+          project_number: 'PROJECT_NUMBER'
+        ignore_read_extra:
+          - 'update_time'
 virtual_fields:
   - name: 'desired_state'
     description: |
@@ -271,8 +285,8 @@ properties:
           - name: 'project'
             type: String
             description: |
-                The name of the Google Cloud project that this VM image belongs to.
-                Format: {project_id}
+              The name of the Google Cloud project that this VM image belongs to.
+              Format: {project_id}
             immutable: true
           - name: 'name'
             type: String
@@ -614,8 +628,7 @@ properties:
       healthInfo": { "docker_proxy_agent_status": "1", "docker_status": "1", "jupyterlab_api_status":
       "-1", "jupyterlab_status": "-1", "updated": "2020-10-18 09:40:03.573409" }'
     output: true
-    properties:
-      []
+    properties: []
   - name: 'createTime'
     type: String
     description: |

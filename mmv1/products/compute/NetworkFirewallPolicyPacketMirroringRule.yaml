@@ -45,21 +45,23 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
+samples:
   - name: 'compute_network_firewall_policy_packet_mirroring_rule'
     primary_resource_id: 'primary'
-    vars:
-      fw_policy: 'fw-policy'
-      network_name: 'fw-network'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-      deployment_group_id: 'deployment-group'
-      endpoint_group_id: 'endpoint-group'
-      security_profile_name: 'sec-profile'
-      security_profile_group_name: 'sec-profile-group'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'compute_network_firewall_policy_packet_mirroring_rule'
+        resource_id_vars:
+          fw_policy: 'fw-policy'
+          network_name: 'fw-network'
+          tag_key: 'tag-key'
+          tag_value: 'tag-value'
+          deployment_group_id: 'deployment-group'
+          endpoint_group_id: 'endpoint-group'
+          security_profile_name: 'sec-profile'
+          security_profile_group_name: 'sec-profile-group'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef

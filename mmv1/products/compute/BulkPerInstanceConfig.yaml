@@ -1,3 +1,4 @@
+---
 # Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
 name: 'BulkPerInstanceConfig'
 api_resource_type_kind: InstanceGroupManager
 api_variant_patterns:
@@ -46,12 +46,14 @@ async:
 custom_code:
   decoder: 'templates/terraform/decoders/compute_bulk_per_instance_config.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/compute_bulk_per_instance_config.go.tmpl'
-examples:
+samples:
   - name: 'compute_bulk_per_instance_config'
     primary_resource_id: 'bulk-igm-per-instance-config'
-    vars:
-      template_name: 'bulk-igm-template'
-      igm_name: 'bulk-igm'
+    steps:
+      - name: 'compute_bulk_per_instance_config'
+        resource_id_vars:
+          template_name: 'bulk-igm-template'
+          igm_name: 'bulk-igm'
 parameters:
   - name: 'zone'
     type: ResourceRef

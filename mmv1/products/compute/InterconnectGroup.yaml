@@ -37,13 +37,15 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
+samples:
   - name: 'interconnect_group_basic'
     primary_resource_id: 'example-interconnect-group'
-    vars:
-      interconnect_group_name: 'example-interconnect-group'
-    test_vars_overrides:
-      'deletion_protection': 'false'
+    steps:
+      - name: 'interconnect_group_basic'
+        resource_id_vars:
+          interconnect_group_name: 'example-interconnect-group'
+        test_vars_overrides:
+          'deletion_protection': 'false'
 parameters:
 properties:
   - name: 'description'

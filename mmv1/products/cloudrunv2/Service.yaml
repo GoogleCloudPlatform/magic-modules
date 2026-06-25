@@ -49,133 +49,170 @@ iam_policy:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_service_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
-examples:
+samples:
   - name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_basic'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_limits'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_limits'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      secret_id: 'secret-1'
-      cloud_run_sql_name: 'cloudrun-sql'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_sql'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+          secret_id: 'secret-1'
+          cloud_run_sql_name: 'cloudrun-sql'
+          deletion_protection: 'true'
+        test_vars_overrides:
+          'deletion_protection': 'false'
+        oics_vars_overrides:
+          'deletion_protection': 'false'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      vpc_access_connector_name: 'run-vpc'
-      vpc_compute_subnetwork_name: 'run-subnetwork'
-      compute_network_name: 'run-network'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_vpcaccess'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+          vpc_access_connector_name: 'run-vpc'
+          vpc_compute_subnetwork_name: 'run-subnetwork'
+          compute_network_name: 'run-network'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_directvpc'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_directvpc'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_gpu'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_gpu'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_probes'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_readiness_probes'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_readiness_probes'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      secret_id: 'secret-1'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_secret'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+          secret_id: 'secret-1'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_multicontainer'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_multicontainer'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_mount_gcs'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
     # Currently failing
     skip_vcr: true
+    steps:
+      - name: 'cloudrunv2_service_mount_gcs'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_mount_nfs'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
     # Currently failing
     skip_vcr: true
+    steps:
+      - name: 'cloudrunv2_service_mount_nfs'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_mesh'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      mesh_name: 'network-services-mesh'
-    ignore_read_extra:
-      - 'deletion_protection'
     external_providers: ["time"]
+    steps:
+      - name: 'cloudrunv2_service_mesh'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+          mesh_name: 'network-services-mesh'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_invokeriam'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_invokeriam'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_iap'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-iap-service'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_iap'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-iap-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_zip_deploy'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      cloud_run_service_name: 'cloudrun-zip-service'
-      targz_path: './test-fixtures/function-source.tar.gz'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_zip_deploy'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-zip-service'
+          targz_path: './test-fixtures/function-source.tar.gz'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_emptydir_disk'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_service_emptydir_disk'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+          deletion_protection: 'true'
+        test_vars_overrides:
+          'deletion_protection': 'false'
+        ignore_read_extra:
+          - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -1092,8 +1129,7 @@ properties:
         properties:
           - name: 'accelerator'
             type: String
-            description:
-              The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/services/gpu for configuring GPU.
+            description: The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/services/gpu for configuring GPU.
             required: true
       - name: 'gpuZonalRedundancyDisabled'
         type: Boolean

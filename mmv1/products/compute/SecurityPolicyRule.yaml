@@ -47,45 +47,56 @@ async:
 custom_code:
   pre_create: 'templates/terraform/pre_create/security_policy_default_rule_update_on_create.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/security_policy_default_rule_delete.go.tmpl'
-examples:
+samples:
   - name: 'security_policy_rule_basic'
     primary_resource_id: 'policy_rule'
-    vars:
-      sec_policy_name: 'policyruletest'
-    test_vars_overrides:
-      # for backward compatible
-      sec_policy_name: '"policyruletest" + randomSuffix'
+    steps:
+      - name: 'security_policy_rule_basic'
+        resource_id_vars:
+          sec_policy_name: 'policyruletest'
+        test_vars_overrides:
+          # for backward compatible
+          sec_policy_name: '"policyruletest" + randomSuffix'
   - name: 'security_policy_rule_default_rule'
     primary_resource_id: 'policy_rule'
-    vars:
-      sec_policy_name: 'policyruletest'
-    test_vars_overrides:
-      # for backward compatible
-      sec_policy_name: '"policyruletest" + randomSuffix'
+    steps:
+      - name: 'security_policy_rule_default_rule'
+        resource_id_vars:
+          sec_policy_name: 'policyruletest'
+        test_vars_overrides:
+          # for backward compatible
+          sec_policy_name: '"policyruletest" + randomSuffix'
   - name: 'security_policy_rule_multiple_rules'
     primary_resource_id: 'policy_rule_one'
-    vars:
-      sec_policy_name: 'policywithmultiplerules'
-    test_vars_overrides:
-      # for backward compatible
-      sec_policy_name: '"policywithmultiplerules" + randomSuffix'
+    steps:
+      - name: 'security_policy_rule_multiple_rules'
+        resource_id_vars:
+          sec_policy_name: 'policywithmultiplerules'
+        test_vars_overrides:
+          # for backward compatible
+          sec_policy_name: '"policywithmultiplerules" + randomSuffix'
   - name: 'security_policy_rule_advanced_features'
     primary_resource_id: 'policy'
-    vars:
-      sec_policy_name: 'policyruletest'
-    test_vars_overrides:
-      sec_policy_name: '"policyruletest" + randomSuffix'
+    steps:
+      - name: 'security_policy_rule_advanced_features'
+        resource_id_vars:
+          sec_policy_name: 'policyruletest'
+        test_vars_overrides:
+          sec_policy_name: '"policyruletest" + randomSuffix'
   - name: 'security_policy_rule_with_body_exclude'
     primary_resource_id: 'policy_rule_one'
     min_version: 'beta'
-    vars:
-      sec_policy_name: 'policyruletest'
-      backend_name: 'backendpolicy'
-      network_name: 'test-network'
-    test_vars_overrides:
-      # for backward compatible
-      sec_policy_name: '"policyruletest" + randomSuffix'
-      backend_name: '"backendpolicy" + randomSuffix'
+    steps:
+      - name: 'security_policy_rule_with_body_exclude'
+        min_version: 'beta'
+        resource_id_vars:
+          sec_policy_name: 'policyruletest'
+          backend_name: 'backendpolicy'
+          network_name: 'test-network'
+        test_vars_overrides:
+          # for backward compatible
+          sec_policy_name: '"policyruletest" + randomSuffix'
+          backend_name: '"backendpolicy" + randomSuffix'
 parameters:
   - name: 'security_policy'
     type: String

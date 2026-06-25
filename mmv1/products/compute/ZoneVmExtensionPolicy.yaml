@@ -19,7 +19,6 @@ self_link: 'projects/{{project}}/zones/{{zone}}/vmExtensionPolicies/{{name}}'
 update_verb: 'PATCH'
 custom_code:
   pre_update: 'templates/terraform/pre_update/vm_extension_policy_name.go.tmpl'
-
 samples:
   - name: 'compute_zone_vm_extension_policy_basic'
     primary_resource_id: 'ops_agent_policy'
@@ -30,15 +29,12 @@ samples:
       - name: 'compute_zone_vm_extension_policy_update'
         vars:
           policy_name: 'zonal-ops-agent-policy'
-
-
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
-
 parameters:
   - name: 'zone'
     type: String
@@ -46,7 +42,6 @@ parameters:
     immutable: true
     url_param_only: true
     description: 'Name of the zone for this request.'
-
 properties:
   - name: 'name'
     type: String
