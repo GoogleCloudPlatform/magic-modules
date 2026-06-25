@@ -17,9 +17,12 @@ description: 'A Global VM Extension Policy.'
 base_url: 'projects/{{project}}/global/vmExtensionPolicies'
 self_link: 'projects/{{project}}/global/vmExtensionPolicies/{{name}}'
 update_verb: 'PATCH'
+delete_url: 'projects/{{project}}/global/vmExtensionPolicies/{{name}}/delete'
+delete_verb: 'POST'
 custom_code:
   pre_update: 'templates/terraform/pre_update/vm_extension_policy_name.go.tmpl'
   test_check_destroy: 'templates/terraform/test_check_destroy/global_vm_extension_policy.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/vm_extension_policy_rollout.go.tmpl'
 
 samples:
   - name: 'compute_global_vm_extension_policy_basic'
@@ -31,6 +34,14 @@ samples:
         ignore_read_extra:
           - 'rollout_operation'
       - name: 'compute_global_vm_extension_policy_update'
+        vars:
+          policy_name: 'global-ops-agent-policy'
+        ignore_read_extra:
+          - 'rollout_operation'
+  - name: 'compute_global_vm_extension_policy_rollout'
+    primary_resource_id: 'ops_agent_policy'
+    steps:
+      - name: 'compute_global_vm_extension_policy_basic'
         vars:
           policy_name: 'global-ops-agent-policy'
         ignore_read_extra:
