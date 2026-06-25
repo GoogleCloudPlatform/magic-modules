@@ -1,0 +1,92 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+name: 'BulkPerInstanceConfig'
+api_resource_type_kind: InstanceGroupManager
+api_variant_patterns:
+  - 'projects/{project}/zones/{zone}/instanceGroupManagers/{instanceGroupManager}'
+description: |
+  A config defined for multiple managed instances that belong to an instance group manager with target_size_policy.mode=BULK.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/bulk-create-instances-in-mig'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers'
+docs:
+base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}'
+id_format: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}'
+import_format:
+  - 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}'
+self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/listManagedInstances'
+create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/createInstances'
+read_verb: 'POST'
+delete_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/deleteInstances'
+delete_verb: 'POST'
+mutex: 'instanceGroupManager/{{project}}/{{zone}}/{{instance_group_manager}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  decoder: 'templates/terraform/decoders/compute_bulk_per_instance_config.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/compute_bulk_per_instance_config.go.tmpl'
+examples:
+  - name: 'compute_bulk_per_instance_config'
+    primary_resource_id: 'bulk-igm-per-instance-config'
+    vars:
+      template_name: 'bulk-igm-template'
+      igm_name: 'bulk-igm'
+parameters:
+  - name: 'zone'
+    type: ResourceRef
+    description: |
+      Zone where the containing instance group manager is located
+    url_param_only: true
+    required: false
+    immutable: true
+    default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'name'
+  - name: 'instanceGroupManager'
+    type: ResourceRef
+    description: |
+      The instance group manager this instance config is part of.
+    url_param_only: true
+    required: true
+    immutable: true
+    resource: 'InstanceGroupManager'
+    imports: 'name'
+properties:
+  - name: 'instances'
+    type: Array
+    is_set: true
+    description: |
+      The list of per-instance configs.
+    immutable: true
+    item_type:
+      type: NestedObject
+      #The properties of the object can be extended in the future.
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            The name for this per-instance config and its corresponding instance.
+          required: true
+          immutable: true
