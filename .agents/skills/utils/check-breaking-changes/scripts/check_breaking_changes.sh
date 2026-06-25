@@ -87,64 +87,70 @@ rm -rf "$DIFF_PROCESSOR_DIR/old" "$DIFF_PROCESSOR_DIR/new"
 cp -R "$PROVIDER_CACHE" "$DIFF_PROCESSOR_DIR/old"
 cp -R "$PROVIDER_CACHE" "$DIFF_PROCESSOR_DIR/new"
 
-# Run clean-provider to remove all generated and third-party files
-echo -e "${BLUE}Cleaning target provider directories...${NC}"
-make clean-provider OUTPUT_PATH="$DIFF_PROCESSOR_DIR/old"
-make clean-provider OUTPUT_PATH="$DIFF_PROCESSOR_DIR/new"
+# Construct a comma-separated list of changed products
+PRODUCT_LIST=$(echo "$PRODUCTS" | tr '\n' ',' | sed 's/,$//')
 
-# 8. Generate "Old" (Base) Provider Code
+# Clean only the directories of the changed products in old and new directories
+echo -e "${BLUE}Cleaning target provider directories for changed products: ${YELLOW}${PRODUCT_LIST}${BLUE}...${NC}"
+for PRODUCT in $PRODUCTS; do
+  rm -rf "$DIFF_PROCESSOR_DIR/old/google-beta/services/${PRODUCT}"
+  rm -rf "$DIFF_PROCESSOR_DIR/new/google-beta/services/${PRODUCT}"
+done
+
+# 8. Build current mmv1 binary in the current context
+echo -e "${BLUE}Building current mmv1 binary...${NC}"
+if [ -f "MODULE.bazel" ] && command -v bazel &> /dev/null; then
+  bazel build //mmv1
+  MM_BINARY="$(pwd)/bazel-bin/mmv1/mmv1_/mmv1"
+else
+  (
+    cd mmv1
+    go build -o ../bin/mmv1 .
+  )
+  MM_BINARY="$(pwd)/bin/mmv1"
+fi
+
+# 9. Generate "Old" (Base) Provider Code
 echo -e "${BLUE}Creating temporary worktree for base commit ${YELLOW}${BASE_REF}${BLUE}...${NC}"
 WORKTREE_DIR="$SCRATCH_DIR/mm-base-worktree"
 rm -rf "$WORKTREE_DIR"
 git worktree add --detach "$WORKTREE_DIR" "$BASE_REF"
 
-echo -e "${BLUE}Generating base provider code (all products)...${NC}"
+echo -e "${BLUE}Generating base provider code for products: ${YELLOW}${PRODUCT_LIST}${BLUE}...${NC}"
 (
-  cd "$WORKTREE_DIR"
-  if [ -f "MODULE.bazel" ] && command -v bazel &> /dev/null; then
-    bazel build //mmv1
-    MM_BINARY="$(pwd)/bazel-bin/mmv1/mmv1_/mmv1"
-  else
-    cd mmv1 && go build -o ../bin/mmv1 . && cd ..
-    MM_BINARY="$(pwd)/bin/mmv1"
-  fi
-
-  # Generate the entire provider into tools/diff-processor/old
   cd mmv1
-  $MM_BINARY --output "$DIFF_PROCESSOR_DIR/old" --version beta
+  $MM_BINARY --output "$DIFF_PROCESSOR_DIR/old" --version beta --product "$PRODUCT_LIST" --base "${WORKTREE_DIR}/mmv1"
 )
 
-# 9. Generate "New" (Current) Provider Code
-echo -e "${BLUE}Generating current provider code (all products)...${NC}"
-# Build mmv1 binary in the current context
-if [ -f "MODULE.bazel" ] && command -v bazel &> /dev/null; then
-  bazel build //mmv1
-  MM_BINARY="$(pwd)/bazel-bin/mmv1/mmv1_/mmv1"
-else
-  cd mmv1 && go build -o ../bin/mmv1 . && cd ..
-  MM_BINARY="$(pwd)/bin/mmv1"
-fi
-
-# Generate the entire provider into tools/diff-processor/new
-cd mmv1
-$MM_BINARY --output "$DIFF_PROCESSOR_DIR/new" --version beta
-cd ..
+# 10. Generate "New" (Current) Provider Code
+echo -e "${BLUE}Generating current provider code for products: ${YELLOW}${PRODUCT_LIST}${BLUE}...${NC}"
+(
+  cd mmv1
+  $MM_BINARY --output "$DIFF_PROCESSOR_DIR/new" --version beta --product "$PRODUCT_LIST"
+)
 
 # 10. Perform package substitutions for side-by-side compilation
 echo -e "${BLUE}Preparing provider code for compilation...${NC}"
 (
   cd "$DIFF_PROCESSOR_DIR"
   
+  real_package_name=github.com/hashicorp/terraform-provider-google-beta
+  real_folder_name=google-beta
+
   # Old package substitution
   cd old/
   if [ -d "google-beta" ]; then
     mv google-beta google
   fi
-  real_package_name=github.com/hashicorp/terraform-provider-google-beta
-  real_folder_name=google-beta
   fake_package_name=google/provider/old
-  find . -type f -name "*.go" -exec sed -i.bak "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
-  sed -i.bak "s|${real_package_name}|${fake_package_name}|g" go.mod
+
+  if [ "$(uname)" = "Darwin" ]; then
+    find . -type f -name "*.go" -exec sed -i "" "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
+    sed -i "" "s|${real_package_name}|${fake_package_name}|g" go.mod
+  else
+    find . -type f -name "*.go" -exec sed -i "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
+    sed -i "s|${real_package_name}|${fake_package_name}|g" go.mod
+  fi
   
   # New package substitution
   cd ../new/
@@ -152,8 +158,14 @@ echo -e "${BLUE}Preparing provider code for compilation...${NC}"
     mv google-beta google
   fi
   fake_package_name=google/provider/new
-  find . -type f -name "*.go" -exec sed -i.bak "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
-  sed -i.bak "s|${real_package_name}|${fake_package_name}|g" go.mod
+
+  if [ "$(uname)" = "Darwin" ]; then
+    find . -type f -name "*.go" -exec sed -i "" "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
+    sed -i "" "s|${real_package_name}|${fake_package_name}|g" go.mod
+  else
+    find . -type f -name "*.go" -exec sed -i "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
+    sed -i "s|${real_package_name}|${fake_package_name}|g" go.mod
+  fi
   
   # Tidy and build diff-processor
   cd ..
@@ -176,7 +188,7 @@ if [ $EXIT_CODE -ne 0 ]; then
   exit $EXIT_CODE
 fi
 
-if [ -z "$OUTPUT" ] || [ "$OUTPUT" == "[]" ]; then
+if [ -z "$OUTPUT" ] || [ "$OUTPUT" == "[]" ] || [ "$OUTPUT" == "null" ]; then
   echo -e "${GREEN}No breaking changes detected! ${NC}"
 else
   echo -e "${RED}Breaking changes detected!${NC}"
