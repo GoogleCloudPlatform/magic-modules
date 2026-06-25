@@ -1,0 +1,8 @@
+resource "google_network_connectivity_custom_hardware_instance" "instance" {
+  provider = google-beta
+  custom_hardware_instance_id = "{{index $.Vars "resource_name"}}"
+  location                    = "us-south1"
+  labels = {
+    env = "test"
+  }
+}
