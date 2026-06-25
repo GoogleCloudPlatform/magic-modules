@@ -39,6 +39,8 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
+    ignore_read_extra:
+      - "cloud_control_metadata"
   - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
     primary_resource_id: "example"
     vars:
@@ -47,6 +49,8 @@ examples:
       folder_display_name: "cm-folder"
     test_env_vars:
       org_id: "ORG_ID"
+    ignore_read_extra:
+      - "cloud_control_metadata"
   - name: "cloudsecuritycompliance_framework_deployment_project_creation"
     primary_resource_id: "example"
     vars:
@@ -56,6 +60,8 @@ examples:
     test_env_vars:
       org_id: "ORG_ID"
       billing_account: "BILLING_ACCT"
+    ignore_read_extra:
+      - "cloud_control_metadata"
   - name: "cloudsecuritycompliance_framework_deployment_org_project_basic"
     primary_resource_id: "example"
     vars:
@@ -63,12 +69,16 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
+    ignore_read_extra:
+      - "cloud_control_metadata"
   - name: "cloudsecuritycompliance_framework_deployment_project_application_basic"
     primary_resource_id: "example"
     vars:
       deployment_name: "example-deployment"
       framework_name: "example-framework"
       app_name: "example-app"
+    ignore_read_extra:
+      - "cloud_control_metadata"
   - name: "cloudsecuritycompliance_framework_deployment_org_basic_backward"
     primary_resource_id: "example"
     vars:
@@ -76,6 +86,8 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
+    ignore_read_extra:
+      - "cloud_control_metadata"
 autogen_async: true
 async:
   operation:

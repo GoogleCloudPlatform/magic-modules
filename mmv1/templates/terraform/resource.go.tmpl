@@ -143,7 +143,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{-       end }}
         },
 {{- end }}
-{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff $.UnorderedListProperties }}
         CustomizeDiff: customdiff.All(
 {{-   if $.UnorderedListProperties }}
 {{-     range $prop := $.UnorderedListProperties }}
