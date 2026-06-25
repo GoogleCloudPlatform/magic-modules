@@ -26,9 +26,8 @@ description: |
   that routes agent traffic through the engine, are configured separately and
   are not managed by this resource.
 
-  This resource follows the AIP-156 singleton pattern: a read against an
-  uninitialized or deprovisioned engine returns the singleton with state
-  INACTIVE rather than HTTP 404.
+  Reading an uninitialized or deprovisioned engine returns the singleton
+  with state INACTIVE rather than reporting it as absent.
 references:
   guides:
     'Configure semantic governance policies': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/configure-semantic-governance'
@@ -45,14 +44,9 @@ update_url: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyE
 update_verb: 'PATCH'
 import_format:
   - 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
-# Singleton has no standard Delete RPC per AIP-156; deletion is handled
-# entirely by the custom_delete template via :deprovision (see
-# custom_code.custom_delete below). We deliberately do NOT set
-# exclude_delete: true — that flag suppresses the entire delete handler
-# (no custom_delete is emitted either) and replaces it with a "cannot be
-# deleted" warning, which is wrong for SGPE.
-# update_mask is left at the magic-modules default (true) so the generator
-# emits a properly-scoped update_mask from the schema diff.
+# Singleton has no standard Delete RPC; deletion is handled by the
+# custom_delete template via :deprovision. Do NOT set exclude_delete (it
+# would suppress the custom_delete handler entirely).
 timeouts:
   insert_minutes: 60
   update_minutes: 60
@@ -68,8 +62,6 @@ custom_code:
   constants: 'templates/terraform/constants/semantic_governance_policy_engine.go.tmpl'
   post_read: 'templates/terraform/post_read/vertex_ai_semantic_governance_policy_engine.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/sgpe_deprovision.go.tmpl'
-custom_diff:
-  - 'sgpeCustomizeDiff'
 examples:
   - name: 'vertex_ai_semantic_governance_policy_engine_basic'
     primary_resource_id: 'sgpe'

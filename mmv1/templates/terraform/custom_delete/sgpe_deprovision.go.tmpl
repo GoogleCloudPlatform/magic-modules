@@ -1,19 +1,10 @@
 // SemanticGovernancePolicyEngine custom delete via :deprovision.
 //
-// SGPE is a singleton resource per AIP-156: it has no standard Delete
-// RPC. Tear-down is performed via a custom :deprovision RPC that POSTs
-// to a sibling URL with an empty body. After deprovision completes, a
-// subsequent Get returns the singleton with state INACTIVE rather than
-// HTTP 404; this is the AIP-156 singleton contract.
-//
-// Errors from :deprovision are returned verbatim — we deliberately do
-// NOT wrap them with transport_tpg.HandleNotFoundError. The wrapping
-// pattern used by RagEngineConfig assumes 404-as-already-deleted is a
-// legitimate concurrent-delete race; for the SGPE singleton, a 404 from
-// :deprovision would indicate a URL bug, a permissions issue masquerading
-// as 404, or a backend regression breaking the AIP-156 contract — none
-// of which should be silently absorbed as "delete success." Loud failure
-// is preferred over silent coercion here.
+// The singleton has no standard Delete RPC; tear-down POSTs to the
+// :deprovision RPC with an empty body. Errors are returned verbatim (NOT
+// wrapped with transport_tpg.HandleNotFoundError): a 404 here would signal
+// a URL/permissions bug or backend regression, not an already-deleted
+// race, so it should fail loudly.
 log.Printf("[DEBUG] Beginning custom_delete for SemanticGovernancePolicyEngine")
 
 project, err := tpgresource.GetProject(d, config)

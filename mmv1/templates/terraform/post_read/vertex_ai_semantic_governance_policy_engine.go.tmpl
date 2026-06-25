@@ -1,7 +1,6 @@
-// SemanticGovernancePolicyEngine post-Read state dispatch.
-// All logic lives in sgpePostReadDispatch (declared in
-// mmv1/templates/terraform/constants/semantic_governance_policy_engine.go.tmpl)
-// so it can be unit-tested in isolation via tpgresource.ResourceDiffMock.
+// SemanticGovernancePolicyEngine post-Read state dispatch. Logic lives in
+// sgpePostReadDispatch (constants template) so it can be unit-tested directly
+// via the sgpeResourceID interface (see the resource's internal test).
 if err := sgpePostReadDispatch(d, res); err != nil {
 	return err
 }

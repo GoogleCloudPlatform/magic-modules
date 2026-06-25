@@ -3,18 +3,11 @@ package vertexai
 
 import (
 	"testing"
-
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 // Unit tests for the SemanticGovernancePolicyEngine helpers declared in
 // mmv1/templates/terraform/constants/semantic_governance_policy_engine.go.tmpl
 // (generated into resource_vertex_ai_semantic_governance_policy_engine.go).
-//
-// The CustomizeDiff tests call sgpeFailedStateWarningCheck directly
-// through tpgresource.ResourceDiffMock, the established magic-modules
-// pattern (precedent:
-// resource_data_loss_prevention_stored_info_type_internal_test.go).
 //
 // The post_read tests call sgpePostReadDispatch directly: it accepts the
 // minimal sgpeResourceID interface (Id/SetId), which fakeResourceData
@@ -47,16 +40,14 @@ func TestUnitSGPE_PostReadDispatch_INACTIVE_clears_id(t *testing.T) {
 	}
 }
 
-// post_read returns error on STATE_UNSPECIFIED, unrecognized enums, and
-// missing/malformed state fields (loud-failure stance — see the
-// constants template's sgpePostReadDispatch comment).
-func TestUnitSGPE_PostReadDispatch_unknownStates_return_error(t *testing.T) {
+// post_read returns an error only when the state field is missing or not a
+// string (a backend contract break). Unrecognized enum values are handled
+// softly as in-state — see TestUnitSGPE_PostReadDispatch_inStateBranches_no_op.
+func TestUnitSGPE_PostReadDispatch_malformedState_return_error(t *testing.T) {
 	t.Parallel()
 	cases := map[string]map[string]interface{}{
-		"STATE_UNSPECIFIED":             {"state": "STATE_UNSPECIFIED"},
-		"unrecognized future value":     {"state": "FUTURE_VALUE_NOT_YET_SUPPORTED"},
-		"state field missing":           {},
-		"state field is not a string":   {"state": 42},
+		"state field missing":         {},
+		"state field is not a string": {"state": 42},
 	}
 	for name, res := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -72,12 +63,12 @@ func TestUnitSGPE_PostReadDispatch_unknownStates_return_error(t *testing.T) {
 	}
 }
 
-// post_read leaves ACTIVE and FAILED states populated and in state.
-// PROVISIONING and DEPROVISIONING also leave the resource in state (with
-// a [WARN] log on the production path); included here for belt-and-braces.
+// post_read leaves the resource in state (no SetId) for ACTIVE/FAILED,
+// PROVISIONING/DEPROVISIONING (with a [WARN] log), and any unrecognized or
+// STATE_UNSPECIFIED value (softly treated as in-state with a [WARN] log).
 func TestUnitSGPE_PostReadDispatch_inStateBranches_no_op(t *testing.T) {
 	t.Parallel()
-	for _, state := range []string{"ACTIVE", "FAILED", "PROVISIONING", "DEPROVISIONING"} {
+	for _, state := range []string{"ACTIVE", "FAILED", "PROVISIONING", "DEPROVISIONING", "STATE_UNSPECIFIED", "FUTURE_VALUE_NOT_YET_SUPPORTED"} {
 		t.Run(state, func(t *testing.T) {
 			origID := "projects/p/locations/us-central1/semanticGovernancePolicyEngine"
 			d := &fakeResourceData{id: origID}
@@ -90,55 +81,6 @@ func TestUnitSGPE_PostReadDispatch_inStateBranches_no_op(t *testing.T) {
 			}
 			if len(d.setIdArgs) != 0 {
 				t.Errorf("state %q must NOT call SetId; got SetId calls %v", state, d.setIdArgs)
-			}
-		})
-	}
-}
-
-// Plan-time CustomizeDiff Check 1 returns nil (does not block) on
-// FAILED + non-empty diff. Production behavior also emits a [WARN] log;
-// we don't assert log content because log capture is fragile and the
-// warning visibility is TF_LOG=WARN-only by design (see the
-// sgpeFailedStateWarningCheck comment in the constants template).
-func TestUnitSGPE_FailedStateWarningCheck_FAILED_with_diff_succeeds(t *testing.T) {
-	t.Parallel()
-	d := &tpgresource.ResourceDiffMock{
-		Before: map[string]interface{}{
-			"state":          "FAILED",
-			"target_project": "old-project",
-		},
-		After: map[string]interface{}{
-			"state":          "FAILED",
-			"target_project": "new-project",
-		},
-	}
-	if err := sgpeFailedStateWarningCheck(d); err != nil {
-		t.Fatalf("expected nil error (warnings are non-blocking); got %v", err)
-	}
-}
-
-// Plan-time CustomizeDiff Check 1 does NOT fire when state ≠ FAILED OR
-// diff is empty. Negative cases.
-func TestUnitSGPE_FailedStateWarningCheck_negativeCases_no_op(t *testing.T) {
-	t.Parallel()
-	cases := map[string]*tpgresource.ResourceDiffMock{
-		"ACTIVE with diff": {
-			Before: map[string]interface{}{"state": "ACTIVE", "target_project": "old"},
-			After:  map[string]interface{}{"state": "ACTIVE", "target_project": "new"},
-		},
-		"PROVISIONING with diff": {
-			Before: map[string]interface{}{"state": "PROVISIONING", "target_project": "old"},
-			After:  map[string]interface{}{"state": "PROVISIONING", "target_project": "new"},
-		},
-		"FAILED with empty diff": {
-			Before: map[string]interface{}{"state": "FAILED", "target_project": "x"},
-			After:  map[string]interface{}{"state": "FAILED", "target_project": "x"},
-		},
-	}
-	for name, d := range cases {
-		t.Run(name, func(t *testing.T) {
-			if err := sgpeFailedStateWarningCheck(d); err != nil {
-				t.Fatalf("expected nil error; got %v", err)
 			}
 		})
 	}

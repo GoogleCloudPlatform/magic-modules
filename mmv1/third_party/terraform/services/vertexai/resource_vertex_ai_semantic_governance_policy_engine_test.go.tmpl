@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -26,19 +25,12 @@ import (
 // Pattern source: TestAccVertexAIFeatureGroup_updated in
 // resource_vertex_ai_feature_group_test.go.
 //
-// **This test is gated on an SGPE backend being available to HashiCorp
-// CI.** Until that gate clears, the example fixture is marked
-// exclude_test: true in the YAML; this test file is still emitted
-// (it's a handwritten file, not generated from an example) but the test
-// will fail on PreCheck against a non-allowlisted project. To enable in
-// CI, remove exclude_test from the example entry in
-// SemanticGovernancePolicyEngine.yaml.
+// Handwritten acceptance coverage (the generated example is exclude_test —
+// see the YAML for why). CI runs this because it is a new TestAcc function.
 func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{
-		"project": envvar.GetTestProjectFromEnv(),
-	}
+	context := map[string]interface{}{}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -61,13 +53,9 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 					resource.TestCheckResourceAttrSet(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"psc_service_attachment"),
-					// NOTE: `ip_address` and `psc_forwarding_rule` are NOT
-					// asserted here because they do not populate at Create
-					// time on the producer-side resource. They are populated
-					// only after a consumer creates a PSC forwarding rule
-					// referencing this engine. The basic fixture has no
-					// consumer, so these fields remain null until then.
-					// See user-facing docs in the YAML `description` field.
+					// ip_address and psc_forwarding_rule are not asserted: they
+					// populate only after a consumer creates a PSC forwarding
+					// rule, which the basic fixture has none of.
 				),
 			},
 			// Step 2: ImportStateVerify after Create. Confirms the
@@ -82,15 +70,10 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 }
 
 func testAccVertexAISemanticGovernancePolicyEngine_basic(context map[string]interface{}) string {
-	// NOTE: deliberately no `provider = google-beta` here. This test runs in
-	// the beta provider binary, where acctest.ProtoV5ProviderFactories
-	// registers the muxed beta provider under the default name "google".
-	// Adding `provider = google-beta` would reference a provider name that is
-	// not in the in-process factory map, forcing Terraform to install
-	// hashicorp/google-beta from the registry and failing CI with
-	// "Inconsistent dependency lock file ... google-beta ... no version is
-	// selected". The example .tf (docs) keeps `provider = google-beta` because
-	// that is the correct user-facing pattern for a beta-only resource.
+	// No `provider = google-beta`: the beta test binary registers the muxed
+	// beta provider under the default name "google", so naming google-beta
+	// here would force a registry install and fail CI on the dependency lock
+	// file. (The example .tf keeps google-beta, which is correct for docs.)
 	return acctest.Nprintf(`
 resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
   region = "us-central1"
@@ -115,15 +98,9 @@ func testAccCheckVertexAISemanticGovernancePolicyEngineDestroyProducer(t *testin
 
 			config := acctest.GoogleProviderConfig(t)
 
-			// URL is constructed via fmt.Sprintf("%s%s", BaseUrl, ...)
-			// rather than via the {{"{{"}}VertexAIBasePath{{"}}"}} placeholder
-			// because ReplaceVarsForTest is single-pass: it would expand
-			// {{"{{"}}VertexAIBasePath{{"}}"}} to the autopush URL
-			// (`https://{{"{{"}}region{{"}}"}}-autopush-aiplatform.sandbox.googleapis.com/v1beta1/`),
-			// but the literal {{"{{"}}region{{"}}"}} inside that expansion
-			// would NOT be rescanned and substituted. The Sprintf form
-			// pre-resolves BaseUrl so all {{"{{"}}var{{"}}"}} markers in the
-			// final string get substituted in one pass.
+			// Build the URL via Sprintf rather than the {{"{{"}}VertexAIBasePath{{"}}"}}
+			// placeholder: ReplaceVarsForTest is single-pass and would not
+			// rescan the {{"{{"}}region{{"}}"}} nested inside an expanded base path.
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(registry.GetProduct("vertexai"), config), "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/semanticGovernancePolicyEngine"))
 			if err != nil {
 				return err
