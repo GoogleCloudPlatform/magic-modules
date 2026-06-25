@@ -1,1 +1,1 @@
-{{if eq "new-resource" .Type}}**New Resource:** {{else if eq "new-datasource" .Type}}**New Data Source:** {{else if eq "new-list-resource" .Type}}{{ end }}{{.Text }} ([#{{- .PRNumber -}}]({{- .PRURL -}}))
+{{if eq "new-resource" .Type}}**New Resource:** {{else if eq "new-datasource" .Type}}**New Data Source:** {{else if eq "new-list-resource" .Type}}**New List Resource:** {{ end }}{{.Text }} ([#{{- .PRNumber -}}]({{- .PRURL -}}))

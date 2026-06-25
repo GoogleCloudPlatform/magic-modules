@@ -12,18 +12,18 @@
 # limitations under the License.
 
 ---
-name: 'Filestore'
-display_name: 'Filestore'
-versions:
-  - name: 'ga'
-    base_url: 'https://file.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://file.googleapis.com/v1beta1/'
-scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+name: Filestore
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+display_name: Filestore
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://file.googleapis.com/v1/
+  - name: beta
+    base_url: https://file.googleapis.com/v1beta1/

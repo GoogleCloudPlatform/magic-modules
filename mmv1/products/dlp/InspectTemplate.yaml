@@ -629,3 +629,8 @@ properties:
                     Resource name of the requested StoredInfoType, for example `organizations/433245324/storedInfoTypes/432452342`
                     or `projects/project-id/storedInfoTypes/432452342`.
                   required: true
+  - name: 'allowLimitedAvailabilityInfoTypes'
+    type: Boolean
+    description: |
+      Enables the use of [limited-availability built-in infoTypes](https://docs.cloud.google.com/sensitive-data-protection/docs/infotypes-reference#limited-availability-infotypes)
+      in inspect_config. These infoTypes are supported only in specific regions and can cause scanning errors if used elsewhere.
