@@ -466,6 +466,11 @@ properties:
                 type: Integer
                 description: |-
                   Optional. Specifies the maximum duration (in seconds) to keep the instance alive via this probe. Can be a maximum of 3600 seconds (1 hour).
+          - name: 'dedicatedIngressEndpointEnabled'
+            type: Boolean
+            min_version: beta
+            description: |-
+              Optional. Whether to enable dedicated ingress endpoint for the deployment. If true, the deployment will be accessible via a dedicated endpoint. This is required to enable GKE V2 runtime.
       - name: 'packageSpec'
         type: NestedObject
         description: |-
