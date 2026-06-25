@@ -1,0 +1,14 @@
+resource "google_cloudbuild_gitlab_config" "{{$.PrimaryResourceId}}" {
+    config_id = "{{index $.ResourceIdVars "config_id"}}"
+    location = "us-central1"
+    secrets {
+        api_access_token_version = "projects/myProject/secrets/myGitLabPAT/versions/1"
+        api_key_version = "projects/myProject/secrets/myApiKey/versions/1"
+        read_access_token_version = "projects/myProject/secrets/myGitLabPAT/versions/1"
+        webhook_secret_version = "projects/myProject/secrets/myWebhookSecret/versions/1"
+    }
+    enterprise_config {
+        host_uri = "https://gitlab.example.com"
+        ssl_ca = "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n"
+    }
+}
