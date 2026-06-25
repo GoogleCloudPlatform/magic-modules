@@ -374,7 +374,6 @@ func expandGracefulShutdownMaxDuration(v interface{}) (map[string]interface{}, e
 	if transformedNanos := maxDurationMap["nanos"]; reflect.ValueOf(transformedNanos).IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(transformedNanos)) {
 		result["nanos"] = int64(transformedNanos.(int))
 	}
-	// Seconds was in ForceSendFields — always include even when zero
 	result["seconds"] = int64(maxDurationMap["seconds"].(int))
 
 	return result, nil
@@ -782,22 +781,6 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 func getInterfaceSlice(v interface{}) []interface{} {
 	s, _ := v.([]interface{})
 	return s
-}
-
-func getInt(v interface{}) int64 {
-	switch t := v.(type) {
-	case int:
-		return int64(t)
-	case int64:
-		return t
-	case float64:
-		return int64(t)
-	case string:
-		i, _ := strconv.ParseInt(t, 10, 64)
-		return i
-	default:
-		return 0
-	}
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
