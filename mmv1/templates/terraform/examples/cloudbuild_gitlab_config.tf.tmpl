@@ -1,5 +1,5 @@
 resource "google_cloudbuild_git_lab_config" "{{$.PrimaryResourceId}}" {
-    config_id = "{{index $.ResourceIdVars "config_id"}}"
+    config_id = "{{index $.Vars "config_id"}}"
     location = "us-central1"
     secrets {
         api_access_token_version = "projects/myProject/secrets/myGitLabPAT/versions/1"

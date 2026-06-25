@@ -32,7 +32,6 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
-include_in_tgc_next: true
 custom_code:
   encoder: templates/terraform/encoders/cloudbuild_gitlab_config.go.tmpl
   post_create: templates/terraform/post_create/cloudbuild_gitlab_config.go.tmpl
