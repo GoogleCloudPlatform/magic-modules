@@ -1,0 +1,4 @@
+// Skip destroy check to avoid eventual consistency issues of global rollouts.
+// The global VM extension policy deletion triggers a background purge rollout
+// that can take a few minutes to fully propagate across GCE zones.
+return nil
