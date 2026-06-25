@@ -38,27 +38,21 @@ custom_code:
   post_create: templates/terraform/post_create/cloudbuild_gitlab_config.go.tmpl
   pre_update: templates/terraform/pre_update/cloudbuild_gitlab_config.go.tmpl
   post_update: templates/terraform/post_update/cloudbuild_gitlab_config.go.tmpl
-samples:
+examples:
   - name: cloudbuild_gitlab_config
     primary_resource_id: gitlab-config
-    steps:
-      - name: cloudbuild_gitlab_config
-        resource_id_vars:
-          config_id: gitlab-config
+    vars:
+      config_id: gitlab-config
   - name: cloudbuild_gitlab_config_enterprise
     primary_resource_id: gitlab-enterprise-config
+    vars:
+      config_id: gitlab-enterprise-config
     exclude_test: true
-    steps:
-      - name: cloudbuild_gitlab_config_enterprise
-        resource_id_vars:
-          config_id: gitlab-enterprise-config
   - name: cloudbuild_gitlab_config_repositories
     primary_resource_id: gitlab-config-with-repos
+    vars:
+      config_id: gitlab-config-with-repos
     exclude_test: true
-    steps:
-      - name: cloudbuild_gitlab_config_repositories
-        resource_id_vars:
-          config_id: gitlab-config-with-repos
 parameters:
   - name: config_id
     type: String
