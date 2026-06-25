@@ -8,14 +8,9 @@ import (
 // Unit tests for the SemanticGovernancePolicyEngine helpers declared in
 // mmv1/templates/terraform/constants/semantic_governance_policy_engine.go.tmpl
 // (generated into resource_vertex_ai_semantic_governance_policy_engine.go).
-//
-// The post_read tests call sgpePostReadDispatch directly: it accepts the
-// minimal sgpeResourceID interface (Id/SetId), which fakeResourceData
-// implements, so these tests exercise the real production switch rather
-// than a copy.
 
-// fakeResourceData implements sgpeResourceID and records SetId calls so
-// tests can assert post_read clears the ID exactly once.
+// fakeResourceData implements sgpeResourceID and records every SetId call,
+// so tests can assert whether (and how often) post_read clears the ID.
 type fakeResourceData struct {
 	id        string
 	setIdArgs []string
@@ -41,8 +36,8 @@ func TestUnitSGPE_PostReadDispatch_INACTIVE_clears_id(t *testing.T) {
 }
 
 // post_read returns an error only when the state field is missing or not a
-// string (a backend contract break). Unrecognized enum values are handled
-// softly as in-state — see TestUnitSGPE_PostReadDispatch_inStateBranches_no_op.
+// string (a backend contract break). Unrecognized enum values are left
+// tracked, not errored — see TestUnitSGPE_PostReadDispatch_inStateBranches_no_op.
 func TestUnitSGPE_PostReadDispatch_malformedState_return_error(t *testing.T) {
 	t.Parallel()
 	cases := map[string]map[string]interface{}{
@@ -63,9 +58,11 @@ func TestUnitSGPE_PostReadDispatch_malformedState_return_error(t *testing.T) {
 	}
 }
 
-// post_read leaves the resource in state (no SetId) for ACTIVE/FAILED,
-// PROVISIONING/DEPROVISIONING (with a [WARN] log), and any unrecognized or
-// STATE_UNSPECIFIED value (softly treated as in-state with a [WARN] log).
+// The no-op branch of the post_read contract: for every non-INACTIVE
+// state the ID is left intact, so Terraform keeps the resource and does
+// not plan a re-create. (Only INACTIVE clears the ID — see the test above.)
+// Per-state [WARN] logging lives in sgpePostReadDispatch and is not
+// asserted here.
 func TestUnitSGPE_PostReadDispatch_inStateBranches_no_op(t *testing.T) {
 	t.Parallel()
 	for _, state := range []string{"ACTIVE", "FAILED", "PROVISIONING", "DEPROVISIONING", "STATE_UNSPECIFIED", "FUTURE_VALUE_NOT_YET_SUPPORTED"} {

@@ -37,7 +37,6 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckVertexAISemanticGovernancePolicyEngineDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// Step 1: Create with the basic fixture.
 			{
 				Config: testAccVertexAISemanticGovernancePolicyEngine_basic(context),
 				Check: resource.ComposeTestCheckFunc(
@@ -58,8 +57,6 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 					// rule, which the basic fixture has none of.
 				),
 			},
-			// Step 2: ImportStateVerify after Create. Confirms the
-			// importer round-trips state cleanly.
 			{
 				ResourceName:      "google_vertex_ai_semantic_governance_policy_engine.sgpe",
 				ImportState:       true,
@@ -120,7 +117,6 @@ func testAccCheckVertexAISemanticGovernancePolicyEngineDestroyProducer(t *testin
 			})
 			if err != nil {
 				// Unexpected error (not the "200 with INACTIVE" we expect).
-				// Surface it loudly per the loud-failure stance.
 				return fmt.Errorf("unexpected error checking SemanticGovernancePolicyEngine deprovision state at %s: %s", url, err)
 			}
 
