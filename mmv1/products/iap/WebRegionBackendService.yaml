@@ -42,6 +42,7 @@ samples:
     primary_resource_id: 'default'
     steps:
       - name: 'region_backend_service_basic'
+        config_path: templates/terraform/samples/services/compute/region_backend_service_basic.tf.tmpl
         resource_id_vars:
           region_backend_service_name: 'region-backend-service'
           health_check_name: 'health-check'

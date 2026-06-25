@@ -42,6 +42,7 @@ samples:
     primary_resource_id: 'tunnelvm'
     steps:
       - name: 'instance_basic'
+        config_path: templates/terraform/samples/services/compute/instance_basic.tf.tmpl
         resource_id_vars:
           instance_name: 'tunnel-vm'
 parameters:
