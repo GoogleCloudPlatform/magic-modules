@@ -150,6 +150,22 @@ examples:
       toolset_id: '"toolset1" + randomSuffix'
       # for backward compatible
       location: '"us" + randomSuffix'
+  - name: "ces_toolset_connector_toolset"
+    primary_resource_id: "ces_toolset_connector_toolset"
+    vars:
+      app_display_name: 'my-app'
+      app_id: 'app-id'
+      toolset_id: 'toolset1'
+      location: 'us'
+      connection_name: 'test-connector'
+      account_id: 'test-sa'
+    test_vars_overrides:
+      # for backward compatible
+      toolset_id: '"toolset1" + randomSuffix'
+      # for backward compatible
+      location: '"us" + randomSuffix'
+      connection_name: '"test-connector" + randomSuffix'
+      account_id: '"test-sa" + randomSuffix'
 autogen_async: true
 autogen_status: VG9vbHNldA==
 parameters:
@@ -587,6 +603,88 @@ properties:
             type: String
             required: true
             description: Python code which will be invoked in tool fake mode.
+  - name: connectorToolset
+    type: NestedObject
+    description: A toolset that generates tools from an Integration Connectors Connection.
+    properties:
+      - name: connection
+        type: String
+        description: |-
+          Required. The full resource name of the referenced Integration Connectors Connection. Format: `projects/{project}/locations/{location}/connections/{connection}`
+        required: true
+      - name: authConfig
+        type: NestedObject
+        description: |-
+          Optional. Configures how authentication is handled in Integration Connectors. By default, an admin authentication is passed in the Integration Connectors API requests. You can override it with a different end-user authentication config. Note: The Connection must have authentication override enabled in order to specify an EUC configuration here - otherwise, the Toolset creation will fail. See: https://cloud.google.com/application-integration/docs/configure-connectors-task#configure-authentication-override
+        properties:
+          - name: oauth2AuthCodeConfig
+            type: NestedObject
+            description: Oauth 2.0 Authorization Code authentication configuration.
+            properties:
+              - name: oauthToken
+                type: String
+                description: |-
+                  Required. Oauth token parameter name to pass through. Must be in the format `$context.variables.<name_of_variable>`.
+                required: true
+          - name: oauth2JwtBearerConfig
+            type: NestedObject
+            description: JWT Profile Oauth 2.0 Authorization Grant authentication configuration.
+            properties:
+              - name: issuer
+                type: String
+                description: |-
+                  Required. Issuer parameter name to pass through. Must be in the format `$context.variables.<name_of_variable>`.
+                required: true
+              - name: subject
+                type: String
+                description: |-
+                  Required. Subject parameter name to pass through. Must be in the format `$context.variables.<name_of_variable>`.
+                required: true
+              - name: clientKey
+                type: String
+                description: |-
+                  Required. Client parameter name to pass through. Must be in the format `$context.variables.<name_of_variable>`.
+                required: true
+      - name: connectorActions
+        type: Array
+        description: Required. The list of connector actions/entity operations to generate tools for.
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: inputFields
+              type: Array
+              description: Optional. Entity fields to use as inputs for the operation. If no fields are specified, all fields of the Entity will be used.
+              item_type:
+                type: String
+            - name: outputFields
+              type: Array
+              description: Optional. Entity fields to return from the operation. If no fields are specified, all fields of the Entity will be returned.
+              item_type:
+                type: String
+            - name: connectionActionId
+              type: String
+              description: ID of a Connection action for the tool to use.
+            - name: entityOperation
+              type: NestedObject
+              description: Entity operation configuration for the tool to use.
+              properties:
+                - name: entityId
+                  type: String
+                  description: Required. ID of the entity.
+                  required: true
+                - name: operation
+                  type: String
+                  description: |-
+                    Required. Operation to perform on the entity.
+                    Possible values:
+                    OPERATION_TYPE_UNSPECIFIED
+                    LIST
+                    GET
+                    CREATE
+                    UPDATE
+                    DELETE
+                  required: true
   - name: updateTime
     type: String
     description: Timestamp when the toolset was last updated.
