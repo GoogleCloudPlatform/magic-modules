@@ -38,6 +38,7 @@ type IamMemberListCallConfig struct {
 	ParentResourceField string
 	EnableRoleFilter    bool
 	EnableMemberFilter  bool
+	EnableProjectField  bool
 }
 
 // IamMemberListResource lists IAM member rows by reading IAM policies on one or more policy targets.
@@ -81,9 +82,17 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 		})
 	}
 
+	if listCallConfig.EnableProjectField {
+		listConfigFields = append(listConfigFields, tpgresource.ListConfigField{
+			Name:     "project",
+			Kind:     tpgresource.ListConfigKindString,
+			Optional: true,
+		})
+	}
+
 	iamResourceSchema := make(map[string]*schema.Schema)
 	for _, field := range listConfigFields {
-		if field.Name == "role" || field.Name == "member" {
+		if field.Name == "role" || field.Name == "member" || field.Name == "project" {
 			continue
 		}
 		schemaField, ok := memberResource.Schema[field.Name]
@@ -152,6 +161,28 @@ func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req l
 	if !parent.IsNull() && !parent.IsUnknown() {
 		if err := baseRd.Set(r.listCallConfig.ParentResourceField, parent.ValueString()); err != nil {
 			return nil, fmt.Errorf("setting %s: %w", r.listCallConfig.ParentResourceField, err)
+		}
+	}
+
+	if r.listCallConfig.EnableProjectField {
+		var project types.String
+		diags := req.Config.GetAttribute(ctx, path.Root("project"), &project)
+		if diags.HasError() {
+			return nil, fmt.Errorf("%s", diags.Errors()[0].Detail())
+		}
+		projectVal := ""
+		if !project.IsNull() && !project.IsUnknown() {
+			projectVal = project.ValueString()
+		} else if r.Client != nil {
+			projectVal = r.Client.Project
+		}
+
+		if projectVal == "" {
+			return nil, fmt.Errorf("project must be set in the list config or configured on the provider")
+		}
+
+		if err := baseRd.Set("project", projectVal); err != nil {
+			return nil, fmt.Errorf("setting project: %w", err)
 		}
 	}
 
