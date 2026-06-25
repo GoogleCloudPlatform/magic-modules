@@ -17,7 +17,6 @@ description: 'A Zone VM Extension Policy.'
 base_url: 'projects/{{project}}/zones/{{zone}}/vmExtensionPolicies'
 self_link: 'projects/{{project}}/zones/{{zone}}/vmExtensionPolicies/{{name}}'
 update_verb: 'PATCH'
-update_mask: true
 custom_code:
   pre_update: 'templates/terraform/pre_update/vm_extension_policy_name.go.tmpl'
 

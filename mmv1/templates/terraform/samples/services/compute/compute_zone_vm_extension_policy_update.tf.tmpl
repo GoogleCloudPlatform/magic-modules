@@ -6,7 +6,7 @@ resource "google_compute_zone_vm_extension_policy" "{{$.PrimaryResourceId}}" {
 
   extension_policies {
     extension_name = "ops-agent"
-    pinned_version = "2.66.0"
+    pinned_version = "2.67.0"
     string_config  = "logging:\n  receivers:\n    syslog:\n      type: files\n      include_paths:\n      - /var/log/messages\n"
   }
 
