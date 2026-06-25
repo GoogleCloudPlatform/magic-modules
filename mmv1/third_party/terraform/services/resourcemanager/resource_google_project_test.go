@@ -70,10 +70,18 @@ func TestAccProject_importBlockWithResourceIdentity(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_project.acceptance",
-				ImportState:             true,
-				ImportStateKind:         resource.ImportBlockWithResourceIdentity,
-				ImportStateVerifyIgnore: []string{"deletion_policy", "terraform_labels"},
+				// The import step config must use deletion_policy = "PREVENT" because
+				// DeletionPolicyReadDefault sets that value during import (it is a
+				// client-side field not stored in the GCP API). Using a mismatching
+				// value would cause a non-empty plan and fail the no-op import check.
+				ResourceName:    "google_project.acceptance",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				Config:          testAccProject_noAllowDestroy(pid, org),
+			},
+			{
+				// Reset deletion_policy to "DELETE" so the project can be cleaned up.
+				Config: testAccProject(pid, org),
 			},
 		},
 	})
