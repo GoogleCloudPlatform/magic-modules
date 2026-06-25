@@ -1,4 +1,3 @@
----
 # Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +15,6 @@
 name: GitLabConfig
 description: |
   GitLabConfig represents the configuration for a GitLab integration.
-deprecation_message: >-
-  `google_cloudbuild_gitlab_config` is deprecated and will be removed in a future major version.
-  Use `google_cloudbuildv2_connection` with `gitlab_config` instead.
 references:
   guides:
     Connect to a GitLab host: https://cloud.google.com/build/docs/automating-builds/gitlab/connect-host-gitlab
