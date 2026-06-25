@@ -18,29 +18,26 @@ description: |
 
   ~> **Note:** Oracle Database @ Google Cloud does not support deconfiguring Exascale storage on an Exadata Infrastructure.
   Deleting this resource from Terraform state will only remove it from Terraform management; it will not delete or reset the Exascale configuration on the actual Exadata Infrastructure.
+immutable: true
 self_link: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}
-id_format: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}'
 create_url: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}:configureExascale
 create_verb: POST
-immutable: true
+id_format: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}
 timeouts:
   insert_minutes: 120
-
-autogen_async: true
 async:
-  actions: ['create']
   type: OpAsync
   operation:
     timeouts:
       insert_minutes: 120
     base_url: '{{op_id}}'
-
+  actions: [create]
+autogen_async: true
 custom_code:
-  custom_delete: templates/terraform/custom_delete/only_remove_from_state.go.tmpl
   decoder: templates/terraform/decoders/oracledatabase_cloud_exadata_infrastructure_exascale_config.go.tmpl
-
+  custom_delete: templates/terraform/custom_delete/only_remove_from_state.go.tmpl
 samples:
   - name: oracledatabase_cloud_exadata_infrastructure_exascale_config_basic
     primary_resource_id: my_exascale_config
@@ -56,7 +53,6 @@ samples:
           deletion_protection: "false"
           project: '"oci-terraform-testing-prod"'
           cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-test-tf-configured-exadata-%s", acctest.RandString(t, 10))
-
 parameters:
   - name: location
     type: String
@@ -70,10 +66,9 @@ parameters:
     url_param_only: true
     resource: CloudExadataInfrastructure
     imports: name
-
 properties:
   - name: totalStorageSizeGb
     type: Integer
     required: true
     immutable: true
-    description: "The total storage to be allocated to Exascale in GBs."
+    description: The total storage to be allocated to Exascale in GBs.
