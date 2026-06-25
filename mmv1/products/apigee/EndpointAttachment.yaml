@@ -45,14 +45,24 @@ async:
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_endpoint_attachment.go.tmpl'
 exclude_sweeper: true
-examples:
+samples:
   - name: 'apigee_endpoint_attachment_basic'
+    exclude_test: true
+    steps:
+      - name: apigee_endpoint_attachment_basic
+        resource_id_vars:
+          location: 'us-central1'
+  - name: 'apigee_endpoint_attachment_basic_test'
     primary_resource_id: 'apigee_endpoint_attachment'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-      location: 'REGION'
+    exclude_basic_doc: true
+    skip_vcr: true
     external_providers: ["time"]
+    steps:
+      - name: 'apigee_endpoint_attachment_basic_test'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
+          location: 'REGION'
 parameters:
   - name: 'orgId'
     type: String
