@@ -14,7 +14,9 @@
 ---
 name: 'EndpointAttachment'
 description: |
-  Apigee Endpoint Attachment.
+  An `EndpointAttachment` in Apigee is a resource that facilitates private connectivity between Apigee and backend services using Private Service Connect (PSC).
+
+  For more information, see the [Apigee documentation](https://docs.cloud.google.com/apigee/docs/api-platform/architecture/southbound-networking-patterns-endpoints).
 references:
   guides:
     'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
@@ -43,6 +45,24 @@ async:
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_endpoint_attachment.go.tmpl'
 exclude_sweeper: true
+samples:
+  - name: 'apigee_endpoint_attachment_basic'
+    exclude_test: true
+    steps:
+      - name: apigee_endpoint_attachment_basic
+        resource_id_vars:
+          location: 'us-central1'
+  - name: 'apigee_endpoint_attachment_basic_test'
+    primary_resource_id: 'apigee_endpoint_attachment'
+    exclude_basic_doc: true
+    skip_vcr: true
+    external_providers: ["time"]
+    steps:
+      - name: 'apigee_endpoint_attachment_basic_test'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
+          location: 'REGION'
 parameters:
   - name: 'orgId'
     type: String
@@ -69,7 +89,7 @@ properties:
   - name: 'location'
     type: String
     description: |
-      Location of the endpoint attachment.
+      The location of the endpoint attachment.
     required: true
   - name: 'host'
     type: String
@@ -79,10 +99,12 @@ properties:
   - name: 'serviceAttachment'
     type: String
     description: |
-      Format: projects/*/regions/*/serviceAttachments/*
+      The resource URL of the service attachment in the format:
+      `projects/*/regions/*/serviceAttachments/*`.
     required: true
   - name: 'connectionState'
     type: String
     description: |
       State of the endpoint attachment connection to the service attachment.
+      Possible values are: `CONNECTION_STATE_UNSPECIFIED`, `PENDING`, `ACCEPTED`, `REJECTED`, `CLOSED`.
     output: true
