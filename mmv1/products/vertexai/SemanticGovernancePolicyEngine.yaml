@@ -32,6 +32,11 @@ references:
   guides:
     'Configure semantic governance policies': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/configure-semantic-governance'
 docs:
+  note: |
+    This resource is in [Preview](https://cloud.google.com/products#product-launch-stages).
+    Preview features are not covered by an SLA or technical support
+    commitment and may change in backwards-incompatible ways. They are
+    not recommended for production use.
 min_version: 'beta'
 id_format: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
 base_url: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
