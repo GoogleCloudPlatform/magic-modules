@@ -92,7 +92,7 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 
 	iamResourceSchema := make(map[string]*schema.Schema)
 	for _, field := range listConfigFields {
-		if field.Name == "role" || field.Name == "member" || field.Name == "project" {
+		if field.Name == "role" || field.Name == "member" {
 			continue
 		}
 		schemaField, ok := memberResource.Schema[field.Name]
