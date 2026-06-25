@@ -15,7 +15,7 @@ import (
 // PATCH-START: existing structs
 // PATCH-END: existing structs
 
-func MigrateFile(filePath, serviceName string) error {
+func MigrateFile(filePath, serviceName string, onlyMigration, onlyFormat bool) error {
 	originalBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
@@ -62,7 +62,8 @@ func MigrateFile(filePath, serviceName string) error {
 
 	madeChanges := false
 
-	// Transformation 1: `examples` -> `samples`
+	if !onlyFormat {
+		// Transformation 1: `examples` -> `samples`
 	var newSamplesNodes []*yaml.Node
 	if examplesNode != nil && examplesNode.Kind == yaml.SequenceNode {
 		for _, exampleMapNode := range examplesNode.Content {
@@ -224,10 +225,12 @@ func MigrateFile(filePath, serviceName string) error {
 			}
 		}
 	}
+	}
 
-	sortMappingNode(resourceMapNode, rootKeyOrder)
-
-	stripStringQuotes(&rootNode)
+	if !onlyMigration {
+		sortMappingNode(resourceMapNode, rootKeyOrder)
+		stripStringQuotes(&rootNode)
+	}
 
 	var buf bytes.Buffer
 	yamlEncoder := yaml.NewEncoder(&buf)

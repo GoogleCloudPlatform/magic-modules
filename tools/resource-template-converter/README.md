@@ -38,6 +38,8 @@ go build -o bin/convert-resource-template main.go
 * `-p, --product <product_names>` (Optional): Comma-separated list of product directories to convert (e.g., `vertexai` or `vertexai,pubsublite`). If specified, only YAML files under the matching product directories are walked and processed. Cannot be specified together with `--file`.
 * `-F, --skip-file <paths>` (Optional): Comma-separated list of resource YAML file paths to skip from migration.
 * `-P, --skip-product <product_names>` (Optional): Comma-separated list of product directories to skip from migration.
+* `--only-migration` (Optional): Run only the migration steps (examples -> samples conversion, copy and migrate templates). Do not sort keys or format string quotes. Cannot be combined with `--only-format`.
+* `--only-format` (Optional): Run only the formatting steps (sort keys, strip string quotes). Do not migrate examples to samples or copy templates. Cannot be combined with `--only-migration`.
 * `--skip-open-pr` (Optional): Fetch open PRs updated in the last 2 months from GitHub. Any matching YAML files modified in those PRs will be skipped.
 
 ---
@@ -91,6 +93,24 @@ To safely bulk-migrate the entire repository but exclude specific products (e.g.
 go run main.go convert-resource-template \
   -P compute \
   -F mmv1/products/dns/ManagedZone.yaml \
+  <path_to_magic_modules_repository>
+```
+
+### Example 6: Run Formatting Only (No Migration)
+To re-format, sort keys, and strip quotes on one or more resource files without migrating examples to samples:
+```bash
+go run main.go convert-resource-template \
+  --only-format \
+  -f mmv1/products/dns/ManagedZone.yaml \
+  <path_to_magic_modules_repository>
+```
+
+### Example 7: Run Migration Only (No Formatting/Sorting)
+To migrate templates and configurations to samples, keeping the original YAML key ordering and quote formatting:
+```bash
+go run main.go convert-resource-template \
+  --only-migration \
+  -f mmv1/products/dns/ManagedZone.yaml \
   <path_to_magic_modules_repository>
 ```
 

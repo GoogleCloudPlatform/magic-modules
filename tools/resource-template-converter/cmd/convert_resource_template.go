@@ -20,6 +20,8 @@ var filePath string
 var targetProduct string
 var skipFilesFlag string
 var skipProductsFlag string
+var onlyMigration bool
+var onlyFormat bool
 var skipOpenPR bool
 
 var convertResourceTemplateCmd = &cobra.Command{
@@ -45,6 +47,9 @@ var convertResourceTemplateCmd = &cobra.Command{
 func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 	if targetFile != "" && targetProduct != "" {
 		return fmt.Errorf("cannot specify both --file and --product")
+	}
+	if onlyMigration && onlyFormat {
+		return fmt.Errorf("cannot specify both --only-migration and --only-format")
 	}
 
 	skipProductsMap := make(map[string]bool)
@@ -180,10 +185,12 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 
 			fmt.Printf("Processing product YAML file: %s (service: %s)\n", t.resolvedPath, t.serviceName)
 
-			if err := copy.ProcessResourceFile(t.resolvedPath, t.serviceName, examplesSourceDir, samplesDestDir); err != nil {
-				return fmt.Errorf("error copying templates for %s: %w", t.resolvedPath, err)
+			if !onlyFormat {
+				if err := copy.ProcessResourceFile(t.resolvedPath, t.serviceName, examplesSourceDir, samplesDestDir); err != nil {
+					return fmt.Errorf("error copying templates for %s: %w", t.resolvedPath, err)
+				}
 			}
-			if err := migrate.MigrateFile(t.resolvedPath, t.serviceName); err != nil {
+			if err := migrate.MigrateFile(t.resolvedPath, t.serviceName, onlyMigration, onlyFormat); err != nil {
 				return fmt.Errorf("failed to migrate file %s: %w", t.resolvedPath, err)
 			}
 		}
@@ -229,11 +236,13 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 					}
 				}
 
-				if err := copy.ProcessResourceFile(path, serviceName, examplesSourceDir, samplesDestDir); err != nil {
-					log.Printf("Error copying templates registered in file %s: %v\n", path, err)
-					// Continue processing other files even if one fails.
+				if !onlyFormat {
+					if err := copy.ProcessResourceFile(path, serviceName, examplesSourceDir, samplesDestDir); err != nil {
+						log.Printf("Error copying templates registered in file %s: %v\n", path, err)
+						// Continue processing other files even if one fails.
+					}
 				}
-				if err := migrate.MigrateFile(path, serviceName); err != nil {
+				if err := migrate.MigrateFile(path, serviceName, onlyMigration, onlyFormat); err != nil {
 					log.Printf("Failed to migrate file %s: %v\n", path, err)
 					// Continue migrating other files even if one fails.
 				}
@@ -255,6 +264,8 @@ func init() {
 	convertResourceTemplateCmd.Flags().StringVarP(&targetProduct, "product", "p", "", "Comma-separated list of product directories to convert (e.g. vertexai,pubsublite)")
 	convertResourceTemplateCmd.Flags().StringVarP(&skipFilesFlag, "skip-file", "F", "", "Comma-separated list of resource yaml files to skip from migration")
 	convertResourceTemplateCmd.Flags().StringVarP(&skipProductsFlag, "skip-product", "P", "", "Comma-separated list of product directories to skip from migration")
+	convertResourceTemplateCmd.Flags().BoolVar(&onlyMigration, "only-migration", false, "Only run migration steps (examples -> samples, copy templates), skip formatting")
+	convertResourceTemplateCmd.Flags().BoolVar(&onlyFormat, "only-format", false, "Only run formatting steps (sort keys, strip quotes), skip migration")
 	convertResourceTemplateCmd.Flags().BoolVar(&skipOpenPR, "skip-open-pr", false, "Skip files modified by active open PRs updated in the last 2 months")
 	rootCmd.AddCommand(convertResourceTemplateCmd)
 }
