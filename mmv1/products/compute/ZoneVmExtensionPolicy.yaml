@@ -1,0 +1,111 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ZoneVmExtensionPolicy'
+description: 'A Zone VM Extension Policy.'
+base_url: 'projects/{{project}}/zones/{{zone}}/vmExtensionPolicies'
+self_link: 'projects/{{project}}/zones/{{zone}}/vmExtensionPolicies/{{name}}'
+update_verb: 'PATCH'
+custom_code:
+  pre_update: 'templates/terraform/pre_update/vm_extension_policy_name.go.tmpl'
+
+samples:
+  - name: 'compute_zone_vm_extension_policy_basic'
+    primary_resource_id: 'ops_agent_policy'
+    steps:
+      - name: 'compute_zone_vm_extension_policy_basic'
+        vars:
+          policy_name: 'zonal-ops-agent-policy'
+      - name: 'compute_zone_vm_extension_policy_update'
+        vars:
+          policy_name: 'zonal-ops-agent-policy'
+
+
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+
+parameters:
+  - name: 'zone'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: 'Name of the zone for this request.'
+
+properties:
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    description: |-
+      Name of the resource. Provided by the client when the resource is created.
+  - name: 'description'
+    type: String
+    description: 'An optional description of this resource.'
+  - name: 'extensionPolicies'
+    type: Map
+    required: true
+    description: |-
+      A map of extension names (for example, "ops-agent") to their corresponding policy configurations.
+    value_type:
+      type: NestedObject
+      properties:
+        - name: 'pinnedVersion'
+          type: String
+          description: 'The specific version of the extension to install.'
+        - name: 'stringConfig'
+          type: String
+          description: 'String-based configuration data for the extension.'
+    key_name: 'extension_name'
+  - name: 'instanceSelectors'
+    type: Array
+    description: 'Selectors to target VMs for this policy.'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'labelSelector'
+          type: NestedObject
+          description: 'LabelSelector matches VM labels.'
+          properties:
+            - name: 'inclusionLabels'
+              type: KeyValuePairs
+              description: 'A map of key-value pairs representing VM labels.'
+  - name: 'priority'
+    type: Integer
+    default_from_api: true
+    description: 'Priority of this policy.'
+  - name: 'creationTimestamp'
+    type: String
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - name: 'id'
+    type: String
+    description: 'The unique identifier for the resource.'
+    output: true
+  - name: 'kind'
+    type: String
+    description: 'Type of the resource.'
+    output: true
+  - name: 'managedByGlobal'
+    type: Boolean
+    description: 'Indicates if this policy is managed by a global policy.'
+    output: true
+  - name: 'state'
+    type: String
+    description: 'Current state of the policy.'
+    output: true
