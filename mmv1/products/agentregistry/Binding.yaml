@@ -1,0 +1,122 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Binding
+base_url: projects/{{project}}/locations/{{location}}/bindings
+self_link: projects/{{project}}/locations/{{location}}/bindings/{{binding_id}}
+create_url: projects/{{project}}/locations/{{location}}/bindings?bindingId={{binding_id}}
+update_verb: PATCH
+update_mask: true
+description: |
+  Represents a user-defined Binding.
+id_format: projects/{{project}}/locations/{{location}}/bindings/{{binding_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/bindings/{{binding_id}}
+autogen_async: true
+async:
+  type: OpAsync
+  actions:
+    - create
+    - delete
+    - update
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+examples:
+  - name: agent_registry_binding_basic
+    primary_resource_id: default
+    skip_func: acctest.SkipTestUntil(t, "2026-09-30") # Wait for google_iam_connectors_connector to graduate from tpg-nightly
+    vars:
+      binding: ar-binding
+    test_env_vars:
+      project: PROJECT_NAME
+parameters:
+  - name: location
+    type: String
+    description: |
+      The location of the resource.
+    required: true
+    url_param_only: true
+  - name: bindingId
+    type: String
+    description: |
+      The name of the Binding.
+    required: true
+    url_param_only: true
+properties:
+  - name: displayName
+    type: String
+    description: |
+      User-defined display name for the Binding.
+  - name: description
+    type: String
+    description: |
+      The description of the Binding.
+  - name: source
+    type: NestedObject
+    required: true
+    description: |
+      The source of the Binding.
+    properties:
+      - name: identifier
+        type: String
+        required: true
+        description: |
+          The identifier of the source Agent. Format: `urn:agent:{publisher}:{namespace}:{name}`
+  - name: target
+    type: NestedObject
+    required: true
+    description: |
+      The target of the Binding.
+    properties:
+      - name: identifier
+        type: String
+        required: true
+        description: |
+          The identifier of the target Agent, MCP Server, or Endpoint. Format:
+          * `urn:agent:{publisher}:{namespace}:{name}`
+          * `urn:mcp:{publisher}:{namespace}:{name}`
+          * `urn:endpoint:{publisher}:{namespace}:{name}`
+  - name: authProviderBinding
+    type: NestedObject
+    required: true
+    description: |
+      The auth provider of the Binding.
+    properties:
+      - name: authProvider
+        type: String
+        required: true
+        description: |
+          The resource name of the target auth provider.
+      - name: scopes
+        type: Array
+        description: |
+          The list of OAuth2 scopes of the auth provider.
+        item_type:
+          type: String
+      - name: continueUri
+        type: String
+        description: |
+          The continue URI of the auth provider.
+  - name: createTime
+    type: Time
+    description: |
+      The timestamp when the resource was created.
+    output: true
+  - name: updateTime
+    type: Time
+    description: |
+      The timestamp when the resource was updated.
+    output: true

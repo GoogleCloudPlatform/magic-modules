@@ -1,0 +1,36 @@
+resource "google_agent_registry_binding" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  binding_id   = "{{index $.Vars "binding"}}"
+  display_name = "My Binding"
+  description  = "My GA agent registry binding"
+
+  source {
+    identifier = data.google_agent_registry_agent.default.urn
+  }
+
+  target {
+    identifier = data.google_agent_registry_agent.default.urn
+  }
+
+  auth_provider_binding {
+    auth_provider = google_iam_connectors_connector.default.id
+    scopes        = ["https://www.googleapis.com/auth/cloud-platform"]
+    continue_uri  = "https://example.com/continue"
+  }
+
+  depends_on = [google_iam_connectors_connector.default]
+}
+
+data "google_agent_registry_agent" "default" {
+  location = "global"
+  filter   = "displayName:Workspace Agent"
+}
+
+resource "google_iam_connectors_connector" "default" {
+  location       = "us-central1"
+  connector_id   = "{{index $.Vars "binding"}}"
+
+  connector_type_params {
+    connector_version = "projects/{{index $.TestEnvVars "project"}}/locations/global/providers/gcp/connectors/pubsub/versions/1"
+  }
+}
