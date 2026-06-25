@@ -53,6 +53,7 @@ examples:
     exclude_import_test: true
 
 custom_code:
+  constants: 'templates/terraform/constants/chronicle_rule.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/chronicle_rule.go.tmpl'
 
 virtual_fields:
@@ -107,6 +108,7 @@ properties:
       Rule Id is the ID of the Rule.
   - name: text
     type: String
+    diff_suppress_func: 'chronicleRuleTextDiffSuppress'
     description: |-
       The YARA-L content of the rule.
       Populated in FULL view.
