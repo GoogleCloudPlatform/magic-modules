@@ -47,6 +47,7 @@ iam_policy:
     - '{{name}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_environment.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/apigee_environment.go.tmpl'
 examples:
   - name: 'apigee_environment_basic'
     vars:
