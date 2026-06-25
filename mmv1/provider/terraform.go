@@ -59,14 +59,16 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time,
 		IAMResourceCount:  0,
 		Product:           product,
 		TargetVersionName: versionName,
-		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
 		templateFS:        templateFS,
 	}
 
-	t.Product.ImportPath = ImportPathFromVersion(versionName)
-	for _, r := range t.Product.Objects {
-		r.ImportPath = t.Product.ImportPath
+	if product != nil {
+		t.Version = *product.VersionObjOrClosest(versionName)
+		t.Product.ImportPath = ImportPathFromVersion(versionName)
+		for _, r := range t.Product.Objects {
+			r.ImportPath = t.Product.ImportPath
+		}
 	}
 
 	return t
@@ -445,18 +447,29 @@ func (t *Terraform) FullResourceName(object api.Resource) string {
 	return fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
 }
 
-func (t Terraform) CopyCommonFiles(outputFolder string, productsToGenerate []string, generateCode, generateDocs bool) {
+func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
 	log.Printf("Copying common files for %s", ProviderName(t))
 
-	files := t.getCommonCopyFiles(t.TargetVersionName, productsToGenerate, generateCode, generateDocs)
+	files := t.getCommonCopyFiles(t.TargetVersionName, generateCode, generateDocs)
 	t.CopyFileList(outputFolder, files, generateCode)
 }
 
 // To copy a new folder, add the folder to foldersCopiedToRootDir or foldersCopiedToGoogleDir.
 // To copy a file, add the file to singleFiles
-func (t Terraform) getCommonCopyFiles(versionName string, productsToGenerate []string, generateCode, generateDocs bool) map[string]string {
+func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generateDocs bool) map[string]string {
 	// key is the target file and value is the source file
 	commonCopyFiles := make(map[string]string, 0)
+
+	// Case 0: If we're generating a specific product, only copy files for that product.
+	if t.Product != nil {
+		googleDir := "google"
+		if versionName != "ga" {
+			googleDir = fmt.Sprintf("google-%s", versionName)
+		}
+		files := t.getCopyFilesInFolder("third_party/terraform/services/"+t.Product.ApiName, googleDir)
+		maps.Copy(commonCopyFiles, files)
+		return commonCopyFiles
+	}
 
 	// Case 1: When copy all of files except .tmpl in a folder to the root directory of downstream repository,
 	// save the folder name to foldersCopiedToRootDir
@@ -472,7 +485,7 @@ func (t Terraform) getCommonCopyFiles(versionName string, productsToGenerate []s
 		foldersCopiedToRootDir = append(foldersCopiedToRootDir, "third_party/terraform/website")
 	}
 	for _, folder := range foldersCopiedToRootDir {
-		files := t.getCopyFilesInFolder(folder, ".", productsToGenerate)
+		files := t.getCopyFilesInFolder(folder, ".")
 		maps.Copy(commonCopyFiles, files)
 	}
 
@@ -493,7 +506,6 @@ func (t Terraform) getCommonCopyFiles(versionName string, productsToGenerate []s
 			"third_party/terraform/fwvalidators",
 			"third_party/terraform/provider",
 			"third_party/terraform/registry",
-			"third_party/terraform/services",
 			"third_party/terraform/sweeper",
 			"third_party/terraform/test-fixtures",
 			"third_party/terraform/tpgdclresource",
@@ -509,7 +521,7 @@ func (t Terraform) getCommonCopyFiles(versionName string, productsToGenerate []s
 	}
 	// Copy files to google(or google-beta or google-private) folder in downstream
 	for _, folder := range foldersCopiedToGoogleDir {
-		files := t.getCopyFilesInFolder(folder, googleDir, productsToGenerate)
+		files := t.getCopyFilesInFolder(folder, googleDir)
 		maps.Copy(commonCopyFiles, files)
 	}
 
@@ -525,7 +537,7 @@ func (t Terraform) getCommonCopyFiles(versionName string, productsToGenerate []s
 	return commonCopyFiles
 }
 
-func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string, productsToGenerate []string) map[string]string {
+func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string]string {
 	m := make(map[string]string, 0)
 	fs.WalkDir(t.templateFS, folderPath, func(path string, di fs.DirEntry, err error) error {
 		if err != nil {
@@ -534,27 +546,6 @@ func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string, productsTo
 		if !di.IsDir() && !strings.HasSuffix(di.Name(), ".tmpl") && !strings.HasSuffix(di.Name(), ".erb") { // Exception files
 			if di.Name() == "gha-branch-renaming.png" || di.Name() == "clock-timings-of-branch-making-and-usage.png" {
 				return nil
-			}
-
-			if strings.HasPrefix(path, "third_party/terraform/services/") {
-				rel := strings.TrimPrefix(path, "third_party/terraform/services/")
-				parts := strings.Split(rel, "/")
-				if len(parts) > 0 {
-					serviceName := parts[0]
-					if len(productsToGenerate) > 0 {
-						matched := false
-						for _, p := range productsToGenerate {
-							prodName := strings.TrimPrefix(p, "products/")
-							if prodName == serviceName {
-								matched = true
-								break
-							}
-						}
-						if !matched {
-							return nil
-						}
-					}
-				}
 			}
 
 			fname := strings.TrimPrefix(path, "third_party/terraform/")
@@ -615,25 +606,35 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 }
 
 // Compiles files that are shared at the provider level
-func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, productsToGenerate []string, overridePath string) {
+func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	log.Printf("Generating common files for %s", ProviderName(t))
-	t.generateResourcesForVersion(products)
-	files := t.getCommonCompileFiles(t.TargetVersionName, productsToGenerate)
+	if t.Product == nil {
+		t.generateResourcesForVersion(products)
+	}
+	files := t.getCommonCompileFiles(t.TargetVersionName)
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 	t.CompileFileList(outputFolder, files, *templateData, products)
 }
 
 // To compile a new folder, add the folder to foldersCompiledToRootDir or foldersCompiledToGoogleDir.
 // To compile a file, add the file to singleFiles
-func (t Terraform) getCommonCompileFiles(versionName string, productsToGenerate []string) map[string]string {
+func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 	// key is the target file and the value is the source file
 	commonCompileFiles := make(map[string]string, 0)
+
+	if t.Product != nil {
+		googleDir := "google"
+		if versionName != "ga" {
+			googleDir = fmt.Sprintf("google-%s", versionName)
+		}
+		return t.getCompileFilesInFolder("third_party/terraform/services/"+t.Product.ApiName, googleDir)
+	}
 
 	// Case 1: When compile all of files except .tmpl in a folder to the root directory of downstream repository,
 	// save the folder name to foldersCopiedToRootDir
 	foldersCompiledToRootDir := []string{"third_party/terraform/scripts"}
 	for _, folder := range foldersCompiledToRootDir {
-		files := t.getCompileFilesInFolder(folder, ".", productsToGenerate)
+		files := t.getCompileFilesInFolder(folder, ".")
 		maps.Copy(commonCompileFiles, files)
 	}
 
@@ -649,7 +650,6 @@ func (t Terraform) getCommonCompileFiles(versionName string, productsToGenerate 
 		"third_party/terraform/fwresource",
 		"third_party/terraform/fwtransport",
 		"third_party/terraform/provider",
-		"third_party/terraform/services",
 		"third_party/terraform/sweeper",
 		"third_party/terraform/test-fixtures",
 		"third_party/terraform/tpgdclresource",
@@ -663,7 +663,7 @@ func (t Terraform) getCommonCompileFiles(versionName string, productsToGenerate 
 		googleDir = fmt.Sprintf("google-%s", versionName)
 	}
 	for _, folder := range foldersCompiledToGoogleDir {
-		files := t.getCompileFilesInFolder(folder, googleDir, productsToGenerate)
+		files := t.getCompileFilesInFolder(folder, googleDir)
 		maps.Copy(commonCompileFiles, files)
 	}
 
@@ -679,34 +679,13 @@ func (t Terraform) getCommonCompileFiles(versionName string, productsToGenerate 
 	return commonCompileFiles
 }
 
-func (t Terraform) getCompileFilesInFolder(folderPath, targetDir string, productsToGenerate []string) map[string]string {
+func (t Terraform) getCompileFilesInFolder(folderPath, targetDir string) map[string]string {
 	m := make(map[string]string, 0)
 	fs.WalkDir(t.templateFS, folderPath, func(path string, di fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if !di.IsDir() && strings.HasSuffix(di.Name(), ".tmpl") {
-			if strings.HasPrefix(path, "third_party/terraform/services/") {
-				rel := strings.TrimPrefix(path, "third_party/terraform/services/")
-				parts := strings.Split(rel, "/")
-				if len(parts) > 0 {
-					serviceName := parts[0]
-					if len(productsToGenerate) > 0 {
-						matched := false
-						for _, p := range productsToGenerate {
-							prodName := strings.TrimPrefix(p, "products/")
-							if prodName == serviceName {
-								matched = true
-								break
-							}
-						}
-						if !matched {
-							return nil
-						}
-					}
-				}
-			}
-
 			fname := strings.TrimPrefix(path, "third_party/terraform/")
 			fname = strings.TrimSuffix(fname, ".tmpl")
 			target := fname

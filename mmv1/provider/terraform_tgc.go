@@ -58,8 +58,10 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 		templateFS:        templateFS,
 	}
 
-	for _, r := range t.Product.Objects {
-		r.ImportPath = ImportPathFromVersion(versionName)
+	if product != nil {
+		for _, r := range t.Product.Objects {
+			r.ImportPath = ImportPathFromVersion(versionName)
+		}
 	}
 
 	return t
@@ -182,26 +184,10 @@ func (tgc *TerraformGoogleConversion) generateCaiIamResources(products []*api.Pr
 	}
 }
 
-func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, products []*api.Product, productsToGenerate []string, overridePath string) {
+func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	log.Printf("Compiling common files for tgc.")
 
-	tgc.generateCaiIamResources(products)
-	tgc.NonDefinedTests = retrieveFullManifestOfNonDefinedTests(tgc.templateFS)
-
-	files := retrieveFullListOfTestFiles(tgc.templateFS)
-	for _, file := range files {
-		tgc.Tests = append(tgc.Tests, strings.Split(file, ".")[0])
-	}
-	tgc.Tests = slices.Compact(tgc.Tests)
-
-	testSource := make(map[string]string)
-	for target, source := range retrieveTestSourceCodeWithLocation(tgc.templateFS, ".tmpl") {
-		target := strings.Replace(target, "go.tmpl", "go", 1)
-		testSource[target] = source
-	}
-
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
-	tgc.CompileFileList(outputFolder, testSource, *templateData, products)
 
 	resourceConverters := map[string]string{
 		"converters/google/resources/resource_converters.go":                       "third_party/tgc/resource_converters.go.tmpl",
@@ -220,7 +206,40 @@ func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, pro
 		"converters/google/resources/services/spanner/iam_spanner_database.go":     "third_party/terraform/services/spanner/iam_spanner_database.go.tmpl",
 		"converters/google/resources/services/spanner/iam_spanner_instance.go":     "third_party/terraform/services/spanner/iam_spanner_instance.go.tmpl",
 	}
-	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
+
+	filteredFiles := make(map[string]string)
+	if tgc.Product != nil {
+		for target, source := range resourceConverters {
+			if strings.Contains(target, "/services/"+tgc.Product.ApiName+"/") {
+				filteredFiles[target] = source
+			}
+		}
+		tgc.CompileFileList(outputFolder, filteredFiles, *templateData, products)
+	} else {
+		// Shared compilation
+		tgc.generateCaiIamResources(products)
+		tgc.NonDefinedTests = retrieveFullManifestOfNonDefinedTests(tgc.templateFS)
+
+		files := retrieveFullListOfTestFiles(tgc.templateFS)
+		for _, file := range files {
+			tgc.Tests = append(tgc.Tests, strings.Split(file, ".")[0])
+		}
+		tgc.Tests = slices.Compact(tgc.Tests)
+
+		testSource := make(map[string]string)
+		for target, source := range retrieveTestSourceCodeWithLocation(tgc.templateFS, ".tmpl") {
+			target := strings.Replace(target, "go.tmpl", "go", 1)
+			testSource[target] = source
+		}
+		tgc.CompileFileList(outputFolder, testSource, *templateData, products)
+
+		for target, source := range resourceConverters {
+			if !strings.Contains(target, "/services/") {
+				filteredFiles[target] = source
+			}
+		}
+		tgc.CompileFileList(outputFolder, filteredFiles, *templateData, products)
+	}
 }
 
 func (tgc TerraformGoogleConversion) CompileFileList(outputFolder string, files map[string]string, fileTemplate TemplateData, products []*api.Product) {
@@ -352,15 +371,12 @@ func retrieveListOfManuallyDefinedTestsFromFile(fsys fs.FS, file string) []strin
 	return tests
 }
 
-func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, productsToGenerate []string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
 	log.Printf("Copying common files for tgc.")
 
 	if !generateCode {
 		return
 	}
-
-	tgc.CopyFileList(outputFolder, retrieveFullListOfTestTilesWithLocation(tgc.templateFS))
-	tgc.CopyFileList(outputFolder, retrieveTestSourceCodeWithLocation(tgc.templateFS, ".go"))
 
 	resourceConverters := map[string]string{
 		"../caiasset/asset.go":                                                                  "third_party/tgc/caiasset/asset.go",
@@ -456,7 +472,25 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, produc
 		"tfplan2cai.go":                                                                         "third_party/tgc/tfplan2cai.go",
 		"tfplan_to_cai_test.go":                                                                 "third_party/tgc/tfplan_to_cai_test.go",
 	}
-	tgc.CopyFileList(outputFolder, resourceConverters)
+
+	filteredFiles := make(map[string]string)
+	if tgc.Product != nil {
+		for target, source := range resourceConverters {
+			if strings.Contains(target, "/services/"+tgc.Product.ApiName+"/") {
+				filteredFiles[target] = source
+			}
+		}
+	} else {
+		// Shared files
+		tgc.CopyFileList(outputFolder, retrieveFullListOfTestTilesWithLocation(tgc.templateFS))
+		tgc.CopyFileList(outputFolder, retrieveTestSourceCodeWithLocation(tgc.templateFS, ".go"))
+		for target, source := range resourceConverters {
+			if !strings.Contains(target, "/services/") {
+				filteredFiles[target] = source
+			}
+		}
+	}
+	tgc.CopyFileList(outputFolder, filteredFiles)
 }
 
 func (tgc TerraformGoogleConversion) CopyFileList(outputFolder string, files map[string]string) {
