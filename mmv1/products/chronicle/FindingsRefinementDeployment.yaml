@@ -17,8 +17,7 @@ description: The FindingsRefinementDeployment resource represents the deployment
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/FindingsRefinementDeployment'
-min_version: 'beta'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/FindingsRefinementDeployment'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment?updateMask=*
@@ -34,7 +33,6 @@ autogen_status: RmluZGluZ3NSZWZpbmVtZW50RGVwbG95bWVudA==
 samples:
   - name: 'chronicle_findings_refinement_deployment_update'
     primary_resource_id: 'example'
-    min_version: 'beta'
     steps:
       - name: 'chronicle_findings_refinement_deployment_full'
         test_env_vars:
