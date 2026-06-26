@@ -633,6 +633,12 @@ properties:
           description: |
             The name of the parent network interface.
           output: true
+        - name: 'serviceClassId'
+          min_version: 'beta'
+          type: String
+          description: |
+            Producer Service's Service class Id for the region of this network interface.
+            Has to be used together with network_attachment.
   - name: 'scheduling'
     type: NestedObject
     description: Sets the scheduling options for this instance.
