@@ -14,52 +14,48 @@
 ---
 name: DashboardChart
 description: >
-  A chart resource used within a NativeDashboard. Its lifecycle (Create, Update, Delete) is
-  managed via custom methods on the NativeDashboard resource.
+  A chart resource used within a NativeDashboard. Its lifecycle (Create, Update, Delete) is managed via custom methods on the NativeDashboard resource.
+
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
   api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dashboardCharts'
-
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts/{{chart_id}}
 create_url: "{{native_dashboard}}:addChart"
-
 update_url: "{{native_dashboard}}:editChart"
 update_verb: POST
-
 delete_url: "{{native_dashboard}}:removeChart"
 delete_verb: POST
-
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dashboardCharts/{{chart_id}}
-
 custom_code:
   pre_delete: "templates/terraform/pre_delete/chronicle_dashboard_chart.go.tmpl"
   pre_update: "templates/terraform/pre_update/chronicle_dashboard_chart_dashboard_query.go.tmpl"
   update_encoder: "templates/terraform/update_encoder/chronicle_dashboard_chart_edit_mask.go.tmpl"
   decoder: "templates/terraform/decoders/chronicle_dashboard_chart.go.tmpl"
-
-examples:
+samples:
   - name: chronicle_dashboardchart_basic
     primary_resource_id: my_chart
-    ignore_read_extra:
-      - "dashboardUserData.0.lastViewedTime"
-    vars:
-      chart_display_name: "testchart_1"
-    test_env_vars:
-      chronicle_id: "CHRONICLE_ID"
-
+    steps:
+      - name: chronicle_dashboardchart_basic
+        ignore_read_extra:
+          - "dashboardUserData.0.lastViewedTime"
+        resource_id_vars:
+          chart_display_name: "testchart_1"
+        test_env_vars:
+          chronicle_id: "CHRONICLE_ID"
   - name: chronicle_dashboardchart_full
     primary_resource_id: my_chart
-    ignore_read_extra:
-      - "dashboardUserData.0.lastViewedTime"
-    vars:
-      dashboard_name: "dashboard_1"
-      dashboard_description: "dashboard_description"
-    test_env_vars:
-      chronicle_id: "CHRONICLE_ID"
-
+    steps:
+      - name: chronicle_dashboardchart_full
+        ignore_read_extra:
+          - "dashboardUserData.0.lastViewedTime"
+        resource_id_vars:
+          dashboard_name: "dashboard_1"
+          dashboard_description: "dashboard_description"
+        test_env_vars:
+          chronicle_id: "CHRONICLE_ID"
 parameters:
   - name: location
     type: String
@@ -73,25 +69,21 @@ parameters:
     description: The ID of the Chronicle instance.
     immutable: true
     url_param_only: true
-
 properties:
   - name: nativeDashboard
     type: String
     description: The parent NativeDashboard resource name, formatted as projects/{project}/locations/{location}/instances/{instance}/nativeDashboards/{dashboard_id}
     url_param_only: true
     immutable: true
-
   - name: name
     type: String
     output: true
     description: The full resource name of the DashboardChart.
-
   - name: chartId
     type: String
     custom_flatten: "templates/terraform/custom_flatten/id_from_name.tmpl"
     output: true
     description: The unique identifier of the chart, automatically extracted from the full resource name.
-
   - name: dashboardQuery
     type: NestedObject
     ignore_read: true
@@ -140,7 +132,6 @@ properties:
         type: String
         output: true
         description: This checksum is computed by the server.
-
   - name: chartLayout
     type: NestedObject
     description: The layout of this chart within the NativeDashboard.
@@ -158,7 +149,6 @@ properties:
       - name: spanY
         type: Integer
         required: true
-
   - name: dashboardChart
     type: NestedObject
     description: Core configuration details for the DashboardChart.

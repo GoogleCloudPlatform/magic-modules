@@ -38,22 +38,26 @@ async:
 collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
-examples:
+samples:
   - name: 'external_vpn_gateway'
     primary_resource_id: 'external_gateway'
-    vars:
-      ha_vpn_gateway_name: 'ha-vpn'
-      network_name: 'network-1'
-      external_gateway_name: 'external-gateway'
-      global_address_name: 'global-address'
-      router_name: 'ha-vpn-router1'
-      # Multiple fine-grained resources
     skip_vcr: true
+    steps:
+      - name: 'external_vpn_gateway'
+        resource_id_vars:
+          ha_vpn_gateway_name: 'ha-vpn'
+          network_name: 'network-1'
+          external_gateway_name: 'external-gateway'
+          global_address_name: 'global-address'
+          router_name: 'ha-vpn-router1'
+          # Multiple fine-grained resources
   - name: 'only_external_vpn_gateway_full'
     primary_resource_id: 'external_gateway'
-    vars:
-      external_gateway_name: 'external-gateway'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'only_external_vpn_gateway_full'
+        resource_id_vars:
+          external_gateway_name: 'external-gateway'
 parameters:
 properties:
   - name: 'description'
@@ -130,7 +134,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs
