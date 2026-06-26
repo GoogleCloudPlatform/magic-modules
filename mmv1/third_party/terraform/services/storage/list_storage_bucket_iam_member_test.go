@@ -16,6 +16,7 @@ import (
 func TestAccStorageBucketIamMemberListResource_queryIdentity(t *testing.T) {
 	t.Parallel()
 
+	project := envvar.GetTestProjectFromEnv()
 	bucket := "tf-test-bucket-iam-" + acctest.RandString(t, 10)
 	account := "tf-test-storage-iam-" + acctest.RandString(t, 10)
 	role := "roles/storage.objectViewer"
@@ -38,7 +39,7 @@ func TestAccStorageBucketIamMemberListResource_queryIdentity(t *testing.T) {
 			},
 			{
 				Query:  true,
-				Config: testAccStorageBucketIamMemberListQueryWithFilters(bucket, role, member),
+				Config: testAccStorageBucketIamMemberListQueryWithFilters(project, bucket, role, member),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("google_storage_bucket_iam_member.test", 1),
 					querycheck.ExpectIdentity("google_storage_bucket_iam_member.test", map[string]knownvalue.Check{
@@ -74,17 +75,18 @@ resource "google_storage_bucket_iam_member" "member" {
 `, bucket, account, role)
 }
 
-func testAccStorageBucketIamMemberListQueryWithFilters(bucket, role, member string) string {
+func testAccStorageBucketIamMemberListQueryWithFilters(project, bucket, role, member string) string {
 	return fmt.Sprintf(`
 list "google_storage_bucket_iam_member" "test" {
   provider = google
   include_resource = true
 
   config {
+		project = %q
     bucket = %q
     role   = %q
     member = %q
   }
 }
-`, bucket, role, member)
+`, project, bucket, role, member)
 }
