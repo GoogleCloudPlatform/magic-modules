@@ -74,6 +74,30 @@ func ResourceSqlUser() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"instance": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"host": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+				}
+			},
+		},
+
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
@@ -466,12 +490,16 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
-
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
 
-	return nil
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":  project,
+		"instance": user.Instance,
+		"name":     user.Name,
+		"host":     user.Host,
+	})
 }
 
 func flattenPasswordPolicy(passwordPolicy *sqladmin.UserPasswordValidationPolicy) interface{} {
