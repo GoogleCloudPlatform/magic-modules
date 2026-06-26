@@ -12,267 +12,303 @@
 # limitations under the License.
 
 ---
-name: 'Repository'
+name: Repository
 description: A repository for storing artifacts
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/artifact-registry/docs/overview'
-  api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories'
+    Official Documentation: https://cloud.google.com/artifact-registry/docs/overview
+  api: https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/repositories'
-self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/repositories
+self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
+create_url: projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  method_name_separator: ':'
+  allowed_iam_role: roles/artifactregistry.reader
+  # TODO: Change to repository_id in 4.0
+  parent_resource_attribute: repository
+  base_url: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+  import_format:
+    - projects/{{project}}/locations/{{location}}/repositories/{{repository}}
+    - '{{repository}}'
+  self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+id_format: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+  - projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-include_in_tgc_next: true
-iam_policy:
-  method_name_separator: ':'
-  allowed_iam_role: 'roles/artifactregistry.reader'
-  # TODO: Change to repository_id in 4.0
-  parent_resource_attribute: 'repository'
-  base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
-  self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/repositories/{{repository}}'
-    - '{{repository}}'
-custom_code:
-  constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
-  encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
-  pre_update: 'templates/terraform/update_encoder/artifact_registry_repository_update.go.tmpl'
 sweeper:
   url_substitutions:
-    - region: "us-central1"
-    - region: "us"
-examples:
-  - name: 'artifact_registry_repository_basic'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example docker repository'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example docker repository" + randomSuffix'
-  - name: 'artifact_registry_repository_multi_region'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example docker repository'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example docker repository" + randomSuffix'
-  - name: 'artifact_registry_repository_docker'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example docker repository'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example docker repository" + randomSuffix'
-  - name: 'artifact_registry_repository_cmek'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      kms_key_name: 'kms-key'
-    test_vars_overrides:
-      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-  - name: 'artifact_registry_repository_virtual'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example virtual docker repository'
-      upstream_repository_id: 'my-repository-upstream'
-      upstream_desc: 'example docker repository (upstream source)'
-      upstream_policy_id: 'my-repository-upstream'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example virtual docker repository" + randomSuffix'
-      # for backward compatible
-      upstream_desc: '"example docker repository (upstream source)" + randomSuffix'
-  - name: 'artifact_registry_repository_remote'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example remote docker repository'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote docker repository" + randomSuffix'
-  - name: 'artifact_registry_repository_remote_apt'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'debian-stable'
-      desc: 'example remote apt repository'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote apt repository" + randomSuffix'
-  - name: 'artifact_registry_repository_remote_yum'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'rocky-9'
-      desc: 'example remote yum repository'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote yum repository" + randomSuffix'
-  - name: 'artifact_registry_repository_cleanup'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example docker repository with cleanup policies'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example docker repository with cleanup policies" + randomSuffix'
-  - name: 'artifact_registry_repository_remote_dockerhub_auth'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-dockerhub-remote'
-      desc: 'example remote dockerhub repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-    # response.
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote dockerhub repository with credentials" + randomSuffix'
-    ignore_read_extra:
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_docker_custom_with_auth'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-docker-custom-remote'
-      desc: 'example remote custom docker repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote custom docker repository with credentia" + randomSuffix'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_maven_custom_with_auth'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-maven-custom-remote'
-      desc: 'example remote custom maven repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote custom maven repository with credential" + randomSuffix'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_npm_custom_with_auth'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-npm-custom-remote'
-      desc: 'example remote custom npm repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote custom npm repository with credentials" + randomSuffix'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_python_custom_with_auth'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-python-custom-remote'
-      desc: 'example remote custom python repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote custom python repository with credentia" + randomSuffix'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_common_repository_with_docker'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-common-remote'
-      desc: 'example remote common repository with docker upstream'
-      upstream_repository_id: 'example-upstream-repo'
-      upstream_repository_desc: 'example upstream repository'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote common repository with docker upstream" + randomSuffix'
-      # for backward compatible
-      upstream_repository_desc: '"example upstream repository" + randomSuffix'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_common_repository_with_artifact_registry_uri'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-common-remote'
-      desc: 'example remote common repository with docker upstream'
-      upstream_repository_id: 'example-upstream-repo'
-      upstream_repository_desc: 'example upstream repository'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote common repository with docker upstream" + randomSuffix'
-      # for backward compatible
-      upstream_repository_desc: '"example upstream repository" + randomSuffix'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_common_repository_with_custom_upstream'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-docker-custom-remote'
-      desc: 'example remote custom docker repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example remote custom docker repository with credentia" + randomSuffix'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_vulnerability_scanning'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example docker repository with vulnerability scanning config'
-    test_vars_overrides:
-      # for backward compatible
-      desc: '"example docker repository with vulnerability scanning " + randomSuffix'
+    - region: us-central1
+    - region: us
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete]
+  result:
+    resource_inside_response: true
+autogen_async: true
+include_in_tgc_next: true
+custom_code:
+  encoder: templates/terraform/encoders/location_from_region.go.tmpl
+  constants: templates/terraform/constants/artifact_registry_repository.go.tmpl
+  pre_update: templates/terraform/update_encoder/artifact_registry_repository_update.go.tmpl
+samples:
+  - name: artifact_registry_repository_basic
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_basic
+        resource_id_vars:
+          repository_id: my-repository
+          desc: example docker repository
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example docker repository" + randomSuffix'
+  - name: artifact_registry_repository_multi_region
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_multi_region
+        resource_id_vars:
+          repository_id: my-repository
+          desc: example docker repository
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example docker repository" + randomSuffix'
+  - name: artifact_registry_repository_docker
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_docker
+        resource_id_vars:
+          repository_id: my-repository
+          desc: example docker repository
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example docker repository" + randomSuffix'
+  - name: artifact_registry_repository_cmek
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_cmek
+        resource_id_vars:
+          repository_id: my-repository
+          kms_key_name: kms-key
+        test_vars_overrides:
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+  - name: artifact_registry_repository_virtual
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_virtual
+        resource_id_vars:
+          repository_id: my-repository
+          desc: example virtual docker repository
+          upstream_repository_id: my-repository-upstream
+          upstream_desc: example docker repository (upstream source)
+          upstream_policy_id: my-repository-upstream
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example virtual docker repository" + randomSuffix'
+          # for backward compatible
+          upstream_desc: '"example docker repository (upstream source)" + randomSuffix'
+  - name: artifact_registry_repository_remote
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote
+        resource_id_vars:
+          repository_id: my-repository
+          desc: example remote docker repository
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote docker repository" + randomSuffix'
+  - name: artifact_registry_repository_remote_apt
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote_apt
+        resource_id_vars:
+          repository_id: debian-stable
+          desc: example remote apt repository
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote apt repository" + randomSuffix'
+  - name: artifact_registry_repository_remote_yum
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote_yum
+        resource_id_vars:
+          repository_id: rocky-9
+          desc: example remote yum repository
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote yum repository" + randomSuffix'
+  - name: artifact_registry_repository_cleanup
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_cleanup
+        resource_id_vars:
+          repository_id: my-repository
+          desc: example docker repository with cleanup policies
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example docker repository with cleanup policies" + randomSuffix'
+  - name: artifact_registry_repository_remote_dockerhub_auth
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote_dockerhub_auth
+        resource_id_vars:
+          repository_id: example-dockerhub-remote
+          desc: example remote dockerhub repository with credentials
+          secret_id: example-secret
+          secret_resource_id: example-remote-secret
+          username: remote-username
+          secret_data: remote-password
+        # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+        # response.
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote dockerhub repository with credentials" + randomSuffix'
+        ignore_read_extra:
+          - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_docker_custom_with_auth
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote_docker_custom_with_auth
+        resource_id_vars:
+          repository_id: example-docker-custom-remote
+          desc: example remote custom docker repository with credentials
+          secret_id: example-secret
+          secret_resource_id: example-remote-secret
+          username: remote-username
+          secret_data: remote-password
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote custom docker repository with credentia" + randomSuffix'
+        ignore_read_extra:
+          # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+          # response.
+          - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_maven_custom_with_auth
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote_maven_custom_with_auth
+        resource_id_vars:
+          repository_id: example-maven-custom-remote
+          desc: example remote custom maven repository with credentials
+          secret_id: example-secret
+          secret_resource_id: example-remote-secret
+          username: remote-username
+          secret_data: remote-password
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote custom maven repository with credential" + randomSuffix'
+        ignore_read_extra:
+          # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+          # response.
+          - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_npm_custom_with_auth
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote_npm_custom_with_auth
+        resource_id_vars:
+          repository_id: example-npm-custom-remote
+          desc: example remote custom npm repository with credentials
+          secret_id: example-secret
+          secret_resource_id: example-remote-secret
+          username: remote-username
+          secret_data: remote-password
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote custom npm repository with credentials" + randomSuffix'
+        ignore_read_extra:
+          # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+          # response.
+          - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_python_custom_with_auth
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote_python_custom_with_auth
+        resource_id_vars:
+          repository_id: example-python-custom-remote
+          desc: example remote custom python repository with credentials
+          secret_id: example-secret
+          secret_resource_id: example-remote-secret
+          username: remote-username
+          secret_data: remote-password
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote custom python repository with credentia" + randomSuffix'
+        ignore_read_extra:
+          # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+          # response.
+          - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_common_repository_with_docker
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote_common_repository_with_docker
+        resource_id_vars:
+          repository_id: example-common-remote
+          desc: example remote common repository with docker upstream
+          upstream_repository_id: example-upstream-repo
+          upstream_repository_desc: example upstream repository
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote common repository with docker upstream" + randomSuffix'
+          # for backward compatible
+          upstream_repository_desc: '"example upstream repository" + randomSuffix'
+        ignore_read_extra:
+          # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+          # response.
+          - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_common_repository_with_artifact_registry_uri
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote_common_repository_with_artifact_registry_uri
+        resource_id_vars:
+          repository_id: example-common-remote
+          desc: example remote common repository with docker upstream
+          upstream_repository_id: example-upstream-repo
+          upstream_repository_desc: example upstream repository
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote common repository with docker upstream" + randomSuffix'
+          # for backward compatible
+          upstream_repository_desc: '"example upstream repository" + randomSuffix'
+        ignore_read_extra:
+          # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+          # response.
+          - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_common_repository_with_custom_upstream
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_remote_common_repository_with_custom_upstream
+        resource_id_vars:
+          repository_id: example-docker-custom-remote
+          desc: example remote custom docker repository with credentials
+          secret_id: example-secret
+          secret_resource_id: example-remote-secret
+          username: remote-username
+          secret_data: remote-password
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example remote custom docker repository with credentia" + randomSuffix'
+        ignore_read_extra:
+          # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+          # response.
+          - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_vulnerability_scanning
+    primary_resource_id: my-repo
+    steps:
+      - name: artifact_registry_repository_vulnerability_scanning
+        resource_id_vars:
+          repository_id: my-repository
+          desc: example docker repository with vulnerability scanning config
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example docker repository with vulnerability scanning " + randomSuffix'
 parameters:
-  - name: 'repository_id'
+  - name: repository_id
     type: String
     description: |-
       The last part of the repository name, for example:
@@ -280,8 +316,8 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'location'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: location
     type: String
     description: |-
       The name of the repository's location. In addition to specific regions,
@@ -295,15 +331,15 @@ parameters:
     immutable: true
     default_from_api: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |-
       The name of the repository, for example:
       "repo1"
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
-  - name: 'format'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/shortname_to_url.go.tmpl
+  - name: format
     type: String
     description: |-
       The format of packages that are stored in the repository. Supported formats
@@ -312,12 +348,11 @@ properties:
       [alpha user group](https://cloud.google.com/artifact-registry/docs/supported-formats#alpha-access).
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-  - name: 'description'
+    diff_suppress_func: tpgresource.CaseDiffSuppress
+  - name: description
     type: String
-    description: |-
-      The user-provided description of the repository.
-  - name: 'labels'
+    description: The user-provided description of the repository.
+  - name: labels
     type: KeyValueLabels
     description: |
       Labels with user-defined metadata.
@@ -325,12 +360,12 @@ properties:
       longer than 63 characters. Label keys must begin with a lowercase letter
       and may only contain lowercase letters, numeric characters, underscores,
       and dashes.
-  - name: 'registryUri'
+  - name: registryUri
     type: String
     output: true
     description: |
       The repository endpoint, for example: us-docker.pkg.dev/my-proj/my-repo.
-  - name: 'kmsKeyName'
+  - name: kmsKeyName
     type: String
     description: |-
       The Cloud KMS resource name of the customer managed encryption key that’s
@@ -338,418 +373,374 @@ properties:
       `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
       This value may not be changed after the Repository has been created.
     immutable: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: The time when the repository was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: The time when the repository was last updated.
     output: true
-  - name: 'dockerConfig'
+  - name: dockerConfig
     type: NestedObject
-    description: |-
-      Docker repository config contains repository level configuration for the repositories of docker type.
+    description: Docker repository config contains repository level configuration for the repositories of docker type.
     allow_empty_object: true
     properties:
-      - name: 'immutableTags'
+      - name: immutableTags
         type: Boolean
-        description: |-
-          The repository which enabled this flag prevents all tags from being modified, moved or deleted. This does not prevent tags from being created.
-  - name: 'mavenConfig'
+        description: The repository which enabled this flag prevents all tags from being modified, moved or deleted. This does not prevent tags from being created.
+  - name: mavenConfig
     type: NestedObject
     description: |-
       MavenRepositoryConfig is maven related repository details.
       Provides additional configuration details for repositories of the maven
       format type.
     allow_empty_object: true
-    diff_suppress_func: 'emptyMavenConfigDiffSuppress'
+    diff_suppress_func: emptyMavenConfigDiffSuppress
     properties:
       # Maven properties.
-      - name: 'allowSnapshotOverwrites'
+      - name: allowSnapshotOverwrites
         type: Boolean
         description: |-
           The repository with this flag will allow publishing the same
           snapshot versions.
         immutable: true
-      - name: 'versionPolicy'
+      - name: versionPolicy
         type: Enum
-        description: |-
-          Version policy defines the versions that the registry will accept.
+        description: Version policy defines the versions that the registry will accept.
         immutable: true
-        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-        default_value: "VERSION_POLICY_UNSPECIFIED"
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
+        default_value: VERSION_POLICY_UNSPECIFIED
         enum_values:
-          - 'VERSION_POLICY_UNSPECIFIED'
-          - 'RELEASE'
-          - 'SNAPSHOT'
-  - name: 'mode'
+          - VERSION_POLICY_UNSPECIFIED
+          - RELEASE
+          - SNAPSHOT
+  - name: mode
     type: Enum
-    description: |-
-      The mode configures the repository to serve artifacts from different sources.
+    description: The mode configures the repository to serve artifacts from different sources.
     immutable: true
-    default_value: "STANDARD_REPOSITORY"
+    default_value: STANDARD_REPOSITORY
     enum_values:
-      - 'STANDARD_REPOSITORY'
-      - 'VIRTUAL_REPOSITORY'
-      - 'REMOTE_REPOSITORY'
-  - name: 'virtualRepositoryConfig'
+      - STANDARD_REPOSITORY
+      - VIRTUAL_REPOSITORY
+      - REMOTE_REPOSITORY
+  - name: virtualRepositoryConfig
     type: NestedObject
-    description: |-
-      Configuration specific for a Virtual Repository.
+    description: Configuration specific for a Virtual Repository.
     conflicts:
       - remote_repository_config
     properties:
-      - name: 'upstreamPolicies'
+      - name: upstreamPolicies
         type: Array
         description: |-
           Policies that configure the upstream artifacts distributed by the Virtual
           Repository. Upstream policies cannot be set on a standard repository.
-        diff_suppress_func: 'upstreamPoliciesDiffSuppress'
+        diff_suppress_func: upstreamPoliciesDiffSuppress
         item_type:
           type: NestedObject
           properties:
-            - name: 'id'
+            - name: id
               type: String
-              description: |-
-                The user-provided ID of the upstream policy.
-            - name: 'repository'
+              description: The user-provided ID of the upstream policy.
+            - name: repository
               type: String
               description: |
                 A reference to the repository resource, for example:
                 "projects/p1/locations/us-central1/repository/repo1".
-            - name: 'priority'
+            - name: priority
               type: Integer
-              description: |-
-                Entries with a greater priority value take precedence in the pull order.
-  - name: 'cleanupPolicies'
+              description: Entries with a greater priority value take precedence in the pull order.
+  - name: cleanupPolicies
     type: Map
     description: |-
       Cleanup policies for this repository. Cleanup policies indicate when
       certain package versions can be automatically deleted.
       Map keys are policy IDs supplied by users during policy creation. They must
       unique within a repository and be under 128 characters in length.
-    key_name: 'id'
-    set_hash_func: 'mapHashID'
+    key_name: id
+    set_hash_func: mapHashID
     value_type:
       type: NestedObject
       properties:
-        - name: 'action'
+        - name: action
           type: Enum
-          description: |-
-            Policy action.
+          description: Policy action.
           enum_values:
-            - 'DELETE'
-            - 'KEEP'
-        - name: 'condition'
+            - DELETE
+            - KEEP
+        - name: condition
           type: NestedObject
-          description: |-
-            Policy condition for matching versions.
+          description: Policy condition for matching versions.
           # TODO: exactly_one_of: condition, mostRecentVersions
           properties:
-            - name: 'tagState'
+            - name: tagState
               type: Enum
-              description: |-
-                Match versions by tag status.
-              default_value: "ANY"
+              description: Match versions by tag status.
+              default_value: ANY
               enum_values:
-                - 'TAGGED'
-                - 'UNTAGGED'
-                - 'ANY'
-            - name: 'tagPrefixes'
+                - TAGGED
+                - UNTAGGED
+                - ANY
+            - name: tagPrefixes
               type: Array
-              description: |-
-                Match versions by tag prefix. Applied on any prefix match.
+              description: Match versions by tag prefix. Applied on any prefix match.
               item_type:
                 type: String
-            - name: 'versionNamePrefixes'
+            - name: versionNamePrefixes
               type: Array
-              description: |-
-                Match versions by version name prefix. Applied on any prefix match.
+              description: Match versions by version name prefix. Applied on any prefix match.
               item_type:
                 type: String
-            - name: 'packageNamePrefixes'
+            - name: packageNamePrefixes
               type: Array
-              description: |-
-                Match versions by package prefix. Applied on any prefix match.
+              description: Match versions by package prefix. Applied on any prefix match.
               item_type:
                 type: String
-            - name: 'olderThan'
+            - name: olderThan
               type: String
-              description: |-
-                Match versions older than a duration.
-              custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
-              diff_suppress_func: 'durationDiffSuppress'
-            - name: 'newerThan'
+              description: Match versions older than a duration.
+              custom_expand: templates/terraform/custom_expand/duration_to_seconds.go.tmpl
+              diff_suppress_func: durationDiffSuppress
+            - name: newerThan
               type: String
-              description: |-
-                Match versions newer than a duration.
-              custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
-              diff_suppress_func: 'durationDiffSuppress'
-        - name: 'mostRecentVersions'
+              description: Match versions newer than a duration.
+              custom_expand: templates/terraform/custom_expand/duration_to_seconds.go.tmpl
+              diff_suppress_func: durationDiffSuppress
+        - name: mostRecentVersions
           type: NestedObject
           description: |-
             Policy condition for retaining a minimum number of versions. May only be
             specified with a Keep action.
           # TODO: exactly_one_of: condition, mostRecentVersions
           properties:
-            - name: 'packageNamePrefixes'
+            - name: packageNamePrefixes
               type: Array
-              description: |-
-                Match versions by package prefix. Applied on any prefix match.
+              description: Match versions by package prefix. Applied on any prefix match.
               item_type:
                 type: String
-            - name: 'keepCount'
+            - name: keepCount
               type: Integer
-              description: |-
-                Minimum number of versions to keep.
-  - name: 'remoteRepositoryConfig'
+              description: Minimum number of versions to keep.
+  - name: remoteRepositoryConfig
     type: NestedObject
-    description: |-
-      Configuration specific for a Remote Repository.
+    description: Configuration specific for a Remote Repository.
     immutable: true
     conflicts:
       - virtual_repository_config
     properties:
-      - name: 'description'
+      - name: description
         type: String
-        description: |-
-          The description of the remote source.
+        description: The description of the remote source.
         immutable: true
-      - name: 'aptRepository'
+      - name: aptRepository
         type: NestedObject
-        description: |-
-          Specific settings for an Apt remote repository.
+        description: Specific settings for an Apt remote repository.
         immutable: true
         exactly_one_of:
-          - 'remoteRepositoryConfig.0.apt_repository'
-          - 'remoteRepositoryConfig.0.docker_repository'
-          - 'remoteRepositoryConfig.0.maven_repository'
-          - 'remoteRepositoryConfig.0.npm_repository'
-          - 'remoteRepositoryConfig.0.python_repository'
-          - 'remoteRepositoryConfig.0.yum_repository'
-          - 'remoteRepositoryConfig.0.common_repository'
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+          - remoteRepositoryConfig.0.common_repository
         properties:
-          - name: 'publicRepository'
+          - name: publicRepository
             type: NestedObject
-            description: |-
-              One of the publicly available Apt repositories supported by Artifact Registry.
+            description: One of the publicly available Apt repositories supported by Artifact Registry.
             immutable: true
             properties:
-              - name: 'repositoryBase'
+              - name: repositoryBase
                 type: Enum
-                description: |-
-                  A common public repository base for Apt, e.g. `"debian/dists/stable"`
+                description: A common public repository base for Apt, e.g. `"debian/dists/stable"`
                 required: true
                 immutable: true
                 enum_values:
-                  - 'DEBIAN'
-                  - 'UBUNTU'
-                  - 'DEBIAN_SNAPSHOT'
-              - name: 'repositoryPath'
+                  - DEBIAN
+                  - UBUNTU
+                  - DEBIAN_SNAPSHOT
+              - name: repositoryPath
                 type: String
-                description: |-
-                  Specific repository from the base.
+                description: Specific repository from the base.
                 required: true
                 immutable: true
-      - name: 'dockerRepository'
+      - name: dockerRepository
         type: NestedObject
-        description: |-
-          Specific settings for a Docker remote repository.
+        description: Specific settings for a Docker remote repository.
         immutable: true
         exactly_one_of:
-          - 'remoteRepositoryConfig.0.apt_repository'
-          - 'remoteRepositoryConfig.0.docker_repository'
-          - 'remoteRepositoryConfig.0.maven_repository'
-          - 'remoteRepositoryConfig.0.npm_repository'
-          - 'remoteRepositoryConfig.0.python_repository'
-          - 'remoteRepositoryConfig.0.yum_repository'
-          - 'remoteRepositoryConfig.0.common_repository'
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+          - remoteRepositoryConfig.0.common_repository
         properties:
-          - name: 'publicRepository'
+          - name: publicRepository
             type: Enum
-            description: |-
-              Address of the remote repository.
+            description: Address of the remote repository.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.docker_repository.0.custom_repository
             enum_values:
-              - 'DOCKER_HUB'
-          - name: 'customRepository'
+              - DOCKER_HUB
+          - name: customRepository
             type: NestedObject
-            description: |-
-              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
+            description: '[Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.'
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.docker_repository.0.public_repository
             properties:
-              - name: 'uri'
+              - name: uri
                 type: String
-                description: |-
-                  Specific uri to the registry, e.g. `"https://registry-1.docker.io"`
+                description: Specific uri to the registry, e.g. `"https://registry-1.docker.io"`
                 immutable: true
-      - name: 'mavenRepository'
+      - name: mavenRepository
         type: NestedObject
-        description: |-
-          Specific settings for a Maven remote repository.
+        description: Specific settings for a Maven remote repository.
         immutable: true
         exactly_one_of:
-          - 'remoteRepositoryConfig.0.apt_repository'
-          - 'remoteRepositoryConfig.0.docker_repository'
-          - 'remoteRepositoryConfig.0.maven_repository'
-          - 'remoteRepositoryConfig.0.npm_repository'
-          - 'remoteRepositoryConfig.0.python_repository'
-          - 'remoteRepositoryConfig.0.yum_repository'
-          - 'remoteRepositoryConfig.0.common_repository'
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+          - remoteRepositoryConfig.0.common_repository
         properties:
-          - name: 'publicRepository'
+          - name: publicRepository
             type: Enum
-            description: |-
-              Address of the remote repository.
+            description: Address of the remote repository.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.maven_repository.0.custom_repository
             enum_values:
-              - 'MAVEN_CENTRAL'
-          - name: 'customRepository'
+              - MAVEN_CENTRAL
+          - name: customRepository
             type: NestedObject
-            description: |-
-              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
+            description: '[Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.'
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.maven_repository.0.public_repository
             properties:
-              - name: 'uri'
+              - name: uri
                 type: String
-                description: |-
-                  Specific uri to the registry, e.g. `"https://repo.maven.apache.org/maven2"`
+                description: Specific uri to the registry, e.g. `"https://repo.maven.apache.org/maven2"`
                 immutable: true
-      - name: 'npmRepository'
+      - name: npmRepository
         type: NestedObject
-        description: |-
-          Specific settings for an Npm remote repository.
+        description: Specific settings for an Npm remote repository.
         immutable: true
         exactly_one_of:
-          - 'remoteRepositoryConfig.0.apt_repository'
-          - 'remoteRepositoryConfig.0.docker_repository'
-          - 'remoteRepositoryConfig.0.maven_repository'
-          - 'remoteRepositoryConfig.0.npm_repository'
-          - 'remoteRepositoryConfig.0.python_repository'
-          - 'remoteRepositoryConfig.0.yum_repository'
-          - 'remoteRepositoryConfig.0.common_repository'
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+          - remoteRepositoryConfig.0.common_repository
         properties:
-          - name: 'publicRepository'
+          - name: publicRepository
             type: Enum
-            description: |-
-              Address of the remote repository.
+            description: Address of the remote repository.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.npm_repository.0.custom_repository
             enum_values:
-              - 'NPMJS'
-          - name: 'customRepository'
+              - NPMJS
+          - name: customRepository
             type: NestedObject
-            description: |-
-              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
+            description: '[Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.'
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.npm_repository.0.public_repository
             properties:
-              - name: 'uri'
+              - name: uri
                 type: String
-                description: |-
-                  Specific uri to the registry, e.g. `"https://registry.npmjs.org"`
+                description: Specific uri to the registry, e.g. `"https://registry.npmjs.org"`
                 immutable: true
-      - name: 'pythonRepository'
+      - name: pythonRepository
         type: NestedObject
-        description: |-
-          Specific settings for a Python remote repository.
+        description: Specific settings for a Python remote repository.
         immutable: true
         exactly_one_of:
-          - 'remoteRepositoryConfig.0.apt_repository'
-          - 'remoteRepositoryConfig.0.docker_repository'
-          - 'remoteRepositoryConfig.0.maven_repository'
-          - 'remoteRepositoryConfig.0.npm_repository'
-          - 'remoteRepositoryConfig.0.python_repository'
-          - 'remoteRepositoryConfig.0.yum_repository'
-          - 'remoteRepositoryConfig.0.common_repository'
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+          - remoteRepositoryConfig.0.common_repository
         properties:
-          - name: 'publicRepository'
+          - name: publicRepository
             type: Enum
-            description: |-
-              Address of the remote repository.
+            description: Address of the remote repository.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.python_repository.0.custom_repository
             enum_values:
-              - 'PYPI'
-          - name: 'customRepository'
+              - PYPI
+          - name: customRepository
             type: NestedObject
-            description: |-
-              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
+            description: '[Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.'
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.python_repository.0.public_repository
             properties:
-              - name: 'uri'
+              - name: uri
                 type: String
-                description: |-
-                  Specific uri to the registry, e.g. `"https://pypi.io"`
+                description: Specific uri to the registry, e.g. `"https://pypi.io"`
                 immutable: true
-      - name: 'yumRepository'
+      - name: yumRepository
         type: NestedObject
-        description: |-
-          Specific settings for an Yum remote repository.
+        description: Specific settings for an Yum remote repository.
         immutable: true
         exactly_one_of:
-          - 'remoteRepositoryConfig.0.apt_repository'
-          - 'remoteRepositoryConfig.0.docker_repository'
-          - 'remoteRepositoryConfig.0.maven_repository'
-          - 'remoteRepositoryConfig.0.npm_repository'
-          - 'remoteRepositoryConfig.0.python_repository'
-          - 'remoteRepositoryConfig.0.yum_repository'
-          - 'remoteRepositoryConfig.0.common_repository'
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+          - remoteRepositoryConfig.0.common_repository
         properties:
-          - name: 'publicRepository'
+          - name: publicRepository
             type: NestedObject
-            description: |-
-              One of the publicly available Yum repositories supported by Artifact Registry.
+            description: One of the publicly available Yum repositories supported by Artifact Registry.
             immutable: true
             properties:
-              - name: 'repositoryBase'
+              - name: repositoryBase
                 type: Enum
-                description: |-
-                  A common public repository base for Yum.
+                description: A common public repository base for Yum.
                 required: true
                 immutable: true
                 enum_values:
-                  - 'CENTOS'
-                  - 'CENTOS_DEBUG'
-                  - 'CENTOS_VAULT'
-                  - 'CENTOS_STREAM'
-                  - 'ROCKY'
-                  - 'EPEL'
-              - name: 'repositoryPath'
+                  - CENTOS
+                  - CENTOS_DEBUG
+                  - CENTOS_VAULT
+                  - CENTOS_STREAM
+                  - ROCKY
+                  - EPEL
+              - name: repositoryPath
                 type: String
-                description: |-
-                  Specific repository from the base, e.g. `"pub/rocky/9/BaseOS/x86_64/os"`
+                description: Specific repository from the base, e.g. `"pub/rocky/9/BaseOS/x86_64/os"`
                 required: true
                 immutable: true
-      - name: 'commonRepository'
+      - name: commonRepository
         type: NestedObject
-        description: |-
-          Specific settings for an Artifact Registory remote repository.
+        description: Specific settings for an Artifact Registory remote repository.
         immutable: true
         exactly_one_of:
-          - 'remoteRepositoryConfig.0.apt_repository'
-          - 'remoteRepositoryConfig.0.docker_repository'
-          - 'remoteRepositoryConfig.0.maven_repository'
-          - 'remoteRepositoryConfig.0.npm_repository'
-          - 'remoteRepositoryConfig.0.python_repository'
-          - 'remoteRepositoryConfig.0.yum_repository'
-          - 'remoteRepositoryConfig.0.common_repository'
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+          - remoteRepositoryConfig.0.common_repository
         properties:
-          - name: 'uri'
+          - name: uri
             type: String
             description: |-
               One of:
@@ -758,64 +749,61 @@ properties:
               c. URI to Artifact Registry Repository, e.g. `"https://REGION-docker.pkg.dev/UPSTREAM_PROJECT_ID/UPSTREAM_REPOSITORY"`
             immutable: true
             required: true
-      - name: 'upstreamCredentials'
+      - name: upstreamCredentials
         type: NestedObject
-        description: |-
-          The credentials used to access the remote repository.
+        description: The credentials used to access the remote repository.
         properties:
-          - name: 'usernamePasswordCredentials'
+          - name: usernamePasswordCredentials
             type: NestedObject
-            description: |-
-              Use username and password to access the remote repository.
+            description: Use username and password to access the remote repository.
             properties:
-              - name: 'username'
+              # Username is sensitive credentials and is never returned in CAI response payload.
+              - name: username
                 type: String
-                description: |-
-                  The username to access the remote repository.
-              - name: 'passwordSecretVersion'
+                is_missing_in_cai: true
+                description: The username to access the remote repository.
+              # PasswordSecretVersion is sensitive credentials and is never returned in CAI response payload.
+              - name: passwordSecretVersion
                 type: String
+                is_missing_in_cai: true
                 description: |-
                   The Secret Manager key version that holds the password to access the
                   remote repository. Must be in the format of
                   `projects/{project}/secrets/{secret}/versions/{version}`.
-      - name: 'disableUpstreamValidation'
+      - name: disableUpstreamValidation
         type: Boolean
         description: |-
           If true, the remote repository upstream and upstream credentials will
           not be validated.
         # Ignore read on this field because it is INPUT_ONLY.
         # Need to use custom flatten because ignore_read doesn't work with nested fields.
-        custom_flatten: 'templates/terraform/custom_flatten/artifactregistry_rr_disable_upstream_validation.go.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/artifactregistry_rr_disable_upstream_validation.go.tmpl
         is_missing_in_cai: true
-  - name: 'cleanupPolicyDryRun'
+  - name: cleanupPolicyDryRun
     type: Boolean
     description: |-
       If true, the cleanup pipeline is prevented from deleting versions in this
       repository.
-  - name: 'vulnerabilityScanningConfig'
+  - name: vulnerabilityScanningConfig
     type: NestedObject
-    description: |-
-      Configuration for vulnerability scanning of artifacts stored in this repository.
+    description: Configuration for vulnerability scanning of artifacts stored in this repository.
     default_from_api: true
     properties:
-      - name: 'enablementConfig'
+      - name: enablementConfig
         type: Enum
-        description: |-
-          This configures whether vulnerability scanning is automatically performed for artifacts pushed to this repository.
+        description: This configures whether vulnerability scanning is automatically performed for artifacts pushed to this repository.
         enum_values:
-          - 'INHERITED'
-          - 'DISABLED'
-      - name: 'enablementState'
+          - INHERITED
+          - DISABLED
+      - name: enablementState
         type: Enum
-        description: |-
-          This field returns whether scanning is active for this repository.
+        description: This field returns whether scanning is active for this repository.
         output: true
         enum_values:
-          - 'SCANNING_UNSUPPORTED'
-          - 'SCANNING_DISABLED'
-          - 'SCANNING_ACTIVE'
-      - name: 'enablementStateReason'
+          - SCANNING_UNSUPPORTED
+          - SCANNING_DISABLED
+          - SCANNING_ACTIVE
+      - name: enablementStateReason
         type: String
-        description: |-
-          This provides an explanation for the state of scanning on this repository.
+        description: This provides an explanation for the state of scanning on this repository.
         output: true

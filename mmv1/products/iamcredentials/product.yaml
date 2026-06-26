@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'IamCredentials'
-display_name: 'IAM Credentials'
-versions:
-  - name: 'ga'
-    base_url: 'https://iamcredentials.googleapis.com/v1/'
+name: IamCredentials
+display_name: IAM Credentials
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-identity'
+  - https://www.googleapis.com/auth/cloud-identity
+versions:
+  - name: ga
+    base_url: https://iamcredentials.googleapis.com/v1/

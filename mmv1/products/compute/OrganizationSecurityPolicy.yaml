@@ -40,19 +40,23 @@ custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 # excluding identity due to policy_id value inconsistency
 exclude_identity_generation: true
-examples:
+samples:
   - name: 'organization_security_policy_basic'
     primary_resource_id: 'policy'
-    vars:
-      short_name: "my-short-name"
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'organization_security_policy_basic'
+        resource_id_vars:
+          short_name: "my-short-name"
+        test_env_vars:
+          org_id: 'ORG_ID'
   - name: 'organization_security_policy_with_advanced_options'
     primary_resource_id: 'policy'
-    vars:
-      sec_policy_name: 'security-policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'organization_security_policy_with_advanced_options'
+        resource_id_vars:
+          sec_policy_name: 'security-policy'
+        test_env_vars:
+          org_id: 'ORG_ID'
 parameters:
   - name: 'parent'
     type: String

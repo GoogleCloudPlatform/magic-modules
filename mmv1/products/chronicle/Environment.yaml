@@ -14,9 +14,8 @@
 ---
 name: Environment
 description: >
-  An environment is logical container for different networks or customers that are managed by the SOC or MSSP.
-  This is useful for SOCs who provide services to several different networks, customers or business units within the organization.
-  The Platform comes with a predefined environment named Default Environment.
+  An environment is logical container for different networks or customers that are managed by the SOC or MSSP. This is useful for SOCs who provide services to several different networks, customers or business units within the organization. The Platform comes with a predefined environment named Default Environment.
+
 min_version: 'beta'
 references:
   guides:
@@ -30,12 +29,9 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments/{{environment_id}}
-
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/chronicle_environment.go.tmpl'
-
 autogen_status: RW52aXJvbm1lbnQ=
-
 samples:
   - name: chronicle_environment_update
     primary_resource_id: sample
@@ -51,18 +47,11 @@ samples:
           chronicle_id: 'CHRONICLE_ID'
         ignore_read_extra:
           - 'deletion_protection'
-
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean
     default_value: true
-    description: 'Whether Terraform will be prevented from destroying the environment.
-      Deleting an environment will remove all its data and all playbooks, environments,
-      integrations instances, reports and agents related to the environment.
-      Once you delete an environment, it cannot be reversed.
-      Deleting environments via terraform destroy or terraform apply will only
-      succeed if this field is false in the Terraform state.'
-
+    description: 'Whether Terraform will be prevented from destroying the environment. Deleting an environment will remove all its data and all playbooks, environments, integrations instances, reports and agents related to the environment. Once you delete an environment, it cannot be reversed. Deleting environments via terraform destroy or terraform apply will only succeed if this field is false in the Terraform state.'
 parameters:
   - name: location
     type: String

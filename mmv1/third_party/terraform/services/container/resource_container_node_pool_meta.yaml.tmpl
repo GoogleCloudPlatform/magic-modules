@@ -198,6 +198,10 @@ fields:
     api_field: 'config.kubeletConfig.imageMinimumGcAge'
   - field: 'node_config.kubelet_config.insecure_kubelet_readonly_port_enabled'
     api_field: 'config.kubeletConfig.insecureKubeletReadonlyPortEnabled'
+  - field: 'node_config.kubelet_config.shutdown_grace_period_seconds'
+    api_field: 'config.kubeletConfig.shutdownGracePeriodSeconds'
+  - field: 'node_config.kubelet_config.shutdown_grace_period_critical_pods_seconds'
+    api_field: 'config.kubeletConfig.shutdownGracePeriodCriticalPodsSeconds'
   - field: 'node_config.kubelet_config.max_parallel_image_pulls'
     api_field: 'config.kubeletConfig.maxParallelImagePulls'
   - field: 'node_config.kubelet_config.memory_manager.policy'
@@ -316,6 +320,8 @@ fields:
     api_field: 'config.taints.key'
   - field: 'node_config.taint.value'
     api_field: 'config.taints.value'
+  - field: 'node_config.taint_config.architecture_taint_behavior'
+    api_field: 'config.taintConfig.architectureTaintBehavior'
   - field: 'node_config.windows_node_config.osversion'
     api_field: 'config.windowsNodeConfig.osVersion'
   - field: 'node_config.workload_metadata_config.mode'
@@ -345,4 +351,6 @@ fields:
   - api_field: 'upgradeSettings.strategy'
   - api_field: 'version'
   - field: 'deletion_policy'
+    provider_only: true
+  - field: 'ignore_node_count_changes'
     provider_only: true

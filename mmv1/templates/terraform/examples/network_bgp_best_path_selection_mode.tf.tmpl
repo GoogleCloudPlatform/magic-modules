@@ -1,5 +1,0 @@
-resource "google_compute_network" "{{$.PrimaryResourceId}}" {
-  project                                   = "{{index $.TestEnvVars "project"}}"
-  name                                      = "{{index $.Vars "network_name"}}"
-  routing_mode                              = "GLOBAL"
-}

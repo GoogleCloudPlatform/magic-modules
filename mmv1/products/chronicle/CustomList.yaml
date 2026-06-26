@@ -15,6 +15,7 @@
 name: CustomList
 description: >
   The custom list is a list of objects, that can be saved as a shared resource, and can be used by playbooks.
+
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
@@ -27,9 +28,7 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists/{{custom_list_id}}
-
 autogen_status: Q3VzdG9tTGlzdA==
-
 samples:
   - name: chronicle_customlist_update
     primary_resource_id: sample
@@ -41,7 +40,6 @@ samples:
       - name: "chronicle_customlist_full"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
-
 parameters:
   - name: location
     type: String

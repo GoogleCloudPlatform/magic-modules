@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Dataform'
-display_name: 'Dataform'
-versions:
-  - name: 'ga'
-    base_url: 'https://dataform.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://dataform.googleapis.com/v1beta1/'
+name: Dataform
+display_name: Dataform
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://dataform.googleapis.com/v1/
+  - name: beta
+    base_url: https://dataform.googleapis.com/v1beta1/

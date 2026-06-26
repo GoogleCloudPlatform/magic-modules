@@ -1,9 +1,0 @@
-resource "google_migration_center_source" "default" {
-  location     = "us-central1"
-  source_id    = "{{index $.Vars "source_id"}}"
-  description  = "Terraform integration test description"
-  display_name = "Terraform integration test display"
-  priority     = 10
-  type         = "SOURCE_TYPE_CUSTOM"
-  managed      = false
-}

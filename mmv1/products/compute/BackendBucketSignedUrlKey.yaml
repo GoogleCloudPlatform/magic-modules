@@ -51,15 +51,17 @@ nested_query:
   modify_by_patch: false
 custom_code:
 exclude_tgc: true
-examples:
+samples:
   - name: 'backend_bucket_signed_url_key'
     primary_resource_id: 'backend_key'
-    vars:
-      key_name: 'test-key'
-      backend_name: 'test-signed-backend-bucket'
-      bucket_name: 'test-storage-bucket'
     external_providers: ["random", "time"]
     exclude_test: true
+    steps:
+      - name: 'backend_bucket_signed_url_key'
+        resource_id_vars:
+          key_name: 'test-key'
+          backend_name: 'test-signed-backend-bucket'
+          bucket_name: 'test-storage-bucket'
 parameters:
   - name: 'backendBucket'
     type: ResourceRef

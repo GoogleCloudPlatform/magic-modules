@@ -25,6 +25,7 @@ base_url: projects/{{project}}/global/machineImages
 min_version: beta
 immutable: true
 has_self_link: true
+generate_list_resource: true
 collection_url_key: items
 iam_policy:
   allowed_iam_role: roles/compute.admin
@@ -37,37 +38,43 @@ id_format: projects/{{project}}/global/machineImages/{{name}}
 async:
   operation:
     base_url: '{{op_id}}'
-examples:
+samples:
   - name: machine_image_basic
     primary_resource_id: image
-    vars:
-      image_name: my-image
-      vm_name: my-vm
+    steps:
+      - name: machine_image_basic
+        resource_id_vars:
+          image_name: my-image
+          vm_name: my-vm
   - name: compute_machine_image_kms
     primary_resource_id: image
     bootstrap_iam:
       - member: serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com
         role: roles/cloudkms.cryptoKeyEncrypterDecrypter
-    vars:
-      image_name: my-image
-      key_name: key
-      keyring_name: keyring
-      vm_name: my-vm
-    test_vars_overrides:
-      # for backward compatible
-      key_name: '"key" + randomSuffix'
-      # for backward compatible
-      keyring_name: '"keyring" + randomSuffix'
+    steps:
+      - name: compute_machine_image_kms
+        resource_id_vars:
+          image_name: my-image
+          key_name: key
+          keyring_name: keyring
+          vm_name: my-vm
+        test_vars_overrides:
+          # for backward compatible
+          key_name: '"key" + randomSuffix'
+          # for backward compatible
+          keyring_name: '"keyring" + randomSuffix'
   - name: machine_image_resource_manager_tags
     primary_resource_id: image
-    vars:
-      image_name: my-image
-      vm_name: my-vm
-      tag_key: tagkey
-      tag_value: tagvalue
-    test_vars_overrides:
-      'tag_key': '"tf-test-key-" + acctest.RandString(t, 10)'
-      'tag_value': '"tf-test-value-" + acctest.RandString(t, 10)'
+    steps:
+      - name: machine_image_resource_manager_tags
+        resource_id_vars:
+          image_name: my-image
+          vm_name: my-vm
+          tag_key: tagkey
+          tag_value: tagvalue
+        test_vars_overrides:
+          'tag_key': '"tf-test-key-" + acctest.RandString(t, 10)'
+          'tag_value': '"tf-test-value-" + acctest.RandString(t, 10)'
 properties:
   - name: name
     type: String

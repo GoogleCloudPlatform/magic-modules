@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'FirebaseDatabase'
-display_name: 'Firebase Realtime Database'
-versions:
-  - name: 'beta'
-    base_url: 'https://firebasedatabase.googleapis.com/v1beta/'
+name: FirebaseDatabase
+display_name: Firebase Realtime Database
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: beta
+    base_url: https://firebasedatabase.googleapis.com/v1beta/
