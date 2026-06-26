@@ -40,6 +40,8 @@ go build -o bin/convert-resource-template main.go
 * `-P, --skip-product <product_names>` (Optional): Comma-separated list of product directories to skip from migration.
 * `--only-migration` (Optional): Run only the migration steps (examples -> samples conversion, copy and migrate templates). Do not sort keys or format string quotes. Cannot be combined with `--only-format`.
 * `--only-format` (Optional): Run only the formatting steps (sort keys, strip string quotes). Do not migrate examples to samples or copy templates. Cannot be combined with `--only-migration`.
+* `--explicit-config-path` (Optional): Force writing `config_path` in step definition mappings during migration, even if they match the default generated template path or were not explicitly defined in the original YAML file.
+* `--eap` (Optional): Enable EAP private overrides repository migration. Forces EAP folder layout resolution and forces `--explicit-config-path` to be true.
 * `--skip-open-pr` (Optional): Skip files modified by active open PRs updated in the last N days (configured by `--skip-open-pr-days`).
 * `--skip-open-pr-days <days>` (Optional): Number of days of open PR history to verify when checking open PRs (defaults to `60`).
 
