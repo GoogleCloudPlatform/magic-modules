@@ -384,7 +384,6 @@ properties:
             - 'INTERNAL_MANAGED_LB'
         - name: 'targetForwardingRules'
           type: Array
-          required: false
           description: |
             A list of forwarding rules to which this rule applies.
             This field allows you to control which load balancers get this rule.
