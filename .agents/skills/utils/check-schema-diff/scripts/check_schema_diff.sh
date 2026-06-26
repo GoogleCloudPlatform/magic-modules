@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 #
-# check_breaking_changes.sh
+# check_schema_diff.sh
 #
-# Automates local breaking change detection for Magic Modules by comparing
-# the current working tree against a base branch (e.g., main).
+# Automates local schema difference checks (breaking changes, missing tests,
+# and missing documentation) for Magic Modules by comparing the current
+# working tree against a base branch (e.g., main).
 #
 # Usage:
-#   ./.agents/skills/utils/check-breaking-changes/scripts/check_breaking_changes.sh [base_ref]
+#   ./.agents/skills/utils/check-schema-diff/scripts/check_schema_diff.sh [base_ref]
 #
 
 set -e
@@ -18,7 +19,7 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}=== Magic Modules Breaking Changes Checker ===${NC}"
+echo -e "${BLUE}=== Magic Modules Schema Diff Checker ===${NC}"
 
 # 1. Validate environment
 if [ ! -d "mmv1" ] || [ ! -d "tools/diff-processor" ]; then
@@ -39,7 +40,7 @@ echo -e "${BLUE}Comparing current changes against base ref: ${YELLOW}${BASE_REF}
 PRODUCTS=$(git diff --name-only "$BASE_REF" | grep '^mmv1/products/' | cut -d'/' -f3 | sort -u || true)
 
 if [ -z "$PRODUCTS" ]; then
-  echo -e "${GREEN}No changes detected in mmv1/products/. Skipping breaking changes check.${NC}"
+  echo -e "${GREEN}No changes detected in mmv1/products/. Skipping schema diff checks.${NC}"
   exit 0
 fi
 
@@ -50,7 +51,7 @@ done
 
 # 4. Set up paths
 REPO_ROOT=$(pwd)
-SCRATCH_DIR="${REPO_ROOT}/scratch/breaking-changes-check"
+SCRATCH_DIR="${REPO_ROOT}/scratch/schema-diff-check"
 PROVIDER_CACHE="${REPO_ROOT}/scratch/provider-cache"
 DIFF_PROCESSOR_DIR="${REPO_ROOT}/tools/diff-processor"
 
@@ -136,7 +137,7 @@ echo -e "${BLUE}Preparing provider code for compilation...${NC}"
   
   real_package_name=github.com/hashicorp/terraform-provider-google-beta
   real_folder_name=google-beta
-
+  
   # Old package substitution
   cd old/
   if [ -d "google-beta" ]; then
@@ -175,27 +176,113 @@ echo -e "${BLUE}Preparing provider code for compilation...${NC}"
   go build -o ./bin/diff-processor .
 )
 
-# 11. Run the breaking changes check
-echo -e "${BLUE}Running breaking changes check...${NC}"
+# Helper function to check if the docs JSON output has missing docs
+has_missing_docs() {
+  local json="$1"
+  if command -v jq &> /dev/null; then
+    # Returns 0 (true) if there are missing docs, 1 (false) otherwise
+    echo "$json" | jq -e '(.Resource | length > 0) or (.DataSource | length > 0)' >/dev/null 2>&1
+    return $?
+  else
+    # Simple Python fallback to check if either list is non-empty
+    python3 -c "
+import sys, json
+data = json.loads(sys.argv[1])
+resources = data.get('Resource') or []
+datasources = data.get('DataSource') or []
+if len(resources) > 0 or len(datasources) > 0:
+    sys.exit(0)
+sys.exit(1)
+" "$json" 2>/dev/null
+    return $?
+  fi
+}
+
+HAS_ISSUES=0
+
+# 11. Run the checks
+
+# 11.1 Run breaking changes check
+echo -e "\n${BLUE}=== Running Breaking Changes Check ===${NC}"
 set +e
-OUTPUT=$("$DIFF_PROCESSOR_DIR/bin/diff-processor" breaking-changes 2>&1)
-EXIT_CODE=$?
+BREAKING_OUTPUT=$("$DIFF_PROCESSOR_DIR/bin/diff-processor" breaking-changes 2>&1)
+BREAKING_EXIT_CODE=$?
 set -e
 
-if [ $EXIT_CODE -ne 0 ]; then
-  echo -e "${RED}Error: diff-processor failed to run or encountered a compilation issue:${NC}"
-  echo "$OUTPUT"
-  exit $EXIT_CODE
+if [ $BREAKING_EXIT_CODE -ne 0 ]; then
+  echo -e "${RED}Error: diff-processor breaking-changes failed to run or encountered a compilation issue:${NC}"
+  echo "$BREAKING_OUTPUT"
+  exit $BREAKING_EXIT_CODE
 fi
 
-if [ -z "$OUTPUT" ] || [ "$OUTPUT" == "[]" ] || [ "$OUTPUT" == "null" ]; then
-  echo -e "${GREEN}No breaking changes detected! ${NC}"
-else
+if [ -n "$BREAKING_OUTPUT" ] && [ "$BREAKING_OUTPUT" != "[]" ] && [ "$BREAKING_OUTPUT" != "null" ]; then
   echo -e "${RED}Breaking changes detected!${NC}"
   if command -v jq &> /dev/null; then
-    echo "$OUTPUT" | jq .
+    echo "$BREAKING_OUTPUT" | jq .
   else
-    echo "$OUTPUT" | python3 -m json.tool
+    echo "$BREAKING_OUTPUT" | python3 -m json.tool
   fi
+  HAS_ISSUES=1
+else
+  echo -e "${GREEN}No breaking changes detected!${NC}"
+fi
+
+# 11.2 Run missing tests check
+echo -e "\n${BLUE}=== Running Missing Tests Check ===${NC}"
+set +e
+TESTS_OUTPUT=$("$DIFF_PROCESSOR_DIR/bin/diff-processor" detect-missing-tests "$DIFF_PROCESSOR_DIR/new/google/services" 2>&1)
+TESTS_EXIT_CODE=$?
+set -e
+
+if [ $TESTS_EXIT_CODE -ne 0 ]; then
+  echo -e "${RED}Error: diff-processor detect-missing-tests failed to run:${NC}"
+  echo "$TESTS_OUTPUT"
+  exit $TESTS_EXIT_CODE
+fi
+
+if [ -n "$TESTS_OUTPUT" ] && [ "$TESTS_OUTPUT" != "{}" ] && [ "$TESTS_OUTPUT" != "null" ]; then
+  echo -e "${YELLOW}Missing tests detected!${NC}"
+  if command -v jq &> /dev/null; then
+    echo "$TESTS_OUTPUT" | jq .
+  else
+    echo "$TESTS_OUTPUT" | python3 -m json.tool
+  fi
+  HAS_ISSUES=1
+else
+  echo -e "${GREEN}No missing tests detected!${NC}"
+fi
+
+# 11.3 Run missing documentation check
+echo -e "\n${BLUE}=== Running Missing Documentation Check ===${NC}"
+set +e
+DOCS_OUTPUT=$("$DIFF_PROCESSOR_DIR/bin/diff-processor" detect-missing-docs "$DIFF_PROCESSOR_DIR/new" 2>&1)
+DOCS_EXIT_CODE=$?
+set -e
+
+if [ $DOCS_EXIT_CODE -ne 0 ]; then
+  echo -e "${RED}Error: diff-processor detect-missing-docs failed to run:${NC}"
+  echo "$DOCS_OUTPUT"
+  exit $DOCS_EXIT_CODE
+fi
+
+if has_missing_docs "$DOCS_OUTPUT"; then
+  echo -e "${YELLOW}Missing documentation detected!${NC}"
+  if command -v jq &> /dev/null; then
+    echo "$DOCS_OUTPUT" | jq .
+  else
+    echo "$DOCS_OUTPUT" | python3 -m json.tool
+  fi
+  HAS_ISSUES=1
+else
+  echo -e "${GREEN}No missing documentation detected!${NC}"
+fi
+
+# 12. Final status report
+echo -e "\n${BLUE}===========================================${NC}"
+if [ $HAS_ISSUES -eq 1 ]; then
+  echo -e "${RED}=== Schema change checks failed! ===${NC}"
   exit 1
+else
+  echo -e "${GREEN}=== All schema change checks passed successfully! ===${NC}"
+  exit 0
 fi
