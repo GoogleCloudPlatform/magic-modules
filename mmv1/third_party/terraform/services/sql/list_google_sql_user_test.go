@@ -45,6 +45,7 @@ func TestAccSqlUserListResource_queryIdentity(t *testing.T) {
 						"name":     knownvalue.StringExact(name),
 						"instance": knownvalue.StringExact(instance),
 						"project":  knownvalue.StringExact(project),
+						"host":     knownvalue.StringExact(""),
 					}),
 					querycheck.ExpectLengthAtLeast("google_sql_user.all_in_instance", 1),
 				},
