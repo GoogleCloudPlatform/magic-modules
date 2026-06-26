@@ -1,25 +1,17 @@
 // Helper functions for the SemanticGovernancePolicyEngine (SGPE) resource,
 // referenced from the resource YAML's custom_code.constants key.
 
-// sgpePostReadDispatch implements the 6-way state translation for the
-// SemanticGovernancePolicyEngine Read flow. It runs after the standard
-// Read has fetched the engine and stored the response in `res`, but
-// before the schema fields are populated from `res` (per resource.go.tmpl
-// ordering).
+// sgpePostReadDispatch runs after the standard Read has fetched the engine
+// into `res`, but before the schema is flattened from it (per resource.go.tmpl
+// ordering). The API returns 200 + INACTIVE (not 404) for a deprovisioned or
+// uninitialized singleton, so this translates INACTIVE into "gone" by clearing
+// the ID; every other state is left in state. A missing or non-string `state`
+// is a backend contract break and returns an error.
 //
-// State -> behavior table:
-//
-//	ACTIVE, FAILED                  -> populate schema, return nil
-//	PROVISIONING, DEPROVISIONING    -> populate schema, emit [WARN], return nil
-//	INACTIVE                        -> SetId(""), emit [WARN], return nil
-//	STATE_UNSPECIFIED, unrecognized -> populate schema, emit [WARN], return nil
-//	missing / non-string state      -> return error (backend contract break)
-//
-// The function reads `res["state"]` directly because the standard schema
-// flatten has not yet populated d.Get("state") at the point post_read runs.
-//
-// It accepts the minimal sgpeResourceID interface rather than
-// *schema.ResourceData so that unit tests can substitute a fake.
+// It reads `res["state"]` directly because the schema flatten has not yet
+// populated d.Get("state") at this point, and accepts the minimal
+// sgpeResourceID interface rather than *schema.ResourceData so unit tests can
+// substitute a fake.
 type sgpeResourceID interface {
 	Id() string
 	SetId(string)
@@ -30,28 +22,13 @@ func sgpePostReadDispatch(d sgpeResourceID, res map[string]interface{}) error {
 	if !ok {
 		return fmt.Errorf("SGPE response is missing or has malformed state field; backend regression.")
 	}
-
-	switch state {
-	case "ACTIVE", "FAILED":
-		// Standard flatten will populate the schema below; nothing to do here.
-		return nil
-	case "PROVISIONING":
-		log.Printf("[WARN] SemanticGovernancePolicyEngine %q is in PROVISIONING state; treating as in-flight transient (continuing with current state)", d.Id())
-		return nil
-	case "DEPROVISIONING":
-		log.Printf("[WARN] SemanticGovernancePolicyEngine %q is in DEPROVISIONING state; treating as in-flight transient (continuing with current state)", d.Id())
-		return nil
-	case "INACTIVE":
-		log.Printf("[WARN] SemanticGovernancePolicyEngine %q is in INACTIVE state; treating as deleted; next apply will plan re-create", d.Id())
+	// Only INACTIVE clears the ID (treat as deleted; next apply re-creates).
+	// Every other state — including unrecognized ones a newer backend may
+	// add — is left in state, so a plan/refresh never errors on an
+	// unfamiliar state.
+	if state == "INACTIVE" {
+		log.Printf("[WARN] SemanticGovernancePolicyEngine %q is INACTIVE; treating as deleted, next apply will re-create", d.Id())
 		d.SetId("")
-		return nil
-	default:
-		// STATE_UNSPECIFIED or any unrecognized enum value. Treat as
-		// in-state (like ACTIVE), NOT as an error: a beta backend may add
-		// new states, and erroring here would fail every plan/refresh/
-		// destroy until the provider is upgraded. We do not clear the ID
-		// (only explicit INACTIVE does), so there is no destructive re-create.
-		log.Printf("[WARN] SemanticGovernancePolicyEngine %q returned unrecognized state %q; treating as in-state. Upgrade terraform-provider-google if this persists.", d.Id(), state)
-		return nil
 	}
+	return nil
 }

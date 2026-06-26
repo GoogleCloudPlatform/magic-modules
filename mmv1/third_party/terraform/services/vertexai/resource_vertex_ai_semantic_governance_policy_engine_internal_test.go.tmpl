@@ -61,8 +61,6 @@ func TestUnitSGPE_PostReadDispatch_malformedState_return_error(t *testing.T) {
 // The no-op branch of the post_read contract: for every non-INACTIVE
 // state the ID is left intact, so Terraform keeps the resource and does
 // not plan a re-create. (Only INACTIVE clears the ID — see the test above.)
-// Per-state [WARN] logging lives in sgpePostReadDispatch and is not
-// asserted here.
 func TestUnitSGPE_PostReadDispatch_inStateBranches_no_op(t *testing.T) {
 	t.Parallel()
 	for _, state := range []string{"ACTIVE", "FAILED", "PROVISIONING", "DEPROVISIONING", "STATE_UNSPECIFIED", "FUTURE_VALUE_NOT_YET_SUPPORTED"} {
