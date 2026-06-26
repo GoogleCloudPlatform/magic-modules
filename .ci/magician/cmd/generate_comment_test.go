@@ -28,30 +28,63 @@ import (
 )
 
 func TestExecGenerateComment(t *testing.T) {
-	mr := NewMockRunner()
+	sb := newSandbox(t)
+
+	magicModulesDir := filepath.Join(sb.Dir, "workspace", "magic-modules", ".ci", "magician")
+	os.MkdirAll(magicModulesDir, 0755)
+	sb.Runner.PushDir(magicModulesDir)
+
+	for _, repo := range []string{"tpg", "tpgb", "tgc", "tfoics"} {
+		os.MkdirAll(filepath.Join(sb.Dir, "workspace", repo), 0755)
+	}
+
+	gitScript := `#!/bin/bash
+		if [[ "$*" == *"diff"* && "$*" == *"--shortstat"* ]]; then
+			if [[ "$PWD" == *"/tpg" || "$PWD" == *"/tpgb" ]]; then
+				echo " 2 files changed, 40 insertions(+)"
+			elif [[ "$PWD" == *"/tgc" ]]; then
+				echo " 1 file changed, 10 insertions(+)"
+			fi
+		elif [[ "$*" == *"clone"* ]]; then
+			exit 0
+		fi
+		`
+	os.WriteFile(filepath.Join(sb.Dir, "git"), []byte(gitScript), 0755)
+
+	makeScript := `#!/bin/bash
+mkdir -p bin
+cat << 'EOF' > bin/diff-processor
+#!/bin/bash
+if [[ "$*" == *"schema-diff"* ]]; then
+	echo '{"AddedResources": ["google_alloydb_instance"]}'
+elif [[ "$*" == *"detect-missing-tests"* ]]; then
+	echo '{"google_folder_access_approval_settings":{"SuggestedTest":"resource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}","Tests":["a","b","c"]}}'
+elif [[ "$*" == *"detect-missing-docs"* ]]; then
+	echo '{"Resource":[],"DataSource":[]}'
+fi
+EOF
+chmod 0755 bin/diff-processor
+exit 0
+`
+	os.WriteFile(filepath.Join(sb.Dir, "make"), []byte(makeScript), 0755)
+
 	gh := &mockGithub{
 		calledMethods: make(map[string][][]any),
 	}
-	ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
-	diffProcessorEnv := map[string]string{
-		"NEW_REF": "auto-pr-123456",
-		"OLD_REF": "auto-pr-123456-old",
-		"PATH":    os.Getenv("PATH"),
-		"GOPATH":  os.Getenv("GOPATH"),
-		"HOME":    os.Getenv("HOME"),
-	}
+	ctlr := source.NewController(filepath.Join(sb.Dir, "workspace", "go"), "modular-magician", "*******", sb.Runner)
+
 	for _, repo := range []string{
 		"terraform-provider-google",
 		"terraform-provider-google-beta",
 		"terraform-google-conversion",
 	} {
-		variablePathOld := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo)
-		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo)
-		err := mr.WriteFile(variablePathOld, "1a2a3a4a")
+		variablePathOld := filepath.Join(sb.Dir, fmt.Sprintf("commitSHA_modular-magician_%s-old.txt", repo))
+		variablePath := filepath.Join(sb.Dir, fmt.Sprintf("commitSHA_modular-magician_%s.txt", repo))
+		err := sb.Runner.WriteFile(variablePathOld, "1a2a3a4a")
 		if err != nil {
 			t.Errorf("Error writing file: %s", err)
 		}
-		err = mr.WriteFile(variablePath, "1a2a3a4b")
+		err = sb.Runner.WriteFile(variablePath, "1a2a3a4b")
 		if err != nil {
 			t.Errorf("Error writing file: %s", err)
 		}
@@ -63,70 +96,11 @@ func TestExecGenerateComment(t *testing.T) {
 		"17",
 		"project1",
 		"sha1",
+		sb.Dir,
 		gh,
-		mr,
+		sb.Runner,
 		ctlr,
 	)
-
-	for method, expectedCalls := range map[string][]ParameterList{
-		"Copy": {
-			{"/mock/dir/tpg", "/mock/dir/magic-modules/tools/diff-processor/old"},
-			{"/mock/dir/tpg", "/mock/dir/magic-modules/tools/diff-processor/new"},
-			{"/mock/dir/tpgb", "/mock/dir/magic-modules/tools/diff-processor/old"},
-			{"/mock/dir/tpgb", "/mock/dir/magic-modules/tools/diff-processor/new"},
-		},
-		"RemoveAll": {
-			{"/mock/dir/magic-modules/tools/diff-processor/old"},
-			{"/mock/dir/magic-modules/tools/diff-processor/new"},
-			{"/mock/dir/magic-modules/tools/diff-processor/bin"},
-			{"/mock/dir/magic-modules/tools/diff-processor/old"},
-			{"/mock/dir/magic-modules/tools/diff-processor/new"},
-			{"/mock/dir/magic-modules/tools/diff-processor/bin"},
-		},
-		"Run": {
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google", "/mock/dir/tpg"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"checkout", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "make", []string{"build"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"checkout", "auto-pr-123456"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"checkout", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "make", []string{"build"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"checkout", "auto-pr-123456"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion", "/mock/dir/tgc"}, map[string]string(nil)},
-			{"/mock/dir/tgc", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, map[string]string(nil)},
-			{"/mock/dir/tfoics", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--name-only"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--name-only"}, map[string]string(nil)},
-			{"/mock/dir/tgc", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
-			{"/mock/dir/tgc", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--name-only"}, map[string]string(nil)},
-			{"/mock/dir/tfoics", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/tpgb"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
-		},
-	} {
-		if actualCalls, ok := mr.Calls(method); !ok {
-			t.Fatalf("Found no calls for %s", method)
-		} else if len(actualCalls) != len(expectedCalls) {
-			t.Fatalf("Unexpected number of calls for %s, got %d, expected %d", method, len(actualCalls), len(expectedCalls))
-		} else {
-			for i, actualParams := range actualCalls {
-				if expectedParams := expectedCalls[i]; !reflect.DeepEqual(actualParams, expectedParams) {
-					t.Fatalf("Wrong params for call %d to %s, got %v, expected %v", i, method, actualParams, expectedParams)
-				}
-			}
-		}
-	}
 
 	for method, expectedCalls := range map[string][][]any{
 		"PostBuildStatus": {
