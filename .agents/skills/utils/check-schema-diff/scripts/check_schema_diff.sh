@@ -36,20 +36,7 @@ fi
 
 echo -e "${BLUE}Comparing current changes against base ref: ${YELLOW}${BASE_REF}${NC}"
 
-# 3. Detect changed products
-PRODUCTS=$(git diff --name-only "$BASE_REF" | grep '^mmv1/products/' | cut -d'/' -f3 | sort -u || true)
-
-if [ -z "$PRODUCTS" ]; then
-  echo -e "${GREEN}No changes detected in mmv1/products/. Skipping schema diff checks.${NC}"
-  exit 0
-fi
-
-echo -e "${BLUE}Detected changed products:${NC}"
-for PRODUCT in $PRODUCTS; do
-  echo -e "  - ${YELLOW}${PRODUCT}${NC}"
-done
-
-# 4. Set up paths
+# 3. Set up paths
 REPO_ROOT=$(pwd)
 SCRATCH_DIR="${REPO_ROOT}/scratch/schema-diff-check"
 PROVIDER_CACHE="${REPO_ROOT}/scratch/provider-cache"
@@ -57,7 +44,7 @@ DIFF_PROCESSOR_DIR="${REPO_ROOT}/tools/diff-processor"
 
 mkdir -p "$SCRATCH_DIR"
 
-# 5. Set up cleanup trap to ensure we never leave git worktrees behind
+# 4. Set up cleanup trap to ensure we never leave git worktrees behind
 cleanup() {
   echo -e "${BLUE}Cleaning up temporary files and worktrees...${NC}"
   if [ -d "$SCRATCH_DIR/mm-base-worktree" ]; then
@@ -88,7 +75,7 @@ sys.exit(1)
   fi
 }
 
-# 6. Build current mmv1 binary in the current context (once for all checks)
+# 5. Build current mmv1 binary in the current context (once for all checks)
 echo -e "${BLUE}Building current mmv1 binary...${NC}"
 if [ -f "MODULE.bazel" ] && command -v bazel &> /dev/null; then
   bazel build //mmv1
@@ -101,14 +88,13 @@ else
   MM_BINARY="$(pwd)/bin/mmv1"
 fi
 
-# 7. Create temporary worktree for base commit (once for all checks)
+# 6. Create temporary worktree for base commit (once for all checks)
 echo -e "${BLUE}Creating temporary worktree for base commit ${YELLOW}${BASE_REF}${BLUE}...${NC}"
 WORKTREE_DIR="$SCRATCH_DIR/mm-base-worktree"
 rm -rf "$WORKTREE_DIR"
 git worktree add --detach "$WORKTREE_DIR" "$BASE_REF"
 
-# Construct a comma-separated list of changed products
-PRODUCT_LIST=$(echo "$PRODUCTS" | tr '\n' ',' | sed 's/,$//')
+
 
 run_version_checks() {
   local VERSION="$1"
@@ -158,23 +144,17 @@ run_version_checks() {
   cp -R "$PROVIDER_CACHE" "$TARGET_DIFF_PROC/old"
   cp -R "$PROVIDER_CACHE" "$TARGET_DIFF_PROC/new"
 
-  # Clean target provider directories for changed products
-  for PRODUCT in $PRODUCTS; do
-    rm -rf "$TARGET_DIFF_PROC/old/${REAL_FOLDER_NAME}/services/${PRODUCT}"
-    rm -rf "$TARGET_DIFF_PROC/new/${REAL_FOLDER_NAME}/services/${PRODUCT}"
-  done
-
   # Generate base and current provider code in parallel
   echo -e "${BLUE}[${VERSION_UPPER}] Generating base and current provider code...${NC}"
   (
     cd mmv1
-    $MM_BINARY --output "$TARGET_DIFF_PROC/old" --version "$VERSION" --product "$PRODUCT_LIST" --base "${WORKTREE_DIR}/mmv1"
+    $MM_BINARY --output "$TARGET_DIFF_PROC/old" --version "$VERSION" --base "${WORKTREE_DIR}/mmv1"
   ) &
   local OLD_GEN_PID=$!
 
   (
     cd mmv1
-    $MM_BINARY --output "$TARGET_DIFF_PROC/new" --version "$VERSION" --product "$PRODUCT_LIST"
+    $MM_BINARY --output "$TARGET_DIFF_PROC/new" --version "$VERSION"
   ) &
   local NEW_GEN_PID=$!
 
@@ -338,7 +318,7 @@ echo -e "${BLUE}=== Beta Provider Schema Diff Results ===${NC}"
 echo -e "${BLUE}=====================================================${NC}"
 cat "$SCRATCH_DIR/check-beta.log"
 
-# 8. Final status report
+# 7. Final status report
 echo -e "\n${BLUE}===========================================${NC}"
 if [ $GA_STATUS -ne 0 ] || [ $BETA_STATUS -ne 0 ]; then
   echo -e "${RED}=== Schema change checks failed! ===${NC}"
