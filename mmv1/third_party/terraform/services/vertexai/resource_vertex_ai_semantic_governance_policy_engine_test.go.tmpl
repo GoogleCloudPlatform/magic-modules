@@ -15,18 +15,9 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// TestAccVertexAISemanticGovernancePolicyEngine_lifecycle exercises the
-// SGPE Create + Import + Deprovision lifecycle in one envelope:
-//
-//	Step 1: Apply basic fixture        (Create LRO ~5-45 min)
-//	Step 2: ImportStateVerify          (no LRO, just round-trip)
-//	CheckDestroy: invokes custom_delete (Deprovision LRO ~5-45 min)
-//
-// Pattern source: TestAccVertexAIFeatureGroup_updated in
-// resource_vertex_ai_feature_group_test.go.
-//
-// Handwritten acceptance coverage (the generated example is exclude_test —
-// see the YAML for why). CI runs this because it is a new TestAcc function.
+// Handwritten lifecycle test (Create + Import; deprovision via CheckDestroy).
+// The generated example is exclude_test — see the singleton-aware
+// CheckDestroy below for why.
 func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 	t.Parallel()
 
@@ -34,7 +25,7 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckVertexAISemanticGovernancePolicyEngineDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -67,13 +58,10 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 }
 
 func testAccVertexAISemanticGovernancePolicyEngine_basic(context map[string]interface{}) string {
-	// No `provider = google-beta`: the beta test binary registers the muxed
-	// beta provider under the default name "google", so naming google-beta
-	// here would force a registry install and fail CI on the dependency lock
-	// file. (The example .tf keeps google-beta, which is correct for docs.)
 	return acctest.Nprintf(`
 resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
-  region = "us-central1"
+  provider = google-beta
+  region   = "us-central1"
 }
 `, context)
 }
@@ -95,10 +83,7 @@ func testAccCheckVertexAISemanticGovernancePolicyEngineDestroyProducer(t *testin
 
 			config := acctest.GoogleProviderConfig(t)
 
-			// Build the URL via Sprintf rather than the {{"{{"}}VertexAIBasePath{{"}}"}}
-			// placeholder: ReplaceVarsForTest is single-pass and would not
-			// rescan the {{"{{"}}region{{"}}"}} nested inside an expanded base path.
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(registry.GetProduct("vertexai"), config), "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/semanticGovernancePolicyEngine"))
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(registry.GetProduct("vertexai"), config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/semanticGovernancePolicyEngine")
 			if err != nil {
 				return err
 			}
