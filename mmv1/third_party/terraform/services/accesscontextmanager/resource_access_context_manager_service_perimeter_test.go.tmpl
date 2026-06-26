@@ -544,15 +544,14 @@ func testAccAccessContextManagerServicePerimeter_nonGcpServicePatternsTest(t *te
 
 func testAccAccessContextManagerServicePerimeter_nonGcpServicePatterns(org, policyTitle, levelTitleName, perimeterTitleName string) string {
 	return fmt.Sprintf(`
-# Access Policy Title: %s
-
-data "google_access_context_manager_access_policy" "test-access" {
+resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
+  title  = "%s"
 }
 
 resource "google_access_context_manager_access_level" "test-access" {
-  parent   = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}"
-  name     = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}/accessLevels/%s"
+  parent   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  name     = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/%s"
   title    = "%s"
   basic {
     conditions {
@@ -562,9 +561,33 @@ resource "google_access_context_manager_access_level" "test-access" {
 }
 
 resource "google_access_context_manager_service_perimeter" "test-access" {
-  parent   = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}"
-  name     = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}/servicePerimeters/%s"
+  parent   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  name     = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/servicePerimeters/%s"
   title    = "%s"
+
+  use_explicit_dry_run_spec = true
+
+  spec {
+    access_levels = [google_access_context_manager_access_level.test-access.name]
+    
+    vpc_accessible_services {
+      enable_restriction = true
+      allowed_services   = ["RESTRICTED-SERVICES"]
+      
+      service_patterns_enforcement_scopes = ["GOOGLE_APIS_VIA_PRIVATE_PATH"]
+      allowed_service_patterns {
+        service = "maps.googleapis.com"
+        pattern = "maps.googleapis.com/*"
+        modifiers {
+          add_request_header {
+            key   = "X-GoogApps-Allowed-Domains"
+            value = "google.com"
+          }
+        }
+      }
+    }
+  }
+
   status {
     access_levels = [google_access_context_manager_access_level.test-access.name]
     
@@ -574,6 +597,7 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
       
       service_patterns_enforcement_scopes = ["GOOGLE_APIS_VIA_PRIVATE_PATH"]
       allowed_service_patterns {
+        service = "maps.googleapis.com"
         pattern = "maps.googleapis.com/*"
         modifiers {
           add_request_header {
@@ -585,7 +609,7 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
     }
   }
 }
-`, policyTitle, org, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName)
+`, org, policyTitle, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName)
 }
 
 // ----------------- Plural Test Case -----------------
@@ -612,15 +636,14 @@ func testAccAccessContextManagerServicePerimeters_nonGcpServicePatternsTest(t *t
 
 func testAccAccessContextManagerServicePerimeters_nonGcpServicePatterns(org, policyTitle, levelTitleName, perimeterTitleName string) string {
 	return fmt.Sprintf(`
-# Access Policy Title: %s
-
-data "google_access_context_manager_access_policy" "test-access" {
+resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
+  title  = "%s"
 }
 
 resource "google_access_context_manager_access_level" "test-access" {
-  parent   = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}"
-  name     = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}/accessLevels/%s"
+  parent   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  name     = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/%s"
   title    = "%s"
   basic {
     conditions {
@@ -630,11 +653,35 @@ resource "google_access_context_manager_access_level" "test-access" {
 }
 
 resource "google_access_context_manager_service_perimeters" "test-access" {
-  parent   = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}"
+  parent   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  
+  use_explicit_dry_run_spec = true
 
   service_perimeters {
-    name           = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}/servicePerimeters/%s"
+    name           = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/servicePerimeters/%s"
     title          = "%s"
+
+    spec {
+      access_levels = [google_access_context_manager_access_level.test-access.name]
+      
+      vpc_accessible_services {
+        enable_restriction = true
+        allowed_services   = ["RESTRICTED-SERVICES"]
+        
+        service_patterns_enforcement_scopes = ["GOOGLE_APIS_VIA_PRIVATE_PATH"]
+        allowed_service_patterns {
+          service = "maps.googleapis.com"
+          pattern = "maps.googleapis.com/*"
+          modifiers {
+            add_request_header {
+              key   = "X-GoogApps-Allowed-Domains"
+              value = "google.com"
+            }
+          }
+        }
+      }
+    }
+
     status {
       access_levels = [google_access_context_manager_access_level.test-access.name]
       
@@ -644,6 +691,7 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
         
         service_patterns_enforcement_scopes = ["GOOGLE_APIS_VIA_PRIVATE_PATH"]
         allowed_service_patterns {
+          service = "maps.googleapis.com"
           pattern = "maps.googleapis.com/*"
           modifiers {
             add_request_header {
@@ -656,5 +704,5 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
     }
   }
 }
-`, policyTitle, org, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName)
+`, org, policyTitle, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName)
 }
