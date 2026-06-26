@@ -113,26 +113,29 @@ else
   MM_BINARY="$(pwd)/bin/mmv1"
 fi
 
-# 9. Generate "Old" (Base) Provider Code
+# 9. Generate "Old" (Base) and "New" (Current) Provider Code in Parallel
 echo -e "${BLUE}Creating temporary worktree for base commit ${YELLOW}${BASE_REF}${BLUE}...${NC}"
 WORKTREE_DIR="$SCRATCH_DIR/mm-base-worktree"
 rm -rf "$WORKTREE_DIR"
 git worktree add --detach "$WORKTREE_DIR" "$BASE_REF"
 
-echo -e "${BLUE}Generating base provider code for products: ${YELLOW}${PRODUCT_LIST}${BLUE}...${NC}"
+echo -e "${BLUE}Generating base and current provider code in parallel for products: ${YELLOW}${PRODUCT_LIST}${BLUE}...${NC}"
 (
   cd mmv1
   $MM_BINARY --output "$DIFF_PROCESSOR_DIR/old" --version beta --product "$PRODUCT_LIST" --base "${WORKTREE_DIR}/mmv1"
-)
+) &
+OLD_GEN_PID=$!
 
-# 10. Generate "New" (Current) Provider Code
-echo -e "${BLUE}Generating current provider code for products: ${YELLOW}${PRODUCT_LIST}${BLUE}...${NC}"
 (
   cd mmv1
   $MM_BINARY --output "$DIFF_PROCESSOR_DIR/new" --version beta --product "$PRODUCT_LIST"
-)
+) &
+NEW_GEN_PID=$!
 
-# 10. Perform package substitutions for side-by-side compilation
+wait $OLD_GEN_PID
+wait $NEW_GEN_PID
+
+# 10. Perform package substitutions for side-by-side compilation in parallel
 echo -e "${BLUE}Preparing provider code for compilation...${NC}"
 (
   cd "$DIFF_PROCESSOR_DIR"
@@ -141,37 +144,45 @@ echo -e "${BLUE}Preparing provider code for compilation...${NC}"
   real_folder_name=google-beta
   
   # Old package substitution
-  cd old/
-  if [ -d "google-beta" ]; then
-    mv google-beta google
-  fi
-  fake_package_name=google/provider/old
+  (
+    cd old/
+    if [ -d "google-beta" ]; then
+      mv google-beta google
+    fi
+    fake_package_name=google/provider/old
 
-  if [ "$(uname)" = "Darwin" ]; then
-    find . -type f -name "*.go" -exec sed -i "" "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
-    sed -i "" "s|${real_package_name}|${fake_package_name}|g" go.mod
-  else
-    find . -type f -name "*.go" -exec sed -i "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
-    sed -i "s|${real_package_name}|${fake_package_name}|g" go.mod
-  fi
+    if [ "$(uname)" = "Darwin" ]; then
+      find . -type f -name "*.go" -exec sed -i "" "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
+      sed -i "" "s|${real_package_name}|${fake_package_name}|g" go.mod
+    else
+      find . -type f -name "*.go" -exec sed -i "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
+      sed -i "s|${real_package_name}|${fake_package_name}|g" go.mod
+    fi
+  ) &
+  OLD_SUB_PID=$!
   
   # New package substitution
-  cd ../new/
-  if [ -d "google-beta" ]; then
-    mv google-beta google
-  fi
-  fake_package_name=google/provider/new
+  (
+    cd new/
+    if [ -d "google-beta" ]; then
+      mv google-beta google
+    fi
+    fake_package_name=google/provider/new
 
-  if [ "$(uname)" = "Darwin" ]; then
-    find . -type f -name "*.go" -exec sed -i "" "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
-    sed -i "" "s|${real_package_name}|${fake_package_name}|g" go.mod
-  else
-    find . -type f -name "*.go" -exec sed -i "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
-    sed -i "s|${real_package_name}|${fake_package_name}|g" go.mod
-  fi
+    if [ "$(uname)" = "Darwin" ]; then
+      find . -type f -name "*.go" -exec sed -i "" "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
+      sed -i "" "s|${real_package_name}|${fake_package_name}|g" go.mod
+    else
+      find . -type f -name "*.go" -exec sed -i "s~${real_package_name}/${real_folder_name}~${fake_package_name}/google~g" {} +
+      sed -i "s|${real_package_name}|${fake_package_name}|g" go.mod
+    fi
+  ) &
+  NEW_SUB_PID=$!
+
+  wait $OLD_SUB_PID
+  wait $NEW_SUB_PID
   
   # Tidy and build diff-processor
-  cd ..
   echo -e "${BLUE}Compiling diff-processor tool...${NC}"
   go mod tidy
   mkdir -p bin/
