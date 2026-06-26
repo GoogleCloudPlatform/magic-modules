@@ -43,21 +43,22 @@ base_url: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEng
 self_link: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
 create_url: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
 # Singleton resource: AIP-156 prescribes upsert via PATCH with no parent
-# Create RPC. Delete is handled by a custom :deprovision RPC.
+# Create RPC.
 create_verb: 'PATCH'
 update_url: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
 update_verb: 'PATCH'
+# No standard Delete; tear-down is the :deprovision custom method (POST,
+# empty body), polled via the async block below.
+delete_url: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine:deprovision'
+delete_verb: 'POST'
 import_format:
   - 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
-# Singleton has no standard Delete RPC; deletion is handled by the
-# custom_delete template via :deprovision. Do NOT set exclude_delete (it
-# would suppress the custom_delete handler entirely).
 timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
 async:
-  actions: ['create', 'update']
+  actions: ['create', 'update', 'delete']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -66,7 +67,6 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/semantic_governance_policy_engine.go.tmpl'
   post_read: 'templates/terraform/post_read/vertex_ai_semantic_governance_policy_engine.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/sgpe_deprovision.go.tmpl'
 examples:
   - name: 'vertex_ai_semantic_governance_policy_engine_basic'
     primary_resource_id: 'sgpe'
