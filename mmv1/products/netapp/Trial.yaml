@@ -1,0 +1,99 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Trial
+description: |
+  A 30-day free trial for Google Cloud NetApp Volumes. 
+  It is global in scope for a project but requires to be created in a valid cloud region in which Google Cloud NetApp Volumes is available.
+references:
+  guides:
+    GCNV Documentation: https://cloud.google.com/netapp/volumes/docs
+  api: https://cloud.google.com/netapp/volumes/docs/reference/rest/v1main/projects.locations/trial
+docs:
+base_url: projects/{{project}}/locations/{{location}}/trial
+self_link: projects/{{project}}/locations/{{location}}/trial
+create_url: projects/{{project}}/locations/{{location}}/trial:subscribe
+delete_url: projects/{{project}}/locations/{{location}}/trial:end
+delete_verb: POST
+id_format: projects/{{project}}/locations/{{location}}/trial
+import_format:
+  - projects/{{project}}/locations/{{location}}/trial
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+
+include_in_tgc_next: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/netapp_trial.go.tmpl
+
+exclude_sweeper: true
+
+parameters:
+  - name: location
+    type: String
+    description: |
+      Name of the location.
+    url_param_only: true
+    required: true
+    immutable: true
+examples:
+  - name: netapp_trial
+    primary_resource_id: default
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the trial.
+      Format: projects/{project}/locations/{location}/trial
+    output: true
+  - name: startTime
+    type: Time
+    description: |
+      The time when the trial started.
+    output: true
+  - name: endTime
+    type: Time
+    description: |
+      The time when the trial ends.
+    output: true
+  - name: state
+    type: Enum
+    description: |
+      The state of the trial.
+      Possible values are: `STATE_UNSPECIFIED`, `ACTIVE`, `INACTIVE`, `ELIGIBLE`, `INELIGIBLE`.
+    output: true
+    enum_values:
+      - STATE_UNSPECIFIED
+      - ACTIVE
+      - INACTIVE
+      - ELIGIBLE
+      - INELIGIBLE
+  - name: exitReason
+    type: Enum
+    description: |
+      The reason for exiting the trial.
+      Possible values are: `EXIT_REASON_UNSPECIFIED`, `EXPIRED`, `UPGRADED`, `OPT_OUT`.
+    output: true
+    enum_values:
+      - EXIT_REASON_UNSPECIFIED
+      - EXPIRED
+      - UPGRADED
+      - OPT_OUT
+  - name: optOutReasons
+    type: Array
+    item_type:
+      type: String
+    description: |
+      Contains the reasons for opting out of the free trial if exit reason is OPT_OUT.
+    output: true
