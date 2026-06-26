@@ -2197,9 +2197,12 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	labelsRaw, _ := rawRes["labels"].(map[string]interface{})
-	labels := make(map[string]string, len(labelsRaw))
-	for k, v := range labelsRaw {
-		labels[k] = v.(string)
+	var labels map[string]string
+	if len(labelsRaw) > 0 {
+		labels = make(map[string]string, len(labelsRaw))
+		for k, v := range labelsRaw {
+			labels[k] = v.(string)
+		}
 	}
 	if err := tpgresource.SetLabels(labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
