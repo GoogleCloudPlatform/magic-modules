@@ -15,6 +15,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -349,11 +350,50 @@ func (u *BigqueryDatasetIamMemberUpdater) DescribeResource() string {
 	return fmt.Sprintf("Bigquery Dataset %s/%s", u.project, u.datasetId)
 }
 
+// BigqueryDatasetIamParentResourceIdentityParser resolves the parent dataset id from import identity.
+func BigqueryDatasetIamParentResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, config *transport_tpg.Config) (string, error) {
+	return tpgiamresource.ParseIamResourceIdentity(d, identity, config, tpgiamresource.IamResourceIdentityConfig{
+		Params: []tpgiamresource.IamIdentityParam{
+			{Key: "project", IdentityKey: "project"},
+			{Key: "dataset_id", IdentityKey: "dataset_id"},
+		},
+		UriFormat: "projects/%s/datasets/%s",
+	})
+}
+
+func BigqueryDatasetIamMemberResource() *schema.Resource {
+	return tpgiamresource.ResourceIamMember(
+		IamMemberBigqueryDatasetSchema,
+		NewBigqueryDatasetIamMemberUpdater,
+		BigqueryDatasetIdParseFunc,
+		tpgiamresource.IamWithParentResourceIdentity(BigqueryDatasetIamParentResourceIdentityParser),
+	)
+}
+
+// NewBigqueryDatasetIamMemberListResource returns the list implementation for google_bigquery_dataset_iam_member.
+func NewBigqueryDatasetIamMemberListResource() list.ListResource {
+	return tpgiamresource.NewIamMemberListResource(
+		"google_bigquery_dataset_iam_member",
+		BigqueryDatasetIamMemberResource(),
+		NewBigqueryDatasetIamMemberUpdater,
+		tpgiamresource.IamMemberListCallConfig{
+			ParentResourceField: "dataset_id",
+			EnableRoleFilter:    true,
+			EnableMemberFilter:  true,
+		},
+	)
+}
+
 func init() {
 	registry.Schema{
 		Name:        "google_bigquery_dataset_iam_member",
 		ProductName: "bigquery",
 		Type:        registry.SchemaTypeIAMResource,
-		Schema:      tpgiamresource.ResourceIamMember(IamMemberBigqueryDatasetSchema, NewBigqueryDatasetIamMemberUpdater, BigqueryDatasetIdParseFunc),
+		Schema:      BigqueryDatasetIamMemberResource(),
+	}.Register()
+	registry.FrameworkListResource{
+		Name:        "google_bigquery_dataset_iam_member",
+		ProductName: "bigquery",
+		Func:        NewBigqueryDatasetIamMemberListResource,
 	}.Register()
 }
