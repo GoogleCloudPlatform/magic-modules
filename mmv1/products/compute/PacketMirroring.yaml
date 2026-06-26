@@ -39,17 +39,19 @@ async:
     resource_inside_response: false
 custom_code:
 include_in_tgc_next: true
-examples:
+samples:
   - name: 'compute_packet_mirroring_full'
     primary_resource_id: 'foobar'
-    vars:
-      instance_name: 'my-instance'
-      subnetwork_name: 'my-subnetwork'
-      service_name: 'my-service'
-      hc_name: 'my-healthcheck'
-      mirroring_name: 'my-mirroring'
-      ilb_rule_name: 'my-ilb'
-      network_name: 'my-network'
+    steps:
+      - name: 'compute_packet_mirroring_full'
+        resource_id_vars:
+          instance_name: 'my-instance'
+          subnetwork_name: 'my-subnetwork'
+          service_name: 'my-service'
+          hc_name: 'my-healthcheck'
+          mirroring_name: 'my-mirroring'
+          ilb_rule_name: 'my-ilb'
+          network_name: 'my-network'
 parameters:
 properties:
   - name: 'name'
@@ -81,8 +83,7 @@ properties:
     properties:
       - name: 'url'
         type: ResourceRef
-        description:
-          The full self_link URL of the network where this rule is active.
+        description: The full self_link URL of the network where this rule is active.
         required: true
         immutable: true
         custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
@@ -155,14 +156,12 @@ properties:
           - 'mirrored_resources.0.instances'
           - 'mirrored_resources.0.tags'
         item_type:
-          description:
-            The subnetworks that should be mirrored.  Specify at most 5.
+          description: The subnetworks that should be mirrored.  Specify at most 5.
           type: NestedObject
           properties:
             - name: 'url'
               type: ResourceRef
-              description:
-                The URL of the subnetwork where this rule should be active.
+              description: The URL of the subnetwork where this rule should be active.
               required: true
               custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
               diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
@@ -184,8 +183,7 @@ properties:
           properties:
             - name: 'url'
               type: ResourceRef
-              description:
-                The URL of the instances where this rule should be active.
+              description: The URL of the instances where this rule should be active.
               required: true
               custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
               diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'

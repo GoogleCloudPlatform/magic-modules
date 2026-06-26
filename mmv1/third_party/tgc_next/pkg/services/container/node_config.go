@@ -1,6 +1,7 @@
 package container
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
+	"github.com/hashicorp/go-cty/cty"
 	"google.golang.org/api/container/v1"
 )
 
@@ -873,6 +875,18 @@ func schemaNodeConfig() *schema.Schema {
 								Type:        schema.TypeInt,
 								Optional:    true,
 								Description: `Defines the maximum allowed grace period (in seconds) to use when terminating pods in response to a soft eviction threshold being met.`,
+							},
+							"shutdown_grace_period_seconds": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Computed:    true,
+								Description: `Controls the total duration of time (in seconds) the node delays shutdown.`,
+							},
+							"shutdown_grace_period_critical_pods_seconds": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Computed:    true,
+								Description: `Controls the portion of total grace period (in seconds) that is specifically reserved for terminating critical pods.`,
 							},
 							"eviction_soft": {
 								Type:        schema.TypeList,
@@ -1741,6 +1755,31 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 
 	if v, ok := nodeConfig["kubelet_config"]; ok {
 		nc.KubeletConfig = expandKubeletConfig(v)
+
+		rawConfigNPRoot := d.GetRawConfig()
+		if !rawConfigNPRoot.IsNull() && rawConfigNPRoot.Type().IsObjectType() {
+			if prefix != "" {
+				parts := strings.Split(prefix, ".")
+				npIndex, err := strconv.Atoi(parts[1])
+				if err != nil {
+					panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
+				}
+				rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
+			}
+
+			if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
+				if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
+					vSGP := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_seconds")
+					if vSGP != cty.NullVal(cty.Number) && !vSGP.IsNull() {
+						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+					}
+					vSGPC := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_critical_pods_seconds")
+					if vSGPC != cty.NullVal(cty.Number) && !vSGPC.IsNull() {
+						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
+					}
+				}
+			}
+		}
 	}
 
 	if v, ok := nodeConfig["linux_node_config"]; ok {
@@ -1927,6 +1966,14 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	}
 	if evictionMaxPodGracePeriodSeconds, ok := cfg["eviction_max_pod_grace_period_seconds"]; ok {
 		kConfig.EvictionMaxPodGracePeriodSeconds = int64(evictionMaxPodGracePeriodSeconds.(int))
+	}
+	if shutdownGracePeriodSeconds, ok := cfg["shutdown_grace_period_seconds"]; ok {
+		kConfig.ShutdownGracePeriodSeconds = int64(shutdownGracePeriodSeconds.(int))
+		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+	}
+	if shutdownGracePeriodCriticalPodsSeconds, ok := cfg["shutdown_grace_period_critical_pods_seconds"]; ok {
+		kConfig.ShutdownGracePeriodCriticalPodsSeconds = int64(shutdownGracePeriodCriticalPodsSeconds.(int))
+		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
 	}
 	if v, ok := cfg["eviction_soft"]; ok && len(v.([]interface{})) > 0 {
 		es := v.([]interface{})[0].(map[string]interface{})
@@ -3105,27 +3152,29 @@ func flattenKubeletConfig(v interface{}) []map[string]interface{} {
 		return nil
 	}
 	transformed := map[string]interface{}{
-		"cpu_cfs_quota":                          c["cpuCfsQuota"],
-		"cpu_cfs_quota_period":                   c["cpuCfsQuotaPeriod"],
-		"cpu_manager_policy":                     c["cpuManagerPolicy"],
-		"memory_manager":                         flattenMemoryManager(c["memoryManager"]),
-		"topology_manager":                       flattenTopologyManager(c["topologyManager"]),
-		"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(v),
-		"pod_pids_limit":                         c["podPidsLimit"],
-		"container_log_max_size":                 c["containerLogMaxSize"],
-		"container_log_max_files":                c["containerLogMaxFiles"],
-		"image_gc_low_threshold_percent":         c["imageGcLowThresholdPercent"],
-		"image_gc_high_threshold_percent":        c["imageGcHighThresholdPercent"],
-		"image_minimum_gc_age":                   c["imageMinimumGcAge"],
-		"image_maximum_gc_age":                   c["imageMaximumGcAge"],
-		"allowed_unsafe_sysctls":                 c["allowedUnsafeSysctls"],
-		"single_process_oom_kill":                c["singleProcessOomKill"],
-		"max_parallel_image_pulls":               c["maxParallelImagePulls"],
-		"eviction_max_pod_grace_period_seconds":  c["evictionMaxPodGracePeriodSeconds"],
-		"eviction_soft":                          flattenEvictionSignals(c["evictionSoft"]),
-		"eviction_soft_grace_period":             flattenEvictionGracePeriod(c["evictionSoftGracePeriod"]),
-		"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c["evictionMinimumReclaim"]),
-		"crash_loop_back_off":                    flattenCrashLoopBackOffConfig(c["crashLoopBackOff"]),
+		"cpu_cfs_quota":                               c["cpuCfsQuota"],
+		"cpu_cfs_quota_period":                        c["cpuCfsQuotaPeriod"],
+		"cpu_manager_policy":                          c["cpuManagerPolicy"],
+		"memory_manager":                              flattenMemoryManager(c["memoryManager"]),
+		"topology_manager":                            flattenTopologyManager(c["topologyManager"]),
+		"insecure_kubelet_readonly_port_enabled":      flattenInsecureKubeletReadonlyPortEnabled(v),
+		"pod_pids_limit":                              c["podPidsLimit"],
+		"container_log_max_size":                      c["containerLogMaxSize"],
+		"container_log_max_files":                     c["containerLogMaxFiles"],
+		"image_gc_low_threshold_percent":              c["imageGcLowThresholdPercent"],
+		"image_gc_high_threshold_percent":             c["imageGcHighThresholdPercent"],
+		"image_minimum_gc_age":                        c["imageMinimumGcAge"],
+		"image_maximum_gc_age":                        c["imageMaximumGcAge"],
+		"allowed_unsafe_sysctls":                      c["allowedUnsafeSysctls"],
+		"single_process_oom_kill":                     c["singleProcessOomKill"],
+		"max_parallel_image_pulls":                    c["maxParallelImagePulls"],
+		"eviction_max_pod_grace_period_seconds":       c["evictionMaxPodGracePeriodSeconds"],
+		"shutdown_grace_period_seconds":               c["shutdownGracePeriodSeconds"],
+		"shutdown_grace_period_critical_pods_seconds": c["shutdownGracePeriodCriticalPodsSeconds"],
+		"eviction_soft":                               flattenEvictionSignals(c["evictionSoft"]),
+		"eviction_soft_grace_period":                  flattenEvictionGracePeriod(c["evictionSoftGracePeriod"]),
+		"eviction_minimum_reclaim":                    flattenEvictionMinimumReclaim(c["evictionMinimumReclaim"]),
+		"crash_loop_back_off":                         flattenCrashLoopBackOffConfig(c["crashLoopBackOff"]),
 	}
 
 	return []map[string]interface{}{transformed}

@@ -43,18 +43,24 @@ custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/apigee_addons_override.go.tmpl'
   custom_identity:
     - 'org'
-examples:
+samples:
   - name: 'apigee_addons_basic'
     exclude_test: true
+    steps:
+      - name: 'apigee_addons_basic'
   - name: 'apigee_addons_full'
     exclude_test: true
+    steps:
+      - name: 'apigee_addons_full'
   - name: 'apigee_addons_test'
     primary_resource_id: 'apigee_org_addons'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
     external_providers: ["time"]
+    steps:
+      - name: 'apigee_addons_test'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
 parameters:
   - name: 'org'
     type: String
@@ -74,39 +80,31 @@ properties:
         properties:
           - name: 'enabled'
             type: Boolean
-            description:
-              Flag that specifies whether the Advanced API Ops add-on is
-              enabled.
+            description: Flag that specifies whether the Advanced API Ops add-on is enabled.
       - name: 'integrationConfig'
         type: NestedObject
         description: Configuration for the Integration add-on.
         properties:
           - name: 'enabled'
             type: Boolean
-            description:
-              Flag that specifies whether the Integration add-on is
-              enabled.
+            description: Flag that specifies whether the Integration add-on is enabled.
       - name: 'monetizationConfig'
         type: NestedObject
         description: Configuration for the Monetization add-on.
         properties:
           - name: 'enabled'
             type: Boolean
-            description:
-              Flag that specifies whether the Monetization add-on is enabled.
+            description: Flag that specifies whether the Monetization add-on is enabled.
       - name: 'apiSecurityConfig'
         type: NestedObject
         description: Configuration for the API Security add-on.
         properties:
           - name: 'enabled'
             type: Boolean
-            description:
-              Flag that specifies whether the API security add-on is enabled.
+            description: Flag that specifies whether the API security add-on is enabled.
           - name: 'expiresAt'
             type: String
-            description:
-              Time at which the API Security add-on expires in in milliseconds since epoch.
-              If unspecified, the add-on will never expire.
+            description: Time at which the API Security add-on expires in in milliseconds since epoch. If unspecified, the add-on will never expire.
             output: true
       - name: 'connectorsPlatformConfig'
         type: NestedObject
@@ -114,11 +112,8 @@ properties:
         properties:
           - name: 'enabled'
             type: Boolean
-            description:
-              Flag that specifies whether the Connectors Platform add-on is enabled.
+            description: Flag that specifies whether the Connectors Platform add-on is enabled.
           - name: 'expiresAt'
             type: String
-            description:
-              Time at which the Connectors Platform add-on expires in milliseconds since epoch.
-              If unspecified, the add-on will never expire.
+            description: Time at which the Connectors Platform add-on expires in milliseconds since epoch. If unspecified, the add-on will never expire.
             output: true

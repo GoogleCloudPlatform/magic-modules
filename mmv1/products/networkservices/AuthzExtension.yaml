@@ -48,26 +48,33 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west1"
-examples:
+samples:
   - name: 'network_services_authz_extension_basic'
     primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-ext'
-      backend_name: 'authz-service'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_services_authz_extension_basic'
+        resource_id_vars:
+          resource_name: 'my-authz-ext'
+          backend_name: 'authz-service'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'network_services_authz_extension_basic_with_auth_grpc'
     min_version: 'beta'
     primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-ext-with-grpc'
-      backend_name: 'authz-service-grpc'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_services_authz_extension_basic_with_auth_grpc'
+        min_version: 'beta'
+        resource_id_vars:
+          resource_name: 'my-authz-ext-with-grpc'
+          backend_name: 'authz-service-grpc'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'network_services_authz_extension_iap'
     primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-ext'
+    steps:
+      - name: 'network_services_authz_extension_iap'
+        resource_id_vars:
+          resource_name: 'my-authz-ext'
 parameters:
   - name: 'name'
     type: String

@@ -39,11 +39,13 @@ iam_policy:
   iam_conditions_request_type: 'QUERY_PARAM'
 include_in_tgc_next: true
 custom_code:
-examples:
+samples:
   - name: 'instance_basic'
     primary_resource_id: 'default'
-    vars:
-      instance_name: 'my-instance'
+    steps:
+      - name: 'instance_basic'
+        resource_id_vars:
+          instance_name: 'my-instance'
 virtual_fields:
   - name: 'allowStoppingForUpdate'
     type: Boolean
@@ -359,8 +361,6 @@ properties:
       Labels to apply to this instance.  A list of key->value pairs.
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setLabels'
     update_verb: 'POST'
-  # TODO: Implement updating metadata *after* resource is created.
-
   # Expose instance 'metadata' as a simple name/value pair hash. However the API
   # defines metadata as a NestedObject with the following layout:
   #
@@ -380,6 +380,8 @@ properties:
   #
   # To comply with the API please add an encoder: and decoder: to the provider.
   - name: 'metadata'
+    # TODO: Implement updating metadata *after* resource is created.
+
     type: KeyValuePairs
     description: |
       The metadata key/value pairs to assign to instances that are
@@ -705,8 +707,7 @@ properties:
             type: String
   - name: 'shieldedInstanceConfig'
     type: NestedObject
-    description:
-      Configuration for various parameters related to shielded instances.
+    description: Configuration for various parameters related to shielded instances.
     update_url: 'projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig'
     # The code for this update method is custom because MM does not support
     # sending just the nested properties
@@ -724,15 +725,12 @@ properties:
         update_verb: 'PATCH'
       - name: 'enableIntegrityMonitoring'
         type: Boolean
-        description:
-          Defines whether the instance has integrity monitoring enabled.
+        description: Defines whether the instance has integrity monitoring enabled.
         update_url: 'projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig'
         update_verb: 'PATCH'
   - name: 'confidentialInstanceConfig'
     type: NestedObject
-    description:
-      'Configuration for confidential computing (requires setting the machine
-        type to any of the n2d-* types and a boot disk of type pd-ssd).'
+    description: 'Configuration for confidential computing (requires setting the machine type to any of the n2d-* types and a boot disk of type pd-ssd).'
     properties:
       - name: 'enableConfidentialCompute'
         type: Boolean

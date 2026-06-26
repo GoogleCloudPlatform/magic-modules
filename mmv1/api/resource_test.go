@@ -208,6 +208,72 @@ func TestResourceServiceVersion(t *testing.T) {
 	}
 }
 
+func TestProviderDefaultFieldsAreSynthesizedAndDeduplicated(t *testing.T) {
+	t.Parallel()
+
+	version := &product.Version{Name: "ga", BaseUrl: "https://example.googleapis.com/v1/"}
+
+	cases := []struct {
+		description  string
+		obj          api.Resource
+		listScope    bool
+		expectedName map[string]int
+	}{
+		{
+			description: "identity synthesizes project without duplication",
+			obj: api.Resource{
+				BaseUrl: "projects/{{project}}/foos",
+				Parameters: []*api.Type{
+					{Name: "project", Type: "String"},
+				},
+			},
+			expectedName: map[string]int{"project": 1},
+		},
+		{
+			description: "list scope synthesizes missing defaults and deduplicates",
+			obj: api.Resource{
+				BaseUrl: "projects/{{project}}/zones/{{zone}}/foos",
+				Parameters: []*api.Type{
+					{Name: "project", Type: "String"},
+					{Name: "zone", Type: "String", IgnoreRead: true, Exclude: true},
+				},
+				ProductMetadata: &api.Product{
+					Versions: []*product.Version{version},
+					Version:  version,
+				},
+			},
+			listScope:    true,
+			expectedName: map[string]int{"project": 1, "zone": 1},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+
+			var got []*api.Type
+			if tc.listScope {
+				got = tc.obj.ListScopeProperties()
+			} else {
+				got = tc.obj.IdentityProperties()
+			}
+
+			counts := map[string]int{}
+			for _, p := range got {
+				counts[p.Name]++
+			}
+
+			for name, want := range tc.expectedName {
+				if gotCount := counts[name]; gotCount != want {
+					t.Fatalf("expected %s exactly %d time(s), got %d", name, want, gotCount)
+				}
+			}
+		})
+	}
+}
+
 // TestMagicianLocation verifies that the current package is being executed from within
 // the RELATIVE_MAGICIAN_LOCATION ("mmv1/") directory structure. This ensures that references
 // to files relative to this location will remain valid even if the repository structure
