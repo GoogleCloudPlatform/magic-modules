@@ -1,0 +1,27 @@
+resource "google_agent_registry_service" "default_service" {
+  location     = "us-central1"
+  service_id   = "test-endpoint"
+  description  = "Test endpoint service"
+  display_name = "Test TF Endpoint"
+
+  interfaces {
+    url              = "https://www.google.com"
+    protocol_binding = "GRPC"
+  }
+
+  endpoint_spec {
+    type = "NO_SPEC"
+  }
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_agent_registry_service.default_service]
+
+  create_duration = "60s"
+}
+
+data "google_agent_registry_endpoint" "default" {
+  location = "us-central1"
+  filter   = "displayName:Test TF Endpoint"
+  depends_on = [time_sleep.wait_60_seconds]
+}
