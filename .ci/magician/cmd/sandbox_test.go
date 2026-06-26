@@ -16,6 +16,9 @@
 package cmd
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"magician/exec"
@@ -26,12 +29,34 @@ type sandbox struct {
 	Runner ExecRunner
 }
 
+// Routes some commands to fake sandbox scripts, bypassing $PATH.
+type interceptingRunner struct {
+	*exec.Runner
+	sbDir string
+}
+
+func (s *interceptingRunner) Run(name string, args []string, env map[string]string) (string, error) {
+	// Only intercept bare commands (git, make, etc.)
+	if !strings.Contains(name, string(filepath.Separator)) {
+		sandboxBin := filepath.Join(s.sbDir, name)
+		if _, err := os.Stat(sandboxBin); err == nil {
+			name = sandboxBin
+		}
+	}
+	return s.Runner.Run(name, args, env)
+}
+
 func newSandbox(t *testing.T) *sandbox {
 	dir := t.TempDir()
 
-	runner, err := exec.NewRunner()
+	realRunner, err := exec.NewRunner()
 	if err != nil {
 		t.Fatalf("Failed to create runner: %v", err)
+	}
+
+	runner := &interceptingRunner{
+		Runner: realRunner,
+		sbDir:  dir,
 	}
 
 	if err := runner.PushDir(dir); err != nil {
