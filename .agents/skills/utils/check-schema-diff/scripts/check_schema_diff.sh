@@ -63,11 +63,6 @@ cleanup() {
   if [ -d "$SCRATCH_DIR/mm-base-worktree" ]; then
     git worktree remove --force "$SCRATCH_DIR/mm-base-worktree" 2>/dev/null || true
   fi
-  # Clean up backup files created by sed
-  find "$DIFF_PROCESSOR_DIR/old" -name "*.bak" -delete 2>/dev/null || true
-  find "$DIFF_PROCESSOR_DIR/new" -name "*.bak" -delete 2>/dev/null || true
-  # Clean up changes to go.mod and go.sum in diff-processor
-  git checkout -- "$DIFF_PROCESSOR_DIR/go.mod" "$DIFF_PROCESSOR_DIR/go.sum" 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -115,14 +110,14 @@ git worktree add --detach "$WORKTREE_DIR" "$BASE_REF"
 # Construct a comma-separated list of changed products
 PRODUCT_LIST=$(echo "$PRODUCTS" | tr '\n' ',' | sed 's/,$//')
 
-HAS_ISSUES=0
-
-# 8. Loop over both GA and Beta provider versions
-for VERSION in ga beta; do
-  VERSION_UPPER=$(echo "$VERSION" | tr '[:lower:]' '[:upper:]')
-  echo -e "\n${BLUE}=====================================================${NC}"
-  echo -e "${BLUE}=== Running Schema Diff Checks for version: ${YELLOW}${VERSION_UPPER}${BLUE} ===${NC}"
-  echo -e "${BLUE}=====================================================${NC}"
+run_version_checks() {
+  local VERSION="$1"
+  local VERSION_UPPER=$(echo "$VERSION" | tr '[:lower:]' '[:upper:]')
+  local TARGET_DIFF_PROC="$SCRATCH_DIR/diff-proc-${VERSION}"
+  local PROVIDER_REPO
+  local PROVIDER_CACHE
+  local REAL_PACKAGE_NAME
+  local REAL_FOLDER_NAME
 
   if [ "$VERSION" = "ga" ]; then
     PROVIDER_REPO="https://github.com/hashicorp/terraform-provider-google.git"
@@ -140,53 +135,56 @@ for VERSION in ga beta; do
     REAL_FOLDER_NAME="google-beta"
   fi
 
+  # Prepare isolated diff-processor directory
+  rm -rf "$TARGET_DIFF_PROC"
+  mkdir -p "$TARGET_DIFF_PROC"
+  (cd "$DIFF_PROCESSOR_DIR" && tar cf - --exclude=old --exclude=new --exclude=bin .) | (cd "$TARGET_DIFF_PROC" && tar xf -)
+
   # Ensure we have a cached downstream provider clone
   if [ ! -d "$PROVIDER_CACHE" ]; then
-    echo -e "${BLUE}Cloning downstream ${VERSION_UPPER} provider (depth 1) into cache...${NC}"
-    git clone --depth 1 "$PROVIDER_REPO" "$PROVIDER_CACHE"
+    echo -e "${BLUE}[${VERSION_UPPER}] Cloning downstream provider (depth 1) into cache...${NC}"
+    git clone --depth 1 "$PROVIDER_REPO" "$PROVIDER_CACHE" >/dev/null 2>&1
   else
-    echo -e "${BLUE}Updating cached downstream ${VERSION_UPPER} provider...${NC}"
+    echo -e "${BLUE}[${VERSION_UPPER}] Updating cached downstream provider...${NC}"
     (
       cd "$PROVIDER_CACHE"
-      git fetch --depth 1 origin main
-      git reset --hard origin/main
+      git fetch --depth 1 origin main >/dev/null 2>&1
+      git reset --hard origin/main >/dev/null 2>&1
     )
   fi
 
   # Prepare old and new directories in diff-processor
-  echo -e "${BLUE}Preparing diff-processor environment for ${VERSION_UPPER}...${NC}"
-  rm -rf "$DIFF_PROCESSOR_DIR/old" "$DIFF_PROCESSOR_DIR/new"
-  cp -R "$PROVIDER_CACHE" "$DIFF_PROCESSOR_DIR/old"
-  cp -R "$PROVIDER_CACHE" "$DIFF_PROCESSOR_DIR/new"
+  echo -e "${BLUE}[${VERSION_UPPER}] Preparing diff-processor environment...${NC}"
+  cp -R "$PROVIDER_CACHE" "$TARGET_DIFF_PROC/old"
+  cp -R "$PROVIDER_CACHE" "$TARGET_DIFF_PROC/new"
 
   # Clean target provider directories for changed products
-  echo -e "${BLUE}Cleaning target provider directories for changed products: ${YELLOW}${PRODUCT_LIST}${BLUE}...${NC}"
   for PRODUCT in $PRODUCTS; do
-    rm -rf "$DIFF_PROCESSOR_DIR/old/${REAL_FOLDER_NAME}/services/${PRODUCT}"
-    rm -rf "$DIFF_PROCESSOR_DIR/new/${REAL_FOLDER_NAME}/services/${PRODUCT}"
+    rm -rf "$TARGET_DIFF_PROC/old/${REAL_FOLDER_NAME}/services/${PRODUCT}"
+    rm -rf "$TARGET_DIFF_PROC/new/${REAL_FOLDER_NAME}/services/${PRODUCT}"
   done
 
   # Generate base and current provider code in parallel
-  echo -e "${BLUE}Generating base and current ${VERSION_UPPER} provider code in parallel...${NC}"
+  echo -e "${BLUE}[${VERSION_UPPER}] Generating base and current provider code...${NC}"
   (
     cd mmv1
-    $MM_BINARY --output "$DIFF_PROCESSOR_DIR/old" --version "$VERSION" --product "$PRODUCT_LIST" --base "${WORKTREE_DIR}/mmv1"
+    $MM_BINARY --output "$TARGET_DIFF_PROC/old" --version "$VERSION" --product "$PRODUCT_LIST" --base "${WORKTREE_DIR}/mmv1"
   ) &
-  OLD_GEN_PID=$!
+  local OLD_GEN_PID=$!
 
   (
     cd mmv1
-    $MM_BINARY --output "$DIFF_PROCESSOR_DIR/new" --version "$VERSION" --product "$PRODUCT_LIST"
+    $MM_BINARY --output "$TARGET_DIFF_PROC/new" --version "$VERSION" --product "$PRODUCT_LIST"
   ) &
-  NEW_GEN_PID=$!
+  local NEW_GEN_PID=$!
 
   wait $OLD_GEN_PID
   wait $NEW_GEN_PID
 
   # Perform package substitutions for side-by-side compilation
-  echo -e "${BLUE}Preparing ${VERSION_UPPER} provider code for compilation...${NC}"
+  echo -e "${BLUE}[${VERSION_UPPER}] Preparing provider code for compilation...${NC}"
   (
-    cd "$DIFF_PROCESSOR_DIR"
+    cd "$TARGET_DIFF_PROC"
     
     # Old package substitution
     (
@@ -194,7 +192,7 @@ for VERSION in ga beta; do
       if [ -d "$REAL_FOLDER_NAME" ] && [ "$REAL_FOLDER_NAME" != "google" ]; then
         mv "$REAL_FOLDER_NAME" google
       fi
-      fake_package_name=google/provider/old
+      local fake_package_name=google/provider/old
 
       if [ "$(uname)" = "Darwin" ]; then
         find . -type f -name "*.go" -exec sed -i "" "s~${REAL_PACKAGE_NAME}/${REAL_FOLDER_NAME}~${fake_package_name}/google~g" {} +
@@ -204,7 +202,7 @@ for VERSION in ga beta; do
         sed -i "s|${REAL_PACKAGE_NAME}|${fake_package_name}|g" go.mod
       fi
     ) &
-    OLD_SUB_PID=$!
+    local OLD_SUB_PID=$!
     
     # New package substitution
     (
@@ -212,7 +210,7 @@ for VERSION in ga beta; do
       if [ -d "$REAL_FOLDER_NAME" ] && [ "$REAL_FOLDER_NAME" != "google" ]; then
         mv "$REAL_FOLDER_NAME" google
       fi
-      fake_package_name=google/provider/new
+      local fake_package_name=google/provider/new
 
       if [ "$(uname)" = "Darwin" ]; then
         find . -type f -name "*.go" -exec sed -i "" "s~${REAL_PACKAGE_NAME}/${REAL_FOLDER_NAME}~${fake_package_name}/google~g" {} +
@@ -222,97 +220,127 @@ for VERSION in ga beta; do
         sed -i "s|${REAL_PACKAGE_NAME}|${fake_package_name}|g" go.mod
       fi
     ) &
-    NEW_SUB_PID=$!
+    local NEW_SUB_PID=$!
 
     wait $OLD_SUB_PID
     wait $NEW_SUB_PID
     
     # Tidy and build diff-processor
-    echo -e "${BLUE}Compiling diff-processor tool for ${VERSION_UPPER}...${NC}"
-    go mod tidy
+    echo -e "${BLUE}[${VERSION_UPPER}] Compiling diff-processor tool...${NC}"
+    go mod tidy >/dev/null 2>&1
     mkdir -p bin/
     go build -o ./bin/diff-processor .
   )
 
+  local HAS_ERR=0
+
   # Run breaking changes check
   echo -e "\n${BLUE}=== Running Breaking Changes Check (${VERSION_UPPER}) ===${NC}"
   set +e
-  BREAKING_OUTPUT=$("$DIFF_PROCESSOR_DIR/bin/diff-processor" breaking-changes 2>&1)
-  BREAKING_EXIT_CODE=$?
+  local BREAKING_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" breaking-changes 2>&1)
+  local BREAKING_EXIT_CODE=$?
   set -e
 
   if [ $BREAKING_EXIT_CODE -ne 0 ]; then
-    echo -e "${RED}Error: diff-processor breaking-changes failed to run or encountered a compilation issue:${NC}"
+    echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor breaking-changes failed:${NC}"
     echo "$BREAKING_OUTPUT"
-    exit $BREAKING_EXIT_CODE
+    return $BREAKING_EXIT_CODE
   fi
 
   if [ -n "$BREAKING_OUTPUT" ] && [ "$BREAKING_OUTPUT" != "[]" ] && [ "$BREAKING_OUTPUT" != "null" ]; then
-    echo -e "${RED}Breaking changes detected in ${VERSION_UPPER}!${NC}"
+    echo -e "${RED}[${VERSION_UPPER}] Breaking changes detected!${NC}"
     if command -v jq &> /dev/null; then
       echo "$BREAKING_OUTPUT" | jq .
     else
       echo "$BREAKING_OUTPUT" | python3 -m json.tool
     fi
-    HAS_ISSUES=1
+    HAS_ERR=1
   else
-    echo -e "${GREEN}No breaking changes detected in ${VERSION_UPPER}!${NC}"
+    echo -e "${GREEN}[${VERSION_UPPER}] No breaking changes detected!${NC}"
   fi
 
   # Run missing tests check
   echo -e "\n${BLUE}=== Running Missing Tests Check (${VERSION_UPPER}) ===${NC}"
   set +e
-  TESTS_OUTPUT=$("$DIFF_PROCESSOR_DIR/bin/diff-processor" detect-missing-tests "$DIFF_PROCESSOR_DIR/new/google/services" 2>&1)
-  TESTS_EXIT_CODE=$?
+  local TESTS_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" detect-missing-tests "$TARGET_DIFF_PROC/new/google/services" 2>&1)
+  local TESTS_EXIT_CODE=$?
   set -e
 
   if [ $TESTS_EXIT_CODE -ne 0 ]; then
-    echo -e "${RED}Error: diff-processor detect-missing-tests failed to run:${NC}"
+    echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor detect-missing-tests failed:${NC}"
     echo "$TESTS_OUTPUT"
-    exit $TESTS_EXIT_CODE
+    return $TESTS_EXIT_CODE
   fi
 
   if [ -n "$TESTS_OUTPUT" ] && [ "$TESTS_OUTPUT" != "{}" ] && [ "$TESTS_OUTPUT" != "null" ]; then
-    echo -e "${YELLOW}Missing tests detected in ${VERSION_UPPER}!${NC}"
+    echo -e "${YELLOW}[${VERSION_UPPER}] Missing tests detected!${NC}"
     if command -v jq &> /dev/null; then
       echo "$TESTS_OUTPUT" | jq .
     else
       echo "$TESTS_OUTPUT" | python3 -m json.tool
     fi
-    HAS_ISSUES=1
+    HAS_ERR=1
   else
-    echo -e "${GREEN}No missing tests detected in ${VERSION_UPPER}!${NC}"
+    echo -e "${GREEN}[${VERSION_UPPER}] No missing tests detected!${NC}"
   fi
 
   # Run missing documentation check
   echo -e "\n${BLUE}=== Running Missing Documentation Check (${VERSION_UPPER}) ===${NC}"
   set +e
-  DOCS_OUTPUT=$("$DIFF_PROCESSOR_DIR/bin/diff-processor" detect-missing-docs "$DIFF_PROCESSOR_DIR/new" 2>&1)
-  DOCS_EXIT_CODE=$?
+  local DOCS_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" detect-missing-docs "$TARGET_DIFF_PROC/new" 2>&1)
+  local DOCS_EXIT_CODE=$?
   set -e
 
   if [ $DOCS_EXIT_CODE -ne 0 ]; then
-    echo -e "${RED}Error: diff-processor detect-missing-docs failed to run:${NC}"
+    echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor detect-missing-docs failed:${NC}"
     echo "$DOCS_OUTPUT"
-    exit $DOCS_EXIT_CODE
+    return $DOCS_EXIT_CODE
   fi
 
   if has_missing_docs "$DOCS_OUTPUT"; then
-    echo -e "${YELLOW}Missing documentation detected in ${VERSION_UPPER}!${NC}"
+    echo -e "${YELLOW}[${VERSION_UPPER}] Missing documentation detected!${NC}"
     if command -v jq &> /dev/null; then
       echo "$DOCS_OUTPUT" | jq .
     else
       echo "$DOCS_OUTPUT" | python3 -m json.tool
     fi
-    HAS_ISSUES=1
+    HAS_ERR=1
   else
-    echo -e "${GREEN}No missing documentation detected in ${VERSION_UPPER}!${NC}"
+    echo -e "${GREEN}[${VERSION_UPPER}] No missing documentation detected!${NC}"
   fi
-done
 
-# 12. Final status report
+  return $HAS_ERR
+}
+
+echo -e "${BLUE}Running GA and Beta schema diff checks in parallel...${NC}"
+
+run_version_checks ga > "$SCRATCH_DIR/check-ga.log" 2>&1 &
+GA_PID=$!
+
+run_version_checks beta > "$SCRATCH_DIR/check-beta.log" 2>&1 &
+BETA_PID=$!
+
+set +e
+wait $GA_PID
+GA_STATUS=$?
+
+wait $BETA_PID
+BETA_STATUS=$?
+set -e
+
+echo -e "\n${BLUE}=====================================================${NC}"
+echo -e "${BLUE}=== GA Provider Schema Diff Results ===${NC}"
+echo -e "${BLUE}=====================================================${NC}"
+cat "$SCRATCH_DIR/check-ga.log"
+
+echo -e "\n${BLUE}=====================================================${NC}"
+echo -e "${BLUE}=== Beta Provider Schema Diff Results ===${NC}"
+echo -e "${BLUE}=====================================================${NC}"
+cat "$SCRATCH_DIR/check-beta.log"
+
+# 8. Final status report
 echo -e "\n${BLUE}===========================================${NC}"
-if [ $HAS_ISSUES -eq 1 ]; then
+if [ $GA_STATUS -ne 0 ] || [ $BETA_STATUS -ne 0 ]; then
   echo -e "${RED}=== Schema change checks failed! ===${NC}"
   exit 1
 else
