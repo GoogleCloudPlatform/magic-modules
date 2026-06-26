@@ -66,6 +66,8 @@ cleanup() {
   # Clean up backup files created by sed
   find "$DIFF_PROCESSOR_DIR/old" -name "*.bak" -delete 2>/dev/null || true
   find "$DIFF_PROCESSOR_DIR/new" -name "*.bak" -delete 2>/dev/null || true
+  # Clean up changes to go.mod and go.sum in diff-processor
+  git checkout -- "$DIFF_PROCESSOR_DIR/go.mod" "$DIFF_PROCESSOR_DIR/go.sum" 2>/dev/null || true
 }
 trap cleanup EXIT
 
