@@ -4,7 +4,6 @@ import (
 	"testing"
 )
 
-// test
 func TestGetSubTestName(t *testing.T) {
 	tests := []struct {
 		name     string

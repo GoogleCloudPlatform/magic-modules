@@ -38,6 +38,9 @@ iam_policy:
   parent_resource_attribute: 'instance_name'
   iam_conditions_request_type: 'QUERY_PARAM'
 include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccComputeInstance_secondaryAliasIpRange'
+    skip: 'data issue with this test'
 custom_code:
 examples:
   - name: 'instance_basic'
