@@ -24,6 +24,7 @@ var onlyMigration bool
 var onlyFormat bool
 var skipOpenPR bool
 var skipOpenPRDays int
+var explicitConfigPath bool
 
 var convertResourceTemplateCmd = &cobra.Command{
 	Use:   "convert-resource-template",
@@ -194,7 +195,7 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 					return fmt.Errorf("error copying templates for %s: %w", t.resolvedPath, err)
 				}
 			}
-			if err := migrate.MigrateFile(t.resolvedPath, t.serviceName, onlyMigration, onlyFormat); err != nil {
+			if err := migrate.MigrateFile(t.resolvedPath, t.serviceName, onlyMigration, onlyFormat, explicitConfigPath); err != nil {
 				return fmt.Errorf("failed to migrate file %s: %w", t.resolvedPath, err)
 			}
 		}
@@ -246,7 +247,7 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 						// Continue processing other files even if one fails.
 					}
 				}
-				if err := migrate.MigrateFile(path, serviceName, onlyMigration, onlyFormat); err != nil {
+				if err := migrate.MigrateFile(path, serviceName, onlyMigration, onlyFormat, explicitConfigPath); err != nil {
 					log.Printf("Failed to migrate file %s: %v\n", path, err)
 					// Continue migrating other files even if one fails.
 				}
@@ -270,6 +271,7 @@ func init() {
 	convertResourceTemplateCmd.Flags().StringVarP(&skipProductsFlag, "skip-product", "P", "", "Comma-separated list of product directories to skip from migration")
 	convertResourceTemplateCmd.Flags().BoolVar(&onlyMigration, "only-migration", false, "Only run migration steps (examples -> samples, copy templates), skip formatting")
 	convertResourceTemplateCmd.Flags().BoolVar(&onlyFormat, "only-format", false, "Only run formatting steps (sort keys, strip quotes), skip migration")
+	convertResourceTemplateCmd.Flags().BoolVar(&explicitConfigPath, "explicit-config-path", false, "Explicitly write config_path for all samples during migration, even if they match default paths")
 	convertResourceTemplateCmd.Flags().BoolVar(&skipOpenPR, "skip-open-pr", false, "Skip files modified by active open PRs updated in the last N days (configured by --skip-open-pr-days)")
 	convertResourceTemplateCmd.Flags().IntVar(&skipOpenPRDays, "skip-open-pr-days", 60, "Number of days of open PR history to verify when checking open PRs")
 	rootCmd.AddCommand(convertResourceTemplateCmd)

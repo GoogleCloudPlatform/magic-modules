@@ -53,7 +53,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "accesscontextmanager", false, false)
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -122,7 +122,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "accesscontextmanager", false, false)
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -187,7 +187,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "accesscontextmanager", false, false)
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -249,7 +249,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "datacatalog", false, false)
+	err = MigrateFile(yamlPath, "datacatalog", false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -305,7 +305,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "artifactregistry", false, false)
+	err = MigrateFile(yamlPath, "artifactregistry", false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -354,7 +354,7 @@ examples:
 	ioutil.WriteFile(tmplPath, []byte(`resource "google" "test" {}`), 0644)
 
 	// Run migration only
-	err = MigrateFile(yamlPath, "accesscontextmanager", true, false)
+	err = MigrateFile(yamlPath, "accesscontextmanager", true, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -394,7 +394,7 @@ description: "An AccessLevel is a label."
 	ioutil.WriteFile(yamlPath, []byte(yamlContent), 0644)
 
 	// Run formatting only
-	err = MigrateFile(yamlPath, "accesscontextmanager", false, true)
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, true, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -412,5 +412,106 @@ description: "An AccessLevel is a label."
 	// Formatting should happen (quotes stripped):
 	if strings.Contains(updatedYaml, `"AccessLevel"`) {
 		t.Errorf("expected string quotes to be stripped under only-format, got: %s", updatedYaml)
+	}
+}
+
+func TestMigrateFile_ExplicitConfigPath(t *testing.T) {
+	// Tests that when explicitConfigPath is enabled, config_path is explicitly written
+	// even if it matches the default templates path, or even if the original yaml didn't have it.
+	tmpDir, err := ioutil.TempDir("", "mm-explicit-config-test")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	productsDir := filepath.Join(tmpDir, "mmv1", "products", "accesscontextmanager")
+	os.MkdirAll(productsDir, 0755)
+
+	examplesDir := filepath.Join(tmpDir, "mmv1", "templates", "terraform", "examples")
+	os.MkdirAll(examplesDir, 0755)
+
+	// Create resource YAML file (without config_path explicitly set)
+	yamlPath := filepath.Join(productsDir, "AccessLevel.yaml")
+	yamlContent := `---
+name: AccessLevel
+examples:
+  - name: access_context_manager_access_level_basic
+    primary_resource_id: access-level
+    vars:
+      access_level_name: chromeos_no_lock
+`
+	ioutil.WriteFile(yamlPath, []byte(yamlContent), 0644)
+
+	tmplPath := filepath.Join(examplesDir, "access_context_manager_access_level_basic.tf.tmpl")
+	ioutil.WriteFile(tmplPath, []byte(`resource "google" "test" {}`), 0644)
+
+	// Run migration with explicitConfigPath = true
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, true)
+	if err != nil {
+		t.Fatalf("MigrateFile failed: %v", err)
+	}
+
+	updatedYamlBytes, _ := ioutil.ReadFile(yamlPath)
+	updatedYaml := string(updatedYamlBytes)
+
+	// Verify YAML content has config_path explicitly set to default samples path, ordered right after name:
+	expectedSubstr := `    steps:
+      - name: access_context_manager_access_level_basic
+        config_path: templates/terraform/samples/services/accesscontextmanager/access_context_manager_access_level_basic.tf.tmpl
+        resource_id_vars:`
+	if !strings.Contains(updatedYaml, expectedSubstr) {
+		t.Errorf("expected sorted keys and config_path right after name. Expected substring:\n%s\n\nGot:\n%s", expectedSubstr, updatedYaml)
+	}
+}
+
+func TestMigrateFile_OnlyMigrationWithExplicitConfigPath(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("", "mm-only-migration-explicit-config-test")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	productsDir := filepath.Join(tmpDir, "mmv1", "products", "accesscontextmanager")
+	os.MkdirAll(productsDir, 0755)
+
+	examplesDir := filepath.Join(tmpDir, "mmv1", "templates", "terraform", "examples")
+	os.MkdirAll(examplesDir, 0755)
+
+	// Create resource YAML file
+	yamlPath := filepath.Join(productsDir, "AccessLevel.yaml")
+	yamlContent := `---
+name: "AccessLevel"
+examples:
+  - name: access_context_manager_access_level_basic
+    primary_resource_id: access-level
+    vars:
+      access_level_name: chromeos_no_lock
+`
+	ioutil.WriteFile(yamlPath, []byte(yamlContent), 0644)
+
+	tmplPath := filepath.Join(examplesDir, "access_context_manager_access_level_basic.tf.tmpl")
+	ioutil.WriteFile(tmplPath, []byte(`resource "google" "test" {}`), 0644)
+
+	// Run migration only
+	err = MigrateFile(yamlPath, "accesscontextmanager", true, false, true)
+	if err != nil {
+		t.Fatalf("MigrateFile failed: %v", err)
+	}
+
+	updatedYamlBytes, _ := ioutil.ReadFile(yamlPath)
+	updatedYaml := string(updatedYamlBytes)
+
+	// Quotes should still be preserved:
+	if !strings.Contains(updatedYaml, `name: "AccessLevel"`) {
+		t.Errorf("expected name quotes to be preserved, got: %s", updatedYaml)
+	}
+
+	// But step key sorting should still happen (config_path sorted right after name):
+	expectedSubstr := `    steps:
+      - name: access_context_manager_access_level_basic
+        config_path: templates/terraform/samples/services/accesscontextmanager/access_context_manager_access_level_basic.tf.tmpl
+        resource_id_vars:`
+	if !strings.Contains(updatedYaml, expectedSubstr) {
+		t.Errorf("expected sorted keys inside steps under only-migration. Expected substring:\n%s\n\nGot:\n%s", expectedSubstr, updatedYaml)
 	}
 }
