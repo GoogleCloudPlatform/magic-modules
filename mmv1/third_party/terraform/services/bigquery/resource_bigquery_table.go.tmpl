@@ -3851,7 +3851,7 @@ func expandStorageDescriptor(configured interface{}) map[string]interface{} {
 
 	if v, ok := raw["serde_info"]; ok {
 		if expanded := expandSerDeInfo(v); expanded != nil {
-			sd["serDeInfo"] = expanded
+			sd["serdeInfo"] = expanded
 		}
 	}
 
@@ -3877,7 +3877,7 @@ func flattenStorageDescriptor(sd map[string]interface{}) []map[string]interface{
 		result["output_format"] = v
 	}
 
-	if v, ok := sd["serDeInfo"].(map[string]interface{}); ok {
+	if v, ok := sd["serdeInfo"].(map[string]interface{}); ok {
 		result["serde_info"] = flattenSerDeInfo(v)
 	}
 
