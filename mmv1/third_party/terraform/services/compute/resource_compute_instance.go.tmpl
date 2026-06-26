@@ -4015,11 +4015,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 						return fmt.Errorf("Error retrieving instance: %s", err)
 					}
 
-					featuresMap, err := tpgresource.ConvertToMap(expandAdvancedMachineFeatures(d))
-					if err != nil {
-						return fmt.Errorf("Error converting advanced_machine_features: %s", err)
-					}
-					instMap["advancedMachineFeatures"] = featuresMap
+					instMap["advancedMachineFeatures"] = expandAdvancedMachineFeatures(d)
 
 					stripInitializeParams(instMap)
 
