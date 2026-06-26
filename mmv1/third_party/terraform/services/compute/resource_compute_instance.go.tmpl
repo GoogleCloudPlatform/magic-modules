@@ -2516,10 +2516,8 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compu
 			return fmt.Errorf("Error setting confidential_instance_config: %s", err)
 		}
 	}
-	if instance.AdvancedMachineFeatures != nil {
-		if err := d.Set("advanced_machine_features", flattenAdvancedMachineFeaturesTyped(instance.AdvancedMachineFeatures)); err != nil {
-			return fmt.Errorf("Error setting advanced_machine_features: %s", err)
-		}
+	if err := d.Set("advanced_machine_features", flattenAdvancedMachineFeaturesTyped(instance.AdvancedMachineFeatures)); err != nil {
+		return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 	}
 	if d.Get("desired_status") != "" {
 		if err := d.Set("desired_status", instance.Status); err != nil {
