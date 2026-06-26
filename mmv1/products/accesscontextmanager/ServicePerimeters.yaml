@@ -212,6 +212,45 @@ properties:
                   is_set: true
                   item_type:
                     type: String
+                - name: allowedServicePatterns
+                  type: Array
+                  description: |
+                    Specifies which Google services are allowed to be accessed from
+                    VPC networks in the service perimeter.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: service
+                        type: String
+                        description: 'Supported service to allow.'
+                      - name: pattern
+                        type: String
+                        description: 'URL pattern to allow.'
+                      - name: modifiers
+                        type: Array
+                        description: 'Modifiers to apply to the requests that match the URL pattern.'
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: addRequestHeader
+                              type: NestedObject
+                              description: 'Adds additional HTTP request headers.'
+                              properties:
+                                - name: key
+                                  type: String
+                                  description: 'HTTP header key.'
+                                - name: value
+                                  type: String
+                                  description: 'HTTP header value.'
+                - name: servicePatternsEnforcementScopes
+                  type: Array
+                  description: |
+                    Defines the enforcement scopes of service patterns.
+                  item_type:
+                    type: Enum
+                    enum_values:
+                      - 'SERVICE_PATTERNS_ENFORCEMENT_SCOPE_UNSPECIFIED'
+                      - 'GOOGLE_APIS_VIA_PRIVATE_PATH'
             - name: ingressPolicies
               type: Array
               description: |
@@ -569,6 +608,45 @@ properties:
                   is_set: true
                   item_type:
                     type: String
+                - name: allowedServicePatterns
+                  type: Array
+                  description: |
+                    Specifies which Google services are allowed to be accessed from
+                    VPC networks in the service perimeter.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: service
+                        type: String
+                        description: 'Supported service to allow.'
+                      - name: pattern
+                        type: String
+                        description: 'URL pattern to allow.'
+                      - name: modifiers
+                        type: Array
+                        description: 'Modifiers to apply to the requests that match the URL pattern.'
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: addRequestHeader
+                              type: NestedObject
+                              description: 'Adds additional HTTP request headers.'
+                              properties:
+                                - name: key
+                                  type: String
+                                  description: 'HTTP header key.'
+                                - name: value
+                                  type: String
+                                  description: 'HTTP header value.'
+                - name: servicePatternsEnforcementScopes
+                  type: Array
+                  description: |
+                    Defines the enforcement scopes of service patterns.
+                  item_type:
+                    type: Enum
+                    enum_values:
+                      - 'SERVICE_PATTERNS_ENFORCEMENT_SCOPE_UNSPECIFIED'
+                      - 'GOOGLE_APIS_VIA_PRIVATE_PATH'
             - name: ingressPolicies
               type: Array
               description: |

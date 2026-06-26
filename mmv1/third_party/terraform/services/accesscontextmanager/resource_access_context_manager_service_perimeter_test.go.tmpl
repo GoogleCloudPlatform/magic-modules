@@ -521,6 +521,25 @@ func (tc *IdentityTypeDiffSuppressFuncDiffSuppressTestCase) Test(t *testing.T) {
 	}
 }
 
+func testAccAccessContextManagerServicePerimeter_nonGcpServicePatternsTest(t *testing.T) {
+	org := envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t), // Use standard GA factories (maps to nightly in nightly build)
+		CheckDestroy:             testAccCheckAccessContextManagerServicePerimeterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAccessContextManagerServicePerimeter_nonGcpServicePatterns(org, "policy", "level", "perimeter"),
+			},
+			{
+				ResourceName:      "google_access_context_manager_service_perimeter.test-access",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 
 func testAccAccessContextManagerServicePerimeter_pscEndpointTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
@@ -662,4 +681,121 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
   }
 }
 `, org, policyTitle, perimeterTitleName, perimeterTitleName)
+}
+
+func testAccAccessContextManagerServicePerimeter_nonGcpServicePatterns(org, policyTitle, levelTitleName, perimeterTitleName string) string {
+	return fmt.Sprintf(`
+# Access Policy Title: %s
+
+data "google_access_context_manager_access_policy" "test-access" {
+  parent = "organizations/%s"
+}
+
+resource "google_access_context_manager_access_level" "test-access" {
+  parent   = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}"
+  name     = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}/accessLevels/%s"
+  title    = "%s"
+  basic {
+    conditions {
+      ip_subnetworks = ["1.2.3.4/32"]
+    }
+  }
+}
+
+resource "google_access_context_manager_service_perimeter" "test-access" {
+  parent   = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}"
+  name     = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}/servicePerimeters/%s"
+  title    = "%s"
+  status {
+    access_levels = [google_access_context_manager_access_level.test-access.name]
+    
+    vpc_accessible_services {
+      enable_restriction = true
+      allowed_services   = ["RESTRICTED-SERVICES"]
+      
+      service_patterns_enforcement_scopes = ["GOOGLE_APIS_VIA_PRIVATE_PATH"]
+      allowed_service_patterns {
+        pattern = "maps.googleapis.com/*"
+        modifiers {
+          add_request_header {
+            key   = "X-GoogApps-Allowed-Domains"
+            value = "google.com"
+          }
+        }
+      }
+    }
+  }
+}
+`, policyTitle, org, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName)
+}
+
+// ----------------- Plural Test Case -----------------
+
+func testAccAccessContextManagerServicePerimeters_nonGcpServicePatternsTest(t *testing.T) {
+	org := envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t), // Use standard GA factories (maps to nightly in nightly build)
+		CheckDestroy:             testAccCheckAccessContextManagerServicePerimeterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAccessContextManagerServicePerimeters_nonGcpServicePatterns(org, "policy", "level", "perimeter"),
+			},
+			{
+				ResourceName:      "google_access_context_manager_service_perimeters.test-access",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccAccessContextManagerServicePerimeters_nonGcpServicePatterns(org, policyTitle, levelTitleName, perimeterTitleName string) string {
+	return fmt.Sprintf(`
+# Access Policy Title: %s
+
+data "google_access_context_manager_access_policy" "test-access" {
+  parent = "organizations/%s"
+}
+
+resource "google_access_context_manager_access_level" "test-access" {
+  parent   = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}"
+  name     = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}/accessLevels/%s"
+  title    = "%s"
+  basic {
+    conditions {
+      ip_subnetworks = ["1.2.3.4/32"]
+    }
+  }
+}
+
+resource "google_access_context_manager_service_perimeters" "test-access" {
+  parent   = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}"
+
+  service_perimeters {
+    name           = "accessPolicies/${data.google_access_context_manager_access_policy.test-access.name}/servicePerimeters/%s"
+    title          = "%s"
+    status {
+      access_levels = [google_access_context_manager_access_level.test-access.name]
+      
+      vpc_accessible_services {
+        enable_restriction = true
+        allowed_services   = ["RESTRICTED-SERVICES"]
+        
+        service_patterns_enforcement_scopes = ["GOOGLE_APIS_VIA_PRIVATE_PATH"]
+        allowed_service_patterns {
+          pattern = "maps.googleapis.com/*"
+          modifiers {
+            add_request_header {
+              key   = "X-GoogApps-Allowed-Domains"
+              value = "google.com"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, policyTitle, org, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName)
 }
