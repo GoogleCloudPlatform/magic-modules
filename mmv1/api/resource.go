@@ -1828,7 +1828,6 @@ func (r Resource) FirstTestConfig() TestConfig {
 	return TestConfig{}
 }
 
-
 func (r Resource) SamplePrimaryResourceId() string {
 	samples := google.Reject(r.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest
