@@ -15,7 +15,7 @@ import (
 // PATCH-START: existing structs
 // PATCH-END: existing structs
 
-func MigrateFile(filePath, serviceName string, onlyMigration, onlyFormat, explicitConfigPath bool) error {
+func MigrateFile(filePath, serviceName string, onlyMigration, onlyFormat, explicitConfigPath, isEAP bool) error {
 	originalBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
@@ -90,8 +90,14 @@ func MigrateFile(filePath, serviceName string, onlyMigration, onlyFormat, explic
 					} else {
 						templateName = fmt.Sprintf("%s.tf.tmpl", nameVal)
 					}
-					calculatedPath := path.Join("templates/terraform/samples/services", serviceName, templateName)
-					defaultPath := path.Join("templates/terraform/samples/services", serviceName, fmt.Sprintf("%s.tf.tmpl", nameVal))
+					var calculatedPath, defaultPath string
+					if isEAP {
+						calculatedPath = path.Join("samples", serviceName, templateName)
+						defaultPath = path.Join("samples", serviceName, fmt.Sprintf("%s.tf.tmpl", nameVal))
+					} else {
+						calculatedPath = path.Join("templates/terraform/samples/services", serviceName, templateName)
+						defaultPath = path.Join("templates/terraform/samples/services", serviceName, fmt.Sprintf("%s.tf.tmpl", nameVal))
+					}
 					if explicitConfigPath || calculatedPath != defaultPath {
 						newConfigPath = calculatedPath
 					}

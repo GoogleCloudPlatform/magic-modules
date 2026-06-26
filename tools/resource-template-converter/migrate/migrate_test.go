@@ -53,7 +53,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, false)
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -122,7 +122,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, false)
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -187,7 +187,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, false)
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -249,7 +249,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "datacatalog", false, false, false)
+	err = MigrateFile(yamlPath, "datacatalog", false, false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -305,7 +305,7 @@ examples:
 	}
 
 	// Run migration
-	err = MigrateFile(yamlPath, "artifactregistry", false, false, false)
+	err = MigrateFile(yamlPath, "artifactregistry", false, false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -354,7 +354,7 @@ examples:
 	ioutil.WriteFile(tmplPath, []byte(`resource "google" "test" {}`), 0644)
 
 	// Run migration only
-	err = MigrateFile(yamlPath, "accesscontextmanager", true, false, false)
+	err = MigrateFile(yamlPath, "accesscontextmanager", true, false, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -394,7 +394,7 @@ description: "An AccessLevel is a label."
 	ioutil.WriteFile(yamlPath, []byte(yamlContent), 0644)
 
 	// Run formatting only
-	err = MigrateFile(yamlPath, "accesscontextmanager", false, true, false)
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, true, false, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -446,7 +446,7 @@ examples:
 	ioutil.WriteFile(tmplPath, []byte(`resource "google" "test" {}`), 0644)
 
 	// Run migration with explicitConfigPath = true
-	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, true)
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, true, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -493,7 +493,7 @@ examples:
 	ioutil.WriteFile(tmplPath, []byte(`resource "google" "test" {}`), 0644)
 
 	// Run migration only
-	err = MigrateFile(yamlPath, "accesscontextmanager", true, false, true)
+	err = MigrateFile(yamlPath, "accesscontextmanager", true, false, true, false)
 	if err != nil {
 		t.Fatalf("MigrateFile failed: %v", err)
 	}
@@ -513,5 +513,54 @@ examples:
         resource_id_vars:`
 	if !strings.Contains(updatedYaml, expectedSubstr) {
 		t.Errorf("expected sorted keys inside steps under only-migration. Expected substring:\n%s\n\nGot:\n%s", expectedSubstr, updatedYaml)
+	}
+}
+
+func TestMigrateFile_EAP(t *testing.T) {
+	// Tests that when isEAP is true, config_path is resolved flatly as samples/<template_name>
+	// and explicitly written.
+	tmpDir, err := ioutil.TempDir("", "mm-eap-test")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	productsDir := filepath.Join(tmpDir, "products", "accesscontextmanager")
+	os.MkdirAll(productsDir, 0755)
+
+	examplesDir := filepath.Join(tmpDir, "examples")
+	os.MkdirAll(examplesDir, 0755)
+
+	// Create resource YAML file (without config_path explicitly set)
+	yamlPath := filepath.Join(productsDir, "AccessLevel.yaml")
+	yamlContent := `---
+name: AccessLevel
+examples:
+  - name: access_context_manager_access_level_basic
+    primary_resource_id: access-level
+    vars:
+      access_level_name: chromeos_no_lock
+`
+	ioutil.WriteFile(yamlPath, []byte(yamlContent), 0644)
+
+	tmplPath := filepath.Join(examplesDir, "access_context_manager_access_level_basic.tf.tmpl")
+	ioutil.WriteFile(tmplPath, []byte(`resource "google" "test" {}`), 0644)
+
+	// Run migration with isEAP = true, explicitConfigPath = true
+	err = MigrateFile(yamlPath, "accesscontextmanager", false, false, true, true)
+	if err != nil {
+		t.Fatalf("MigrateFile failed: %v", err)
+	}
+
+	updatedYamlBytes, _ := ioutil.ReadFile(yamlPath)
+	updatedYaml := string(updatedYamlBytes)
+
+	// Verify YAML content has nested config_path under samples/serviceName/:
+	expectedSubstr := `    steps:
+      - name: access_context_manager_access_level_basic
+        config_path: samples/accesscontextmanager/access_context_manager_access_level_basic.tf.tmpl
+        resource_id_vars:`
+	if !strings.Contains(updatedYaml, expectedSubstr) {
+		t.Errorf("expected nested EAP config_path under samples/. Expected substring:\n%s\n\nGot:\n%s", expectedSubstr, updatedYaml)
 	}
 }

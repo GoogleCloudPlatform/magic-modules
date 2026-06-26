@@ -25,6 +25,7 @@ var onlyFormat bool
 var skipOpenPR bool
 var skipOpenPRDays int
 var explicitConfigPath bool
+var eapFlag bool
 
 var convertResourceTemplateCmd = &cobra.Command{
 	Use:   "convert-resource-template",
@@ -84,19 +85,30 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 
 	var productsPath, examplesSourceDir, samplesDestDir string
 
-	if _, err := os.Stat(filepath.Join(basePath, "mmv1")); err == nil {
+	isEAP := eapFlag
+	if !isEAP {
+		if _, err := os.Stat(filepath.Join(basePath, "products")); err == nil {
+			if _, err := os.Stat(filepath.Join(basePath, "mmv1")); err != nil {
+				isEAP = true
+			}
+		}
+	}
+
+	if isEAP {
+		// EAP private overrides repository
+		productsPath = filepath.Join(basePath, "products")
+		examplesSourceDir = basePath
+		samplesDestDir = filepath.Join(basePath, "samples")
+		explicitConfigPath = true
+	} else {
 		// Public magic-modules repository
+		if _, err := os.Stat(filepath.Join(basePath, "mmv1")); err != nil {
+			log.Fatalf("Neither 'mmv1' nor 'products' directory structure found. Please ensure this tool is run from a magic-modules or magic-modules-private-overrides directory.")
+		}
 		productsPath = filepath.Join(basePath, "mmv1", "products")
 		templatesPath := filepath.Join(basePath, "mmv1", "templates", "terraform")
 		examplesSourceDir = filepath.Join(templatesPath, "examples")
 		samplesDestDir = filepath.Join(templatesPath, "samples", "services")
-	} else if _, err := os.Stat(filepath.Join(basePath, "products")); err == nil {
-		// EAP private overrides repository
-		productsPath = filepath.Join(basePath, "products")
-		examplesSourceDir = basePath
-		samplesDestDir = filepath.Join(basePath, "templates", "terraform", "samples", "services")
-	} else {
-		log.Fatalf("Neither 'mmv1' nor 'products' directory structure found. Please ensure this tool is run from a magic-modules or magic-modules-private-overrides directory.")
 	}
 
 	var pathsToWalk []string
@@ -195,7 +207,7 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 					return fmt.Errorf("error copying templates for %s: %w", t.resolvedPath, err)
 				}
 			}
-			if err := migrate.MigrateFile(t.resolvedPath, t.serviceName, onlyMigration, onlyFormat, explicitConfigPath); err != nil {
+			if err := migrate.MigrateFile(t.resolvedPath, t.serviceName, onlyMigration, onlyFormat, explicitConfigPath, isEAP); err != nil {
 				return fmt.Errorf("failed to migrate file %s: %w", t.resolvedPath, err)
 			}
 		}
@@ -247,7 +259,7 @@ func exeCconvertResourceTemplate(basePath string, targetFile string) error {
 						// Continue processing other files even if one fails.
 					}
 				}
-				if err := migrate.MigrateFile(path, serviceName, onlyMigration, onlyFormat, explicitConfigPath); err != nil {
+				if err := migrate.MigrateFile(path, serviceName, onlyMigration, onlyFormat, explicitConfigPath, isEAP); err != nil {
 					log.Printf("Failed to migrate file %s: %v\n", path, err)
 					// Continue migrating other files even if one fails.
 				}
@@ -272,6 +284,7 @@ func init() {
 	convertResourceTemplateCmd.Flags().BoolVar(&onlyMigration, "only-migration", false, "Only run migration steps (examples -> samples, copy templates), skip formatting")
 	convertResourceTemplateCmd.Flags().BoolVar(&onlyFormat, "only-format", false, "Only run formatting steps (sort keys, strip quotes), skip migration")
 	convertResourceTemplateCmd.Flags().BoolVar(&explicitConfigPath, "explicit-config-path", false, "Explicitly write config_path for all samples during migration, even if they match default paths")
+	convertResourceTemplateCmd.Flags().BoolVar(&eapFlag, "eap", false, "Enable EAP private overrides repository migration (forces EAP directory structure and explicit config_path)")
 	convertResourceTemplateCmd.Flags().BoolVar(&skipOpenPR, "skip-open-pr", false, "Skip files modified by active open PRs updated in the last N days (configured by --skip-open-pr-days)")
 	convertResourceTemplateCmd.Flags().IntVar(&skipOpenPRDays, "skip-open-pr-days", 60, "Number of days of open PR history to verify when checking open PRs")
 	rootCmd.AddCommand(convertResourceTemplateCmd)
