@@ -128,21 +128,39 @@ run_version_checks() {
 
   # Ensure we have a cached downstream provider clone
   if [ ! -d "$PROVIDER_CACHE" ]; then
-    echo -e "${BLUE}[${VERSION_UPPER}] Cloning downstream provider (depth 1) into cache...${NC}"
-    git clone --depth 1 "$PROVIDER_REPO" "$PROVIDER_CACHE" >/dev/null 2>&1
+    echo -e "${BLUE}[${VERSION_UPPER}] Cloning downstream provider into cache...${NC}"
+    git clone --depth 500 "$PROVIDER_REPO" "$PROVIDER_CACHE" >/dev/null 2>&1
   else
     echo -e "${BLUE}[${VERSION_UPPER}] Updating cached downstream provider...${NC}"
     (
       cd "$PROVIDER_CACHE"
-      git fetch --depth 1 origin main >/dev/null 2>&1
+      git fetch --depth 500 origin main >/dev/null 2>&1
       git reset --hard origin/main >/dev/null 2>&1
     )
+  fi
+
+  # Find downstream commit matching base ref
+  echo -e "${BLUE}[${VERSION_UPPER}] Finding downstream commit matching base ref ${YELLOW}${BASE_REF}${BLUE}...${NC}"
+  local MATCHING_COMMIT=""
+  for MM_SHA in $(git log --format="%H" -n 100 "$BASE_REF"); do
+    MATCHING_COMMIT=$(cd "$PROVIDER_CACHE" && git log --grep="\[upstream:${MM_SHA}\]" --format="%H" -n 1)
+    if [ -n "$MATCHING_COMMIT" ]; then
+      echo -e "${GREEN}[${VERSION_UPPER}] Found matching provider commit: ${YELLOW}${MATCHING_COMMIT}${GREEN} (for MM commit ${MM_SHA:0:8})${NC}"
+      break
+    fi
+  done
+
+  if [ -z "$MATCHING_COMMIT" ]; then
+    echo -e "${YELLOW}[${VERSION_UPPER}] Warning: No matching provider commit found in recent ancestors of ${BASE_REF}; using provider HEAD.${NC}"
+    MATCHING_COMMIT=$(cd "$PROVIDER_CACHE" && git rev-parse HEAD)
   fi
 
   # Prepare old and new directories in diff-processor
   echo -e "${BLUE}[${VERSION_UPPER}] Preparing diff-processor environment...${NC}"
   cp -R "$PROVIDER_CACHE" "$TARGET_DIFF_PROC/old"
   cp -R "$PROVIDER_CACHE" "$TARGET_DIFF_PROC/new"
+  (cd "$TARGET_DIFF_PROC/old" && git checkout "$MATCHING_COMMIT" >/dev/null 2>&1)
+  (cd "$TARGET_DIFF_PROC/new" && git checkout "$MATCHING_COMMIT" >/dev/null 2>&1)
 
   # Generate base and current provider code in parallel
   echo -e "${BLUE}[${VERSION_UPPER}] Generating base and current provider code...${NC}"
