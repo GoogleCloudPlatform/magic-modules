@@ -372,6 +372,29 @@ properties:
             the firewall policy rule is not enforced and traffic behaves as if it did
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
+        - name: 'targetType'
+          type: Enum
+          description: |
+            Target types of the firewall policy rule.
+            Default value is INSTANCES.
+            When target_type is INTERNAL_MANAGED_LB, target_forwarding_rules must be set
+          default_from_api: true
+          enum_values:
+            - 'INSTANCES'
+            - 'INTERNAL_MANAGED_LB'
+        - name: 'targetForwardingRules'
+          type: Array
+          description: |
+            A list of forwarding rules to which this rule applies.
+            This field allows you to control which load balancers get this rule.
+            For example, the following are valid values:
+            - https://www.googleapis.com/compute/v1/projects/project/global/forwardingRules/forwardingRule
+            - https://www.googleapis.com/compute/v1/projects/project/regions/region/forwardingRules/forwardingRule
+            - projects/project/global/forwardingRules/forwardingRule
+            - projects/project/regions/region/forwardingRules/forwardingRule
+          item_type:
+            type: String
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - name: 'predefinedRules'
     type: Array
     description: A list of firewall policy pre-defined rules.
