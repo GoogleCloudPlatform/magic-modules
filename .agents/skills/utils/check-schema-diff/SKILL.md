@@ -33,7 +33,7 @@ To compare against a specific branch or commit, pass it as an argument:
 ```
 
 ### 3. Analyze the Output
-The tool runs three checks:
+The tool runs three checks across both GA and Beta provider versions:
 - **Breaking Changes:** Detects backwards-incompatible schema changes.
 - **Missing Tests:** Identifies new or changed fields that are not covered by any acceptance tests.
 - **Missing Documentation:** Identifies new fields that are not documented in the resource/datasource markdown files.
