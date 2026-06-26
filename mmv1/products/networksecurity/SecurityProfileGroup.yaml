@@ -88,13 +88,23 @@ samples:
           org_id: 'ORG_ID'
   - name: 'network_security_security_profile_group_url_filtering'
     primary_resource_id: 'default'
+    vars:
+      security_profile_group_name: 'sec-profile-group'
+      security_profile_name: 'sec-profile'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: "security_profile_group_wildfire_basic"
+    primary_resource_id: "default"
+    min_version: "beta"
     steps:
-      - name: 'network_security_security_profile_group_url_filtering'
+      - name: "security_profile_group_wildfire_basic"
         resource_id_vars:
-          security_profile_group_name: 'sec-profile-group'
-          security_profile_name: 'sec-profile'
+          threat_profile_name: "threat-profile"
+          profile_name: "wildfire-profile"
+          profile_group_name: "profile-group"
+          group_description: "Initial profile group description"
         test_env_vars:
-          org_id: 'ORG_ID'
+          org_id: "ORG_ID"
 parameters:
   - name: 'name'
     type: String
@@ -159,3 +169,8 @@ properties:
     type: String
     description: |
       Reference to a SecurityProfile with the CustomIntercept configuration.
+  - name: 'wildfireAnalysisProfile'
+    type: String
+    description: |
+      Reference to a SecurityProfile with the WildFire analysis configuration for the Security Profile Group.
+    min_version: beta

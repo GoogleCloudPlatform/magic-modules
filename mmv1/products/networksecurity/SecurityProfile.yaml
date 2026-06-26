@@ -97,15 +97,51 @@ samples:
           org_id: 'ORG_ID'
   - name: network_security_security_profile_broker
     primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-security-profile'
+      network_name: 'my-network'
+      deployment_group_id: 'my-dg'
+      endpoint_group_id: 'my-eg'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: "network_security_profile_wildfire_basic"
+    primary_resource_id: "default"
+    min_version: "beta"
     steps:
-      - name: network_security_security_profile_broker
+      - name: "network_security_profile_wildfire_basic"
         resource_id_vars:
-          resource_name: 'my-security-profile'
-          network_name: 'my-network'
-          deployment_group_id: 'my-dg'
-          endpoint_group_id: 'my-eg'
+          network_name: "wildfire-network"
+          subnet_name: "wildfire-subnet"
+          proxy_subnet_name: "wildfire-proxy-subnet"
+          gateway_name: "wildfire-gateway"
+          authz_extension_name: "wildfire-authz-ext"
+          policy_name: "wildfire-authz-policy"
+          resource_name: "wildfire-security-profile"
+        vars:
+          profile_description: "Initial SWP security profile description"
+          ext_authority: "ext11.com"
+          ext_timeout: "0.1s"
+          ext_fail_open: false
         test_env_vars:
-          org_id: 'ORG_ID'
+          project: "PROJECT_NAME"
+          org_id: "ORG_ID"
+      - name: "network_security_profile_wildfire_basic"
+        resource_id_vars:
+          network_name: "wildfire-network"
+          subnet_name: "wildfire-subnet"
+          proxy_subnet_name: "wildfire-proxy-subnet"
+          gateway_name: "wildfire-gateway"
+          authz_extension_name: "wildfire-authz-ext"
+          policy_name: "wildfire-authz-policy"
+          resource_name: "wildfire-security-profile"
+        vars:
+          profile_description: "Updated SWP security profile description"
+          ext_authority: "ext11-updated.com"
+          ext_timeout: "0.4s"
+          ext_fail_open: true
+        test_env_vars:
+          project: "PROJECT_NAME"
+          org_id: "ORG_ID"
 parameters:
   - name: 'name'
     type: String
@@ -357,3 +393,69 @@ properties:
       - 'URL_FILTERING'
       - 'CUSTOM_MIRRORING'
       - 'CUSTOM_INTERCEPT'
+      - 'WILDFIRE_ANALYSIS'
+  - name: 'wildfireAnalysisProfile'
+    type: NestedObject
+    min_version: beta
+    description: |
+      WildFire malware analysis configuration.
+    properties:
+      - name: 'wildfireRealtimeLookup'
+        type: Boolean
+      - name: 'wildfireSubmissionRules'
+        type: Array
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'fileSelectionMode'
+              type: Enum
+              required: true
+              enum_values:
+                - 'ALL_FILE_TYPES'
+                - 'CUSTOM_FILE_TYPES'
+            - name: 'direction'
+              type: Enum
+              required: true
+              enum_values:
+                - 'UPLOAD'
+                - 'DOWNLOAD'
+                - 'BOTH'
+            - name: 'customFileTypes'
+              type: NestedObject
+              properties:
+                - name: 'fileTypes'
+                  type: Array
+                  item_type:
+                    type: String
+      - name: 'wildfireInlineCloudAnalysisRules'
+        type: Array
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'fileSelectionMode'
+              type: Enum
+              required: true
+              enum_values:
+                - 'ALL_FILE_TYPES'
+                - 'CUSTOM_FILE_TYPES'
+            - name: 'direction'
+              type: Enum
+              required: true
+              enum_values:
+                - 'UPLOAD'
+                - 'DOWNLOAD'
+                - 'BOTH'
+            - name: 'action'
+              type: Enum
+              required: true
+              enum_values:
+                - 'ALLOW'
+                - 'DENY'
+                - 'ALERT'
+            - name: 'customFileTypes'
+              type: NestedObject
+              properties:
+                - name: 'fileTypes'
+                  type: Array
+                  item_type:
+                    type: String
