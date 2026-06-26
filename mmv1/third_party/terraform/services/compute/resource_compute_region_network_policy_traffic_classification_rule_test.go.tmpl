@@ -99,7 +99,7 @@ resource "google_compute_region_network_policy_traffic_classification_rule" "pri
   provider     = google-beta
 
   rule_name               = "test-rule"
-  description             = "This is a simple rule description"
+  description             = "This is a updated rule description"
   disabled                = false
   network_policy          = google_compute_region_network_policy.basic_regional_network_policy.name
   priority                = 1000
@@ -118,6 +118,167 @@ resource "google_compute_region_network_policy_traffic_classification_rule" "pri
       ports = ["80","443"]
     }
   }
+}
+`, context)
+}
+
+func TestAccComputeRegionNetworkPolicyTrafficClassificationRule_regionNetworkPolicyTrafficClassificationRuleTargetFields(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_name":  envvar.GetTestProjectFromEnv(),
+    "org_id":        envvar.GetTestOrgFromEnv(t),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionNetworkPolicyTrafficClassificationRuleDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionNetworkPolicyTrafficClassificationRule_regionNetworkPolicyTrafficClassificationRuleTargetSecureTags(context),
+			},
+			{
+				ResourceName:            "google_compute_region_network_policy_traffic_classification_rule.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"network_policy", "region"},
+			},
+			{
+				Config: testAccComputeRegionNetworkPolicyTrafficClassificationRule_regionNetworkPolicyTrafficClassificationRuleTargetServiceAccounts(context),
+			},
+			{
+				ResourceName:            "google_compute_region_network_policy_traffic_classification_rule.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"network_policy", "region"},
+			},
+		},
+	})
+}
+
+func testAccComputeRegionNetworkPolicyTrafficClassificationRule_regionNetworkPolicyTrafficClassificationRuleTargetSecureTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_network_policy" "basic_regional_network_policy" {
+  provider     = google-beta
+
+  name        = "tf-test-nw-policy%{random_suffix}"
+  description = "Sample regional network firewall policy"
+  project     = "%{project_name}"
+  region      = "%{region}"
+}
+
+resource "google_compute_region_network_policy_traffic_classification_rule" "primary" {
+  provider     = google-beta
+
+  rule_name               = "test-rule"
+  description             = "This is a simple rule description"
+  disabled                = false
+  network_policy          = google_compute_region_network_policy.basic_regional_network_policy.name
+  priority                = 1000
+  region                  = "%{region}"
+
+  action {
+    traffic_class = "TC1"
+    dscp_mode = "AUTO"
+  }
+
+  target_secure_tags {
+    name = google_tags_tag_value.basic_value.id
+  }
+
+  match {
+    src_ip_ranges            = ["10.100.0.1/32"]
+    dest_ip_ranges           = ["11.100.0.1/32"]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
+
+resource "google_tags_tag_key" "basic_key" {
+  provider     = google-beta
+
+  description = "For keyname resources."
+  parent      = "organizations/%{org_id}"
+  purpose     = "GCE_FIREWALL"
+  short_name  = "tf-test-tagkey-%{random_suffix}"
+
+  purpose_data = {
+    organization = "auto"
+  }
+}
+
+resource "google_tags_tag_value" "basic_value" {
+  provider     = google-beta
+
+  description = "For valuename resources."
+  parent      = google_tags_tag_key.basic_key.id
+  short_name  = "tf-test-tagvalue-%{random_suffix}"
+}
+`, context)
+}
+
+func testAccComputeRegionNetworkPolicyTrafficClassificationRule_regionNetworkPolicyTrafficClassificationRuleTargetServiceAccounts(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_network_policy" "basic_regional_network_policy" {
+  provider     = google-beta
+
+  name        = "tf-test-nw-policy%{random_suffix}"
+  description = "Sample regional network firewall policy"
+  project     = "%{project_name}"
+  region      = "%{region}"
+}
+
+resource "google_compute_region_network_policy_traffic_classification_rule" "primary" {
+  provider     = google-beta
+
+  rule_name               = "test-rule"
+  description             = "This is a updated rule description"
+  disabled                = false
+  network_policy          = google_compute_region_network_policy.basic_regional_network_policy.name
+  priority                = 1000
+  region                  = "%{region}"
+
+  action {
+    dscp_mode = "CUSTOM"
+    dscp_value = 47
+    traffic_class = "TC5"
+  }
+  
+  target_service_accounts = ["test@google.com"]
+
+  match {
+    src_ip_ranges            = ["10.101.0.1/32"]
+    dest_ip_ranges           = ["11.102.0.1/32"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports = ["80","443"]
+    }
+  }
+}
+
+resource "google_tags_tag_key" "basic_key" {
+  provider     = google-beta
+
+  description = "For keyname resources."
+  parent      = "organizations/%{org_id}"
+  purpose     = "GCE_FIREWALL"
+  short_name  = "tf-test-tagkey-%{random_suffix}"
+
+  purpose_data = {
+    organization = "auto"
+  }
+}
+
+resource "google_tags_tag_value" "basic_value" {
+  provider     = google-beta
+
+  description = "For valuename resources."
+  parent      = google_tags_tag_key.basic_key.id
+  short_name  = "tf-test-tagvalue-%{random_suffix}"
 }
 `, context)
 }
