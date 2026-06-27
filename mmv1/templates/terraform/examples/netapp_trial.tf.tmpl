@@ -1,3 +1,10 @@
 resource "google_netapp_trial" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
+
+  # It is highly recommended to include this lifecycle block.
+  # Modifying the location will cause Terraform to destroy and recreate the trial,
+  # but Google Cloud strictly enforces a limit of one trial per project every 12 months.
+  lifecycle {
+    prevent_destroy = true
+  }
 }

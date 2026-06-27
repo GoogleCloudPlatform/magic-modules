@@ -16,11 +16,14 @@ name: Trial
 description: |
   A 30-day free trial for Google Cloud NetApp Volumes.
   It is global in scope for a project but requires to be created in a valid cloud region in which Google Cloud NetApp Volumes is available.
+
+  **Note:** Modifying the `location` of this resource will cause Terraform to destroy and recreate the trial. 
+  Because Google Cloud enforces a limit of one free trial per project every 12 months, this recreation will fail. 
+  It is highly recommended to use the `lifecycle { prevent_destroy = true }` block on this resource.
 references:
   guides:
     GCNV Documentation: https://cloud.google.com/netapp/volumes/docs
-  api: https://cloud.google.com/netapp/volumes/docs/reference/rest/v1main/projects.locations/trial
-docs:
+  api: https://cloud.google.com/netapp/volumes/docs/reference/rest/v1beta1/projects.locations/trial
 base_url: projects/{{project}}/locations/{{location}}/trial
 self_link: projects/{{project}}/locations/{{location}}/trial
 create_url: projects/{{project}}/locations/{{location}}/trial:subscribe
@@ -33,6 +36,14 @@ timeouts:
   insert_minutes: 20
   delete_minutes: 20
 
+async:
+  type: OpAsync
+  operation:
+    base_url: "{{op_id}}"
+  actions: [create, delete]
+  result:
+    resource_inside_response: false
+autogen_async: true
 exclude_sweeper: true
 exclude_tgc: true
 custom_code:
