@@ -41,6 +41,8 @@ timeouts:
   insert_minutes: 20
   delete_minutes: 20
 custom_code:
+  pre_create: 'templates/terraform/pre_create/network_management_network_monitoring_provider_url.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/network_management_network_monitoring_provider_url.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/network_management_network_monitoring_provider.go.tmpl'
   post_create: 'templates/terraform/post_create/network_management_network_monitoring_provider_wait.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_management_network_monitoring_provider_wait.go.tmpl'
