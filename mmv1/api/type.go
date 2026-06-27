@@ -1478,7 +1478,8 @@ func (t *Type) ProviderOnly() bool {
 // exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
 // convert to snake in this method
 func (t *Type) GetPropertySchemaPath(schemaPath string) string {
-	nestedProps := t.ResourceMetadata.UserProperites()
+	rootProps := t.ResourceMetadata.UserProperites()
+	nestedProps := rootProps
 
 	var pathTkns []string
 	for _, pname := range strings.Split(schemaPath, ".0.") {
@@ -1492,6 +1493,31 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 			index = slices.IndexFunc(nestedProps, func(p *Type) bool {
 				return p.Name == schemaPath
 			})
+		}
+
+		// If still not found, search inside root-level flatten_object NestedObjects,
+		// but only for single-token paths (schemaPath == pname). Their children appear
+		// at the same Terraform schema level as top-level fields.
+		// We restrict to single-token paths to avoid resolving multi-token paths that
+		// start inside a root FlattenObject and pass through non-MaxItems:1 lists,
+		// which the SDK rejects in ExactlyOneOf/ConflictsWith constraints.
+		if index == -1 && schemaPath == pname {
+			for _, fp := range rootProps {
+				if fp.FlattenObject {
+					childProps := fp.NestedProperties()
+					childIdx := slices.IndexFunc(childProps, func(p *Type) bool {
+						// Compare camelCase or underscore forms to handle mixed-case
+						// field names (e.g. "secret_dataWo" vs "secret_data_wo")
+						return p.Name == camelPname || p.Name == pname ||
+							google.Underscore(p.Name) == pname
+					})
+					if childIdx != -1 {
+						nestedProps = childProps
+						index = childIdx
+						break
+					}
+				}
+			}
 		}
 
 		if index == -1 {
