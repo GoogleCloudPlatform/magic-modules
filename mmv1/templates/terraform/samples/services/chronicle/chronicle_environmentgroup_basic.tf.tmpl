@@ -1,0 +1,10 @@
+resource "google_chronicle_environment_group" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name = "myEnvironmentGroup"
+  environments_ids = [
+    "Default Environment"
+  ]
+}
