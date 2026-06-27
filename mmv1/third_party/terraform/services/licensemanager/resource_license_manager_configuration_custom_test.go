@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"regexp"
 	"testing"
 )
 
@@ -52,4 +53,26 @@ resource "google_license_manager_configuration" "example" {
   active           = `+fmt.Sprintf("%t", active)+`
 }
 `, context)
+}
+
+func TestAccLicenseManagerConfiguration_createInactive(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"configuration_id": "tf-test-example-config-" + randomSuffix,
+		"product":          "Office2021ProfessionalPlus",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccLicenseManagerConfiguration_active(context, false, 10),
+				ExpectError: regexp.MustCompile("creating an inactive configuration is not supported"),
+			},
+		},
+	})
 }
