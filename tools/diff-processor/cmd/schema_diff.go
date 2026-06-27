@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	_ "google/provider/new/google/allservices"
 	newProvider "google/provider/new/google/provider"
+	_ "google/provider/old/google/allservices"
 	oldProvider "google/provider/old/google/provider"
 
 	"encoding/json"
