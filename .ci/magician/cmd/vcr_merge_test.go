@@ -47,6 +47,7 @@ func TestExecVCRMerge(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			sb := newSandbox(t)
+			sb.RequireAllowlist()
 
 			// Intercepts the hardcoded `gcloud storage` commands and translates gs:// URLs into local directory operations.
 			fakeGcloud := `#!/bin/bash
