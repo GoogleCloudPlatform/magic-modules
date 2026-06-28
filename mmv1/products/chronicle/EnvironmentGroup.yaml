@@ -65,6 +65,7 @@ parameters:
 properties:
   - name: description
     type: String
+    required: true
     description: |-
       The EnvironmentGroup description.
       This value is optional. This value should be up to
