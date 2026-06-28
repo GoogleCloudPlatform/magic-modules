@@ -6,6 +6,7 @@ import (
 
 func TestFetchPRNumber(t *testing.T) {
 	sb := newSandbox(t)
+	sb.RequireAllowlist()
 	gh := &mockGithub{
 		calledMethods: make(map[string][][]any),
 		commitMessage: "Add `additional_group_keys` attribute to `google_cloud_identity_group` resource (#9217) (#6504)\n\n* Add `additional_group_keys` attribute to `google_cloud_identity_group` resource\n\n* Update acceptance test to check for attribute\n\n* Fix test check\n\n* Add `output: true` to nested properties in output field\n[upstream:49d3741f9d4d810a0a4768363bb8498afa21c688]\n\nSigned-off-by: Modular Magician <magic-modules@google.com>",
