@@ -664,6 +664,7 @@ func TestHandleBuildFailures(t *testing.T) {
 	}
 
 	sb := newSandbox(t)
+	sb.RequireAllowlist()
 	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", sb.Dir, result, vcr.Replaying, gh, sb.Runner)
 
 	assert.NoError(t, err)
@@ -691,6 +692,7 @@ func TestHandleBuildFailures_Recording(t *testing.T) {
 	}
 
 	sb := newSandbox(t)
+	sb.RequireAllowlist()
 	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", sb.Dir, result, vcr.Recording, gh, sb.Runner)
 
 	assert.NoError(t, err)
@@ -710,6 +712,7 @@ func TestHandleBuildFailures_NoFailures(t *testing.T) {
 	result := vcr.Result{}
 
 	sb := newSandbox(t)
+	sb.RequireAllowlist()
 	handled, err := handleBuildFailures("123", "build-456", "http://target", "sha789", sb.Dir, result, vcr.Replaying, gh, sb.Runner)
 
 	assert.NoError(t, err)
@@ -737,6 +740,7 @@ func TestAppendVCRResultToDiffComment_NotExists(t *testing.T) {
 	}
 
 	sb := newSandbox(t)
+	sb.RequireAllowlist()
 	err := appendVCRResultToDiffComment("123", "VCR Results", sb.Dir, gh, sb.Runner)
 
 	assert.NoError(t, err)
@@ -762,6 +766,7 @@ func TestAppendVCRResultToDiffComment_UseFileID(t *testing.T) {
 		},
 	}
 	sb := newSandbox(t)
+	sb.RequireAllowlist()
 
 	sb.Runner.WriteFile("diff_comment_id.txt", "456")
 
