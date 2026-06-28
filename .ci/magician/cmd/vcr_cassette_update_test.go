@@ -320,6 +320,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			sb := newSandbox(t)
+			sb.RequireAllowlist()
 
 			// Intercepts gs:// URLs and translates to local copy operations.
 			fakeGcloud := `#!/bin/bash
@@ -412,6 +413,7 @@ exec /usr/bin/git "$@"`
 
 func TestExecVCRCassetteUpdate_BuildFailure(t *testing.T) {
 	sb := newSandbox(t)
+	sb.RequireAllowlist()
 
 	// Simulates a build failure during integration testing.
 	fakeGo := `#!/bin/bash
