@@ -29,6 +29,9 @@ import (
 
 func TestExecGenerateComment(t *testing.T) {
 	sb := newSandbox(t)
+	sb.RequireAllowlist()
+	sb.AllowPassthrough("diff-processor")
+
 
 	magicModulesDir := filepath.Join(sb.Dir, "workspace", "magic-modules", ".ci", "magician")
 	os.MkdirAll(magicModulesDir, 0755)
