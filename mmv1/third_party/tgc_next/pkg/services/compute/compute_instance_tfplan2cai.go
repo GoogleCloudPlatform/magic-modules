@@ -191,7 +191,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Tags:                     tags,
 		Params:                   params,
 		Labels:                   tpgresource.ExpandLabels(d),
-		ServiceAccounts:          expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
 		GuestAccelerators:        accels,
 		MinCpuPlatform:           d.Get("min_cpu_platform").(string),
 		Scheduling:               scheduling,
@@ -202,6 +201,11 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		ReservationAffinity:      reservationAffinity,
 		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
 		InstanceEncryptionKey:    instanceEncryptionKey,
+	}
+	if serviceAccount := expandServiceAccounts(d.Get("service_account").([]interface{})); len(serviceAccount) > 0 {
+		if err := convertViaJSONTgcNext(serviceAccount, &instance.ServiceAccounts); err != nil {
+			return nil, fmt.Errorf("Error converting service_accounts: %s", err)
+		}
 	}
 	if metadataMap != nil {
 		metadataBytes, err := json.Marshal(metadataMap)
