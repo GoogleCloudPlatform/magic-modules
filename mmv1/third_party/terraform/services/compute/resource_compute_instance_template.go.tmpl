@@ -1697,13 +1697,6 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
-	var metadata *compute.Metadata
-	if metadataMap != nil {
-		metadata = &compute.Metadata{}
-		if err := tpgresource.Convert(metadataMap, metadata); err != nil {
-			return fmt.Errorf("Error converting metadata: %s", err)
-		}
-	}
 	{{- if ne $.TargetVersionName "ga" }}
 	partnerMetadataMap, err := resourceInstancePartnerMetadata(d)
 	if err != nil {
@@ -1712,12 +1705,6 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	partnerMetadataConverted, err := convertPartnerMetadataToCompute(partnerMetadataMap)
 	if err != nil {
 		return err
-	}
-	var partnerMetadata map[string]compute.StructuredEntries
-	if len(partnerMetadataConverted) > 0 {
-		if err := tpgresource.Convert(partnerMetadataConverted, &partnerMetadata); err != nil {
-			return fmt.Errorf("Error converting partner metadata: %s", err)
-		}
 	}
 	{{- end }}
 
@@ -1770,10 +1757,6 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		MachineType:                d.Get("machine_type").(string),
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Disks:                      disks,
-		Metadata:                   metadata,
-		{{- if ne $.TargetVersionName "ga" }}
-		PartnerMetadata:            partnerMetadata,
-		{{- end }}
 		NetworkInterfaces:          networks,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Scheduling:                 scheduling,
@@ -1846,6 +1829,18 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err := json.Unmarshal(itBytes, &itBody); err != nil {
 		return fmt.Errorf("Error unmarshaling instance template: %s", err)
 	}
+	if len(metadataMap) > 0 {
+		if props, ok := itBody["properties"].(map[string]interface{}); ok {
+			props["metadata"] = metadataMap
+		}
+	}
+	{{- if ne $.TargetVersionName "ga" }}
+	if len(partnerMetadataConverted) > 0 {
+		if props, ok := itBody["properties"].(map[string]interface{}); ok {
+			props["partnerMetadata"] = partnerMetadataConverted
+		}
+	}
+	{{- end }}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/instanceTemplates")
 	if err != nil {
