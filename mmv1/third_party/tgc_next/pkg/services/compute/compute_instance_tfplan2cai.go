@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -203,7 +204,11 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		InstanceEncryptionKey:    instanceEncryptionKey,
 	}
 	if metadataMap != nil {
-		if err := tpgresource.Convert(metadataMap, &instance.Metadata); err != nil {
+		metadataBytes, err := json.Marshal(metadataMap)
+		if err != nil {
+			return nil, fmt.Errorf("Error encoding metadata: %s", err)
+		}
+		if err := json.Unmarshal(metadataBytes, &instance.Metadata); err != nil {
 			return nil, fmt.Errorf("Error converting metadata: %s", err)
 		}
 	}
