@@ -1,0 +1,241 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: PersistentResource
+description: A PersistentResource that can be used to run custom workloads.
+api_variant_patterns:
+  - projects/{project}/locations/{location}/persistentResources/{persistent_resource}
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/vertex-ai/docs/training/persistent-resource-overview
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.persistentResources
+docs:
+base_url: projects/{{project}}/locations/{{location}}/persistentResources
+self_link: projects/{{project}}/locations/{{location}}/persistentResources/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/persistentResources?persistentResourceId={{name}}
+timeouts:
+  insert_minutes: 60
+  delete_minutes: 60
+sweeper:
+  prefixes:
+    - tf-test-
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete]
+  result:
+    resource_inside_response: true
+examples:
+  - name: vertex_ai_persistent_resource_basic
+    primary_resource_id: persistent_resource
+    vars:
+      name: persistent-resource
+  - name: vertex_ai_persistent_resource_full
+    primary_resource_id: persistent_resource
+    vars:
+      name: persistent-resource
+      kms_key_name: 'kms-name'
+    test_vars_overrides:
+      kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+  - name: vertex_ai_persistent_resource_untested_fields
+    primary_resource_id: persistent_resource
+    skip_test: true
+    vars:
+      name: persistent-resource
+parameters:
+  - name: location
+    type: String
+    description: The location for the resource
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: The name of the PersistentResource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: displayName
+    type: String
+    description: Optional. The display name of the PersistentResource. The name can be up to 128 characters long and can consist of any UTF-8 characters.
+    default_from_api: true
+    immutable: true
+  - name: resourcePools
+    type: Array
+    description: Required. The spec of the pools of different resources.
+    required: true
+    immutable: true
+    item_type:
+      description: Represents the spec of a group of resources of the same type, for example machine type, disk, and accelerators, in a PersistentResource.
+      type: NestedObject
+      properties:
+        - name: id
+          type: String
+          description: Immutable. The unique ID in a PersistentResource for referring to this resource pool. User can specify it if necessary. Otherwise, it's generated automatically.
+          immutable: true
+          default_from_api: true
+        - name: machineSpec
+          type: NestedObject
+          description: Required. Immutable. The specification of a single machine.
+          immutable: true
+          properties:
+            - name: machineType
+              type: String
+              description: Immutable. The type of the machine.
+              immutable: true
+            - name: acceleratorType
+              type: String
+              description: Immutable. The type of accelerator(s) that may be attached to the machine as per accelerator_count.
+              immutable: true
+            - name: acceleratorCount
+              type: Integer
+              description: The number of accelerators to attach to the machine.
+              immutable: true
+            - name: gpuPartitionSize
+              type: String
+              description: Optional. Immutable. The Nvidia GPU partition size.
+              immutable: true
+            - name: tpuTopology
+              type: String
+              description: Immutable. The topology of the TPUs. Corresponds to the TPU topologies available from GKE.
+              immutable: true
+        - name: diskSpec
+          type: NestedObject
+          description: Optional. Disk spec for the machine in this node pool.
+          properties:
+            - name: bootDiskType
+              type: String
+              description: Type of the boot disk.
+            - name: bootDiskSizeGb
+              type: Integer
+              description: Size in GB of the boot disk (default is 100GB).
+        - name: replicaCount
+          type: Integer
+          description: Optional. The total number of machines to use for this resource pool.
+        - name: autoscalingSpec
+          type: NestedObject
+          description: Optional. Optional spec to configure GKE or Ray-on-Vertex autoscaling
+          properties:
+            - name: minReplicaCount
+              type: Integer
+              description: Optional. Min replica count for autoscaling.
+            - name: maxReplicaCount
+              type: Integer
+              description: Optional. Max replica count for autoscaling.
+  - name: network
+    type: String
+    description: Optional. The full name of the Compute Engine network to peered with Vertex AI to host the persistent resources.
+    immutable: true
+  - name: pscInterfaceConfig
+    type: NestedObject
+    description: Optional. Configuration for PSC-I for PersistentResource.
+    immutable: true
+    properties:
+      - name: networkAttachment
+        type: String
+        description: Optional. The name of the Compute Engine network attachment to attach to the resource.
+      - name: dnsPeeringConfigs
+        type: Array
+        description: Optional. DNS peering configurations.
+        item_type:
+          type: NestedObject
+          description: DNS peering configuration.
+          properties:
+            - name: targetDomain
+              type: String
+              description: Required. The target domain for the DNS peering.
+              required: true
+            - name: dnsName
+              type: String
+              description: Required. The DNS name.
+              required: true
+  - name: reservedIpRanges
+    type: Array
+    description: Optional. A list of names for the reserved IP ranges under the VPC network that can be used for this persistent resource.
+    immutable: true
+    item_type:
+      type: String
+      description: IP range name
+  - name: resourceRuntimeSpec
+    type: NestedObject
+    description: Optional. Persistent Resource runtime spec. For example, used for Ray cluster configuration.
+    immutable: true
+    properties:
+      - name: raySpec
+        type: NestedObject
+        description: Optional. Ray cluster configuration. Required when creating a dedicated RayCluster on the PersistentResource.
+        properties:
+          - name: imageUri
+            type: String
+            description: Optional. Default image for user to choose a preferred ML framework.
+          - name: resourcePoolImages
+            type: KeyValuePairs
+            description: Optional. Required if image_uri isn't set. A map of resource_pool_id to prebuild Ray image.
+          - name: headNodeResourcePoolId
+            type: String
+            description: Optional. This will be used to indicate which resource pool will serve as the Ray head node.
+      - name: serviceAccountSpec
+        type: NestedObject
+        description: Optional. Configure the use of workload identity on the PersistentResource
+        properties:
+          - name: enableCustomServiceAccount
+            type: Boolean
+            description: Required. If true, custom user-managed service account is enforced to run any workloads (for example, Vertex Jobs) on the resource.
+            required: true
+          - name: serviceAccount
+            type: String
+            description: Optional. Required when all below conditions are met * `enable_custom_service_account` is true; * any runtime is specified via `ResourceRuntimeSpec` on creation time, for example, Ray.
+  - name: labels
+    type: KeyValueLabels
+    description: The labels with user-defined metadata to organize PersistentResource.
+    immutable: true
+  - name: encryptionSpec
+    type: NestedObject
+    description: Optional. Customer-managed encryption key spec for a PersistentResource.
+    immutable: true
+    properties:
+      - name: kmsKeyName
+        type: String
+        description: Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+        required: true
+        immutable: true
+  - name: state
+    type: String
+    description: Output only. The detailed state of a PersistentResource.
+    output: true
+  - name: error
+    type: NestedObject
+    description: Output only. Only populated when persistent resource's state is STOPPING or ERROR.
+    output: true
+    properties:
+      - name: code
+        type: Integer
+        output: true
+      - name: message
+        type: String
+        output: true
+  - name: createTime
+    type: String
+    description: Output only. Time when the PersistentResource was created.
+    output: true
+  - name: startTime
+    type: String
+    description: Output only. Time when the PersistentResource for the first time entered the RUNNING state.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. Time when the PersistentResource was most recently updated.
+    output: true

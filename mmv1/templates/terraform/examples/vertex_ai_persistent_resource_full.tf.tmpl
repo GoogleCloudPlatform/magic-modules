@@ -1,0 +1,65 @@
+data "google_project" "project" {}
+
+
+
+
+resource "google_vertex_ai_persistent_resource" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "name"}}"
+  location = "us-central1"
+  display_name = "example-resource"
+  
+  labels = {
+    env = "test"
+  }
+  
+
+  
+  resource_pools {
+    id = "head-node"
+    machine_spec {
+      machine_type = "e2-standard-8"
+    }
+    replica_count = 1
+    disk_spec {
+      boot_disk_size_gb = 100
+      boot_disk_type    = "pd-ssd"
+    }
+  }
+  
+  resource_pools {
+    id = "worker-node"
+    machine_spec {
+      machine_type = "n1-standard-4"
+    }
+    autoscaling_spec {
+      min_replica_count = 1
+      max_replica_count = 3
+    }
+    disk_spec {
+      boot_disk_size_gb = 100
+      boot_disk_type    = "pd-ssd"
+    }
+  }
+
+  resource_runtime_spec {
+    ray_spec {
+      head_node_resource_pool_id = "head-node"
+      resource_pool_images = {
+        "head-node"   = "us-docker.pkg.dev/vertex-ai/training/ray-cpu.2-33.py310:latest"
+        "worker-node" = "us-docker.pkg.dev/vertex-ai/training/ray-cpu.2-33.py310:latest"
+      }
+    }
+  }
+
+  encryption_spec {
+    kms_key_name = "{{index $.Vars "kms_key_name"}}"
+  }
+
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
