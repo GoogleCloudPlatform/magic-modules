@@ -669,7 +669,6 @@ func expandComputeLocalSsdRecoveryTimeoutTgc(v interface{}) (*compute.Duration, 
 	return duration, nil
 }
 
-
 func expandAccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
 	expanded := expandAccessConfigs(configs)
 	acs := make([]*compute.AccessConfig, 0, len(expanded))
