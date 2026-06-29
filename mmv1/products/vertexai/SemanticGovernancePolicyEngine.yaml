@@ -122,5 +122,6 @@ properties:
     description: |
       The current state of the SemanticGovernancePolicyEngine. One of:
       STATE_UNSPECIFIED, PROVISIONING, ACTIVE, FAILED, DEPROVISIONING,
-      INACTIVE.
+      INACTIVE. `FAILED` indicates provisioning did not succeed; recover by
+      destroying the resource (deprovision) or re-applying (re-provision).
     output: true

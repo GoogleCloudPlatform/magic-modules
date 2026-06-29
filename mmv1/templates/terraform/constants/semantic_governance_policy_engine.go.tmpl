@@ -23,9 +23,12 @@ func sgpePostReadDispatch(d sgpeResourceID, res map[string]interface{}) error {
 		return fmt.Errorf("SGPE response is missing or has malformed state field; backend regression.")
 	}
 	// Only INACTIVE clears the ID (treat as deleted; next apply re-creates).
-	// Every other state — including unrecognized ones a newer backend may
-	// add — is left in state, so a plan/refresh never errors on an
-	// unfamiliar state.
+	// Every other state — including FAILED and any unrecognized state a newer
+	// backend may add — is intentionally left in state. FAILED is a real
+	// terminal state (per the SGPE API a FAILED engine may be re-provisioned
+	// or deprovisioned), so we surface it via the Computed `state` attribute
+	// and let the user choose to destroy (deprovision) or re-apply
+	// (re-provision).
 	if state == "INACTIVE" {
 		log.Printf("[WARN] SemanticGovernancePolicyEngine %q is INACTIVE; treating as deleted, next apply will re-create", d.Id())
 		d.SetId("")
