@@ -7264,7 +7264,7 @@ resource "google_sql_database_instance" "instance" {
 			psc_enabled = true
 			psc_auto_connection_policy_enabled = true
 			psc_auto_connections {
-				consumer_network = "projects/${google_project.testproject.project_id}/global/networks/default"
+				consumer_network = "projects/speckle-prober-psc-consumer/global/networks/default"
 			}
 		}
 		ipv4_enabled = false
