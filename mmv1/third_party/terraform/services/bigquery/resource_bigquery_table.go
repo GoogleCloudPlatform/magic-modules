@@ -1956,7 +1956,9 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (map[string]interfa
 		table["tableConstraints"] = tableConstraints
 	}
 
-	table["resourceTags"] = tpgresource.ExpandStringMap(d, "resource_tags")
+	if _, ok := d.GetOk("resource_tags"); ok {
+		table["resourceTags"] = tpgresource.ExpandStringMap(d, "resource_tags")
+	}
 
 	if v, ok := d.GetOk("external_catalog_table_options"); ok {
 		table["externalCatalogTableOptions"] = expandExternalCatalogTableOptions(v)
