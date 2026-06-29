@@ -322,12 +322,15 @@ cluster.
 
     * `"UNSPECIFIED"`: Default value. This should not be used.
     * `"NO_RESERVATION"`: Do not consume from any reserved capacity.
-    * `"ANY_RESERVATION"`: Consume any reservation available.
+    * `"ANY_RESERVATION"`: Consume any non-specific reservation available, with a fallback to on-demand capacity in case of none reservaition being claimable.
     * `"SPECIFIC_RESERVATION"`: Must consume from a specific reservation. Must specify key value fields for specifying the reservations.
+    * `"ANY_RESERVATION_THEN_FAIL"`: Consume any non-specific reservation available, without a fallback to on-demand capacity in case of none reservaition being claimable.
 * `key` (Optional) The label key of a reservation resource. To target a SPECIFIC_RESERVATION by name, specify "compute.googleapis.com/reservation-name" as the key and specify the name of your reservation as its value.
 * `values` (Optional) The list of label values of reservation resources. For example: the name of the specific reservation when using a key of "compute.googleapis.com/reservation-name"
 
 <a name="nested_node_config"></a>The `node_config` block supports:
+
+* `kubelet_config` - (Optional) Node kubelet configs. Structure is [documented below](#nested_kubelet_config).
 
 * `taint_config` - (Optional) Taint configuration for the node pool. Structure is [documented below](#nested_node_config_taint_config).
 
@@ -362,6 +365,12 @@ In addition to the arguments listed above, the following computed attributes are
 - `create` - (Default `60 minutes`) Used for adding node pools
 - `update` - (Default `60 minutes`) Used for updates to node pools
 - `delete` - (Default `60 minutes`) Used for removing node pools.
+
+<a name="nested_kubelet_config"></a>The `kubelet_config` block supports:
+
+* `shutdown_grace_period_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown. This is the time allocated for all pods (critical and non-critical) to terminate. The value must be between 10 and 10000. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
+
+* `shutdown_grace_period_critical_pods_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown for critical pods. This value must be less than or equal to `shutdown_grace_period_seconds`. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
 
 ## Import
 

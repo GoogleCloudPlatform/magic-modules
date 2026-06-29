@@ -14,7 +14,6 @@
 ---
 name: DataProductDataAsset
 api_resource_type_kind: DataAsset
-cai_resource_kind: DataAsset
 description: |
   A data asset resource that can be packaged and shared via a data product.
 references:
@@ -34,6 +33,7 @@ async:
     base_url: '{{op_id}}'
   actions: [create, update, delete]
 autogen_async: true
+cai_resource_kind: DataAsset
 samples:
   - name: dataplex_data_product_data_asset_basic
     primary_resource_id: example
@@ -54,6 +54,10 @@ samples:
         test_env_vars:
           project_name: PROJECT_NAME
 parameters:
+  - name: name
+    type: String
+    output: true
+    description: The relative resource name of the data asset.
   - name: location
     type: String
     required: true

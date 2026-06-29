@@ -91,12 +91,8 @@ var (
 		"melinath": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2026, 3, 31),
-					endDate:   newDate(2026, 4, 5),
-				},
-				{
-					startDate: newDate(2026, 4, 10),
-					endDate:   newDate(2026, 4, 12),
+					startDate: newDate(2026, 6, 26),
+					endDate:   newDate(2026, 7, 6),
 				},
 			},
 		},
@@ -121,6 +117,10 @@ var (
 				{
 					startDate: newDate(2026, 06, 01),
 					endDate:   newDate(2026, 06, 12),
+				},
+				{
+					startDate: newDate(2026, 06, 29),
+					endDate:   newDate(2026, 07, 06),
 				},
 			},
 		},
@@ -171,5 +171,6 @@ var (
 		"shuyama1":   {},
 		"trodge":     {},
 		"zli82016":   {},
+		"vr-ibm":     {},
 	}
 )

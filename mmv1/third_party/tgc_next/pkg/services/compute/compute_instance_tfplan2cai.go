@@ -197,7 +197,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Scheduling:               scheduling,
 		DeletionProtection:       d.Get("deletion_protection").(bool),
 		Hostname:                 d.Get("hostname").(string),
-		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
+		AdvancedMachineFeatures:  expandAdvancedMachineFeaturesTgcNext(d),
 		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:      reservationAffinity,
 		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
@@ -655,4 +655,12 @@ func expandComputeLocalSsdRecoveryTimeoutTgc(v interface{}) (*compute.Duration, 
 		duration.ForceSendFields = append(duration.ForceSendFields, "Seconds")
 	}
 	return duration, nil
+}
+
+func expandAdvancedMachineFeaturesTgcNext(d tpgresource.TerraformResourceData) *compute.AdvancedMachineFeatures {
+	features := expandAdvancedMachineFeaturesTyped(d)
+	if features != nil && features.PerformanceMonitoringUnit == "" {
+		features.PerformanceMonitoringUnit = "STANDARD"
+	}
+	return features
 }

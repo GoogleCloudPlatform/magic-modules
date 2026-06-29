@@ -34,11 +34,13 @@ async:
 include_in_tgc_next: true
 custom_code:
 legacy_long_form_project: true
-examples:
+samples:
   - name: 'network_firewall_policy_full'
     primary_resource_id: 'policy'
-    vars:
-      policy_name: 'tf-test-policy'
+    steps:
+      - name: 'network_firewall_policy_full'
+        resource_id_vars:
+          policy_name: 'tf-test-policy'
 iam_policy:
   parent_resource_attribute: 'name'
 parameters:
