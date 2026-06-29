@@ -23,6 +23,21 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
           managed_memory_topic = "USER_PREFERENCES"
         }
       }
+      structured_memory_configs {
+        scope_keys = ["user_id"]
+        schema_configs {
+          id            = "user-profile"
+          memory_schema = jsonencode({
+            type = "object"
+            properties = {
+              technical_stack = {
+                type        = "string"
+                description = "Comma-separated list tools or languages used by the user."
+              }
+            }
+          })
+        }
+      }
       ttl_config {
         default_ttl = "86400s"
       }

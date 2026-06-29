@@ -682,3 +682,37 @@ properties:
                   type: Boolean
                   description: |-
                     Optional. Generate memories in the third person if set to true.
+          - name: 'structuredMemoryConfigs'
+            type: Array
+            description: |-
+              Optional. Structured memory configurations for Agent Engine sub-resources.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'scopeKeys'
+                  type: Array
+                  description: |-
+                    Optional. List of scope keys that this structured memory config applies to.
+                  item_type:
+                    type: String
+                - name: 'schemaConfigs'
+                  type: Array
+                  description: |-
+                    Optional. List of schema configs that this structured memory config applies to.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'id'
+                        type: String
+                        description: |-
+                          Required. Unique ID identifying the memory schema.
+                        required: true
+                      - name: 'memorySchema'
+                        type: String
+                        description: |-
+                          Optional. The memory schema defined as an OpenAPI Schema Object JSON string.
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                        validation:
+                          function: 'validation.StringIsJSON'
