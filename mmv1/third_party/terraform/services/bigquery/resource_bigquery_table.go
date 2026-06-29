@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	
+
 	"golang.org/x/exp/slices"
 
 	"github.com/hashicorp/go-cty/cty"
@@ -632,7 +632,7 @@ func ResourceBigQueryTable() *schema.Resource {
 			State: resourceBigQueryTableImport,
 		},
 		CustomizeDiff: customdiff.All(
-            tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			resourceBigQueryTableSchemaCustomizeDiff,
 			tpgresource.SetLabelsDiff,
@@ -745,7 +745,7 @@ func ResourceBigQueryTable() *schema.Resource {
 								return json
 							},
 							DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
-							Description: `A JSON schema for the external table. Schema is required for CSV and JSON formats and is disallowed for Google Cloud Bigtable, Cloud Datastore backups, and Avro formats when using external tables.`,
+							Description:      `A JSON schema for the external table. Schema is required for CSV and JSON formats and is disallowed for Google Cloud Bigtable, Cloud Datastore backups, and Avro formats when using external tables.`,
 						},
 						// CsvOptions: [Optional] Additional properties to set if
 						// sourceFormat is set to CSV.
@@ -1209,9 +1209,9 @@ func ResourceBigQueryTable() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						// TypeSystem: [Required] Specifies the system which defines the foreign data type.
 						"type_system": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      `Specifies the system which defines the foreign data type.`,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `Specifies the system which defines the foreign data type.`,
 						},
 					},
 				},
@@ -1776,17 +1776,17 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 						// ConnectionId: [Optional] The connection specifying the credentials to be used to read external storage, such as Azure Blob, Cloud Storage, or S3. The connection is needed to read the open source table from BigQuery Engine. The connection_id can have the form `<project_id>.<location_id>.<connection_id>` or `projects/<project_id>/locations/<location_id>/connections/<connection_id>`.
 						"connection_id": {
-							Type:        schema.TypeString,
-							Optional:    true,
+							Type:             schema.TypeString,
+							Optional:         true,
 							DiffSuppressFunc: bigQueryTableConnectionIdSuppress,
-							Description: `The connection specifying the credentials to be used to read external storage, such as Azure Blob, Cloud Storage, or S3. The connection is needed to read the open source table from BigQuery Engine. The connection_id can have the form <project_id>.<location_id>.<connection_id> or projects/<project_id>/locations/<location_id>/connections/<connection_id>.`,
+							Description:      `The connection specifying the credentials to be used to read external storage, such as Azure Blob, Cloud Storage, or S3. The connection is needed to read the open source table from BigQuery Engine. The connection_id can have the form <project_id>.<location_id>.<connection_id> or projects/<project_id>/locations/<location_id>/connections/<connection_id>.`,
 						},
 					},
 				},
 			},
-//UDP schema start
-            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
-//UDP schema end
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -2440,11 +2440,10 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Error setting external_catalog_table_options: %s", err)
 		}
 	}
-                
-    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-        return err
-    }
-    
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -2653,13 +2652,13 @@ func resourceBigQueryTableColumnDrop(config *transport_tpg.Config, userAgent str
 }
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
-        
-    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-        return err
-    }else if ok{
-        return nil
-    }
-    
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("cannot destroy table %v without setting deletion_protection=false and running `terraform apply`", d.Id())
 	}
@@ -3963,9 +3962,9 @@ func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 
 func init() {
 	registry.Schema{
-		Name: "google_bigquery_table",
+		Name:        "google_bigquery_table",
 		ProductName: "bigquery",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceBigQueryTable(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceBigQueryTable(),
 	}.Register()
 }
