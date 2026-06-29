@@ -256,11 +256,19 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		if err != nil {
 			return fmt.Errorf("Error expanding partner_metadata: %s", err)
 		}
-		partnerMetadataTyped, err := convertPartnerMetadataToComputeTyped(pmRaw)
+		partnerMetadataConverted, err := convertPartnerMetadataToCompute(pmRaw)
 		if err != nil {
 			return fmt.Errorf("Error converting partner_metadata: %s", err)
 		}
-		instance.PartnerMetadata = partnerMetadataTyped
+		if len(partnerMetadataConverted) > 0 {
+			partnerMetadataBytes, err := json.Marshal(partnerMetadataConverted)
+			if err != nil {
+				return fmt.Errorf("Error marshaling partner_metadata: %s", err)
+			}
+			if err := json.Unmarshal(partnerMetadataBytes, &instance.PartnerMetadata); err != nil {
+				return fmt.Errorf("Error setting partner_metadata: %s", err)
+			}
+		}
 	}
 	{{- end }}
 
