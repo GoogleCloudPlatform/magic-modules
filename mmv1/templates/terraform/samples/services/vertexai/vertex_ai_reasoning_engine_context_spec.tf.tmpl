@@ -13,6 +13,16 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
         embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
       }
       disable_memory_revisions = false
+      customization_configs {
+        scope_keys                   = ["user_id"]
+        enable_third_person_memories = false
+        consolidation_config {
+          revisions_per_candidate_count = 1
+        }
+        memory_topics {
+          managed_memory_topic = "USER_PREFERENCES"
+        }
+      }
       ttl_config {
         default_ttl = "86400s"
       }
