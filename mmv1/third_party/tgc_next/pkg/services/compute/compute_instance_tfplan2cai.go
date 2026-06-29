@@ -121,7 +121,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating params: %s", err)
 	}
 
-	metadata, err := resourceInstanceMetadataTyped(d)
+	metadataMap, err := resourceInstanceMetadata(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
@@ -183,7 +183,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Description:              d.Get("description").(string),
 		Disks:                    disks,
 		MachineType:              machineTypeUrl,
-		Metadata:                 metadata,
 		Name:                     d.Get("name").(string),
 		Zone:                     d.Get("zone").(string),
 		NetworkInterfaces:        networkInterfaces,
@@ -202,6 +201,11 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		ReservationAffinity:      reservationAffinity,
 		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
 		InstanceEncryptionKey:    instanceEncryptionKey,
+	}
+	if metadataMap != nil {
+		if err := tpgresource.Convert(metadataMap, &instance.Metadata); err != nil {
+			return nil, fmt.Errorf("Error converting metadata: %s", err)
+		}
 	}
 	if cic := expandConfidentialInstanceConfig(d); cic != nil {
 		instance.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{
