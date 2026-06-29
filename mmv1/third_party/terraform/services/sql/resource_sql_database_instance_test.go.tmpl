@@ -7267,7 +7267,7 @@ resource "google_sql_database_instance" "instance" {
 				consumer_network = "projects/${google_project.testproject.project_id}/global/networks/default"
 			}
 		}
-		ipv4_enabled = true
+		ipv4_enabled = false
     }
 	backup_configuration {
 		enabled = true
