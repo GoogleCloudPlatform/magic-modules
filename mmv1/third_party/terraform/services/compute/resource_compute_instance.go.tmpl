@@ -4,7 +4,9 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	{{- if ne $.TargetVersionName "ga" }}
 	"encoding/json"
+	{{- end }}
 	"errors"
 	"fmt"
 	"log"
