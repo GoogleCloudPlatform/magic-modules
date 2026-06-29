@@ -658,7 +658,7 @@ func expandComputeLocalSsdRecoveryTimeoutTgc(v interface{}) (*compute.Duration, 
 }
 
 func expandAdvancedMachineFeaturesTgcNext(d tpgresource.TerraformResourceData) *compute.AdvancedMachineFeatures {
-	features := expandAdvancedMachineFeatures(d)
+	features := expandAdvancedMachineFeaturesTyped(d)
 	if features != nil && features.PerformanceMonitoringUnit == "" {
 		features.PerformanceMonitoringUnit = "STANDARD"
 	}
