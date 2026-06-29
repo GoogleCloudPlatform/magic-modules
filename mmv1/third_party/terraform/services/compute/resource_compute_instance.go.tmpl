@@ -2296,6 +2296,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compute.Instance, project, zone string, config *transport_tpg.Config) error {
 	var metadataMap map[string]interface{}
 	if instance.Metadata != nil {
+		var err error
 		metadataMap, err = tpgresource.ConvertToMap(instance.Metadata)
 		if err != nil {
 			return fmt.Errorf("Error converting metadata: %s", err)
