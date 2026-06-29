@@ -173,9 +173,24 @@ func ListDnsManagedZones(config *transport_tpg.Config, project string, callback 
 				return fmt.Errorf("error setting project on temporary resource data: %w", err)
 			}
 			rd.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, managedZone.Name))
+
 			if err := managedZoneSchema.Read(rd, config); err != nil {
 				return err
 			}
+			if err := rd.Set("name", managedZone.Name); err != nil {
+				return fmt.Errorf("error setting name on temporary resource data: %w", err)
+			}
+			if err := rd.Set("project", project); err != nil {
+				return fmt.Errorf("error setting project on temporary resource data: %w", err)
+			}
+
+			if err := tpgresource.SetResourceIdentityAttributes(rd, map[string]interface{}{
+				"name":    managedZone.Name,
+				"project": project,
+			}); err != nil {
+				return fmt.Errorf("error setting identity: %w", err)
+			}
+
 			if err := callback(rd); err != nil {
 				return err
 			}
