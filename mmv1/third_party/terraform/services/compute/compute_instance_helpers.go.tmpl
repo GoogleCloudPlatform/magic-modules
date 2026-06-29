@@ -1626,3 +1626,81 @@ func stripInitializeParams(instanceMap map[string]interface{}) {
 	}
 }
 
+\n
+func flattenSchedulingMap(resp map[string]interface{}) []map[string]interface{} {
+	schedulingMap := make(map[string]interface{})
+
+	if v, ok := resp["onHostMaintenance"].(string); ok { schedulingMap["on_host_maintenance"] = v }
+	if v, ok := resp["preemptible"].(bool); ok { schedulingMap["preemptible"] = v }
+	if v, ok := resp["minNodeCpus"].(float64); ok { schedulingMap["min_node_cpus"] = int(v) }
+	if v, ok := resp["provisioningModel"].(string); ok { schedulingMap["provisioning_model"] = v }
+	if v, ok := resp["instanceTerminationAction"].(string); ok { schedulingMap["instance_termination_action"] = v }
+	if v, ok := resp["availabilityDomain"].(float64); ok { schedulingMap["availability_domain"] = int(v) }
+	if v, ok := resp["terminationTime"].(string); ok { schedulingMap["termination_time"] = v }
+	if v, ok := resp["automaticRestart"].(bool); ok { schedulingMap["automatic_restart"] = v }
+
+	if maxRunDurationRaw, ok := resp["maxRunDuration"].(map[string]interface{}); ok && maxRunDurationRaw != nil {
+		maxRunDuration := make(map[string]interface{})
+		if s, ok := maxRunDurationRaw["seconds"].(float64); ok { maxRunDuration["seconds"] = int(s) }
+		if n, ok := maxRunDurationRaw["nanos"].(float64); ok { maxRunDuration["nanos"] = int(n) }
+		schedulingMap["max_run_duration"] = []map[string]interface{}{maxRunDuration}
+	}
+
+	if stopActionRaw, ok := resp["onInstanceStopAction"].(map[string]interface{}); ok && stopActionRaw != nil {
+		if stopAction, ok := stopActionRaw["discardLocalSsd"].(bool); ok {
+			schedulingMap["on_instance_stop_action"] = []map[string]interface{}{{"discard_local_ssd": stopAction}}
+		}
+	}
+
+{{ if ne $.TargetVersionName `ga` -}}
+	if v, ok := resp["skipGuestOsShutdown"].(bool); ok { schedulingMap["skip_guest_os_shutdown"] = v }
+	if v, ok := resp["hostErrorTimeoutSeconds"].(float64); ok && v != 0 { schedulingMap["host_error_timeout_seconds"] = int(v) }
+	if v, ok := resp["maintenanceInterval"].(string); ok && v != "" { schedulingMap["maintenance_interval"] = v }
+
+	if gracefulShutdownRaw, ok := resp["gracefulShutdown"].(map[string]interface{}); ok && gracefulShutdownRaw != nil {
+		gsMap := make(map[string]interface{})
+		if gs, ok := gracefulShutdownRaw["enabled"].(bool); ok { gsMap["enabled"] = gs }
+		if maxDurationRaw, ok := gracefulShutdownRaw["maxDuration"].(map[string]interface{}); ok && maxDurationRaw != nil {
+			maxDuration := make(map[string]interface{})
+			if s, ok := maxDurationRaw["seconds"].(float64); ok { maxDuration["seconds"] = int(s) }
+			if n, ok := maxDurationRaw["nanos"].(float64); ok { maxDuration["nanos"] = int(n) }
+			gsMap["max_duration"] = []map[string]interface{}{maxDuration}
+		}
+		schedulingMap["graceful_shutdown"] = []map[string]interface{}{gsMap}
+	}
+
+	if preemptionNoticeDurationRaw, ok := resp["preemptionNoticeDuration"].(map[string]interface{}); ok && preemptionNoticeDurationRaw != nil {
+		preemptionNoticeDuration := make(map[string]interface{})
+		if s, ok := preemptionNoticeDurationRaw["seconds"].(float64); ok { preemptionNoticeDuration["seconds"] = int(s) }
+		if n, ok := preemptionNoticeDurationRaw["nanos"].(float64); ok { preemptionNoticeDuration["nanos"] = int(n) }
+		schedulingMap["preemption_notice_duration"] = []map[string]interface{}{preemptionNoticeDuration}
+	}
+{{- end }}
+
+	if localSsdRecoveryTimeoutRaw, ok := resp["localSsdRecoveryTimeout"].(map[string]interface{}); ok && localSsdRecoveryTimeoutRaw != nil {
+		localSsdRecoveryTimeout := make(map[string]interface{})
+		if s, ok := localSsdRecoveryTimeoutRaw["seconds"].(float64); ok { localSsdRecoveryTimeout["seconds"] = int(s) }
+		if n, ok := localSsdRecoveryTimeoutRaw["nanos"].(float64); ok { localSsdRecoveryTimeout["nanos"] = int(n) }
+		schedulingMap["local_ssd_recovery_timeout"] = []map[string]interface{}{localSsdRecoveryTimeout}
+	}
+
+	nodeAffinities := schema.NewSet(schema.HashResource(instanceSchedulingNodeAffinitiesElemSchema()), nil)
+	if nodeAffinitiesRaw, ok := resp["nodeAffinities"].([]interface{}); ok && nodeAffinitiesRaw != nil {
+		for _, naRaw := range nodeAffinitiesRaw {
+			if na, ok := naRaw.(map[string]interface{}); ok {
+				naMap := make(map[string]interface{})
+				if k, ok := na["key"].(string); ok { naMap["key"] = k }
+				if o, ok := na["operator"].(string); ok { naMap["operator"] = o }
+				if vRaw, ok := na["values"].([]interface{}); ok {
+					valuesList := make([]interface{}, len(vRaw))
+					for i, v := range vRaw { valuesList[i] = v }
+					naMap["values"] = schema.NewSet(schema.HashString, valuesList)
+				}
+				nodeAffinities.Add(naMap)
+			}
+		}
+	}
+	schedulingMap["node_affinities"] = nodeAffinities
+
+	return []map[string]interface{}{schedulingMap}
+}

@@ -1950,8 +1950,8 @@ func flattenDisk(disk map[string]interface{}, configDisk map[string]any, default
 
 	guestOsFeaturesSlice := make([]interface{}, 0, len(disk["guestOsFeatures"].([]interface{})))
 	for _, f := range disk["guestOsFeatures"].([]interface{}) {
-		if f != nil && f.Type != "" {
-			guestOsFeaturesSlice = append(guestOsFeaturesSlice, map[string]interface{}{"type": f.Type})
+		if f != nil && f.(map[string]interface{})["type"].(string) != "" {
+			guestOsFeaturesSlice = append(guestOsFeaturesSlice, map[string]interface{}{"type": f.(map[string]interface{})["type"].(string)})
 		}
 	}
 	diskMap["auto_delete"] = disk["autoDelete"].(bool)
@@ -2144,7 +2144,17 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 
 		md := instanceTemplate["properties"].(map[string]interface{})["metadata"].(map[string]interface{})
 
-		_md := flattenMetadataBeta(md)
+		_md := make(map[string]string)
+		if items, ok := md["items"].([]interface{}); ok {
+			for _, item := range items {
+				itemMap := item.(map[string]interface{})
+				if v, ok := itemMap["value"].(string); ok {
+					_md[itemMap["key"].(string)] = v
+				} else {
+					_md[itemMap["key"].(string)] = ""
+				}
+			}
+		}
 
 		if script, scriptExists := d.GetOk("metadata_startup_script"); scriptExists {
 			if err = d.Set("metadata_startup_script", script); err != nil {
@@ -2159,13 +2169,22 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	if err = d.Set("numeric_id", strconv.FormatUint(instanceTemplate.Id, 10)); err != nil {
+	var numericId string
+	switch v := instanceTemplate["id"].(type) {
+	case string:
+		numericId = v
+	case float64:
+		numericId = strconv.FormatFloat(v, 'f', -1, 64)
+	default:
+		numericId = fmt.Sprintf("%v", v)
+	}
+	if err = d.Set("numeric_id", numericId); err != nil {
 		return fmt.Errorf("Error setting numeric_id: %s", err)
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
-	if instanceTemplate.Properties.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instanceTemplate.Properties.PartnerMetadata))
+	if instanceTemplate["properties"].(map[string]interface{})["partnerMetadata"] != nil {
+		partnerMetadata, err := flattenPartnerMetadata(instanceTemplate["properties"].(map[string]interface{})["partnerMetadata"].(map[string]interface{}))
 		if err != nil {
 			return fmt.Errorf("Error parsing partner metadata: %s", err)
 		}
@@ -2177,7 +2196,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 
 	// Set the tags fingerprint if there is one.
 	if instanceTemplate["properties"].(map[string]interface{})["tags"].(map[string]interface{}) != nil {
-		if err = d.Set("tags_fingerprint", instanceTemplate["properties"].(map[string]interface{})["tags"].(map[string]interface{}).Fingerprint); err != nil {
+		if err = d.Set("tags_fingerprint", instanceTemplate["properties"].(map[string]interface{})["tags"].(map[string]interface{})["fingerprint"].(string)); err != nil {
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
 	} else {
@@ -2185,21 +2204,25 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
 	}
-	if instanceTemplate["properties"].(map[string]interface{})["labels"].(map[string]interface{}) != nil {
-		if err := tpgresource.SetLabels(instanceTemplate["properties"].(map[string]interface{})["labels"].(map[string]interface{}), d, "labels"); err != nil {
+	if labelsRaw, ok := instanceTemplate["properties"].(map[string]interface{})["labels"].(map[string]interface{}); ok && labelsRaw != nil {
+		labels := make(map[string]string)
+		for k, v := range labelsRaw {
+			labels[k] = v.(string)
+		}
+		if err := tpgresource.SetLabels(labels, d, "labels"); err != nil {
 			return fmt.Errorf("Error setting labels: %s", err)
 		}
-	}
-	if err := tpgresource.SetLabels(instanceTemplate["properties"].(map[string]interface{})["labels"].(map[string]interface{}), d, "terraform_labels"); err != nil {
-		return fmt.Errorf("Error setting terraform_labels: %s", err)
-	}
-	if err := d.Set("effective_labels", instanceTemplate["properties"].(map[string]interface{})["labels"].(map[string]interface{})); err != nil {
-		return fmt.Errorf("Error setting effective_labels: %s", err)
+		if err := tpgresource.SetLabels(labels, d, "terraform_labels"); err != nil {
+			return fmt.Errorf("Error setting terraform_labels: %s", err)
+		}
+		if err := d.Set("effective_labels", labels); err != nil {
+			return fmt.Errorf("Error setting effective_labels: %s", err)
+		}
 	}
 	if err = d.Set("self_link", instanceTemplate["selfLink"].(string)); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
-	if err = d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", instanceTemplate["selfLink"].(string), instanceTemplate.Id)); err != nil {
+	if err = d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", instanceTemplate["selfLink"].(string), numericId)); err != nil {
 		return fmt.Errorf("Error setting self_link_unique: %s", err)
 	}
 	if err = d.Set("creation_timestamp", instanceTemplate["creationTimestamp"].(string)); err != nil {
@@ -2251,11 +2274,8 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(npcMap)); err != nil {
 		return err
 	}
-	if instanceTemplate["properties"].(map[string]interface{})["networkInterfaces"].([]interface{}) != nil {
-		networkInterfacesRaw, err := networkInterfacesToInterface(instanceTemplate["properties"].(map[string]interface{})["networkInterfaces"].([]interface{}))
-		if err != nil {
-			return err
-		}
+	if instanceTemplate["properties"].(map[string]interface{})["networkInterfaces"] != nil {
+		networkInterfacesRaw := instanceTemplate["properties"].(map[string]interface{})["networkInterfaces"].([]interface{})
 		networkInterfaces, region, _, _, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
 		if err != nil {
 			return err
@@ -2270,8 +2290,8 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			}
 		}
 	}
-	if instanceTemplate["properties"].(map[string]interface{})["scheduling"].(map[string]interface{}) != nil {
-		scheduling := flattenScheduling(instanceTemplate["properties"].(map[string]interface{})["scheduling"].(map[string]interface{}))
+	if instanceTemplate["properties"].(map[string]interface{})["scheduling"] != nil {
+		scheduling := flattenSchedulingMap(instanceTemplate["properties"].(map[string]interface{})["scheduling"].(map[string]interface{}))
 {{ if ne $.TargetVersionName `ga` }}
 		// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
 		// To avoid diff, we need to set the value from the state not from API response.
