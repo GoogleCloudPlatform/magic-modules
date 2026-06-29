@@ -1,0 +1,287 @@
+// Custom encoder for Cloud Run V2 Job to transform v2 schema structure (template...)
+// into v1 CAI asset payload structure (spec.template...) expected by CAI.
+if obj == nil {
+	return obj, nil
+}
+
+v1Obj := make(map[string]interface{})
+v1Obj["apiVersion"] = "run.googleapis.com/v1"
+v1Obj["kind"] = "Job"
+
+metadata := make(map[string]interface{})
+if labels, ok := obj["labels"]; ok && labels != nil {
+	metadata["labels"] = labels
+}
+if annotations, ok := obj["annotations"]; ok && annotations != nil {
+	metadata["annotations"] = annotations
+}
+if client, ok := obj["client"].(string); ok && client != "" {
+	if metadata["annotations"] == nil {
+		metadata["annotations"] = make(map[string]interface{})
+	}
+	if annMap, ok := metadata["annotations"].(map[string]interface{}); ok {
+		annMap["run.googleapis.com/client-name"] = client
+	}
+}
+if clientVer, ok := obj["clientVersion"].(string); ok && clientVer != "" {
+	if metadata["annotations"] == nil {
+		metadata["annotations"] = make(map[string]interface{})
+	}
+	if annMap, ok := metadata["annotations"].(map[string]interface{}); ok {
+		annMap["run.googleapis.com/client-version"] = clientVer
+	}
+}
+if launchStage, ok := obj["launchStage"].(string); ok && launchStage != "" {
+	if metadata["annotations"] == nil {
+		metadata["annotations"] = make(map[string]interface{})
+	}
+	if annMap, ok := metadata["annotations"].(map[string]interface{}); ok {
+		annMap["run.googleapis.com/launch-stage"] = launchStage
+	}
+}
+if binAuth, ok := obj["binaryAuthorization"].(map[string]interface{}); ok && binAuth != nil {
+	if bg, ok := binAuth["breakglassJustification"].(string); ok && bg != "" {
+		if metadata["annotations"] == nil {
+			metadata["annotations"] = make(map[string]interface{})
+		}
+		if annMap, ok := metadata["annotations"].(map[string]interface{}); ok {
+			annMap["run.googleapis.com/binary-authorization-breakglass"] = bg
+		}
+	}
+	if ud, ok := binAuth["useDefault"].(bool); ok && ud {
+		if metadata["annotations"] == nil {
+			metadata["annotations"] = make(map[string]interface{})
+		}
+		if annMap, ok := metadata["annotations"].(map[string]interface{}); ok {
+			annMap["run.googleapis.com/binary-authorization"] = "default"
+		}
+	}
+}
+if len(metadata) > 0 {
+	v1Obj["metadata"] = metadata
+}
+
+if v2Tmpl, ok := obj["template"].(map[string]interface{}); ok {
+	spec := make(map[string]interface{})
+	execTmpl := make(map[string]interface{})
+	execMeta := make(map[string]interface{})
+	if labels, ok := v2Tmpl["labels"]; ok && labels != nil {
+		execMeta["labels"] = labels
+	}
+	if annotations, ok := v2Tmpl["annotations"]; ok && annotations != nil {
+		execMeta["annotations"] = annotations
+	}
+
+	execSpec := make(map[string]interface{})
+	if parallelism, ok := v2Tmpl["parallelism"]; ok && parallelism != nil {
+		execSpec["parallelism"] = parallelism
+	}
+	if taskCount, ok := v2Tmpl["taskCount"]; ok && taskCount != nil {
+		execSpec["taskCount"] = taskCount
+	}
+
+	if v2TaskTmpl, ok := v2Tmpl["template"].(map[string]interface{}); ok {
+		if execEnv, ok := v2TaskTmpl["executionEnvironment"].(string); ok && execEnv != "" {
+			if execMeta["annotations"] == nil {
+				execMeta["annotations"] = make(map[string]interface{})
+			}
+			if annMap, ok := execMeta["annotations"].(map[string]interface{}); ok {
+				if execEnv == "EXECUTION_ENVIRONMENT_GEN2" {
+					annMap["run.googleapis.com/execution-environment"] = "gen2"
+				} else if execEnv == "EXECUTION_ENVIRONMENT_GEN1" {
+					annMap["run.googleapis.com/execution-environment"] = "gen1"
+				} else {
+					annMap["run.googleapis.com/execution-environment"] = execEnv
+				}
+			}
+		}
+
+		if vpc, ok := v2TaskTmpl["vpcAccess"].(map[string]interface{}); ok && vpc != nil {
+			if execMeta["annotations"] == nil {
+				execMeta["annotations"] = make(map[string]interface{})
+			}
+			if annMap, ok := execMeta["annotations"].(map[string]interface{}); ok {
+				if conn, ok := vpc["connector"].(string); ok && conn != "" {
+					annMap["run.googleapis.com/vpc-access-connector"] = conn
+				}
+				if eg, ok := vpc["egress"].(string); ok && eg != "" {
+					if eg == "ALL_TRAFFIC" {
+						annMap["run.googleapis.com/vpc-access-egress"] = "all-traffic"
+					} else if eg == "PRIVATE_RANGES_ONLY" {
+						annMap["run.googleapis.com/vpc-access-egress"] = "private-ranges-only"
+					} else {
+						annMap["run.googleapis.com/vpc-access-egress"] = strings.ToLower(strings.ReplaceAll(eg, "_", "-"))
+					}
+				}
+				if nis, ok := vpc["networkInterfaces"]; ok && nis != nil {
+					if nisBytes, err := json.Marshal(nis); err == nil {
+						annMap["run.googleapis.com/network-interfaces"] = string(nisBytes)
+					}
+				}
+			}
+		}
+
+		taskTmpl := make(map[string]interface{})
+		taskSpec := make(map[string]interface{})
+		if rawContainers, ok := v2TaskTmpl["containers"].([]interface{}); ok && rawContainers != nil {
+			var v1Containers []interface{}
+			for _, rc := range rawContainers {
+				if cMap, ok := rc.(map[string]interface{}); ok {
+					v1C := make(map[string]interface{})
+					for k, v := range cMap {
+						v1C[k] = v
+					}
+					if rawEnvs, ok := cMap["env"].([]interface{}); ok {
+						var v1Envs []interface{}
+						for _, re := range rawEnvs {
+							if eMap, ok := re.(map[string]interface{}); ok {
+								v1E := make(map[string]interface{})
+								for k, v := range eMap {
+									v1E[k] = v
+								}
+								if vs, ok := eMap["valueSource"].(map[string]interface{}); ok {
+									if skr, ok := vs["secretKeyRef"].(map[string]interface{}); ok {
+										v1Skr := make(map[string]interface{})
+										if sec, ok := skr["secret"]; ok { v1Skr["name"] = sec }
+										if ver, ok := skr["version"]; ok { v1Skr["key"] = ver }
+										if len(v1Skr) > 0 {
+											v1E["valueFrom"] = map[string]interface{}{"secretKeyRef": v1Skr}
+											delete(v1E, "valueSource")
+										}
+									}
+								}
+								v1Envs = append(v1Envs, v1E)
+							} else {
+								v1Envs = append(v1Envs, re)
+							}
+						}
+						v1C["env"] = v1Envs
+					}
+					if rawVms, ok := cMap["volumeMounts"].([]interface{}); ok {
+						var v1Vms []interface{}
+						for _, rvm := range rawVms {
+							if vmMap, ok := rvm.(map[string]interface{}); ok {
+								if name, ok := vmMap["name"].(string); ok && name == "cloudsql" {
+									continue
+								}
+							}
+							v1Vms = append(v1Vms, rvm)
+						}
+						if len(v1Vms) > 0 {
+							v1C["volumeMounts"] = v1Vms
+						} else {
+							delete(v1C, "volumeMounts")
+						}
+					}
+					v1Containers = append(v1Containers, v1C)
+				} else {
+					v1Containers = append(v1Containers, rc)
+				}
+			}
+			taskSpec["containers"] = v1Containers
+		}
+		if rawVols, ok := v2TaskTmpl["volumes"].([]interface{}); ok && rawVols != nil {
+			var v1Vols []interface{}
+			for _, rv := range rawVols {
+				if volMap, ok := rv.(map[string]interface{}); ok {
+					v1Vol := make(map[string]interface{})
+					for k, v := range volMap {
+						v1Vol[k] = v
+					}
+					var ed map[string]interface{}
+					if e, ok := volMap["emptyDir"].(map[string]interface{}); ok { ed = e }
+					if e, ok := volMap["empty_dir"].(map[string]interface{}); ok { ed = e }
+					if ed != nil {
+						if med, ok := ed["medium"].(string); ok {
+							if med == "MEMORY" {
+								ed["medium"] = "Memory"
+							} else if med == "DISK" {
+								ed["medium"] = "Disk"
+							}
+						}
+						if _, ok := volMap["emptyDir"]; ok { v1Vol["emptyDir"] = ed }
+						if _, ok := volMap["empty_dir"]; ok { v1Vol["empty_dir"] = ed }
+					}
+					if gcs, ok := volMap["gcs"].(map[string]interface{}); ok && gcs != nil {
+						csi := make(map[string]interface{})
+						csi["driver"] = "gcsfuse.run.googleapis.com"
+						if ro, ok := gcs["readOnly"]; ok {
+							csi["readOnly"] = ro
+						}
+						attrs := make(map[string]interface{})
+						if b, ok := gcs["bucket"]; ok {
+							attrs["bucketName"] = b
+						}
+						if mos, ok := gcs["mountOptions"].([]interface{}); ok && len(mos) > 0 {
+							var strs []string
+							for _, m := range mos {
+								if s, ok := m.(string); ok { strs = append(strs, s) }
+							}
+							if len(strs) > 0 { attrs["mountOptions"] = strings.Join(strs, ",") }
+						}
+						if len(attrs) > 0 { csi["volumeAttributes"] = attrs }
+						v1Vol["csi"] = csi
+						delete(v1Vol, "gcs")
+					}
+					var sqlInst map[string]interface{}
+					if s, ok := volMap["cloudSqlInstance"].(map[string]interface{}); ok { sqlInst = s }
+					if s, ok := volMap["cloud_sql_instance"].(map[string]interface{}); ok { sqlInst = s }
+					if sqlInst != nil {
+						if insts, ok := sqlInst["instances"].([]interface{}); ok && len(insts) > 0 {
+							var strs []string
+							for _, inst := range insts {
+								if s, ok := inst.(string); ok { strs = append(strs, s) }
+							}
+							if len(strs) > 0 {
+								if execMeta["annotations"] == nil {
+									execMeta["annotations"] = make(map[string]interface{})
+								}
+								if annMap, ok := execMeta["annotations"].(map[string]interface{}); ok {
+									annMap["run.googleapis.com/cloudsql-instances"] = strings.Join(strs, ",")
+								}
+							}
+						}
+						continue
+					}
+					v1Vols = append(v1Vols, v1Vol)
+				} else {
+					v1Vols = append(v1Vols, rv)
+				}
+			}
+			taskSpec["volumes"] = v1Vols
+		}
+		if timeoutVal, ok := v2TaskTmpl["timeout"]; ok && timeoutVal != nil {
+			if timeoutStr, ok := timeoutVal.(string); ok {
+				taskSpec["timeoutSeconds"] = strings.TrimSuffix(timeoutStr, "s")
+			} else {
+				taskSpec["timeoutSeconds"] = timeoutVal
+			}
+		}
+		if sa, ok := v2TaskTmpl["serviceAccount"]; ok && sa != nil {
+			taskSpec["serviceAccountName"] = sa
+		}
+		if retries, ok := v2TaskTmpl["maxRetries"]; ok && retries != nil {
+			taskSpec["maxRetries"] = retries
+		}
+		if ns, ok := v2TaskTmpl["nodeSelector"]; ok && ns != nil {
+			taskSpec["nodeSelector"] = ns
+		}
+		if ek, ok := v2TaskTmpl["encryptionKey"]; ok && ek != nil {
+			taskSpec["encryptionKey"] = ek
+		}
+		if gpu, ok := v2TaskTmpl["gpuZonalRedundancyDisabled"]; ok && gpu != nil {
+			taskSpec["gpuZonalRedundancyDisabled"] = gpu
+		}
+		taskTmpl["spec"] = taskSpec
+		execSpec["template"] = taskTmpl
+	}
+
+	if len(execMeta) > 0 {
+		execTmpl["metadata"] = execMeta
+	}
+	execTmpl["spec"] = execSpec
+	spec["template"] = execTmpl
+	v1Obj["spec"] = spec
+}
+
+return v1Obj, nil
