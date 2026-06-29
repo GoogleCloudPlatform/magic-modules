@@ -2025,7 +2025,7 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 		log.Printf("[INFO] Creating a replica materialized view with DDL: '%s'", replicationDDL)
 
-		queriesURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/queries")
+		queriesURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/queries")
 		if err != nil {
 			return err
 		}
@@ -2069,7 +2069,7 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 			tableRef := table["tableReference"].(map[string]interface{})
 			log.Printf("[INFO] Creating BigQuery table: %s without schema", tableRef["tableId"])
 
-			tableInsertURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables")
+			tableInsertURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables")
 			if err != nil {
 				return err
 			}
@@ -2092,7 +2092,7 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 			table["schema"] = schemaBack
 			log.Printf("[INFO] Updating BigQuery table: %s with schema", tableRef["tableId"])
-			tableUpdateURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables/{{"{{"}}table_id{{"}}"}}")
+			tableUpdateURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 			if err != nil {
 				return err
 			}
@@ -2112,7 +2112,7 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 			tableRef := table["tableReference"].(map[string]interface{})
 			log.Printf("[INFO] Creating BigQuery table: %s", tableRef["tableId"])
 
-			tableInsertURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables")
+			tableInsertURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables")
 			if err != nil {
 				return err
 			}
@@ -2137,7 +2137,7 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 		tableRef := table["tableReference"].(map[string]interface{})
 		log.Printf("[INFO] Creating BigQuery table: %s", tableRef["tableId"])
 
-		tableInsertURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables")
+		tableInsertURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables")
 		if err != nil {
 			return err
 		}
@@ -2178,7 +2178,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 	tableID := d.Get("table_id").(string)
 
-	tableURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables/{{"{{"}}table_id{{"}}"}}")
+	tableURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 	if err != nil {
 		return err
 	}
@@ -2557,7 +2557,7 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 	var oldTableRaw map[string]interface{}
 
 	if shouldDropColumns || shouldIgnoreDataPolicies {
-		oldTableURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables/{{"{{"}}table_id{{"}}"}}")
+		oldTableURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 		if err != nil {
 			return err
 		}
@@ -2595,7 +2595,7 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	tableUpdateURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables/{{"{{"}}table_id{{"}}"}}")
+	tableUpdateURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 	if err != nil {
 		return err
 	}
@@ -2695,7 +2695,7 @@ func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	tableDeleteURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigQueryBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables/{{"{{"}}table_id{{"}}"}}")
+	tableDeleteURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 	if err != nil {
 		return err
 	}
@@ -3442,7 +3442,7 @@ func flattenEncryptionConfiguration(ec map[string]interface{}) []map[string]inte
 	}
 
 	//	The key name was returned, no need to set the version
-	return []map[string]interface{}{{"{{"}}"kms_key_name": kmsKeyName, "kms_key_version": ""{{"}}"}}
+	return []map[string]interface{}{{"kms_key_name": kmsKeyName, "kms_key_version": ""}}
 }
 
 func flattenTimePartitioning(tp map[string]interface{}, use_old_rpf bool) []map[string]interface{} {
@@ -3970,7 +3970,7 @@ func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	// Explicitly set virtual fields with default values to their default values on import
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}/tables/{{"{{"}}table_id{{"}}"}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
