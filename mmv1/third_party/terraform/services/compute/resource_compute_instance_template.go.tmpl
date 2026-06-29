@@ -21,11 +21,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 var (
@@ -1444,7 +1439,7 @@ func resourceComputeInstanceTemplateBootDiskCustomizeDiff(_ context.Context, dif
 	return nil
 }
 
-func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*compute.AttachedDisk, error) {
+func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
@@ -1457,38 +1452,38 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 
 	disksCount := d.Get("disk.#").(int)
 
-	disks := make([]*compute.AttachedDisk, 0, disksCount)
+	disks := make([]map[string]interface{}, 0, disksCount)
 	for i := 0; i < disksCount; i++ {
 		prefix := fmt.Sprintf("disk.%d", i)
 
 		// Build the disk
-		var disk compute.AttachedDisk
-		disk.Boot = i == 0
-		disk.AutoDelete = d.Get(prefix + ".auto_delete").(bool)
+		disk := make(map[string]interface{})
+		disk["boot"] = i == 0
+		disk["autoDelete"] = d.Get(prefix + ".auto_delete").(bool)
 
 		if v, ok := d.GetOk(prefix + ".boot"); ok {
-			disk.Boot = v.(bool)
+			disk["boot"] = v.(bool)
 		}
 
 		if v, ok := d.GetOk(prefix + ".device_name"); ok {
-			disk.DeviceName = v.(string)
+			disk["deviceName"] = v.(string)
 		}
 
 		if _, ok := d.GetOk(prefix + ".disk_encryption_key"); ok {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{}
+			disk["diskEncryptionKey"] = make(map[string]interface{})
 			if v, ok := d.GetOk(prefix + ".disk_encryption_key.0.kms_key_self_link"); ok {
-				disk.DiskEncryptionKey.KmsKeyName = v.(string)
+				disk["diskEncryptionKey"].(map[string]interface{})["kmsKeyName"] = v.(string)
 			}
 			if v, ok := d.GetOk(prefix + ".disk_encryption_key.0.kms_key_service_account"); ok {
-				disk.DiskEncryptionKey.KmsKeyServiceAccount = v.(string)
+				disk["diskEncryptionKey"].(map[string]interface{})["kmsKeyServiceAccount"] = v.(string)
 			}
 		}
-		// Assign disk.DiskSizeGb and disk.InitializeParams.DiskSizeGb the same value
+		// Assign disk.DiskSizeGb and int64(disk["initializeParams"].(map[string]interface{})["diskSizeGb"].(float64)) the same value
 		if v, ok := d.GetOk(prefix + ".disk_size_gb"); ok {
-			disk.DiskSizeGb = int64(v.(int))
+			disk["diskSizeGb"] = int64(v.(int))
 		}
 		if v, ok := d.GetOk(prefix + ".source"); ok {
-			disk.Source = v.(string)
+			disk["source"] = v.(string)
 			conflicts := []string{"disk_size_gb", "disk_name", "disk_type", "provisioned_iops", "provisioned_throughput", "source_image", "source_snapshot", "labels"}
 			for _, conflict := range conflicts {
 				if _, ok := d.GetOk(prefix + "." + conflict); ok {
@@ -1496,29 +1491,29 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 				}
 			}
 		} else {
-			disk.InitializeParams = &compute.AttachedDiskInitializeParams{}
+			disk["initializeParams"] = make(map[string]interface{})
 
 			if v, ok := d.GetOk(prefix + ".disk_name"); ok {
-				disk.InitializeParams.DiskName = v.(string)
+				disk["initializeParams"].(map[string]interface{})["diskName"] = v.(string)
 			}
-			// Assign disk.DiskSizeGb and disk.InitializeParams.DiskSizeGb the same value
+			// Assign disk.DiskSizeGb and int64(disk["initializeParams"].(map[string]interface{})["diskSizeGb"].(float64)) the same value
 			if v, ok := d.GetOk(prefix + ".disk_size_gb"); ok {
-				disk.InitializeParams.DiskSizeGb = int64(v.(int))
+				disk["initializeParams"].(map[string]interface{})["diskSizeGb"] = int64(v.(int))
 			}
-			disk.InitializeParams.DiskType = "pd-standard"
+			disk["initializeParams"].(map[string]interface{})["diskType"] = "pd-standard"
 			if v, ok := d.GetOk(prefix + ".disk_type"); ok {
-				disk.InitializeParams.DiskType = v.(string)
+				disk["initializeParams"].(map[string]interface{})["diskType"] = v.(string)
 			}
 			if v, ok := d.GetOk(prefix + ".provisioned_iops"); ok {
-				disk.InitializeParams.ProvisionedIops = int64(v.(int))
+				disk["initializeParams"].(map[string]interface{})["provisionedIops"] = int64(v.(int))
 			}
 			if v, ok := d.GetOk(prefix + ".provisioned_throughput"); ok {
-				disk.InitializeParams.ProvisionedThroughput = int64(v.(int))
+				disk["initializeParams"].(map[string]interface{})["provisionedThroughput"] = int64(v.(int))
 			}
 			if _, ok := d.GetOk(prefix + ".resource_manager_tags"); ok {
-				disk.InitializeParams.ResourceManagerTags = tpgresource.ExpandStringMap(d, prefix + ".resource_manager_tags")
+				disk["initializeParams"].(map[string]interface{})["resourceManagerTags"] = tpgresource.ExpandStringMap(d, prefix + ".resource_manager_tags")
 			}
-			disk.InitializeParams.Labels = tpgresource.ExpandStringMap(d, prefix+".labels")
+			disk["initializeParams"].(map[string]interface{})["labels"] = tpgresource.ExpandStringMap(d, prefix+".labels")
 
 			if v, ok := d.GetOk(prefix + ".source_image"); ok {
 				imageName := v.(string)
@@ -1528,48 +1523,48 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 						"Error resolving image name '%s': %s",
 						imageName, err)
 				}
-				disk.InitializeParams.SourceImage = imageUrl
+				disk["initializeParams"].(map[string]interface{})["sourceImage"] = imageUrl
 			}
 
 			if _, ok := d.GetOk(prefix + ".source_image_encryption_key"); ok {
-				disk.InitializeParams.SourceImageEncryptionKey = &compute.CustomerEncryptionKey{}
+				disk["initializeParams"].(map[string]interface{})["sourceImageEncryptionKey"] = make(map[string]interface{})
 				if v, ok := d.GetOk(prefix + ".source_image_encryption_key.0.raw_key"); ok {
-					disk.InitializeParams.SourceImageEncryptionKey.RawKey = v.(string)
+					disk["initializeParams"].(map[string]interface{})["sourceImageEncryptionKey"].(map[string]interface{})["rawKey"] = v.(string)
 				}
 				if v, ok := d.GetOk(prefix + ".source_image_encryption_key.0.rsa_encrypted_key"); ok {
-					disk.InitializeParams.SourceImageEncryptionKey.RsaEncryptedKey = v.(string)
+					disk["initializeParams"].(map[string]interface{})["sourceImageEncryptionKey"].(map[string]interface{})["rsaEncryptedKey"] = v.(string)
 				}
 				if v, ok := d.GetOk(prefix + ".source_image_encryption_key.0.kms_key_self_link"); ok {
-					disk.InitializeParams.SourceImageEncryptionKey.KmsKeyName = v.(string)
+					disk["initializeParams"].(map[string]interface{})["sourceImageEncryptionKey"].(map[string]interface{})["kmsKeyName"] = v.(string)
 				}
 				if v, ok := d.GetOk(prefix + ".source_image_encryption_key.0.kms_key_service_account"); ok {
-					disk.InitializeParams.SourceImageEncryptionKey.KmsKeyServiceAccount = v.(string)
+					disk["initializeParams"].(map[string]interface{})["sourceImageEncryptionKey"].(map[string]interface{})["kmsKeyServiceAccount"] = v.(string)
 				}
 			}
 
 			if v, ok := d.GetOk(prefix + ".source_snapshot"); ok {
-				disk.InitializeParams.SourceSnapshot = v.(string)
+				disk["initializeParams"].(map[string]interface{})["sourceSnapshot"] = v.(string)
 			}
 
 			if _, ok := d.GetOk(prefix + ".source_snapshot_encryption_key"); ok {
-				disk.InitializeParams.SourceSnapshotEncryptionKey = &compute.CustomerEncryptionKey{}
+				disk["initializeParams"].(map[string]interface{})["sourceSnapshotEncryptionKey"] = make(map[string]interface{})
 				if v, ok := d.GetOk(prefix + ".source_snapshot_encryption_key.0.raw_key"); ok {
-					disk.InitializeParams.SourceSnapshotEncryptionKey.RawKey = v.(string)
+					disk["initializeParams"].(map[string]interface{})["sourceSnapshotEncryptionKey"].(map[string]interface{})["rawKey"] = v.(string)
 				}
 				if v, ok := d.GetOk(prefix + ".source_snapshot_encryption_key.0.rsa_encrypted_key"); ok {
-					disk.InitializeParams.SourceSnapshotEncryptionKey.RsaEncryptedKey = v.(string)
+					disk["initializeParams"].(map[string]interface{})["sourceSnapshotEncryptionKey"].(map[string]interface{})["rsaEncryptedKey"] = v.(string)
 				}
 				if v, ok := d.GetOk(prefix + ".source_snapshot_encryption_key.0.kms_key_self_link"); ok {
-					disk.InitializeParams.SourceSnapshotEncryptionKey.KmsKeyName = v.(string)
+					disk["initializeParams"].(map[string]interface{})["sourceSnapshotEncryptionKey"].(map[string]interface{})["kmsKeyName"] = v.(string)
 				}
 				if v, ok := d.GetOk(prefix + ".source_snapshot_encryption_key.0.kms_key_service_account"); ok {
-					disk.InitializeParams.SourceSnapshotEncryptionKey.KmsKeyServiceAccount = v.(string)
+					disk["initializeParams"].(map[string]interface{})["sourceSnapshotEncryptionKey"].(map[string]interface{})["kmsKeyServiceAccount"] = v.(string)
 				}
 			}
 
 			if _, ok := d.GetOk(prefix + ".resource_policies"); ok {
 				// instance template only supports a resource name here (not uri)
-				disk.InitializeParams.ResourcePolicies = expandInstanceTemplateResourcePolicies(d, prefix + ".resource_policies")
+				disk["initializeParams"].(map[string]interface{})["resourcePolicies"] = expandInstanceTemplateResourcePolicies(d, prefix + ".resource_policies")
 			}
 			
 			if v, ok := d.GetOk(prefix + ".storage_pool"); ok {
@@ -1578,29 +1573,29 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
     			if err != nil {
         			return nil, err
     			}
-    			disk.InitializeParams.StoragePool = storagePoolUrl
+    			disk["initializeParams"].(map[string]interface{})["storagePool"] = storagePoolUrl
 			}
 		}
 
 		if v, ok := d.GetOk(prefix + ".interface"); ok {
-			disk.Interface = v.(string)
+			disk["interface"] = v.(string)
 		}
 
 		if v, ok := d.GetOk(prefix + ".mode"); ok {
-			disk.Mode = v.(string)
+			disk["mode"] = v.(string)
 		}
 
 		if v, ok := d.GetOk(prefix + ".type"); ok {
-			disk.Type = v.(string)
+			disk["type"] = v.(string)
 		}
 
 		if v, ok := d.GetOk(prefix + ".guest_os_features"); ok {
 			guestOsFeaturesSlice := expandComputeInstanceGuestOsFeatures(v.([]interface{}))
-			disk.GuestOsFeatures = make([]*compute.GuestOsFeature, len(guestOsFeaturesSlice))
+			disk["guestOsFeatures"] = make([]map[string]interface{}, len(guestOsFeaturesSlice))
 			for i, raw := range guestOsFeaturesSlice {
-				disk.GuestOsFeatures[i] = &compute.GuestOsFeature{}
+				disk["guestOsFeatures"].([]map[string]interface{})[i] = make(map[string]interface{})
 				if m, ok := raw.(map[string]interface{}); ok && m != nil {
-					if err := tpgresource.Convert(m, disk.GuestOsFeatures[i]); err != nil {
+					if err := tpgresource.Convert(m, &disk["guestOsFeatures"].([]map[string]interface{})[i]); err != nil {
 						return nil, fmt.Errorf("Error converting guest_os_features: %s", err)
 					}
 				}
@@ -1608,10 +1603,10 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 		}
 
 		if v, ok := d.GetOk(prefix + ".architecture"); ok {
-			disk.Architecture = v.(string)
+			disk["architecture"] = v.(string)
 		}
 
-		disks = append(disks, &disk)
+		disks = append(disks, disk)
 	}
 
 	return disks, nil
@@ -1626,23 +1621,23 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 // 'zones/us-east1-b/acceleratorTypes/nvidia-tesla-k80'.
 // Accelerator type 'zones/us-east1-b/acceleratorTypes/nvidia-tesla-k80'
 // must be a valid resource name (not an url).
-func expandInstanceTemplateGuestAccelerators(d tpgresource.TerraformResourceData, config *transport_tpg.Config) []*compute.AcceleratorConfig {
+func expandInstanceTemplateGuestAccelerators(d tpgresource.TerraformResourceData, config *transport_tpg.Config) []map[string]interface{} {
 	configs, ok := d.GetOk("guest_accelerator")
 	if !ok {
 		return nil
 	}
 	accels := configs.([]interface{})
-	guestAccelerators := make([]*compute.AcceleratorConfig, 0, len(accels))
+	guestAccelerators := make([]map[string]interface{}, 0, len(accels))
 	for _, raw := range accels {
 		data := raw.(map[string]interface{})
 		if data["count"].(int) == 0 {
 			continue
 		}
-		guestAccelerators = append(guestAccelerators, &compute.AcceleratorConfig{
-			AcceleratorCount: int64(data["count"].(int)),
+		guestAccelerators = append(guestAccelerators, map[string]interface{}{
+			"acceleratorCount": int64(data["count"].(int)),
 			// We can't use ParseAcceleratorFieldValue here because an instance
 			// template does not have a zone we can use.
-			AcceleratorType: data["type"].(string),
+			"acceleratorType": data["type"].(string),
 		})
 	}
 
@@ -1698,9 +1693,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return nil
 	}
-	var networkPerformanceConfig *compute.NetworkPerformanceConfig
+	var networkPerformanceConfig map[string]interface{}
 	if npcMap != nil {
-		networkPerformanceConfig = &compute.NetworkPerformanceConfig{}
+		networkPerformanceConfig = make(map[string]interface{})
 		if err := tpgresource.Convert(npcMap, networkPerformanceConfig); err != nil {
 			return fmt.Errorf("Error converting networkPerformanceConfig: %s", err)
 		}
@@ -1709,9 +1704,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
-	var reservationAffinity *compute.ReservationAffinity
+	var reservationAffinity map[string]interface{}
 	if reservationAffinityMap != nil {
-		reservationAffinity = &compute.ReservationAffinity{}
+		reservationAffinity = make(map[string]interface{})
 		if err := tpgresource.Convert(reservationAffinityMap, reservationAffinity); err != nil {
 			return fmt.Errorf("Error converting reservationAffinity: %s", err)
 		}
@@ -1719,63 +1714,63 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	resourcePolicies := expandInstanceTemplateResourcePolicies(d, "resource_policies")
 
 	tagsMap := resourceInstanceTags(d)
-	var tags *compute.Tags
+	var tags map[string]interface{}
 	if tagsMap != nil {
-		tags = &compute.Tags{}
+		tags = make(map[string]interface{})
 		if err := tpgresource.Convert(tagsMap, tags); err != nil {
 			return fmt.Errorf("Error converting tags: %s", err)
 		}
 	}
 
-	instanceProperties := &compute.InstanceProperties{
-		CanIpForward:               d.Get("can_ip_forward").(bool),
-		Description:                d.Get("instance_description").(string),
-		GuestAccelerators:          expandInstanceTemplateGuestAccelerators(d, config),
-		MachineType:                d.Get("machine_type").(string),
-		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
-		Disks:                      disks,
-		Metadata:                   metadata,
+	instanceProperties := map[string]interface{}{
+		"canIpForward":               d.Get("can_ip_forward").(bool),
+		"description":                d.Get("instance_description").(string),
+		"guestAccelerators":          expandInstanceTemplateGuestAccelerators(d, config),
+		"machineType":                d.Get("machine_type").(string),
+		"minCpuPlatform":             d.Get("min_cpu_platform").(string),
+		"disks":                      disks,
+		"metadata":                   metadata,
 		{{- if ne $.TargetVersionName "ga" }}
-		PartnerMetadata:            PartnerMetadata,
+		"partnerMetadata":            PartnerMetadata,
 		{{- end }}
-		NetworkInterfaces:          networks,
-		NetworkPerformanceConfig:   networkPerformanceConfig,
-		Scheduling:                 scheduling,
-		ServiceAccounts:            expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
-		Tags:                       tags,
-		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-		ResourcePolicies:           resourcePolicies,
-		ReservationAffinity:        reservationAffinity,
-		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
+		"networkInterfaces":          networks,
+		"networkPerformanceConfig":   networkPerformanceConfig,
+		"scheduling":                 scheduling,
+		"serviceAccounts":            expandServiceAccounts(d.Get("service_account").([]interface{})),
+		"tags":                       tags,
+		"advancedMachineFeatures":    expandAdvancedMachineFeatures(d),
+		"resourcePolicies":           resourcePolicies,
+		"reservationAffinity":        reservationAffinity,
+		"keyRevocationActionType":    d.Get("key_revocation_action_type").(string),
 	}
 	if cic := expandConfidentialInstanceConfig(d); cic != nil {
-		instanceProperties.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{
-			EnableConfidentialCompute: cic["enableConfidentialCompute"].(bool),
-			ConfidentialInstanceType:  cic["confidentialInstanceType"].(string),
+		instanceProperties["confidentialInstanceConfig"] = map[string]interface{}{
+			"enableConfidentialCompute": cic["enableConfidentialCompute"].(bool),
+			"confidentialInstanceType":  cic["confidentialInstanceType"].(string),
 		}
 	}
 
 	if sicMap := expandShieldedVmConfigs(d); sicMap != nil {
-		instanceProperties.ShieldedInstanceConfig = &compute.ShieldedInstanceConfig{
-			EnableSecureBoot:          sicMap["enableSecureBoot"].(bool),
-			EnableVtpm:                sicMap["enableVtpm"].(bool),
-			EnableIntegrityMonitoring: sicMap["enableIntegrityMonitoring"].(bool),
-			ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
+		instanceProperties["shieldedInstanceConfig"] = map[string]interface{}{
+			"enableSecureBoot":          sicMap["enableSecureBoot"].(bool),
+			"enableVtpm":                sicMap["enableVtpm"].(bool),
+			"enableIntegrityMonitoring": sicMap["enableIntegrityMonitoring"].(bool),
+			"forceSendFields":           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
 		}
 	}
 
 {{- if ne $.TargetVersionName "ga" }}
 	if dd := expandDisplayDevice(d); dd != nil {
 		enabled, _ := dd["enableDisplay"].(bool)
-		instanceProperties.DisplayDevice = &compute.DisplayDevice{
-			EnableDisplay:   enabled,
-			ForceSendFields: []string{"EnableDisplay"},
+		instanceProperties["displayDevice"] = map[string]interface{}{
+			"enableDisplay":   enabled,
+			"forceSendFields": []string{"EnableDisplay"},
 		}
 	}
 {{- end }}
 
 	if _, ok := d.GetOk("effective_labels"); ok {
-		instanceProperties.Labels = tpgresource.ExpandEffectiveLabels(d)
+		instanceProperties["labels"] = tpgresource.ExpandEffectiveLabels(d)
 	}
 
 	if _, ok := d.GetOk("resource_manager_tags"); ok {
@@ -1795,9 +1790,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	} else {
 		itName = id.UniqueId()
 	}
-	instanceTemplate := &compute.InstanceTemplate{
-		Description: d.Get("description").(string),
-		Properties:  instanceProperties,
+	instanceTemplate := map[string]interface{}{
+		"description": d.Get("description").(string),
+		"properties":  instanceProperties,
 		Name:        itName,
 	}
 
@@ -1827,7 +1822,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	}
 
 	// Store the ID now
-	d.SetId(fmt.Sprintf("projects/%s/global/instanceTemplates/%s", project, instanceTemplate.Name))
+	d.SetId(fmt.Sprintf("projects/%s/global/instanceTemplates/%s", project, instanceTemplate["name"].(string)))
 	// And also the unique ID
 	d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", d.Id(), op["targetId"]))
 
@@ -1896,7 +1891,7 @@ func diskCharacteristicsFromMap(m map[string]interface{}) diskCharacteristics {
 	return dc
 }
 
-func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultProject string) (map[string]interface{}, error) {
+func flattenDisk(disk map[string]interface{}, configDisk map[string]any, defaultProject string) (map[string]interface{}, error) {
 	diskMap := make(map[string]interface{})
 
 
@@ -1905,9 +1900,9 @@ func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultP
 	diskMap["source_snapshot"] = configDisk["source_snapshot"]
 	diskMap["source_snapshot_encryption_key"] = configDisk["source_snapshot_encryption_key"]
 
-	if disk.InitializeParams != nil {
-		if disk.InitializeParams.SourceImage != "" {
-			path, err := resolveImageRefToRelativeURI(defaultProject, disk.InitializeParams.SourceImage)
+	if disk["initializeParams"] != nil {
+		if disk["initializeParams"].(map[string]interface{})["sourceImage"].(string) != "" {
+			path, err := resolveImageRefToRelativeURI(defaultProject, disk["initializeParams"].(map[string]interface{})["sourceImage"].(string))
 			if err != nil {
 				return nil, errwrap.Wrapf("Error expanding source image input to relative URI: {{"{{"}}err{{"}}"}}", err)
 			}
@@ -1915,20 +1910,20 @@ func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultP
 		} else {
 			diskMap["source_image"] = ""
 		}
-		diskMap["disk_type"] = disk.InitializeParams.DiskType
+		diskMap["disk_type"] = disk["initializeParams"].(map[string]interface{})["diskType"].(string)
 		diskMap["provisioned_iops"] = disk.InitializeParams.ProvisionedIops
 		diskMap["provisioned_throughput"] = disk.InitializeParams.ProvisionedThroughput
-		diskMap["disk_name"] = disk.InitializeParams.DiskName
-		diskMap["labels"] = disk.InitializeParams.Labels
+		diskMap["disk_name"] = disk["initializeParams"].(map[string]interface{})["diskName"].(string)
+		diskMap["labels"] = disk["initializeParams"].(map[string]interface{})["labels"].(map[string]interface{})
 		// The API does not return a disk size value for scratch disks. They are largely only one size,
 		// so we can assume that size here. Prefer disk.DiskSizeGb over the deprecated
-		// disk.InitializeParams.DiskSizeGb.
-		if disk.DiskSizeGb == 0 && disk.InitializeParams.DiskSizeGb == 0 && disk.Type == "SCRATCH" {
+		// int64(disk["initializeParams"].(map[string]interface{})["diskSizeGb"].(float64)).
+		if disk.DiskSizeGb == 0 && int64(disk["initializeParams"].(map[string]interface{})["diskSizeGb"].(float64)) == 0 && disk["type"].(string) == "SCRATCH" {
 			diskMap["disk_size_gb"] = DEFAULT_SCRATCH_DISK_SIZE_GB
 		} else if disk.DiskSizeGb != 0 {
 			diskMap["disk_size_gb"] = disk.DiskSizeGb
 		} else {
-			diskMap["disk_size_gb"] = disk.InitializeParams.DiskSizeGb
+			diskMap["disk_size_gb"] = int64(disk["initializeParams"].(map[string]interface{})["diskSizeGb"].(float64))
 		}
 		diskMap["resource_policies"] = disk.InitializeParams.ResourcePolicies
 		diskMap["resource_manager_tags"] = disk.InitializeParams.ResourceManagerTags
@@ -1957,13 +1952,13 @@ func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultP
 			guestOsFeaturesSlice = append(guestOsFeaturesSlice, map[string]interface{}{"type": f.Type})
 		}
 	}
-	diskMap["auto_delete"] = disk.AutoDelete
-	diskMap["boot"] = disk.Boot
-	diskMap["device_name"] = disk.DeviceName
-	diskMap["interface"] = disk.Interface
+	diskMap["auto_delete"] = disk["autoDelete"].(bool)
+	diskMap["boot"] = disk["boot"].(bool)
+	diskMap["device_name"] = disk["deviceName"].(string)
+	diskMap["interface"] = disk["interface"].(string)
 	diskMap["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
-	diskMap["mode"] = disk.Mode
-	diskMap["type"] = disk.Type
+	diskMap["mode"] = disk["mode"].(string)
+	diskMap["type"] = disk["type"].(string)
 	diskMap["guest_os_features"] = flattenComputeInstanceGuestOsFeatures(guestOsFeaturesSlice)
 	diskMap["architecture"] = configDisk["architecture"]
 
@@ -2084,12 +2079,12 @@ func reorderDisks(configDisks []interface{}, apiDisks []map[string]interface{}) 
 	return ds
 }
 
-func flattenDisks(disks []*compute.AttachedDisk, d *schema.ResourceData, defaultProject string) ([]map[string]interface{}, error) {
+func flattenDisks(disks []interface{}, d *schema.ResourceData, defaultProject string) ([]map[string]interface{}, error) {
 	apiDisks := make([]map[string]interface{}, len(disks))
 
 	for i, disk := range disks {
 		configDisk := d.Get(fmt.Sprintf("disk.%d", i)).(map[string]any)
-		apiDisk, err := flattenDisk(disk, configDisk, defaultProject)
+		apiDisk, err := flattenDisk(disk.(map[string]interface{}), configDisk, defaultProject)
 		if err != nil {
 			return nil, err
 		}
@@ -2138,21 +2133,14 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
 	}
-	itBytes, err := json.Marshal(res)
-	if err != nil {
-		return fmt.Errorf("Error marshaling instance template response: %s", err)
-	}
-	var instanceTemplate compute.InstanceTemplate
-	if err := json.Unmarshal(itBytes, &instanceTemplate); err != nil {
-		return fmt.Errorf("Error unmarshaling instance template response: %s", err)
-	}
+	instanceTemplate := res
 	// Set the metadata fingerprint if there is one.
-	if instanceTemplate.Properties.Metadata != nil {
-		if err = d.Set("metadata_fingerprint", instanceTemplate.Properties.Metadata.Fingerprint); err != nil {
+	if instanceTemplate["properties"].(map[string]interface{})["metadata"].(map[string]interface{}) != nil {
+		if err = d.Set("metadata_fingerprint", instanceTemplate["properties"].(map[string]interface{})["metadata"].(map[string]interface{})["fingerprint"].(string)); err != nil {
 			return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
 		}
 
-		md := instanceTemplate.Properties.Metadata
+		md := instanceTemplate["properties"].(map[string]interface{})["metadata"].(map[string]interface{})
 
 		_md := flattenMetadataBeta(md)
 
@@ -2186,8 +2174,8 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	{{- end }}
 
 	// Set the tags fingerprint if there is one.
-	if instanceTemplate.Properties.Tags != nil {
-		if err = d.Set("tags_fingerprint", instanceTemplate.Properties.Tags.Fingerprint); err != nil {
+	if instanceTemplate["properties"].(map[string]interface{})["tags"].(map[string]interface{}) != nil {
+		if err = d.Set("tags_fingerprint", instanceTemplate["properties"].(map[string]interface{})["tags"].(map[string]interface{}).Fingerprint); err != nil {
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
 	} else {
@@ -2195,31 +2183,31 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.Labels != nil {
-		if err := tpgresource.SetLabels(instanceTemplate.Properties.Labels, d, "labels"); err != nil {
+	if instanceTemplate["properties"].(map[string]interface{})["labels"].(map[string]interface{}) != nil {
+		if err := tpgresource.SetLabels(instanceTemplate["properties"].(map[string]interface{})["labels"].(map[string]interface{}), d, "labels"); err != nil {
 			return fmt.Errorf("Error setting labels: %s", err)
 		}
 	}
-	if err := tpgresource.SetLabels(instanceTemplate.Properties.Labels, d, "terraform_labels"); err != nil {
+	if err := tpgresource.SetLabels(instanceTemplate["properties"].(map[string]interface{})["labels"].(map[string]interface{}), d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
-	if err := d.Set("effective_labels", instanceTemplate.Properties.Labels); err != nil {
+	if err := d.Set("effective_labels", instanceTemplate["properties"].(map[string]interface{})["labels"].(map[string]interface{})); err != nil {
 		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
-	if err = d.Set("self_link", instanceTemplate.SelfLink); err != nil {
+	if err = d.Set("self_link", instanceTemplate["selfLink"].(string)); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
-	if err = d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", instanceTemplate.SelfLink, instanceTemplate.Id)); err != nil {
+	if err = d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", instanceTemplate["selfLink"].(string), instanceTemplate.Id)); err != nil {
 		return fmt.Errorf("Error setting self_link_unique: %s", err)
 	}
-	if err = d.Set("creation_timestamp", instanceTemplate.CreationTimestamp); err != nil {
+	if err = d.Set("creation_timestamp", instanceTemplate["creationTimestamp"].(string)); err != nil {
 		return fmt.Errorf("Error setting creation_timestamp: %s", err)
 	}
-	if err = d.Set("name", instanceTemplate.Name); err != nil {
+	if err = d.Set("name", instanceTemplate["name"].(string)); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if instanceTemplate.Properties.Disks != nil {
-		disks, err := flattenDisks(instanceTemplate.Properties.Disks, d, project)
+	if instanceTemplate["properties"].(map[string]interface{})["disks"].([]interface{}) != nil {
+		disks, err := flattenDisks(instanceTemplate["properties"].(map[string]interface{})["disks"].([]interface{}), d, project)
 		if err != nil {
 			return fmt.Errorf("error flattening disks: %s", err)
 		}
@@ -2227,33 +2215,33 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting disk: %s", err)
 		}
 	}
-	if err = d.Set("description", instanceTemplate.Description); err != nil {
+	if err = d.Set("description", instanceTemplate["description"].(string)); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
-	if err = d.Set("machine_type", instanceTemplate.Properties.MachineType); err != nil {
+	if err = d.Set("machine_type", instanceTemplate["properties"].(map[string]interface{})["machineType"].(string)); err != nil {
 		return fmt.Errorf("Error setting machine_type: %s", err)
 	}
-	if err = d.Set("min_cpu_platform", instanceTemplate.Properties.MinCpuPlatform); err != nil {
+	if err = d.Set("min_cpu_platform", instanceTemplate["properties"].(map[string]interface{})["minCpuPlatform"].(string)); err != nil {
 		return fmt.Errorf("Error setting min_cpu_platform: %s", err)
 	}
 
-	if err = d.Set("can_ip_forward", instanceTemplate.Properties.CanIpForward); err != nil {
+	if err = d.Set("can_ip_forward", instanceTemplate["properties"].(map[string]interface{})["canIpForward"].(bool)); err != nil {
 		return fmt.Errorf("Error setting can_ip_forward: %s", err)
 	}
 
-	if err = d.Set("instance_description", instanceTemplate.Properties.Description); err != nil {
+	if err = d.Set("instance_description", instanceTemplate["properties"].(map[string]interface{})["description"].(string)); err != nil {
 		return fmt.Errorf("Error setting instance_description: %s", err)
 	}
-	if err = d.Set("key_revocation_action_type", instanceTemplate.Properties.KeyRevocationActionType); err != nil {
+	if err = d.Set("key_revocation_action_type", instanceTemplate["properties"].(map[string]interface{})["keyRevocationActionType"].(string)); err != nil {
 		return fmt.Errorf("Error setting key_revocation_action_type: %s", err)
 	}
 	if err = d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
 	var npcMap map[string]interface{}
-	if instanceTemplate.Properties.NetworkPerformanceConfig != nil {
+	if instanceTemplate["properties"].(map[string]interface{})["networkPerformanceConfig"].(map[string]interface{}) != nil {
 		var err error
-		npcMap, err = tpgresource.ConvertToMap(instanceTemplate.Properties.NetworkPerformanceConfig)
+		npcMap, err = tpgresource.ConvertToMap(instanceTemplate["properties"].(map[string]interface{})["networkPerformanceConfig"].(map[string]interface{}))
 		if err != nil {
 			return fmt.Errorf("Error converting network_performance_config: %s", err)
 		}
@@ -2261,8 +2249,8 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(npcMap)); err != nil {
 		return err
 	}
-	if instanceTemplate.Properties.NetworkInterfaces != nil {
-		networkInterfacesRaw, err := networkInterfacesToInterface(instanceTemplate.Properties.NetworkInterfaces)
+	if instanceTemplate["properties"].(map[string]interface{})["networkInterfaces"].([]interface{}) != nil {
+		networkInterfacesRaw, err := networkInterfacesToInterface(instanceTemplate["properties"].(map[string]interface{})["networkInterfaces"].([]interface{}))
 		if err != nil {
 			return err
 		}
@@ -2280,8 +2268,8 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			}
 		}
 	}
-	if instanceTemplate.Properties.Scheduling != nil {
-		scheduling := flattenScheduling(instanceTemplate.Properties.Scheduling)
+	if instanceTemplate["properties"].(map[string]interface{})["scheduling"].(map[string]interface{}) != nil {
+		scheduling := flattenScheduling(instanceTemplate["properties"].(map[string]interface{})["scheduling"].(map[string]interface{}))
 {{ if ne $.TargetVersionName `ga` }}
 		// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
 		// To avoid diff, we need to set the value from the state not from API response.
@@ -2298,8 +2286,8 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting scheduling: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.Tags != nil {
-		if err = d.Set("tags", instanceTemplate.Properties.Tags.Items); err != nil {
+	if instanceTemplate["properties"].(map[string]interface{})["tags"].(map[string]interface{}) != nil {
+		if err = d.Set("tags", instanceTemplate["properties"].(map[string]interface{})["tags"].(map[string]interface{})["items"].([]interface{})); err != nil {
 			return fmt.Errorf("Error setting tags: %s", err)
 		}
 	} else {
@@ -2307,17 +2295,17 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting empty tags: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.ServiceAccounts != nil {
-		if err = d.Set("service_account", flattenServiceAccounts(serviceAccountsToInterface(instanceTemplate.Properties.ServiceAccounts))); err != nil {
+	if instanceTemplate["properties"].(map[string]interface{})["serviceAccounts"].([]interface{}) != nil {
+		if err = d.Set("service_account", flattenServiceAccounts(serviceAccountsToInterface(instanceTemplate["properties"].(map[string]interface{})["serviceAccounts"].([]interface{})))); err != nil {
 			return fmt.Errorf("Error setting service_account: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.GuestAccelerators != nil {
-		if err = d.Set("guest_accelerator", flattenGuestAccelerators(guestAcceleratorsToInterface(instanceTemplate.Properties.GuestAccelerators))); err != nil {
+	if instanceTemplate["properties"].(map[string]interface{})["guestAccelerators"].([]interface{}) != nil {
+		if err = d.Set("guest_accelerator", flattenGuestAccelerators(guestAcceleratorsToInterface(instanceTemplate["properties"].(map[string]interface{})["guestAccelerators"].([]interface{})))); err != nil {
 			return fmt.Errorf("Error setting guest_accelerator: %s", err)
 		}
 	}
-	if sic := instanceTemplate.Properties.ShieldedInstanceConfig; sic != nil {
+	if sic := instanceTemplate["properties"].(map[string]interface{})["shieldedInstanceConfig"].(map[string]interface{}); sic != nil {
 		sicMap := map[string]interface{}{
 			"enableSecureBoot":          sic.EnableSecureBoot,
 			"enableVtpm":                sic.EnableVtpm,
@@ -2328,8 +2316,8 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	if instanceTemplate.Properties.ConfidentialInstanceConfig != nil {
-		cicMap, convErr := tpgresource.ConvertToMap(instanceTemplate.Properties.ConfidentialInstanceConfig)
+	if instanceTemplate["properties"].(map[string]interface{})["confidentialInstanceConfig"].(map[string]interface{}) != nil {
+		cicMap, convErr := tpgresource.ConvertToMap(instanceTemplate["properties"].(map[string]interface{})["confidentialInstanceConfig"].(map[string]interface{}))
 		if convErr != nil {
 			return fmt.Errorf("Error converting confidential_instance_config: %s", convErr)
 		}
@@ -2337,14 +2325,14 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting confidential_instance_config: %s", err)
 		}
 	}
-	if instanceTemplate.Properties.AdvancedMachineFeatures != nil {
-		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(instanceTemplate.Properties.AdvancedMachineFeatures)); err != nil {
+	if instanceTemplate["properties"].(map[string]interface{})["advancedMachineFeatures"].(map[string]interface{}) != nil {
+		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeaturesTyped(instanceTemplate["properties"].(map[string]interface{})["advancedMachineFeatures"].(map[string]interface{}))); err != nil {
 			return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 		}
 	}
 {{- if ne $.TargetVersionName "ga" }}
-	if instanceTemplate.Properties.DisplayDevice != nil {
-		ddMap, convErr := tpgresource.ConvertToMap(instanceTemplate.Properties.DisplayDevice)
+	if instanceTemplate["properties"].(map[string]interface{})["displayDevice"].(map[string]interface{}) != nil {
+		ddMap, convErr := tpgresource.ConvertToMap(instanceTemplate["properties"].(map[string]interface{})["displayDevice"].(map[string]interface{}))
 		if convErr != nil {
 			return fmt.Errorf("Error converting displayDevice: %s", convErr)
 		}
@@ -2354,13 +2342,13 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	}
 {{- end }}
 
-	if instanceTemplate.Properties.ResourcePolicies != nil {
-		if err = d.Set("resource_policies", instanceTemplate.Properties.ResourcePolicies); err != nil {
+	if instanceTemplate["properties"].(map[string]interface{})["resourcePolicies"].([]interface{}) != nil {
+		if err = d.Set("resource_policies", instanceTemplate["properties"].(map[string]interface{})["resourcePolicies"].([]interface{})); err != nil {
 			return fmt.Errorf("Error setting resource_policies: %s", err)
 		}
 	}
 
-	if reservationAffinity := instanceTemplate.Properties.ReservationAffinity; reservationAffinity != nil {
+	if reservationAffinity := instanceTemplate["properties"].(map[string]interface{})["reservationAffinity"].(map[string]interface{}); reservationAffinity != nil {
 		reservationAffinityMap, err := tpgresource.ConvertToMap(reservationAffinity)
 		if err != nil {
 			return fmt.Errorf("Error converting reservation_affinity: %s", err)
@@ -2414,23 +2402,24 @@ func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interfac
 // This wraps the general compute instance helper expandScheduling.
 // Default value of OnHostMaintenance depends on the value of Preemptible,
 // so we can't set a default in schema
-func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, meta interface{}) (*compute.Scheduling, error) {
+func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, meta interface{}) (map[string]interface{}, error) {
 	v, ok := d.GetOk("scheduling")
 	if !ok || v == nil {
 		// We can't set defaults for lists (e.g. scheduling)
-		return &compute.Scheduling{
-			OnHostMaintenance: "MIGRATE",
+		return map[string]interface{}{
+			"onHostMaintenance": "MIGRATE",
 		}, nil
 	}
 
-	expanded, err := expandScheduling(v)
+	expandedStr, err := expandScheduling(v)
+	expanded, _ := tpgresource.ConvertToMap(expandedStr)
 	if err != nil {
 		return nil, err
 	}
 
 	// Make sure we have an appropriate value for OnHostMaintenance if Preemptible
-	if expanded.Preemptible && expanded.OnHostMaintenance == "" {
-		expanded.OnHostMaintenance = "TERMINATE"
+	if expanded["preemptible"].(bool) && expanded["onHostMaintenance"].(string) == "" {
+		expanded["onHostMaintenance"] = "TERMINATE"
 	}
 	return expanded, nil
 }
