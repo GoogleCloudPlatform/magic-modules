@@ -1312,7 +1312,7 @@ func ResourceContainerCluster() *schema.Resource {
 									"window_duration": {
 										Required:         true,
 										Type:             schema.TypeString,
-										DiffSuppressFunc: tpgresource.DurationDiffSuppress,
+										DiffSuppressFunc: DurationDiffSuppress,
 										ValidateFunc:     validateDuration,
 									},
 									"window_start_time": {
