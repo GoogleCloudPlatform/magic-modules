@@ -1418,7 +1418,7 @@ resource "google_redis_cluster" "cluster-ms" {
   node_type 				 = "REDIS_SHARED_CORE_NANO"
   transit_encryption_mode 	 = "TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION"
   authorization_mode 		 = "AUTH_MODE_DISABLED"
-  maintenance_version 		 = "REDISCLUSTER_20251008_00_00"
+  maintenance_version 		 = "REDISCLUSTER_20260512_00_00"
   redis_configs = { 
     maxmemory-policy		 = "volatile-ttl"
   }
