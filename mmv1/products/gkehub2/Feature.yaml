@@ -286,7 +286,7 @@ properties:
           - name: scopeTenancyPool
             type: String
             description: 'Pool to be used for Workload Identity. This pool in trust-domain mode is used with Fleet Tenancy, so that sameness can be enforced. ex: projects/example/locations/global/workloadidentitypools/custompool'
-            required: true
+            required: false
   - name: fleetDefaultMemberConfig
     type: NestedObject
     description: Optional. Fleet Default Membership Configuration.
