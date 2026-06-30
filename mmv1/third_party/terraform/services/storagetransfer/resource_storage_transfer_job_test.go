@@ -668,6 +668,7 @@ func TestAccStorageTransferJob_awsS3CompatibleDataSource(t *testing.T) {
 }
 
 func TestAccStorageTransferJob_azureBlobStorageDataSourcePrivateNetwork(t *testing.T) {
+	t.Skip("only works locally: requires a private cross-cloud interconnect between Azure and GCP that is not available in the test environment")
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
