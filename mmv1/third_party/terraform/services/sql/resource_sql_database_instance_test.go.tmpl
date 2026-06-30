@@ -285,12 +285,8 @@ func TestAccSqlDatabaseInstance_enforceNewSqlNetworkArchitecture(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccSqlDatabaseInstance_enforceNewSqlNetworkArchitecture(instanceName, false),
-				Check: resource.ComposeTestCheckFunc(
-					// Verify that even though we set it to false in HCL, the state stays true
-					// and no diff was generated (otherwise this step would fail or show a plan).
-					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "enforce_new_sql_network_architecture", "true"),
-				),
+				Config:      testAccSqlDatabaseInstance_enforceNewSqlNetworkArchitecture(instanceName, false),
+				ExpectError: regexp.MustCompile("enforce_new_sql_network_architecture can only be set during resource creation"),
 			},
 		},
 	})

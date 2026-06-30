@@ -265,11 +265,10 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 				Description: `Used to block Terraform from deleting a SQL Instance. Defaults to true.`,
 			},
 			"enforce_new_sql_network_architecture": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Computed:         true,
-				DiffSuppressFunc: sqlNetworkArchitectureDiffSuppress,
-				Description:      `Whether to enforce the new SQL network architecture.`,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: `Whether to enforce the new SQL network architecture.`,
 			},
 			"final_backup_description": {
 				Type:        schema.TypeString,
@@ -1682,12 +1681,6 @@ func pitrSupportDbCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v 
 		return fmt.Errorf("point_in_time_recovery_enabled is only available for the following %v. You may want to consider using binary_log_enabled instead and remove point_in_time_recovery_enabled (removing point_in_time_recovery_enabled and adding binary_log_enabled will enable pitr for MYSQL)", dbVersionPitrValid)
 	}
 	return nil
-}
-
-func sqlNetworkArchitectureDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// If the state is true and the config is false, suppress the diff.
-	// This follows the gcloud pattern where the flag is an irreversible opt-in.
-	return old == "true" && new == "false"
 }
 
 func sqlNetworkArchitectureCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
