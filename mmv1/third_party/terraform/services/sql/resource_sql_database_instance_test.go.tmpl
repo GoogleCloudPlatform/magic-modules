@@ -7299,8 +7299,7 @@ resource "google_sql_database_instance" "instance" {
 			psc_enabled = true
 			psc_auto_connection_policy_enabled = true
 			psc_auto_connections {
-				consumer_network            = data.google_compute_network.default.id
-				consumer_service_project_id = "%s"
+				consumer_network = data.google_compute_network.default.id
 			}
 		}
 		ipv4_enabled = false
@@ -7319,7 +7318,7 @@ resource "google_sql_database_instance" "instance" {
     google_project_iam_member.sa_network_viewer,
   ]
 }
-`, projectId, projectId, projectId, projectId, projectId, projectId, projectId, projectId, instanceName, projectId)
+`, projectId, projectId, projectId, projectId, projectId, projectId, projectId, projectId, instanceName)
 }
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, projectId string, orgId string, billingAccount string) string {
