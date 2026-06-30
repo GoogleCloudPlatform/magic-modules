@@ -1982,9 +1982,14 @@ func flattenRegionScheduling(resp map[string]interface{}) []map[string]interface
 	if v, ok := resp["minNodeCpus"]; ok { schedulingMap["min_node_cpus"] = parseInt(v) }
 	if v, ok := resp["provisioningModel"]; ok { schedulingMap["provisioning_model"] = v }
 	if v, ok := resp["instanceTerminationAction"]; ok { schedulingMap["instance_termination_action"] = v }
-	if v, ok := resp["availabilityDomain"]; ok { schedulingMap["availability_domain"] = v }
+	if v, ok := resp["availabilityDomain"]; ok { schedulingMap["availability_domain"] = parseInt(v) }
 	if v, ok := resp["terminationTime"]; ok { schedulingMap["termination_time"] = v }
 	if v, ok := resp["automaticRestart"]; ok { schedulingMap["automatic_restart"] = v }
+	if v, ok := resp["skipGuestOsShutdown"]; ok { schedulingMap["skip_guest_os_shutdown"] = v }
+{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := resp["maintenanceInterval"]; ok { schedulingMap["maintenance_interval"] = v }
+	if v, ok := resp["hostErrorTimeoutSeconds"]; ok { schedulingMap["host_error_timeout_seconds"] = parseInt(v) }
+{{- end }}
 
 	if maxDurRaw, ok := resp["maxRunDuration"]; ok && maxDurRaw != nil {
 		maxDur := maxDurRaw.(map[string]interface{})
@@ -2015,6 +2020,7 @@ func flattenRegionScheduling(resp map[string]interface{}) []map[string]interface
 		}
 	}
 
+{{- if ne $.TargetVersionName "ga" }}
 	if gracefulRaw, ok := resp["gracefulShutdown"]; ok && gracefulRaw != nil {
 		graceful := gracefulRaw.(map[string]interface{})
 		graceMap := map[string]interface{}{
@@ -2031,6 +2037,7 @@ func flattenRegionScheduling(resp map[string]interface{}) []map[string]interface
 		}
 		schedulingMap["graceful_shutdown"] = []map[string]interface{}{graceMap}
 	}
+{{- end }}
 
 	if pndRaw, ok := resp["preemptionNoticeDuration"]; ok && pndRaw != nil {
 		pnd := pndRaw.(map[string]interface{})
