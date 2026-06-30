@@ -285,10 +285,8 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 
 	if metadataBody, err := resourceInstanceMetadata(d); err != nil {
 		return fmt.Errorf("Error expanding metadata: %s", err)
-	} else if len(metadataBody) > 0 {
-		instanceBody["metadata"] = metadataBody
 	} else {
-		delete(instanceBody, "metadata")
+		instanceBody["metadata"] = metadataBody
 	}
 
 	if partnerMetadataRaw, err := resourceInstancePartnerMetadata(d); err != nil {
