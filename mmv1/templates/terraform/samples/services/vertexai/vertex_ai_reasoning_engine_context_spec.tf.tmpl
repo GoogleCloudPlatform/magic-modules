@@ -46,26 +46,26 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
         schema_configs {
           id            = "user-profile"
           memory_schema = jsonencode({
-            type = "object"
+            type = "OBJECT"
             properties = {
               name = {
-                type        = "string"
+                type        = "STRING"
                 description = "Name of the user."
               }
               technical_stack = {
-                type        = "string"
+                type        = "STRING"
                 description = "Comma-separated list tools or languages used by the user."
               }
               primary_goal = {
-                type        = "string"
+                type        = "STRING"
                 description = "The main objective the user is pursuing."
               }
               expertise_level = {
-                type        = "string"
+                type        = "STRING"
                 description = "Current skill level (e.g., Junior, Senior)."
               }
               job_status = {
-                type        = "string"
+                type        = "STRING"
                 description = "The job status of the individual"
                 enum        = ["unemployed", "part_time", "full_time", "student"]
               }
@@ -80,14 +80,14 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
         schema_configs {
           id            = "conversation-summary"
           memory_schema = jsonencode({
-            type = "object"
+            type = "OBJECT"
             properties = {
               main_topic = {
-                type        = "string"
+                type        = "STRING"
                 description = "The primary topic of this specific chat session."
               }
               status = {
-                type        = "string"
+                type        = "STRING"
                 description = "Current resolution state of the discussion."
                 enum        = ["open", "in_progress", "resolved"]
               }
