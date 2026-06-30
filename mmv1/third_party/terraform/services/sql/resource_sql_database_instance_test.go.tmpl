@@ -1249,7 +1249,12 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testi
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		CheckDestroy: func(s *terraform.State) error {
+			if err := testAccSqlDatabaseInstanceDestroyProducer(t)(s); err != nil {
+				return err
+			}
+			return testAccCheckSqlDatabaseInstanceDeleteServiceConnectionPolicy(t, "google_sql_database_instance.instance")(s)
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName, projectId, orgId, billingAccount),
@@ -7244,11 +7249,66 @@ resource "google_sql_database_instance" "instance" {
 func testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName string, projectId string, orgId string, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "testproject" {
-  name                = "%s"
-  project_id          = "%s"
-  org_id              = "%s"
-  billing_account     = "%s"
+  name            = "%s"
+  project_id      = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
   deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "compute" {
+  project            = google_project.testproject.project_id
+  service            = "compute.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "dns" {
+  project            = google_project.testproject.project_id
+  service            = "dns.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "networkconnectivity" {
+  project            = google_project.testproject.project_id
+  service            = "networkconnectivity.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "servicenetworking" {
+  project            = google_project.testproject.project_id
+  service            = "servicenetworking.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "sqladmin" {
+  project            = google_project.testproject.project_id
+  service            = "sqladmin.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service_identity" "gcp_sa_cloud_sql" {
+  project    = google_project.testproject.project_id
+  service    = "sqladmin.googleapis.com"
+  depends_on = [google_project_service.sqladmin]
+}
+
+resource "google_project_iam_member" "sa_consumer_network_admin" {
+  project = google_project.testproject.project_id
+  role    = "roles/networkconnectivity.serviceAutomationConsumerNetworkAdmin"
+  member  = google_project_service_identity.gcp_sa_cloud_sql.member
+}
+
+resource "google_project_iam_member" "sa_network_viewer" {
+  project = google_project.testproject.project_id
+  role    = "roles/compute.networkViewer"
+  member  = google_project_service_identity.gcp_sa_cloud_sql.member
+}
+
+resource "google_compute_network" "default" {
+  project                 = google_project.testproject.project_id
+  name                    = "default"
+  auto_create_subnetworks = true
+  depends_on              = [google_project_service.compute]
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -7264,7 +7324,7 @@ resource "google_sql_database_instance" "instance" {
 			psc_enabled = true
 			psc_auto_connection_policy_enabled = true
 			psc_auto_connections {
-				consumer_network = "projects/speckle-prober-psc-consumer/global/networks/default"
+				consumer_network = google_compute_network.default.id
 			}
 		}
 		ipv4_enabled = false
@@ -7275,6 +7335,13 @@ resource "google_sql_database_instance" "instance" {
 	}
 	availability_type = "REGIONAL"
   }
+  depends_on = [
+    google_project_service.dns,
+    google_project_service.networkconnectivity,
+    google_project_service.servicenetworking,
+    google_project_iam_member.sa_consumer_network_admin,
+    google_project_iam_member.sa_network_viewer,
+  ]
 }
 `, projectId, projectId, orgId, billingAccount, instanceName)
 }
@@ -7609,6 +7676,45 @@ func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected 
 					return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_service_project_id property is not present or set as expected in state of %s", resourceName)
 				}
 			}
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckSqlDatabaseInstanceDeleteServiceConnectionPolicy(t *testing.T, resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Can't find %s in state", resourceName)
+		}
+
+		policy, ok := rs.Primary.Attributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.service_connection_policy"]
+		if !ok || policy == "" {
+			return nil
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		url := policy
+		if !strings.HasPrefix(policy, "http") {
+			url = fmt.Sprintf("https://networkconnectivity.googleapis.com/v1/%s", strings.TrimPrefix(policy, "/"))
+		}
+
+		billingProject := ""
+		if config.BillingProject != "" {
+			billingProject = config.BillingProject
+		}
+
+		log.Printf("[DEBUG] Deleting service connection policy %q at %s", policy, url)
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "DELETE",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			return fmt.Errorf("Error deleting service connection policy %s: %s", policy, err)
 		}
 
 		return nil
