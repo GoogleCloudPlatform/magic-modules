@@ -28,8 +28,8 @@ There are two ways to generate the initial YAML definition for the resource:
 *   Wait for the subagent to return its report.
 *   **Handoff:**
     - If the subagent reports that tests passed successfully, present the results to the user.
-    - If the subagent reports test failures, enter the **Default Workflow** ([.agents/skills/workflows/default/SKILL.md](file:///Users/camthornton/magic-modules/.agents/skills/workflows/default/SKILL.md)) at **Step 5 (Fix)** to plan remediation.
+    - If the subagent reports test failures, enter the **Default Workflow** ([default/SKILL.md](../default/SKILL.md)) at **Step 5 (Fix)** to plan remediation.
 
 ### 2B. Manual Path
 *   Follow the standard process to draft the YAML definition in `mmv1/products/...` based on API documentation and repository patterns.
-*   **Handoff:** Once the YAML is drafted, enter the **Default Workflow** ([.agents/skills/workflows/default/SKILL.md](file:///Users/camthornton/magic-modules/.agents/skills/workflows/default/SKILL.md)) at **Step 3 (Generate)** to compile the provider and continue with testing.
+*   **Handoff:** Once the YAML is drafted, enter the **Default Workflow** ([default/SKILL.md](../default/SKILL.md)) at **Step 3 (Generate)** to compile the provider and continue with testing.

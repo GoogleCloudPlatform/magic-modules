@@ -222,6 +222,8 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 	nameToWait := saName
 	if serviceAccountKey != nil {
 		nameToWait = serviceAccountKey.Name
+	} else if data.Name.ValueString() != "" {
+		nameToWait = data.Name.ValueString()
 	}
 	log.Printf("[DEBUG] Retrieving Service Account Key %q\n", nameToWait)
 	if err := ServiceAccountKeyWaitTime(keys, nameToWait, publicKeyType, "Retrieving Service account key", 4*time.Minute); err != nil {
@@ -259,6 +261,10 @@ func (p *googleEphemeralServiceAccountKey) Close(ctx context.Context, req epheme
 	log.Printf("[DEBUG] Deleting Service Account Key %q\n", data.Name)
 	keys := iambeta.NewClient(p.providerConfig, p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys
 	if _, err := keys.Delete(data.Name).Do(); err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 403) || transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			log.Printf("[DEBUG] Got a 403 or 404 error trying to delete service account key %s, assuming it's already gone: %s", data.Name, err)
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error deleting Service Account Key",
 			fmt.Sprintf("Error deleting Service Account Key %q: %s", data.Name, err.Error()),

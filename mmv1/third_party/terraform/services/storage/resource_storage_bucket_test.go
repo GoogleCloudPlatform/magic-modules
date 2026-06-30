@@ -13,10 +13,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	storage_tpg "github.com/hashicorp/terraform-provider-google/google/services/storage"
 
 	"google.golang.org/api/googleapi"
@@ -62,6 +65,39 @@ func TestAccStorageBucket_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_importBlockWithResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	project := envvar.GetTestProjectFromEnv()
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basic(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "project", project),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "name", bucketName),
+				),
+			},
+			{
+				ResourceName:       "google_storage_bucket.bucket",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
@@ -2429,7 +2465,7 @@ resource "google_storage_bucket" "bucket" {
     }
     condition {
       matches_storage_class = []
-      age = 10
+      age                   = 10
     }
   }
   lifecycle_rule {
@@ -2500,6 +2536,17 @@ resource "google_storage_bucket" "bucket" {
     }
     condition {
       age = 1
+    }
+  }
+	lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+	   age              = 5
+       size_above_bytes = 100
+	   size_below_bytes = 500
     }
   }
 }
@@ -2591,6 +2638,17 @@ resource "google_storage_bucket" "bucket" {
     condition {
       matches_suffix = ["test"]
       age            = 2
+    }
+  }
+	lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+	  age              = 5
+      size_above_bytes = 200
+	  size_below_bytes = 1000
     }
   }
 }

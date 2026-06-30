@@ -102,6 +102,48 @@ func (l *Loader) LoadProducts() {
 	}
 
 	l.Products = l.batchLoadProducts(allProductFiles)
+
+	// Set up ResourcePrefixPkgMap now that all products are loaded.
+	runtime := api.Runtime{
+		// Hardcode a few unusually-named handwritten resources. These are among the oldest resources
+		// in the provider; we shouldn't be adding more to this list.
+		ResourcePrefixPkgMap: map[string]string{
+			"google_project":         "services/resourcemanager",
+			"google_folder":          "services/resourcemanager",
+			"google_organization":    "services/resourcemanager",
+			"google_service_account": "services/resourcemanager",
+		},
+	}
+	prefixCount := map[string]int{}
+	for _, p := range l.Products {
+		prefix := fmt.Sprintf("google_%s_", p.TerraformName())
+		runtime.ResourcePrefixPkgMap[prefix] = "services/" + strings.ToLower(p.ApiName)
+		prefixCount[prefix] += 1
+		if prefixCount[prefix] > 1 {
+			delete(runtime.ResourcePrefixPkgMap, prefix)
+		}
+		// Always add resources with legacy_name
+		for _, r := range p.Objects {
+			if r.LegacyName != "" && !strings.HasPrefix(r.LegacyName, prefix) {
+				runtime.ResourcePrefixPkgMap[r.LegacyName] = "services/" + strings.ToLower(p.ApiName)
+			}
+		}
+	}
+	// For products that share a prefix, add the individual resources instead.
+	for _, p := range l.Products {
+		prefix := fmt.Sprintf("google_%s_", p.TerraformName())
+		if prefixCount[prefix] > 1 {
+			for _, r := range p.Objects {
+				runtime.ResourcePrefixPkgMap[r.TerraformName()] = "services/" + strings.ToLower(p.ApiName)
+			}
+		}
+	}
+	for _, p := range l.Products {
+		p.Runtime = runtime
+		for _, r := range p.Objects {
+			r.Runtime = runtime
+		}
+	}
 }
 
 func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Product {
@@ -347,7 +389,7 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 
 	// Convert Examples to Samples in memory after overrides are applied
 	if len(resource.Examples) > 0 {
-
+		var convertedSamples []*apiresource.Sample
 		for _, e := range resource.Examples {
 			// Create an in-memory custom wrapper over the fs for legacy template files
 			if e.ConfigPath == "" {
@@ -383,8 +425,9 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 				TGCSkipTest:         e.TGCSkipTest,
 				Steps:               steps,
 			}
-			resource.Samples = append(resource.Samples, sample)
+			convertedSamples = append(convertedSamples, sample)
 		}
+		resource.Samples = append(convertedSamples, resource.Samples...)
 		resource.Examples = nil
 	}
 

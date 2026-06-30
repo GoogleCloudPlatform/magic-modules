@@ -12,44 +12,45 @@
 # limitations under the License.
 
 ---
-name: 'Destination'
+name: Destination
 description: |
   'Manage Multicloud Data Transfer Destinations'
 references:
   guides:
-    'QUICKSTART_TITLE': 'https://docs.cloud.google.com/data-transfer-essentials/docs/create-resources'
-  api: 'https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.multicloudDataTransferConfigs.destinations'
-
-base_url: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs/{{multicloud_data_transfer_config}}/destinations'
-self_link: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs/{{multicloud_data_transfer_config}}/destinations/{{name}}'
-
-create_url: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs/{{multicloud_data_transfer_config}}/destinations?destination_id={{name}}'
-
-update_verb: 'PATCH'
+    QUICKSTART_TITLE: https://docs.cloud.google.com/data-transfer-essentials/docs/create-resources
+  api: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.multicloudDataTransferConfigs.destinations
+base_url: projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs/{{multicloud_data_transfer_config}}/destinations
+self_link: projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs/{{multicloud_data_transfer_config}}/destinations/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs/{{multicloud_data_transfer_config}}/destinations?destination_id={{name}}
 update_mask: true
-
-autogen_async: true
-
+update_verb: PATCH
+sweeper:
+  parent:
+    resource_type: google_network_connectivity_multicloud_data_transfer_config
+    parent_field: name
+    parent_field_extract_name: true
+    child_field: multicloud_data_transfer_config
 async:
   operation:
     base_url: '{{op_id}}'
-
-examples:
-  - name: "network_connectivity_destination_basic"
-    primary_resource_id: "example"
-    vars:
-      config_name: "basic-config"
-      destination_name: "basic-destination"
-
+autogen_async: true
+samples:
+  - name: network_connectivity_destination_basic
+    primary_resource_id: example
+    steps:
+      - name: network_connectivity_destination_basic
+        resource_id_vars:
+          config_name: basic-config
+          destination_name: basic-destination
 parameters:
-  - name: 'multicloudDataTransferConfig'
+  - name: multicloudDataTransferConfig
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The multicloud data transfer config of the destination.
-  - name: 'location'
+  - name: location
     type: String
     required: true
     immutable: true
@@ -57,45 +58,45 @@ parameters:
     description: |
       The location of the destination.
 properties:
-  - name: 'name'
+  - name: name
     type: String
     required: true
     immutable: true
     ignore_read: true
     description: |
       The name of the destination.
-  - name: 'createTime'
+  - name: createTime
     type: Time
     output: true
     description: |
       Time when the `Destination` resource was created.
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     output: true
     description: |
       Time when the `Destination` resource was updated.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       User-defined labels.
-  - name: 'etag'
+  - name: etag
     type: Fingerprint
     output: true
     description: |
       The etag is computed by the server, and might be sent with update and
       delete requests so that the client has an up-to-date value before
       proceeding.
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A description of this resource.
-  - name: 'ipPrefix'
+  - name: ipPrefix
     type: String
     required: true
     immutable: true
     description: |
       The IP prefix that represents your workload on another CSP.
-  - name: 'endpoints'
+  - name: endpoints
     type: Array
     required: true
     is_set: true
@@ -104,30 +105,30 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'asn'
+        - name: asn
           type: String
           required: true
           description: |
             The ASN of the remote IP prefix.
-        - name: 'csp'
+        - name: csp
           type: String
           required: true
           description: |
             The CSP of the remote IP prefix.
-        - name: 'state'
+        - name: state
           type: Enum
           output: true
           enum_values:
-            - 'VALID'
-            - 'INVALID'
+            - VALID
+            - INVALID
           description: |
             The state of the DestinationEndpoint resource.
-        - name: 'updateTime'
+        - name: updateTime
           type: Time
           output: true
           description: |
             Time when the DestinationEndpoint resource was updated.
-  - name: 'stateTimeline'
+  - name: stateTimeline
     type: NestedObject
     output: true
     description: |
@@ -135,24 +136,24 @@ properties:
       state. If a state change is expected, the value is `ADDING`,
       `DELETING` or `SUSPENDING`, depending on the action specified.
     properties:
-      - name: 'states'
+      - name: states
         type: Array
         output: true
         description: The state and activation time details of the resource state.
         item_type:
           type: NestedObject
           properties:
-            - name: 'state'
+            - name: state
               type: Enum
               output: true
               enum_values:
-                - 'ADDING'
-                - 'ACTIVE'
-                - 'DELETING'
-                - 'SUSPENDING'
-                - 'SUSPENDED'
-              description: 'The state of the resource.'
-            - name: 'effectiveTime'
+                - ADDING
+                - ACTIVE
+                - DELETING
+                - SUSPENDING
+                - SUSPENDED
+              description: The state of the resource.
+            - name: effectiveTime
               type: Time
               output: true
               description: |
@@ -161,7 +162,7 @@ properties:
                 transient state of the resource will be effective. For instance, if the
                 state is `ADDING`, this field shows the time when the resource state
                 transitions to `ACTIVE`.
-  - name: 'uid'
+  - name: uid
     type: String
     output: true
     description: |

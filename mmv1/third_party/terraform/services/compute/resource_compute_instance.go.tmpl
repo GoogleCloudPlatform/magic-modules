@@ -747,6 +747,29 @@ func ResourceComputeInstance() *schema.Resource {
 							},
 						},
 
+						{{ if ne $.TargetVersionName `ga` -}}
+						"alias_ipv6_range": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: `An array of IPv6 alias IP ranges for this network interface.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ip_cidr_range": {
+										Type:             schema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
+										Description:      `The IPv6 CIDR range represented by this alias IP range.`,
+									},
+									"subnetwork_range_name": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The subnetwork secondary range name specifying the secondary range from which to allocate the IP CIDR range for this alias IP range.`,
+									},
+								},
+							},
+						},
+						{{- end }}
+
 						"stack_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -1469,6 +1492,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:        schema.TypeString,
 							Optional:    true,
 							AtLeastOneOf: advancedMachineFeaturesKeys,
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("STANDARD"),
 							ValidateFunc: validation.StringInSlice([]string{"STANDARD", "ENHANCED", "ARCHITECTURAL"}, false),
 							Description: `The PMU is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are "STANDARD", "ENHANCED", and "ARCHITECTURAL".`,
 						},
@@ -1723,56 +1747,75 @@ func getInstance(config *transport_tpg.Config, d *schema.ResourceData) (*compute
 	if err != nil {
 		return nil, err
 	}
-	zone, err := tpgresource.GetZone(d, config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return nil, err
 	}
-	{{- if eq $.TargetVersionName "ga" }}
-	instance, err := NewClient(config, userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
-	{{- else }}
-	instance, err := NewClient(config, userAgent).Instances.Get(project, zone, d.Get("name").(string)).View("FULL").Do()
-	{{- end }}
+{{- if ne $.TargetVersionName "ga" }}
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"view": "FULL"})
+	if err != nil {
+		return nil, err
+	}
+{{- end }}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
 	}
-	return instance, nil
+	var instance compute.Instance
+	if err = tpgresource.Convert(res, &instance); err != nil {
+		return nil, fmt.Errorf("Error parsing instance response: %s", err)
+	}
+	return &instance, nil
 }
 
 func getDisk(diskUri string, d *schema.ResourceData, config *transport_tpg.Config) (*compute.Disk, error) {
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
 
+	var diskUrl string
 	if strings.Contains(diskUri, "regions/") {
 		source, err := tpgresource.ParseRegionDiskFieldValue(diskUri, d, config)
 		if err != nil {
 			return nil, err
 		}
-
-		disk, err := NewClient(config, userAgent).RegionDisks.Get(source.Project, source.Region, source.Name).Do()
+		diskUrl = fmt.Sprintf("%sprojects/%s/regions/%s/disks/%s",
+			transport_tpg.BaseUrl(Product, config), source.Project, source.Region, source.Name)
+	} else {
+		source, err := tpgresource.ParseDiskFieldValue(diskUri, d, config)
 		if err != nil {
 			return nil, err
 		}
-
-		return disk, err
+		diskUrl = fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s",
+			transport_tpg.BaseUrl(Product, config), source.Project, source.Zone, source.Name)
 	}
 
-	source, err := tpgresource.ParseDiskFieldValue(diskUri, d, config)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		RawURL:    diskUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	disk, err := NewClient(config, userAgent).Disks.Get(source.Project, source.Zone, source.Name).Do()
-	if err != nil {
-		return nil, err
+	var disk compute.Disk
+	if err = tpgresource.Convert(res, &disk); err != nil {
+		return nil, fmt.Errorf("Error parsing disk response: %s", err)
 	}
-
-	return disk, err
+	return &disk, nil
 }
 
 func expandComputeInstance(project string, d *schema.ResourceData, config *transport_tpg.Config) (*compute.Instance, error) {
@@ -1792,7 +1835,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 
 	disks := []*compute.AttachedDisk{}
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
-		bootDisk, err := expandBootDisk(d, config, project)
+		bootDisk, err := expandBootDiskTyped(d, config, project)
 		if err != nil {
 			return nil, err
 		}
@@ -1800,7 +1843,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 	}
 
 	if _, hasScratchDisk := d.GetOk("scratch_disk"); hasScratchDisk {
-		scratchDisks, err := expandScratchDisks(d, config, project)
+		scratchDisks, err := expandScratchDisksTyped(d, config, project)
 		if err != nil {
 			return nil, err
 		}
@@ -1811,7 +1854,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 
 	for i := 0; i < attachedDisksCount; i++ {
 		diskConfig := d.Get(fmt.Sprintf("attached_disk.%d", i)).(map[string]interface{})
-		disk, err := expandAttachedDisk(diskConfig, d, config)
+		disk, err := expandAttachedDiskTyped(diskConfig, d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -1824,12 +1867,12 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		return nil, fmt.Errorf("Error creating scheduling: %s", err)
 	}
 
-	params, err := expandParams(d)
+	params, err := expandParamsTyped(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating params: %s", err)
 	}
 
-	metadata, err := resourceInstanceMetadata(d)
+	metadata, err := resourceInstanceMetadataTyped(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
@@ -1839,32 +1882,64 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 	if err != nil {
 		return nil, fmt.Errorf("Error creating partner metadata: %s", err)
 	}
-	PartnerMetadata, err := convertPartnerMetadataToCompute(partnerMetadataMap)
+	PartnerMetadata, err := convertPartnerMetadataToComputeTyped(partnerMetadataMap)
 	if err != nil {
 		return nil, fmt.Errorf("Error converting partner metadata: %s", err)
 	}
 	{{- end }}
 
-	networkInterfaces, err := expandNetworkInterfaces(d, config)
+	networkInterfaces, err := expandNetworkInterfacesTyped(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}
-	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
+	npcMap, err := expandNetworkPerformanceConfig(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network performance config: %s", err)
 	}
-	accels, err := expandInstanceGuestAccelerators(d, config)
+	var networkPerformanceConfig *compute.NetworkPerformanceConfig
+	if npcMap != nil {
+		networkPerformanceConfig = &compute.NetworkPerformanceConfig{}
+		if err := tpgresource.Convert(npcMap, networkPerformanceConfig); err != nil {
+			return nil, fmt.Errorf("Error converting networkPerformanceConfig: %s", err)
+		}
+	}
+	accels, err := expandInstanceGuestAcceleratorsTyped(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating guest accelerators: %s", err)
 	}
 
-	reservationAffinity, err := expandReservationAffinity(d)
+	tagsMap := resourceInstanceTags(d)
+	var tags *compute.Tags
+	if tagsMap != nil {
+		tags = &compute.Tags{}
+		if err := tpgresource.Convert(tagsMap, tags); err != nil {
+			return nil, fmt.Errorf("Error converting tags: %s", err)
+		}
+	}
+
+	reservationAffinityMap, err := expandReservationAffinity(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating reservation affinity: %s", err)
 	}
+	var reservationAffinity *compute.ReservationAffinity
+	if reservationAffinityMap != nil {
+		reservationAffinity = &compute.ReservationAffinity{}
+		if err := tpgresource.Convert(reservationAffinityMap, reservationAffinity); err != nil {
+			return nil, fmt.Errorf("Error converting reservationAffinity: %s", err)
+		}
+	}
+
+	instanceEncryptionKeyMap := expandComputeInstanceEncryptionKey(d)
+	var instanceEncryptionKey *compute.CustomerEncryptionKey
+	if instanceEncryptionKeyMap != nil {
+		instanceEncryptionKey = &compute.CustomerEncryptionKey{}
+		if err := tpgresource.Convert(instanceEncryptionKeyMap, instanceEncryptionKey); err != nil {
+			return nil, fmt.Errorf("Error converting instance_encryption_key: %s", err)
+		}
+	}
 
 	// Create the instance information
-	return &compute.Instance{
+	instance := &compute.Instance{
 		CanIpForward:               d.Get("can_ip_forward").(bool),
 		Description:                d.Get("description").(string),
 		Disks:                      disks,
@@ -1876,28 +1951,47 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		Name:                       d.Get("name").(string),
 		NetworkInterfaces:          networkInterfaces,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
-		Tags:                       resourceInstanceTags(d),
+		Tags:                       tags,
 		Params:                     params,
 		Labels:                     tpgresource.ExpandEffectiveLabels(d),
-		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
+		ServiceAccounts:            expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
 		GuestAccelerators:          accels,
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Scheduling:                 scheduling,
 		DeletionProtection:         d.Get("deletion_protection").(bool),
 		Hostname:                   d.Get("hostname").(string),
 		ForceSendFields:            []string{"CanIpForward", "DeletionProtection"},
-		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
-		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
-		DisplayDevice:              expandDisplayDevice(d),
+		AdvancedMachineFeatures:    expandAdvancedMachineFeaturesTyped(d),
 		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
-		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
+		InstanceEncryptionKey:      instanceEncryptionKey,
 		{{- if ne $.TargetVersionName `ga` }}
 		EraseWindowsVssSignature:   d.Get("erase_windows_vss_signature").(bool),
 		{{- end }}
-	}, nil
+	}
+	if cic := expandConfidentialInstanceConfig(d); cic != nil {
+		instance.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{
+			EnableConfidentialCompute: cic["enableConfidentialCompute"].(bool),
+			ConfidentialInstanceType:  cic["confidentialInstanceType"].(string),
+		}
+	}
+	if sicMap := expandShieldedVmConfigs(d); sicMap != nil {
+		instance.ShieldedInstanceConfig = &compute.ShieldedInstanceConfig{
+			EnableSecureBoot:          sicMap["enableSecureBoot"].(bool),
+			EnableVtpm:                sicMap["enableVtpm"].(bool),
+			EnableIntegrityMonitoring: sicMap["enableIntegrityMonitoring"].(bool),
+			ForceSendFields:           []string{"EnableSecureBoot", "EnableVtpm", "EnableIntegrityMonitoring"},
+		}
+	}
+	if dd := expandDisplayDevice(d); dd != nil {
+		enabled, _ := dd["enableDisplay"].(bool)
+		instance.DisplayDevice = &compute.DisplayDevice{
+			EnableDisplay:   enabled,
+			ForceSendFields: []string{"EnableDisplay"},
+		}
+	}
+	return instance, nil
 }
 
 var computeInstanceStatus = []string{
@@ -2016,12 +2110,6 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return err
 	}
-	log.Printf("[DEBUG] Loading zone: %s", z)
-	zone, err := NewClient(config, userAgent).Zones.Get(
-		project, z).Do()
-	if err != nil {
-		return fmt.Errorf("Error loading zone '%s': %s", z, err)
-	}
 
 	instance, err := expandComputeInstance(project, d, config)
 	if err != nil {
@@ -2081,7 +2169,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 
 	if val, ok := d.GetOk("desired_status"); ok {
 		if val.(string) != "RUNNING" {
-			err = changeInstanceStatusOnCreation(config, d, project, zone.Name, val.(string), userAgent)
+			err = changeInstanceStatusOnCreation(config, d, project, z, val.(string), userAgent)
 			if err != nil {
 				return fmt.Errorf("Error changing instance status after creation: %s", err)
 			}
@@ -2104,20 +2192,79 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	md := flattenMetadataBeta(instance.Metadata)
+	{{ if ne $.TargetVersionName `ga` -}}
+	// Read from state before calling the helper, which will overwrite scheduling with the API
+	// response. The API doesn't persist nanos, so we restore it afterward to avoid a diff.
+	savedNanos, hadNanos := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos")
+	{{- end }}
+
+	zone := tpgresource.GetResourceNameFromSelfLink(instance.Zone)
+
+	if err := populateComputeInstanceResourceData(d, instance, project, zone, config); err != nil {
+		return err
+	}
 
 	// If the existing state contains "metadata_startup_script" instead of "metadata.startup-script",
 	// we should move the remote metadata.startup-script to metadata_startup_script to avoid
 	// specifying it in two places.
 	if _, ok := d.GetOk("metadata_startup_script"); ok {
+		md := d.Get("metadata").(map[string]interface{})
 		if err := d.Set("metadata_startup_script", md["startup-script"]); err != nil {
 			return fmt.Errorf("Error setting metadata_startup_script: %s", err)
 		}
-
 		delete(md, "startup-script")
+		if err := d.Set("metadata", md); err != nil {
+			return fmt.Errorf("Error setting metadata: %s", err)
+		}
 	}
 
-	if err = d.Set("metadata", md); err != nil {
+	// Fall back on internal ip if there is no external ip.  This makes sense in the situation where
+	// terraform is being used on a cloud instance and can therefore access the instances it creates
+	// via their internal ips.
+	networkInterfacesRaw, err := networkInterfacesToInterface(instance.NetworkInterfaces)
+	if err != nil {
+		return err
+	}
+	_, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
+	if err != nil {
+		return err
+	}
+	sshIP := externalIP
+	if sshIP == "" {
+		sshIP = internalIP
+	}
+	d.SetConnInfo(map[string]string{
+		"type": "ssh",
+		"host": sshIP,
+	})
+
+	{{ if ne $.TargetVersionName `ga` -}}
+	// Workaround: restore nanos from state since the API doesn't persist it (see comment above).
+	if hadNanos {
+		scheduling := flattenScheduling(instance.Scheduling)
+		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
+		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
+		max_duration["nanos"] = int64(savedNanos.(int))
+
+		graceful_shutdown["max_duration"] = []interface{}{max_duration}
+		scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+		if err := d.Set("scheduling", scheduling); err != nil {
+			return fmt.Errorf("Error setting scheduling: %s", err)
+		}
+	}
+	{{- end }}
+
+	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compute.Instance, project, zone string, config *transport_tpg.Config) error {
+	if err := d.Set("metadata", flattenMetadataBeta(instance.Metadata)); err != nil {
 		return fmt.Errorf("Error setting metadata: %s", err)
 	}
 
@@ -2125,50 +2272,35 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
-	if instance.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instance.PartnerMetadata))
-		if err != nil {
-			return fmt.Errorf("Error parsing partner metadata: %s", err)
-		}
-		if err = d.Set("partner_metadata", partnerMetadata); err != nil {
-			return fmt.Errorf("Error setting partner metadata: %s", err)
-		}
-	}
-	{{- end }}
-
 	if err := d.Set("can_ip_forward", instance.CanIpForward); err != nil {
 		return fmt.Errorf("Error setting can_ip_forward: %s", err)
 	}
 	if err := d.Set("machine_type", tpgresource.GetResourceNameFromSelfLink(instance.MachineType)); err != nil {
 		return fmt.Errorf("Error setting machine_type: %s", err)
 	}
-	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(instance.NetworkPerformanceConfig)); err != nil {
+	var npcMap map[string]interface{}
+	if instance.NetworkPerformanceConfig != nil {
+		var err error
+		npcMap, err = tpgresource.ConvertToMap(instance.NetworkPerformanceConfig)
+		if err != nil {
+			return fmt.Errorf("Error converting network_performance_config: %s", err)
+		}
+	}
+	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(npcMap)); err != nil {
 		return err
 	}
 	// Set the networks
-	// Use the first external IP found for the default connection info.
-	networkInterfaces, _, internalIP, externalIP, err := flattenNetworkInterfaces(d, config, instance.NetworkInterfaces)
+	networkInterfacesRaw, err := networkInterfacesToInterface(instance.NetworkInterfaces)
+	if err != nil {
+		return err
+	}
+	networkInterfaces, _, _, _, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
 	if err != nil {
 		return err
 	}
 	if err := d.Set("network_interface", networkInterfaces); err != nil {
 		return err
 	}
-
-	// Fall back on internal ip if there is no external ip.  This makes sense in the situation where
-	// terraform is being used on a cloud instance and can therefore access the instances it creates
-	// via their internal ips.
-	sshIP := externalIP
-	if sshIP == "" {
-		sshIP = internalIP
-	}
-
-	// Initialize the connection info
-	d.SetConnInfo(map[string]string{
-		"type": "ssh",
-		"host": sshIP,
-	})
 
 	// Set the tags fingerprint if there is one.
 	if instance.Tags != nil {
@@ -2300,15 +2432,12 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	// Remove nils from map in case there were disks in the config that were not present on read;
 	// i.e. a disk was detached out of band
 	ads := []map[string]interface{}{}
-	for _, d := range attachedDisks {
-		if d != nil {
-			ads = append(ads, d)
+	for _, ad := range attachedDisks {
+		if ad != nil {
+			ads = append(ads, ad)
 		}
 	}
-
-	zone := tpgresource.GetResourceNameFromSelfLink(instance.Zone)
-
-	if err := d.Set("service_account", flattenServiceAccounts(instance.ServiceAccounts)); err != nil {
+	if err := d.Set("service_account", flattenServiceAccounts(serviceAccountsToInterface(instance.ServiceAccounts))); err != nil {
 		return fmt.Errorf("Error setting service_account: %s", err)
 	}
 	if err := d.Set("attached_disk", ads); err != nil {
@@ -2318,34 +2447,28 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error setting scratch_disk: %s", err)
 	}
 
-{{ if eq $.TargetVersionName `ga` -}}
 	if err := d.Set("scheduling", flattenScheduling(instance.Scheduling)); err != nil {
 		return fmt.Errorf("Error setting scheduling: %s", err)
 	}
-{{ else -}}
-	// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
-	// To avoid diff, we need to set the value from the state not from API response.
-	scheduling := flattenScheduling(instance.Scheduling)
-	if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
-		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
-		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
-		max_duration["nanos"] = int64(nanos.(int))
-
-		graceful_shutdown["max_duration"] = []interface{}{max_duration}
-		scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
-	}
-	if err := d.Set("scheduling", scheduling); err != nil {
-		return fmt.Errorf("Error setting scheduling: %s", err)
-	}
-{{- end }}
-
-	if err := d.Set("guest_accelerator", flattenGuestAccelerators(instance.GuestAccelerators)); err != nil {
+	if err := d.Set("guest_accelerator", flattenGuestAccelerators(guestAcceleratorsToInterface(instance.GuestAccelerators))); err != nil {
 		return fmt.Errorf("Error setting guest_accelerator: %s", err)
 	}
-	if err := d.Set("shielded_instance_config", flattenShieldedVmConfig(instance.ShieldedInstanceConfig)); err != nil {
+	var shieldedVmConfigMap map[string]interface{}
+	if sic := instance.ShieldedInstanceConfig; sic != nil {
+		shieldedVmConfigMap = map[string]interface{}{
+			"enableSecureBoot":          sic.EnableSecureBoot,
+			"enableVtpm":                sic.EnableVtpm,
+			"enableIntegrityMonitoring": sic.EnableIntegrityMonitoring,
+		}
+	}
+	if err := d.Set("shielded_instance_config", flattenShieldedVmConfig(shieldedVmConfigMap)); err != nil {
 		return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 	}
-	if err := d.Set("enable_display", flattenEnableDisplay(instance.DisplayDevice)); err != nil {
+	var displayDeviceMap map[string]interface{}
+	if instance.DisplayDevice != nil {
+		displayDeviceMap = map[string]interface{}{"enableDisplay": instance.DisplayDevice.EnableDisplay}
+	}
+	if err := d.Set("enable_display", flattenEnableDisplay(displayDeviceMap)); err != nil {
 		return fmt.Errorf("Error setting enable_display: %s", err)
 	}
 	if err := d.Set("cpu_platform", instance.CpuPlatform); err != nil {
@@ -2384,10 +2507,16 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("current_status", instance.Status); err != nil {
 		return fmt.Errorf("Error setting current_status: %s", err)
 	}
-	if err := d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig)); err != nil {
-		return fmt.Errorf("Error setting confidential_instance_config: %s", err)
+	if instance.ConfidentialInstanceConfig != nil {
+		cicMap, err := tpgresource.ConvertToMap(instance.ConfidentialInstanceConfig)
+		if err != nil {
+			return fmt.Errorf("Error converting confidential_instance_config: %s", err)
+		}
+		if err := d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(cicMap)); err != nil {
+			return fmt.Errorf("Error setting confidential_instance_config: %s", err)
+		}
 	}
-	if err := d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)); err != nil {
+	if err := d.Set("advanced_machine_features", flattenAdvancedMachineFeaturesTyped(instance.AdvancedMachineFeatures)); err != nil {
 		return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 	}
 	if d.Get("desired_status") != "" {
@@ -2395,15 +2524,43 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("Error setting desired_status: %s", err)
 		}
 	}
-	if err := d.Set("reservation_affinity", flattenReservationAffinity(instance.ReservationAffinity)); err != nil {
+	var reservationAffinityMap map[string]interface{}
+	if instance.ReservationAffinity != nil {
+		var err error
+		reservationAffinityMap, err = tpgresource.ConvertToMap(instance.ReservationAffinity)
+		if err != nil {
+			return fmt.Errorf("Error converting reservation_affinity: %s", err)
+		}
+	}
+	if err := d.Set("reservation_affinity", flattenReservationAffinity(reservationAffinityMap)); err != nil {
 		return fmt.Errorf("Error setting reservation_affinity: %s", err)
 	}
 	if err := d.Set("key_revocation_action_type", instance.KeyRevocationActionType); err != nil {
 		return fmt.Errorf("Error setting key_revocation_action_type: %s", err)
 	}
-	if err := d.Set("instance_encryption_key", flattenComputeInstanceEncryptionKey(instance.InstanceEncryptionKey)); err != nil {
+	var instanceEncryptionKeyMap map[string]interface{}
+	if instance.InstanceEncryptionKey != nil {
+		var err error
+		instanceEncryptionKeyMap, err = tpgresource.ConvertToMap(instance.InstanceEncryptionKey)
+		if err != nil {
+			return fmt.Errorf("Error converting instance_encryption_key: %s", err)
+		}
+	}
+	if err := d.Set("instance_encryption_key", flattenComputeInstanceEncryptionKey(instanceEncryptionKeyMap)); err != nil {
 		return fmt.Errorf("Error setting instance_encryption_key: %s", err)
 	}
+
+	{{- if ne $.TargetVersionName `ga` }}
+	if instance.PartnerMetadata != nil {
+		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instance.PartnerMetadata))
+		if err != nil {
+			return fmt.Errorf("Error parsing partner metadata: %s", err)
+		}
+		if err = d.Set("partner_metadata", partnerMetadata); err != nil {
+			return fmt.Errorf("Error setting partner metadata: %s", err)
+		}
+	}
+	{{- end }}
 
     {{- if ne $.TargetVersionName `ga` }}
 	// If not forced to false, upgrading to a new provider version and subsequently changing a vm property
@@ -2415,13 +2572,6 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
     }
     {{- end }}
 
-	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
-
-                
-    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-        return err
-    }
-    
 	return nil
 }
 
@@ -2447,11 +2597,29 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	// Use beta api directly in order to read network_interface.fingerprint without having to put it in the schema.
-	// Change back to getInstance(config, d) once updating alias ips is GA.
-	instance, err := NewClient(config, userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
+	instanceUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
+	if err != nil {
+		return fmt.Errorf("Error generating instance URL: %s", err)
+	}
+{{- if ne $.TargetVersionName "ga" }}
+	instanceUrl, err = transport_tpg.AddQueryParams(instanceUrl, map[string]string{"view": "FULL"})
+	if err != nil {
+		return err
+	}
+{{- end }}
+	instanceMap, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    instanceUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
+	}
+	instance := &compute.Instance{}
+	if err := tpgresource.Convert(instanceMap, instance); err != nil {
+		return fmt.Errorf("Error parsing instance response: %s", err)
 	}
 
 	// Enable partial mode for the resource since it is possible
@@ -2460,24 +2628,34 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("description") {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				instance, err := NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+				instMap, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   project,
+					RawURL:    instanceUrl,
+					UserAgent: userAgent,
+				})
 				if err != nil {
 					return fmt.Errorf("Error retrieving instance: %s", err)
 				}
 
-				instance.Description = d.Get("description").(string)
+				instMap["description"] = d.Get("description").(string)
 
-				op, err := NewClient(config, userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+				stripInitializeParams(instMap)
+
+				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   project,
+					RawURL:    instanceUrl,
+					UserAgent: userAgent,
+					Body:      instMap,
+				})
 				if err != nil {
 					return fmt.Errorf("Error updating instance: %s", err)
 				}
 
-				opErr := ComputeOperationWaitTime(config, op, project, "description, updating", userAgent, d.Timeout(schema.TimeoutUpdate))
-				if opErr != nil {
-					return opErr
-				}
-
-				return nil
+				return ComputeOperationWaitTime(config, res, project, "description, updating", userAgent, d.Timeout(schema.TimeoutUpdate))
 			},
 		})
 
@@ -2487,14 +2665,18 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if d.HasChange("metadata") {
-		metadata, err := resourceInstanceMetadata(d)
+		metadataBody, err := resourceInstanceMetadata(d)
 		if err != nil {
 			return fmt.Errorf("Error parsing metadata: %s", err)
 		}
 
-		metadataV1 := &compute.Metadata{}
-		if err := tpgresource.Convert(metadata, metadataV1); err != nil {
-			return err
+		metadataInstanceUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
+		if err != nil {
+			return fmt.Errorf("Error generating URL: %s", err)
+		}
+		setMetadataUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setMetadata")
+		if err != nil {
+			return fmt.Errorf("Error generating URL: %s", err)
 		}
 
 		// We're retrying for an error 412 where the metadata fingerprint is out of date
@@ -2502,24 +2684,34 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			RetryFunc: func() error {
 				// retrieve up-to-date metadata from the API in case several updates hit simultaneously. instances
 				// sometimes but not always share metadata fingerprints.
-				instance, err := NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+				instMap, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   project,
+					RawURL:    metadataInstanceUrl,
+					UserAgent: userAgent,
+				})
 				if err != nil {
 					return fmt.Errorf("Error retrieving metadata: %s", err)
 				}
 
-				metadataV1.Fingerprint = instance.Metadata.Fingerprint
+				if md, ok := instMap["metadata"].(map[string]interface{}); ok {
+					metadataBody["fingerprint"] = md["fingerprint"]
+				}
 
-				op, err := NewClient(config, userAgent).Instances.SetMetadata(project, zone, instance.Name, metadataV1).Do()
+				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "POST",
+					Project:   project,
+					RawURL:    setMetadataUrl,
+					UserAgent: userAgent,
+					Body:      metadataBody,
+				})
 				if err != nil {
 					return fmt.Errorf("Error updating metadata: %s", err)
 				}
 
-				opErr := ComputeOperationWaitTime(config, op, project, "metadata to update", userAgent, d.Timeout(schema.TimeoutUpdate))
-				if opErr != nil {
-					return opErr
-				}
-
-				return nil
+				return ComputeOperationWaitTime(config, res, project, "metadata to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 			},
 		})
 
@@ -2532,29 +2724,39 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("partner_metadata") {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				instance, err := NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).View("FULL").Do()
+				instMap, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   project,
+					RawURL:    instanceUrl,
+					UserAgent: userAgent,
+				})
 				if err != nil {
 					return fmt.Errorf("Error retrieving partner_metadata: %s", err)
 				}
-				instance.Fingerprint = instance.Fingerprint
-				patchedPM := resourceInstancePatchPartnerMetadata(d, convertPartnerMetadataFromCompute(instance.PartnerMetadata))
-				computePM, err := convertPartnerMetadataToCompute(patchedPM)
-				if err != nil {
-					return fmt.Errorf("Error converting partner metadata: %s", err)
-				}
-				instance.PartnerMetadata = computePM
-				instance.NullFields = []string{"partnerMetadata"}
 
-				op, err := NewClient(config, userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+				currentPM, ok := instMap["partnerMetadata"].(map[string]interface{})
+				if !ok && instMap["partnerMetadata"] != nil {
+					log.Printf("[WARN] resourceComputeInstanceUpdate: unexpected type for partnerMetadata: %T", instMap["partnerMetadata"])
+				}
+				patchedPM := resourceInstancePatchPartnerMetadata(d, currentPM)
+				instMap["partnerMetadata"] = patchedPM
+
+				stripInitializeParams(instMap)
+
+				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   project,
+					RawURL:    instanceUrl,
+					UserAgent: userAgent,
+					Body:      instMap,
+				})
 				if err != nil {
 					return fmt.Errorf("Error updating partner_metadata: %s", err)
 				}
 
-				opErr := ComputeOperationWaitTime(config, op, project, "partner metadata to update", userAgent, d.Timeout(schema.TimeoutUpdate))
-				if opErr != nil {
-					return opErr
-				}
-				return nil
+				return ComputeOperationWaitTime(config, res, project, "partner metadata to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 			},
 		})
 
@@ -2565,15 +2767,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 {{ end }}
 	if d.HasChange("tags") {
-		tags := resourceInstanceTags(d)
-		tagsV1 := &compute.Tags{}
-		if err := tpgresource.Convert(tags, tagsV1); err != nil {
-			return err
-		}
-		tagsBody, err := tpgresource.ConvertToMap(tagsV1)
-		if err != nil {
-			return fmt.Errorf("Error converting tags: %s", err)
-		}
+		tagsBody := resourceInstanceTags(d)
 		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setTags")
 		if err != nil {
 			return fmt.Errorf("Error generating URL: %s", err)
@@ -2630,29 +2824,38 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("params.0.resource_manager_tags") {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				instance, err := NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+				instMap, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   project,
+					RawURL:    instanceUrl,
+					UserAgent: userAgent,
+				})
 				if err != nil {
 					return fmt.Errorf("Error retrieving instance: %s", err)
 				}
 
-				params, err := expandParams(d)
+				paramsMap, err := expandParams(d)
 				if err != nil {
 					return fmt.Errorf("Error updating params: %s", err)
 				}
+				instMap["params"] = paramsMap
 
-				instance.Params = params
+				stripInitializeParams(instMap)
 
-				op, err := NewClient(config, userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   project,
+					RawURL:    instanceUrl,
+					UserAgent: userAgent,
+					Body:      instMap,
+				})
 				if err != nil {
 					return fmt.Errorf("Error updating instance: %s", err)
 				}
 
-				opErr := ComputeOperationWaitTime(config, op, project, "resource_manager_tags, updating", userAgent, d.Timeout(schema.TimeoutUpdate))
-				if opErr != nil {
-					return opErr
-				}
-
-				return nil
+				return ComputeOperationWaitTime(config, res, project, "resource_manager_tags, updating", userAgent, d.Timeout(schema.TimeoutUpdate))
 			},
 		})
 
@@ -2758,7 +2961,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	networkInterfaces, err := expandNetworkInterfaces(d, config)
+	networkInterfaces, err := expandNetworkInterfacesTyped(d, config)
 	if err != nil {
 		return fmt.Errorf("Error getting network interface from config: %s", err)
 	}
@@ -2821,13 +3024,22 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				if err != nil {
 					return fmt.Errorf("Cannot determine self_link for subnetwork %q: %s", subnetwork, err)
 				}
-				resp, err := NewClient(config, userAgent).Subnetworks.Get(sf.Project, sf.Region, sf.Name).Do()
+				subnetUrl := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks/%s",
+					transport_tpg.BaseUrl(Product, config), sf.Project, sf.Region, sf.Name)
+				subnetRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   sf.Project,
+					RawURL:    subnetUrl,
+					UserAgent: userAgent,
+				})
 				if err != nil {
 					return errwrap.Wrapf("Error getting subnetwork value: {{"{{"}}err{{"}}"}}", err)
 				}
-				nf, err := tpgresource.ParseNetworkFieldValue(resp.Network, d, config)
+				networkSelfLink := subnetRes["network"].(string)
+				nf, err := tpgresource.ParseNetworkFieldValue(networkSelfLink, d, config)
 				if err != nil {
-					return fmt.Errorf("Cannot determine self_link for network %q: %s", resp.Network, err)
+					return fmt.Errorf("Cannot determine self_link for network %q: %s", networkSelfLink, err)
 				}
 				networkInterface.Network = nf.RelativeLink()
 			}
@@ -2865,9 +3077,22 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 
 			// re-read fingerprint
-			instance, err = NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+			freshUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
+			}
+			freshMap, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    freshUrl,
+				UserAgent: userAgent,
+			})
+			if err != nil {
+				return err
+			}
+			if err := tpgresource.Convert(freshMap, instance); err != nil {
+				return fmt.Errorf("Error parsing instance response: %s", err)
 			}
 			instNetworkInterface = instance.NetworkInterfaces[i]
 		}
@@ -2876,16 +3101,21 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			// Alias IP ranges cannot be updated; they must be removed and then added
 			// unless you are changing subnetwork/network
 			if len(instNetworkInterface.AliasIpRanges) > 0 {
-				ni := &compute.NetworkInterface{
-					Fingerprint:     instNetworkInterface.Fingerprint,
-					ForceSendFields: []string{"AliasIpRanges"},
-				}
-				if commonAliasIpRanges := CheckForCommonAliasIp(instNetworkInterface, networkInterface); len(commonAliasIpRanges) > 0 {
-					ni.AliasIpRanges = commonAliasIpRanges
-				}
-				niBody, err := tpgresource.ConvertToMap(ni)
+				oldNiMap, err := tpgresource.ConvertToMap(instNetworkInterface)
 				if err != nil {
-					return errwrap.Wrapf("Error converting network interface: {{"{{"}}err{{"}}"}}", err)
+					return fmt.Errorf("Error converting network interface to map: %w", err)
+				}
+				newNiMap, err := tpgresource.ConvertToMap(networkInterface)
+				if err != nil {
+					return fmt.Errorf("Error converting network interface to map: %w", err)
+				}
+				aliasRanges := []interface{}{}
+				if commonAliasIpRanges := CheckForCommonAliasIp(oldNiMap, newNiMap); len(commonAliasIpRanges) > 0 {
+					aliasRanges = commonAliasIpRanges
+				}
+				niBody := map[string]interface{}{
+					"fingerprint":   instNetworkInterface.Fingerprint,
+					"aliasIpRanges": aliasRanges,
 				}
 				url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateNetworkInterface")
 				if err != nil {
@@ -2911,9 +3141,22 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					return opErr
 				}
 				// re-read fingerprint
-				instance, err = NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+				freshUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
 				if err != nil {
 					return err
+				}
+				freshMap, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   project,
+					RawURL:    freshUrl,
+					UserAgent: userAgent,
+				})
+				if err != nil {
+					return err
+				}
+				if err := tpgresource.Convert(freshMap, instance); err != nil {
+					return fmt.Errorf("Error parsing instance response: %s", err)
 				}
 				instNetworkInterface = instance.NetworkInterfaces[i]
 			}
@@ -2950,6 +3193,56 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				return opErr
 			}
 		}
+
+{{ if ne $.TargetVersionName `ga` -}}
+		if !updateDuringStop && d.HasChange(prefix+".alias_ipv6_range") {
+			// Alias IPv6 ranges cannot be updated; they must be removed and then added
+			// unless you are changing subnetwork/network
+			if len(instNetworkInterface.AliasIpv6Ranges) > 0 {
+				ni := &compute.NetworkInterface{
+					Fingerprint:     instNetworkInterface.Fingerprint,
+					ForceSendFields: []string{"AliasIpv6Ranges"},
+				}
+				if commonAliasIpv6Ranges := CheckForCommonAliasIpv6(instNetworkInterface, networkInterface); len(commonAliasIpv6Ranges) > 0 {
+					ni.AliasIpv6Ranges = commonAliasIpv6Ranges
+				}
+				op, err := NewClient(config, userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
+				if err != nil {
+					return errwrap.Wrapf("Error removing alias_ipv6_range: {{"{{"}}err{{"}}"}}", err)
+				}
+				opErr := ComputeOperationWaitTime(config, op, project, "updating alias ipv6 ranges", userAgent, d.Timeout(schema.TimeoutUpdate))
+				if opErr != nil {
+					return opErr
+				}
+				// re-read fingerprint
+				instance, err = NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+				if err != nil {
+					return err
+				}
+				instNetworkInterface = instance.NetworkInterfaces[i]
+			}
+
+			networkInterfacePatchObj := &compute.NetworkInterface{
+				AliasIpv6Ranges: networkInterface.AliasIpv6Ranges,
+				Fingerprint:     instNetworkInterface.Fingerprint,
+			}
+			updateCall := NewClient(config, userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
+			op, err := updateCall()
+			if err != nil {
+				return errwrap.Wrapf("Error updating network interface: {{`{{`}}err{{`}}`}}", err)
+			}
+			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+			// re-read fingerprint
+			instance, err = NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+			if err != nil {
+				return err
+			}
+			instNetworkInterface = instance.NetworkInterfaces[i]
+		}
+{{- end }}
 
 		if !updateDuringStop && d.HasChange(prefix+".stack_type") {
 
@@ -3097,6 +3390,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				Network:       networkInterface.Network,
 				Subnetwork:    networkInterface.Subnetwork,
 				AliasIpRanges: networkInterface.AliasIpRanges,
+{{ if ne $.TargetVersionName `ga` -}}
+				AliasIpv6Ranges: networkInterface.AliasIpv6Ranges,
+{{- end }}
 			}
 
 			// network_ip can be inferred if not declared. Let's only patch if it's being changed by user
@@ -3196,7 +3492,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		oDisks := map[uint64]string{}
 		for _, disk := range o.([]interface{}) {
 			diskConfig := disk.(map[string]interface{})
-			computeDisk, err := expandAttachedDisk(diskConfig, d, config)
+			computeDisk, err := expandAttachedDiskTyped(diskConfig, d, config)
 			if err != nil {
 				return err
 			}
@@ -3217,7 +3513,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		var attach []*compute.AttachedDisk
 		for _, disk := range n.([]interface{}) {
 			diskConfig := disk.(map[string]interface{})
-			computeDisk, err := expandAttachedDisk(diskConfig, d, config)
+			computeDisk, err := expandAttachedDiskTyped(diskConfig, d, config)
 			if err != nil {
 				return err
 			}
@@ -3376,24 +3672,34 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("can_ip_forward") {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				instance, err := NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+				instMap, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   project,
+					RawURL:    instanceUrl,
+					UserAgent: userAgent,
+				})
 				if err != nil {
 					return fmt.Errorf("Error retrieving instance: %s", err)
 				}
 
-				instance.CanIpForward = d.Get("can_ip_forward").(bool)
+				instMap["canIpForward"] = d.Get("can_ip_forward").(bool)
 
-				op, err := NewClient(config, userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+				stripInitializeParams(instMap)
+
+				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   project,
+					RawURL:    instanceUrl,
+					UserAgent: userAgent,
+					Body:      instMap,
+				})
 				if err != nil {
 					return fmt.Errorf("Error updating instance: %s", err)
 				}
 
-				opErr := ComputeOperationWaitTime(config, op, project, "can_ip_forward, updating", userAgent, d.Timeout(schema.TimeoutUpdate))
-				if opErr != nil {
-					return opErr
-				}
-
-				return nil
+				return ComputeOperationWaitTime(config, res, project, "can_ip_forward, updating", userAgent, d.Timeout(schema.TimeoutUpdate))
 			},
 		})
 
@@ -3409,37 +3715,63 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		previousStatus, desiredStatus := d.GetChange("desired_status")
 
 		if desiredStatus != "" {
-			var op *compute.Operation
+			var res map[string]interface{}
 
 			if desiredStatus == "RUNNING" {
 				if previousStatus == "SUSPENDED" {
-{{- if ne $.TargetVersionName "ga" }}
-					op, err = NewClient(config, userAgent).Instances.Resume(project, zone, instance.Name, &compute.InstancesResumeRequest{}).Do()
-{{- else }}
-					op, err = NewClient(config, userAgent).Instances.Resume(project, zone, instance.Name).Do()
-{{- end }}
+					resumeUrl, urlErr := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/resume")
+					if urlErr != nil {
+						return urlErr
+					}
+					res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+						Config:    config,
+						Method:    "POST",
+						Project:   project,
+						RawURL:    resumeUrl,
+						UserAgent: userAgent,
+					})
 					if err != nil {
 						return err
 					}
 				} else {
-					op, err = startInstanceOperation(d, config)
+					res, err = startInstanceOperation(d, config)
 					if err != nil {
 						return errwrap.Wrapf("Error starting instance: {{"{{"}}err{{"}}"}}", err)
 					}
 				}
 			} else if desiredStatus == "TERMINATED" {
-				op, err = NewClient(config, userAgent).Instances.Stop(project, zone, instance.Name).Do()
+				stopUrl, urlErr := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/stop")
+				if urlErr != nil {
+					return urlErr
+				}
+				res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "POST",
+					Project:   project,
+					RawURL:    stopUrl,
+					UserAgent: userAgent,
+				})
 				if err != nil {
 					return err
 				}
 			} else if desiredStatus == "SUSPENDED" {
-				op, err = NewClient(config, userAgent).Instances.Suspend(project, zone, instance.Name).Do()
+				suspendUrl, urlErr := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/suspend")
+				if urlErr != nil {
+					return urlErr
+				}
+				res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "POST",
+					Project:   project,
+					RawURL:    suspendUrl,
+					UserAgent: userAgent,
+				})
 				if err != nil {
 					return err
 				}
 			}
 			opErr := ComputeOperationWaitTime(
-				config, op, project, "updating status", userAgent,
+				config, res, project, "updating status", userAgent,
 				d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
@@ -3608,12 +3940,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		if d.HasChange("shielded_instance_config") {
-			shieldedVmConfig := expandShieldedVmConfigs(d)
-
-			body, err := tpgresource.ConvertToMap(shieldedVmConfig)
-			if err != nil {
-				return fmt.Errorf("Error converting shielded vm config: %s", err)
-			}
+			body := expandShieldedVmConfigs(d)
 			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateShieldedInstanceConfig")
 			if err != nil {
 				return fmt.Errorf("Error generating URL: %s", err)
@@ -3674,26 +4001,35 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if d.HasChange("advanced_machine_features") {
 			err = transport_tpg.Retry(transport_tpg.RetryOptions{
 				RetryFunc: func() error {
-					// retrieve up-to-date instance from the API in case several updates hit simultaneously. instances
-					// sometimes but not always share metadata fingerprints.
-					instance, err := NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+					// retrieve up-to-date instance from the API in case several updates hit simultaneously.
+					instMap, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+						Config:    config,
+						Method:    "GET",
+						Project:   project,
+						RawURL:    instanceUrl,
+						UserAgent: userAgent,
+					})
 					if err != nil {
 						return fmt.Errorf("Error retrieving instance: %s", err)
 					}
 
-					instance.AdvancedMachineFeatures = expandAdvancedMachineFeatures(d)
+					instMap["advancedMachineFeatures"] = expandAdvancedMachineFeatures(d)
 
-					op, err := NewClient(config, userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+					stripInitializeParams(instMap)
+
+					res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+						Config:    config,
+						Method:    "PUT",
+						Project:   project,
+						RawURL:    instanceUrl,
+						UserAgent: userAgent,
+						Body:      instMap,
+					})
 					if err != nil {
 						return fmt.Errorf("Error updating instance: %s", err)
 					}
 
-					opErr := ComputeOperationWaitTime(config, op, project, "advanced_machine_features to update", userAgent, d.Timeout(schema.TimeoutUpdate))
-					if opErr != nil {
-						return opErr
-					}
-
-					return nil
+					return ComputeOperationWaitTime(config, res, project, "advanced_machine_features to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 				},
 			})
 
@@ -3705,9 +4041,18 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		// If the instance stops it can invalidate the fingerprint for network interface.
 		// refresh the instance to get a new fingerprint
 		if len(updatesToNIWhileStopped) > 0 {
-			instance, err = NewClient(config, userAgent).Instances.Get(project, zone, instance.Name).Do()
+			freshInstMap, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    instanceUrl,
+				UserAgent: userAgent,
+			})
 			if err != nil {
 				return err
+			}
+			if err := tpgresource.Convert(freshInstMap, instance); err != nil {
+				return fmt.Errorf("Error parsing instance response: %s", err)
 			}
 		}
 		for _, patch := range updatesToNIWhileStopped {
@@ -3723,12 +4068,12 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 		if (statusBeforeUpdate == "RUNNING" && desiredStatus != "TERMINATED") ||
 			(statusBeforeUpdate == "TERMINATED" && desiredStatus == "RUNNING") {
-			op, err := startInstanceOperation(d, config)
+			startRes, err := startInstanceOperation(d, config)
 			if err != nil {
 				return errwrap.Wrapf("Error starting instance: {{"{{"}}err{{"}}"}}", err)
 			}
 
-			opErr := ComputeOperationWaitTime(config, op, project,
+			opErr := ComputeOperationWaitTime(config, startRes, project,
 				"starting instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
@@ -3750,27 +4095,15 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	return resourceComputeInstanceRead(d, meta)
 }
 
-func startInstanceOperation(d *schema.ResourceData, config *transport_tpg.Config) (*compute.Operation, error) {
+func startInstanceOperation(d *schema.ResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	zone, err := tpgresource.GetZone(d, config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
-	}
-
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return nil, err
-	}
-
-	// Use beta api directly in order to read network_interface.fingerprint without having to put it in the schema.
-	// Change back to getInstance(config, d) once updating alias ips is GA.
-	instance, err := NewClient(config, userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
-	if err != nil {
-		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", instance.Name))
 	}
 
 	// Retrieve instance from config to pull encryption keys if necessary
@@ -3779,28 +4112,53 @@ func startInstanceOperation(d *schema.ResourceData, config *transport_tpg.Config
 		return nil, err
 	}
 
-	var encrypted []*compute.CustomerEncryptionKeyProtectedDisk
+	var encryptedDisks []map[string]interface{}
 	for _, disk := range instanceFromConfig.Disks {
 		if disk.DiskEncryptionKey != nil {
-			key := compute.CustomerEncryptionKey{RawKey: disk.DiskEncryptionKey.RawKey, KmsKeyName: disk.DiskEncryptionKey.KmsKeyName}
-			eDisk := compute.CustomerEncryptionKeyProtectedDisk{Source: disk.Source, DiskEncryptionKey: &key}
-			encrypted = append(encrypted, &eDisk)
+			diskKey := map[string]interface{}{}
+			if disk.DiskEncryptionKey.RawKey != "" {
+				diskKey["rawKey"] = disk.DiskEncryptionKey.RawKey
+			}
+			if disk.DiskEncryptionKey.RsaEncryptedKey != "" {
+				diskKey["rsaEncryptedKey"] = disk.DiskEncryptionKey.RsaEncryptedKey
+			}
+			if disk.DiskEncryptionKey.KmsKeyName != "" {
+				diskKey["kmsKeyName"] = disk.DiskEncryptionKey.KmsKeyName
+			}
+			if disk.DiskEncryptionKey.KmsKeyServiceAccount != "" {
+				diskKey["kmsKeyServiceAccount"] = disk.DiskEncryptionKey.KmsKeyServiceAccount
+			}
+			encryptedDisks = append(encryptedDisks, map[string]interface{}{
+				"source":            disk.Source,
+				"diskEncryptionKey": diskKey,
+			})
 		}
 	}
 
-	var op *compute.Operation
+	var actionUrl string
+	var body map[string]interface{}
 
-	if len(encrypted) > 0 {
-		request := compute.InstancesStartWithEncryptionKeyRequest{Disks: encrypted}
-		op, err = NewClient(config, userAgent).Instances.StartWithEncryptionKey(project, zone, instance.Name, &request).Do()
+	if len(encryptedDisks) > 0 {
+		actionUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/startWithEncryptionKey")
+		body = map[string]interface{}{"disks": encryptedDisks}
 	} else {
-		op, err = NewClient(config, userAgent).Instances.Start(project, zone, instance.Name).Do()
+		actionUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/start")
+	}
+	if err != nil {
+		return nil, err
 	}
 
-	return op, err
+	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    actionUrl,
+		UserAgent: userAgent,
+		Body:      body,
+	})
 }
 
-func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceData, meta interface{}) (*compute.AttachedDisk, error) {
+func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceData, meta interface{}) (map[string]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
 
 	s := diskConfig["source"].(string)
@@ -3819,27 +4177,28 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 		sourceLink = source.RelativeLink()
 	}
 
-	disk := &compute.AttachedDisk{
-		Source: sourceLink,
+	disk := map[string]interface{}{
+		"source": sourceLink,
 	}
 
 	if v, ok := diskConfig["mode"]; ok {
-		disk.Mode = v.(string)
+		disk["mode"] = v.(string)
 	}
 
 	if v, ok := diskConfig["device_name"]; ok {
-		disk.DeviceName = v.(string)
+		disk["deviceName"] = v.(string)
 	}
 
         if v, ok := d.GetOk("boot_disk.0.interface"); ok && v != "" {
-          disk.Interface = v.(string)
+          disk["interface"] = v.(string)
         }
 
+	var diskEncryptionKey map[string]interface{}
 	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
 	if keyOk {
 		if keyValue != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				RawKey: keyValue.(string),
+			diskEncryptionKey = map[string]interface{}{
+				"rawKey": keyValue.(string),
 			}
 		}
 	}
@@ -3847,8 +4206,8 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 	keyValue, keyOk = diskConfig["disk_encryption_key_rsa"]
 	if keyOk {
 		if keyValue != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				RsaEncryptedKey: keyValue.(string),
+			diskEncryptionKey = map[string]interface{}{
+				"rsaEncryptedKey": keyValue.(string),
 			}
 		}
 	}
@@ -3859,8 +4218,8 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 			return nil, errors.New("Only one of kms_key_self_link and disk_encryption_key_raw can be set")
 		}
 		if kmsValue != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				KmsKeyName: kmsValue.(string),
+			diskEncryptionKey = map[string]interface{}{
+				"kmsKeyName": kmsValue.(string),
 			}
 		}
 	}
@@ -3868,31 +4227,48 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 	kmsServiceAccount, kmsServiceAccountOk := diskConfig["disk_encryption_service_account"]
 	if kmsServiceAccountOk {
 		if kmsServiceAccount != "" {
-			if disk.DiskEncryptionKey == nil {
-				disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-					KmsKeyServiceAccount: kmsServiceAccount.(string),
-				}
+			if diskEncryptionKey == nil {
+				diskEncryptionKey = map[string]interface{}{}
 			}
-			disk.DiskEncryptionKey.KmsKeyServiceAccount = kmsServiceAccount.(string)
+			diskEncryptionKey["kmsKeyServiceAccount"] = kmsServiceAccount.(string)
 		}
 	}
 
+	if diskEncryptionKey != nil {
+		disk["diskEncryptionKey"] = diskEncryptionKey
+	}
+
 	if forceAttach, ok := diskConfig["force_attach"]; ok {
-		disk.ForceAttach = forceAttach.(bool)
+		disk["forceAttach"] = forceAttach.(bool)
 	}
 
 	return disk, nil
 }
 
+// expandAttachedDiskTyped adapts the map-based expandAttachedDisk output to the
+// typed *compute.AttachedDisk still required by callers that build Apiary
+// request structs directly or read typed fields.
+func expandAttachedDiskTyped(diskConfig map[string]interface{}, d *schema.ResourceData, meta interface{}) (*compute.AttachedDisk, error) {
+	expanded, err := expandAttachedDisk(diskConfig, d, meta)
+	if err != nil {
+		return nil, err
+	}
+	disk := &compute.AttachedDisk{}
+	if err := convertViaJSON(expanded, disk); err != nil {
+		return nil, fmt.Errorf("Error converting attached disk: %s", err)
+	}
+	return disk, nil
+}
+
 // See comment on expandInstanceTemplateGuestAccelerators regarding why this
 // code is duplicated.
-func expandInstanceGuestAccelerators(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.AcceleratorConfig, error) {
+func expandInstanceGuestAccelerators(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]interface{}, error) {
 	configs, ok := d.GetOk("guest_accelerator")
 	if !ok {
 		return nil, nil
 	}
 	accels := configs.([]interface{})
-	guestAccelerators := make([]*compute.AcceleratorConfig, 0, len(accels))
+	guestAccelerators := make([]interface{}, 0, len(accels))
 	for _, raw := range accels {
 		data := raw.(map[string]interface{})
 		if data["count"].(int) == 0 {
@@ -3902,13 +4278,32 @@ func expandInstanceGuestAccelerators(d tpgresource.TerraformResourceData, config
 		if err != nil {
 			return nil, fmt.Errorf("cannot parse accelerator type: %v", err)
 		}
-		guestAccelerators = append(guestAccelerators, &compute.AcceleratorConfig{
-			AcceleratorCount: int64(data["count"].(int)),
-			AcceleratorType:  at.RelativeLink(),
+		guestAccelerators = append(guestAccelerators, map[string]interface{}{
+			"acceleratorCount": int64(data["count"].(int)),
+			"acceleratorType":  at.RelativeLink(),
 		})
 	}
 
 	return guestAccelerators, nil
+}
+
+// expandInstanceGuestAcceleratorsTyped adapts the map-based
+// expandInstanceGuestAccelerators output to the typed
+// []*compute.AcceleratorConfig still required by callers that build Apiary
+// request structs directly.
+func expandInstanceGuestAcceleratorsTyped(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.AcceleratorConfig, error) {
+	expanded, err := expandInstanceGuestAccelerators(d, config)
+	if err != nil {
+		return nil, err
+	}
+	if expanded == nil {
+		return nil, nil
+	}
+	accels := make([]*compute.AcceleratorConfig, 0, len(expanded))
+	if err := convertViaJSON(expanded, &accels); err != nil {
+		return nil, fmt.Errorf("Error converting guest accelerators: %s", err)
+	}
+	return accels, nil
 }
 
 // suppressEmptyGuestAcceleratorDiff is used to work around perpetual diff
@@ -4020,27 +4415,50 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	zone, err := tpgresource.GetZone(d, config)
-	if err != nil {
-		return err
-	}
 	log.Printf("[INFO] Requesting instance deletion: %s", d.Get("name").(string))
 
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Cannot delete instance %s: instance Deletion Protection is enabled. Set deletion_protection to false for this resource and run \"terraform apply\" before attempting to delete it.", d.Get("name").(string))
 	} else {
-		op, err := NewClient(config, userAgent).Instances.Delete(project, zone, d.Get("name").(string)).Do()
+		deleteUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
+		if err != nil {
+			return fmt.Errorf("Error generating delete URL: %s", err)
+		}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "DELETE",
+			Project:   project,
+			RawURL:    deleteUrl,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return fmt.Errorf("Error deleting instance: %s", err)
 		}
 
 		// Wait for the operation to complete
-		opErr := ComputeOperationWaitTime(config, op, project, "instance to delete", userAgent, d.Timeout(schema.TimeoutDelete))
+		opErr := ComputeOperationWaitTime(config, res, project, "instance to delete", userAgent, d.Timeout(schema.TimeoutDelete))
 		if opErr != nil {
-			// Refresh operation to check status
-			op, _ = NewClient(config, userAgent).ZoneOperations.Get(project, zone, strconv.FormatUint(op.Id, 10)).Do()
+			// Refresh operation status via its selfLink
+			selfLink, ok := res["selfLink"].(string)
+			if !ok && res["selfLink"] != nil {
+				log.Printf("[WARN] resourceComputeInstanceDelete: unexpected type for selfLink: %T", res["selfLink"])
+			}
+			if selfLink == "" {
+				return opErr
+			}
+			opCheck, _ := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    selfLink,
+				UserAgent: userAgent,
+			})
 			// Do not return an error if the operation actually completed
-			if op == nil || op.Status != "DONE" {
+			opStatus, ok := opCheck["status"].(string)
+			if !ok && opCheck["status"] != nil {
+				log.Printf("[WARN] resourceComputeInstanceDelete: unexpected type for operation status: %T", opCheck["status"])
+			}
+			if opCheck == nil || opStatus != "DONE" {
 				return opErr
 			}
 		}
@@ -4079,70 +4497,88 @@ func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandParams(d *schema.ResourceData) (*compute.InstanceParams, error) {
-	params := &compute.InstanceParams{
-	}
+func expandParams(d *schema.ResourceData) (map[string]interface{}, error) {
+	params := map[string]interface{}{}
 
 	if _, ok := d.GetOk("params.0.resource_manager_tags"); ok {
-		params.ResourceManagerTags = tpgresource.ExpandStringMap(d, "params.0.resource_manager_tags")
+		params["resourceManagerTags"] = tpgresource.ExpandStringMap(d, "params.0.resource_manager_tags")
 	}
 
 	return params, nil
 }
 
-func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, project string) (*compute.AttachedDisk, error) {
+// expandParamsTyped adapts the map-based expandParams output to the typed
+// *compute.InstanceParams still required by callers that build Apiary request
+// structs directly.
+func expandParamsTyped(d *schema.ResourceData) (*compute.InstanceParams, error) {
+	expanded, err := expandParams(d)
+	if err != nil {
+		return nil, err
+	}
+	params := &compute.InstanceParams{}
+	if err := convertViaJSON(expanded, params); err != nil {
+		return nil, fmt.Errorf("Error converting params: %s", err)
+	}
+	return params, nil
+}
+
+func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, project string) (map[string]interface{}, error) {
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
 
-	disk := &compute.AttachedDisk{
-		AutoDelete: d.Get("boot_disk.0.auto_delete").(bool),
-		Boot:       true,
+	disk := map[string]interface{}{
+		"autoDelete": d.Get("boot_disk.0.auto_delete").(bool),
+		"boot":       true,
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.device_name"); ok {
-		disk.DeviceName = v.(string)
+		disk["deviceName"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.interface"); ok {
-		disk.Interface = v.(string)
+		disk["interface"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.guest_os_features"); ok {
-		disk.GuestOsFeatures = expandComputeInstanceGuestOsFeatures(v)
+		disk["guestOsFeatures"] = expandComputeInstanceGuestOsFeatures(v)
 	}
 
+	var diskEncryptionKey map[string]interface{}
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
 		if v != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				RawKey: v.(string),
+			diskEncryptionKey = map[string]interface{}{
+				"rawKey": v.(string),
 			}
 		}
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_rsa"); ok {
 		if v != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				RsaEncryptedKey: v.(string),
+			diskEncryptionKey = map[string]interface{}{
+				"rsaEncryptedKey": v.(string),
 			}
 		}
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.kms_key_self_link"); ok {
 		if v != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				KmsKeyName: v.(string),
+			diskEncryptionKey = map[string]interface{}{
+				"kmsKeyName": v.(string),
 			}
 		}
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_service_account"); ok {
 		if v != "" {
-			disk.DiskEncryptionKey.KmsKeyServiceAccount = v.(string)
+			diskEncryptionKey["kmsKeyServiceAccount"] = v.(string)
 		}
 	}
 
+	if diskEncryptionKey != nil {
+		disk["diskEncryptionKey"] = diskEncryptionKey
+	}
 
 	if v, ok := d.GetOk("boot_disk.0.source"); ok {
 		var err error
@@ -4157,26 +4593,26 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 		if err != nil {
 			return nil, err
 		}
-		disk.Source = source.RelativeLink()
+		disk["source"] = source.RelativeLink()
 	}
 
 	if _, ok := d.GetOk("boot_disk.0.initialize_params"); ok {
-		disk.InitializeParams = &compute.AttachedDiskInitializeParams{}
+		initializeParams := map[string]interface{}{}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.size"); ok {
-			disk.InitializeParams.DiskSizeGb = int64(v.(int))
+			initializeParams["diskSizeGb"] = strconv.Itoa(v.(int))
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.provisioned_iops"); ok {
-			disk.InitializeParams.ProvisionedIops = int64(v.(int))
+			initializeParams["provisionedIops"] = strconv.Itoa(v.(int))
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.provisioned_throughput"); ok {
-			disk.InitializeParams.ProvisionedThroughput = int64(v.(int))
+			initializeParams["provisionedThroughput"] = strconv.Itoa(v.(int))
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.enable_confidential_compute"); ok {
-			disk.InitializeParams.EnableConfidentialCompute = v.(bool)
+			initializeParams["enableConfidentialCompute"] = v.(bool)
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.type"); ok {
@@ -4185,7 +4621,7 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 			if err != nil {
 				return nil, fmt.Errorf("Error loading disk type '%s': %s", diskTypeName, err)
 			}
-			disk.InitializeParams.DiskType = diskType.RelativeLink()
+			initializeParams["diskType"] = diskType.RelativeLink()
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.image"); ok {
@@ -4195,11 +4631,14 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 				return nil, fmt.Errorf("Error resolving image name '%s': %s", imageName, err)
 			}
 
-			disk.InitializeParams.SourceImage = imageUrl
+			initializeParams["sourceImage"] = imageUrl
 		}
 
 		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.source_image_encryption_key"); ok {
-			disk.InitializeParams.SourceImageEncryptionKey = expandComputeInstanceSourceEncryptionKey(d, "boot_disk.0.initialize_params.0.source_image_encryption_key")
+			sourceImageEncryptionKeyMap := expandComputeInstanceSourceEncryptionKey(d, "boot_disk.0.initialize_params.0.source_image_encryption_key")
+			if sourceImageEncryptionKeyMap != nil {
+				initializeParams["sourceImageEncryptionKey"] = sourceImageEncryptionKeyMap
+			}
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.snapshot"); ok {
@@ -4208,23 +4647,26 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 			if err != nil {
 				return nil, fmt.Errorf("Error resolving snapshot name '%s': %s", snapshotName, err)
 			}
-			disk.InitializeParams.SourceSnapshot = snapshotUrl.RelativeLink()
+			initializeParams["sourceSnapshot"] = snapshotUrl.RelativeLink()
 		}
 
 		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.source_snapshot_encryption_key"); ok {
-			disk.InitializeParams.SourceSnapshotEncryptionKey = expandComputeInstanceSourceEncryptionKey(d, "boot_disk.0.initialize_params.0.source_snapshot_encryption_key")
+			sourceSnapshotEncryptionKeyMap := expandComputeInstanceSourceEncryptionKey(d, "boot_disk.0.initialize_params.0.source_snapshot_encryption_key")
+			if sourceSnapshotEncryptionKeyMap != nil {
+				initializeParams["sourceSnapshotEncryptionKey"] = sourceSnapshotEncryptionKeyMap
+			}
 		}
 
 		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.labels"); ok {
-			disk.InitializeParams.Labels = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.labels")
+			initializeParams["labels"] = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.labels")
 		}
 
 		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.resource_manager_tags"); ok {
-			disk.InitializeParams.ResourceManagerTags = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.resource_manager_tags")
+			initializeParams["resourceManagerTags"] = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.resource_manager_tags")
 		}
 
 		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.resource_policies"); ok {
-			disk.InitializeParams.ResourcePolicies = tpgresource.ConvertStringArr(d.Get("boot_disk.0.initialize_params.0.resource_policies").([]interface{}))
+			initializeParams["resourcePolicies"] = tpgresource.ConvertStringArr(d.Get("boot_disk.0.initialize_params.0.resource_policies").([]interface{}))
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.storage_pool"); ok {
@@ -4232,11 +4674,11 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 			if err != nil {
 				return nil, fmt.Errorf("Error resolving storage pool name '%s': '%s'", v.(string), err)
 			}
-			disk.InitializeParams.StoragePool = storagePoolUrl.(string)
+			initializeParams["storagePool"] = storagePoolUrl.(string)
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.architecture"); ok {
-			disk.InitializeParams.Architecture = v.(string)
+			initializeParams["architecture"] = v.(string)
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.replica_zones"); ok {
@@ -4249,28 +4691,51 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 				}
 				replicaZones = append(replicaZones, zoneStr)
 			}
-			disk.InitializeParams.ReplicaZones = replicaZones
+			initializeParams["replicaZones"] = replicaZones
 		}
+
+		disk["initializeParams"] = initializeParams
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.mode"); ok {
-		disk.Mode = v.(string)
+		disk["mode"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.force_attach"); ok {
-		disk.ForceAttach = v.(bool)
+		disk["forceAttach"] = v.(bool)
 	}
 
 	return disk, nil
 }
 
+// expandBootDiskTyped adapts the map-based expandBootDisk output to the typed
+// *compute.AttachedDisk still required by callers that build Apiary request
+// structs directly.
+func expandBootDiskTyped(d *schema.ResourceData, config *transport_tpg.Config, project string) (*compute.AttachedDisk, error) {
+	expanded, err := expandBootDisk(d, config, project)
+	if err != nil {
+		return nil, err
+	}
+	disk := &compute.AttachedDisk{}
+	if err := convertViaJSON(expanded, disk); err != nil {
+		return nil, fmt.Errorf("Error converting boot disk: %s", err)
+	}
+	return disk, nil
+}
+
 func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config *transport_tpg.Config) []map[string]interface{} {
+	guestOsFeaturesSlice := make([]interface{}, 0, len(disk.GuestOsFeatures))
+	for _, f := range disk.GuestOsFeatures {
+		if f != nil && f.Type != "" {
+			guestOsFeaturesSlice = append(guestOsFeaturesSlice, map[string]interface{}{"type": f.Type})
+		}
+	}
 	result := map[string]interface{}{
 		"auto_delete": disk.AutoDelete,
 		"device_name": disk.DeviceName,
 		"mode":        disk.Mode,
 		"source":      tpgresource.ConvertSelfLinkToV1(disk.Source),
-		"guest_os_features":       flattenComputeInstanceGuestOsFeatures(disk.GuestOsFeatures),
+		"guest_os_features":       flattenComputeInstanceGuestOsFeatures(guestOsFeaturesSlice),
 		"force_attach": d.Get("boot_disk.0.force_attach"),
 		// disk_encryption_key_raw is not returned from the API, so copy it from what the user
 		// originally specified to avoid diffs.
@@ -4340,28 +4805,43 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 	return []map[string]interface{}{result}
 }
 
-func expandScratchDisks(d *schema.ResourceData, config *transport_tpg.Config, project string) ([]*compute.AttachedDisk, error) {
+func expandScratchDisks(d *schema.ResourceData, config *transport_tpg.Config, project string) ([]interface{}, error) {
 	diskType, err := readDiskType(config, d, "local-ssd")
 	if err != nil {
 		return nil, fmt.Errorf("Error loading disk type 'local-ssd': %s", err)
 	}
 
 	n := d.Get("scratch_disk.#").(int)
-	scratchDisks := make([]*compute.AttachedDisk, 0, n)
+	scratchDisks := make([]interface{}, 0, n)
 	for i := 0; i < n; i++ {
-		scratchDisks = append(scratchDisks, &compute.AttachedDisk{
-			AutoDelete: true,
-			Type:       "SCRATCH",
-			DeviceName: d.Get(fmt.Sprintf("scratch_disk.%d.device_name", i)).(string),
-			Interface:  d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string),
-			DiskSizeGb: int64(d.Get(fmt.Sprintf("scratch_disk.%d.size", i)).(int)),
-			InitializeParams: &compute.AttachedDiskInitializeParams{
-				DiskType: diskType.RelativeLink(),
+		scratchDisks = append(scratchDisks, map[string]interface{}{
+			"autoDelete": true,
+			"type":       "SCRATCH",
+			"deviceName": d.Get(fmt.Sprintf("scratch_disk.%d.device_name", i)).(string),
+			"interface":  d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string),
+			"diskSizeGb": strconv.Itoa(d.Get(fmt.Sprintf("scratch_disk.%d.size", i)).(int)),
+			"initializeParams": map[string]interface{}{
+				"diskType": diskType.RelativeLink(),
 			},
 		})
 	}
 
 	return scratchDisks, nil
+}
+
+// expandScratchDisksTyped adapts the map-based expandScratchDisks output to the
+// typed []*compute.AttachedDisk still required by callers that build Apiary
+// request structs directly.
+func expandScratchDisksTyped(d *schema.ResourceData, config *transport_tpg.Config, project string) ([]*compute.AttachedDisk, error) {
+	expanded, err := expandScratchDisks(d, config, project)
+	if err != nil {
+		return nil, err
+	}
+	disks := make([]*compute.AttachedDisk, 0, len(expanded))
+	if err := convertViaJSON(expanded, &disks); err != nil {
+		return nil, fmt.Errorf("Error converting scratch disks: %s", err)
+	}
+	return disks, nil
 }
 
 func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
@@ -4469,21 +4949,60 @@ func isEmptyServiceAccountBlock(d *schema.ResourceData) bool {
 }
 
 // Alias ip ranges cannot be removed and created at the same time. This checks if there are any unchanged alias ip ranges
-// to be kept in between the PATCH operations on Network Interface
-func CheckForCommonAliasIp(old, new *compute.NetworkInterface) []*compute.AliasIpRange {
+// to be kept in between the PATCH operations on Network Interface.
+//
+// The arguments and return value use REST-shaped maps (camelCase keys) to keep this helper
+// independent of the typed compute client library; callers can convert via tpgresource.ConvertToMap
+// before invoking it.
+func CheckForCommonAliasIp(old, new map[string]interface{}) []interface{} {
 	newAliasIpMap := make(map[string]bool)
-	for _, ipRange := range new.AliasIpRanges {
+	if newRanges, ok := new["aliasIpRanges"].([]interface{}); ok {
+		for _, raw := range newRanges {
+			ipRange, ok := raw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			cidr := ipRange["ipCidrRange"].(string)
+			newAliasIpMap[cidr] = true
+		}
+	}
+
+	resultAliasIpRanges := make([]interface{}, 0)
+	if oldRanges, ok := old["aliasIpRanges"].([]interface{}); ok {
+		for _, raw := range oldRanges {
+			ipRange, ok := raw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			cidr := ipRange["ipCidrRange"].(string)
+			if newAliasIpMap[cidr] {
+				resultAliasIpRanges = append(resultAliasIpRanges, ipRange)
+			}
+		}
+	}
+	return resultAliasIpRanges
+}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func CheckForCommonAliasIpv6(old, new *compute.NetworkInterface) []*compute.AliasIpRange {
+	return checkForCommonAliasIpRanges(old.AliasIpv6Ranges, new.AliasIpv6Ranges)
+}
+
+func checkForCommonAliasIpRanges(old, new []*compute.AliasIpRange) []*compute.AliasIpRange {
+	newAliasIpMap := make(map[string]bool)
+	for _, ipRange := range new {
 		newAliasIpMap[ipRange.IpCidrRange] = true
 	}
 
 	resultAliasIpRanges := make([]*compute.AliasIpRange, 0)
-	for _, val := range old.AliasIpRanges {
+	for _, val := range old {
 		if newAliasIpMap[val.IpCidrRange] {
 			resultAliasIpRanges = append(resultAliasIpRanges, val)
 		}
 	}
 	return resultAliasIpRanges
 }
+{{- end }}
 
 func updateDisk(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project, patchUrl string, obj map[string]interface{}) error {
 	billingProject := project

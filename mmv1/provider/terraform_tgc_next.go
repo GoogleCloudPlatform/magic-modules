@@ -75,9 +75,11 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 		templateFS:                 templateFS,
 	}
 
-	t.Product.ImportPath = ImportPathFromVersion(versionName)
-	for _, r := range t.Product.Objects {
-		r.ImportPath = ImportPathFromVersion(versionName)
+	if product != nil {
+		t.Product.ImportPath = ImportPathFromVersion(versionName)
+		for _, r := range t.Product.Objects {
+			r.ImportPath = ImportPathFromVersion(versionName)
+		}
 	}
 
 	return t
@@ -124,15 +126,17 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 
+	fileNamePrefix := tgc.ResourceGoFilename(object)
+
 	converters := []string{"tfplan2cai", "cai2hcl"}
 	for _, converter := range converters {
 		templatePath := fmt.Sprintf("templates/tgc_next/%s/resource_converter.go.tmpl", converter)
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_%s.go", productName, google.Underscore(object.Name), converter))
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", fileNamePrefix, converter))
 		templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 	}
 
 	templatePath := "templates/tgc_next/services/resource.go.tmpl"
-	fileName := fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name))
+	fileName := fmt.Sprintf("%s.go", fileNamePrefix)
 	targetFilePath := path.Join(targetFolder, fileName)
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 	tgc.replaceImportPath(targetFolder, fileName)
@@ -157,7 +161,7 @@ func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resou
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_generated_test.go", tgc.ResourceGoFilename(object)))
 	templateData.GenerateTGCNextTestFile(targetFilePath, object)
 	return nil
 }
@@ -178,8 +182,6 @@ func (tgc *TerraformGoogleConversionNext) GenerateProduct(outputFolder string) {
 }
 
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
-	tgc.generateResourcesForVersion(products)
-
 	resourceConverters := map[string]string{
 		// common
 		"pkg/transport/config.go":                    "third_party/terraform/transport/config.go.tmpl",
@@ -204,7 +206,25 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 	}
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
-	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
+	filteredFiles := make(map[string]string)
+
+	if tgc.Product != nil {
+		for target, source := range resourceConverters {
+			if strings.Contains(target, "/services/"+tgc.Product.ApiName+"/") {
+				filteredFiles[target] = source
+			}
+		}
+		tgc.CompileFileList(outputFolder, filteredFiles, *templateData, products)
+	} else {
+		// Shared compilation
+		tgc.generateResourcesForVersion(products)
+		for target, source := range resourceConverters {
+			if !strings.Contains(target, "/services/") {
+				filteredFiles[target] = source
+			}
+		}
+		tgc.CompileFileList(outputFolder, filteredFiles, *templateData, products)
+	}
 }
 
 func (tgc TerraformGoogleConversionNext) CompileFileList(outputFolder string, files map[string]string, fileTemplate TemplateData, products []*api.Product) {
@@ -247,10 +267,6 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
 
-	if err := copy.Copy("third_party/tgc_next", outputFolder); err != nil {
-		log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
-	}
-
 	resourceConverters := map[string]string{
 		// common
 		"pkg/envvar/envvar_utils.go":              "third_party/terraform/envvar/envvar_utils.go",
@@ -282,7 +298,40 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/services/resourcemanagerv3/client.go":      "third_party/terraform/services/resourcemanagerv3/client.go",
 		"pkg/services/storage/client.go":                "third_party/terraform/services/storage/client.go",
 	}
-	tgc.CopyFileList(outputFolder, resourceConverters)
+
+	filteredFiles := make(map[string]string)
+
+	if tgc.Product != nil {
+		// Service-specific copying
+		for target, source := range resourceConverters {
+			if strings.Contains(target, "/services/"+tgc.Product.ApiName+"/") {
+				filteredFiles[target] = source
+			}
+		}
+		tgc.CopyFileList(outputFolder, filteredFiles)
+
+		srcDir := filepath.Join("third_party/tgc_next/pkg/services", tgc.Product.ApiName)
+		dstDir := filepath.Join(outputFolder, "pkg/services", tgc.Product.ApiName)
+		if err := copy.Copy(srcDir, dstDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+			log.Println(fmt.Errorf("error copying service directory %v: %v", srcDir, err))
+		}
+	} else {
+		// Shared copying
+		if err := copy.Copy("third_party/tgc_next", outputFolder, copy.Options{
+			Skip: func(srcinfo os.FileInfo, src, dest string) (bool, error) {
+				return strings.Contains(src, "pkg/services/"), nil
+			},
+		}); err != nil {
+			log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
+		}
+
+		for target, source := range resourceConverters {
+			if !strings.Contains(target, "/services/") {
+				filteredFiles[target] = source
+			}
+		}
+		tgc.CopyFileList(outputFolder, filteredFiles)
+	}
 }
 
 func (tgc TerraformGoogleConversionNext) CopyTfToCaiCommonFiles(outputFolder string) {
@@ -348,25 +397,9 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	}
 }
 
-func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resource) {
-	for _, example := range object.Examples {
-		if example.ExcludeTest {
-			continue
-		}
-		if object.ProductMetadata.VersionObjOrClosest(tgc.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
-			continue
-		}
-		object.TGCTests = append(object.TGCTests, resource.TGCTest{
-			Name: "TestAcc" + example.TestSlug(object.ProductMetadata.Name, object.Name),
-			Skip: example.TGCSkipTest,
-		})
-	}
-}
-
 func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resource) {
 	if object.Examples != nil {
-		tgc.addTestsFromExamples(object)
-		return
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 	for _, sample := range object.Samples {
 		if sample.ExcludeTest {
@@ -465,7 +498,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 		if errors.Is(err, os.ErrNotExist) {
 			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
 				log.Printf("no handwritten test file found at %s", handwrittenTestFilePath)
-				return nil
+				return tgc.addTestsByTestNameMatch(object)
 			}
 			handwrittenTestFilePath += ".tmpl"
 			data, err = fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)

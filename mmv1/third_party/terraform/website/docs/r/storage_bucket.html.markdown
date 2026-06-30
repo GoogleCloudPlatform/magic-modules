@@ -289,6 +289,10 @@ The following arguments are supported:
 
 * `noncurrent_time_before` - (Optional) Relevant only for versioned objects. The date in RFC 3339 (e.g. `2017-06-13`) when the object became nonconcurrent. Due to a current bug you are unable to set this value to `0` within Terraform. When set to `0` it will be ignored, and your state will treat it as though you supplied no `noncurrent_time_before` condition.
 
+* `size_above_bytes` - (Optional) Objects having a size greater than this value in bytes will be matched.
+
+* `size_below_bytes` - (Optional) Objects having a size smaller than this value in bytes will be matched.
+
 <a name="nested_autoclass"></a>The `autoclass` block supports:
 
 * `enabled` - (Required) While set to `true`, autoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.
@@ -449,6 +453,18 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 ```tf
 import {
   id = "{{project_id}}/{{bucket}}"
+  to = google_storage_bucket.default
+}
+```
+
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Storage buckets using identity values. For example:
+
+```tf
+import {
+  identity = {
+    project = "{{project_id}}"
+    name    = "{{bucket}}"
+  }
   to = google_storage_bucket.default
 }
 ```

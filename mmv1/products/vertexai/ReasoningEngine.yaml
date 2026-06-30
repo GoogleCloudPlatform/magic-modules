@@ -37,61 +37,61 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-examples:
+samples:
   - name: 'vertex_ai_reasoning_engine_deletion_policy'
     primary_resource_id: 'reasoning_engine'
-    exclude_docs: true
-    vars:
-      name: 'reasoning-engine'
-    ignore_read_extra:
-      - 'deletion_policy'
+    exclude_basic_doc: true
+    steps:
+      - name: 'vertex_ai_reasoning_engine_deletion_policy'
+        resource_id_vars:
+          name: 'reasoning-engine'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_basic'
     primary_resource_id: 'reasoning_engine'
-    exclude_docs: true
-    vars:
-      name: 'reasoning-engine'
-    ignore_read_extra:
-      - 'deletion_policy'
+    exclude_basic_doc: true
+    steps:
+      - name: 'vertex_ai_reasoning_engine_basic'
+        resource_id_vars:
+          name: 'reasoning-engine'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_source_based_deployment'
     primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: 'vertex_ai_reasoning_engine_source_based_deployment'
+        resource_id_vars:
+          name: 'reasoning-engine'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_developer_connect_source'
-    skip_docs: true  # skip docs until templatized (or decide to skip docs permanently then)
     primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: 'vertex_ai_reasoning_engine_developer_connect_source'
+        resource_id_vars:
+          name: 'reasoning-engine'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_image_spec'
     primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: 'vertex_ai_reasoning_engine_image_spec'
+        resource_id_vars:
+          name: 'reasoning-engine'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_byoc'
-    skip_func: acctest.SkipTestUntil(t, "2026-05-15")  # requires valid image in Artifact Registry, give time for things to settle
-    skip_vcr: true  # multiple IAM members
+    skip_func: acctest.SkipTestUntil(t, "2026-05-15") # requires valid image in Artifact Registry, give time for things to settle
+    skip_vcr: true # multiple IAM members
     primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: 'vertex_ai_reasoning_engine_byoc'
+        resource_id_vars:
+          name: 'reasoning-engine'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_psc_interface'
     primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-      bucket_name: 'reasoning-engine'
-      network_name: 'network'
-      network_attachment_name: 'network-attachment'
-      subnetwork_name: 'subnetwork'
-    test_vars_overrides:
-      # for backward compatible
-      network_name: '"network" + randomSuffix'
-      # for backward compatible
-      subnetwork_name: '"subnetwork" + randomSuffix'
     external_providers: ["time"]
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
@@ -101,46 +101,66 @@ examples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
         role: "roles/viewer"
     exclude_test: true
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: 'vertex_ai_reasoning_engine_psc_interface'
+        resource_id_vars:
+          name: 'reasoning-engine'
+          bucket_name: 'reasoning-engine'
+          network_name: 'network'
+          network_attachment_name: 'network-attachment'
+          subnetwork_name: 'subnetwork'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
+          # for backward compatible
+          subnetwork_name: '"subnetwork" + randomSuffix'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_full'
     primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-      bucket_name: 'reasoning-engine'
-      kms_key_name: 'example-key'
-      secret_name: 'secret'
-      service_account_id: 'sa'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    test_vars_overrides:
-      'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
-      # for backward compatible
-      secret_name: '"secret" + randomSuffix'
-      # for backward compatible
-      service_account_id: '"sa" + randomSuffix'
     external_providers: ["time"]
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: 'vertex_ai_reasoning_engine_full'
+        resource_id_vars:
+          name: 'reasoning-engine'
+          bucket_name: 'reasoning-engine'
+          kms_key_name: 'example-key'
+          secret_name: 'secret'
+          service_account_id: 'sa'
+        test_vars_overrides:
+          'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
+          # for backward compatible
+          secret_name: '"secret" + randomSuffix'
+          # for backward compatible
+          service_account_id: '"sa" + randomSuffix'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_context_spec'
     primary_resource_id: 'reasoning_engine'
     min_version: beta
-    vars:
-      name: 're-ctx-spec'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: 'vertex_ai_reasoning_engine_context_spec'
+        min_version: beta
+        resource_id_vars:
+          name: 're-ctx-spec'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_granular_ttl'
     primary_resource_id: 'reasoning_engine'
     min_version: beta
-    vars:
-      name: 're-gran-ttl'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: 'vertex_ai_reasoning_engine_granular_ttl'
+        min_version: beta
+        resource_id_vars:
+          name: 're-gran-ttl'
+        ignore_read_extra:
+          - 'deletion_policy'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/reasoning_engine_deletion_policy.go.tmpl'
   post_update: 'templates/terraform/post_update/sleep_10s.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
 virtual_fields:
   - name: 'deletion_policy'
     description: |
@@ -158,7 +178,7 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'reasoning_engine'
-  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_reasoning_engine.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_reasoning_engine.tf.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/reasoningEngines/{{name}}'
 parameters:
@@ -187,7 +207,6 @@ properties:
     description: |
       The labels associated with this ReasoningEngine. You can use these to
       organize and group your ReasoningEngines.
-
   - name: 'createTime'
     type: String
     description: |-
@@ -610,3 +629,97 @@ properties:
             type: Boolean
             description: |-
               If true, no memory revisions will be created for any requests to the Memory Bank.
+          - name: 'customizationConfigs'
+            type: Array
+            description: |-
+              Optional. Customization configs for how Agent Engine sub-resources manage context at different scope levels.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'scopeKeys'
+                  type: Array
+                  description: |-
+                    Optional. List of scope keys that this customization config applies to.
+                  item_type:
+                    type: String
+                - name: 'memoryTopics'
+                  type: Array
+                  description: |-
+                    Optional. List of topics that the memory should be associated with.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'managedMemoryTopic'
+                        type: NestedObject
+                        # Note: exactly_one_of within array elements is not enforced client-side by MM; relies on backend API server validation.
+                        exactly_one_of:
+                          - managedMemoryTopic
+                          - customMemoryTopic
+                        description: |-
+                          Optional. Managed memory topic.
+                        properties:
+                          - name: 'managedTopicEnum'
+                            type: String
+                            description: |-
+                              Managed topic enum (e.g. USER_PREFERENCES, EXPLICIT_INSTRUCTIONS).
+                      - name: 'customMemoryTopic'
+                        type: NestedObject
+                        description: |-
+                          Optional. Custom memory topic.
+                        properties:
+                          - name: 'label'
+                            type: String
+                            description: |-
+                              Label of custom memory topic.
+                          - name: 'description'
+                            type: String
+                            description: |-
+                              Description of custom memory topic.
+                - name: 'consolidationConfig'
+                  type: NestedObject
+                  description: |-
+                    Optional. Configuration for how many memory revisions Memory Bank considers when consolidating each memory candidate.
+                  properties:
+                    - name: 'revisionsPerCandidateCount'
+                      type: Integer
+                      description: |-
+                        Number of revisions to consider per candidate count.
+                - name: 'enableThirdPersonMemories'
+                  type: Boolean
+                  description: |-
+                    Optional. Generate memories in the third person if set to true.
+          - name: 'structuredMemoryConfigs'
+            type: Array
+            description: |-
+              Optional. Structured memory configurations for Agent Engine sub-resources.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'scopeKeys'
+                  type: Array
+                  description: |-
+                    Optional. List of scope keys that this structured memory config applies to.
+                  item_type:
+                    type: String
+                - name: 'schemaConfigs'
+                  type: Array
+                  description: |-
+                    Optional. List of schema configs that this structured memory config applies to.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'id'
+                        type: String
+                        description: |-
+                          Required. Unique ID identifying the memory schema.
+                        required: true
+                      - name: 'memorySchema'
+                        type: String
+                        api_name: 'schema'
+                        description: |-
+                          Optional. The memory schema defined as an OpenAPI Schema Object JSON string.
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                        validation:
+                          function: 'validation.StringIsJSON'

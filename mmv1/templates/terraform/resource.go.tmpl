@@ -46,7 +46,9 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
+    {{- if and $.IdentityUpgraders (not $.IsTgcCompiler) }}
+    "github.com/hashicorp/terraform-plugin-go/tftypes"
+    {{- end }}
     "{{ $.ImportPath }}/registry"
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
@@ -315,7 +317,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{- end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.CreateUri}}"))
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.CreateUri}}")
     if err != nil {
         return err
     }
@@ -370,9 +372,17 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if $.CustomCode.PreCreate }}
     {{ customTemplate $ $.CustomCode.PreCreate false -}}
 {{- end}}
+{{- if $.RPCCreateMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCCreateMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.CreateVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -575,7 +585,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
     return func() (map[string]interface{}, error) {
         config := meta.(*transport_tpg.Config)
 
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}"))
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
         if err != nil {
             return nil, err
         }
@@ -615,9 +625,17 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
 
+{{ if $.RPCReadMethod -}}
+        res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
         res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
             Project: billingProject,
             RawURL: url,
             UserAgent: userAgent,
@@ -671,7 +689,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}{{$.ReadQueryParams}}"))
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
     if err != nil {
         return err
     }
@@ -710,9 +728,17 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     {{- if $.CustomCode.PreRead }}
         {{ customTemplate $ $.CustomCode.PreRead false -}}
     {{- end }}
+{{- if $.RPCReadMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -852,7 +878,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
 {{if $.Updatable -}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-{{-     if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+{{-     if and (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)) (not $.BypassClientsideUpdateCheck)}}
     clientSideFields := map[string]bool{"deletion_policy": true}
     clientSideOnly := true
     for field := range Resource{{ $.ResourceName -}}().Schema {
@@ -955,7 +981,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{-             end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{ $.UpdateUri }}"))
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.UpdateUri }}")
     if err != nil {
         return err
     }
@@ -997,9 +1023,17 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) > 0 {
 {{-             end}}
+{{- if $.RPCUpdateMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCUpdateMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ $.UpdateVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -1058,7 +1092,7 @@ if len(updateMask) > 0 {
 if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
 {{		            if $group.FingerprintName }}
-        getUrl, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}"))
+        getUrl, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
         if err != nil {
             return err
         }
@@ -1078,9 +1112,17 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         billingProject = bp
         }
 
+{{ if $.RPCReadMethod -}}
+        getRes, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
         getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
             Project: billingProject,
             RawURL: getUrl,
             UserAgent: userAgent,
@@ -1145,7 +1187,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         transport_tpg.MutexStore.Lock(lockName)
         defer transport_tpg.MutexStore.Unlock(lockName)
 {{-                 end}}
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{ $group.UpdateUrl }}"))
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $group.UpdateUrl }}")
         if err != nil {
             return err
         }
@@ -1170,9 +1212,17 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         billingProject = bp
         }
 
+{{ if $.RPCUpdateMethod -}}
+        res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCUpdateMethod -}}",
+{{- else }}
         res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ $group.UpdateVerb }}",
+{{- end}}
             Project: billingProject,
             RawURL: url,
             UserAgent: userAgent,
@@ -1285,7 +1335,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     transport_tpg.MutexStore.Lock(lockName)
     defer transport_tpg.MutexStore.Unlock(lockName)
     {{- end }}
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.DeleteUri}}"))
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.DeleteUri}}")
     if err != nil {
         return err
     }
@@ -1327,9 +1377,17 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
+{{- if $.RPCDeleteMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCDeleteMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ camelize $.DeleteVerb "upper" -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -1458,7 +1516,7 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 {{- end }}
 
 {{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
-    {{ $.CustomTemplate $.IdentityUpgraderFile false -}}
+    {{ customTemplate $ $.IdentityUpgraderFile false -}}
 {{- end }}
 
 {{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
@@ -1546,8 +1604,10 @@ if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName
 {{- end}}
 {{- end}}
 {{if $.HasSelfLink -}}
-    if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
-        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    if selfLink, ok := res["selfLink"].(string); ok && selfLink != "" {
+        if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(selfLink)); err != nil {
+            return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+        }
     }
 {{- end }}
     return nil

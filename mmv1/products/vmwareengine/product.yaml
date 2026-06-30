@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Vmwareengine'
-display_name: 'Cloud VMware Engine'
-versions:
-  - name: 'ga'
-    base_url: 'https://vmwareengine.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://vmwareengine.googleapis.com/v1/'
+name: Vmwareengine
+display_name: Cloud VMware Engine
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://vmwareengine.googleapis.com/v1/
+  - name: beta
+    base_url: https://vmwareengine.googleapis.com/v1/

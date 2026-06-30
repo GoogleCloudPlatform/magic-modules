@@ -24,6 +24,7 @@
 
 package {{ $.Res.PackageName }}_test
 
+{{if or (gt (len $.Res.TestSamples) 0) (not $.Res.ExcludeDelete) -}}
 import (
 	"fmt"
 	"log"
@@ -41,10 +42,14 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
 	"{{ $.ImportPath  }}/services/{{ lower $.Res.ProductMetadata.Name }}"
+{{- range $pkg, $alias := $.Res.TestDependencies }}
+	{{ $alias }} "{{ $.ImportPath  }}/{{ $pkg }}"
+{{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
 
 	"google.golang.org/api/googleapi"
+
 )
 
 {{if $.Res.CustomCode.TestConstants -}} 
@@ -82,7 +87,7 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	t.Parallel()
 
 	{{- if $s.BootstrapIam }}
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 	{{- range $iam := $s.BootstrapIam }}
 		{
 			Member: "{{$iam.Member}}",
@@ -191,7 +196,7 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 	{{- else }}
 
 		config := acctest.GoogleProviderConfig(t)
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf("%s%s", transport_tpg.BaseUrl({{ lower $.Res.ProductMetadata.Name }}.Product, config), "{{$.Res.SelfLinkUri}}"))
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl({{ lower $.Res.ProductMetadata.Name }}.Product, config)+"{{$.Res.SelfLinkUri}}")
 		if err != nil {
 			return err
 		}
@@ -229,4 +234,5 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		return nil
 	}
 }
+{{- end }}
 {{- end }}

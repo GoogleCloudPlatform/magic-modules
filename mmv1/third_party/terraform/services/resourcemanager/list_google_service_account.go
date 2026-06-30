@@ -17,6 +17,7 @@ import (
 	"google.golang.org/api/iam/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -63,6 +64,7 @@ func (listR *GoogleServiceAccountListResource) List(ctx context.Context, listReq
 	}
 	project := listR.GetProject(data.Project)
 
+	errServiceAccountListStreamClosed := errors.New("stream closed")
 	stream.Results = func(push func(list.ListResult) bool) {
 		err := ListServiceAccounts(listR.Client, project, func(rd *schema.ResourceData) error {
 			result := listReq.NewListResult(ctx)
@@ -72,16 +74,18 @@ func (listR *GoogleServiceAccountListResource) List(ctx context.Context, listReq
 			}
 
 			if !push(result) {
-				return errors.New("stream closed")
+				return errServiceAccountListStreamClosed
 			}
 			return nil
 		})
-		if err != nil {
-			diags.AddError("API Error", err.Error())
-			result := listReq.NewListResult(ctx)
-			result.Diagnostics = diags
-			push(result)
+		// A closed stream is not an error: return without pushing again.
+		if err == nil || errors.Is(err, errServiceAccountListStreamClosed) {
+			return
 		}
+		diags.AddError("API Error", err.Error())
+		result := listReq.NewListResult(ctx)
+		result.Diagnostics = diags
+		push(result)
 	}
 }
 
@@ -104,7 +108,7 @@ func ListServiceAccounts(config *transport_tpg.Config, project string, callback 
 			return fmt.Errorf("error setting project on temporary resource data: %w", err)
 		}
 	}
-	url, err := tpgresource.ReplaceVars(d, config, "{{IAMBetaBasePath}}projects/{{project}}/serviceAccounts")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(iambeta.Product, config)+"projects/{{project}}/serviceAccounts")
 	if err != nil {
 		return err
 	}
@@ -125,6 +129,7 @@ func ListServiceAccounts(config *transport_tpg.Config, project string, callback 
 	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
 		Config:         config,
 		TempData:       d,
+		Resource:       ResourceGoogleServiceAccount(),
 		ListURL:        url,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,

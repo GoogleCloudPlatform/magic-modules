@@ -12,56 +12,61 @@
 # limitations under the License.
 
 ---
-name: 'Client'
+name: Client
 description: |
   Application Integration Client.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/application-integration/docs/overview'
-    'Set up Application Integration': 'https://cloud.google.com/application-integration/docs/setup-application-integration'
-  api: 'https://cloud.google.com/application-integration/docs/reference/rest/v1/projects.locations.clients'
+    Official Documentation: https://cloud.google.com/application-integration/docs/overview
+    Set up Application Integration: https://cloud.google.com/application-integration/docs/setup-application-integration
+  api: https://cloud.google.com/application-integration/docs/reference/rest/v1/projects.locations.clients
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/clients'
-self_link: 'projects/{{project}}/locations/{{location}}/clients'
-create_url: 'projects/{{project}}/locations/{{location}}/clients:provision'
-delete_url: 'projects/{{project}}/locations/{{location}}/clients:deprovision'
-delete_verb: 'POST'
+base_url: projects/{{project}}/locations/{{location}}/clients
 immutable: true
-mutex: 'Client/{{location}}'
+self_link: projects/{{project}}/locations/{{location}}/clients
+create_url: projects/{{project}}/locations/{{location}}/clients:provision
+delete_url: projects/{{project}}/locations/{{location}}/clients:deprovision
+delete_verb: POST
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/clients'
+  - projects/{{project}}/locations/{{location}}/clients
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  decoder: 'templates/terraform/decoders/integrations_client.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/integrations_client.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
+mutex: Client/{{location}}
 exclude_sweeper: true
-examples:
-  - name: 'integrations_client_basic'
-    primary_resource_id: 'example'
-  - name: 'integrations_client_full'
-    primary_resource_id: 'example'
-    vars:
-      key_ring_name: 'my-keyring'
-      crypto_key_name: 'my-crypto-key'
-    test_vars_overrides:
-      key_ring_name: '"tftest-shared-keyring-1"'
-      crypto_key_name: '"tftest-shared-key-1"'
-      kms_key: 'kms.BootstrapKMSKeyInLocation(t, "us-east1")'
+custom_code:
+  decoder: templates/terraform/decoders/integrations_client.go.tmpl
+  pre_create: templates/terraform/pre_create/integrations_client.go.tmpl
+samples:
+  - name: integrations_client_basic
+    primary_resource_id: example
+    steps:
+      - name: integrations_client_basic
+  - name: integrations_client_full
+    primary_resource_id: example
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-integrations.iam.gserviceaccount.com"
-        role: "roles/cloudkmskacls.serviceAgent"
+      - member: serviceAccount:service-{project_number}@gcp-sa-integrations.iam.gserviceaccount.com
+        role: roles/cloudkmskacls.serviceAgent
     skip_vcr: true
-  - name: 'integrations_client_service_account'
-    primary_resource_id: 'example'
-    vars:
-      service_account_id: 'service-acc'
-    exclude_docs: true
+    steps:
+      - name: integrations_client_full
+        resource_id_vars:
+          key_ring_name: my-keyring
+          crypto_key_name: my-crypto-key
+        test_vars_overrides:
+          key_ring_name: '"tftest-shared-keyring-1"'
+          crypto_key_name: '"tftest-shared-key-1"'
+          kms_key: kms.BootstrapKMSKeyInLocation(t, "us-east1")
+  - name: integrations_client_service_account
+    primary_resource_id: example
+    exclude_basic_doc: true
+    steps:
+      - name: integrations_client_service_account
+        resource_id_vars:
+          service_account_id: service-acc
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       Location in which client needs to be provisioned.
@@ -69,53 +74,53 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'cloudKmsConfig'
+  - name: cloudKmsConfig
     type: NestedObject
     description: |
       Cloud KMS config for AuthModule to encrypt/decrypt credentials.
     immutable: true
     ignore_read: true
     properties:
-      - name: 'kmsLocation'
+      - name: kmsLocation
         type: String
         description: |
           Location name of the key ring, e.g. "us-west1".
         required: true
-      - name: 'kmsRing'
+      - name: kmsRing
         type: String
         description: |
           A key ring organizes keys in a specific Google Cloud location and allows you to
           manage access control on groups of keys. A key ring's name does not need to be
           unique across a Google Cloud project, but must be unique within a given location.
         required: true
-      - name: 'key'
+      - name: key
         type: String
         description: |
           A Cloud KMS key is a named object containing one or more key versions, along
           with metadata for the key. A key exists on exactly one key ring tied to a
           specific location.
         required: true
-      - name: 'keyVersion'
+      - name: keyVersion
         type: String
         description: |
           Each version of a key contains key material used for encryption or signing.
           A key's version is represented by an integer, starting at 1. To decrypt data
           or verify a signature, you must use the same key version that was used to
           encrypt or sign the data.
-      - name: 'kmsProjectId'
+      - name: kmsProjectId
         type: String
         description: |
           The Google Cloud project id of the project where the kms key stored. If empty,
           the kms key is stored at the same project as customer's project and ecrypted
           with CMEK, otherwise, the kms key is stored in the tenant project and
           encrypted with GMEK.
-  - name: 'createSampleIntegrations'
+  - name: createSampleIntegrations
     type: Boolean
     description: |
       Indicates if sample integrations should be created along with provisioning.
     immutable: true
     ignore_read: true
-  - name: 'runAsServiceAccount'
+  - name: runAsServiceAccount
     type: String
     description: |
       User input run-as service account, if empty, will bring up a new default service account.

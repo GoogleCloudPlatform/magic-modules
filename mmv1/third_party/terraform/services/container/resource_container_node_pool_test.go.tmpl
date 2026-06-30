@@ -4,16 +4,25 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/services/tags"
+
+{{ if eq $.TargetVersionName "ga" }}
+	gke "google.golang.org/api/container/v1"
+{{- else }}
+	gke "google.golang.org/api/container/v1beta1"
+{{- end }}
 )
 
 func TestAccContainerNodePool_basic(t *testing.T) {
@@ -771,6 +780,38 @@ func TestAccContainerNodePool_withReservationAffinitySpecific(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_withReservationAffinityAnyReservationThenFail(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	reservation := fmt.Sprintf("tf-test-reservation-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withReservationAffinityAnyReservationThenFail(cluster, reservation, np, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.with_reservation_affinity",
+						"node_config.0.reservation_affinity.#", "1"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_reservation_affinity",
+						"node_config.0.reservation_affinity.0.consume_reservation_type", "ANY_RESERVATION_THEN_FAIL"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_reservation_affinity",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
 
@@ -883,7 +924,7 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "static", "None", "best-effort", "pod", "100ms", networkName, subnetworkName, "TRUE", "100Mi", "1m", "10m", true, true, 2048, 10, 10, 85),
+				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "static", "None", "best-effort", "pod", "100ms", networkName, subnetworkName, "TRUE", "100Mi", "1m", "10m", true, true, 2048, 10, 10, 85, "100s"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						acctest.ExpectNoDelete(),
@@ -918,6 +959,8 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 						                       "node_config.0.kubelet_config.0.topology_manager.0.scope", "pod"),							   
 					// resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
 					//      "node_config.0.kubelet_config.0.allowed_unsafe_sysctls.0", "kernel.shm*"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
+            "node_config.0.kubelet_config.0.crash_loop_back_off.0.max_container_restart_period", "100s"),
 				),
 			},
 			{
@@ -926,7 +969,7 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "", "Static", "single-numa-node", "container", "", networkName, subnetworkName, "FALSE", "200Mi", "30s", "", false, true, 1024, 5, 50, 80),
+				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "", "Static", "single-numa-node", "container", "", networkName, subnetworkName, "FALSE", "200Mi", "30s", "", false, true, 1024, 5, 50, 80, "60s"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						acctest.ExpectNoDelete(),
@@ -943,11 +986,44 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 						"node_config.0.kubelet_config.0.topology_manager.0.policy", "single-numa-node"),
 					resource.TestCheckResourceAttr(
 						"google_container_node_pool.with_kubelet_config",
-						"node_config.0.kubelet_config.0.topology_manager.0.scope", "container"),		
+						"node_config.0.kubelet_config.0.topology_manager.0.scope", "container"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
+						"node_config.0.kubelet_config.0.crash_loop_back_off.0.max_container_restart_period", "60s"),
 				),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_kubelet_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccContainerNodePool_withKubeletConfigShutdownGracePeriod(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withKubeletConfigShutdownGracePeriod(cluster, np, networkName, subnetworkName, 120, 30),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config_shutdown",
+						"node_config.0.kubelet_config.0.shutdown_grace_period_seconds", "120"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config_shutdown",
+						"node_config.0.kubelet_config.0.shutdown_grace_period_critical_pods_seconds", "30"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_kubelet_config_shutdown",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -971,7 +1047,7 @@ func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccContainerNodePool_withKubeletConfig(cluster, np, "dontexist", "", "", "", "100us", networkName, subnetworkName,"TRUE", "", "", "", false, true, 1024, 2, 70, 75),
+				Config:      testAccContainerNodePool_withKubeletConfig(cluster, np, "dontexist", "", "", "", "100us", networkName, subnetworkName,"TRUE", "", "", "", false, true, 1024, 2, 70, 75, "300s"),
 				ExpectError: regexp.MustCompile(`.*to be one of \["?static"? "?none"? "?"?\].*`),
 			},
 		},
@@ -1165,6 +1241,25 @@ func TestAccContainerNodePool_withWindowsNodeConfig(t *testing.T) {
 				ResourceName:      "google_container_node_pool.with_windows_node_config",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccContainerNodePool_withNodeImageConfig(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withNodeImageConfig(cluster, np, "test-cos-images", "test-image-project"),
+				ExpectError: regexp.MustCompile(`image 'test-cos-images' is not available in project 'test-image-project'`),
 			},
 		},
 	})
@@ -1422,7 +1517,7 @@ func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
 			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -1547,6 +1642,31 @@ func TestAccContainerNodePool_withGPU(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_withRDMA(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withRDMA(cluster, np, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np_with_gpudirect",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccContainerNodePool_withManagement(t *testing.T) {
 	t.Parallel()
 
@@ -1625,6 +1745,14 @@ func TestAccContainerNodePool_withNodeDrainConfig(t *testing.T) {
 				ResourceName:      "google_container_node_pool.np_with_node_drain_config",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_withPrivateNodeDrainConfig(cluster, nodePool, networkName, subnetworkName,  "pdb_timeout_duration", "300s"),
+        ExpectError: regexp.MustCompile(`node drain timeout is not enabled for this project`),
+			},
+			{
+				Config: testAccContainerNodePool_withPrivateNodeDrainConfig(cluster, nodePool, networkName, subnetworkName,  "grace_termination_duration", "300s"),
+        ExpectError: regexp.MustCompile(`node drain timeout is not enabled for this project`),
 			},
 		},
 	})
@@ -3876,6 +4004,55 @@ resource "google_container_node_pool" "with_reservation_affinity" {
 `, cluster, networkName, subnetworkName, reservation, np)
 }
 
+func testAccContainerNodePool_withReservationAffinityAnyReservationThenFail(cluster, reservation, np, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+
+resource "google_compute_reservation" "gce_reservation" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type     = "n1-standard-1"
+    }
+  }
+
+  specific_reservation_required = false
+}
+
+resource "google_container_node_pool" "with_reservation_affinity" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    machine_type    = "n1-standard-1"
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+    reservation_affinity {
+      consume_reservation_type = "ANY_RESERVATION_THEN_FAIL"
+    }
+  }
+}
+`, cluster, networkName, subnetworkName, reservation, np)
+}
+
 
 func testAccContainerNodePool_withWorkloadMetadataConfig(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
@@ -4042,7 +4219,7 @@ resource "google_container_node_pool" "with_sandbox_config" {
 `, cluster, networkName, subnetworkName, np)
 }
 
-func testAccContainerNodePool_withKubeletConfig(cluster, np, policy, memoryManagerPolicy, topologyManagerPolicy, topologyManagerScope, period, networkName, subnetworkName, insecureKubeletReadonlyPortEnabled, containerLogMaxSize, imageMinimumGcAge, imageMaximumGcAge string, quota, singleProcessOomKill bool, podPidsLimit, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent int) string {
+func testAccContainerNodePool_withKubeletConfig(cluster, np, policy, memoryManagerPolicy, topologyManagerPolicy, topologyManagerScope, period, networkName, subnetworkName, insecureKubeletReadonlyPortEnabled, containerLogMaxSize, imageMinimumGcAge, imageMaximumGcAge string, quota, singleProcessOomKill bool, podPidsLimit, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent int, maxContainerRestart string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
@@ -4070,13 +4247,13 @@ resource "google_container_node_pool" "with_kubelet_config" {
     image_type = "COS_CONTAINERD"
     kubelet_config {
       cpu_manager_policy                     = %q
-	  memory_manager  {
-	    policy = %q
-	  }
-	  topology_manager {
-	    policy = %q
-	    scope = %q
-	  }
+      memory_manager  {
+        policy = %q
+      }
+      topology_manager {
+        policy = %q
+        scope = %q
+      }
       cpu_cfs_quota                          = %v
       cpu_cfs_quota_period                   = %q
       insecure_kubelet_readonly_port_enabled = "%s"
@@ -4093,7 +4270,7 @@ resource "google_container_node_pool" "with_kubelet_config" {
       eviction_max_pod_grace_period_seconds  = 200
       eviction_soft {
         memory_available = "100Mi"
-	nodefs_available = "50%%"
+        nodefs_available = "50%%"
         nodefs_inodes_free = "40%%"
         imagefs_available = "30%%"
         imagefs_inodes_free = "20%%"
@@ -4101,7 +4278,7 @@ resource "google_container_node_pool" "with_kubelet_config" {
       }
       eviction_soft_grace_period {
         memory_available = "5m"
-	nodefs_available = "4m30s"
+        nodefs_available = "4m30s"
         nodefs_inodes_free = "3.6m"
         imagefs_available = "100s"
         imagefs_inodes_free = "2m"
@@ -4115,6 +4292,9 @@ resource "google_container_node_pool" "with_kubelet_config" {
         imagefs_inodes_free = "9%%"
         pid_available = "5%%"
       }
+			crash_loop_back_off {
+				max_container_restart_period = "%s"
+			}
     }
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
@@ -4123,7 +4303,41 @@ resource "google_container_node_pool" "with_kubelet_config" {
     logging_variant = "DEFAULT"
   }
 }
-`, cluster, networkName, subnetworkName, np, policy, memoryManagerPolicy, topologyManagerPolicy, topologyManagerScope, quota, period, insecureKubeletReadonlyPortEnabled, podPidsLimit, containerLogMaxSize, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent, imageMinimumGcAge, imageMaximumGcAge, singleProcessOomKill)
+`, cluster, networkName, subnetworkName, np, policy, memoryManagerPolicy, topologyManagerPolicy, topologyManagerScope, quota, period, insecureKubeletReadonlyPortEnabled, podPidsLimit, containerLogMaxSize, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent, imageMinimumGcAge, imageMaximumGcAge, singleProcessOomKill, maxContainerRestart)
+}
+
+func testAccContainerNodePool_withKubeletConfigShutdownGracePeriod(cluster, np, networkName, subnetworkName string, shutdownGracePeriodSeconds, shutdownGracePeriodCriticalPodsSeconds int) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+
+resource "google_container_node_pool" "with_kubelet_config_shutdown" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    machine_type       = "c4-standard-2"
+    image_type = "COS_CONTAINERD"
+    spot = true
+    kubelet_config {
+      shutdown_grace_period_seconds = %d
+      shutdown_grace_period_critical_pods_seconds = %d
+    }
+  }
+}
+`, cluster, networkName, subnetworkName, np, shutdownGracePeriodSeconds, shutdownGracePeriodCriticalPodsSeconds)
 }
 
 func testAccContainerNodePool_withLinuxNodeConfig(cluster, np, tcpMem, networkName, subnetworkName string) string {
@@ -4287,6 +4501,42 @@ resource "google_container_node_pool" "with_windows_node_config" {
   }
 }
 `, cluster, np, osversion)
+}
+
+func testAccContainerNodePool_withNodeImageConfig(cluster, np, imageName, imageProject string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  min_master_version  = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
+  networking_mode     = "VPC_NATIVE"
+  ip_allocation_policy {}
+}
+
+resource "google_container_node_pool" "with_node_image_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    image_type = "CUSTOM_CONTAINERD"
+    node_image_config {
+		  image = "%s"
+		  image_project = "%s"
+    }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, np, imageName, imageProject)
 }
 
 func testAccContainerNodePool_withCgroupMode(cluster, np, mode, networkName, subnetworkName string) string {
@@ -4654,6 +4904,51 @@ resource "google_container_node_pool" "with_upgrade_settings" {
 `, clusterName, networkName, subnetworkName, nodePoolName, upgradeSettings)
 }
 
+func testAccContainerNodePool_withRDMA(cluster, np, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1b" {
+  location = "us-central1-b"
+}
+
+resource "google_container_cluster" "cluster" {
+  name                = "%s"
+  location            = "us-central1-b"
+  min_master_version  = data.google_container_engine_versions.central1b.latest_master_version
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+  enable_multi_networking = true
+  datapath_provider       = "ADVANCED_DATAPATH"
+
+  initial_node_count       = 1
+  remove_default_node_pool = true
+}
+
+resource "google_container_node_pool" "np_with_gpudirect" {
+  name     = "%s"
+  location = "us-central1-b"
+  cluster  = google_container_cluster.cluster.name
+  network_config { accelerator_network_profile = "auto" }
+
+  node_config {
+    machine_type = "a3-ultragpu-8g"
+
+    guest_accelerator {
+		type  = "nvidia-h200-141gb"
+		count = 8
+   }
+
+   gpudirect_strategy = "RDMA"
+
+   ephemeral_storage_local_ssd_config {
+     local_ssd_count = 32
+     data_cache_count = 0
+   }
+  }
+}
+`, cluster, networkName, subnetworkName, np)
+}
+
 func testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1c" {
@@ -4762,6 +5057,34 @@ resource "google_container_node_pool" "np_with_node_drain_config" {
   }
 }
 `, cluster, networkName, subnetworkName, np)
+}
+
+func testAccContainerNodePool_withPrivateNodeDrainConfig(cluster, np, networkName, subnetworkName, privateName, privateVal string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+
+resource "google_container_node_pool" "np_with_node_drain_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_drain_config {
+    %s = "%s"
+  }
+}
+`, cluster, networkName, subnetworkName, np, privateName, privateVal)
 }
 
 func testAccContainerNodePool_withAccurateTimeConfig(cluster, np, networkName, subnetworkName string, enablePTP bool) string {
@@ -5579,7 +5902,7 @@ func TestAccContainerNodePool_withConfidentialBootDisk(t *testing.T) {
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
 			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -6035,9 +6358,6 @@ resource "google_container_node_pool" "np" {
 
 func TestAccContainerNodePool_writableCgroups(t *testing.T) {
 	t.Parallel()
-	// TODO(chrishenzie): Convert this to a negative test (expecting failure)
-	// once the API behavior change is fully rolled out.
-	t.Skip("Skipping due to API behavior change blocking writable cgroups modifications on node pools")
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	nodepool := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
@@ -6060,22 +6380,7 @@ func TestAccContainerNodePool_writableCgroups(t *testing.T) {
 					),
 				),
 			},
-			// Test disabling writable_cgroups on a node pool.
-			{
-				Config: testAccContainerNodePool_writableCgroupsDisabled(cluster, nodepool, networkName, subnetworkName),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						acctest.ExpectNoDelete(),
-					},
-				},
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_container_node_pool.np",
-						"node_config.0.containerd_config.0.writable_cgroups.0.enabled",
-						"false",
-					),
-				),
-			},
+
 		},
 	})
 }
@@ -6114,39 +6419,6 @@ resource "google_container_node_pool" "np" {
 `, cluster, network, subnetwork, nodepool)
 }
 
-func testAccContainerNodePool_writableCgroupsDisabled(cluster, nodepool, network, subnetwork string) string {
-	return fmt.Sprintf(`
-data "google_container_engine_versions" "central1a" {
-  location = "us-central1-a"
-}
-
-resource "google_container_cluster" "primary" {
-  name                = "%s"
-  location            = "us-central1-a"
-  initial_node_count  = 1
-  min_master_version  = data.google_container_engine_versions.central1a.release_channel_latest_version["RAPID"]
-  network             = "%s"
-  subnetwork          = "%s"
-  deletion_protection = false
-}
-
-resource "google_container_node_pool" "np" {
-  name               = "%s"
-  location           = "us-central1-a"
-  cluster            = google_container_cluster.primary.name
-  initial_node_count = 1
-
-  node_config {
-    image_type   = "COS_CONTAINERD"
-    containerd_config {
-      writable_cgroups {
-        enabled = false
-      }
-    }
-  }
-}
-`, cluster, network, subnetwork, nodepool)
-}
 
 func TestAccContainerNodePool_registryHosts(t *testing.T) {
 	t.Parallel()
@@ -6886,4 +7158,219 @@ func TestAccContainerNodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) 
 			},
 		},
 	})
+}
+
+func TestAccContainerNodePool_ignoreNodeCountChanges(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", suffix)
+	poolName := fmt.Sprintf("tf-test-pool-%s", suffix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_ignoreNodeCountChanges(suffix, clusterName, poolName, 2, true),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_count", "2"),
+				),
+			},
+			{
+				PreConfig: func() { testAccResizeNodePoolExternally(t, clusterName, poolName, 3) },
+				Config: testAccContainerNodePool_ignoreNodeCountChanges(suffix, clusterName, poolName, 2, true),
+				PlanOnly: true,
+			},
+			{
+				// Step 3: Flip ignore_node_count_changes to false and set node_count = 3 (matching GKE cloud state).
+				// This registers the flag update and aligns HCL with the actual GKE size.
+				Config: testAccContainerNodePool_ignoreNodeCountChanges(suffix, clusterName, poolName, 3, false),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_count", "3"),
+				),
+			},
+			{
+				// Step 4: Now that drift detection is active (flag is false in state), set node_count = 2.
+				// This detects the difference (3 -> 2) and resizes the GKE Node Pool back to 2.
+				Config: testAccContainerNodePool_ignoreNodeCountChanges(suffix, clusterName, poolName, 2, false),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_count", "2"),
+				),
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_ignoreNodeCountChanges(suffix, clusterName, poolName string, count int, ignoreChanges bool) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "custom" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "custom" {
+  name          = "tf-test-subnet-%s"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.custom.id
+
+  secondary_ip_range {
+    range_name    = "pods"
+    ip_cidr_range = "10.1.0.0/16"
+  }
+
+  secondary_ip_range {
+    range_name    = "services"
+    ip_cidr_range = "10.2.0.0/20"
+  }
+}
+
+resource "google_container_cluster" "cluster" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  network             = google_compute_network.custom.id
+  subnetwork          = google_compute_subnetwork.custom.id
+  deletion_protection = false
+
+  ip_allocation_policy {
+    cluster_secondary_range_name  = "pods"
+    services_secondary_range_name = "services"
+  }
+
+  remove_default_node_pool = true
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  node_count         = %d
+  ignore_node_count_changes = %t
+
+  node_config {
+    preemptible  = true
+    machine_type = "e2-medium"
+  }
+}
+`, suffix, suffix, clusterName, poolName, count, ignoreChanges)
+}
+
+func testAccResizeNodePoolExternally(t *testing.T, clusterName, poolName string, size int64) {
+	config := acctest.GoogleProviderConfig(t)
+	userAgent := "terraform-provider-google-test"
+	location := "us-central1-a"
+	fqName := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", 
+		config.Project, location, clusterName, poolName)
+	
+	req := &gke.SetNodePoolSizeRequest{
+		NodeCount: size,
+	}
+	
+	gkeClient := container.NewClient(config, userAgent)
+	op, err := gkeClient.Projects.Locations.Clusters.NodePools.SetSize(fqName, req).Do()
+	if err != nil {
+		t.Fatalf("Failed to resize node pool externally: %s", err)
+	}
+	
+	err = container.ContainerOperationWait(config, op, config.Project, location, "resizing node pool externally", userAgent, 20 * time.Minute)
+	if err != nil {
+		t.Fatalf("Failed waiting for external GKE resize operation: %s", err)
+	}
+}
+
+func TestAccContainerNodePool_withTaintConfig(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Default enum value means adding arm taint to nodes (same as ARM)
+			{
+				Config: testAccContainerNodePool_withTaintConfig(cluster, np, networkName, subnetworkName, "ARCHITECTURE_TAINT_BEHAVIOR_UNSPECIFIED"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.taint_config.0.architecture_taint_behavior", "ARCHITECTURE_TAINT_BEHAVIOR_UNSPECIFIED"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.effective_taints.#", "1"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.effective_taints.0.key", "kubernetes.io/arch"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.effective_taints.0.value", "arm64"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.effective_taints.0.effect", "NO_SCHEDULE"),
+				),
+			},
+			// NONE variant means no architecture taint will be applied
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_withTaintConfig(cluster, np, networkName, subnetworkName, "NONE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.taint_config.0.architecture_taint_behavior", "NONE"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.effective_taints.#", "0"),
+				),
+			},
+			// ARM is a default behavior right now, same as ARCHITECTURE_TAINT_BEHAVIOR_UNSPECIFIED
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_withTaintConfig(cluster, np, networkName, subnetworkName, "ARM"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.taint_config.0.architecture_taint_behavior", "ARM"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.effective_taints.#", "1"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.effective_taints.0.key", "kubernetes.io/arch"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.effective_taints.0.value", "arm64"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.effective_taints.0.effect", "NO_SCHEDULE"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_withTaintConfig(cluster, np, networkName, subnetworkName, behavior string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  deletion_protection = false
+  network            = "%s"
+  subnetwork         = "%s"
+  min_master_version  = data.google_container_engine_versions.central1a.release_channel_latest_version["RAPID"]
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+
+  node_config {
+    machine_type = "n4a-standard-2"
+    taint_config {
+      architecture_taint_behavior = "%s"
+    }
+  }
+}
+`, cluster, networkName, subnetworkName, np, behavior)
 }

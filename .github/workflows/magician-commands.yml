@@ -17,14 +17,18 @@ jobs:
     steps:
       - name: Check for magician invocation
         id: read-comment
-        uses: actions-ecosystem/action-regex-match@d50fd2e7a37d0e617aea3d7ada663bd56862b9cc # v2.0.2
-        with:
-          text: ${{ github.event.comment.body }}
-          regex: '.*@modular-magician .*'
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if [[ "$COMMENT_BODY" =~ .*@modular-magician\ .* ]]; then
+            echo "match=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "match=" >> "$GITHUB_OUTPUT"
+          fi
       
       - name: Checkout Repository
         if: steps.read-comment.outputs.match != ''
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: main
       

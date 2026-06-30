@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Cluster'
-description: 'A managed alloydb cluster.'
+name: Cluster
+description: A managed alloydb cluster.
 references:
   guides:
-    'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
-  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters/create'
+    AlloyDB: https://cloud.google.com/alloydb/docs/
+  api: https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters/create
 docs:
   note: |
     Users can promote a secondary cluster to a primary cluster with the help of `cluster_type`.
@@ -30,113 +30,126 @@ docs:
       1. Refresh the state of the AlloyDB resources by running `terraform apply -refresh-only --auto-approve` .
       2. Manually update the terraform configuration file(s) to match the actual state of the resources by modifying the `cluster_type` and `secondary_config` fields.
       3. Verify the sync of terraform state by running `terraform plan` and ensure that the infrastructure matches the configuration and no changes are required.
-base_url: 'projects/{{project}}/locations/{{location}}/clusters'
-self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
-mutex: 'projects/{{project}}'
-create_url: 'projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/clusters
+self_link: projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
+create_url: projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
+  - projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
   - '{{cluster_id}}'
 timeouts:
   insert_minutes: 120
   update_minutes: 120
   delete_minutes: 120
-autogen_async: true
+mutex: projects/{{project}}
+# Skipping the sweeper because we need to force-delete clusters.
+exclude_sweeper: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
-    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 120
       update_minutes: 120
       delete_minutes: 120
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
-custom_code:
-  pre_create: 'templates/terraform/pre_create/alloydb_cluster.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/alloydb_cluster.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/alloydb_cluster.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_tpgcompute_servicenetworking.go.tmpl'
-deletion_policy_default: "DEFAULT"
 deletion_policy_custom_docs: true
-# Skipping the sweeper because we need to force-delete clusters.
-exclude_sweeper: true
+deletion_policy_default: DEFAULT
+autogen_async: true
 include_in_tgc_next: true
-examples:
-  - name: 'alloydb_cluster_basic'
-    primary_resource_id: 'default'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'alloydb_cluster_before_upgrade'
-    primary_resource_id: 'default'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "alloydb-1")'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'alloydb_cluster_after_upgrade'
-    primary_resource_id: 'default'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "alloydb-1")'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'alloydb_cluster_full'
-    primary_resource_id: 'full'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster-full'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'alloydb_cluster_restore'
-    primary_resource_id: 'source'
-    vars:
-      alloydb_cluster_name: 'alloydb-source-cluster'
-      alloydb_backup_restored_cluster_name: 'alloydb-backup-restored'
-      alloydb_pitr_restored_cluster_name: 'alloydb-pitr-restored'
-      alloydb_backup_id: 'alloydb-backup'
-      alloydb_instance_name: 'alloydb-instance'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'tpgcompute.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
-    ignore_read_extra:
-      - 'deletion_protection'
-      - 'reconciling'
-      - 'update_time'
+custom_code:
+  pre_create: templates/terraform/pre_create/alloydb_cluster.go.tmpl
+  pre_update: templates/terraform/pre_update/alloydb_cluster.go.tmpl
+  pre_delete: templates/terraform/pre_delete/alloydb_cluster.go.tmpl
+samples:
+  - name: alloydb_cluster_basic
+    primary_resource_id: default
+    steps:
+      - name: alloydb_cluster_basic
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster
+        ignore_read_extra:
+          - deletion_protection
+  - name: alloydb_cluster_before_upgrade
+    primary_resource_id: default
+    steps:
+      - name: alloydb_cluster_before_upgrade
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster
+          alloydb_instance_name: alloydb-instance
+          network_name: alloydb-network
+        test_vars_overrides:
+          network_name: compute.BootstrapSharedTestNetwork(t, "alloydb-1")
+        ignore_read_extra:
+          - deletion_protection
+  - name: alloydb_cluster_after_upgrade
+    primary_resource_id: default
+    steps:
+      - name: alloydb_cluster_after_upgrade
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster
+          alloydb_instance_name: alloydb-instance
+          network_name: alloydb-network
+        test_vars_overrides:
+          network_name: compute.BootstrapSharedTestNetwork(t, "alloydb-1")
+        ignore_read_extra:
+          - deletion_protection
+  - name: alloydb_cluster_full
+    primary_resource_id: full
+    steps:
+      - name: alloydb_cluster_full
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-cluster-full
+        ignore_read_extra:
+          - deletion_protection
+  - name: alloydb_cluster_restore
+    primary_resource_id: source
     exclude_test: true
-  - name: 'alloydb_secondary_cluster_basic'
-    primary_resource_id: 'secondary'
-    vars:
-      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
-      alloydb_primary_instance_name: 'alloydb-primary-instance'
-      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: alloydb_cluster_restore
+        resource_id_vars:
+          alloydb_cluster_name: alloydb-source-cluster
+          alloydb_backup_restored_cluster_name: alloydb-backup-restored
+          alloydb_pitr_restored_cluster_name: alloydb-pitr-restored
+          alloydb_backup_id: alloydb-backup
+          alloydb_instance_name: alloydb-instance
+          network_name: alloydb-network
+        test_vars_overrides:
+          network_name: compute.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")
+        ignore_read_extra:
+          - deletion_protection
+          - reconciling
+          - update_time
+  - name: alloydb_secondary_cluster_basic
+    primary_resource_id: secondary
     exclude_test: true
-  - name: 'alloydb_secondary_cluster_basic_test'
-    primary_resource_id: 'secondary'
-    vars:
-      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
-      alloydb_primary_instance_name: 'alloydb-primary-instance'
-      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-    ignore_read_extra:
-      - 'deletion_protection'
-    exclude_docs: true
+    steps:
+      - name: alloydb_secondary_cluster_basic
+        resource_id_vars:
+          alloydb_primary_cluster_name: alloydb-primary-cluster
+          alloydb_primary_instance_name: alloydb-primary-instance
+          alloydb_secondary_cluster_name: alloydb-secondary-cluster
+        ignore_read_extra:
+          - deletion_protection
+  - name: alloydb_secondary_cluster_basic_test
+    primary_resource_id: secondary
+    exclude_basic_doc: true
+    steps:
+      - name: alloydb_secondary_cluster_basic_test
+        resource_id_vars:
+          alloydb_primary_cluster_name: alloydb-primary-cluster
+          alloydb_primary_instance_name: alloydb-primary-instance
+          alloydb_secondary_cluster_name: alloydb-secondary-cluster
+          network_name: alloydb-network
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+        ignore_read_extra:
+          - deletion_protection
 virtual_fields:
-  - name: 'deletion_policy'
+  - name: deletion_policy
     description: |
       Policy to determine if the cluster should be deleted forcefully.
       Deleting a cluster forcefully, deletes the cluster and all its associated instances within the cluster.
@@ -150,9 +163,9 @@ virtual_fields:
 
       Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE
     type: String
-    #excluded from generation due to Universal Deletion Policy
+    # excluded from generation due to Universal Deletion Policy
     exclude: true
-  - name: 'deletion_protection'
+  - name: deletion_protection
     description: |
       Whether Terraform will be prevented from destroying the cluster.
       When the field is set to true or unset in Terraform state, a `terraform apply`
@@ -160,7 +173,7 @@ virtual_fields:
       When the field is set to false, deleting the cluster is allowed.
     type: Boolean
     default_value: true
-  - name: 'skip_await_major_version_upgrade'
+  - name: skip_await_major_version_upgrade
     type: Boolean
     default_value: true
     description: |
@@ -168,14 +181,14 @@ virtual_fields:
       Possible values: true, false
       Default value: "true"
 parameters:
-  - name: 'clusterId'
+  - name: clusterId
     type: String
     description: |
       The ID of the alloydb cluster.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location where the alloydb cluster should reside.
@@ -183,168 +196,168 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the cluster resource.
     output: true
-  - name: 'uid'
+  - name: uid
     type: String
     description: |
       The system-generated UID of the resource.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: 'User-defined labels for the alloydb cluster.'
-  - name: 'encryptionConfig'
+    description: User-defined labels for the alloydb cluster.
+  - name: encryptionConfig
     type: NestedObject
     description: |
       EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
     properties:
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
         immutable: true
-  - name: 'encryptionInfo'
+  - name: encryptionInfo
     type: NestedObject
     description: |
       EncryptionInfo describes the encryption information of a cluster or a backup.
     output: true
     properties:
-      - name: 'encryptionType'
+      - name: encryptionType
         type: Enum
-        description: 'Output only. Type of encryption.'
+        description: Output only. Type of encryption.
         output: true
         enum_values:
-          - 'TYPE_UNSPECIFIED'
-          - 'GOOGLE_DEFAULT_ENCRYPTION'
-          - 'CUSTOMER_MANAGED_ENCRYPTION'
-      - name: 'kmsKeyVersions'
+          - TYPE_UNSPECIFIED
+          - GOOGLE_DEFAULT_ENCRYPTION
+          - CUSTOMER_MANAGED_ENCRYPTION
+      - name: kmsKeyVersions
         type: Array
         description: |
           Output only. Cloud KMS key versions that are being used to protect the database or the backup.
         output: true
         item_type:
           type: String
-  - name: 'continuousBackupInfo'
+  - name: continuousBackupInfo
     type: NestedObject
     description: |
       ContinuousBackupInfo describes the continuous backup properties of a cluster.
     output: true
     properties:
-      - name: 'enabledTime'
+      - name: enabledTime
         type: String
         description: |
           When ContinuousBackup was most recently enabled. Set to null if ContinuousBackup is not enabled.
         output: true
-      - name: 'schedule'
+      - name: schedule
         type: Array
         description: |
           Days of the week on which a continuous backup is taken. Output only field. Ignored if passed into the request.
         output: true
         item_type:
           type: String
-      - name: 'earliestRestorableTime'
+      - name: earliestRestorableTime
         type: String
         description: |
           The earliest restorable time that can be restored to. Output only field.
         output: true
-      - name: 'encryptionInfo'
+      - name: encryptionInfo
         type: NestedObject
         description: |
           Output only. The encryption information for the WALs and backups required for ContinuousBackup.
         output: true
         properties:
-          - name: 'encryptionType'
+          - name: encryptionType
             type: String
-            description: 'Output only. Type of encryption.'
+            description: Output only. Type of encryption.
             output: true
-          - name: 'kmsKeyVersions'
+          - name: kmsKeyVersions
             type: Array
             description: |
               Output only. Cloud KMS key versions that are being used to protect the database or the backup.
             output: true
             item_type:
               type: String
-  - name: 'networkConfig'
+  - name: networkConfig
     type: NestedObject
     description: |
       Metadata related to network configuration.
     default_from_api: true
     properties:
-      - name: 'network'
+      - name: network
         type: String
         description: |
           The resource link for the VPC network in which cluster resources are created and from which they are accessible via Private IP. The network must belong to the same project as the cluster.
           It is specified in the form: "projects/{projectNumber}/global/networks/{network_id}".
         exactly_one_of:
-          - 'network_config.0.network'
-          - 'psc_config.0.psc_enabled'
-        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - name: 'allocatedIpRange'
+          - network_config.0.network
+          - psc_config.0.psc_enabled
+        diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+      - name: allocatedIpRange
         type: String
         description: |
           The name of the allocated IP range for the private IP AlloyDB cluster. For example: "google-managed-services-default".
           If set, the instance IPs for this cluster will be created in the allocated range.
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       User-settable and human-readable display name for the Cluster.
-  - name: 'etag'
+  - name: etag
     type: String
-    description: 'For Resource freshness validation (https://google.aip.dev/154)'
-  - name: 'reconciling'
+    description: For Resource freshness validation (https://google.aip.dev/154)
+  - name: reconciling
     type: Boolean
     description: |
       Output only. Reconciling (https://google.aip.dev/128#reconciliation).
       Set to true if the current state of Cluster does not match the user's intended state, and the service is actively updating the resource to reconcile them.
       This can happen due to user-triggered updates or system actions like failover or maintenance.
     output: true
-  - name: 'state'
+  - name: state
     type: String
-    description: 'Output only. The current serving state of the cluster.'
+    description: Output only. The current serving state of the cluster.
     output: true
-  - name: 'annotations'
+  - name: annotations
     type: KeyValueAnnotations
     description: |
       Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels. https://google.aip.dev/128
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-  - name: 'databaseVersion'
+  - name: databaseVersion
     type: String
     description: |
       The database engine major version. This is an optional field and it's populated at the Cluster creation time.
       Note: Changing this field to a higer version results in upgrading the AlloyDB cluster which is an irreversible change.
     default_from_api: true
-  - name: 'pscConfig'
+  - name: pscConfig
     type: NestedObject
-    description: 'Configuration for Private Service Connect (PSC) for the cluster.'
+    description: Configuration for Private Service Connect (PSC) for the cluster.
     properties:
-      - name: 'pscEnabled'
+      - name: pscEnabled
         type: Boolean
-        description: 'Create an instance that allows connections from Private Service Connect endpoints to the instance.'
-      - name: 'serviceOwnedProjectNumber'
+        description: Create an instance that allows connections from Private Service Connect endpoints to the instance.
+      - name: serviceOwnedProjectNumber
         type: Integer
         description: |
           The project number that needs to be allowlisted on the network attachment to enable outbound connectivity, if the network attachment is configured to ACCEPT_MANUAL connections.
           In case the network attachment is configured to ACCEPT_AUTOMATIC, this project number does not need to be allowlisted explicitly.
         output: true
-  - name: 'initialUser'
+  - name: initialUser
     type: NestedObject
     description: |
       Initial user to setup during cluster creation. If unset for new Clusters, a postgres role with null password is created. You will need to create additional users or set the password in order to log in.
     ignore_read: true
-    custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl
     properties:
-      - name: 'user'
+      - name: user
         type: String
         description: |
           The database username.
         is_missing_in_cai: true
         at_least_one_of:
-          - 'initial_user.0.user'
-          - 'initial_user.0.password'
-      - name: 'password'
+          - initial_user.0.user
+          - initial_user.0.password
+      - name: password
         type: String
         description: |
           The initial password for the user.
@@ -352,9 +365,9 @@ properties:
         write_only: true
         is_missing_in_cai: true
         at_least_one_of:
-          - 'initial_user.0.user'
-          - 'initial_user.0.password'
-  - name: 'restoreBackupSource'
+          - initial_user.0.user
+          - initial_user.0.password
+  - name: restoreBackupSource
     type: NestedObject
     description: |
       The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source', 'restore_backupdr_backup_source' and 'restore_backupdr_pitr_source', they can't be set together.
@@ -365,13 +378,13 @@ properties:
       - restore_backupdr_backup_source
       - restore_backupdr_pitr_source
     properties:
-      - name: 'backupName'
+      - name: backupName
         type: String
         description: |
           The name of the backup that this cluster is restored from.
         required: true
         immutable: true
-  - name: 'restoreContinuousBackupSource'
+  - name: restoreContinuousBackupSource
     type: NestedObject
     description: |
       The source when restoring via point in time recovery (PITR). Conflicts with 'restore_backup_source', 'restore_backupdr_backup_source' and 'restore_backupdr_pitr_source', they can't be set together.
@@ -382,19 +395,19 @@ properties:
       - restore_backupdr_backup_source
       - restore_backupdr_pitr_source
     properties:
-      - name: 'cluster'
+      - name: cluster
         type: String
         description: |
           The name of the source cluster that this cluster is restored from.
         required: true
         immutable: true
-      - name: 'pointInTime'
+      - name: pointInTime
         type: String
         description: |
           The point in time that this cluster is restored to, in RFC 3339 format.
         required: true
         immutable: true
-  - name: 'restoreBackupdrBackupSource'
+  - name: restoreBackupdrBackupSource
     type: NestedObject
     description: |
       The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source',  'restore_backup_source' and 'restore_backupdr_pitr_source', they can't be set together.
@@ -405,16 +418,16 @@ properties:
       - restore_backup_source
       - restore_backupdr_pitr_source
     properties:
-      - name: 'backup'
+      - name: backup
         type: String
         description: |
           The name of the BackupDR backup that this cluster is restored from. It must be of the format "projects/[PROJECT]/locations/[LOCATION]/backupVaults/[VAULT_ID]/dataSources/[DATASOURCE_ID]/backups/[BACKUP_ID]"
         required: true
         immutable: true
-  - name: 'restoreBackupdrPitrSource'
+  - name: restoreBackupdrPitrSource
     type: NestedObject
     description: |
-       The BackupDR source used for point in time recovery. Conflicts with 'restore_backupdr_backup_source', 'restore_continuous_backup_source' and 'restore_backupdr_backup_source', they can't be set togeter.
+      The BackupDR source used for point in time recovery. Conflicts with 'restore_backupdr_backup_source', 'restore_continuous_backup_source' and 'restore_backupdr_backup_source', they can't be set togeter.
     immutable: true
     ignore_read: true
     conflicts:
@@ -422,19 +435,19 @@ properties:
       - restore_continuous_backup_source
       - restore_backupdr_backup_source
     properties:
-      - name: 'dataSource'
+      - name: dataSource
         type: String
         description: |
           The name of the BackupDR data source that this cluster is restore from. It must be of the format "projects/[PROJECT]/locations/[LOCATION]/backupVaults/[VAULT_ID]/dataSources/[DATASOURCE_ID]"
         required: true
         immutable: true
-      - name: 'pointInTime'
+      - name: pointInTime
         type: String
         description: |
           The point in time that this cluster is restored to, in RFC 3339 format.
         required: true
         immutable: true
-  - name: 'continuousBackupConfig'
+  - name: continuousBackupConfig
     type: NestedObject
     description: |
       The continuous backup config for this cluster.
@@ -442,35 +455,35 @@ properties:
       If no policy is provided then the default policy will be used. The default policy takes one backup a day and retains backups for 14 days.
     default_from_api: true
     properties:
-      - name: 'enabled'
+      - name: enabled
         type: Boolean
         description: |
           Whether continuous backup recovery is enabled. If not set, defaults to true.
         send_empty_value: true
         default_value: true
-      - name: 'recoveryWindowDays'
+      - name: recoveryWindowDays
         type: Integer
         description: |
           The numbers of days that are eligible to restore from using PITR. To support the entire recovery window, backups and logs are retained for one day more than the recovery window.
 
           If not set, defaults to 14 days.
         default_from_api: true
-      - name: 'encryptionConfig'
+      - name: encryptionConfig
         type: NestedObject
         description: |
           EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
         properties:
-          - name: 'kmsKeyName'
+          - name: kmsKeyName
             type: String
             description: |
               The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
-  - name: 'automatedBackupPolicy'
+  - name: automatedBackupPolicy
     type: NestedObject
     description: |
       The automated backup policy for this cluster. AutomatedBackupPolicy is disabled by default.
     default_from_api: true
     properties:
-      - name: 'backupWindow'
+      - name: backupWindow
         type: String
         description: |
           The length of the time window during which a backup can be taken. If a backup does not succeed within this time window, it will be canceled and considered failed.
@@ -479,158 +492,154 @@ properties:
 
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
         default_from_api: true
-      - name: 'location'
+      - name: location
         type: String
         description: |
           The location where the backup will be stored. Currently, the only supported option is to store the backup in the same region as the cluster.
         default_from_api: true
-      - name: 'labels'
+      - name: labels
         type: KeyValuePairs
-        description:
-          'Labels to apply to backups created using this configuration.'
-      - name: 'encryptionConfig'
+        description: Labels to apply to backups created using this configuration.
+      - name: encryptionConfig
         type: NestedObject
         description: |
           EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
         properties:
-          - name: 'kmsKeyName'
+          - name: kmsKeyName
             type: String
             description: |
               The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
-      - name: 'weeklySchedule'
+      - name: weeklySchedule
         type: NestedObject
-        description: 'Weekly schedule for the Backup.'
+        description: Weekly schedule for the Backup.
         default_from_api: true
         properties:
-          - name: 'daysOfWeek'
+          - name: daysOfWeek
             type: Array
-            description: 'The days of the week to perform a backup. At least one day of the week must be provided.'
+            description: The days of the week to perform a backup. At least one day of the week must be provided.
             item_type:
               type: Enum
-              description: 'The days of the week to perform a backup. At least one day of the week must be provided.'
+              description: The days of the week to perform a backup. At least one day of the week must be provided.
               enum_values:
-                - 'MONDAY'
-                - 'TUESDAY'
-                - 'WEDNESDAY'
-                - 'THURSDAY'
-                - 'FRIDAY'
-                - 'SATURDAY'
-                - 'SUNDAY'
+                - MONDAY
+                - TUESDAY
+                - WEDNESDAY
+                - THURSDAY
+                - FRIDAY
+                - SATURDAY
+                - SUNDAY
             min_size: 1
-          - name: 'startTimes'
+          - name: startTimes
             type: Array
             description: |
               The times during the day to start a backup. At least one start time must be provided. The start times are assumed to be in UTC and to be an exact hour (e.g., 04:00:00).
             required: true
-            custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_automated_backup_policy_start_times_flatten.go.tmpl'
+            custom_flatten: templates/terraform/custom_flatten/alloydb_cluster_input_automated_backup_policy_start_times_flatten.go.tmpl
             item_type:
               type: NestedObject
               properties:
-                - name: 'hours'
+                - name: hours
                   type: Integer
                   description: |
                     Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
-                - name: 'minutes'
+                - name: minutes
                   type: Integer
                   is_missing_in_cai: true
                   description: |
                     Minutes of hour of day. Currently, only the value 0 is supported.
-                - name: 'seconds'
+                - name: seconds
                   type: Integer
                   is_missing_in_cai: true
                   description: |
                     Seconds of minutes of the time. Currently, only the value 0 is supported.
-                - name: 'nanos'
+                - name: nanos
                   type: Integer
                   is_missing_in_cai: true
                   description: |
                     Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
-      - name: 'timeBasedRetention'
+      - name: timeBasedRetention
         type: NestedObject
         description: |
           Time-based Backup retention policy. Conflicts with 'quantity_based_retention', both can't be set together.
         conflicts:
           - automated_backup_policy.0.quantity_based_retention
         properties:
-          - name: 'retentionPeriod'
+          - name: retentionPeriod
             type: String
             description: |
               The retention period.
               A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
-      - name: 'quantityBasedRetention'
+      - name: quantityBasedRetention
         type: NestedObject
         description: |
           Quantity-based Backup retention policy to retain recent backups. Conflicts with 'time_based_retention', both can't be set together.
         conflicts:
           - automated_backup_policy.0.time_based_retention
         properties:
-          - name: 'count'
+          - name: count
             type: Integer
             description: |
               The number of backups to retain.
-      - name: 'enabled'
+      - name: enabled
         type: Boolean
         description: |
           Whether automated backups are enabled.
         default_from_api: true
-  - name: 'backupSource'
+  - name: backupSource
     type: NestedObject
-    description: 'Cluster created from backup.'
+    description: Cluster created from backup.
     output: true
     properties:
-      - name: 'backupName'
+      - name: backupName
         type: String
-        description: 'The name of the backup resource.'
-  - name: 'migrationSource'
+        description: The name of the backup resource.
+  - name: migrationSource
     type: NestedObject
-    description: 'Cluster created via DMS migration.'
+    description: Cluster created via DMS migration.
     output: true
     properties:
-      - name: 'hostPort'
+      - name: hostPort
         type: String
-        description:
-          'The host and port of the on-premises instance in host:port format'
-      - name: 'referenceId'
+        description: The host and port of the on-premises instance in host:port format
+      - name: referenceId
         type: String
-        description:
-          'Place holder for the external source identifier(e.g DMS job name)
-          that created the cluster.'
-      - name: 'sourceType'
+        description: Place holder for the external source identifier(e.g DMS job name) that created the cluster.
+      - name: sourceType
         type: String
-        description: 'Type of migration source.'
-  - name: 'backupdrBackupSource'
+        description: Type of migration source.
+  - name: backupdrBackupSource
     type: NestedObject
-    description: 'Cluster created from a BackupDR backup.'
+    description: Cluster created from a BackupDR backup.
     output: true
     properties:
-      - name: 'backup'
+      - name: backup
         type: String
-        description: 'The name of the BackupDR backup resource.'
-  - name: 'clusterType'
+        description: The name of the BackupDR backup resource.
+  - name: clusterType
     type: Enum
     description: |
       The type of cluster. If not set, defaults to PRIMARY.
-    default_value: "PRIMARY"
+    default_value: PRIMARY
     enum_values:
-      - 'PRIMARY'
-      - 'SECONDARY'
-  - name: 'secondaryConfig'
+      - PRIMARY
+      - SECONDARY
+  - name: secondaryConfig
     type: NestedObject
     description: |
       Configuration of the secondary cluster for Cross Region Replication. This should be set if and only if the cluster is of type SECONDARY.
     properties:
-      - name: 'primaryClusterName'
+      - name: primaryClusterName
         type: String
         description: |
           Name of the primary cluster must be in the format
           'projects/{project}/locations/{location}/clusters/{cluster_id}'
         required: true
-  - name: 'maintenanceUpdatePolicy'
+  - name: maintenanceUpdatePolicy
     type: NestedObject
     description: |
       MaintenanceUpdatePolicy defines the policy for system updates.
     properties:
-      - name: 'maintenanceWindows'
+      - name: maintenanceWindows
         type: Array
         description: |
           Preferred windows to perform maintenance. Currently limited to 1.
@@ -639,84 +648,84 @@ properties:
             specifies a preferred day and time for maintenance.
           type: NestedObject
           properties:
-            - name: 'day'
+            - name: day
               type: Enum
               description: |
                 Preferred day of the week for maintenance, e.g. MONDAY, TUESDAY, etc.
               required: true
               enum_values:
-                - 'MONDAY'
-                - 'TUESDAY'
-                - 'WEDNESDAY'
-                - 'THURSDAY'
-                - 'FRIDAY'
-                - 'SATURDAY'
-                - 'SUNDAY'
-            - name: 'startTime'
+                - MONDAY
+                - TUESDAY
+                - WEDNESDAY
+                - THURSDAY
+                - FRIDAY
+                - SATURDAY
+                - SUNDAY
+            - name: startTime
               type: NestedObject
               description: |
                 Preferred time to start the maintenance operation on the specified day. Maintenance will start within 1 hour of this time.
               required: true
               properties:
-                - name: 'hours'
+                - name: hours
                   type: Integer
                   description: |
                     Hours of day in 24 hour format. Should be from 0 to 23.
                   required: true
                   send_empty_value: true
-                - name: 'minutes'
+                - name: minutes
                   type: Integer
                   description: |
                     Minutes of hour of day. Currently, only the value 0 is supported.
                   send_empty_value: true
-                - name: 'seconds'
+                - name: seconds
                   type: Integer
                   description: |
                     Seconds of minutes of the time. Currently, only the value 0 is supported.
                   send_empty_value: true
-                - name: 'nanos'
+                - name: nanos
                   type: Integer
                   description: |
                     Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
                   send_empty_value: true
-  - name: 'subscriptionType'
+  - name: subscriptionType
     type: Enum
     description: |
       The subscrition type of cluster.
     default_from_api: true
     enum_values:
-      - 'TRIAL'
-      - 'STANDARD'
-  - name: 'trialMetadata'
+      - TRIAL
+      - STANDARD
+  - name: trialMetadata
     type: NestedObject
     description: |
       Contains information and all metadata related to TRIAL clusters.
     output: true
     properties:
-      - name: 'startTime'
+      - name: startTime
         type: String
         description: |
           Start time of the trial cluster.
-      - name: 'endTime'
+      - name: endTime
         type: String
         description: |
           End time of the trial cluster.
-      - name: 'upgradeTime'
+      - name: upgradeTime
         type: String
         description: |
           Upgrade time of the trial cluster to standard cluster.
-      - name: 'graceEndTime'
+      - name: graceEndTime
         type: String
         description: |
           Grace end time of the trial cluster.
-  - name: 'dataplexConfig'
+  - name: dataplexConfig
     type: NestedObject
     description: |
       Configuration for Dataplex integration. This is an optional field. If not set, Dataplex integration will be enabled by default.
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_dataplex_config.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/alloydb_cluster_dataplex_config.go.tmpl
     properties:
-      - name: 'enabled'
+      - name: enabled
         type: Boolean
         description: |
           Indicates whether Dataplex integration is enabled for the cluster.

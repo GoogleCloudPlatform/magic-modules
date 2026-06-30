@@ -34,68 +34,75 @@ autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_user.go.tmpl'
   pre_update: 'templates/terraform/pre_update/alloydb_user.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 # exluding resource_identity due to custom_import
 exclude_identity_generation: true
-examples:
+samples:
   - name: 'alloydb_user_builtin'
     primary_resource_id: 'user1'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_user_name: 'user1'
-      alloydb_user_pass: 'user_secret'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      # for backward compatible
-      alloydb_user_name: '"user1" + randomSuffix'
-    ignore_read_extra:
-      - 'password'
     exclude_test: true
+    steps:
+      - name: 'alloydb_user_builtin'
+        resource_id_vars:
+          alloydb_cluster_name: 'alloydb-cluster'
+          alloydb_cluster_pass: 'cluster_secret'
+          alloydb_instance_name: 'alloydb-instance'
+          alloydb_user_name: 'user1'
+          alloydb_user_pass: 'user_secret'
+          network_name: 'alloydb-network'
+        test_vars_overrides:
+          # for backward compatible
+          alloydb_user_name: '"user1" + randomSuffix'
+        ignore_read_extra:
+          - 'password'
   - name: 'alloydb_user_builtin_test'
     primary_resource_id: 'user1'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_user_name: 'user1'
-      alloydb_user_pass: 'user_secret'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-      # for backward compatible
-      alloydb_user_name: '"user1" + randomSuffix'
-    ignore_read_extra:
-      - 'password'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'alloydb_user_builtin_test'
+        resource_id_vars:
+          alloydb_cluster_name: 'alloydb-cluster'
+          alloydb_cluster_pass: 'cluster_secret'
+          alloydb_instance_name: 'alloydb-instance'
+          alloydb_user_name: 'user1'
+          alloydb_user_pass: 'user_secret'
+          network_name: 'alloydb-network'
+        test_vars_overrides:
+          'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+          # for backward compatible
+          alloydb_user_name: '"user1" + randomSuffix'
+        ignore_read_extra:
+          - 'password'
   - name: 'alloydb_user_iam'
     primary_resource_id: 'user2'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_user_name: 'user2@foo.com'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      # for backward compatible
-      alloydb_user_name: '"user2@foo.com" + randomSuffix'
     exclude_test: true
+    steps:
+      - name: 'alloydb_user_iam'
+        resource_id_vars:
+          alloydb_cluster_name: 'alloydb-cluster'
+          alloydb_instance_name: 'alloydb-instance'
+          alloydb_cluster_pass: 'cluster_secret'
+          alloydb_user_name: 'user2@foo.com'
+          network_name: 'alloydb-network'
+        test_vars_overrides:
+          # for backward compatible
+          alloydb_user_name: '"user2@foo.com" + randomSuffix'
   - name: 'alloydb_user_iam_test'
     primary_resource_id: 'user2'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_user_name: 'user2@foo.com'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-      # for backward compatible
-      alloydb_user_name: '"user2@foo.com" + randomSuffix'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'alloydb_user_iam_test'
+        resource_id_vars:
+          alloydb_cluster_name: 'alloydb-cluster'
+          alloydb_instance_name: 'alloydb-instance'
+          alloydb_cluster_pass: 'cluster_secret'
+          alloydb_user_name: 'user2@foo.com'
+          network_name: 'alloydb-network'
+        test_vars_overrides:
+          'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+          # for backward compatible
+          alloydb_user_name: '"user2@foo.com" + randomSuffix'
 parameters:
   - name: 'cluster'
     type: ResourceRef

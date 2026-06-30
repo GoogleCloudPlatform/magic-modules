@@ -37,25 +37,38 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
-examples:
+include_in_tgc_next: true
+samples:
   - name: network_management_connectivity_test_instances
     primary_resource_id: instance-test
-    vars:
-      dest_instance: dest-vm
-      network_name: conn-test-net
-      primary_resource_name: conn-test-instances
-      source_instance: source-vm
+    steps:
+      - name: network_management_connectivity_test_instances
+        resource_id_vars:
+          dest_instance: dest-vm
+          network_name: conn-test-net
+          primary_resource_name: conn-test-instances
+          source_instance: source-vm
   - name: network_management_connectivity_test_addresses
     primary_resource_id: address-test
-    vars:
-      dest_addr: dest-addr
-      network: connectivity-vpc
-      primary_resource_name: conn-test-addr
-      source_addr: src-addr
+    steps:
+      - name: network_management_connectivity_test_addresses
+        resource_id_vars:
+          dest_addr: dest-addr
+          network: connectivity-vpc
+          primary_resource_name: conn-test-addr
+          source_addr: src-addr
   - name: network_management_connectivity_test_endpoints
     primary_resource_id: endpoints-test
-    vars:
-      primary_resource_name: conn-test-endpoints
+    steps:
+      - name: network_management_connectivity_test_endpoints
+        resource_id_vars:
+          primary_resource_name: conn-test-endpoints
+  - name: network_management_connectivity_test_gke_pod
+    primary_resource_id: pod-test
+    steps:
+      - name: network_management_connectivity_test_gke_pod
+        resource_id_vars:
+          primary_resource_name: conn-test-pod
 properties:
   - name: name
     type: String
@@ -230,6 +243,16 @@ properties:
           2. When you are using Shared VPC and the IP address that you provide is
           from the service project. In this case, the network that the IP address
           resides in is defined in the host project.
+      - name: gkePod
+        type: String
+        description: A [GKE Pod](https://cloud.google.com/kubernetes-engine/docs/concepts/pod) URI.
+      - name: networkType
+        type: Enum
+        description: For source endpoints, type of the network where the endpoint is located. Not relevant for destination endpoints.
+        enum_values:
+          - GCP_NETWORK
+          - NON_GCP_NETWORK
+          - INTERNET
   - name: protocol
     type: String
     default_value: TCP

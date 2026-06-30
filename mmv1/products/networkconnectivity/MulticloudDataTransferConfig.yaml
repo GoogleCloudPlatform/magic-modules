@@ -12,122 +12,123 @@
 # limitations under the License.
 
 ---
-name: 'MulticloudDataTransferConfig'
+name: MulticloudDataTransferConfig
 description: |
   'Manage Multicloud Data Transfer Configs'
 references:
   guides:
-    'QUICKSTART_TITLE': 'https://docs.cloud.google.com/data-transfer-essentials/docs/create-resources'
-  api: 'https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.multicloudDataTransferConfigs'
-
-base_url: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs'
-self_link: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs/{{name}}'
-
-create_url: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs?multicloudDataTransferConfigId={{name}}'
-
-update_verb: 'PATCH'
+    QUICKSTART_TITLE: https://docs.cloud.google.com/data-transfer-essentials/docs/create-resources
+  api: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.multicloudDataTransferConfigs
+base_url: projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs
+self_link: projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs?multicloudDataTransferConfigId={{name}}
 update_mask: true
-
-autogen_async: true
+update_verb: PATCH
+sweeper:
+  url_substitutions:
+    - region: europe-west1
+    - region: europe-west2
+    - region: europe-west3
+    - region: europe-west4
 async:
   operation:
     base_url: '{{op_id}}'
-
-examples:
-  - name: "network_connectivity_multicloud_data_transfer_config_basic"
-    primary_resource_id: "example"
-    vars:
-      config_name: "basic_config"
-
+autogen_async: true
+samples:
+  - name: network_connectivity_multicloud_data_transfer_config_basic
+    primary_resource_id: example
+    steps:
+      - name: network_connectivity_multicloud_data_transfer_config_basic
+        resource_id_vars:
+          config_name: basic_config
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The location of the multicloud data transfer config.
-
 properties:
-  - name: 'name'
+  - name: name
     type: String
     required: true
     immutable: true
     ignore_read: true
     description: |
       The name of the MulticloudDataTransferConfig resource.
-  - name: 'createTime'
+  - name: createTime
     type: Time
     output: true
     description: |
       Time when the MulticloudDataTransferConfig resource was created.
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     output: true
     description: |
       Time when the MulticloudDataTransferConfig resource was updated.
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       User-defined labels.
-  - name: 'etag'
+  - name: etag
     type: Fingerprint
     output: true
     description: |
       The etag is computed by the server, and might be sent with update and
       delete requests so that the client has an up-to-date value before
       proceeding.
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A description of this resource.
-  - name: 'destinationsCount'
+  - name: destinationsCount
     type: Integer
     output: true
     description: |
       The number of Destination resources configured for the
       MulticloudDataTransferConfig resource.
-  - name: 'destinationsActiveCount'
+  - name: destinationsActiveCount
     type: Integer
     output: true
     description: |
       The number of Destination resources in use with the
       MulticloudDataTransferConfig resource.
-  - name: 'services'
+  - name: services
     type: Array
     is_set: true
     description: |
       Maps services to their current or planned states. Service names are keys,
       and the associated values describe the state of the service.
-    custom_flatten: 'templates/terraform/custom_flatten/network_connectivity_mcdt_services_state_timeline_flatten.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/network_connectivity_mcdt_services_state_timeline_expand.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/network_connectivity_mcdt_services_state_timeline_flatten.go.tmpl
+    custom_expand: templates/terraform/custom_expand/network_connectivity_mcdt_services_state_timeline_expand.go.tmpl
     item_type:
       type: NestedObject
       properties:
-        - name: 'service_name'
-          api_name: 'key'
+        - name: service_name
+          api_name: key
           type: String
           description: |
             The name of the service, like "big-query" or "cloud-storage".
             This corresponds to the map key in the API.
           required: true
-        - name: 'states'
-          api_name: 'value.states'
+        - name: states
+          api_name: value.states
           type: Array
-          description: 'The state and activation time details for the service.'
+          description: The state and activation time details for the service.
           output: true
           item_type:
             type: NestedObject
             properties:
-              - name: 'state'
+              - name: state
                 type: String
-                description: 'The state of the resource.'
+                description: The state of the resource.
                 output: true
-              - name: 'effectiveTime'
+              - name: effectiveTime
                 type: String
-                description: 'The time when the state becomes effective'
+                description: The time when the state becomes effective
                 output: true
-  - name: 'uid'
+  - name: uid
     type: String
     output: true
     description: |

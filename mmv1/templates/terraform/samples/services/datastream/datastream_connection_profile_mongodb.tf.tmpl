@@ -1,0 +1,25 @@
+resource "google_datastream_connection_profile" "default" {
+    display_name          = "Mongodb Source"
+    location              = "us-central1"
+    connection_profile_id = "{{index $.ResourceIdVars "source_connection_profile_id"}}"
+
+    mongodb_profile {
+        host_addresses = [
+          {
+            hostname = "mongodb-primary.example.com"
+            port     = 27017
+          }
+        ]
+
+        replica_set = "myReplicaSet"
+        username    = "mongoUser"
+        password    = "mongoPassword"
+
+        standard_connection_format {}
+
+        additional_options = {
+          readPreference     = "secondary"
+          readPreferenceTags = "nodeType:ANALYTICS"
+        }
+    }
+}
