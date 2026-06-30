@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -121,7 +122,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating params: %s", err)
 	}
 
-	metadata, err := resourceInstanceMetadataTyped(d)
+	metadataMap, err := resourceInstanceMetadata(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
@@ -183,7 +184,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Description:              d.Get("description").(string),
 		Disks:                    disks,
 		MachineType:              machineTypeUrl,
-		Metadata:                 metadata,
 		Name:                     d.Get("name").(string),
 		Zone:                     d.Get("zone").(string),
 		NetworkInterfaces:        networkInterfaces,
@@ -202,6 +202,15 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		ReservationAffinity:      reservationAffinity,
 		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
 		InstanceEncryptionKey:    instanceEncryptionKey,
+	}
+	if metadataMap != nil {
+		metadataBytes, err := json.Marshal(metadataMap)
+		if err != nil {
+			return nil, fmt.Errorf("Error encoding metadata: %s", err)
+		}
+		if err := json.Unmarshal(metadataBytes, &instance.Metadata); err != nil {
+			return nil, fmt.Errorf("Error converting metadata: %s", err)
+		}
 	}
 	if cic := expandConfidentialInstanceConfig(d); cic != nil {
 		instance.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{

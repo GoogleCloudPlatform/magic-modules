@@ -4,6 +4,9 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	{{- if ne $.TargetVersionName "ga" }}
+	"encoding/json"
+	{{- end }}
 	"errors"
 	"fmt"
 	"log"
@@ -1872,21 +1875,6 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		return nil, fmt.Errorf("Error creating params: %s", err)
 	}
 
-	metadata, err := resourceInstanceMetadataTyped(d)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating metadata: %s", err)
-	}
-
-	{{ if ne $.TargetVersionName `ga` -}}
-	partnerMetadataMap, err := resourceInstancePartnerMetadata(d)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating partner metadata: %s", err)
-	}
-	PartnerMetadata, err := convertPartnerMetadataToComputeTyped(partnerMetadataMap)
-	if err != nil {
-		return nil, fmt.Errorf("Error converting partner metadata: %s", err)
-	}
-	{{- end }}
 
 	networkInterfaces, err := expandNetworkInterfacesTyped(d, config)
 	if err != nil {
@@ -1944,10 +1932,6 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		Description:                d.Get("description").(string),
 		Disks:                      disks,
 		MachineType:                machineTypeUrl,
-		Metadata:                   metadata,
-		{{- if ne $.TargetVersionName "ga" }}
-		PartnerMetadata:            PartnerMetadata,
-		{{- end }}
 		Name:                       d.Get("name").(string),
 		NetworkInterfaces:          networkInterfaces,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
@@ -2128,6 +2112,26 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return fmt.Errorf("Error converting instance: %s", err)
 	}
+	metadataMap, err := resourceInstanceMetadata(d)
+	if err != nil {
+		return fmt.Errorf("Error creating metadata: %s", err)
+	}
+	if len(metadataMap) > 0 {
+		instanceBody["metadata"] = metadataMap
+	}
+	{{ if ne $.TargetVersionName `ga` -}}
+	partnerMetadataMap, err := resourceInstancePartnerMetadata(d)
+	if err != nil {
+		return fmt.Errorf("Error creating partner metadata: %s", err)
+	}
+	partnerMetadataConverted, err := convertPartnerMetadataToCompute(partnerMetadataMap)
+	if err != nil {
+		return fmt.Errorf("Error converting partner metadata: %s", err)
+	}
+	if len(partnerMetadataConverted) > 0 {
+		instanceBody["partnerMetadata"] = partnerMetadataConverted
+	}
+	{{- end }}
 	insertUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances")
 	if err != nil {
 		return fmt.Errorf("Error generating URL: %s", err)
@@ -2264,7 +2268,15 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compute.Instance, project, zone string, config *transport_tpg.Config) error {
-	if err := d.Set("metadata", flattenMetadataBeta(instance.Metadata)); err != nil {
+	var metadataMap map[string]interface{}
+	if instance.Metadata != nil {
+		var err error
+		metadataMap, err = tpgresource.ConvertToMap(instance.Metadata)
+		if err != nil {
+			return fmt.Errorf("Error converting metadata: %s", err)
+		}
+	}
+	if err := d.Set("metadata", flattenMetadataBeta(metadataMap)); err != nil {
 		return fmt.Errorf("Error setting metadata: %s", err)
 	}
 
@@ -2552,7 +2564,15 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compu
 
 	{{- if ne $.TargetVersionName `ga` }}
 	if instance.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instance.PartnerMetadata))
+		var partnerMetadataMap map[string]interface{}
+		partnerMetadataBytes, err := json.Marshal(instance.PartnerMetadata)
+		if err != nil {
+			return fmt.Errorf("Error marshaling partner metadata: %s", err)
+		}
+		if err = json.Unmarshal(partnerMetadataBytes, &partnerMetadataMap); err != nil {
+			return fmt.Errorf("Error converting partner metadata: %s", err)
+		}
+		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(partnerMetadataMap))
 		if err != nil {
 			return fmt.Errorf("Error parsing partner metadata: %s", err)
 		}

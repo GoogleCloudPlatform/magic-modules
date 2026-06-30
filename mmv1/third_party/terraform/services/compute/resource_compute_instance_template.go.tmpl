@@ -1670,7 +1670,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	metadata, err := resourceInstanceMetadataTyped(d)
+	metadataMap, err := resourceInstanceMetadata(d)
 	if err != nil {
 		return err
 	}
@@ -1679,7 +1679,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
-	PartnerMetadata, err := convertPartnerMetadataToComputeTyped(partnerMetadataMap)
+	partnerMetadataConverted, err := convertPartnerMetadataToCompute(partnerMetadataMap)
 	if err != nil {
 		return err
 	}
@@ -1734,10 +1734,6 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		MachineType:                d.Get("machine_type").(string),
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Disks:                      disks,
-		Metadata:                   metadata,
-		{{- if ne $.TargetVersionName "ga" }}
-		PartnerMetadata:            PartnerMetadata,
-		{{- end }}
 		NetworkInterfaces:          networks,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Scheduling:                 scheduling,
@@ -1809,6 +1805,18 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err := json.Unmarshal(itBytes, &itBody); err != nil {
 		return fmt.Errorf("Error unmarshaling instance template: %s", err)
 	}
+	if len(metadataMap) > 0 {
+		if props, ok := itBody["properties"].(map[string]interface{}); ok {
+			props["metadata"] = metadataMap
+		}
+	}
+	{{- if ne $.TargetVersionName "ga" }}
+	if len(partnerMetadataConverted) > 0 {
+		if props, ok := itBody["properties"].(map[string]interface{}); ok {
+			props["partnerMetadata"] = partnerMetadataConverted
+		}
+	}
+	{{- end }}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/instanceTemplates")
 	if err != nil {
@@ -2152,9 +2160,14 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
 		}
 
-		md := instanceTemplate.Properties.Metadata
-
-		_md := flattenMetadataBeta(md)
+		metadata := instanceTemplate.Properties.Metadata
+		var metadataMap map[string]interface{}
+		if metadata != nil {
+			if metadataMap, err = tpgresource.ConvertToMap(metadata); err != nil {
+				return fmt.Errorf("Error converting metadata: %s", err)
+			}
+		}
+		_md := flattenMetadataBeta(metadataMap)
 
 		if script, scriptExists := d.GetOk("metadata_startup_script"); scriptExists {
 			if err = d.Set("metadata_startup_script", script); err != nil {
@@ -2175,7 +2188,15 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 
 	{{ if ne $.TargetVersionName `ga` -}}
 	if instanceTemplate.Properties.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instanceTemplate.Properties.PartnerMetadata))
+		var partnerMetadataMap map[string]interface{}
+		partnerMetadataBytes, err := json.Marshal(instanceTemplate.Properties.PartnerMetadata)
+		if err != nil {
+			return fmt.Errorf("Error marshaling partner metadata: %s", err)
+		}
+		if err = json.Unmarshal(partnerMetadataBytes, &partnerMetadataMap); err != nil {
+			return fmt.Errorf("Error converting partner metadata: %s", err)
+		}
+		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(partnerMetadataMap))
 		if err != nil {
 			return fmt.Errorf("Error parsing partner metadata: %s", err)
 		}

@@ -1343,7 +1343,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	if err != nil {
 		return err
 	}
-	PartnerMetadata, err := convertPartnerMetadataToComputeTyped(partnerMetadataMap)
+	partnerMetadata, err := convertPartnerMetadataToCompute(partnerMetadataMap)
 	if err != nil {
 		return err
 	}
@@ -1421,16 +1421,8 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		instanceProperties["reservationAffinity"] = reservationAffinity
 	}
 	{{- if ne $.TargetVersionName "ga" }}
-	if len(PartnerMetadata) > 0 {
-		pmJSON, err := json.Marshal(PartnerMetadata)
-		if err != nil {
-			return fmt.Errorf("Error marshaling partner metadata: %s", err)
-		}
-		var pmIface interface{}
-		if err := json.Unmarshal(pmJSON, &pmIface); err != nil {
-			return fmt.Errorf("Error unmarshaling partner metadata: %s", err)
-		}
-		instanceProperties["partnerMetadata"] = pmIface
+	if len(partnerMetadata) > 0 {
+		instanceProperties["partnerMetadata"] = partnerMetadata
 	}
 	if dd := expandDisplayDevice(d); dd != nil {
 		ddMap, err := tpgresource.ConvertToMap(dd)
@@ -1573,9 +1565,15 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
 		}
 
-		md := instanceTemplate.Properties.Metadata
-
-		_md := flattenMetadataBeta(md)
+		metadata := instanceTemplate.Properties.Metadata
+		var metadataMap map[string]interface{}
+		if metadata != nil {
+			var convErr error
+			if metadataMap, convErr = tpgresource.ConvertToMap(metadata); convErr != nil {
+				return fmt.Errorf("Error converting metadata: %s", convErr)
+			}
+		}
+		_md := flattenMetadataBeta(metadataMap)
 
 		if script, scriptExists := d.GetOk("metadata_startup_script"); scriptExists {
 			if err = d.Set("metadata_startup_script", script); err != nil {
@@ -1596,7 +1594,15 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 
 	{{ if ne $.TargetVersionName `ga` -}}
 	if instanceTemplate.Properties.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instanceTemplate.Properties.PartnerMetadata))
+		var partnerMetadataMap map[string]interface{}
+		partnerMetadataBytes, err := json.Marshal(instanceTemplate.Properties.PartnerMetadata)
+		if err != nil {
+			return fmt.Errorf("Error marshaling partner metadata: %s", err)
+		}
+		if err = json.Unmarshal(partnerMetadataBytes, &partnerMetadataMap); err != nil {
+			return fmt.Errorf("Error converting partner metadata: %s", err)
+		}
+		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(partnerMetadataMap))
 		if err != nil {
 			return fmt.Errorf("Error parsing partner metadata: %s", err)
 		}

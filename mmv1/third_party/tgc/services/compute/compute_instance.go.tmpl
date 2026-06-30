@@ -129,7 +129,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
-	metadata, err := resourceInstanceMetadataTyped(d)
+	metadataMap, err := resourceInstanceMetadata(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
@@ -159,7 +159,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Description:             d.Get("description").(string),
 		Disks:                   disks,
 		MachineType:             machineTypeUrl,
-		Metadata:                metadata,
 		Name:                    d.Get("name").(string),
 		Zone:                    d.Get("zone").(string),
 		NetworkInterfaces:       networkInterfaces,
@@ -173,6 +172,11 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Hostname:                d.Get("hostname").(string),
 		ForceSendFields:         []string{"CanIpForward", "DeletionProtection"},
 		AdvancedMachineFeatures: expandAdvancedMachineFeaturesTyped(d),
+	}
+	if metadataMap != nil {
+		if err := tpgresource.Convert(metadataMap, &instance.Metadata); err != nil {
+			return nil, fmt.Errorf("Error converting metadata: %s", err)
+		}
 	}
 	if sicMap := expandShieldedVmConfigs(d); sicMap != nil {
 		instance.ShieldedInstanceConfig = &compute.ShieldedInstanceConfig{
