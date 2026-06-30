@@ -45,6 +45,10 @@ async:
   include_project: true
 autogen_status: UG9saWN5T3JjaGVzdHJhdG9yRm9yRm9sZGVy
 autogen_async: true
+custom_diff:
+  - policyOrchestratorForFolderCustomizeDiff
+custom_code:
+  constants: templates/terraform/constants/osconfigv2_policy_orchestrator_for_folder.go.tmpl
 samples:
   - name: osconfigv2_policy_orchestrator_for_folder_basic
     primary_resource_id: policy_orchestrator_for_folder
