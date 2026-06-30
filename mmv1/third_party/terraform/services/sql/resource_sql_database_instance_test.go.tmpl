@@ -296,6 +296,30 @@ func TestAccSqlDatabaseInstance_enforceNewSqlNetworkArchitecture(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_enforceNewSqlNetworkArchitectureError(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_enforceNewSqlNetworkArchitecture(instanceName, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "enforce_new_sql_network_architecture", "false"),
+				),
+			},
+			{
+				Config:      testAccSqlDatabaseInstance_enforceNewSqlNetworkArchitecture(instanceName, true),
+				ExpectError: regexp.MustCompile("enforce_new_sql_network_architecture can only be set during resource creation"),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 	t.Parallel()
 

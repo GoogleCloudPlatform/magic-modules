@@ -246,6 +246,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			nodeCountCustomDiff,
 			autoUpgradeEnabledCustomizeDiff,
 			activeDirectoryCustomizeDiff,
+			sqlNetworkArchitectureCustomizeDiff,
 			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
@@ -1689,6 +1690,13 @@ func sqlNetworkArchitectureDiffSuppress(k, old, new string, d *schema.ResourceDa
 	return old == "true" && new == "false"
 }
 
+func sqlNetworkArchitectureCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if d.Id() != "" && d.HasChange("enforce_new_sql_network_architecture") {
+		return fmt.Errorf("enforce_new_sql_network_architecture can only be set during resource creation")
+	}
+	return nil
+}
+
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -2670,29 +2678,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		})
 		if err != nil {
 			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
-		}
-		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
-		if err != nil {
-			return err
-		}
-		err = resourceSqlDatabaseInstanceRead(d, meta)
-		if err != nil {
-			return err
-		}
-	}
-
-	if d.HasChange("enforce_new_sql_network_architecture") && d.Get("enforce_new_sql_network_architecture").(bool) {
-		instance = &sqladmin.DatabaseInstance{SqlNetworkArchitecture: "NEW_NETWORK_ARCHITECTURE"}
-		err = transport_tpg.Retry(transport_tpg.RetryOptions{
-			RetryFunc: func() (rerr error) {
-				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
-				return rerr
-			},
-			Timeout:              d.Timeout(schema.TimeoutUpdate),
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
-		})
-		if err != nil {
-			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", d.Get("name").(string), err)
 		}
 		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
