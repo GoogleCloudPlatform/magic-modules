@@ -28,16 +28,20 @@ func TestAccDataSourceGoogleCloudBackupDRDataSource_basic(t *testing.T) {
 		"data_source_id": data_source_id,
 	}
 
-	stepChecks := func(wantName string, wantState string) []resource.TestCheckFunc {
+	stepChecks := func(wantName string, wantState string, wantConfigState string, wantBackupBlocked string) []resource.TestCheckFunc {
 		stepCheck := []resource.TestCheckFunc{
 			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "name", wantName),
 			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "state", wantState),
+			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "config_state", wantConfigState),
+			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "backup_blocked_by_vault_access_restriction", wantBackupBlocked),
 		}
 		return stepCheck
 	}
 	project := envvar.GetTestProjectFromEnv()
 	expectedName := fmt.Sprintf("projects/%s/locations/us-central1/backupVaults/bv-test/dataSources/%s", project, data_source_id)
 	expectedState := "ACTIVE"
+	expectedConfigState := "ACTIVE"
+	expectedBackupBlocked := "false"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -45,7 +49,7 @@ func TestAccDataSourceGoogleCloudBackupDRDataSource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleCloudBackupDRDataSource_basic(context),
-				Check:  resource.ComposeTestCheckFunc(stepChecks(expectedName, expectedState)...),
+				Check:  resource.ComposeTestCheckFunc(stepChecks(expectedName, expectedState, expectedConfigState, expectedBackupBlocked)...),
 			},
 		},
 	})
