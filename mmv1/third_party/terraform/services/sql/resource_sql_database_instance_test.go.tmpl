@@ -7249,24 +7249,6 @@ resource "google_sql_database_instance" "instance" {
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName string, projectId string) string {
 	return fmt.Sprintf(`
-resource "google_project_service" "dns" {
-  project            = "%s"
-  service            = "dns.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "networkconnectivity" {
-  project            = "%s"
-  service            = "networkconnectivity.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "servicenetworking" {
-  project            = "%s"
-  service            = "servicenetworking.googleapis.com"
-  disable_on_destroy = false
-}
-
 resource "google_project_service_identity" "gcp_sa_cloud_sql" {
   project    = "%s"
   service    = "sqladmin.googleapis.com"
@@ -7319,14 +7301,11 @@ resource "google_sql_database_instance" "instance" {
 	availability_type = "REGIONAL"
   }
   depends_on = [
-    google_project_service.dns,
-    google_project_service.networkconnectivity,
-    google_project_service.servicenetworking,
     google_project_iam_member.sa_consumer_network_admin,
     google_project_iam_member.sa_network_viewer,
   ]
 }
-`, projectId, projectId, projectId, projectId, projectId, projectId, projectId, projectId, instanceName, projectId)
+`, projectId, projectId, projectId, projectId, projectId, instanceName, projectId)
 }
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, projectId string, orgId string, billingAccount string) string {
