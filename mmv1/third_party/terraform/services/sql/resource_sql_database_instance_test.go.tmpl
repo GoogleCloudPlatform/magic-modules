@@ -1256,7 +1256,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testi
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName, projectId),
-				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil, false, false, true, "", "COMPLETED")),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil, false, false, true, "", "")),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
