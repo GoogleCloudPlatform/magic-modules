@@ -163,19 +163,23 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 
 	if v, ok := original["node_affinities"]; ok && v != nil {
 		naSet := v.(*schema.Set).List()
-		nodeAffinities := make([]interface{}, 0, len(naSet))
-		for _, nodeAffRaw := range naSet {
-			if nodeAffRaw == nil {
-				continue
+		if len(naSet) == 0 {
+			result["nodeAffinities"] = []interface{}{nil}
+		} else {
+			nodeAffinities := make([]interface{}, 0, len(naSet))
+			for _, nodeAffRaw := range naSet {
+				if nodeAffRaw == nil {
+					continue
+				}
+				nodeAff := nodeAffRaw.(map[string]interface{})
+				nodeAffinities = append(nodeAffinities, map[string]interface{}{
+					"key":      nodeAff["key"].(string),
+					"operator": nodeAff["operator"].(string),
+					"values":   tpgresource.ConvertStringArr(nodeAff["values"].(*schema.Set).List()),
+				})
 			}
-			nodeAff := nodeAffRaw.(map[string]interface{})
-			nodeAffinities = append(nodeAffinities, map[string]interface{}{
-				"key":      nodeAff["key"].(string),
-				"operator": nodeAff["operator"].(string),
-				"values":   tpgresource.ConvertStringArr(nodeAff["values"].(*schema.Set).List()),
-			})
+			result["nodeAffinities"] = nodeAffinities
 		}
-		result["nodeAffinities"] = nodeAffinities
 	}
 
 	if v, ok := original["min_node_cpus"]; ok && v.(int) != 0 {

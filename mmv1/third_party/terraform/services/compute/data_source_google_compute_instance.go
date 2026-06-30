@@ -1,7 +1,6 @@
 package compute
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -44,8 +43,9 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 
 	var metadataMap map[string]interface{}
 	if instance.Metadata != nil {
-		metaBytes, _ := json.Marshal(instance.Metadata)
-		_ = json.Unmarshal(metaBytes, &metadataMap)
+		if metadataMap, err = tpgresource.ConvertToMap(instance.Metadata); err != nil {
+			return fmt.Errorf("error converting metadata: %s", err)
+		}
 	}
 	md := flattenMetadataBeta(metadataMap)
 	if err = d.Set("metadata", md); err != nil {
