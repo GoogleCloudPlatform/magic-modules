@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 {{- end }}
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -1907,10 +1908,10 @@ func flattenRegionDisk(disk map[string]interface{}, configDisk map[string]any, d
 		if v, ok := initParams["diskName"]; ok { diskMap["disk_name"] = v }
 		if v, ok := initParams["labels"]; ok { diskMap["labels"] = v }
 
-		var diskSizeGb float64
-		if v, ok := disk["diskSizeGb"].(float64); ok { diskSizeGb = v }
-		var initDiskSizeGb float64
-		if v, ok := initParams["diskSizeGb"].(float64); ok { initDiskSizeGb = v }
+		var diskSizeGb int
+		if v, ok := disk["diskSizeGb"]; ok { diskSizeGb = parseInt(v) }
+		var initDiskSizeGb int
+		if v, ok := initParams["diskSizeGb"]; ok { initDiskSizeGb = parseInt(v) }
 		diskTypeStr, _ := disk["type"].(string)
 
 		if diskSizeGb == 0 && initDiskSizeGb == 0 && diskTypeStr == "SCRATCH" {
@@ -1972,7 +1973,7 @@ func flattenRegionScheduling(resp map[string]interface{}) []map[string]interface
 	schedulingMap := map[string]interface{}{}
 	if v, ok := resp["onHostMaintenance"]; ok { schedulingMap["on_host_maintenance"] = v }
 	if v, ok := resp["preemptible"]; ok { schedulingMap["preemptible"] = v }
-	if v, ok := resp["minNodeCpus"]; ok { schedulingMap["min_node_cpus"] = v }
+	if v, ok := resp["minNodeCpus"]; ok { schedulingMap["min_node_cpus"] = parseInt(v) }
 	if v, ok := resp["provisioningModel"]; ok { schedulingMap["provisioning_model"] = v }
 	if v, ok := resp["instanceTerminationAction"]; ok { schedulingMap["instance_termination_action"] = v }
 	if v, ok := resp["availabilityDomain"]; ok { schedulingMap["availability_domain"] = v }
@@ -1983,8 +1984,8 @@ func flattenRegionScheduling(resp map[string]interface{}) []map[string]interface
 		maxDur := maxDurRaw.(map[string]interface{})
 		schedulingMap["max_run_duration"] = []map[string]interface{}{
 			{
-				"seconds": maxDur["seconds"],
-				"nanos":   maxDur["nanos"],
+				"seconds": parseInt(maxDur["seconds"]),
+				"nanos":   parseInt(maxDur["nanos"]),
 			},
 		}
 	}
@@ -2002,8 +2003,8 @@ func flattenRegionScheduling(resp map[string]interface{}) []map[string]interface
 		timeout := timeoutRaw.(map[string]interface{})
 		schedulingMap["local_ssd_recovery_timeout"] = []map[string]interface{}{
 			{
-				"seconds": timeout["seconds"],
-				"nanos":   timeout["nanos"],
+				"seconds": parseInt(timeout["seconds"]),
+				"nanos":   parseInt(timeout["nanos"]),
 			},
 		}
 	}
@@ -2017,8 +2018,8 @@ func flattenRegionScheduling(resp map[string]interface{}) []map[string]interface
 			maxDur := maxDurRaw.(map[string]interface{})
 			graceMap["max_duration"] = []map[string]interface{}{
 				{
-					"seconds": maxDur["seconds"],
-					"nanos":   maxDur["nanos"],
+					"seconds": parseInt(maxDur["seconds"]),
+					"nanos":   parseInt(maxDur["nanos"]),
 				},
 			}
 		}
@@ -2029,8 +2030,8 @@ func flattenRegionScheduling(resp map[string]interface{}) []map[string]interface
 		pnd := pndRaw.(map[string]interface{})
 		schedulingMap["preemption_notice_duration"] = []map[string]interface{}{
 			{
-				"seconds": pnd["seconds"],
-				"nanos":   pnd["nanos"],
+				"seconds": parseInt(pnd["seconds"]),
+				"nanos":   parseInt(pnd["nanos"]),
 			},
 		}
 	}
@@ -2052,5 +2053,24 @@ func flattenRegionScheduling(resp map[string]interface{}) []map[string]interface
 	}
 
 	return []map[string]interface{}{schedulingMap}
+}
+
+func parseInt(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case string:
+		parsed, _ := strconv.Atoi(val)
+		return parsed
+	case float64:
+		return int(val)
+	case int:
+		return val
+	case int64:
+		return int(val)
+	default:
+		return 0
+	}
 }
 
