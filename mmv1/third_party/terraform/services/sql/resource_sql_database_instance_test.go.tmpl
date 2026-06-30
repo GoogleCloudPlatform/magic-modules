@@ -7281,10 +7281,9 @@ resource "google_project_iam_member" "sa_network_viewer" {
   member  = google_project_service_identity.gcp_sa_cloud_sql.member
 }
 
-resource "google_compute_network" "default" {
-  project                 = "%s"
-  name                    = "default"
-  auto_create_subnetworks = true
+data "google_compute_network" "default" {
+  project = "%s"
+  name    = "default"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -7300,7 +7299,7 @@ resource "google_sql_database_instance" "instance" {
 			psc_enabled = true
 			psc_auto_connection_policy_enabled = true
 			psc_auto_connections {
-				consumer_network = google_compute_network.default.id
+				consumer_network = data.google_compute_network.default.id
 			}
 		}
 		ipv4_enabled = false
