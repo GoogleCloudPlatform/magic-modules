@@ -30,7 +30,7 @@ description: |
   with state INACTIVE rather than reporting it as absent.
 references:
   guides:
-    'Configure semantic governance policies': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/configure-semantic-governance'
+    'Semantic governance overview': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/semantic-governance-overview'
 docs:
 min_version: 'beta'
 id_format: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
