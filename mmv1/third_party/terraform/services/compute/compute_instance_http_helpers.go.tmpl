@@ -1,0 +1,268 @@
+package compute
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+// FlattenAliasIpRangeHTTP replaces the legacy SDK-dependent flattenAliasIpRange.
+// It operates directly on API JSON response maps, allowing all direct-HTTP compute resources to share it.
+func FlattenAliasIpRangeHTTP(d *schema.ResourceData, ranges []interface{}, i int) []map[string]interface{} {
+	prefix := fmt.Sprintf("network_interface.%d", i)
+
+	configData := []map[string]interface{}{}
+	for _, item := range d.Get(prefix + ".alias_ip_range").([]interface{}) {
+		configData = append(configData, item.(map[string]interface{}))
+	}
+
+	apiData := make([]map[string]interface{}, 0, len(ranges))
+	for _, raw := range ranges {
+		ipRange, ok := raw.(map[string]interface{})
+		if !ok || ipRange == nil {
+			continue
+		}
+
+		ipCidrRange, _ := ipRange["ipCidrRange"].(string)
+		subnetworkRangeName, _ := ipRange["subnetworkRangeName"].(string)
+
+		apiData = append(apiData, map[string]interface{}{
+			"ip_cidr_range":         ipCidrRange,
+			"subnetwork_range_name": subnetworkRangeName,
+		})
+	}
+
+	// Preserve config ordering to prevent permadiffs
+	sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "ip_cidr_range")
+	if err != nil {
+		return apiData
+	}
+	return sorted
+}
+
+func FlattenDisksHTTP(disks []interface{}, d *schema.ResourceData, defaultProject string) ([]map[string]interface{}, error) {
+	apiDisks := make([]map[string]interface{}, len(disks))
+	for i, diskRaw := range disks {
+		disk := diskRaw.(map[string]interface{})
+		configDisk := d.Get(fmt.Sprintf("disk.%d", i)).(map[string]any)
+		apiDisk, err := FlattenDiskHTTP(disk, configDisk, defaultProject)
+		if err != nil {
+			return nil, err
+		}
+		apiDisks[i] = apiDisk
+	}
+	return reorderDisks(d.Get("disk").([]interface{}), apiDisks), nil
+}
+
+func FlattenDiskHTTP(disk map[string]interface{}, configDisk map[string]any, defaultProject string) (map[string]interface{}, error) {
+	diskMap := make(map[string]interface{})
+	diskMap["source_image_encryption_key"] = configDisk["source_image_encryption_key"]
+	diskMap["source_snapshot"] = configDisk["source_snapshot"]
+	diskMap["source_snapshot_encryption_key"] = configDisk["source_snapshot_encryption_key"]
+
+	if initParamsRaw, ok := disk["initializeParams"]; ok && initParamsRaw != nil {
+		initParams := initParamsRaw.(map[string]interface{})
+		if srcImg, ok := initParams["sourceImage"].(string); ok && srcImg != "" {
+			path, err := resolveImageRefToRelativeURI(defaultProject, srcImg)
+			if err != nil {
+				return nil, err
+			}
+			diskMap["source_image"] = path
+		} else {
+			diskMap["source_image"] = ""
+		}
+		if v, ok := initParams["diskType"]; ok { diskMap["disk_type"] = v }
+		if v, ok := initParams["provisionedIops"]; ok { diskMap["provisioned_iops"] = ParseIntHTTP(v) }
+		if v, ok := initParams["provisionedThroughput"]; ok { diskMap["provisioned_throughput"] = ParseIntHTTP(v) }
+		if v, ok := initParams["diskName"]; ok { diskMap["disk_name"] = v } else { diskMap["disk_name"] = "" }
+		if v, ok := initParams["labels"]; ok { diskMap["labels"] = v }
+
+		var diskSizeGb int
+		if v, ok := disk["diskSizeGb"]; ok { diskSizeGb = ParseIntHTTP(v) }
+		var initDiskSizeGb int
+		if v, ok := initParams["diskSizeGb"]; ok { initDiskSizeGb = ParseIntHTTP(v) }
+		diskTypeStr, _ := disk["type"].(string)
+
+		if diskSizeGb == 0 && initDiskSizeGb == 0 && diskTypeStr == "SCRATCH" {
+			diskMap["disk_size_gb"] = DEFAULT_SCRATCH_DISK_SIZE_GB
+		} else if diskSizeGb != 0 {
+			diskMap["disk_size_gb"] = diskSizeGb
+		} else {
+			diskMap["disk_size_gb"] = initDiskSizeGb
+		}
+
+		if v, ok := initParams["resourcePolicies"]; ok { diskMap["resource_policies"] = v }
+		if v, ok := initParams["resourceManagerTags"]; ok { diskMap["resource_manager_tags"] = v }
+		if sp, ok := initParams["storagePool"].(string); ok && sp != "" {
+			diskMap["storage_pool"] = tpgresource.GetResourceNameFromSelfLink(sp)
+		}
+	}
+
+	if encKeyRaw, ok := disk["diskEncryptionKey"]; ok && encKeyRaw != nil {
+		encKey := encKeyRaw.(map[string]interface{})
+		encryption := make([]map[string]interface{}, 1)
+		encryption[0] = make(map[string]interface{})
+		encryption[0]["kms_key_self_link"] = encKey["kmsKeyName"]
+		if diskEncryptionKey, ok := configDisk["disk_encryption_key"].([]interface{}); ok && len(diskEncryptionKey) > 0 {
+			if encryptionKeyMap, ok := diskEncryptionKey[0].(map[string]interface{}); ok {
+				if kmsSa, ok := encryptionKeyMap["kms_key_service_account"].(string); ok && kmsSa != "" {
+					encryption[0]["kms_key_service_account"] = kmsSa
+				}
+			}
+		}
+		diskMap["disk_encryption_key"] = encryption
+	}
+
+	var guestOsFeaturesSlice []interface{}
+	if gofRaw, ok := disk["guestOsFeatures"].([]interface{}); ok {
+		for _, fRaw := range gofRaw {
+			if f, ok := fRaw.(map[string]interface{}); ok {
+				if typ, ok := f["type"].(string); ok && typ != "" {
+					guestOsFeaturesSlice = append(guestOsFeaturesSlice, map[string]interface{}{"type": typ})
+				}
+			}
+		}
+	}
+	if v, ok := disk["autoDelete"]; ok { diskMap["auto_delete"] = v } else { diskMap["auto_delete"] = false }
+	if v, ok := disk["boot"]; ok { diskMap["boot"] = v } else { diskMap["boot"] = false }
+	if v, ok := disk["deviceName"]; ok { diskMap["device_name"] = v } else { diskMap["device_name"] = "" }
+	if v, ok := disk["interface"]; ok { diskMap["interface"] = v } else { diskMap["interface"] = "" }
+	if src, ok := disk["source"].(string); ok {
+		diskMap["source"] = tpgresource.ConvertSelfLinkToV1(src)
+	} else {
+		diskMap["source"] = ""
+	}
+	if v, ok := disk["mode"]; ok { diskMap["mode"] = v } else { diskMap["mode"] = "" }
+	if v, ok := disk["type"]; ok { diskMap["type"] = v } else { diskMap["type"] = "" }
+	diskMap["guest_os_features"] = flattenComputeInstanceGuestOsFeatures(guestOsFeaturesSlice)
+	diskMap["architecture"] = configDisk["architecture"]
+
+	return diskMap, nil
+}
+
+func FlattenSchedulingHTTP(resp map[string]interface{}) []map[string]interface{} {
+	schedulingMap := map[string]interface{}{}
+	if v, ok := resp["onHostMaintenance"]; ok { schedulingMap["on_host_maintenance"] = v }
+	if v, ok := resp["preemptible"]; ok { schedulingMap["preemptible"] = v }
+	if v, ok := resp["minNodeCpus"]; ok { schedulingMap["min_node_cpus"] = ParseIntHTTP(v) }
+	if v, ok := resp["provisioningModel"]; ok { schedulingMap["provisioning_model"] = v }
+	if v, ok := resp["instanceTerminationAction"]; ok { schedulingMap["instance_termination_action"] = v }
+	if v, ok := resp["availabilityDomain"]; ok { schedulingMap["availability_domain"] = ParseIntHTTP(v) }
+	if v, ok := resp["terminationTime"]; ok { schedulingMap["termination_time"] = v }
+	if v, ok := resp["automaticRestart"]; ok { schedulingMap["automatic_restart"] = v }
+	if v, ok := resp["skipGuestOsShutdown"]; ok { schedulingMap["skip_guest_os_shutdown"] = v }
+{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := resp["maintenanceInterval"]; ok { schedulingMap["maintenance_interval"] = v }
+	if v, ok := resp["hostErrorTimeoutSeconds"]; ok { schedulingMap["host_error_timeout_seconds"] = ParseIntHTTP(v) }
+{{- end }}
+
+	if maxDurRaw, ok := resp["maxRunDuration"]; ok && maxDurRaw != nil {
+		maxDur := maxDurRaw.(map[string]interface{})
+		schedulingMap["max_run_duration"] = []map[string]interface{}{
+			{
+				"seconds": ParseIntHTTP(maxDur["seconds"]),
+				"nanos":   ParseIntHTTP(maxDur["nanos"]),
+			},
+		}
+	}
+
+	if stopRaw, ok := resp["onInstanceStopAction"]; ok && stopRaw != nil {
+		stop := stopRaw.(map[string]interface{})
+		schedulingMap["on_instance_stop_action"] = []map[string]interface{}{
+			{
+				"discard_local_ssd": stop["discardLocalSsd"],
+			},
+		}
+	}
+
+	if timeoutRaw, ok := resp["localSsdRecoveryTimeout"]; ok && timeoutRaw != nil {
+		timeout := timeoutRaw.(map[string]interface{})
+		schedulingMap["local_ssd_recovery_timeout"] = []map[string]interface{}{
+			{
+				"seconds": ParseIntHTTP(timeout["seconds"]),
+				"nanos":   ParseIntHTTP(timeout["nanos"]),
+			},
+		}
+	}
+
+{{- if ne $.TargetVersionName "ga" }}
+	if gracefulRaw, ok := resp["gracefulShutdown"]; ok && gracefulRaw != nil {
+		graceful := gracefulRaw.(map[string]interface{})
+		graceMap := map[string]interface{}{
+			"enabled": graceful["enabled"],
+		}
+		if maxDurRaw, ok := graceful["maxDuration"]; ok && maxDurRaw != nil {
+			maxDur := maxDurRaw.(map[string]interface{})
+			graceMap["max_duration"] = []map[string]interface{}{
+				{
+					"seconds": ParseIntHTTP(maxDur["seconds"]),
+					"nanos":   ParseIntHTTP(maxDur["nanos"]),
+				},
+			}
+		}
+		schedulingMap["graceful_shutdown"] = []map[string]interface{}{graceMap}
+	}
+{{- end }}
+
+	if pndRaw, ok := resp["preemptionNoticeDuration"]; ok && pndRaw != nil {
+		pnd := pndRaw.(map[string]interface{})
+		schedulingMap["preemption_notice_duration"] = []map[string]interface{}{
+			{
+				"seconds": ParseIntHTTP(pnd["seconds"]),
+				"nanos":   ParseIntHTTP(pnd["nanos"]),
+			},
+		}
+	}
+
+	if naRaw, ok := resp["nodeAffinities"].([]interface{}); ok && naRaw != nil {
+		nodeAffinities := make([]map[string]interface{}, len(naRaw))
+		for i, naItem := range naRaw {
+			na := naItem.(map[string]interface{})
+			nodeAffinity := map[string]interface{}{
+				"key":      na["key"],
+				"operator": na["operator"],
+			}
+			if valsRaw, ok := na["values"].([]interface{}); ok {
+				nodeAffinity["values"] = valsRaw
+			}
+			nodeAffinities[i] = nodeAffinity
+		}
+		schedulingMap["node_affinities"] = nodeAffinities
+	}
+
+	return []map[string]interface{}{schedulingMap}
+}
+
+func ParseIntHTTP(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case string:
+		parsed, _ := strconv.Atoi(val)
+		return parsed
+	case float64:
+		return int(val)
+	case int:
+		return val
+	case int64:
+		return int(val)
+	default:
+		return 0
+	}
+}
+
+func FlattenWorkloadIdentityConfigHTTP(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	config := v.(map[string]interface{})
+	return []map[string]interface{}{
+		{
+			"identity":                     config["identity"],
+			"identity_certificate_enabled": config["identityCertificateEnabled"],
+		},
+	}
+}

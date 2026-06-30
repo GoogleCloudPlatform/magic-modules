@@ -11,6 +11,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"google.golang.org/api/googleapi"
+	"github.com/hashicorp/errwrap"
 )
 
 func instanceSchedulingNodeAffinitiesElemSchema() *schema.Resource {
@@ -52,42 +54,6 @@ func expandAliasIpRanges(ranges []interface{}) []interface{} {
 		ipRanges = append(ipRanges, ipRange)
 	}
 	return ipRanges
-}
-
-func flattenAliasIpRange(d *schema.ResourceData, ranges []interface{}, i int) []map[string]interface{} {
-	prefix := fmt.Sprintf("network_interface.%d", i)
-
-	configData := []map[string]interface{}{}
-	for _, item := range d.Get(prefix + ".alias_ip_range").([]interface{}) {
-		configData = append(configData, item.(map[string]interface{}))
-	}
-
-	apiData := make([]map[string]interface{}, 0, len(ranges))
-	for _, raw := range ranges {
-		ipRange, ok := raw.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		ipCidrRange, ok := ipRange["ipCidrRange"].(string)
-		if !ok && ipRange["ipCidrRange"] != nil {
-			log.Printf("[WARN] flattenAliasIpRange: unexpected type for ipCidrRange: %T", ipRange["ipCidrRange"])
-		}
-		subnetworkRangeName, ok := ipRange["subnetworkRangeName"].(string)
-		if !ok && ipRange["subnetworkRangeName"] != nil {
-			log.Printf("[WARN] flattenAliasIpRange: unexpected type for subnetworkRangeName: %T", ipRange["subnetworkRangeName"])
-		}
-		apiData = append(apiData, map[string]interface{}{
-			"ip_cidr_range":         ipCidrRange,
-			"subnetwork_range_name": subnetworkRangeName,
-		})
-	}
-
-	//permadiff fix
-	sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "ip_cidr_range")
-	if err != nil {
-		return apiData
-	}
-	return sorted
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -726,7 +692,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"subnetwork":          tpgresource.ConvertSelfLinkToV1(subnetwork),
 			"subnetwork_project":  subnet.Project,
 			"access_config":       ac,
-			"alias_ip_range":      flattenAliasIpRange(d, aliasIpRanges, i),
+			"alias_ip_range":      FlattenAliasIpRangeHTTP(d, aliasIpRanges, i),
 			{{ if ne $.TargetVersionName `ga` -}}
 			"alias_ipv6_range":     flattenIpv6AliasRange(d, getInterfaceSlice(iface["aliasIpv6Ranges"]), i),
 			{{- end }}
@@ -1556,4 +1522,246 @@ func flattenWorkloadIdentityConfig(v map[string]interface{}) []map[string]interf
 			"identity_certificate_enabled": v["identityCertificateEnabled"],
 		},
 	}
+}
+
+var DEFAULT_SCRATCH_DISK_SIZE_GB = 375
+
+type diskCharacteristics struct {
+	mode        string
+	diskType    string
+	diskSizeGb  string
+	autoDelete  bool
+	sourceImage string
+	provisionedIops string
+	provisionedThroughput string
+}
+
+func diskCharacteristicsFromMap(m map[string]interface{}) diskCharacteristics {
+	dc := diskCharacteristics{}
+	if v := m["mode"]; v == nil || v.(string) == "" {
+		// mode has an apply-time default of READ_WRITE
+		dc.mode = "READ_WRITE"
+	} else {
+		dc.mode = v.(string)
+	}
+
+	if v := m["disk_type"]; v != nil {
+		dc.diskType = v.(string)
+	}
+
+	if v := m["disk_size_gb"]; v != nil {
+		// Terraform and GCP return ints as different types (int vs int64), so just
+		// use strings to compare for simplicity.
+		dc.diskSizeGb = fmt.Sprintf("%v", v)
+	}
+
+	if v := m["auto_delete"]; v != nil {
+		dc.autoDelete = v.(bool)
+	}
+
+	if v := m["source_image"]; v != nil {
+		dc.sourceImage = v.(string)
+	}
+
+	if v := m["provisioned_iops"]; v != nil {
+		// Terraform and GCP return ints as different types (int vs int64), so just
+		// use strings to compare for simplicity.
+		dc.provisionedIops = fmt.Sprintf("%v", v)
+	}
+	
+	if v := m["provisioned_throughput"]; v != nil {
+		// Terraform and GCP return ints as different types (int vs int64), so just
+		// use strings to compare for simplicity.
+		dc.provisionedThroughput = fmt.Sprintf("%v", v)
+	}
+
+	return dc
+}
+
+func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultProject string) (map[string]interface{}, error) {
+	diskMap := make(map[string]interface{})
+
+
+	// These values are not returned by the API, so we copy them from the config.
+	diskMap["source_image_encryption_key"] = configDisk["source_image_encryption_key"]
+	diskMap["source_snapshot"] = configDisk["source_snapshot"]
+	diskMap["source_snapshot_encryption_key"] = configDisk["source_snapshot_encryption_key"]
+
+	if disk.InitializeParams != nil {
+		if disk.InitializeParams.SourceImage != "" {
+			path, err := resolveImageRefToRelativeURI(defaultProject, disk.InitializeParams.SourceImage)
+			if err != nil {
+				return nil, errwrap.Wrapf("Error expanding source image input to relative URI: {{ "{{err}}" }}", err)
+			}
+			diskMap["source_image"] = path
+		} else {
+			diskMap["source_image"] = ""
+		}
+		diskMap["disk_type"] = disk.InitializeParams.DiskType
+		diskMap["provisioned_iops"] = disk.InitializeParams.ProvisionedIops
+		diskMap["provisioned_throughput"] = disk.InitializeParams.ProvisionedThroughput
+		diskMap["disk_name"] = disk.InitializeParams.DiskName
+		diskMap["labels"] = disk.InitializeParams.Labels
+		// The API does not return a disk size value for scratch disks. They are largely only one size,
+		// so we can assume that size here. Prefer disk.DiskSizeGb over the deprecated
+		// disk.InitializeParams.DiskSizeGb.
+		if disk.DiskSizeGb == 0 && disk.InitializeParams.DiskSizeGb == 0 && disk.Type == "SCRATCH" {
+			diskMap["disk_size_gb"] = DEFAULT_SCRATCH_DISK_SIZE_GB
+		} else if disk.DiskSizeGb != 0 {
+			diskMap["disk_size_gb"] = disk.DiskSizeGb
+		} else {
+			diskMap["disk_size_gb"] = disk.InitializeParams.DiskSizeGb
+		}
+		diskMap["resource_policies"] = disk.InitializeParams.ResourcePolicies
+		diskMap["resource_manager_tags"] = disk.InitializeParams.ResourceManagerTags
+		if disk.InitializeParams.StoragePool != "" {
+    		diskMap["storage_pool"] = tpgresource.GetResourceNameFromSelfLink(disk.InitializeParams.StoragePool)
+		}
+	}
+
+	if disk.DiskEncryptionKey != nil {
+		encryption := make([]map[string]interface{}, 1)
+		encryption[0] = make(map[string]interface{})
+		encryption[0]["kms_key_self_link"] = disk.DiskEncryptionKey.KmsKeyName
+		if diskEncryptionKey, ok := configDisk["disk_encryption_key"].([]interface{}); ok && len(diskEncryptionKey) > 0 {
+			if encryptionKeyMap, ok := diskEncryptionKey[0].(map[string]interface{}); ok {
+				if kmsSa, ok := encryptionKeyMap["kms_key_service_account"].(string); ok && kmsSa != "" {
+					encryption[0]["kms_key_service_account"] = kmsSa
+				}
+			}
+		}
+		diskMap["disk_encryption_key"] = encryption
+	}
+
+	guestOsFeaturesSlice := make([]interface{}, 0, len(disk.GuestOsFeatures))
+	for _, f := range disk.GuestOsFeatures {
+		if f != nil && f.Type != "" {
+			guestOsFeaturesSlice = append(guestOsFeaturesSlice, map[string]interface{}{"type": f.Type})
+		}
+	}
+	diskMap["auto_delete"] = disk.AutoDelete
+	diskMap["boot"] = disk.Boot
+	diskMap["device_name"] = disk.DeviceName
+	diskMap["interface"] = disk.Interface
+	diskMap["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
+	diskMap["mode"] = disk.Mode
+	diskMap["type"] = disk.Type
+	diskMap["guest_os_features"] = flattenComputeInstanceGuestOsFeatures(guestOsFeaturesSlice)
+	diskMap["architecture"] = configDisk["architecture"]
+
+	return diskMap, nil
+}
+
+func reorderDisks(configDisks []interface{}, apiDisks []map[string]interface{}) []map[string]interface{} {
+	if len(apiDisks) != len(configDisks) {
+		// There are different numbers of disks in state and returned from the API, so it's not
+		// worth trying to reorder them since it'll be a diff anyway.
+		return apiDisks
+	}
+
+	result := make([]map[string]interface{}, len(apiDisks))
+
+	/*
+		Disks aren't necessarily returned from the API in the same order they were sent, so gather
+		information about the ones in state that we can use to map it back. We can't do this by
+		just looping over all of the disks, because you could end up matching things in the wrong
+		order. For example, if the config disks contain the following disks:
+		disk 1: auto delete = false, size = 10
+		disk 2: auto delete = false, size = 10, device name = "disk 2"
+		disk 3: type = scratch
+		And the disks returned from the API are:
+		disk a: auto delete = false, size = 10, device name = "disk 2"
+		disk b: auto delete = false, size = 10, device name = "disk 1"
+		disk c: type = scratch
+		Then disk a will match disk 1, disk b won't match any disk, and c will match 3, making the
+		final order a, c, b, which is wrong. To get disk a to match disk 2, we have to go in order
+		of fields most specifically able to identify a disk to least.
+	*/
+	disksByDeviceName := map[string]int{}
+	scratchDisksByInterface := map[string][]int{}
+	attachedDisksBySource := map[string]int{}
+	attachedDisksByDiskName := map[string]int{}
+	attachedDisksByCharacteristics := []int{}
+
+	for i, d := range configDisks {
+		if i == 0 {
+			// boot disk
+			continue
+		}
+		disk := d.(map[string]interface{})
+		if v := disk["device_name"]; v.(string) != "" {
+			disksByDeviceName[v.(string)] = i
+		} else if v := disk["type"]; v.(string) == "SCRATCH" {
+			iface := disk["interface"].(string)
+			scratchDisksByInterface[iface] = append(scratchDisksByInterface[iface], i)
+		} else if v := disk["source"]; v.(string) != "" {
+			attachedDisksBySource[v.(string)] = i
+		} else if v := disk["disk_name"]; v.(string) != "" {
+			attachedDisksByDiskName[v.(string)] = i
+		} else {
+			attachedDisksByCharacteristics = append(attachedDisksByCharacteristics, i)
+		}
+	}
+
+	// Align the disks, going from the most specific criteria to the least.
+	for _, apiDisk := range apiDisks {
+		// 1. This resource only works if the boot disk is the first one (which should be fixed
+		//	  separately), so put the boot disk first.
+		if apiDisk["boot"].(bool) {
+			result[0] = apiDisk
+
+			// 2. All disks have a unique device name
+		} else if i, ok := disksByDeviceName[apiDisk["device_name"].(string)]; ok {
+			result[i] = apiDisk
+
+			// 3. Scratch disks are all the same except device name and interface, so match them by
+			//    interface.
+		} else if apiDisk["type"].(string) == "SCRATCH" {
+			iface := apiDisk["interface"].(string)
+			indexes := scratchDisksByInterface[iface]
+			if len(indexes) > 0 {
+				result[indexes[0]] = apiDisk
+				scratchDisksByInterface[iface] = indexes[1:]
+			} else {
+				result = append(result, apiDisk)
+			}
+
+			// 4. Each attached disk will have a different source, so match by that.
+		} else if i, ok := attachedDisksBySource[apiDisk["source"].(string)]; ok {
+			result[i] = apiDisk
+
+			// 5. If a disk was created for this resource via initializeParams, it will have a
+			//    unique name.
+		} else if v, ok := apiDisk["disk_name"]; ok && attachedDisksByDiskName[v.(string)] != 0 {
+			result[attachedDisksByDiskName[v.(string)]] = apiDisk
+
+			// 6. If no unique keys exist on this disk, then use a combination of its remaining
+			//    characteristics to see whether it matches exactly.
+		} else {
+			found := false
+			for arrayIndex, i := range attachedDisksByCharacteristics {
+				configDisk := configDisks[i].(map[string]interface{})
+				stateDc := diskCharacteristicsFromMap(configDisk)
+				readDc := diskCharacteristicsFromMap(apiDisk)
+				if reflect.DeepEqual(stateDc, readDc) {
+					result[i] = apiDisk
+					attachedDisksByCharacteristics = append(attachedDisksByCharacteristics[:arrayIndex], attachedDisksByCharacteristics[arrayIndex+1:]...)
+					found = true
+					break
+				}
+			}
+			if !found {
+				result = append(result, apiDisk)
+			}
+		}
+	}
+
+	// Remove nils from map in case there were disks that could not be matched
+	ds := []map[string]interface{}{}
+	for _, d := range result {
+		if d != nil {
+			ds = append(ds, d)
+		}
+	}
+	return ds
 }
