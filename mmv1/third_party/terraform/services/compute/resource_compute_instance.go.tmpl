@@ -2137,7 +2137,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	}
 	if paramsBody, err := expandParams(d); err != nil {
 		return fmt.Errorf("Error expanding params: %s", err)
-	} else if len(paramsBody) > 0 {
+	} else {
 		instanceBody["params"] = paramsBody
 	}
 	if metadataBody, err := resourceInstanceMetadata(d); err != nil {
