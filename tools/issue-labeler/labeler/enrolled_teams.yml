@@ -38,6 +38,9 @@ service/aiplatform-prediction:
 service/aiplatform-rag-engine:
   resources:
   - google_vertex_ai_rag_engine_config
+service/aiplatform-semantic-governance:
+  resources:
+  - google_vertex_ai_semantic_governance.*
 service/aiplatform-tensorboard:
   resources:
   - google_vertex_ai_tensorboard
