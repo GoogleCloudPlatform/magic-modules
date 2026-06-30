@@ -1242,9 +1242,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testi
 	t.Parallel()
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
-	projectId := "psctestproject" + acctest.RandString(t, 10)
-	orgId := envvar.GetTestOrgFromEnv(t)
-	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
+	projectId := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1257,7 +1255,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testi
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName, projectId, orgId, billingAccount),
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName, projectId),
 				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil, false, false, true, "", "COMPLETED")),
 			},
 			{
@@ -7246,73 +7244,51 @@ resource "google_sql_database_instance" "instance" {
 `, projectId, projectId, orgId, billingAccount, instanceName)
 }
 
-func testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName string, projectId string, orgId string, billingAccount string) string {
+func testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName string, projectId string) string {
 	return fmt.Sprintf(`
-resource "google_project" "testproject" {
-  name            = "%s"
-  project_id      = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-  deletion_policy = "DELETE"
-}
-
-resource "google_project_service" "compute" {
-  project            = google_project.testproject.project_id
-  service            = "compute.googleapis.com"
-  disable_on_destroy = false
-}
-
 resource "google_project_service" "dns" {
-  project            = google_project.testproject.project_id
+  project            = "%s"
   service            = "dns.googleapis.com"
   disable_on_destroy = false
 }
 
 resource "google_project_service" "networkconnectivity" {
-  project            = google_project.testproject.project_id
+  project            = "%s"
   service            = "networkconnectivity.googleapis.com"
   disable_on_destroy = false
 }
 
 resource "google_project_service" "servicenetworking" {
-  project            = google_project.testproject.project_id
+  project            = "%s"
   service            = "servicenetworking.googleapis.com"
   disable_on_destroy = false
 }
 
-resource "google_project_service" "sqladmin" {
-  project            = google_project.testproject.project_id
-  service            = "sqladmin.googleapis.com"
-  disable_on_destroy = false
-}
-
 resource "google_project_service_identity" "gcp_sa_cloud_sql" {
-  project    = google_project.testproject.project_id
+  project    = "%s"
   service    = "sqladmin.googleapis.com"
-  depends_on = [google_project_service.sqladmin]
 }
 
 resource "google_project_iam_member" "sa_consumer_network_admin" {
-  project = google_project.testproject.project_id
+  project = "%s"
   role    = "roles/networkconnectivity.serviceAutomationConsumerNetworkAdmin"
   member  = google_project_service_identity.gcp_sa_cloud_sql.member
 }
 
 resource "google_project_iam_member" "sa_network_viewer" {
-  project = google_project.testproject.project_id
+  project = "%s"
   role    = "roles/compute.networkViewer"
   member  = google_project_service_identity.gcp_sa_cloud_sql.member
 }
 
 resource "google_compute_network" "default" {
-  project                 = google_project.testproject.project_id
+  project                 = "%s"
   name                    = "default"
   auto_create_subnetworks = true
-  depends_on              = [google_project_service.compute]
 }
 
 resource "google_sql_database_instance" "instance" {
-  project             = google_project.testproject.project_id
+  project             = "%s"
   name                = "%s"
   region              = "us-south1"
   database_version    = "MYSQL_8_0"
@@ -7343,7 +7319,7 @@ resource "google_sql_database_instance" "instance" {
     google_project_iam_member.sa_network_viewer,
   ]
 }
-`, projectId, projectId, orgId, billingAccount, instanceName)
+`, projectId, projectId, projectId, projectId, projectId, projectId, projectId, projectId, instanceName)
 }
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, projectId string, orgId string, billingAccount string) string {
