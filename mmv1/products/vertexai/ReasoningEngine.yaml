@@ -650,12 +650,18 @@ properties:
                     type: NestedObject
                     properties:
                       - name: 'managedMemoryTopic'
-                        type: String
+                        type: NestedObject
+                        # Note: exactly_one_of within array elements is not enforced client-side by MM; relies on backend API server validation.
                         exactly_one_of:
                           - managedMemoryTopic
                           - customMemoryTopic
                         description: |-
-                          Optional. Managed memory topic enum.
+                          Optional. Managed memory topic.
+                        properties:
+                          - name: 'managedTopicEnum'
+                            type: String
+                            description: |-
+                              Managed topic enum (e.g. USER_PREFERENCES, EXPLICIT_INSTRUCTIONS).
                       - name: 'customMemoryTopic'
                         type: NestedObject
                         description: |-
@@ -709,6 +715,7 @@ properties:
                         required: true
                       - name: 'memorySchema'
                         type: String
+                        api_name: 'schema'
                         description: |-
                           Optional. The memory schema defined as an OpenAPI Schema Object JSON string.
                         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
