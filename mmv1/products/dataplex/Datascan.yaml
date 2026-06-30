@@ -904,4 +904,4 @@ properties:
       - name: catalogPublishingEnabled
         type: Boolean
         description: |
-          If set, the latest DataScan job result will be published to Dataplex Catalog.
+          If set, the latest DataScan job result will be published to Knowledge Catalog.
