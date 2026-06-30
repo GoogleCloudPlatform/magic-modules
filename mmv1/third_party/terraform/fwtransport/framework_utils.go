@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -242,6 +243,9 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 		case resource.DeleteRequest:
 			sReq := req.(resource.DeleteRequest)
 			diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
+		case ephemeral.OpenRequest:
+			eReq := req.(ephemeral.OpenRequest)
+			diagInfo = eReq.Config.GetAttribute(ctx, path.Root("project_id"), &projectID)
 		}
 		diags.Append(diagInfo...)
 		if diags.HasError() {
@@ -313,6 +317,9 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 			case resource.DeleteRequest:
 				sReq := req.(resource.DeleteRequest)
 				diagInfo = sReq.State.GetAttribute(ctx, path.Root(m[1:]), &v)
+			case ephemeral.OpenRequest:
+				eReq := req.(ephemeral.OpenRequest)
+				diagInfo = eReq.Config.GetAttribute(ctx, path.Root(m[1:]), &v)
 			}
 			//an error here means the attribute was not found, we want to do nothing in that case
 			if !diagInfo.HasError() {
@@ -341,6 +348,9 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 			case resource.DeleteRequest:
 				sReq := req.(resource.DeleteRequest)
 				diagInfo = sReq.State.GetAttribute(ctx, path.Root(m), &v)
+			case ephemeral.OpenRequest:
+				eReq := req.(ephemeral.OpenRequest)
+				diagInfo = eReq.Config.GetAttribute(ctx, path.Root(m), &v)
 			}
 			//an error here means the attribute was not found, we want to do nothing in that case
 			if !diagInfo.HasError() {
