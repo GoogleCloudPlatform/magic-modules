@@ -2,7 +2,9 @@
 package compute
 
 import (
+{{- if ne $.TargetVersionName `ga` }}
 	"encoding/json"
+{{- end }}
 	"fmt"
 	"strings"
 	"time"
