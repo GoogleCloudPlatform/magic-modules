@@ -620,7 +620,7 @@ The optional `settings.ip_configuration.psc_config` sublist supports:
 
 * `psc_write_endpoint_dns_enabled` - (Optional) Whether PSC write endpoint DNS is enabled for this instance. This is only supported for Enterprise Plus edition instances.
 
-* `psc_auto_connection_policy_enabled` - (Optional) Whether a service connection policy is created for the auto connections configured for the instance.
+* `settings.ip_configuration.psc_config.psc_auto_connection_policy_enabled` - (Optional) Whether a service connection policy is created for the auto connections configured for the instance.
 
 * `allowed_consumer_projects` - (Optional) List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).
 
