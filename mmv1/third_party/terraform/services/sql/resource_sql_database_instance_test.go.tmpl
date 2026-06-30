@@ -7312,6 +7312,10 @@ resource "google_sql_database_instance" "instance" {
 		enabled = true
 		binary_log_enabled = true
 	}
+	database_flags {
+		name  = "cloudsql_iam_authentication"
+		value = "on"
+	}
 	availability_type = "REGIONAL"
   }
   depends_on = [
