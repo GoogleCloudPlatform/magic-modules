@@ -1692,6 +1692,10 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		if err = d.Set("can_ip_forward", cif); err != nil {
 			return fmt.Errorf("Error setting can_ip_forward: %s", err)
 		}
+	} else {
+		if err = d.Set("can_ip_forward", false); err != nil {
+			return fmt.Errorf("Error setting can_ip_forward: %s", err)
+		}
 	}
 
 	if idesc, ok := properties["description"].(string); ok {
@@ -1905,7 +1909,7 @@ func flattenRegionDisk(disk map[string]interface{}, configDisk map[string]any, d
 		if v, ok := initParams["diskType"]; ok { diskMap["disk_type"] = v }
 		if v, ok := initParams["provisionedIops"]; ok { diskMap["provisioned_iops"] = parseInt(v) }
 		if v, ok := initParams["provisionedThroughput"]; ok { diskMap["provisioned_throughput"] = parseInt(v) }
-		if v, ok := initParams["diskName"]; ok { diskMap["disk_name"] = v }
+		if v, ok := initParams["diskName"]; ok { diskMap["disk_name"] = v } else { diskMap["disk_name"] = "" }
 		if v, ok := initParams["labels"]; ok { diskMap["labels"] = v }
 
 		var diskSizeGb int
@@ -1954,15 +1958,17 @@ func flattenRegionDisk(disk map[string]interface{}, configDisk map[string]any, d
 			}
 		}
 	}
-	if v, ok := disk["autoDelete"]; ok { diskMap["auto_delete"] = v }
-	if v, ok := disk["boot"]; ok { diskMap["boot"] = v }
-	if v, ok := disk["deviceName"]; ok { diskMap["device_name"] = v }
-	if v, ok := disk["interface"]; ok { diskMap["interface"] = v }
+	if v, ok := disk["autoDelete"]; ok { diskMap["auto_delete"] = v } else { diskMap["auto_delete"] = false }
+	if v, ok := disk["boot"]; ok { diskMap["boot"] = v } else { diskMap["boot"] = false }
+	if v, ok := disk["deviceName"]; ok { diskMap["device_name"] = v } else { diskMap["device_name"] = "" }
+	if v, ok := disk["interface"]; ok { diskMap["interface"] = v } else { diskMap["interface"] = "" }
 	if src, ok := disk["source"].(string); ok {
 		diskMap["source"] = tpgresource.ConvertSelfLinkToV1(src)
+	} else {
+		diskMap["source"] = ""
 	}
-	if v, ok := disk["mode"]; ok { diskMap["mode"] = v }
-	if v, ok := disk["type"]; ok { diskMap["type"] = v }
+	if v, ok := disk["mode"]; ok { diskMap["mode"] = v } else { diskMap["mode"] = "" }
+	if v, ok := disk["type"]; ok { diskMap["type"] = v } else { diskMap["type"] = "" }
 	diskMap["guest_os_features"] = flattenComputeInstanceGuestOsFeatures(guestOsFeaturesSlice)
 	diskMap["architecture"] = configDisk["architecture"]
 
