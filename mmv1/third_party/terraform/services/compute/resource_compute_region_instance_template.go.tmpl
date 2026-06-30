@@ -1903,8 +1903,8 @@ func flattenRegionDisk(disk map[string]interface{}, configDisk map[string]any, d
 			diskMap["source_image"] = ""
 		}
 		if v, ok := initParams["diskType"]; ok { diskMap["disk_type"] = v }
-		if v, ok := initParams["provisionedIops"]; ok { diskMap["provisioned_iops"] = v }
-		if v, ok := initParams["provisionedThroughput"]; ok { diskMap["provisioned_throughput"] = v }
+		if v, ok := initParams["provisionedIops"]; ok { diskMap["provisioned_iops"] = parseInt(v) }
+		if v, ok := initParams["provisionedThroughput"]; ok { diskMap["provisioned_throughput"] = parseInt(v) }
 		if v, ok := initParams["diskName"]; ok { diskMap["disk_name"] = v }
 		if v, ok := initParams["labels"]; ok { diskMap["labels"] = v }
 
