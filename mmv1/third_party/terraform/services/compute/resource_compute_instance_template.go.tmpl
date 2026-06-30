@@ -1821,18 +1821,12 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		Name:        itName,
 	}
 
-	itBytes, err := json.Marshal(instanceTemplate)
+	itBody, err := tpgresource.ConvertToMap(instanceTemplate)
 	if err != nil {
-		return fmt.Errorf("Error marshaling instance template: %s", err)
+		return fmt.Errorf("Error converting instance template: %s", err)
 	}
-	var itBody map[string]interface{}
-	if err := json.Unmarshal(itBytes, &itBody); err != nil {
-		return fmt.Errorf("Error unmarshaling instance template: %s", err)
-	}
-	if len(metadataMap) > 0 {
-		if props, ok := itBody["properties"].(map[string]interface{}); ok {
-			props["metadata"] = metadataMap
-		}
+	if props, ok := itBody["properties"].(map[string]interface{}); ok {
+		props["metadata"] = metadataMap
 	}
 	{{- if ne $.TargetVersionName "ga" }}
 	if len(partnerMetadataConverted) > 0 {
@@ -2212,12 +2206,8 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 
 	{{ if ne $.TargetVersionName `ga` -}}
 	if instanceTemplate.Properties.PartnerMetadata != nil {
-		var partnerMetadataMap map[string]interface{}
-		partnerMetadataBytes, err := json.Marshal(instanceTemplate.Properties.PartnerMetadata)
+		partnerMetadataMap, err := tpgresource.ConvertToMap(instanceTemplate.Properties.PartnerMetadata)
 		if err != nil {
-			return fmt.Errorf("Error marshaling partner metadata: %s", err)
-		}
-		if err = json.Unmarshal(partnerMetadataBytes, &partnerMetadataMap); err != nil {
 			return fmt.Errorf("Error converting partner metadata: %s", err)
 		}
 		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(partnerMetadataMap))
@@ -2513,6 +2503,26 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 	if err := tpgresource.Convert(expanded, schedulingTyped); err != nil {
 		return nil, fmt.Errorf("Error converting scheduling: %s", err)
 	}
+	for _, pair := range [][2]string{
+		{"preemptible", "Preemptible"},
+		{"onHostMaintenance", "OnHostMaintenance"},
+		{"provisioningModel", "ProvisioningModel"},
+		{"instanceTerminationAction", "InstanceTerminationAction"},
+		{"skipGuestOsShutdown", "SkipGuestOsShutdown"},
+	} {
+		if _, ok := expanded[pair[0]]; ok {
+			schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, pair[1])
+		}
+	}
+{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := expanded["hostErrorTimeoutSeconds"]; ok {
+		if v == nil {
+			schedulingTyped.NullFields = append(schedulingTyped.NullFields, "HostErrorTimeoutSeconds")
+		} else {
+			schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, "HostErrorTimeoutSeconds")
+		}
+	}
+{{- end }}
 	return schedulingTyped, nil
 }
 
@@ -2522,12 +2532,8 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 func networkInterfacesToInterface(networkInterfaces []*compute.NetworkInterface) ([]interface{}, error) {
 	result := make([]interface{}, 0, len(networkInterfaces))
 	for _, ni := range networkInterfaces {
-		b, err := json.Marshal(ni)
+		m, err := tpgresource.ConvertToMap(ni)
 		if err != nil {
-			return nil, err
-		}
-		var m map[string]interface{}
-		if err := json.Unmarshal(b, &m); err != nil {
 			return nil, err
 		}
 		result = append(result, m)

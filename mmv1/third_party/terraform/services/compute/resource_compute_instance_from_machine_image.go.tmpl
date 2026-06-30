@@ -161,13 +161,9 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		}
 	}
 
-	instanceBytes, err := json.Marshal(instance)
+	instanceBody, err := tpgresource.ConvertToMap(instance)
 	if err != nil {
-		return fmt.Errorf("Error marshaling instance: %s", err)
-	}
-	instanceBody := map[string]interface{}{}
-	if err = json.Unmarshal(instanceBytes, &instanceBody); err != nil {
-		return fmt.Errorf("Error processing instance body: %s", err)
+		return fmt.Errorf("Error converting instance: %s", err)
 	}
 
 	metadataMap, err := resourceInstanceMetadata(d)

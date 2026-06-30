@@ -4,9 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
-	{{- if ne $.TargetVersionName "ga" }}
-	"encoding/json"
-	{{- end }}
 	"errors"
 	"fmt"
 	"log"
@@ -2145,7 +2142,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	}
 	if metadataBody, err := resourceInstanceMetadata(d); err != nil {
 		return fmt.Errorf("Error expanding metadata: %s", err)
-	} else if len(metadataBody) > 0 {
+	} else {
 		instanceBody["metadata"] = metadataBody
 	}
 	{{- if ne $.TargetVersionName "ga" }}
@@ -2623,12 +2620,8 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compu
 
 	{{- if ne $.TargetVersionName `ga` }}
 	if instance.PartnerMetadata != nil {
-		var partnerMetadataMap map[string]interface{}
-		partnerMetadataBytes, err := json.Marshal(instance.PartnerMetadata)
+		partnerMetadataMap, err := tpgresource.ConvertToMap(instance.PartnerMetadata)
 		if err != nil {
-			return fmt.Errorf("Error marshaling partner metadata: %s", err)
-		}
-		if err = json.Unmarshal(partnerMetadataBytes, &partnerMetadataMap); err != nil {
 			return fmt.Errorf("Error converting partner metadata: %s", err)
 		}
 		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(partnerMetadataMap))
