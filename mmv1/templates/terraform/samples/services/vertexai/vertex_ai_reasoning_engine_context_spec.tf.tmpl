@@ -13,6 +13,88 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
         embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
       }
       disable_memory_revisions = false
+
+      # 1. User-level Customization Config (Lifelong baseline)
+      customization_configs {
+        scope_keys                   = ["user_id"]
+        enable_third_person_memories = true
+        consolidation_config {
+          revisions_per_candidate_count = 1
+        }
+        memory_topics {
+          managed_memory_topic {
+            managed_topic_enum = "USER_PREFERENCES"
+          }
+        }
+      }
+
+      # 2. Session-level Customization Config (Transient scratchpad)
+      customization_configs {
+        scope_keys                   = ["user_id", "session_id"]
+        enable_third_person_memories = true
+        memory_topics {
+          custom_memory_topic {
+            label       = "session_scratchpad"
+            description = "Active consideration details, recent queries, and temporary workflow state."
+          }
+        }
+      }
+
+      # 1. Standard User Profile Schema (from official documentation)
+      structured_memory_configs {
+        scope_keys = ["user_id"]
+        schema_configs {
+          id            = "user-profile"
+          memory_schema = jsonencode({
+            type = "OBJECT"
+            properties = {
+              name = {
+                type        = "STRING"
+                description = "Name of the user."
+              }
+              technical_stack = {
+                type        = "STRING"
+                description = "Comma-separated list tools or languages used by the user."
+              }
+              primary_goal = {
+                type        = "STRING"
+                description = "The main objective the user is pursuing."
+              }
+              expertise_level = {
+                type        = "STRING"
+                description = "Current skill level (e.g., Junior, Senior)."
+              }
+              job_status = {
+                type        = "STRING"
+                description = "The job status of the individual"
+                enum        = ["unemployed", "part_time", "full_time", "student"]
+              }
+            }
+          })
+        }
+      }
+
+      # 2. Conversation Summary Schema (Demonstrating session scope)
+      structured_memory_configs {
+        scope_keys = ["user_id", "session_id"]
+        schema_configs {
+          id            = "conversation-summary"
+          memory_schema = jsonencode({
+            type = "OBJECT"
+            properties = {
+              main_topic = {
+                type        = "STRING"
+                description = "The primary topic of this specific chat session."
+              }
+              status = {
+                type        = "STRING"
+                description = "Current resolution state of the discussion."
+                enum        = ["open", "in_progress", "resolved"]
+              }
+            }
+          })
+        }
+      }
       ttl_config {
         default_ttl = "86400s"
       }
