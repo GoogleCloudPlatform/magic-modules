@@ -7728,6 +7728,11 @@ func testAccCheckSqlDatabaseInstanceDeleteServiceConnectionPolicy(t *testing.T, 
 			return fmt.Errorf("Can't find %s in state", resourceName)
 		}
 
+		creationResult, ok := rs.Primary.Attributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.service_connection_policy_creation_result"]
+		if !ok || creationResult != "COMPLETED" {
+			return nil
+		}
+
 		policy, ok := rs.Primary.Attributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.service_connection_policy"]
 		if !ok || policy == "" {
 			return nil
