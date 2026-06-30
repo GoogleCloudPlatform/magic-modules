@@ -1,9 +1,12 @@
 package sql
 
 import (
+	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/sqladmin/v1beta4"
 )
 
 func TestMaintenanceVersionDiffSuppress(t *testing.T) {
@@ -219,6 +222,68 @@ func TestDatabaseVersionDiffSuppress(t *testing.T) {
 			t.Parallel()
 			if databaseVersionDiffSuppress("version", testCase.oldVersion, testCase.newVersion, nil) != testCase.shouldSuppressDiff {
 				t.Fatalf("%q => %q expect DiffSuppress to return %t", testCase.oldVersion, testCase.newVersion, testCase.shouldSuppressDiff)
+			}
+		})
+	}
+}
+
+func TestExpandPscConfig(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		Configured []interface{}
+		Expected   *sqladmin.PscConfig
+	}{
+		"basic": {
+			Configured: []interface{}{
+				map[string]interface{}{
+					"psc_enabled":                    true,
+					"psc_auto_dns_enabled":           true,
+					"psc_write_endpoint_dns_enabled": true,
+					"allowed_consumer_projects":      schema.NewSet(schema.HashString, []interface{}{"project-a", "project-b"}),
+					"network_attachment_uri":         "projects/p/regions/r/networkAttachments/na",
+					"psc_auto_connections":           []interface{}{},
+				},
+			},
+			Expected: &sqladmin.PscConfig{
+				PscEnabled:                 true,
+				PscAutoDnsEnabled:          true,
+				PscWriteEndpointDnsEnabled: true,
+				AllowedConsumerProjects:    []string{"project-a", "project-b"},
+				NetworkAttachmentUri:       "projects/p/regions/r/networkAttachments/na",
+				PscAutoConnections:         []*sqladmin.PscAutoConnectionConfig{},
+				ForceSendFields:            []string{"AllowedConsumerProjects"},
+			},
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+			got := expandPscConfig(tc.Configured)
+			if got == nil {
+				t.Fatalf("expected non-nil PscConfig")
+			}
+			if got.PscEnabled != tc.Expected.PscEnabled {
+				t.Errorf("expected PscEnabled %t, got %t", tc.Expected.PscEnabled, got.PscEnabled)
+			}
+			if got.PscAutoDnsEnabled != tc.Expected.PscAutoDnsEnabled {
+				t.Errorf("expected PscAutoDnsEnabled %t, got %t", tc.Expected.PscAutoDnsEnabled, got.PscAutoDnsEnabled)
+			}
+			if got.PscWriteEndpointDnsEnabled != tc.Expected.PscWriteEndpointDnsEnabled {
+				t.Errorf("expected PscWriteEndpointDnsEnabled %t, got %t", tc.Expected.PscWriteEndpointDnsEnabled, got.PscWriteEndpointDnsEnabled)
+			}
+			sort.Strings(got.AllowedConsumerProjects)
+			sort.Strings(tc.Expected.AllowedConsumerProjects)
+			if !reflect.DeepEqual(got.AllowedConsumerProjects, tc.Expected.AllowedConsumerProjects) {
+				t.Errorf("expected AllowedConsumerProjects %v, got %v", tc.Expected.AllowedConsumerProjects, got.AllowedConsumerProjects)
+			}
+			if got.NetworkAttachmentUri != tc.Expected.NetworkAttachmentUri {
+				t.Errorf("expected NetworkAttachmentUri %s, got %s", tc.Expected.NetworkAttachmentUri, got.NetworkAttachmentUri)
+			}
+			if !reflect.DeepEqual(got.ForceSendFields, tc.Expected.ForceSendFields) {
+				t.Errorf("expected ForceSendFields %v, got %v", tc.Expected.ForceSendFields, got.ForceSendFields)
 			}
 		})
 	}
