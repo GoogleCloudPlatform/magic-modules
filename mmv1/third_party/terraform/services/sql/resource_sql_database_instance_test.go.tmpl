@@ -7271,7 +7271,7 @@ resource "google_project_service_identity" "gcp_sa_cloud_sql" {
 
 resource "google_project_iam_member" "sa_consumer_network_admin" {
   project = "%s"
-  role    = "roles/networkconnectivity.serviceAutomationConsumerNetworkAdmin"
+  role    = "roles/networkconnectivity.consumerNetworkAdmin"
   member  = google_project_service_identity.gcp_sa_cloud_sql.member
 }
 
