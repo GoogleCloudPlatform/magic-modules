@@ -21,6 +21,10 @@ create_url: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults?
 id_format: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults/{{exascale_db_storage_vault_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults/{{exascale_db_storage_vault_id}}
+timeouts:
+  insert_minutes: 120
+  update_minutes: 60
+  delete_minutes: 60
 async:
   type: OpAsync
   operation:
@@ -77,6 +81,22 @@ samples:
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
           exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-full-%s", acctest.RandString(t, 10))
+  - name: oracledatabase_exascale_db_storage_vault_dedicated_exadata_infrastructure
+    primary_resource_id: my_storage_vault
+    steps:
+      - name: oracledatabase_exascale_db_storage_vault_dedicated_exadata_infrastructure
+        resource_id_vars:
+          project: my-project
+          cloud_exadata_infrastructure_id: my-infra
+          exascale_db_storage_vault_id: my-instance
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oci-terraform-testing-prod"'
+          cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-configured-exadata-%s", acctest.RandString(t, 10))'
+          exascale_db_storage_vault_id: 'fmt.Sprintf("ofake-tf-test-vault-on-exadata-%s", acctest.RandString(t, 10))'
 virtual_fields:
   - name: deletion_protection
     type: Boolean
@@ -134,6 +154,15 @@ properties:
       Format:
       projects/{project}/locations/{location}/exascaleDbStorageVaults/{exascale_db_storage_vault}
     output: true
+  - name: exadataInfrastructure
+    type: ResourceRef
+    description: |
+      The Exadata Infrastructure resource on which ExascaleDbStorageVault resource is created.
+      In the format: projects/{project}/locations/{region}/cloudExadataInfrastructures/{cloud_extradata_infrastructure}
+    resource: CloudExadataInfrastructure
+    imports: name
+    immutable: true
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
   - name: properties
     type: NestedObject
     description: |-
