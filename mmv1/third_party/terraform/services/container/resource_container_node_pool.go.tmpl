@@ -158,6 +158,12 @@ func (instanceGroupManagerCache *instanceGroupManagerCache) needsRefresh(fullyQu
 	return time.Since(igm.updateTime) > instanceGroupManagerCache.ttl
 }
 
+func (instanceGroupManagerCache *instanceGroupManagerCache) remove(fullyQualifiedName string) {
+	instanceGroupManagerCache.mutex.Lock()
+	defer instanceGroupManagerCache.mutex.Unlock()
+	delete(instanceGroupManagerCache.instanceGroupManagers, fullyQualifiedName)
+}
+
 // We need to set ttl to 0 to disable caching in VCR testing.
 // This ensure all NP/MIG LIST requests are made consistently,
 // preventing non-deterministic behavior that would break VCR.
@@ -1791,6 +1797,16 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		}
 		if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
 				return err
+		}
+		// The node pool size changed, so any cached InstanceGroupManager target sizes for
+		// this node pool are now stale. Invalidate them so the subsequent read fetches the
+		// new size from the API instead of returning a stale cached value.
+		if igmUrls, ok := d.GetOk(prefix + "instance_group_urls"); ok {
+			for _, u := range igmUrls.([]interface{}) {
+				if key := instanceGroupManagerURL.FindString(u.(string)); key != "" {
+					igmCache.remove(key)
+				}
+			}
 		}
 		log.Printf("[INFO] GKE node pool %s size has been updated to %d", name, newSize)
 	}
