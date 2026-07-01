@@ -1,0 +1,32 @@
+func policyOrchestratorForOrganizationCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	v, ok := diff.GetOk("orchestration_scope.0.selectors")
+	if !ok {
+		return nil
+	}
+	selectors := v.([]interface{})
+	for _, rawSelector := range selectors {
+		if rawSelector == nil {
+			continue
+		}
+		selector := rawSelector.(map[string]interface{})
+
+		hasLocation := false
+		if val, ok := selector["location_selector"]; ok && val != nil {
+			if list := val.([]interface{}); len(list) > 0 {
+				hasLocation = true
+			}
+		}
+
+		hasHierarchy := false
+		if val, ok := selector["resource_hierarchy_selector"]; ok && val != nil {
+			if list := val.([]interface{}); len(list) > 0 {
+				hasHierarchy = true
+			}
+		}
+
+		if hasLocation && hasHierarchy {
+			return fmt.Errorf("only one of orchestration_scope.selectors.location_selector or orchestration_scope.selectors.resource_hierarchy_selector can be set")
+		}
+	}
+	return nil
+}
