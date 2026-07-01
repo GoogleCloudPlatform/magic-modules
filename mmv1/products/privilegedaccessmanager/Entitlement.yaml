@@ -127,6 +127,10 @@ properties:
       The approvals needed before access will be granted to a requester.
       No approvals will be needed if this field is null. Different types of approval workflows that can be used to gate privileged access granting.
     immutable: true
+    # This flattener is entirely handwritten and must be updated with any new field or subfield.
+    # Solves a permadiff when the API returns `{"approvalWorkflow": {"manualApprovals": {}}}`
+    # for entitlements created without an approval workflow.
+    custom_flatten: templates/terraform/custom_flatten/privileged_access_manager_entitlement_approval_workflow.go.tmpl
     properties:
       - name: manualApprovals
         type: NestedObject
