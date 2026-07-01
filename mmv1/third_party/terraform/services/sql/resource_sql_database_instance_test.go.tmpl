@@ -1243,22 +1243,15 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testi
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	projectId := envvar.GetTestProjectFromEnv()
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "sql-psc-auto-conn")
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck: func() {
-			acctest.AccTestPreCheck(t)
-			testAccSqlDatabaseInstanceDeleteExistingServiceConnectionPolicies(t, projectId, "us-south1", "default")
-		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: func(s *terraform.State) error {
-			if err := testAccSqlDatabaseInstanceDestroyProducer(t)(s); err != nil {
-				return err
-			}
-			return testAccCheckSqlDatabaseInstanceDeleteServiceConnectionPolicy(t, "google_sql_database_instance.instance")(s)
-		},
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName, projectId),
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName, projectId, networkName),
 				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, nil, false, false, true, "", "COMPLETED")),
 			},
 			{
@@ -7247,7 +7240,7 @@ resource "google_sql_database_instance" "instance" {
 `, projectId, projectId, orgId, billingAccount, instanceName)
 }
 
-func testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName string, projectId string) string {
+func testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName string, projectId string, networkName string) string {
 	return fmt.Sprintf(`
 resource "google_project_service_identity" "gcp_sa_cloud_sql" {
   project    = "%s"
@@ -7266,9 +7259,8 @@ resource "google_project_iam_member" "sa_network_viewer" {
   member  = google_project_service_identity.gcp_sa_cloud_sql.member
 }
 
-data "google_compute_network" "default" {
-  project = "%s"
-  name    = "default"
+data "google_compute_network" "testnetwork" {
+  name    = "%s"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -7284,7 +7276,7 @@ resource "google_sql_database_instance" "instance" {
 			psc_enabled = true
 			psc_auto_connection_policy_enabled = true
 			psc_auto_connections {
-				consumer_network            = data.google_compute_network.default.id
+				consumer_network            = data.google_compute_network.testnetwork.id
 				consumer_service_project_id = "%s"
 			}
 		}
@@ -7305,7 +7297,7 @@ resource "google_sql_database_instance" "instance" {
     google_project_iam_member.sa_network_viewer,
   ]
 }
-`, projectId, projectId, projectId, projectId, projectId, instanceName, projectId)
+`, projectId, projectId, projectId, networkName, projectId, instanceName, projectId)
 }
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, projectId string, orgId string, billingAccount string) string {
@@ -7644,105 +7636,6 @@ func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected 
 	}
 }
 
-func testAccSqlDatabaseInstanceDeleteExistingServiceConnectionPolicies(t *testing.T, project string, region string, networkName string) {
-	config := acctest.GoogleProviderConfig(t)
-	url := fmt.Sprintf("https://networkconnectivity.googleapis.com/v1/projects/%s/locations/%s/serviceConnectionPolicies", project, region)
-
-	billingProject := ""
-	if config.BillingProject != "" {
-		billingProject = config.BillingProject
-	}
-
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: config.UserAgent,
-	})
-	if err != nil {
-		log.Printf("[DEBUG] Error listing existing service connection policies: %s", err)
-		return
-	}
-	if res == nil || res["serviceConnectionPolicies"] == nil {
-		return
-	}
-
-	policies, ok := res["serviceConnectionPolicies"].([]interface{})
-	if !ok {
-		return
-	}
-	for _, p := range policies {
-		policy, ok := p.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		network, ok := policy["network"].(string)
-		if !ok || (!strings.HasSuffix(network, "/networks/"+networkName) && !strings.Contains(network, "/"+networkName+"")) {
-			continue
-		}
-		name, ok := policy["name"].(string)
-		if !ok || name == "" {
-			continue
-		}
-		deleteUrl := fmt.Sprintf("https://networkconnectivity.googleapis.com/v1/%s", strings.TrimPrefix(name, "/"))
-		log.Printf("[DEBUG] Deleting existing service connection policy %q before test", name)
-		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "DELETE",
-			Project:   billingProject,
-			RawURL:    deleteUrl,
-			UserAgent: config.UserAgent,
-		})
-		if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-			log.Printf("[DEBUG] Error deleting service connection policy %s: %s", name, err)
-		}
-	}
-}
-
-func testAccCheckSqlDatabaseInstanceDeleteServiceConnectionPolicy(t *testing.T, resourceName string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("Can't find %s in state", resourceName)
-		}
-
-		creationResult, ok := rs.Primary.Attributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.service_connection_policy_creation_result"]
-		if !ok || creationResult != "COMPLETED" {
-			return nil
-		}
-
-		policy, ok := rs.Primary.Attributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.service_connection_policy"]
-		if !ok || policy == "" {
-			return nil
-		}
-
-		config := acctest.GoogleProviderConfig(t)
-		url := policy
-		if !strings.HasPrefix(policy, "http") {
-			url = fmt.Sprintf("https://networkconnectivity.googleapis.com/v1/%s", strings.TrimPrefix(policy, "/"))
-		}
-
-		billingProject := ""
-		if config.BillingProject != "" {
-			billingProject = config.BillingProject
-		}
-
-		log.Printf("[DEBUG] Deleting service connection policy %q at %s", policy, url)
-		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "DELETE",
-			Project:   billingProject,
-			RawURL:    url,
-			UserAgent: config.UserAgent,
-		})
-		if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-			return fmt.Errorf("Error deleting service connection policy %s: %s", policy, err)
-		}
-
-		return nil
-	}
-}
 
 func verifyPscNetorkAttachmentOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, expectedNetworkAttachmentUri string) func(*terraform.State) error {
 	return func(s *terraform.State) error {
