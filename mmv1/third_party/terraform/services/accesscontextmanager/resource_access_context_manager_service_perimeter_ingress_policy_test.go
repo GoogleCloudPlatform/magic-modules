@@ -2,9 +2,9 @@ package accesscontextmanager_test
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -418,4 +418,3 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 }
 `, org, policyTitle, perimeterTitleName, perimeterTitleName)
 }
-

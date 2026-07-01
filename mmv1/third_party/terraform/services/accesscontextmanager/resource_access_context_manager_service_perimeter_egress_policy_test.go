@@ -2,9 +2,9 @@ package accesscontextmanager_test
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
