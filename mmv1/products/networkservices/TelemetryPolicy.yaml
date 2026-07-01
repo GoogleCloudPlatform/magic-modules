@@ -38,6 +38,21 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+samples:
+  - name: network_services_telemetry_policy_basic
+    primary_resource_id: default
+    steps:
+      - name: network_services_telemetry_policy_basic
+        resource_id_vars:
+          name: my-telemetry-policy
+          mesh_name: my-mesh
+  - name: network_services_telemetry_policy_full
+    primary_resource_id: default
+    steps:
+      - name: network_services_telemetry_policy_full
+        resource_id_vars:
+          name: my-telemetry-policy
+          mesh_name: my-mesh
 parameters:
   - name: name
     type: String
