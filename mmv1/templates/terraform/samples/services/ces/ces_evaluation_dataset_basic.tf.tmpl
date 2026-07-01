@@ -1,0 +1,21 @@
+resource "google_ces_app" "app" {
+  provider     = google-beta
+  app_id       = "{{index $.ResourceIdVars "app_id"}}"
+  display_name = "test-app-display-name"
+  location     = "us"
+
+  language_settings {
+    default_language_code = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_evaluation_dataset" "default" {
+  provider              = google-beta
+  evaluation_dataset_id = "{{index $.ResourceIdVars "dataset_id"}}"
+  display_name          = "{{index $.Vars "display_name"}}"
+  app                   = google_ces_app.app.app_id
+  location              = "us"
+}
