@@ -1,0 +1,8 @@
+resource "google_vertex_ai_rag_corpus" "{{$.PrimaryResourceId}}" {
+  region       = "us-west1"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  description  = "{{index $.Vars "description"}}"
+  vertex_ai_search_config {
+    serving_config = "projects/{{index $.TestEnvVars "project"}}/locations/us-west1/collections/default_collection/engines/example-engine/servingConfigs/default_serving_config"
+  }
+}

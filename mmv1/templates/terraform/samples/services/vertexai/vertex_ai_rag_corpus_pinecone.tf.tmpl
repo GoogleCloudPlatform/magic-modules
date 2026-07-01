@@ -1,0 +1,10 @@
+resource "google_vertex_ai_rag_corpus" "{{$.PrimaryResourceId}}" {
+  region       = "us-west1"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  description  = "{{index $.Vars "description"}}"
+  vector_db_config {
+    pinecone {
+      index_name = "example-pinecone-index"
+    }
+  }
+}

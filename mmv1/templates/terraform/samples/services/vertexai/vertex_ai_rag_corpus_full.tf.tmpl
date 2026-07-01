@@ -1,0 +1,27 @@
+resource "google_kms_crypto_key_iam_member" "vertexai_encrypterdecrypter" {
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-{{index $.TestEnvVars "project_number"}}@gcp-sa-vertex-rag.iam.gserviceaccount.com"
+}
+
+resource "google_vertex_ai_rag_corpus" "{{$.PrimaryResourceId}}" {
+  region       = "us-west1"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  description  = "{{index $.Vars "description"}}"
+  vector_db_config {
+    rag_embedding_model_config {
+      vertex_prediction_endpoint {
+        endpoint = "projects/{{index $.TestEnvVars "project"}}/locations/us-west1/publishers/google/models/text-embedding-004"
+      }
+    }
+    rag_managed_db {
+      ann {
+        leaf_count = {{index $.Vars "leaf_count"}}
+        tree_depth = {{index $.Vars "tree_depth"}}
+      }
+    }
+  }
+  encryption_spec {
+    kms_key_name = google_kms_crypto_key_iam_member.vertexai_encrypterdecrypter.crypto_key_id
+  }
+}
