@@ -1,0 +1,147 @@
+// Copyright (c) IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+package resourcemanager
+
+import (
+	"context"
+	"errors"
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/list"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func init() {
+	registry.FrameworkListResource{
+		Name:        "google_project_iam_custom_role",
+		ProductName: "resourcemanager",
+		Func:        NewGoogleProjectIamCustomRoleListResource,
+	}.Register()
+}
+
+type GoogleProjectIamCustomRoleListResource struct {
+	tpgresource.ListResourceMetadata
+}
+
+// GoogleProjectIamCustomRoleListModel matches [ListResourceMetadata.ListConfigFields] (tfsdk names and types).
+type GoogleProjectIamCustomRoleListModel struct {
+	Project types.String `tfsdk:"project"`
+}
+
+func NewGoogleProjectIamCustomRoleListResource() list.ListResource {
+	listR := &GoogleProjectIamCustomRoleListResource{}
+	listR.TypeName = "google_project_iam_custom_role"
+	listR.SDKv2Resource = ResourceGoogleProjectIamCustomRole()
+	listR.ListConfigFields = []tpgresource.ListConfigField{{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true}}
+	return listR
+}
+
+func (listR *GoogleProjectIamCustomRoleListResource) List(ctx context.Context, listReq list.ListRequest, stream *list.ListResultsStream) {
+	var data GoogleProjectIamCustomRoleListModel
+	diags := listReq.Config.Get(ctx, &data)
+	if diags.HasError() {
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+	if listR.Client == nil {
+		diags = append(diags, diag.NewErrorDiagnostic(
+			"Provider not configured",
+			"The Google provider client is not available; ensure the provider is configured (e.g. credentials and default project).",
+		))
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+	project := tpgresource.GetResourceNameFromSelfLink(listR.GetProject(data.Project))
+
+	errProjectIamCustomRoleListStreamClosed := errors.New("stream closed")
+	stream.Results = func(push func(list.ListResult) bool) {
+		err := ListProjectIamCustomRoles(listR.Client, project, func(rd *schema.ResourceData) error {
+			result := listReq.NewListResult(ctx)
+
+			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd, "title", "role_id"); err != nil {
+				return err
+			}
+
+			if !push(result) {
+				return errProjectIamCustomRoleListStreamClosed
+			}
+			return nil
+		})
+		// A closed stream is not an error: return without pushing again.
+		if err == nil || errors.Is(err, errProjectIamCustomRoleListStreamClosed) {
+			return
+		}
+		diags.AddError("API Error", err.Error())
+		result := listReq.NewListResult(ctx)
+		result.Diagnostics = diags
+		push(result)
+	}
+}
+
+func ListProjectIamCustomRoles(config *transport_tpg.Config, project string, callback func(rd *schema.ResourceData) error) error {
+	if config == nil {
+		return fmt.Errorf("provider client is not configured")
+	}
+	if project == "" {
+		return fmt.Errorf("project must be set")
+	}
+
+	d := ResourceGoogleProjectIamCustomRole().Data(&terraform.InstanceState{})
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("error setting project on temporary resource data: %w", err)
+	}
+
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(iambeta.Product, config)+"projects/{{project}}/roles")
+	if err != nil {
+		return err
+	}
+
+	billingProject := project
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
+		Config:         config,
+		TempData:       d,
+		Resource:       ResourceGoogleProjectIamCustomRole(),
+		ListURL:        url,
+		BillingProject: billingProject,
+		UserAgent:      userAgent,
+		ItemName:       "roles",
+		Flattener: func(item map[string]interface{}, d *schema.ResourceData, _ *transport_tpg.Config) error {
+			name, ok := item["name"].(string)
+			if !ok || name == "" {
+				return fmt.Errorf("missing name in role list response")
+			}
+			d.SetId(name)
+			return nil
+		},
+		Callback: func(rd *schema.ResourceData) error {
+			if err := ResourceGoogleProjectIamCustomRole().Read(rd, config); err != nil {
+				return err
+			}
+			if err := tpgresource.SetResourceIdentityAttributes(rd, map[string]interface{}{
+				"project": extractProjectFromProjectIamCustomRoleID(rd.Id()),
+				"role_id": tpgresource.GetResourceNameFromSelfLink(rd.Id()),
+			}); err != nil {
+				return err
+			}
+			return callback(rd)
+		},
+	})
+}
