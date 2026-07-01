@@ -81,7 +81,6 @@ properties:
       - admit-on-first-miss
       - admit-on-second-miss
     diff_suppress_func: StorageAnywhereCacheAdmissionPolicyDiffSuppress
-    custom_expand: templates/terraform/custom_expand/storage_anywhere_cache_admission_policy.go.tmpl
   - name: ttl
     type: String
     default_value: 86400s
