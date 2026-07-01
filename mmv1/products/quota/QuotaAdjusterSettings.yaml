@@ -1,0 +1,60 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'QuotaAdjusterSettings'
+description: |
+  Manages the Quota Adjuster settings for a Google Cloud project.
+references:
+  api: 'https://cloud.google.com/docs/quota/quota-adjuster'
+
+base_url: 'projects/{{project}}/locations/global/quotaAdjusterSettings'
+self_link: 'projects/{{project}}/locations/global/quotaAdjusterSettings'
+
+create_url: 'projects/{{project}}/locations/global/quotaAdjusterSettings'
+update_url: 'projects/{{project}}/locations/global/quotaAdjusterSettings'
+update_verb: 'PATCH'
+update_mask: true
+immutable: false
+
+parameters:
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    description: |
+      Name of the configuration, in the following format: projects/PROJECT_NUMBER/locations/global/quotaAdjusterSettings. Replace PROJECT_NUMBER with the project number for your project.
+
+properties:
+  - name: 'enablement'
+    type: Enum
+    required: true
+    description: |
+      The enablement status of the quota adjuster.
+    enum_values:
+      - 'ENABLED'
+      - 'DISABLED'
+
+  - name: 'update_time'
+    type: String
+    output: true
+    description: |
+      The timestamp when the QuotaAdjusterSettings resource was last updated.
+      This is an RFC3339 UTC "Zulu" format timestamp with nanosecond precision.
+
+  - name: 'etag'
+    type: String
+    output: true
+    optional: true
+    description: |
+      The current ETag of the QuotaAdjusterSettings. If an ETag is provided on update and does not match the current server's ETag in the QuotaAdjusterSettings, the request is blocked and returns an ABORTED error
