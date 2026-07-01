@@ -5,8 +5,9 @@ resource "google_biglake_iceberg_catalog" "{{$.PrimaryResourceId}}" {
 
   federated_catalog_options {
     unity_catalog_info {
-      catalog_name  = "my_catalog"
-      instance_name = "1.1.gcp.databricks.com"
+      catalog_name                     = "my_catalog"
+      instance_name                    = "1.1.gcp.databricks.com"
+      service_principal_application_id = "b3204274-6556-4d40-ad18-556f91659745"
     }
     refresh_options {
       refresh_schedule {
