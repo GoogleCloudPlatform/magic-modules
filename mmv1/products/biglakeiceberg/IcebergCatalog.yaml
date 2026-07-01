@@ -39,15 +39,8 @@ iam_policy:
     - projects/{{project}}/catalogs/{{name}}
     - '{{name}}'
 supports_indirect_user_project_override: true
-virtual_fields:
-  - name: biglake_service_account_member
-    type: String
-    output: true
-    description: |
-      The Identity of the service account in the form `serviceAccount:{email}`. This value is often used to refer to the service account in order to grant IAM permissions.
 custom_code:
   custom_update: templates/terraform/custom_update/biglake_iceberg_catalog_update.go.tmpl
-  post_read: templates/terraform/post_read/biglake_iceberg_catalog.go.tmpl
 samples:
   - name: biglake_iceberg_catalog
     primary_resource_id: my_iceberg_catalog
@@ -179,8 +172,6 @@ properties:
   - name: description
     type: String
     description: A user-provided description of the catalog. Maximum 1024 UTF-8 characters.
-    required: false
-    default_from_api: true
   - name: replicas
     type: Array
     item_type:
@@ -224,7 +215,6 @@ properties:
     description: |
       Options for a CATALOG_TYPE_FEDERATED catalog. Required when catalog_type
       is CATALOG_TYPE_FEDERATED.
-    required: false
     properties:
       - name: secret_name
         api_name: secret-name
@@ -233,27 +223,21 @@ properties:
           The secret resource name in Secret Manager, in the format
           `projects/{projectId}/locations/{location}/secrets/{secret_id}`.
           Used to store credentials for authenticating with the remote catalog.
-        required: false
-        default_from_api: true
       - name: service_directory_name
         api_name: service-directory-name
         type: String
         description: |
           The Service Directory service name for private network connectivity
           through Cross-Cloud Interconnect.
-        required: false
-        default_from_api: true
       - name: refresh_options
         api_name: refresh-options
         type: NestedObject
         description: Configuration for metadata synchronization from the remote catalog.
-        required: false
         properties:
           - name: refresh_schedule
             api_name: refresh-schedule
             type: NestedObject
             description: Schedule for periodic metadata refresh.
-            required: false
             properties:
               - name: refresh_interval
                 api_name: refresh-interval
@@ -262,12 +246,10 @@ properties:
                   The interval between metadata refreshes, expressed as a duration
                   string (e.g., `300s`).
                   The value must be at least 300s or 0s to disable refresh.
-                required: false
           - name: refresh_scope
             api_name: refresh-scope
             type: NestedObject
             description: Scope of metadata to synchronize from the remote catalog.
-            required: false
             properties:
               - name: namespace_filters
                 api_name: namespace-filters
@@ -277,7 +259,6 @@ properties:
                 description: |
                   A list of namespace filters to limit which namespaces are
                   synchronized from the remote catalog.
-                required: false
       - name: refresh_status
         api_name: refresh-status
         type: NestedObject
@@ -313,7 +294,6 @@ properties:
         description: |
           Configuration for a Databricks Unity Catalog remote catalog. Exactly
           one of unity_catalog_info or glue_catalog_info must be specified.
-        required: false
         properties:
           - name: instance_name
             api_name: instance-name
@@ -331,14 +311,12 @@ properties:
             api_name: service-principal-application-id
             type: String
             description: The application ID of the Databricks service principal for OIDC authentication.
-            required: false
       - name: glue_catalog_info
         api_name: glue-catalog-info
         type: NestedObject
         description: |
           Configuration for an AWS Glue remote catalog. Exactly one of
           unity_catalog_info or glue_catalog_info must be specified.
-        required: false
         properties:
           - name: warehouse
             api_name: warehouse

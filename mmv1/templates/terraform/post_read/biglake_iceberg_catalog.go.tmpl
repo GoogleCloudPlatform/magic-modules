@@ -1,5 +1,0 @@
-if sa, ok := d.GetOk("biglake_service_account"); ok {
-	if err := d.Set("biglake_service_account_member", "serviceAccount:"+sa.(string)); err != nil {
-		return fmt.Errorf("Error setting biglake_service_account_member: %s", err)
-	}
-}
