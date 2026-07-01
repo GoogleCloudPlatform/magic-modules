@@ -1,0 +1,19 @@
+This Pull Request resolves the runtime panic and subsequent schema validation type mismatch errors encountered when deploying or importing `google_apphub_service` and `google_apphub_workload` resources that have `extendedMetadata` populated (such as GKE services registered in the Agent Registry as `MCP_SERVER` types).
+
+This fixes the issues tracked in **#26476**.
+
+### 🔍 Root Cause Analysis
+
+1. **The Panic Bug**: The auto-generated provider code in `flattenApphubServiceServicePropertiesExtendedMetadata` and `flattenApphubWorkloadWorkloadPropertiesExtendedMetadata` expects the API response's `extendedMetadata` field to be a slice (`[]interface{}`). However, the Google Cloud API returns it as a JSON map (`map[string]interface{}`) where keys are schemas (e.g. `"apphub.googleapis.com/McpServer"`). This type mismatch leads to a hard type assertion panic (`panic: interface conversion: interface {} is map[string]interface {}, not []interface {}`) that crashes the provider during state reads.
+2. **The Schema Type Mismatch**: The schema defines `metadata_struct` as a `schema.TypeString` (representing a JSON-serialized string), but the API returns a JSON object (a map). The generated code returned this map directly (`return v`), which caused a schema validation type mismatch error: `expected type 'string', got unconvertible type 'map[string]interface {}'`.
+
+### 🛠️ Changes Implemented
+
+* **Robust Type Handling**: Updated the `extendedMetadata` flattening functions in both `resource_apphub_service.go` and `resource_apphub_workload.go` to handle both map and slice structures. For maps, it correctly iterates over keys and values and transforms them into the list of key-value blocks expected by the Terraform schema.
+* **Auto-Serialization**: Updated the `metadata_struct` flattening functions to automatically serialize the incoming metadata map into a valid JSON string, satisfying the schema's `TypeString` requirement.
+
+### 🧪 Verification & Testing
+Tested end-to-end in a live GCP environment using `terraform import` and `terraform apply` on GKE-based MCP servers:
+* Bypasses the crash entirely.
+* Successfully imports and refreshes the state of App Hub services with full metadata.
+* Repeated applications run cleanly without any type validation errors.
