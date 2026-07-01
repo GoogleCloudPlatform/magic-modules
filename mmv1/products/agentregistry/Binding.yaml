@@ -58,6 +58,11 @@ parameters:
     required: true
     url_param_only: true
 properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the Binding.
+    output: true
   - name: displayName
     type: String
     description: |

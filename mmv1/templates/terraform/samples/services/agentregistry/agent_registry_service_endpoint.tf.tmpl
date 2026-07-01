@@ -1,0 +1,16 @@
+resource "google_agent_registry_service" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  service_id   = "{{index $.ResourceIdVars "service"}}"
+  description  = "My Endpoint Agent Registry Service"
+  display_name = "My Service"
+
+  interfaces {
+    url              = "https://example.com"
+    protocol_binding = "HTTP_JSON"
+  }
+
+  endpoint_spec {
+    type    = "NO_SPEC"
+    content = "{}"
+  }
+}
