@@ -1,0 +1,101 @@
+package serviceusagev2_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccServiceUsageV2ProjectConsumerPolicy_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckServiceUsageV2ProjectConsumerPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceUsageV2ProjectConsumerPolicy_basic(context),
+			},
+			{
+				ResourceName:            "google_service_usage_v2_project_consumer_policy.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "enable_rules.0.services"},
+			},
+			{
+				Config: testAccServiceUsageV2ProjectConsumerPolicy_update(context),
+			},
+			{
+				ResourceName:            "google_service_usage_v2_project_consumer_policy.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "enable_rules.0.services"},
+			},
+			{
+				Config: testAccServiceUsageV2ProjectConsumerPolicy_removeService(context),
+			},
+			{
+				ResourceName:            "google_service_usage_v2_project_consumer_policy.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "enable_rules.0.services"},
+			},
+		},
+	})
+}
+
+func testAccServiceUsageV2ProjectConsumerPolicy_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_service_usage_v2_project_consumer_policy" "default" {
+  provider = google-beta
+
+  enable_rules {
+    services = [
+      "services/storage.googleapis.com"
+    ]
+  }
+}
+`, context)
+}
+
+func testAccServiceUsageV2ProjectConsumerPolicy_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_service_usage_v2_project_consumer_policy" "default" {
+  provider        = google-beta
+  deletion_policy = "FORCE"
+
+  enable_rules {
+    services = [
+      "services/storage.googleapis.com",
+      "services/compute.googleapis.com"
+    ]
+  }
+}
+`, context)
+}
+
+func testAccServiceUsageV2ProjectConsumerPolicy_removeService(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_service_usage_v2_project_consumer_policy" "default" {
+  provider        = google-beta
+  deletion_policy = "FORCE"
+
+  enable_rules {
+    services = [
+      "services/storage.googleapis.com"
+    ]
+  }
+}
+`, context)
+}
+{{- end }}

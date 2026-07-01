@@ -1,0 +1,34 @@
+// ProjectConsumerPolicy is a singleton resource and can't be deleted.
+// We will check if the enableRules have been cleared
+
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}ServiceUsageV2BasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/consumerPolicies/default")
+if err != nil {
+return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+billingProject = config.BillingProject
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+Config:    config,
+Method:    "GET",
+Project:   billingProject,
+RawURL:    url,
+UserAgent: config.UserAgent,
+})
+if err != nil {
+return nil
+}
+
+if enableRules, ok := res["enableRules"]; ok {
+if rules, ok := enableRules.([]interface{}); ok && len(rules) > 0 {
+return fmt.Errorf("ProjectConsumerPolicy enableRules were not cleared")
+}
+}
+
+return nil
