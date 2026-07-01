@@ -13,6 +13,18 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+// apigeeSharedflowDeploymentCollapseOrgPrefix collapses a doubled
+// "organizations/" segment in a constructed URL/ID. org_id may be supplied
+// either bare or fully-qualified ("organizations/<id>", e.g. from
+// google_apigee_organization.id); the URL templates already prepend
+// "organizations/", so the fully-qualified form would otherwise yield
+// "organizations/organizations/<id>". The stored org_id value is left untouched
+// (the diff is handled by DiffSuppressFunc), so existing resources are never
+// re-created.
+func apigeeSharedflowDeploymentCollapseOrgPrefix(s string) string {
+	return strings.Replace(s, "organizations/organizations/", "organizations/", 1)
+}
+
 func ResourceApigeeSharedFlowDeployment() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceApigeeSharedflowDeploymentCreate,
@@ -46,6 +58,14 @@ func ResourceApigeeSharedFlowDeployment() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: `The Apigee Organization associated with the Apigee instance`,
+				// Users may pass google_apigee_organization.id
+				// ("organizations/<project-id>"); after import the captured org_id has
+				// no prefix. Suppress the diff when the two values are equal once the
+				// "organizations/" prefix is stripped, so the prefixed and bare forms
+				// don't trigger a spurious ForceNew (destroy/recreate).
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return strings.TrimPrefix(old, "organizations/") == strings.TrimPrefix(new, "organizations/")
+				},
 			},
 			"revision": {
 				Type:        schema.TypeString,
@@ -80,6 +100,9 @@ func resourceApigeeSharedflowDeploymentCreate(d *schema.ResourceData, meta inter
 	}
 
 	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"organizations/{{org_id}}/environments/{{environment}}/sharedflows/{{sharedflow_id}}/revisions/{{revision}}/deployments?override=true&serviceAccount={{service_account}}")
+	if err == nil {
+		url = apigeeSharedflowDeploymentCollapseOrgPrefix(url)
+	}
 	if err != nil {
 		return err
 	}
@@ -106,6 +129,9 @@ func resourceApigeeSharedflowDeploymentCreate(d *schema.ResourceData, meta inter
 
 	// Store the ID now
 	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/sharedflows/{{sharedflow_id}}/revisions/{{revision}}/deployments")
+	if err == nil {
+		id = apigeeSharedflowDeploymentCollapseOrgPrefix(id)
+	}
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -124,6 +150,9 @@ func resourceApigeeSharedflowDeploymentRead(d *schema.ResourceData, meta interfa
 	}
 
 	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"organizations/{{org_id}}/environments/{{environment}}/sharedflows/{{sharedflow_id}}/revisions/{{revision}}/deployments")
+	if err == nil {
+		url = apigeeSharedflowDeploymentCollapseOrgPrefix(url)
+	}
 	if err != nil {
 		return err
 	}
@@ -185,6 +214,9 @@ func resourceApigeeSharedflowDeploymentUpdate(d *schema.ResourceData, meta inter
 	}
 
 	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"organizations/{{org_id}}/environments/{{environment}}/sharedflows/{{sharedflow_id}}/revisions/{{revision}}/deployments?override=true&serviceAccount={{service_account}}")
+	if err == nil {
+		url = apigeeSharedflowDeploymentCollapseOrgPrefix(url)
+	}
 	if err != nil {
 		return err
 	}
@@ -211,6 +243,9 @@ func resourceApigeeSharedflowDeploymentUpdate(d *schema.ResourceData, meta inter
 
 	// Store the ID now
 	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/sharedflows/{{sharedflow_id}}/revisions/{{revision}}/deployments")
+	if err == nil {
+		id = apigeeSharedflowDeploymentCollapseOrgPrefix(id)
+	}
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -238,6 +273,9 @@ func resourceApigeeSharedflowDeploymentDelete(d *schema.ResourceData, meta inter
 	billingProject := ""
 
 	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"organizations/{{org_id}}/environments/{{environment}}/sharedflows/{{sharedflow_id}}/revisions/{{revision}}/deployments")
+	if err == nil {
+		url = apigeeSharedflowDeploymentCollapseOrgPrefix(url)
+	}
 	if err != nil {
 		return err
 	}
@@ -279,6 +317,9 @@ func resourceApigeeSharedflowDeploymentImport(d *schema.ResourceData, meta inter
 
 	// Replace import id for the resource id
 	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/sharedflows/{{sharedflow_id}}/revisions/{{revision}}/deployments")
+	if err == nil {
+		id = apigeeSharedflowDeploymentCollapseOrgPrefix(id)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
