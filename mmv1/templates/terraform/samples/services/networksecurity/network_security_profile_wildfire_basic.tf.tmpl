@@ -1,0 +1,159 @@
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  project                 = "{{index $.TestEnvVars "project"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "backend" {
+  provider      = google-beta
+  name          = "{{index $.ResourceIdVars "subnet_name"}}"
+  project       = "{{index $.TestEnvVars "project"}}"
+  region        = "us-west1"
+  ip_cidr_range = "10.1.2.0/24"
+
+  network = google_compute_network.default.id
+}
+
+resource "google_compute_subnetwork" "proxy_only" {
+  provider      = google-beta
+  name          = "{{index $.ResourceIdVars "proxy_subnet_name"}}"
+  project       = "{{index $.TestEnvVars "project"}}"
+  region        = "us-west1"
+  ip_cidr_range = "10.129.0.0/23"
+
+  purpose = "REGIONAL_MANAGED_PROXY"
+  role    = "ACTIVE"
+
+  network = google_compute_network.default.id
+}
+
+resource "google_compute_address" "swp_ip" {
+  provider = google-beta
+
+  name         = "{{index $.ResourceIdVars "gateway_name"}}"
+  project      = "{{index $.TestEnvVars "project"}}"
+  region       = "us-west1"
+
+  subnetwork   = google_compute_subnetwork.backend.id
+  address_type = "INTERNAL"
+  purpose      = "GCE_ENDPOINT"
+}
+
+resource "google_network_security_gateway_security_policy" "default" {
+  provider = google-beta
+
+  name     = "{{index $.ResourceIdVars "gateway_name"}}"
+  project  = "{{index $.TestEnvVars "project"}}"
+  location = "us-west1"
+}
+
+resource "google_network_services_gateway" "default" {
+  provider = google-beta
+
+  name     = "{{index $.ResourceIdVars "gateway_name"}}"
+  project  = "{{index $.TestEnvVars "project"}}"
+  location = "us-west1"
+
+  type = "SECURE_WEB_GATEWAY"
+
+  delete_swg_autogen_router_on_destroy = true
+
+  addresses = [
+    google_compute_address.swp_ip.address
+  ]
+
+  ports = [443]
+
+  scope      = "swp-scope"
+  network    = google_compute_network.default.id
+  subnetwork = google_compute_subnetwork.backend.id
+
+  gateway_security_policy = google_network_security_gateway_security_policy.default.id
+
+  depends_on = [
+    google_compute_subnetwork.proxy_only
+  ]
+}
+
+resource "google_network_services_authz_extension" "default" {
+  provider = google-beta
+
+  name     = "{{index $.ResourceIdVars "authz_extension_name"}}"
+  project  = "{{index $.TestEnvVars "project"}}"
+  location = "us-west1"
+
+  description           = "my description"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+
+  authority = "{{index $.Vars "ext_authority"}}"
+  service   = "authz-server.internal.net" 
+
+  timeout   = "{{index $.Vars "ext_timeout"}}"
+  fail_open = {{index $.Vars "ext_fail_open"}}
+
+  forward_headers = [
+    "Authorization"
+  ]
+}
+
+resource "google_network_security_security_profile" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  name        = "{{index $.ResourceIdVars "resource_name"}}"
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  description = "{{index $.Vars "profile_description"}}"
+  location    = "global"
+  type        = "WILDFIRE_ANALYSIS"
+
+  wildfire_analysis_profile {
+    wildfire_inline_cloud_analysis_rules {
+      action = "ALERT"
+      custom_file_types {
+        file_types = ["PE"]
+      }
+      direction           = "DOWNLOAD"
+      file_selection_mode = "CUSTOM_FILE_TYPES"
+    }
+    wildfire_submission_rules {
+      custom_file_types {
+        file_types = ["PE"]
+      }
+      direction           = "UPLOAD"
+      file_selection_mode = "CUSTOM_FILE_TYPES"
+    }
+  }
+}
+
+resource "google_network_security_authz_policy" "default" {
+  provider = google-beta
+
+  name        = "{{index $.ResourceIdVars "policy_name"}}"
+  project     = "{{index $.TestEnvVars "project"}}"
+  location    = "us-west1"
+  description = "SWP authz policy"
+
+  target {
+    load_balancing_scheme = "INTERNAL_MANAGED"
+
+    resources = [
+      google_network_services_gateway.default.id
+    ]
+  }
+
+  action = "CUSTOM"
+
+  custom_provider {
+    authz_extension {
+      resources = [
+        google_network_services_authz_extension.default.id
+      ]
+    }
+  }
+
+  depends_on = [
+    google_network_services_gateway.default,
+    google_network_services_authz_extension.default,
+    google_network_security_security_profile.{{$.PrimaryResourceId}}
+  ]
+}
