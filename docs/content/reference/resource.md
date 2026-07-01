@@ -314,6 +314,18 @@ iam_policy:
 
 Injects arbitrary logic into a generated resource. For more information, see [Add custom resource code]({{< ref "/develop/custom-code" >}}).
 
+### `import_format`
+
+Overrides the default accepted formats when running `terraform import` for a resource. Generated resources will normally accept values based on a subsets of the resource `self_link`, using this attribute is only necessary when those are inadequate due to more complex URL behavior such as when a resource is a child of another resource.
+
+Expected to be formatted as follows:
+```yaml
+import_format:
+   - example_import_one
+   - example_import_two
+```
+Leading a token with `%` e.g. `{{%parent}}/resource/{{resource}}` will allow that token to hold multiple `/`s.
+
 ### `mutex`
 
 All resources (of all kinds) that share a mutex value will block rather than
