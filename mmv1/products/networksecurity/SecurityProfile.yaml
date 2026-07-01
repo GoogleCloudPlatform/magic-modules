@@ -106,7 +106,6 @@ samples:
           endpoint_group_id: 'my-eg'
         test_env_vars:
           org_id: 'ORG_ID'
-<<<<<<< feat/add-support-to-wildfire-fields
   - name: "network_security_profile_wildfire_basic"
     primary_resource_id: "default"
     min_version: "beta"
@@ -145,8 +144,6 @@ samples:
         test_env_vars:
           project: "PROJECT_NAME"
           org_id: "ORG_ID"
-=======
->>>>>>> main
 parameters:
   - name: 'name'
     type: String
