@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -755,18 +756,45 @@ func resourceComputeSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParams
 	}
 }
 
-// resourceComputeSecurityPolicyRuleHash hashes security policy rules by priority and action.
-// Using only priority causes hash collisions when two rules share the same priority (which
-// the API rejects, but which users may write transiently), causing schema.Set to silently
-// drop one rule and bypass the duplicate-priority validation in rulesCustomizeDiff.
-// Including action ensures distinct rules always produce distinct hashes while still
-// excluding volatile optional fields (description, preview, match sub-fields) that the
-// API may return as empty strings instead of nil, preventing unnecessary rule recreation.
+// resourceComputeSecurityPolicyRuleHash hashes security policy rules by the fields that
+// uniquely define a rule's behavior. Hashing on priority+action alone caused schema.Set to
+// treat an edited rule as unchanged whenever the edit kept the same priority and action
+// (e.g. changing match.expr.expression): d.HasChange("rule") returned false and the update
+// was silently skipped (hashicorp/terraform-provider-google#27936).
+//
+// To keep the anti-churn guarantee that motivated the priority+action-only hash
+// (hashicorp/terraform-provider-google#16882 -- the API returns some optional fields as
+// empty strings rather than nil), every optional field below is read with a zero-value
+// default, so a rule the API echoes back hashes identically to the one in config.
 func resourceComputeSecurityPolicyRuleHash(v interface{}) int {
 	raw := v.(map[string]interface{})
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("%d-", raw["priority"].(int)))
 	buf.WriteString(fmt.Sprintf("%s-", raw["action"].(string)))
+	if preview, ok := raw["preview"].(bool); ok {
+		buf.WriteString(fmt.Sprintf("%t-", preview))
+	}
+	if description, ok := raw["description"].(string); ok {
+		buf.WriteString(fmt.Sprintf("%s-", description))
+	}
+	if matchList, ok := raw["match"].([]interface{}); ok && len(matchList) > 0 && matchList[0] != nil {
+		match := matchList[0].(map[string]interface{})
+		if versionedExpr, ok := match["versioned_expr"].(string); ok {
+			buf.WriteString(fmt.Sprintf("%s-", versionedExpr))
+		}
+		if exprList, ok := match["expr"].([]interface{}); ok && len(exprList) > 0 && exprList[0] != nil {
+			if expression, ok := exprList[0].(map[string]interface{})["expression"].(string); ok {
+				buf.WriteString(fmt.Sprintf("%s-", expression))
+			}
+		}
+		if configList, ok := match["config"].([]interface{}); ok && len(configList) > 0 && configList[0] != nil {
+			if ranges, ok := configList[0].(map[string]interface{})["src_ip_ranges"].(*schema.Set); ok {
+				ips := tpgresource.ConvertStringArr(ranges.List())
+				sort.Strings(ips)
+				buf.WriteString(fmt.Sprintf("%s-", strings.Join(ips, ",")))
+			}
+		}
+	}
 	return tpgresource.Hashcode(buf.String())
 }
 
