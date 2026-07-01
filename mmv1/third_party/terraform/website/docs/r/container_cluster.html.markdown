@@ -196,6 +196,8 @@ for more information.
     See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison)
     for available features.
 
+* `ignore_node_count_changes` - (Optional) Whether to ignore external changes (drift) to the GKE node count (e.g. from GKE autoscaling). Setting this to `true` skips querying Compute Engine Instance Group Managers (IGMs) to determine the current node count on read, which can save API quota and speed up plans on large clusters. Unlike Terraform core's `lifecycle { ignore_changes = [node_count] }`, this allows configuration-driven scaling updates in your HCL while still ignoring runtime autoscaling drift.
+
 * `initial_node_count` - (Optional) The number of nodes to create in this
 cluster's default node pool. In regional or multi-zonal clusters, this is the
 number of nodes per zone. Must be set if `node_pool` is not set. If you're using
@@ -282,6 +284,9 @@ region are guaranteed to support the same version.
     cluster creation without deleting and recreating the entire cluster. Unless you absolutely need the ability
     to say "these are the _only_ node pools associated with this cluster", use the
     [google_container_node_pool](container_node_pool.html) resource instead of this property.
+    * `ignore_node_count_changes` - (Optional) Whether to ignore external changes (drift) to the node count (e.g. from GKE autoscaling). Setting this to `true` skips querying Compute Engine Instance Group Managers (IGMs) to determine the current node count on read, which can save API quota and speed up plans on large clusters. Unlike Terraform core's `lifecycle { ignore_changes = [node_count] }`, this allows configuration-driven scaling updates in your HCL while still ignoring runtime autoscaling drift.
+
+* `skip_node_pool_refresh` - (Optional) Whether to skip refreshing the GKE cluster's inline node pool list during read operations. Setting this to `true` prevents the provider from querying GKE API for node pools, resolving long plan times on clusters with a large number of node pools. **Warning:** When enabled, the cluster's `node_pool` attribute in the Terraform state will remain empty (`[]`), even if node pools exist externally. This flag cannot be set to `true` if you define inline `node_pool` blocks in your configuration; doing so will result in a validation error during plan.
 
 * `node_pool_auto_config` - (Optional) Node pool configs that apply to auto-provisioned node pools in
     [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters and
@@ -475,7 +480,7 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
     It is enabled by default;
     set `disabled = true` to disable.
 
-* `agent_sandbox_config` - (Optional, Beta) Configuration for the Agent Sandbox addon. Structure is documented below:
+* `agent_sandbox_config` - (Optional) Configuration for the Agent Sandbox addon. Structure is documented below:
     * `enabled` - (Required) Whether the Agent Sandbox addon is enabled.
 
 * `http_load_balancing` - (Optional) The status of the HTTP (L7) load balancing
@@ -1310,6 +1315,8 @@ workload_identity_config {
 
 <a name="nested_node_pool_node_config"></a>The `node_config` block supports:
 
+* `kubelet_config` - (Optional) Node kubelet configs. Structure is [documented below](#nested_kubelet_config).
+
 * `taint_config` - (Optional) Taint configuration for the node pool. Structure is [documented below](#nested_node_pool_node_config_taint_config).
 
 <a name="nested_node_pool_node_config_taint_config"></a>The `taint_config` block supports:
@@ -1319,7 +1326,7 @@ workload_identity_config {
 <a name="nested_node_pool_auto_config"></a>The `node_pool_auto_config` block supports:
 
 * `node_kubelet_config` - (Optional) Kubelet configuration for Autopilot clusters. Currently, only `insecure_kubelet_readonly_port_enabled` is supported here.
-Structure is [documented below](#nested_node_kubelet_config).
+    Structure is [documented below](#nested_node_kubelet_config).
 
 * `resource_manager_tags` - (Optional) A map of resource manager tag keys and values to be attached to the nodes for managing Compute Engine firewalls using Network Firewall Policies. Tags must be according to specifications found [here](https://cloud.google.com/vpc/docs/tags-firewalls-overview#specifications). A maximum of 5 tag key-value pairs can be specified. Existing tags will be replaced with new values. Tags must be in one of the following formats ([KEY]=[VALUE]) 1. `tagKeys/{tag_key_id}=tagValues/{tag_value_id}` 2. `{org_id}/{tag_key_name}={tag_value_name}` 3. `{project_id}/{tag_key_name}={tag_value_name}`.
 
@@ -1500,8 +1507,9 @@ not.
 
     * `"UNSPECIFIED"`: Default value. This should not be used.
     * `"NO_RESERVATION"`: Do not consume from any reserved capacity.
-    * `"ANY_RESERVATION"`: Consume any reservation available.
+    * `"ANY_RESERVATION"`: Consume any non-specific reservation available, with a fallback to on-demand capacity in case of none reservaition being claimable.
     * `"SPECIFIC_RESERVATION"`: Must consume from a specific reservation. Must specify key value fields for specifying the reservations.
+    * `"ANY_RESERVATION_THEN_FAIL"`: Consume any non-specific reservation available, without a fallback to on-demand capacity in case of none reservaition being claimable.
 * `key` (Optional) The label key of a reservation resource. To target a SPECIFIC_RESERVATION by name, specify "compute.googleapis.com/reservation-name" as the key and specify the name of your reservation as its value.
 * `values` (Optional) The list of label values of reservation resources. For example: the name of the specific reservation when using a key of "compute.googleapis.com/reservation-name"
 
@@ -1647,6 +1655,10 @@ those in the Guaranteed QoS class, by influencing NUMA affinity. Structure is [d
 * `eviction_minimum_reclaim` - (Optional) Defines a map of signal names to percentage that defines minimum reclaims. It describes the minimum amount of a given resource the kubelet will reclaim when performing a pod eviction. Structure is [documented below](#nested_eviction_minimum_reclaim).
 
 * `crash_loop_back_off` - (Optional) Contains configuration options to modify node-level parameters for container restart behavior. Structure is [documented below](#nested_crash_loop_back_off).
+
+* `shutdown_grace_period_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown. This is the time allocated for all pods (critical and non-critical) to terminate. The value must be between 10 and 10000. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
+
+* `shutdown_grace_period_critical_pods_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown for critical pods. This value must be less than or equal to `shutdown_grace_period_seconds`. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
 
 <a name="nested_eviction_soft"></a>The `eviction_soft` block supports:
 

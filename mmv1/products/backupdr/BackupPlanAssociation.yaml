@@ -12,72 +12,74 @@
 # limitations under the License.
 
 ---
-name: 'BackupPlanAssociation'
-base_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations
-create_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/?backup_plan_association_id={{backup_plan_association_id}}
-self_link: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
-update_verb: 'PATCH'
-update_mask: true
-delete_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
+name: BackupPlanAssociation
 description: A Backup and DR BackupPlanAssociation.
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}'
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
-  api: 'https://cloud.google.com/backup-disaster-recovery/docs/reference/rest'
-autogen_async: true
+    Official Documentation: https://cloud.google.com/backup-disaster-recovery/docs
+  api: https://cloud.google.com/backup-disaster-recovery/docs/reference/rest
+base_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations
+self_link: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
+create_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/?backup_plan_association_id={{backup_plan_association_id}}
+delete_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
 timeouts:
   insert_minutes: 60
   update_minutes: 20
   delete_minutes: 60
-examples:
-  - name: 'backup_dr_bpa'
-    primary_resource_id: 'my-backup-plan-association'
-    vars:
-      backup_plan_association_id: "my-bpa"
-      compute-name: "test-instance"
-      backup_vault_id: "bv-bpa"
-      backup_plan_id: "bp-bpa-test"
-      account_id: "my-custom"
-    test_env_vars:
-      project: "PROJECT_NAME"
-  - name: 'backup_dr_bpa_filestore'
-    primary_resource_id: 'my-backup-plan-association-filestore'
-    vars:
-      backup_plan_association_id: "my-bpa-filestore"
-      filestore_instance_id: "test-instance-bpa"
-      backup_vault_id: "bv-bpa-filestore"
-      backup_plan_id: "bp-bpa-filestore"
-    test_env_vars:
-      project: "PROJECT_NAME"
-
+autogen_async: true
+samples:
+  - name: backup_dr_bpa
+    primary_resource_id: my-backup-plan-association
+    steps:
+      - name: backup_dr_bpa
+        resource_id_vars:
+          backup_plan_association_id: my-bpa
+          compute-name: test-instance
+          backup_vault_id: bv-bpa
+          backup_plan_id: bp-bpa-test
+          account_id: my-custom
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: backup_dr_bpa_filestore
+    primary_resource_id: my-backup-plan-association-filestore
+    steps:
+      - name: backup_dr_bpa_filestore
+        resource_id_vars:
+          backup_plan_association_id: my-bpa-filestore
+          filestore_instance_id: test-instance-bpa
+          backup_vault_id: bv-bpa-filestore
+          backup_plan_id: bp-bpa-filestore
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     url_param_only: true
     description: |
       The location for the backupplan association
-  - name: 'backup_plan_association_id'
+  - name: backup_plan_association_id
     type: String
     required: true
     url_param_only: true
-    description: |-
-      The id of backupplan association
+    description: The id of backupplan association
 properties:
-  - name: 'resource'
+  - name: resource
     type: String
     description: |
       The resource for which BPA needs to be created
     required: true
     ignore_read: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of backup plan association resource created
     output: true
-  - name: 'backupPlan'
+  - name: backupPlan
     type: String
     description: |
       The BP with which resource needs to be created
@@ -86,41 +88,41 @@ properties:
       - A Backup Plan configured for 'compute.googleapis.com/Disk' can be used to protect both standard Disks and Regional Disks resources.
       - A Backup Plan configured for 'file.googleapis.com/Instance' can only protect Filestore instances.
     required: true
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-  - name: 'resourceType'
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+  - name: resourceType
     type: String
     description: |
       The resource type of workload on which backupplan is applied.
       Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "compute.googleapis.com/RegionDisk", and "file.googleapis.com/Instance"
     required: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The time when the instance was created
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
-     The time when the instance was updated.
+      The time when the instance was updated.
     output: true
-  - name: 'dataSource'
+  - name: dataSource
     type: String
     description: |
       Resource name of data source which will be used as storage location for backups taken
     output: true
-  - name: 'rulesConfigInfo'
+  - name: rulesConfigInfo
     type: Array
     output: true
     description: |
-       Message for rules config info
+      Message for rules config info
     item_type:
       type: NestedObject
       properties:
-        - name: 'ruleId'
+        - name: ruleId
           type: String
           description: Backup Rule id fetched from backup plan.
           output: true
-        - name: 'lastBackupState'
+        - name: lastBackupState
           type: Enum
           description: State of last backup taken.
           enum_values:
@@ -130,20 +132,20 @@ properties:
             - :SUCCEEDED
             - :FAILED
           output: true
-        - name: 'lastBackupError'
+        - name: lastBackupError
           type: NestedObject
           description: google.rpc.Status object to store the last backup error
           output: true
           properties:
-            - name: 'code'
+            - name: code
               type: Double
               output: true
               description: The status code, which should be an enum value of [google.rpc.Code]
-            - name: 'message'
+            - name: message
               type: String
               description: A developer-facing error message, which should be in English.
               output: true
-        - name: 'lastSuccessfulBackupConsistencyTime'
+        - name: lastSuccessfulBackupConsistencyTime
           type: String
           description: The point in time when the last successful backup was captured from the source
           output: true

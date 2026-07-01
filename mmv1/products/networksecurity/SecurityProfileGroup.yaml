@@ -43,6 +43,7 @@ async:
 custom_code:
 include_in_tgc_next: true
 samples:
+<<<<<<< feat/add-support-to-wildfire-fields
   - name: 'network_security_security_profile_basic'
     primary_resource_id: 'default'
     steps:
@@ -115,6 +116,60 @@ samples:
           group_description: "Initial profile group description"
         test_env_vars:
           org_id: "ORG_ID"
+=======
+  - name: 'network_security_security_profile_group_basic'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'network_security_security_profile_group_basic'
+        resource_id_vars:
+          security_profile_group_name: 'sec-profile-group'
+          security_profile_name: 'sec-profile'
+        test_env_vars:
+          org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_group_mirroring'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'network_security_security_profile_group_mirroring'
+        min_version: 'beta'
+        resource_id_vars:
+          network_name: 'network'
+          deployment_group_id: 'deployment-group'
+          endpoint_group_id: 'endpoint-group'
+          security_profile_name: 'sec-profile'
+          security_profile_group_name: 'sec-profile-group'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
+        test_env_vars:
+          org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_group_intercept'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'network_security_security_profile_group_intercept'
+        min_version: 'beta'
+        resource_id_vars:
+          network_name: 'network'
+          deployment_group_id: 'deployment-group'
+          endpoint_group_id: 'endpoint-group'
+          security_profile_name: 'sec-profile'
+          security_profile_group_name: 'sec-profile-group'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
+        test_env_vars:
+          org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_group_url_filtering'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'network_security_security_profile_group_url_filtering'
+        resource_id_vars:
+          security_profile_group_name: 'sec-profile-group'
+          security_profile_name: 'sec-profile'
+        test_env_vars:
+          org_id: 'ORG_ID'
+>>>>>>> main
 parameters:
   - name: 'name'
     type: String

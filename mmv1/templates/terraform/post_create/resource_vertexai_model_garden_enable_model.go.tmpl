@@ -1,0 +1,28 @@
+log.Printf("[DEBUG] Beginning post_create for Vertex AI Model Garden EnableModel %q", d.Id())
+
+// EnableModel is a synchronous method, so the create response (res) already
+// contains the EnableModelResponse body. Surface the output-only fields and
+// validate that the enablement actually succeeded.
+
+if enablementState, ok := res["enablementState"].(string); ok {
+	log.Printf("[DEBUG] EnableModel enablement state for %q: %s", d.Id(), enablementState)
+	if err := d.Set("enablement_state", enablementState); err != nil {
+		return fmt.Errorf("Error setting enablement_state: %s", err)
+	}
+	if enablementState == "ENABLEMENT_STATE_FAILED" {
+		// The API call returned successfully but reported that the model could
+		// not be enabled (e.g. unmet prerequisites). Fail the apply and clear
+		// the ID so the resource is not recorded as created.
+		d.SetId("")
+		return fmt.Errorf("Error enabling Model Garden model %q: API returned enablement state ENABLEMENT_STATE_FAILED", d.Get("publisher_model_name"))
+	}
+} else {
+	log.Printf("[WARN] No enablementState returned by enableModel for %q", d.Id())
+}
+
+if publisherEndpoint, ok := res["publisherEndpoint"].(string); ok {
+	log.Printf("[DEBUG] EnableModel publisher endpoint for %q: %s", d.Id(), publisherEndpoint)
+	if err := d.Set("publisher_endpoint", publisherEndpoint); err != nil {
+		return fmt.Errorf("Error setting publisher_endpoint: %s", err)
+	}
+}

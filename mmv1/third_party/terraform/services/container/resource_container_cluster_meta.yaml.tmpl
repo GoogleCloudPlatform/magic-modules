@@ -13,9 +13,7 @@ cai_asset_name_formats:
   - {{"//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}"}}
   - {{"//container.googleapis.com/projects/{{project}}/zones/{{location}}/clusters/{{name}}"}}
 fields:
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.agentSandboxConfig.enabled'
-{{- end }}
   - field: 'addons_config.cloudrun_config.disabled'
     api_field: 'addonsConfig.cloudRunConfig.disabled'
   - field: 'addons_config.cloudrun_config.load_balancer_type'
@@ -359,6 +357,8 @@ fields:
   - api_field: 'nodeConfig.kubeletConfig.imageMaximumGcAge'
   - api_field: 'nodeConfig.kubeletConfig.imageMinimumGcAge'
   - api_field: 'nodeConfig.kubeletConfig.insecureKubeletReadonlyPortEnabled'
+  - api_field: 'nodeConfig.kubeletConfig.shutdownGracePeriodSeconds'
+  - api_field: 'nodeConfig.kubeletConfig.shutdownGracePeriodCriticalPodsSeconds'
   - api_field: 'nodeConfig.kubeletConfig.maxParallelImagePulls'
   - api_field: 'nodeConfig.kubeletConfig.memoryManager.policy'
   - api_field: 'nodeConfig.kubeletConfig.podPidsLimit'
@@ -444,6 +444,8 @@ fields:
     api_field: 'nodePools.autoscaling.totalMaxNodeCount'
   - field: 'node_pool.autoscaling.total_min_node_count'
     api_field: 'nodePools.autoscaling.totalMinNodeCount'
+  - field: 'node_pool.ignore_node_count_changes'
+    provider_only: true
   - field: 'node_pool.initial_node_count'
     api_field: 'nodePools.initialNodeCount'
   - field: 'node_pool.instance_group_urls'
@@ -640,6 +642,10 @@ fields:
     api_field: 'nodePools.config.kubeletConfig.imageMinimumGcAge'
   - field: 'node_pool.node_config.kubelet_config.insecure_kubelet_readonly_port_enabled'
     api_field: 'nodePools.config.kubeletConfig.insecureKubeletReadonlyPortEnabled'
+  - field: 'node_pool.node_config.kubelet_config.shutdown_grace_period_seconds'
+    api_field: 'nodePools.config.kubeletConfig.shutdownGracePeriodSeconds'
+  - field: 'node_pool.node_config.kubelet_config.shutdown_grace_period_critical_pods_seconds'
+    api_field: 'nodePools.config.kubeletConfig.shutdownGracePeriodCriticalPodsSeconds'
   - field: 'node_pool.node_config.kubelet_config.max_parallel_image_pulls'
     api_field: 'nodePools.config.kubeletConfig.maxParallelImagePulls'
   - field: 'node_pool.node_config.kubelet_config.memory_manager.policy'
@@ -907,4 +913,8 @@ fields:
 {{- end }}
   - api_field: 'workloadIdentityConfig.workloadPool'
   - field: 'deletion_policy'
+    provider_only: true
+  - field: 'skip_node_pool_refresh'
+    provider_only: true
+  - field: 'ignore_node_count_changes'
     provider_only: true
