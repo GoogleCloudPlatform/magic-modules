@@ -134,6 +134,11 @@ properties:
           description: |
             The project id or number of the interface to which the IP was assigned.
           output: true
+        - name: 'serviceClassId'
+          type: String
+          description: |
+            The service class id of the producer service to which the IP was assigned.
+          output: true
         - name: 'subnetwork'
           type: String
           description: |
