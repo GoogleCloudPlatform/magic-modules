@@ -61,7 +61,7 @@ properties:
   - name: name
     type: String
     description: |
-      The resource name of the Service.
+      The resource name of the Binding.
     output: true
   - name: displayName
     type: String
