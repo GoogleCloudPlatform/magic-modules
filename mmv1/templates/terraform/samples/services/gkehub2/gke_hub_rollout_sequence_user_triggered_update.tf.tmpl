@@ -1,23 +1,13 @@
-
-provider "google-beta" {
-  gke_hub_custom_endpoint = "https://gkehub.googleapis.com/v1alpha/"
-  gke_hub2_custom_endpoint = "https://gkehub.googleapis.com/v1alpha/"
-}
-
-data "google_project" "project" {
-  provider = google-beta
-}
+data "google_project" "project" {}
 
 data "google_container_engine_versions" "versions" {
-  provider = google-beta
   location = "us-central1-a"
 }
 
 resource "time_static" "exclusion_start" {}
 
 resource "google_container_cluster" "primary" {
-  provider           = google-beta
-  name               = "%{cluster_name}"
+  name               = "{{index $.ResourceIdVars "cluster_name"}}"
   location           = "us-central1-a"
   initial_node_count = 1
   min_master_version = data.google_container_engine_versions.versions.release_channel_default_version["REGULAR"]
@@ -51,20 +41,26 @@ resource "google_container_cluster" "primary" {
 }
 
 resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
-  provider = google-beta
-  rollout_sequence_id = "%{rollout_sequence_id}"
+  rollout_sequence_id = "{{index $.ResourceIdVars "rollout_sequence_id"}}"
   display_name        = "User Triggered Rollout Sequence"
 
   min_control_plane_version = data.google_container_engine_versions.versions.release_channel_latest_version["REGULAR"]
   min_node_version          = data.google_container_engine_versions.versions.release_channel_latest_version["REGULAR"]
 
+  # Ensures that any rollouts created from this sequence will ignore all clusters in the project, other than the cluster we create for this test.
   ignored_clusters_selector {
     label_selector = "!(has(resource.labels.rs_test_cluster) && resource.labels.rs_test_cluster == 'tf-test-%{random_suffix}')"
   }
 
   stages {
-    fleet_projects = ["projects/%{project_id}"]
+    fleet_projects = ["projects/{{index $.TestEnvVars "project_id"}}"]
     soak_duration  = "30s"
+  }
+
+  auto_upgrade_config {
+    rollout_creation_scope {
+      upgrade_types = []
+    }
   }
 
   depends_on = [google_container_cluster.primary]

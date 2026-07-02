@@ -27,8 +27,6 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/global/rolloutSequences/{{rollout_sequence_id}}'
-custom_code:
-  constants: 'templates/terraform/constants/gke_hub_rollout_sequence.go.tmpl'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -42,10 +40,10 @@ async:
     result:
       resource_inside_response: false
 custom_code:
-  constants: 'templates/terraform/constants/gkehub2_rollout_sequence.go.tmpl'
-  post_create: 'templates/terraform/post_create/gkehub2_rollout_sequence.go.tmpl'
+  constants: 'templates/terraform/constants/gke_hub_rollout_sequence.go.tmpl'
+  post_create: 'templates/terraform/post_create/gke_hub_rollout_sequence.go.tmpl'
   post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.tmpl'
-  post_update: 'templates/terraform/post_update/gkehub2_rollout_sequence.go.tmpl'
+  post_update: 'templates/terraform/post_update/gke_hub_rollout_sequence.go.tmpl'
 parameters:
   - name: 'rollout_sequence_id'
     type: String
@@ -157,6 +155,8 @@ properties:
           Exceptions are rollouts enforcing our security policies (e.g. such as
           end-of-support and outdated control plane patch enforcements).
           These policy enforcements cannot be disabled.
+        allow_empty_object: true
+        send_empty_value: true
         properties:
           - name: 'upgradeTypes'
             type: Array
@@ -166,6 +166,7 @@ properties:
               Current valid values are `CONTROL_PLANE_MINOR`, `CONTROL_PLANE_PATCH`, `NODE_MINOR`, and `NODE_PATCH`.
             item_type:
               type: String
+            send_empty_value: true
 
   - name: 'targetControlPlaneVersion'
     type: String
