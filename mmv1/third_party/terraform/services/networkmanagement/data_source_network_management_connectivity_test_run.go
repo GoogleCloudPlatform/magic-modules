@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -159,7 +160,7 @@ func dataSourceGoogleNetworkManagementTestRun(d *schema.ResourceData, meta inter
 		obj["name"] = nameProp
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{NetworkManagementBasePath}}projects/{{project}}/locations/global/connectivityTests/{{name}}:rerun")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/global/connectivityTests/{{name}}:rerun")
 	if err != nil {
 		return err
 	}
@@ -222,7 +223,7 @@ func dataSourceGoogleNetworkManagementTestRunRead(d *schema.ResourceData, meta i
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{NetworkManagementBasePath}}projects/{{project}}/locations/global/connectivityTests/{{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/global/connectivityTests/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -466,4 +467,13 @@ func expandNetworkManagementConnectivityTestRunName(v interface{}, d tpgresource
 		return nil, fmt.Errorf("Invalid value for zone: %s", err)
 	}
 	return f.RelativeLink(), nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_network_management_connectivity_test_run",
+		ProductName: "networkmanagement",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleNetworkManagementTestRun(),
+	}.Register()
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/certificatemanager/v1"
@@ -56,7 +57,7 @@ func dataSourceGoogleCertificateManagerCertificatesRead(d *schema.ResourceData, 
 	filter := d.Get("filter").(string)
 
 	certificates := make([]map[string]interface{}, 0)
-	certificatesList, err := config.NewCertificateManagerClient(userAgent).Projects.Locations.Certificates.List(fmt.Sprintf("projects/%s/locations/%s", project, region)).Filter(filter).Do()
+	certificatesList, err := NewClient(config, userAgent).Projects.Locations.Certificates.List(fmt.Sprintf("projects/%s/locations/%s", project, region)).Filter(filter).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Certificates : %s %s", project, region))
 	}
@@ -135,4 +136,13 @@ func flattenCertificateManagedProvisioningIssue(v *certificatemanager.Provisioni
 	output["reason"] = v.Reason
 
 	return []interface{}{output}
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_certificate_manager_certificates",
+		ProductName: "certificatemanager",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCertificateManagerCertificates(),
+	}.Register()
 }

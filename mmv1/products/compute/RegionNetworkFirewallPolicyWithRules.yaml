@@ -41,21 +41,28 @@ legacy_long_form_project: true
 sweeper:
   url_substitutions:
     - region: "us-west2"
-examples:
+samples:
   - name: 'compute_region_network_firewall_policy_with_rules_full'
     primary_resource_id: 'primary'
-    vars:
-      address_group: 'address-group'
-      network: 'network'
-      fw_policy: 'fw-policy'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'compute_region_network_firewall_policy_with_rules_full'
+        resource_id_vars:
+          address_group: 'address-group'
+          network: 'network'
+          fw_policy: 'fw-policy'
+          tag_key: 'tag-key'
+          tag_value: 'tag-value'
+        test_vars_overrides:
+          # for backward compatible
+          network: '"network" + randomSuffix'
+        test_env_vars:
+          org_id: 'ORG_ID'
   - name: 'compute_region_network_firewall_policy_with_rules_roce'
     primary_resource_id: 'policy'
-    vars:
-      policy_name: 'rnf-policy'
+    steps:
+      - name: 'compute_region_network_firewall_policy_with_rules_roce'
+        resource_id_vars:
+          policy_name: 'rnf-policy'
 parameters:
   - name: 'region'
     type: String
@@ -126,9 +133,7 @@ properties:
           required: true
         - name: 'match'
           type: NestedObject
-          description:
-            A match condition that incoming traffic is evaluated against. If it
-            evaluates to true, the corresponding 'action' is enforced.
+          description: A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
           required: true
           properties:
             - name: 'srcIpRanges'
@@ -367,6 +372,29 @@ properties:
             the firewall policy rule is not enforced and traffic behaves as if it did
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
+        - name: 'targetType'
+          type: Enum
+          description: |
+            Target types of the firewall policy rule.
+            Default value is INSTANCES.
+            When target_type is INTERNAL_MANAGED_LB, target_forwarding_rules must be set
+          default_from_api: true
+          enum_values:
+            - 'INSTANCES'
+            - 'INTERNAL_MANAGED_LB'
+        - name: 'targetForwardingRules'
+          type: Array
+          description: |
+            A list of forwarding rules to which this rule applies.
+            This field allows you to control which load balancers get this rule.
+            For example, the following are valid values:
+            - https://www.googleapis.com/compute/v1/projects/project/global/forwardingRules/forwardingRule
+            - https://www.googleapis.com/compute/v1/projects/project/regions/region/forwardingRules/forwardingRule
+            - projects/project/global/forwardingRules/forwardingRule
+            - projects/project/regions/region/forwardingRules/forwardingRule
+          item_type:
+            type: String
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - name: 'predefinedRules'
     type: Array
     description: A list of firewall policy pre-defined rules.
@@ -394,9 +422,7 @@ properties:
           output: true
         - name: 'match'
           type: NestedObject
-          description:
-            A match condition that incoming traffic is evaluated against. If it
-            evaluates to true, the corresponding 'action' is enforced.
+          description: A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
           output: true
           properties:
             - name: 'srcIpRanges'

@@ -44,21 +44,25 @@ async:
     resource_inside_response: false
 custom_code:
   decoder: 'templates/terraform/decoders/unwrap_route_policy_resource.go.tmpl'
-examples:
+samples:
   - name: 'router_route_policy_export'
     primary_resource_id: 'rp-export'
-    vars:
-      router_name: 'my-router'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      route_policy_name: 'my-rp1'
+    steps:
+      - name: 'router_route_policy_export'
+        resource_id_vars:
+          router_name: 'my-router'
+          network_name: 'my-network'
+          subnet_name: 'my-subnetwork'
+          route_policy_name: 'my-rp1'
   - name: 'router_route_policy_import'
     primary_resource_id: 'rp-import'
-    vars:
-      router_name: 'my-router'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      route_policy_name: 'my-rp2'
+    steps:
+      - name: 'router_route_policy_import'
+        resource_id_vars:
+          router_name: 'my-router'
+          network_name: 'my-network'
+          subnet_name: 'my-subnetwork'
+          route_policy_name: 'my-rp2'
 parameters:
   - name: 'router'
     type: ResourceRef
@@ -104,7 +108,7 @@ properties:
         - name: 'priority'
           type: Integer
           description: |
-            The evaluation priority for this term, which must be between 0 (inclusive) and 231 (exclusive), and unique within the list.
+            The evaluation priority for this term, which must be between 0 (inclusive) and 2147483648 (exclusive), and unique within the list.
           required: true
         - name: 'match'
           type: NestedObject
@@ -114,23 +118,17 @@ properties:
           properties:
             - name: 'expression'
               type: String
-              description:
-                Textual representation of an expression in Common Expression
-                Language syntax.
+              description: Textual representation of an expression in Common Expression Language syntax.
               required: true
             - name: 'title'
               type: String
-              description:
-                Title for the expression, i.e. a short string describing its
-                purpose.
+              description: Title for the expression, i.e. a short string describing its purpose.
             - name: 'description'
               type: String
               description: Description of the expression
             - name: 'location'
               type: String
-              description:
-                String indicating the location of the expression for error
-                reporting, e.g. a file name and a position in the file
+              description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file
         - name: 'actions'
           type: Array
           description: |

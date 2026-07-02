@@ -12,39 +12,44 @@
 # limitations under the License.
 
 ---
-name: 'SecurityProfileV2'
+name: SecurityProfileV2
 description: |
   Security profile for risk assessment version 2 in Apigee.
 references:
   guides:
-    'Creating a security profile': 'https://cloud.google.com/apigee/docs/api-security/security-scores#security-profiles-v2'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityProfilesV2/create'
+    Creating a security profile: https://cloud.google.com/apigee/docs/api-security/security-scores#security-profiles-v2
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityProfilesV2/create
 docs:
 base_url: '{{org_id}}/securityProfilesV2'
 self_link: '{{org_id}}/securityProfilesV2/{{profile_id}}'
 create_url: '{{org_id}}/securityProfilesV2?security_profile_v2_id={{profile_id}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
 import_format:
   - '{{org_id}}/securityProfilesV2/{{profile_id}}'
   - '{{org_id}}/{{profile_id}}'
+exclude_identity_generation: true
 custom_code:
-  custom_import: "templates/terraform/custom_import/apigee_security_profile_v2.go.tmpl"
-examples:
-  - name: 'apigee_security_profile_v2_basic'
-    vars:
-      security_profile_id: "my-profile"
+  custom_import: templates/terraform/custom_import/apigee_security_profile_v2.go.tmpl
+samples:
+  - name: apigee_security_profile_v2_basic
     exclude_test: true
-  - name: 'apigee_security_profile_v2_basic_test'
-    primary_resource_id: 'security_profile_v2'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    steps:
+      - name: apigee_security_profile_v2_basic
+        resource_id_vars:
+          security_profile_id: my-profile
+  - name: apigee_security_profile_v2_basic_test
+    primary_resource_id: security_profile_v2
+    exclude_basic_doc: true
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers: [time]
+    steps:
+      - name: apigee_security_profile_v2_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee Security Profile V2,
@@ -52,7 +57,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'profileId'
+  - name: profileId
     type: String
     description: |
       Resource ID of the security profile.
@@ -60,40 +65,40 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the security profile v2 resource,
       in the format `organizations/{{org_name}}/securityProfilesV2/{{profile_id}}`.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description of the security profile.
-  - name: 'profileAssessmentConfigs'
+  - name: profileAssessmentConfigs
     type: Map
     description: |
       A map of the assessment name and the assessment config.
     required: true
-    key_name: 'assessment'
+    key_name: assessment
     value_type:
       type: NestedObject
       properties:
-        - name: 'weight'
+        - name: weight
           type: Enum
           description: |
             The weight of the assessment.
           required: true
           enum_values:
-            - 'MINOR'
-            - 'MODERATE'
-            - 'MAJOR'
-  - name: 'createTime'
+            - MINOR
+            - MODERATE
+            - MAJOR
+  - name: createTime
     type: String
     description: |
       The timestamp at which this profile was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The timestamp at which this profile was most recently updated.

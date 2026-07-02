@@ -12,57 +12,92 @@
 # limitations under the License.
 
 ---
-name: 'WorkforcePoolProviderScimTenant'
+name: WorkforcePoolProviderScimTenant
 description: |
   Represents a SCIM tenant configuration for a Workforce Pool Provider.
   The SCIM tenant configuration allows for the synchronization of user/group identities from external identity provider into Google Cloud using the System for Cross-domain Identity Management (SCIM) protocol.
 references:
   guides:
-    'Configure a SCIM Tenant': 'https://cloud.google.com/iam/docs/workforce-sign-in-microsoft-entra-id-scalable-groups?group_type=extended#extended-attributes'
-  api: 'https://docs.cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers.scimTenants'
-base_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants'
-self_link: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}'
-create_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants?workforcePoolProviderScimTenantId={{scim_tenant_id}}'
-delete_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}?hardDelete={{hard_delete}}'
-import_format:
-  - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}'
-update_verb: 'PATCH'
+    Configure a SCIM Tenant: https://cloud.google.com/iam/docs/workforce-sign-in-microsoft-entra-id-scalable-groups?group_type=extended#extended-attributes
+  api: https://docs.cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers.scimTenants
+base_url: locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants
+self_link: locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}
+create_url: locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants?workforcePoolProviderScimTenantId={{scim_tenant_id}}
+delete_url: locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}?hardDelete={{hard_delete}}
 update_mask: true
+update_verb: PATCH
+import_format:
+  - locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}
 timeouts:
   insert_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
-  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
-  post_update: 'templates/terraform/post_create/sleep.go.tmpl'
-examples:
-  - name: 'iam_workforce_pool_provider_scim_tenant_basic'
-    primary_resource_id: "example"
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-      scim_tenant_id: 'example-scim-tenant'
-      hard_delete: 'true'
-    test_env_vars:
-      org_id: 'ORG_ID'
+  decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
+  post_create: templates/terraform/post_create/sleep.go.tmpl
+  post_update: templates/terraform/post_create/sleep.go.tmpl
+samples:
+  - name: iam_workforce_pool_provider_scim_tenant_basic
+    primary_resource_id: example
+    steps:
+      - name: iam_workforce_pool_provider_scim_tenant_basic
+        resource_id_vars:
+          workforce_pool_id: example-pool
+          provider_id: example-prvdr
+          scim_tenant_id: example-scim-tenant
+          hard_delete: "true"
+        test_vars_overrides:
+          # for backward compatible
+          hard_delete: '"true" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
+parameters:
+  - name: location
+    type: String
+    description: |
+      The location for the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: workforcePoolId
+    type: String
+    description: |
+      The ID of the workforce pool.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: providerId
+    type: String
+    description: |
+      The ID of the provider.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: scimTenantId
+    type: String
+    description: |
+      The ID to use for the SCIM tenant, which becomes the final component of the resource name. This value must be 4-32 characters, and may contain the characters [a-z0-9-].
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: hardDelete
+    type: Boolean
+    description: Deletes the SCIM tenant immediately. This operation cannot be undone.
+    url_param_only: true
+    default_value: false
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Identifier. The resource name of the scim tenant.
       Format: `locations/{location}/workforcePools/{workforce_pool}/providers/{workforce_pool_provider}/scimTenants/{scim_tenant_id}
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
-    description:
-      A user-specified display name for the scim tenant. Cannot exceed 32
-      characters.
-  - name: 'description'
+    description: A user-specified display name for the scim tenant. Cannot exceed 32 characters.
+  - name: description
     type: String
-    description:
-      A user-specified description of the provider. Cannot exceed 256
-      characters.
-  - name: 'state'
+    description: A user-specified description of the provider. Cannot exceed 256 characters.
+  - name: state
     type: Enum
     output: true
     description: |
@@ -71,10 +106,10 @@ properties:
       * DELETED: The scim tenant is soft-deleted. Soft-deleted scim tenants are permanently
         deleted after approximately 30 days.
     enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'ACTIVE'
-      - 'DELETED'
-  - name: 'baseUri'
+      - STATE_UNSPECIFIED
+      - ACTIVE
+      - DELETED
+  - name: baseUri
     type: String
     description: |
       Represents the base URI as defined in [RFC 7644, Section
@@ -83,50 +118,16 @@ properties:
       Format:
       https://iamscim.googleapis.com/{version}/{tenant_id}/
     output: true
-  - name: 'claimMapping'
+  - name: claimMapping
     type: KeyValuePairs
     description: Maps BYOID claims to SCIM claims. This is a required field for new SCIM Tenants being created.
-  - name: 'purgeTime'
+  - name: purgeTime
     type: Time
     description: The timestamp that represents the time when the SCIM tenant is purged.
     output: true
-  - name: 'serviceAgent'
+  - name: serviceAgent
     type: String
     description: |
       Service Agent created by SCIM Tenant API. SCIM tokens created under
       this tenant will be attached to this service agent.
     output: true
-parameters:
-  - name: 'location'
-    type: String
-    description: |
-      The location for the resource.
-    url_param_only: true
-    required: true
-    immutable: true
-  - name: 'workforcePoolId'
-    type: String
-    description: |
-      The ID of the workforce pool.
-    url_param_only: true
-    required: true
-    immutable: true
-  - name: 'providerId'
-    type: String
-    description: |
-      The ID of the provider.
-    url_param_only: true
-    required: true
-    immutable: true
-  - name: 'scimTenantId'
-    type: String
-    description: |
-      The ID to use for the SCIM tenant, which becomes the final component of the resource name. This value must be 4-32 characters, and may contain the characters [a-z0-9-].
-    url_param_only: true
-    required: true
-    immutable: true
-  - name: 'hardDelete'
-    type: Boolean
-    description: Deletes the SCIM tenant immediately. This operation cannot be undone.
-    url_param_only: true
-    default_value: false

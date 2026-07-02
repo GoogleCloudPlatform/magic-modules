@@ -256,6 +256,15 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 * `resource_policies` - (Optional) Resource policies for this managed instance group. Structure is [documented below](#nested_resource_policies).
 
+* `target_size_policy` - (Optional) The policy that specifies how the MIG creates its VMs to achieve the target size. Structure is [documented below](#nested_target_size_policy).
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+
 - - -
 
 The `standby_policy` block supports:
@@ -303,8 +312,8 @@ update_policy {
 instance_lifecycle_policy {
   force_update_on_repair    = "YES"
   default_action_on_failure = "DO_NOTHING"
-  on_failed_health_check    = "DO_NOTHING"   //google-beta only
-  on_repair {                                //google-beta only
+  on_failed_health_check    = "DO_NOTHING"
+  on_repair {
     allow_changing_zone      = "YES"
   }
 }
@@ -312,8 +321,8 @@ instance_lifecycle_policy {
 
 * `force_update_on_repair` - (Optional), Specifies whether to apply the group's latest configuration when repairing a VM. Valid options are: `YES`, `NO`. If `YES` and you updated the group's instance template or per-instance configurations after the VM was created, then these changes are applied when VM is repaired. If `NO` (default), then updates are applied in accordance with the group's update policy type.
 * `default_action_on_failure` - (Optional), Specifies the action that a MIG performs on a failed VM. If the value of the `on_failed_health_check` field is `DEFAULT_ACTION`, then the same action also applies to the VMs on which your application fails a health check. Valid options are: `DO_NOTHING`, `REPAIR`. If `DO_NOTHING`, then MIG does not repair a failed VM. If `REPAIR` (default), then MIG automatically repairs a failed VM by recreating it. For more information, see about repairing VMs in a MIG.
-* `on_failed_health_check` - (Optional, Beta), Specifies the action that a MIG performs on an unhealthy VM. A VM is marked as unhealthy when the application running on that VM fails a health check. Valid options are: `DEFAULT_ACTION`, `DO_NOTHING`, `REPAIR`. If `DEFAULT_ACTION` (default), then MIG uses the same action configured for the  `default_action_on_failure` field. If `DO_NOTHING`, then MIG does not repair unhealthy VM. If `REPAIR`, then MIG automatically repairs an unhealthy VM by recreating it. For more information, see about repairing VMs in a MIG.
-* `on_repair` - (Optional, [Beta](../guides/provider_versions.html.markdown)), Configuration for VM repairs in the MIG. Structure is [documented below](#nested_on_repair).
+* `on_failed_health_check` - (Optional), Specifies the action that a MIG performs on an unhealthy VM. A VM is marked as unhealthy when the application running on that VM fails a health check. Valid options are: `DEFAULT_ACTION`, `DO_NOTHING`, `REPAIR`. If `DEFAULT_ACTION` (default), then MIG uses the same action configured for the  `default_action_on_failure` field. If `DO_NOTHING`, then MIG does not repair unhealthy VM. If `REPAIR`, then MIG automatically repairs an unhealthy VM by recreating it. For more information, see about repairing VMs in a MIG.
+* `on_repair` - (Optional), Configuration for VM repairs in the MIG. Structure is [documented below](#nested_on_repair).
 - - -
 
 <a name="nested_on_repair"></a>The `on_repair` block supports:
@@ -437,6 +446,10 @@ params{
 <a name="nested_resource_policies"></a>The `resource_policies` block supports:
 
 * `workload_policy` - (Optional) The URL of the workload policy that is specified for this managed instance group. It can be a full or partial URL.
+
+<a name="nested_target_size_policy"></a>The `target_size_policy` block supports:
+
+* `mode` - (Required)The mode of target size policy based on which the MIG creates its VMs individually or all at once. Values: "BULK", "INDIVIDUAL".
 
 ## Attributes Reference
 

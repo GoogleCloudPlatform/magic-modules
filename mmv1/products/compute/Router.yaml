@@ -52,37 +52,49 @@ sweeper:
     - region: "us-east1"
     - region: "us-east4"
 include_in_tgc_next: true
-examples:
+samples:
   - name: 'router_basic'
     primary_resource_id: 'foobar'
-    vars:
-      router_name: 'my-router'
-      network_name: 'my-network'
-    ignore_read_extra:
-      - 'advertisedIpRanges'
+    steps:
+      - name: 'router_basic'
+        resource_id_vars:
+          router_name: 'my-router'
+          network_name: 'my-network'
+        ignore_read_extra:
+          - 'advertisedIpRanges'
   - name: 'compute_router_encrypted_interconnect'
     primary_resource_id: 'encrypted-interconnect-router'
-    vars:
-      router_name: 'test-router'
-      network_name: 'test-network'
-    ignore_read_extra:
-      - 'advertisedIpRanges'
+    steps:
+      - name: 'compute_router_encrypted_interconnect'
+        resource_id_vars:
+          router_name: 'test-router'
+          network_name: 'test-network'
+        ignore_read_extra:
+          - 'advertisedIpRanges'
   - name: 'compute_router_md5encrypted'
     primary_resource_id: 'foobar'
-    vars:
-      router_name: 'test-router'
-      network_name: 'test-network'
-    exclude_docs: true
-    ignore_read_extra:
-      - 'advertisedIpRanges'
+    exclude_basic_doc: true
+    steps:
+      - name: 'compute_router_md5encrypted'
+        resource_id_vars:
+          router_name: 'test-router'
+          network_name: 'test-network'
+        ignore_read_extra:
+          - 'advertisedIpRanges'
   - name: 'router_ncc_gw'
     min_version: beta
     primary_resource_id: 'foobar'
-    vars:
-      router_name: 'my-router'
-      network_name: 'net-spoke'
-      hub_name: 'hub'
-      ncc_gw_name: 'my-ncc-gw'
+    steps:
+      - name: 'router_ncc_gw'
+        min_version: beta
+        resource_id_vars:
+          router_name: 'my-router'
+          network_name: 'net-spoke'
+          hub_name: 'hub'
+          ncc_gw_name: 'my-ncc-gw'
+        test_vars_overrides:
+          # for backward compatible
+          hub_name: '"hub" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -122,13 +134,13 @@ properties:
     description: |
       A reference to the network to which this router belongs.
     immutable: true
-  # TODO: Figure out the story for interfaces/bgpPeers. Right
-  # now in Terraform we have three separate resources: router,
-  # router_interface, and router_peer. Decide whether we want to keep that
-  # pattern for the other providers, keep it unique for Terraform, or add
-  # these fields to the Terraform resource (and then within that, decide
-  # whether to deprecate router_interface and router_peer or leave them
-  # alone).
+    # TODO: Figure out the story for interfaces/bgpPeers. Right
+    # now in Terraform we have three separate resources: router,
+    # router_interface, and router_peer. Decide whether we want to keep that
+    # pattern for the other providers, keep it unique for Terraform, or add
+    # these fields to the Terraform resource (and then within that, decide
+    # whether to deprecate router_interface and router_peer or leave them
+    # alone).
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
@@ -169,7 +181,7 @@ properties:
 
           This enum field has the one valid value: ALL_SUBNETS
         send_empty_value: true
- # TODO: #324 enum?
+        # TODO: #324 enum?
         item_type:
           type: String
       - name: 'advertisedIpRanges'
@@ -258,7 +270,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs

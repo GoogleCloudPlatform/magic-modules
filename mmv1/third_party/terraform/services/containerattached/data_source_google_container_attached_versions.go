@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -50,7 +51,7 @@ func dataSourceGoogleContainerAttachedVersionsRead(d *schema.ResourceData, meta 
 		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ContainerAttachedBasePath}}projects/{{project}}/locations/{{location}}/attachedServerConfig")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/attachedServerConfig")
 	if err != nil {
 		return err
 	}
@@ -75,4 +76,13 @@ func dataSourceGoogleContainerAttachedVersionsRead(d *schema.ResourceData, meta 
 
 	d.SetId(time.Now().UTC().String())
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_attached_versions",
+		ProductName: "containerattached",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleContainerAttachedVersions(),
+	}.Register()
 }

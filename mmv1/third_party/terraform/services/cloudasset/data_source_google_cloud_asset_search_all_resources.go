@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -265,4 +266,13 @@ func flattenDatasourceGoogleCloudAssetSearchAllResources(v interface{}) []map[st
 	}
 
 	return results
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_cloud_asset_search_all_resources",
+		ProductName: "cloudasset",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleCloudAssetSearchAllResources(),
+	}.Register()
 }

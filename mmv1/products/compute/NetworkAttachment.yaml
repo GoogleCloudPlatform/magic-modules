@@ -36,26 +36,33 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
+# excluding identity due to region value inconsistency
+exclude_identity_generation: true
+samples:
   - name: 'network_attachment_basic'
     primary_resource_id: 'default'
-    vars:
-      resource_name: 'basic-network-attachment'
-      network_name: 'basic-network'
-      subnetwork_name: 'basic-subnetwork'
-      accepted_producer_project_name: 'prj-accepted'
-      rejected_producer_project_name: 'prj-rejected'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+    steps:
+      - name: 'network_attachment_basic'
+        resource_id_vars:
+          resource_name: 'basic-network-attachment'
+          network_name: 'basic-network'
+          subnetwork_name: 'basic-subnetwork'
+          accepted_producer_project_name: 'prj-accepted'
+          rejected_producer_project_name: 'prj-rejected'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
   - name: 'network_attachment_instance_usage'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      resource_name: 'basic-network-attachment'
-      network_name: 'basic-network'
-      subnetwork_name: 'basic-subnetwork'
-      instance_name: 'basic-instance'
+    steps:
+      - name: 'network_attachment_instance_usage'
+        min_version: 'beta'
+        resource_id_vars:
+          resource_name: 'basic-network-attachment'
+          network_name: 'basic-network'
+          subnetwork_name: 'basic-subnetwork'
+          instance_name: 'basic-instance'
 parameters:
   - name: 'name'
     type: String
@@ -157,12 +164,14 @@ properties:
       imports: 'selfLink'
   - name: 'producerRejectLists'
     type: Array
+    is_missing_in_cai: true
     description: |
       Projects that are not allowed to connect to this network attachment. The project can be specified using its id or number.
     item_type:
       type: String
   - name: 'producerAcceptLists'
     type: Array
+    is_missing_in_cai: true
     description: |
       Projects that are allowed to connect to this network attachment. The project can be specified using its id or number.
     item_type:

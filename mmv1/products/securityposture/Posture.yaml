@@ -49,13 +49,15 @@ custom_code:
   constants: 'templates/terraform/constants/posture.go.tmpl'
 custom_diff:
   - 'revisionIdCustomizeDiff'
-examples:
+samples:
   - name: 'securityposture_posture_basic'
     primary_resource_id: 'posture1'
-    vars:
-      posture_id: 'posture_example'
-    test_env_vars:
-      org_id: 'ORG_TARGET'
+    steps:
+      - name: 'securityposture_posture_basic'
+        resource_id_vars:
+          posture_id: 'posture_example'
+        test_env_vars:
+          org_id: 'ORG_TARGET'
 parameters:
   - name: 'parent'
     type: String
@@ -178,11 +180,7 @@ properties:
                         Mapping of security controls for the policy.
               - name: 'constraint'
                 type: NestedObject
-                description: 'Policy constraint definition.It can have the definition of one of following constraints:
-                orgPolicyConstraint
-                orgPolicyConstraintCustom
-                securityHealthAnalyticsModule
-                securityHealthAnalyticsCustomModule'
+                description: 'Policy constraint definition.It can have the definition of one of following constraints: orgPolicyConstraint orgPolicyConstraintCustom securityHealthAnalyticsModule securityHealthAnalyticsCustomModule'
                 required: true
                 properties:
                   - name: 'orgPolicyConstraint'
@@ -233,6 +231,7 @@ properties:
                               default_value: false
                             - name: 'enforce'
                               type: Boolean
+                              send_empty_value: true
                               description: |
                                 If `true`, then the policy is enforced. If `false`, then any configuration is acceptable.
                                 This field can be set only in policies for boolean constraints.
@@ -245,23 +244,17 @@ properties:
                               properties:
                                 - name: 'expression'
                                   type: String
-                                  description:
-                                    Textual representation of an expression in Common Expression
-                                    Language syntax.
+                                  description: Textual representation of an expression in Common Expression Language syntax.
                                   required: true
                                 - name: 'title'
                                   type: String
-                                  description:
-                                    Title for the expression, i.e. a short string describing its
-                                    purpose.
+                                  description: Title for the expression, i.e. a short string describing its purpose.
                                 - name: 'description'
                                   type: String
                                   description: Description of the expression
                                 - name: 'location'
                                   type: String
-                                  description:
-                                    String indicating the location of the expression for error
-                                    reporting, e.g. a file name and a position in the file
+                                  description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file
                   - name: 'orgPolicyConstraintCustom'
                     type: NestedObject
                     description: |
@@ -365,23 +358,17 @@ properties:
                               properties:
                                 - name: 'expression'
                                   type: String
-                                  description:
-                                    Textual representation of an expression in Common Expression
-                                    Language syntax.
+                                  description: Textual representation of an expression in Common Expression Language syntax.
                                   required: true
                                 - name: 'title'
                                   type: String
-                                  description:
-                                    Title for the expression, i.e. a short string describing its
-                                    purpose.
+                                  description: Title for the expression, i.e. a short string describing its purpose.
                                 - name: 'description'
                                   type: String
                                   description: Description of the expression
                                 - name: 'location'
                                   type: String
-                                  description:
-                                    String indicating the location of the expression for error
-                                    reporting, e.g. a file name and a position in the file
+                                  description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file
                   - name: 'securityHealthAnalyticsModule'
                     type: NestedObject
                     description: 'Security Health Analytics built-in detector definition.'
@@ -432,23 +419,17 @@ properties:
                             properties:
                               - name: 'expression'
                                 type: String
-                                description:
-                                  Textual representation of an expression in Common Expression
-                                  Language syntax.
+                                description: Textual representation of an expression in Common Expression Language syntax.
                                 required: true
                               - name: 'title'
                                 type: String
-                                description:
-                                  Title for the expression, i.e. a short string describing its
-                                  purpose.
+                                description: Title for the expression, i.e. a short string describing its purpose.
                               - name: 'description'
                                 type: String
                                 description: Description of the expression
                               - name: 'location'
                                 type: String
-                                description:
-                                  String indicating the location of the expression for error
-                                  reporting, e.g. a file name and a position in the file
+                                description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file
                           - name: 'customOutput'
                             type: NestedObject
                             description: |
@@ -477,23 +458,17 @@ properties:
                                       properties:
                                         - name: 'expression'
                                           type: String
-                                          description:
-                                            Textual representation of an expression in Common Expression
-                                            Language syntax.
+                                          description: Textual representation of an expression in Common Expression Language syntax.
                                           required: true
                                         - name: 'title'
                                           type: String
-                                          description:
-                                            Title for the expression, i.e. a short string describing its
-                                            purpose.
+                                          description: Title for the expression, i.e. a short string describing its purpose.
                                         - name: 'description'
                                           type: String
                                           description: Description of the expression
                                         - name: 'location'
                                           type: String
-                                          description:
-                                            String indicating the location of the expression for error
-                                            reporting, e.g. a file name and a position in the file
+                                          description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file
                           - name: 'resourceSelector'
                             type: NestedObject
                             description: |

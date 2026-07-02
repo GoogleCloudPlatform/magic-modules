@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -51,4 +52,13 @@ func dataSourceGoogleComposerEnvironmentRead(d *schema.ResourceData, meta interf
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_composer_environment",
+		ProductName: "composer",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComposerEnvironment(),
+	}.Register()
 }

@@ -15,7 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	tpgcloudbilling "github.com/hashicorp/terraform-provider-google/google/services/cloudbilling"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -43,11 +46,24 @@ func ResourceGoogleProject() *schema.Resource {
 		Delete: resourceGoogleProjectDelete,
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("PREVENT"),
 			tpgresource.SetLabelsDiff,
 		),
 
 		Importer: &schema.ResourceImporter{
 			State: resourceProjectImportState,
+		},
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project_id": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -69,8 +85,8 @@ func ResourceGoogleProject() *schema.Resource {
 			},
 			"deletion_policy": {
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
-				Default:  "PREVENT",
 				Description: `The deletion policy for the Project. Setting PREVENT will protect the project against any destroy actions caused by a terraform apply or terraform destroy. Setting ABANDON allows the resource
 				to be abandoned rather than deleted. Possible values are: "PREVENT", "ABANDON", "DELETE"`,
 				ValidateFunc: validation.StringInSlice([]string{"PREVENT", "ABANDON", "DELETE"}, false),
@@ -181,7 +197,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	var op *cloudresourcemanager.Operation
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (reqErr error) {
-			op, reqErr = config.NewResourceManagerClient(userAgent).Projects.Create(project).Do()
+			op, reqErr = rmClient.NewClient(config, userAgent).Projects.Create(project).Do()
 			return reqErr
 		},
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -194,6 +210,12 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	d.SetId(fmt.Sprintf("projects/%s", pid))
+
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project_id": pid,
+	}); err != nil {
+		return err
+	}
 
 	// Wait for the operation to complete
 	opAsMap, err := tpgresource.ConvertToMap(op)
@@ -269,7 +291,7 @@ func resourceGoogleProjectCheckPreRequisites(config *transport_tpg.Config, d *sc
 	req := &cloudbilling.TestIamPermissionsRequest{
 		Permissions: []string{perm},
 	}
-	resp, err := config.NewBillingClient(userAgent).BillingAccounts.TestIamPermissions(ba, req).Do()
+	resp, err := tpgcloudbilling.NewClient(config, userAgent).BillingAccounts.TestIamPermissions(ba, req).Do()
 	if err != nil {
 		return fmt.Errorf("failed to check permissions on billing account %q: %v", ba, err)
 	}
@@ -277,7 +299,7 @@ func resourceGoogleProjectCheckPreRequisites(config *transport_tpg.Config, d *sc
 		return fmt.Errorf("missing permission on %q: %v", ba, perm)
 	}
 	if !d.Get("auto_create_network").(bool) {
-		call := config.NewServiceUsageClient(userAgent).Services.Get("projects/00000000000/services/serviceusage.googleapis.com")
+		call := tpgserviceusage.NewClient(config, userAgent).Services.Get("projects/00000000000/services/serviceusage.googleapis.com")
 		if config.UserProjectOverride {
 			if billingProject, err := tpgresource.GetBillingProject(d, config); err == nil {
 				call.Header().Add("X-Goog-User-Project", billingProject)
@@ -320,53 +342,15 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 	// Explicitly set client-side fields to default values if unset
-	if _, ok := d.GetOkExists("deletion_policy"); !ok {
-		if err := d.Set("deletion_policy", "PREVENT"); err != nil {
-			return fmt.Errorf("Error setting deletion_policy: %s", err)
-		}
-	}
-	if err := d.Set("project_id", pid); err != nil {
-		return fmt.Errorf("Error setting project_id: %s", err)
-	}
-	if err := d.Set("number", strconv.FormatInt(p.ProjectNumber, 10)); err != nil {
-		return fmt.Errorf("Error setting number: %s", err)
-	}
-	if err := d.Set("name", p.Name); err != nil {
-		return fmt.Errorf("Error setting name: %s", err)
-	}
-	if err := tpgresource.SetLabels(p.Labels, d, "labels"); err != nil {
-		return fmt.Errorf("Error setting labels: %s", err)
-	}
-	if err := tpgresource.SetLabels(p.Labels, d, "terraform_labels"); err != nil {
-		return fmt.Errorf("Error setting terraform_labels: %s", err)
-	}
-	if err := d.Set("effective_labels", p.Labels); err != nil {
-		return fmt.Errorf("Error setting effective_labels: %s", err)
-	}
 
-	if p.Parent != nil {
-		switch p.Parent.Type {
-		case "organization":
-			if err := d.Set("org_id", p.Parent.Id); err != nil {
-				return fmt.Errorf("Error setting org_id: %s", err)
-			}
-			if err := d.Set("folder_id", ""); err != nil {
-				return fmt.Errorf("Error setting folder_id: %s", err)
-			}
-		case "folder":
-			if err := d.Set("folder_id", p.Parent.Id); err != nil {
-				return fmt.Errorf("Error setting folder_id: %s", err)
-			}
-			if err := d.Set("org_id", ""); err != nil {
-				return fmt.Errorf("Error setting org_id: %s", err)
-			}
-		}
+	if err := populateGoogleProjectResourceData(d, p, pid, config); err != nil {
+		return err
 	}
 
 	var ba *cloudbilling.ProjectBillingInfo
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (reqErr error) {
-			ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
+			ba, reqErr = tpgcloudbilling.NewClient(config, userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 			return reqErr
 		},
 		Timeout: d.Timeout(schema.TimeoutRead),
@@ -393,6 +377,58 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func populateGoogleProjectResourceData(d *schema.ResourceData, p *cloudresourcemanager.Project, pid string, config *transport_tpg.Config) error {
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "PREVENT"); err != nil {
+		return err
+	}
+
+	if err := d.Set("project_id", pid); err != nil {
+		return fmt.Errorf("Error setting project_id: %s", err)
+	}
+	if err := d.Set("number", strconv.FormatInt(p.ProjectNumber, 10)); err != nil {
+		return fmt.Errorf("Error setting number: %s", err)
+	}
+	if err := d.Set("name", p.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := tpgresource.SetLabels(p.Labels, d, "labels"); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(p.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if v := d.Get("terraform_labels").(map[string]interface{}); len(v) == 0 && len(p.Labels) > 0 {
+		if err := d.Set("terraform_labels", p.Labels); err != nil {
+			return fmt.Errorf("Error setting terraform_labels: %s", err)
+		}
+	}
+	if err := d.Set("effective_labels", p.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
+	}
+
+	if p.Parent != nil {
+		switch p.Parent.Type {
+		case "organization":
+			if err := d.Set("org_id", p.Parent.Id); err != nil {
+				return fmt.Errorf("Error setting org_id: %s", err)
+			}
+			if err := d.Set("folder_id", ""); err != nil {
+				return fmt.Errorf("Error setting folder_id: %s", err)
+			}
+		case "folder":
+			if err := d.Set("folder_id", p.Parent.Id); err != nil {
+				return fmt.Errorf("Error setting folder_id: %s", err)
+			}
+			if err := d.Set("org_id", ""); err != nil {
+				return fmt.Errorf("Error setting org_id: %s", err)
+			}
+		}
+	}
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project_id": pid,
+	})
 }
 
 func PrefixedProject(pid string) string {
@@ -495,6 +531,11 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	d.Partial(false)
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project_id": pid,
+	}); err != nil {
+		return err
+	}
 	return resourceGoogleProjectRead(d, meta)
 }
 
@@ -502,7 +543,7 @@ func updateProject(config *transport_tpg.Config, d *schema.ResourceData, project
 	var newProj *cloudresourcemanager.Project
 	if err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (updateErr error) {
-			newProj, updateErr = config.NewResourceManagerClient(userAgent).Projects.Update(desiredProject.ProjectId, desiredProject).Do()
+			newProj, updateErr = rmClient.NewClient(config, userAgent).Projects.Update(desiredProject.ProjectId, desiredProject).Do()
 			return updateErr
 		},
 		Timeout: d.Timeout(schema.TimeoutUpdate),
@@ -532,7 +573,7 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 		pid := parts[len(parts)-1]
 		if err := transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				_, delErr := config.NewResourceManagerClient(userAgent).Projects.Delete(pid).Do()
+				_, delErr := rmClient.NewClient(config, userAgent).Projects.Delete(pid).Do()
 				return delErr
 			},
 			Timeout: d.Timeout(schema.TimeoutDelete),
@@ -545,6 +586,25 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	// Handle identity-based import (Terraform 1.12+ import blocks with resource identity).
+	// In this case d.Id() is empty and project_id is available via the identity block.
+	if d.Id() == "" {
+		identity, err := d.Identity()
+		if err != nil || identity == nil {
+			return nil, fmt.Errorf("Error getting identity for import: %v", err)
+		}
+		pidVal, ok := identity.GetOk("project_id")
+		if !ok {
+			return nil, fmt.Errorf("project_id must be set in the identity block for import")
+		}
+		pid := pidVal.(string)
+		d.SetId(fmt.Sprintf("projects/%s", pid))
+		if err := d.Set("auto_create_network", true); err != nil {
+			return nil, fmt.Errorf("Error setting auto_create_network: %s", err)
+		}
+		return []*schema.ResourceData{d}, nil
+	}
+
 	parts := strings.Split(d.Id(), "/")
 	pid := parts[len(parts)-1]
 	// Prevent importing via project number, this will cause issues later
@@ -577,7 +637,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 
 	// Read the network from the API so we can get the correct self link format. We can't construct it from the
 	// base path because it might not line up exactly (compute.googleapis.com vs www.googleapis.com)
-	net, err := config.NewComputeClient(userAgent).Networks.Get(projectId, networkName).Do()
+	net, err := tpgcompute.NewClient(config, userAgent).Networks.Get(projectId, networkName).Do()
 	if err != nil {
 		return err
 	}
@@ -585,7 +645,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 	token := ""
 	for paginate := true; paginate; {
 		filter := fmt.Sprintf("network eq %s", net.SelfLink)
-		resp, err := config.NewComputeClient(userAgent).Firewalls.List(projectId).Filter(filter).Do()
+		resp, err := tpgcompute.NewClient(config, userAgent).Firewalls.List(projectId).Filter(filter).Do()
 		if err != nil {
 			return errwrap.Wrapf("Error listing firewall rules in proj: {{err}}", err)
 		}
@@ -593,7 +653,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 		log.Printf("[DEBUG] Found %d firewall rules in %q network", len(resp.Items), networkName)
 
 		for _, firewall := range resp.Items {
-			op, err := config.NewComputeClient(userAgent).Firewalls.Delete(projectId, firewall.Name).Do()
+			op, err := tpgcompute.NewClient(config, userAgent).Firewalls.Delete(projectId, firewall.Name).Do()
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
@@ -620,7 +680,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 		ba.BillingAccountName = "billingAccounts/" + name
 	}
 	updateBillingInfoFunc := func() error {
-		_, err := config.NewBillingClient(userAgent).Projects.UpdateBillingInfo(PrefixedProject(pid), ba).Do()
+		_, err := tpgcloudbilling.NewClient(config, userAgent).Projects.UpdateBillingInfo(PrefixedProject(pid), ba).Do()
 		return err
 	}
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -640,7 +700,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 		var ba *cloudbilling.ProjectBillingInfo
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (reqErr error) {
-				ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
+				ba, reqErr = tpgcloudbilling.NewClient(config, userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 				return reqErr
 			},
 			Timeout: d.Timeout(schema.TimeoutRead),
@@ -659,7 +719,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 }
 
 func deleteComputeNetwork(project, network, userAgent string, config *transport_tpg.Config) error {
-	op, err := config.NewComputeClient(userAgent).Networks.Delete(
+	op, err := tpgcompute.NewClient(config, userAgent).Networks.Delete(
 		project, network).Do()
 	if err != nil {
 		return errwrap.Wrapf("Error deleting network: {{err}}", err)
@@ -679,7 +739,7 @@ func readGoogleProject(d *schema.ResourceData, config *transport_tpg.Config, use
 	pid := parts[len(parts)-1]
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (reqErr error) {
-			p, reqErr = config.NewResourceManagerClient(userAgent).Projects.Get(pid).Do()
+			p, reqErr = rmClient.NewClient(config, userAgent).Projects.Get(pid).Do()
 			return reqErr
 		},
 		Timeout: d.Timeout(schema.TimeoutRead),
@@ -731,12 +791,12 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 						// BatchEnable returns an error for a single item, so enable with single endpoint
 						name := fmt.Sprintf("projects/%s/services/%s", project, services[0])
 						req := &serviceusage.EnableServiceRequest{}
-						call = config.NewServiceUsageClient(userAgent).Services.Enable(name, req)
+						call = tpgserviceusage.NewClient(config, userAgent).Services.Enable(name, req)
 					} else {
 						// Batch enable for multiple services.
 						name := fmt.Sprintf("projects/%s", project)
 						req := &serviceusage.BatchEnableServicesRequest{ServiceIds: services}
-						call = config.NewServiceUsageClient(userAgent).Services.BatchEnable(name, req)
+						call = tpgserviceusage.NewClient(config, userAgent).Services.BatchEnable(name, req)
 					}
 
 					if config.UserProjectOverride && billingProject != "" {
@@ -800,7 +860,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			ctx := context.Background()
-			call := config.NewServiceUsageClient(userAgent).Services.List(fmt.Sprintf("projects/%s", project)).PageSize(200)
+			call := tpgserviceusage.NewClient(config, userAgent).Services.List(fmt.Sprintf("projects/%s", project)).PageSize(200)
 			if config.UserProjectOverride && billingProject != "" {
 				call.Header().Add("X-Goog-User-Project", billingProject)
 			}
@@ -871,4 +931,13 @@ func waitForServiceUsageEnabledServices(services []string, project, billingProje
 		return errwrap.Wrap(err, fmt.Errorf("failed to enable some service(s) %q for project %s", missing, project))
 	}
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_project",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceGoogleProject(),
+	}.Register()
 }

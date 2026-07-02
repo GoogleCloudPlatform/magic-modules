@@ -13,89 +13,104 @@
 
 ---
 name: Trigger
-legacy_long_form_project: true
+description: |
+  The Eventarc Trigger resource
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/eventarc/standard/docs/overview#eventarc-triggers
+  api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.triggers
 base_url: projects/{{project}}/locations/{{location}}/triggers
 self_link: projects/{{project}}/locations/{{location}}/triggers/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/triggers?triggerId={{name}}
-update_verb: PATCH
 update_mask: true
-references:
-  guides:
-    'Official Documentation': 'https://cloud.google.com/eventarc/standard/docs/overview#eventarc-triggers'
-  api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.triggers
+update_verb: PATCH
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: europe-west1
 async:
-  actions: ['create', 'update', 'delete']
   type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, update, delete]
   result:
     resource_inside_response: true
+legacy_long_form_project: true
 autogen_async: true
-description: |
- The Eventarc Trigger resource
-sweeper:
-  url_substitutions:
-    - region: "us-central1"
-    - region: "europe-west1"
-examples:
+custom_code:
+samples:
   - name: eventarc_trigger_with_cloud_run_destination
     primary_resource_id: primary
-    vars:
-      trigger_name: some-trigger
-      topic_name: some-topic
-      service_name: some-service
+    steps:
+      - name: eventarc_trigger_with_cloud_run_destination
+        resource_id_vars:
+          trigger_name: some-trigger
+          topic_name: some-topic
+          service_name: some-service
   - name: eventarc_trigger_with_http_destination
     primary_resource_id: primary
-    vars:
-      trigger_name: some-trigger
-      network_attachment_name: network-attachment
-    test_vars_overrides:
-      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-trigger-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-trigger-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-trigger-network")))'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: eventarc_trigger_with_http_destination
+        resource_id_vars:
+          trigger_name: some-trigger
+          network_attachment_name: network-attachment
+        test_vars_overrides:
+          network_attachment_name: compute.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-trigger-na", compute.BootstrapSubnet(t, "tf-bootstrap-eventarc-trigger-subnet", compute.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-trigger-network")))
+        test_env_vars:
+          project_id: PROJECT_NAME
+          service_account: SERVICE_ACCT
   - name: eventarc_trigger_with_channel_cmek
     primary_resource_id: primary
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      trigger_name: some-trigger
-      service_name: some-service
-      channel_name: some-channel
-      key_name: some-key
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-    test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
-    exclude_docs: true
+      - member: serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com
+        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    exclude_basic_doc: true
+    steps:
+      - name: eventarc_trigger_with_channel_cmek
+        resource_id_vars:
+          trigger_name: some-trigger
+          service_name: some-service
+          channel_name: some-channel
+          key_name: some-key
+        test_env_vars:
+          project_id: PROJECT_NAME
+          service_account: SERVICE_ACCT
+        test_vars_overrides:
+          key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name
   - name: eventarc_trigger_with_workflow_destination
     primary_resource_id: primary
-    vars:
-      trigger_name: some-trigger
-      workflow_name: some-workflow
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: eventarc_trigger_with_workflow_destination
+        resource_id_vars:
+          trigger_name: some-trigger
+          workflow_name: some-workflow
+        test_env_vars:
+          service_account: SERVICE_ACCT
   - name: eventarc_trigger_with_path_pattern_filter
     primary_resource_id: primary
-    vars:
-      trigger_name: some-trigger
-      service_account_id: trigger-sa
-      service_name: some-service
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: eventarc_trigger_with_path_pattern_filter
+        resource_id_vars:
+          trigger_name: some-trigger
+          service_account_id: trigger-sa
+          service_name: some-service
   - name: eventarc_trigger_with_firestore_source
     primary_resource_id: primary
-    vars:
-      trigger_name: some-trigger
-      service_account_id: trigger-sa
-      service_name: some-service
-      database_id: some-database
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: eventarc_trigger_with_firestore_source
+        resource_id_vars:
+          trigger_name: some-trigger
+          service_account_id: trigger-sa
+          service_name: some-service
+          database_id: some-database
+        test_env_vars:
+          project_id: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -175,7 +190,7 @@ properties:
             default_from_api: true
       - name: cloudFunction
         type: String
-        description: 'The Cloud Function resource name. Only Cloud Functions V2 is supported. Format projects/{project}/locations/{location}/functions/{function} This is a read-only field. [WARNING] Creating Cloud Functions V2 triggers is only supported via the Cloud Functions product. An error will be returned if the user sets this value.'
+        description: The Cloud Function resource name. Only Cloud Functions V2 is supported. Format projects/{project}/locations/{location}/functions/{function} This is a read-only field. [WARNING] Creating Cloud Functions V2 triggers is only supported via the Cloud Functions product. An error will be returned if the user sets this value.
         output: true
       - name: gke
         type: NestedObject

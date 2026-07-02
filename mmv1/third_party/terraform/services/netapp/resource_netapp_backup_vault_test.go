@@ -2,6 +2,7 @@ package netapp_test
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/netapp"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -67,6 +69,53 @@ resource "google_netapp_backup_vault" "test_backup_vault" {
 `, context)
 }
 
+func TestAccNetappBackupVault_withKmsConfig(t *testing.T) {
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"location":      "us-east4",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappBackupVault_withKmsConfigExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_netapp_backup_vault.test_backup_vault_kms", "kms_config"),
+					resource.TestMatchResourceAttr("google_netapp_backup_vault.test_backup_vault_kms", "kms_config",
+						regexp.MustCompile(fmt.Sprintf("projects/.+/locations/%s/kmsConfigs/tf-test-netapp-kms-%s", context["location"], context["random_suffix"]))),
+					resource.TestCheckResourceAttr("google_netapp_backup_vault.test_backup_vault_kms", "location", context["location"].(string)),
+				),
+			},
+			{
+				ResourceName:            "google_netapp_backup_vault.test_backup_vault_kms",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name"},
+			},
+		},
+	})
+}
+
+func testAccNetappBackupVault_withKmsConfigExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_netapp_kmsconfig" "test_kms_config" {
+  name            = "tf-test-netapp-kms-%{random_suffix}"
+  location        = "us-east4"
+  crypto_key_name = "projects/cloud-netapp-cmek-e2e-testing/locations/us-east4/keyRings/cmek-cep-key-ring-static/cryptoKeys/cmek-tf-key-static"
+  description     = "Terraform Test NetApp KMS Config"
+}
+
+resource "google_netapp_backup_vault" "test_backup_vault_kms" {
+  name        = "tf-test-bv-kms-%{random_suffix}"
+  location    = "us-east4"
+  kms_config  = google_netapp_kmsconfig.test_kms_config.id
+  description = "Backup Vault with KMS"
+}
+`, context)
+}
+
 func testAccCheckNetappBackupVaultDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
@@ -79,7 +128,7 @@ func testAccCheckNetappBackupVaultDestroyProducer(t *testing.T) func(s *terrafor
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(netapp.Product, config)+"projects/{{project}}/locations/{{location}}/backupVaults/{{name}}")
 			if err != nil {
 				return err
 			}

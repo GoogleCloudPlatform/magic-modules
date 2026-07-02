@@ -3,6 +3,9 @@ package kms
 import (
 	"fmt"
 
+	{{ if ne $.Compiler "terraformgoogleconversion-codegen" -}}
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	{{- end}}
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -60,7 +63,7 @@ func (u *KmsKeyRingIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Pol
 		return nil, err
 	}
 
-	p, err := u.Config.NewKmsClient(userAgent).Projects.Locations.KeyRings.GetIamPolicy(u.resourceId).OptionsRequestedPolicyVersion(tpgiamresource.IamPolicyVersion).Do()
+	p, err := NewClient(u.Config, userAgent).Projects.Locations.KeyRings.GetIamPolicy(u.resourceId).OptionsRequestedPolicyVersion(tpgiamresource.IamPolicyVersion).Do()
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
@@ -87,7 +90,7 @@ func (u *KmsKeyRingIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager
 		return err
 	}
 
-	_, err = u.Config.NewKmsClient(userAgent).Projects.Locations.KeyRings.SetIamPolicy(u.resourceId, &cloudkms.SetIamPolicyRequest{
+	_, err = NewClient(u.Config, userAgent).Projects.Locations.KeyRings.SetIamPolicy(u.resourceId, &cloudkms.SetIamPolicyRequest{
 		Policy: kmsPolicy,
 	}).Do()
 
@@ -127,3 +130,32 @@ func kmsToResourceManagerPolicy(p *cloudkms.Policy) (*cloudresourcemanager.Polic
 	}
 	return out, nil
 }
+{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
+
+func init() {
+	registry.Schema{
+		Name:        "google_kms_key_ring_iam_member",
+		ProductName: "kms",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamMember(IamKmsKeyRingSchema, NewKmsKeyRingIamUpdater, KeyRingIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_kms_key_ring_iam_binding",
+		ProductName: "kms",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamBinding(IamKmsKeyRingSchema, NewKmsKeyRingIamUpdater, KeyRingIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_kms_key_ring_iam_policy",
+		ProductName: "kms",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamPolicy(IamKmsKeyRingSchema, NewKmsKeyRingIamUpdater, KeyRingIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_kms_key_ring_iam_policy",
+		ProductName: "kms",
+		Type:        registry.SchemaTypeIAMDataSource,
+		Schema:      tpgiamresource.DataSourceIamPolicy(IamKmsKeyRingSchema, NewKmsKeyRingIamUpdater),
+	}.Register()
+}
+{{- end}}

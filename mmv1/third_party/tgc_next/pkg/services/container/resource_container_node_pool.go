@@ -4,8 +4,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 )
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_node_pool",
+		ProductName: "container",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceContainerNodePool(),
+	}.Register()
+}
 
 // ContainerNodePoolAssetType is the CAI asset type name for container node pool.
 const ContainerNodePoolAssetType string = "container.googleapis.com/NodePool"
@@ -307,6 +317,12 @@ var schemaNodePool = map[string]*schema.Schema{
 					Computed:    true,
 					Description: `Whether nodes have internal IP addresses only.`,
 				},
+				"accelerator_network_profile": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					ForceNew:    true,
+					Description: `The accelerator network profile for the node pool.`,
+				},
 				"pod_range": {
 					Type:        schema.TypeString,
 					Optional:    true,
@@ -430,6 +446,12 @@ var schemaNodePool = map[string]*schema.Schema{
 				},
 			},
 		},
+	},
+
+	"ignore_node_count_changes": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Description: `When true, the provider ignores external changes (drift) to the node count by skipping GCE API queries to the Instance Group Managers. This is a performance optimization for large clusters that saves API quota. Setting this to true will result in missing managed_instance_group_urls in the state.`,
 	},
 }
 

@@ -11,86 +11,92 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: 'GlossaryTerm'
+---
+name: GlossaryTerm
 description: |
   Represents a collection of terms within a Glossary that are related to each other.
-base_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms/{{term_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms/{{term_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms?term_id={{term_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms/{{term_id}}
+self_link: projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms/{{term_id}}
+create_url: projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms?term_id={{term_id}}
 update_mask: true
+update_verb: PATCH
+import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms/{{term_id}}']
 timeouts:
   insert_minutes: 15
   update_minutes: 15
   delete_minutes: 15
 autogen_async: true
-import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms/{{term_id}}']
-examples:
-  - name: 'dataplex_glossary_term_basic'
-    primary_resource_id: 'term_test_id'
-    vars:
-      term_name: 'term-basic'
-  - name: 'dataplex_glossary_term_full'
-    primary_resource_id: 'term_test_id_full'
-    vars:
-      term_name: 'term-full'
+samples:
+  - name: dataplex_glossary_term_basic
+    primary_resource_id: term_test_id
+    steps:
+      - name: dataplex_glossary_term_basic
+        resource_id_vars:
+          term_name: term-basic
+  - name: dataplex_glossary_term_full
+    primary_resource_id: term_test_id_full
+    external_providers: [time]
+    steps:
+      - name: dataplex_glossary_term_full
+        resource_id_vars:
+          term_name: term-full
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location where the glossary term should reside.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'glossaryId'
+  - name: glossaryId
     type: String
     description: |
       The glossary id for creation.
     url_param_only: true
     immutable: true
-  - name: 'termId'
+  - name: termId
     type: String
     description: |
       The term id for creation.
     url_param_only: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the GlossaryTerm. Format: projects/{projectId}/locations/{locationId}/glossaries/{glossaryId}/categories/{termId}
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       User friendly display name of the GlossaryTerm. This is user-mutable. This will be same as the termId, if not specified.
     required: false
-  - name: 'description'
+  - name: description
     type: String
     description: |
       The user-mutable description of the GlossaryTerm.
     required: false
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       User-defined labels for the GlossaryTerm.
     required: false
-  - name: 'uid'
+  - name: uid
     type: String
     description: |
       System generated unique id for the GlossaryTerm. This ID will be different if the GlossaryTerm is deleted and re-created with the same name.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       The time at which the GlossaryTerm was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       The time at which the GlossaryTerm was last updated.
     output: true
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The immediate parent of the GlossaryTerm in the resource-hierarchy. It can either be a Glossary or a Term. Format: projects/{projectId}/locations/{locationId}/glossaries/{glossaryId} OR projects/{projectId}/locations/{locationId}/glossaries/{glossaryId}/terms/{termId}

@@ -1,0 +1,84 @@
+var icebergTableIgnoredProperties = map[string]bool{
+	"location":                              true,
+	"gcp.biglake.bigquery-advanced.enabled": true,
+	"gcp.biglake.bigquery-dml.enabled":      true,
+	"gcp.biglake.table-management.enabled":  true,
+}
+
+func icebergTablePropertiesDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// properties.KEY
+	parts := strings.SplitN(k, ".", 2)
+	if len(parts) == 2 && icebergTableIgnoredProperties[parts[1]] && new == "" {
+		return true
+	}
+	return false
+}
+
+// expandIcebergTableSortOrderForCommit converts the Terraform "sort_order" block
+// into the SortOrder body of an "add-sort-order" commit update. The "order-id" is
+// assigned by the server, so only the fields are sent. Returns nil when no sort
+// order is configured.
+func expandIcebergTableSortOrderForCommit(v interface{}) map[string]interface{} {
+	l, ok := v.([]interface{})
+	if !ok || len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	raw, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	rawFields, ok := raw["fields"].([]interface{})
+	if !ok || len(rawFields) == 0 {
+		return nil
+	}
+	fields := make([]interface{}, 0, len(rawFields))
+	for _, f := range rawFields {
+		fm, ok := f.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		fields = append(fields, map[string]interface{}{
+			"source-id":  fm["source_id"],
+			"transform":  fm["transform"],
+			"direction":  fm["direction"],
+			"null-order": fm["null_order"],
+		})
+	}
+	return map[string]interface{}{
+		// order-id is required on the SortOrder body; the server reassigns it,
+		// and "set-default-sort-order: -1" then selects this last-added order.
+		"order-id": 1,
+		"fields":   fields,
+	}
+}
+
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+// addIcebergTableAccessDelegationHeader sets the X-Iceberg-Access-Delegation
+// header that the Iceberg REST catalog requires for every table operation when
+// the parent catalog uses credential_mode = CREDENTIAL_MODE_VENDED_CREDENTIALS.
+// The credential mode is a property of the catalog, not the table, so it is
+// looked up at request time. Catalogs in the default end-user mode reject the
+// header, so it is only added when vending is actually enabled.
+func addIcebergTableAccessDelegationHeader(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string, headers http.Header) error {
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BiglakeIcebergBasePath{{"}}"}}iceberg/v1/restcatalog/extensions/projects/{{"{{"}}project{{"}}"}}/catalogs/{{"{{"}}catalog{{"}}"}}")
+	if err != nil {
+		return err
+	}
+
+	catalog, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return fmt.Errorf("Error reading IcebergCatalog to determine credential mode: %s", err)
+	}
+
+	if mode, ok := catalog["credential-mode"].(string); ok && mode == "CREDENTIAL_MODE_VENDED_CREDENTIALS" {
+		headers.Add("X-Iceberg-Access-Delegation", "vended-credentials")
+	}
+	return nil
+}
+{{- end }}

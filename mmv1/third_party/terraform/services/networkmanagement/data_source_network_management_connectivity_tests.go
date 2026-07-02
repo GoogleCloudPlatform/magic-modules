@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -43,7 +44,7 @@ func dataSourceGoogleNetworkManagementConnectivityTests(d *schema.ResourceData, 
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{NetworkManagementBasePath}}projects/{{project}}/locations/global/connectivityTests")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/global/connectivityTests")
 	if err != nil {
 		return err
 	}
@@ -161,4 +162,13 @@ func getDataFromName(v interface{}, part int) string {
 	name := v.(string)
 	split := strings.Split(name, "/")
 	return split[part]
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_network_management_connectivity_tests",
+		ProductName: "networkmanagement",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleNetworkManagementConnectivityTests(),
+	}.Register()
 }

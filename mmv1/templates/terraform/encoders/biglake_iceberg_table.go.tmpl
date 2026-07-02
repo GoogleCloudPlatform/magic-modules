@@ -1,0 +1,63 @@
+	// Accumulate the metadata update actions of a CommitTableRequest.
+	updateActions := []interface{}{}
+
+	if d.HasChange("properties") {
+		oldProp, newProp := d.GetChange("properties")
+		oldMap := oldProp.(map[string]interface{})
+		newMap := newProp.(map[string]interface{})
+
+		removals := []string{}
+		for k := range oldMap {
+			if icebergTableIgnoredProperties[k] {
+				continue
+			}
+			if _, ok := newMap[k]; !ok {
+				removals = append(removals, k)
+			}
+		}
+
+		updates := map[string]string{}
+		for k, v := range newMap {
+			if icebergTableIgnoredProperties[k] {
+				continue
+			}
+			updates[k] = v.(string)
+		}
+
+		updateActions = append(updateActions,
+			map[string]interface{}{
+				"action":  "set-properties",
+				"updates": updates,
+			},
+			map[string]interface{}{
+				"action":   "remove-properties",
+				"removals": removals,
+			},
+		)
+	}
+
+	if d.HasChange("sort_order") {
+		if sortOrder := expandIcebergTableSortOrderForCommit(d.Get("sort_order")); sortOrder != nil {
+			// Add the new sort order, then make it the table's default. The
+			// server assigns the new order id, so "-1" selects the last added.
+			updateActions = append(updateActions,
+				map[string]interface{}{
+					"action":     "add-sort-order",
+					"sort-order": sortOrder,
+				},
+				map[string]interface{}{
+					"action":        "set-default-sort-order",
+					"sort-order-id": -1,
+				},
+			)
+		}
+	}
+
+	if len(updateActions) > 0 {
+		// Wrap in 'updates' and 'requirements' as per CommitTableRequest
+		return map[string]interface{}{
+			"requirements": []interface{}{},
+			"updates":      updateActions,
+		}, nil
+	}
+	return nil, nil

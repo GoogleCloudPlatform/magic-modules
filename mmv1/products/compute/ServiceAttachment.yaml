@@ -46,71 +46,87 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west4"
     - region: "us-east1"
-examples:
+samples:
   - name: 'service_attachment_basic'
     primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+    steps:
+      - name: 'service_attachment_basic'
+        resource_id_vars:
+          service_attachment_name: 'my-psc-ilb'
+          network_name: 'psc-ilb-network'
+          nat_subnetwork_name: 'psc-ilb-nat'
+          producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+          producer_health_check_name: 'producer-service-health-check'
+          producer_service_name: 'producer-service'
+          producer_forwarding_rule_name: 'producer-forwarding-rule'
+          consumer_address_name: 'psc-ilb-consumer-address'
+          consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
   - name: 'service_attachment_explicit_projects'
     primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+    steps:
+      - name: 'service_attachment_explicit_projects'
+        resource_id_vars:
+          service_attachment_name: 'my-psc-ilb'
+          network_name: 'psc-ilb-network'
+          nat_subnetwork_name: 'psc-ilb-nat'
+          producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+          producer_health_check_name: 'producer-service-health-check'
+          producer_service_name: 'producer-service'
+          producer_forwarding_rule_name: 'producer-forwarding-rule'
+          consumer_address_name: 'psc-ilb-consumer-address'
+          consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
   - name: 'service_attachment_explicit_networks'
     primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_network_name: 'psc-ilb-consumer-network'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+    steps:
+      - name: 'service_attachment_explicit_networks'
+        resource_id_vars:
+          service_attachment_name: 'my-psc-ilb'
+          network_name: 'psc-ilb-network'
+          nat_subnetwork_name: 'psc-ilb-nat'
+          producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+          producer_health_check_name: 'producer-service-health-check'
+          producer_service_name: 'producer-service'
+          producer_forwarding_rule_name: 'producer-forwarding-rule'
+          consumer_network_name: 'psc-ilb-consumer-network'
+          consumer_address_name: 'psc-ilb-consumer-address'
+          consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
   - name: 'service_attachment_reconcile_connections'
     primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+    steps:
+      - name: 'service_attachment_reconcile_connections'
+        resource_id_vars:
+          service_attachment_name: 'my-psc-ilb'
+          network_name: 'psc-ilb-network'
+          nat_subnetwork_name: 'psc-ilb-nat'
+          producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+          producer_health_check_name: 'producer-service-health-check'
+          producer_service_name: 'producer-service'
+          producer_forwarding_rule_name: 'producer-forwarding-rule'
+          consumer_address_name: 'psc-ilb-consumer-address'
+          consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
   - name: 'service_attachment_tunneling_config'
     primary_resource_id: 'psc_ilb_service_attachment'
     min_version: beta
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
+    steps:
+      - name: 'service_attachment_tunneling_config'
+        min_version: beta
+        resource_id_vars:
+          service_attachment_name: 'my-psc-ilb'
+          network_name: 'psc-ilb-network'
+          nat_subnetwork_name: 'psc-ilb-nat'
+          producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+          producer_health_check_name: 'producer-service-health-check'
+          producer_service_name: 'producer-service'
+          producer_forwarding_rule_name: 'producer-forwarding-rule'
   - name: 'service_attachment_cross_region_ilb'
     primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      name: 'sa'
+    steps:
+      - name: 'service_attachment_cross_region_ilb'
+        resource_id_vars:
+          name: 'sa'
+        test_vars_overrides:
+          # for backward compatible
+          name: '"sa" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -277,6 +293,7 @@ properties:
       An array of projects that are not allowed to connect to this service
       attachment.
     send_empty_value: true
+    is_missing_in_cai: true # Ignored in TGC tests due to timing issues in CAI updates where the field disappears in intermediate steps.
     item_type:
       type: String
   - name: 'consumerAcceptLists'
@@ -296,6 +313,7 @@ properties:
           description: |
             A project that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
+          is_missing_in_cai: true
         - name: 'networkUrl'
           type: String
           # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
@@ -309,13 +327,14 @@ properties:
             The endpoint that is allowed to connect to this service attachment.
             Only one of project_id_or_num, network_url and endpoint_url may be set.
           diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-          min_version: beta
+          is_missing_in_cai: true
         - name: 'connectionLimit'
           type: Integer
           description: |
             The number of consumer forwarding rules the consumer project can
             create.
           required: true
+          is_missing_in_cai: true
   - name: 'reconcileConnections'
     type: Boolean
     description: |

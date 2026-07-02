@@ -39,9 +39,9 @@ func TestResolveParentsBasic(t *testing.T) {
 		t.Fatalf("Error parsing %s: %s", f, err)
 	}
 
-	parentToChildMap := NewParentResourceResolver(logger).Resolve(jsonPlan)
-	assert.Equal(t, "google_vmwareengine_network_peering.peering", parentToChildMap["google_compute_network.peered_network"][0])
-	assert.Equal(t, "google_vmwareengine_network_peering.peering", parentToChildMap["google_vmwareengine_network.vmware_network"][0])
+	dependencyMap := NewParentResourceResolver(logger).Resolve(jsonPlan)
+	assert.Equal(t, "google_compute_network.peered_network", dependencyMap["google_vmwareengine_network_peering.peering"]["peer_network"])
+	assert.Equal(t, "google_vmwareengine_network.vmware_network", dependencyMap["google_vmwareengine_network_peering.peering"]["vmware_engine_network"])
 }
 
 func TestResolveParentsNested(t *testing.T) {
@@ -55,8 +55,8 @@ func TestResolveParentsNested(t *testing.T) {
 		t.Fatalf("Error parsing %s: %s", f, err)
 	}
 
-	parentToChildMap := NewParentResourceResolver(logger).Resolve(jsonPlan)
-	assert.Equal(t, "google_compute_disk.secondary", parentToChildMap["google_compute_disk.primary"][0])
+	dependencyMap := NewParentResourceResolver(logger).Resolve(jsonPlan)
+	assert.Equal(t, "google_compute_disk.primary", dependencyMap["google_compute_disk.secondary"]["async_primary_disk.0.disk"])
 }
 
 func TestSortTraversalOrder(t *testing.T) {
@@ -160,7 +160,7 @@ func TestSortTraversalOrder(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := sortTraversalOrder(tc.graph)
+			got, err := SortTraversalOrder(tc.graph)
 
 			if tc.wantErr {
 				if err == nil {

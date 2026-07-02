@@ -41,20 +41,22 @@ custom_code:
 sweeper:
   url_substitutions:
     - location: 'global'
-examples:
+samples:
   - name: 'network_services_lb_edge_extension_basic'
     primary_resource_id: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    vars:
-      forwarding_rule_name: 'elb-forwarding-rule'
-      target_http_proxy_name: 'elb-target-http-proxy'
-      url_map_name: 'elb-url-map'
-      backend_service_name: 'elb-backend-subnet'
-      lb_edge_extension_name: 'elb-edge-ext'
-      wasm_plugin_name: 'elb-wasm-plugin-data'
-      repository_name: 'repository-standard'
     exclude_test: true
+    steps:
+      - name: 'network_services_lb_edge_extension_basic'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+        resource_id_vars:
+          forwarding_rule_name: 'elb-forwarding-rule'
+          target_http_proxy_name: 'elb-target-http-proxy'
+          url_map_name: 'elb-url-map'
+          backend_service_name: 'elb-backend-subnet'
+          lb_edge_extension_name: 'elb-edge-ext'
+          wasm_plugin_name: 'elb-wasm-plugin-data'
+          repository_name: 'repository-standard'
 parameters:
   - name: 'location'
     type: String
@@ -109,7 +111,7 @@ properties:
         - name: 'matchCondition'
           type: NestedObject
           description: |
-             Conditions under which this chain is invoked for a request.
+            Conditions under which this chain is invoked for a request.
           required: true
           properties:
             - name: 'celExpression'
@@ -147,12 +149,12 @@ properties:
               - name: 'failOpen'
                 type: Boolean
                 description: |
-                   Determines how the proxy behaves if the call to the extension fails or times out.
-                   When set to TRUE, request or response processing continues without error.
-                   Any subsequent extensions in the extension chain are also executed.
-                   When set to FALSE: * If response headers have not been delivered to the downstream client,
-                   a generic 500 error is returned to the client. The error response can be tailored by
-                   configuring a custom error response in the load balancer.
+                  Determines how the proxy behaves if the call to the extension fails or times out.
+                  When set to TRUE, request or response processing continues without error.
+                  Any subsequent extensions in the extension chain are also executed.
+                  When set to FALSE: * If response headers have not been delivered to the downstream client,
+                  a generic 500 error is returned to the client. The error response can be tailored by
+                  configuring a custom error response in the load balancer.
               - name: 'supportedEvents'
                 type: Array
                 description: |
@@ -168,6 +170,18 @@ properties:
                   If omitted, all headers are sent. Each element is a string indicating the header name.
                 item_type:
                   type: String
+              - name: 'forwardAttributes'
+                type: Array
+                description: |
+                  List of the Envoy attributes to forward to the extension server. The attributes
+                  provided here are included as part of the `ProcessingRequest.attributes` field
+                  (of type `map`), where the keys are the attribute names. Refer to the
+                  [documentation](https://docs.cloud.google.com/service-extensions/docs/attributes)
+                  for the names of attributes that can be forwarded. If omitted, no attributes
+                  are sent. Each element is a string indicating the attribute name.
+                item_type:
+                  type: String
+                max_size: 16
   - name: 'loadBalancingScheme'
     type: Enum
     description: |

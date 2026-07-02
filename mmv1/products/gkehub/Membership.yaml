@@ -12,131 +12,143 @@
 # limitations under the License.
 
 ---
-name: 'Membership'
+name: Membership
 description: |
   Membership contains information about a member cluster.
 references:
   guides:
-    'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
-  api: 'https://cloud.google.com/anthos/multicluster-management/reference/rest/v1/projects.locations.memberships'
+    Registering a Cluster: https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster
+  api: https://cloud.google.com/anthos/multicluster-management/reference/rest/v1/projects.locations.memberships
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/memberships'
-self_link: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/memberships?membershipId={{membership_id}}'
-update_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/memberships
+self_link: projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}
+create_url: projects/{{project}}/locations/{{location}}/memberships?membershipId={{membership_id}}
+update_url: projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: membership_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}
+    - '{{membership_id}}'
+id_format: projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
+  - projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-iam_policy:
-  method_name_separator: ':'
-  parent_resource_attribute: 'membership_id'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
-    - '{{membership_id}}'
-custom_code:
-  constants: 'templates/terraform/constants/gke_hub_membership_diff.go.tmpl'
-include_in_tgc_next: true
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: true
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'gkehub_membership_regional'
-    primary_resource_id: 'membership'
-    vars:
-      name: 'basic'
-      cluster_name: 'basic-cluster'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      location: 'REGION'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-  - name: 'gkehub_membership_basic'
-    primary_resource_id: 'membership'
-    vars:
-      name: 'basic'
-      cluster_name: 'basic-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkehub_membership_issuer'
-    primary_resource_id: 'membership'
-    vars:
-      name: 'basic'
-      cluster_name: 'basic-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
+autogen_async: true
+include_in_tgc_next: true
+custom_code:
+  constants: templates/terraform/constants/gke_hub_membership_diff.go.tmpl
+samples:
+  - name: gkehub_membership_regional
+    primary_resource_id: membership
+    steps:
+      - name: gkehub_membership_regional
+        resource_id_vars:
+          name: basic
+          cluster_name: basic-cluster
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+          location: REGION
+        test_vars_overrides:
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          # for backward compatible
+          name: '"basic" + randomSuffix'
+  - name: gkehub_membership_basic
+    primary_resource_id: membership
+    steps:
+      - name: gkehub_membership_basic
+        resource_id_vars:
+          name: basic
+          cluster_name: basic-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          # for backward compatible
+          name: '"basic" + randomSuffix'
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: gkehub_membership_issuer
+    primary_resource_id: membership
+    steps:
+      - name: gkehub_membership_issuer
+        resource_id_vars:
+          name: basic
+          cluster_name: basic-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          # for backward compatible
+          name: '"basic" + randomSuffix'
+        oics_vars_overrides:
+          deletion_protection: "false"
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       Location of the membership.
       The default value is `global`.
     url_param_only: true
     immutable: true
-    default_value: "global"
+    default_value: global
 properties:
-  - name: 'membershipId'
+  - name: membershipId
     type: String
     description: |
       The client-provided identifier of the membership.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The unique identifier of the membership.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Labels to apply to this membership.
-  - name: 'endpoint'
+  - name: endpoint
     type: NestedObject
     description: |
       If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
     immutable: true
     properties:
-      - name: 'gkeCluster'
+      - name: gkeCluster
         type: NestedObject
         description: |
           If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
         immutable: true
         properties:
-          - name: 'resourceLink'
+          - name: resourceLink
             type: String
             description: |
               Self-link of the GCP resource for the GKE cluster.
@@ -146,16 +158,16 @@ properties:
               `google_container_cluster.my-cluster.id`.
             required: true
             immutable: true
-            diff_suppress_func: 'suppressGkeHubEndpointSelfLinkDiff'
-            custom_expand: 'templates/terraform/custom_expand/gke_hub_membership.tmpl'
-  - name: 'authority'
+            diff_suppress_func: suppressGkeHubEndpointSelfLinkDiff
+            custom_expand: templates/terraform/custom_expand/gke_hub_membership.tmpl
+  - name: authority
     type: NestedObject
     description: |
       Authority encodes how Google will recognize identities from this Membership.
       See the workload identity documentation for more details:
       https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
     properties:
-      - name: 'issuer'
+      - name: issuer
         type: String
         description: |
           A JSON Web Token (JWT) issuer URI. `issuer` must start with `https://` and // be a valid

@@ -47,90 +47,125 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/workerPools/{{name}}'
     - '{{name}}'
 custom_code:
+  encoder: 'templates/terraform/encoders/cloudrunv2_worker_pool.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/cloudrunv2_worker_pool.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_worker_pool_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
-examples:
+samples:
   - name: 'cloudrunv2_worker_pool_basic'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_worker_pool_basic'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_basic_depends_on'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_worker_pool_basic_depends_on'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_limits'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_worker_pool_limits'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_sql'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-      secret_id: 'secret-1'
-      cloud_run_sql_name: 'cloudrun-sql'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_worker_pool_sql'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+          secret_id: 'secret-1'
+          cloud_run_sql_name: 'cloudrun-sql'
+          deletion_protection: 'true'
+        test_vars_overrides:
+          'deletion_protection': 'false'
+        oics_vars_overrides:
+          'deletion_protection': 'false'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_directvpc'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_worker_pool_directvpc'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_gpu'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_worker_pool_gpu'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_secret'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-      secret_id: 'secret-1'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_worker_pool_secret'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+          secret_id: 'secret-1'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_multicontainer'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_worker_pool_multicontainer'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_mount_gcs'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
     # Currently failing
     skip_vcr: true
+    steps:
+      - name: 'cloudrunv2_worker_pool_mount_gcs'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+        ignore_read_extra:
+          - 'deletion_protection'
+  - name: 'cloudrunv2_worker_pool_emptydir_disk'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'cloudrunv2_worker_pool_emptydir_disk'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+          deletion_protection: 'true'
+        test_vars_overrides:
+          'deletion_protection': 'false'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_mount_nfs'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
     # Currently failing
     skip_vcr: true
+    steps:
+      - name: 'cloudrunv2_worker_pool_mount_nfs'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_startup_liveness_probe'
     primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-      vpc_access_connector_name: 'wp-connector'
-      compute_network_name: 'wp-net'
-      vpc_compute_subnetwork_name: 'wp-subnet'
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+      - name: 'cloudrunv2_worker_pool_startup_liveness_probe'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+          vpc_access_connector_name: 'wp-connector'
+          compute_network_name: 'wp-net'
+          vpc_compute_subnetwork_name: 'wp-subnet'
+        ignore_read_extra:
+          - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -154,7 +189,7 @@ properties:
     type: String
     description: |
       Name of the WorkerPool.
-    url_param_only: true
+    ignore_read: true
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
@@ -328,6 +363,14 @@ properties:
           All system annotations in v1 now have a corresponding field in v2 WorkerPoolRevisionTemplate.
 
           This field follows Kubernetes annotations' namespacing, limits, and rules.
+      - name: 'client'
+        type: String
+        description: |
+          Arbitrary identifier for the API client.
+      - name: 'clientVersion'
+        type: String
+        description: |
+          Arbitrary version identifier for the API client.
       - name: 'vpcAccess'
         type: NestedObject
         description: |-
@@ -535,17 +578,23 @@ properties:
                     - name: 'httpHeaders'
                       description: |-
                         Optional. Custom headers to set in the request. HTTP allows repeated headers.
-                      type: NestedObject
-                      properties:
-                        - name: 'port'
-                          required: true
-                          description: |-
-                            Required. The header field name
-                          type: Integer
-                        - name: 'value'
-                          description: |-
-                            Optional. The header field value
-                          type: String
+                      type: Array
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'port'
+                            description: |-
+                              Required. The header field name
+                            type: Integer
+                            deprecation_message: '`port` field is deprecated and will be removed in a future major release. It was never supported by the API.'
+                          - name: 'name'
+                            description: |-
+                              Required. The header field name
+                            type: String
+                          - name: 'value'
+                            description: |-
+                              Optional. The header field value
+                            type: String
                 - name: 'tcpSocket'
                   description: |-
                     Optional. TCPSocket specifies an action involving a TCP port. Exactly one of httpGet, tcpSocket, or grpc must be specified.
@@ -609,17 +658,23 @@ properties:
                     - name: 'httpHeaders'
                       description: |-
                         Optional. Custom headers to set in the request. HTTP allows repeated headers.
-                      type: NestedObject
-                      properties:
-                        - name: 'port'
-                          required: true
-                          description: |-
-                            Required. The header field name
-                          type: Integer
-                        - name: 'value'
-                          description: |-
-                            Optional. The header field value
-                          type: String
+                      type: Array
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'port'
+                            description: |-
+                              Required. The header field name
+                            type: Integer
+                            deprecation_message: '`port` field is deprecated and will be removed in a future major release. It was never supported by the API.'
+                          - name: 'name'
+                            description: |-
+                              Required. The header field name
+                            type: String
+                          - name: 'value'
+                            description: |-
+                              Optional. The header field value
+                            type: String
                 - name: 'tcpSocket'
                   description: |-
                     Optional. TCPSocket specifies an action involving a TCP port. Exactly one of httpGet, tcpSocket, or grpc must be specified.
@@ -726,6 +781,7 @@ properties:
                   default_value: "MEMORY"
                   enum_values:
                     - 'MEMORY'
+                    - 'DISK'
                 - name: 'sizeLimit'
                   type: String
                   description: |-
@@ -794,8 +850,7 @@ properties:
         properties:
           - name: 'accelerator'
             type: String
-            description:
-              The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/services/gpu for configuring GPU.
+            description: The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/services/gpu for configuring GPU.
             required: true
       - name: 'gpuZonalRedundancyDisabled'
         type: Boolean
@@ -803,7 +858,7 @@ properties:
   - name: 'instanceSplits'
     type: Array
     description: |-
-       Specifies how to distribute instances over a collection of Revisions belonging to the WorkerPool. If instance split is empty or not provided, defaults to 100% instances assigned to the latest Ready Revision.
+      Specifies how to distribute instances over a collection of Revisions belonging to the WorkerPool. If instance split is empty or not provided, defaults to 100% instances assigned to the latest Ready Revision.
     default_from_api: true
     item_type:
       type: NestedObject

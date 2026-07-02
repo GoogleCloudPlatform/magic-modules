@@ -12,9 +12,9 @@
 # limitations under the License.
 
 ---
-name: 'Source'
+name: Source
 api_variant_patterns:
-  - 'organizations/{organization}/sources/{source}'
+  - organizations/{organization}/sources/{source}
 description: |
   A Cloud Security Command Center's (Cloud SCC) finding source. A finding
   source is an entity or a mechanism that can produce a finding. A source is
@@ -22,39 +22,44 @@ description: |
   monitor, etc.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
-  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.sources'
+    Official Documentation: https://cloud.google.com/security-command-center/docs
+  api: https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.sources
 docs:
-base_url: 'organizations/{{organization}}/sources'
+base_url: organizations/{{organization}}/sources
 self_link: '{{name}}'
-update_verb: 'PATCH'
 update_mask: true
-exclude_delete: true
+update_verb: PATCH
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: POST
+  parent_resource_attribute: source
+  base_url: organizations/{{organization}}/sources/{{source}}
+  import_format:
+    - organizations/{{organization}}/sources/{{source}}
+    - '{{source}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-iam_policy:
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'source'
-  base_url: 'organizations/{{organization}}/sources/{{source}}'
-  import_format:
-    - 'organizations/{{organization}}/sources/{{source}}'
-    - '{{source}}'
+exclude_delete: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.tmpl'
-examples:
-  - name: 'scc_source_basic'
-    primary_resource_id: 'custom_source'
-    vars:
-      source_display_name: 'My Source'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      # resource can't be destroyed, so checkdestroy fails unnecessarily
+  custom_import: templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.tmpl
+samples:
+  - name: scc_source_basic
+    primary_resource_id: custom_source
     exclude_test: true
+    steps:
+      - name: scc_source_basic
+        resource_id_vars:
+          source_display_name: My Source
+        test_vars_overrides:
+          # for backward compatible
+          source_display_name: '"My Source" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
+          # resource can't be destroyed, so checkdestroy fails unnecessarily
 parameters:
-  - name: 'organization'
+  - name: organization
     type: String
     description: |
       The organization whose Cloud Security Command Center the Source
@@ -63,19 +68,19 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of this source, in the format
       `organizations/{{organization}}/sources/{{source}}`.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       The description of the source (max of 1024 characters).
     validation:
-      function: 'validation.StringLenBetween(0, 1024)'
-  - name: 'displayName'
+      function: validation.StringLenBetween(0, 1024)
+  - name: displayName
     type: String
     description: |
       The source’s display name. A source’s display name must be unique

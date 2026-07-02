@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -164,7 +165,7 @@ func dataSourceGoogleComputeStoragePoolTypesRead(d *schema.ResourceData, meta in
 	zone := d.Get("zone").(string)
 	storagePoolType := d.Get("storage_pool_type").(string)
 
-	spt, err := config.NewComputeClient(userAgent).StoragePoolTypes.Get(project, zone, storagePoolType).Do()
+	spt, err := NewClient(config, userAgent).StoragePoolTypes.Get(project, zone, storagePoolType).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, "GCE storage pool types", fmt.Sprintf("GCE storage pool types in project %s", project))
 	}
@@ -239,4 +240,13 @@ func dataSourceGoogleComputeStoragePoolTypesRead(d *schema.ResourceData, meta in
 	d.SetId(strconv.FormatUint(spt.Id, 10))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_storage_pool_types",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeStoragePoolTypes(),
+	}.Register()
 }

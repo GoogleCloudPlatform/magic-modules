@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -102,7 +103,7 @@ func dataSourceGoogleKmsSecretAsymmetricRead(ctx context.Context, d *schema.Reso
 		Ciphertext:       base64CipherText,
 		CiphertextCrc32c: int64(ciphertextCRC32C)}
 
-	client := config.NewKmsClientWithCtx(ctx, userAgent)
+	client := NewClientWithCtx(ctx, config, userAgent)
 	if client == nil {
 		return fmt.Errorf("failed to get a KMS client")
 	}
@@ -149,4 +150,13 @@ func validateHexadecimalUint32(i interface{}, val string) ([]string, []error) {
 		return nil, []error{fmt.Errorf("could not decode %q as a unsigned 32 bit hexadecimal integer", val)}
 	}
 	return nil, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_kms_secret_asymmetric",
+		ProductName: "kms",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleKmsSecretAsymmetric(),
+	}.Register()
 }

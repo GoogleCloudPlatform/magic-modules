@@ -40,114 +40,147 @@ custom_code:
   constants: templates/terraform/constants/iam_workforce_pool_provider.go.tmpl
   post_create: templates/terraform/post_create/iam_workforce_pool_provider.go.tmpl
   post_update: templates/terraform/post_update/iam_workforce_pool_provider.go.tmpl
-examples:
+samples:
   - name: iam_workforce_pool_provider_saml_basic
     primary_resource_id: example
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_saml_basic
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_saml_full
     primary_resource_id: example
-    ignore_read_extra:
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_saml_full
+        ignore_read_extra:
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_oidc_basic
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_oidc_basic
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_oidc_full
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_oidc_full
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_oidc_upload_key
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-    exclude_docs: true
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    exclude_basic_doc: true
+    steps:
+      - name: iam_workforce_pool_provider_oidc_upload_key
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_basic
-    skip_func: acctest.SkipTestUntil(t, "2026-03-05")  # waiting for rollout
     primary_resource_id: example
-    vars:
-      workforce_pool_id: example-pool
-      provider_id: example-prvdr
-    test_env_vars:
-      org_id: ORG_ID
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+    skip_func: acctest.SkipTestUntil(t, "2026-03-05") # waiting for rollout
+    steps:
+      - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_basic
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_full
-    skip_func: acctest.SkipTestUntil(t, "2026-03-05")  # waiting for rollout
     primary_resource_id: example
-    vars:
-      workforce_pool_id: example-pool
-      provider_id: example-prvdr
-    test_env_vars:
-      org_id: ORG_ID
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+    skip_func: acctest.SkipTestUntil(t, "2026-03-05") # waiting for rollout
+    steps:
+      - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_full
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
+  - name: iam_workforce_pool_provider_oidc_detailed_audit_logging
+    primary_resource_id: example
+    steps:
+      - name: iam_workforce_pool_provider_oidc_detailed_audit_logging
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
 properties:
   - name: location
     type: String
@@ -342,7 +375,7 @@ properties:
                 required: true
                 description: |
                   The plain text of the client secret value.
-                sensitive: true
+                write_only: true
                 validation:
                   function: validation.StringIsNotEmpty
               - name: thumbprint
@@ -448,6 +481,7 @@ properties:
                 required: true
                 description: |
                   The plain text of the client secret value.
+                write_only: true
                 validation:
                   function: validation.StringIsNotEmpty
               - name: thumbprint
@@ -499,8 +533,6 @@ properties:
               details.
   - name: extendedAttributesOauth2Client
     type: NestedObject
-    deprecation_message: |-
-      `extended_attributes_oauth2_client` is deprecated. Use SCIM instead.
     description: |
       The configuration for OAuth 2.0 client used to get the extended group
       memberships for user identities. Only the `AZURE_AD_GROUPS_ID` attribute
@@ -513,6 +545,7 @@ properties:
       retrieved when the user signs in and at regular intervals during the user's
       active session. Each user identity in the workforce identity pool must map
       to a unique Microsoft Entra ID user.
+    deprecation_message: '`extended_attributes_oauth2_client` is deprecated. Use SCIM instead.'
     properties:
       - name: issuerUri
         type: String
@@ -541,6 +574,7 @@ properties:
                 required: true
                 description: |
                   The plain text of the client secret value.
+                write_only: true
                 validation:
                   function: validation.StringIsNotEmpty
               - name: thumbprint
@@ -590,3 +624,6 @@ properties:
     enum_values:
       - SCIM_USAGE_UNSPECIFIED
       - ENABLED_FOR_GROUPS
+  - name: detailedAuditLogging
+    type: Boolean
+    description: If true, populates additional debug information in Cloud Audit Logs for this provider. Logged attribute mappings and values can be found in `sts.googleapis.com` data access logs. Default value is false.

@@ -38,19 +38,28 @@ custom_code:
   decoder: 'templates/terraform/decoders/resource_compute_network_firewall_policy_with_rules.go.tmpl'
   post_create: 'templates/terraform/post_create/resource_compute_network_firewall_policy_with_rules.go.tmpl'
 legacy_long_form_project: true
-examples:
+samples:
   - name: 'compute_network_firewall_policy_with_rules_full'
     primary_resource_id: 'primary'
-    vars:
-      address_group: 'address-group'
-      fw_policy: 'fw-policy'
-      network: 'network'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-      security_profile_group: 'spg'
-      security_profile: 'sp'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'compute_network_firewall_policy_with_rules_full'
+        resource_id_vars:
+          address_group: 'address-group'
+          fw_policy: 'fw-policy'
+          network: 'network'
+          tag_key: 'tag-key'
+          tag_value: 'tag-value'
+          security_profile_group: 'spg'
+          security_profile: 'sp'
+        test_vars_overrides:
+          # for backward compatible
+          network: '"network" + randomSuffix'
+          # for backward compatible
+          security_profile_group: '"spg" + randomSuffix'
+          # for backward compatible
+          security_profile: '"sp" + randomSuffix'
+        test_env_vars:
+          org_id: 'ORG_ID'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -112,9 +121,7 @@ properties:
           required: true
         - name: 'match'
           type: NestedObject
-          description:
-            A match condition that incoming traffic is evaluated against. If it
-            evaluates to true, the corresponding 'action' is enforced.
+          description: A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
           required: true
           properties:
             - name: 'srcIpRanges'
@@ -380,9 +387,7 @@ properties:
           output: true
         - name: 'match'
           type: NestedObject
-          description:
-            A match condition that incoming traffic is evaluated against. If it
-            evaluates to true, the corresponding 'action' is enforced.
+          description: A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
           output: true
           properties:
             - name: 'srcIpRanges'

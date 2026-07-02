@@ -56,21 +56,21 @@ func TestConvertErrorMessage(t *testing.T) {
 		rawErrorMessage string
 		want            string
 	}{
-		"error message with start and end markers": {
-			rawErrorMessage: "------- Stdout: ------- === RUN TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === PAUSE TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === CONT TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample --- PASS: TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample (11.76s) PASS ------- Stderr: ------- 2025/01/21 08:06:22 [DEBUG] [transport] [server-transport 0xc002614000] Closing: EOF 2025/01/21 08:06:22 [DEBUG] [transport] [server-transport 0xc002614000] loopyWriter exiting with error: transport closed by client 2025/01/21 08:06:22",
-			want:            "=== RUN TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === PAUSE TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === CONT TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample --- PASS: TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample (11.76s) PASS",
+		"panic scenario keeps stderr": {
+			rawErrorMessage: "Test ended in panic. ------- Stdout: ------- === RUN TestAccComputeProjectMetadata_modify_2 === PAUSE TestAccComputeProjectMetadata_modify_2 === CONT TestAccComputeProjectMetadata_modify_2 ------- Stderr: ------- panic: runtime error: invalid memory address or nil pointer dereference",
+			want:            "=== RUN TestAccComputeProjectMetadata_modify_2 === PAUSE TestAccComputeProjectMetadata_modify_2 === CONT TestAccComputeProjectMetadata_modify_2\npanic: runtime error: invalid memory address or nil pointer dereference",
 		},
-		"error message with start but no end markers": {
-			rawErrorMessage: "------- Stdout: ------- === RUN TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === PAUSE TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === CONT TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample --- PASS: TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample (11.76s) PASS",
-			want:            "=== RUN TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === PAUSE TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === CONT TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample --- PASS: TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample (11.76s) PASS",
+		"standard failure with debug logs drops stderr": {
+			rawErrorMessage: "=== RUN TestAccComputeInstance_Basic === PAUSE TestAccComputeInstance_Basic === CONT TestAccComputeInstance_Basic --- FAIL: TestAccComputeInstance_Basic (11.76s) FAIL ------- Stderr: ------- 2025/01/21 08:06:22 [DEBUG] [transport] Closing: EOF",
+			want:            "=== RUN TestAccComputeInstance_Basic === PAUSE TestAccComputeInstance_Basic === CONT TestAccComputeInstance_Basic --- FAIL: TestAccComputeInstance_Basic (11.76s) FAIL",
 		},
-		"error message with no start but with end markers": {
-			rawErrorMessage: "=== RUN TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === PAUSE TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === CONT TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample --- PASS: TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample (11.76s) PASS ------- Stderr: ------- 2025/01/21 08:06:22 [DEBUG] [transport] [server-transport 0xc002614000] Closing: EOF 2025/01/21 08:06:22 [DEBUG] [transport] [server-transport 0xc002614000] loopyWriter exiting with error: transport closed by client 2025/01/21 08:06:22",
-			want:            "=== RUN TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === PAUSE TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === CONT TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample --- PASS: TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample (11.76s) PASS",
+		"standard failure with start marker but no stderr": {
+			rawErrorMessage: "------- Stdout: ------- === RUN TestAccComputeInstance_Basic === PAUSE TestAccComputeInstance_Basic === CONT TestAccComputeInstance_Basic --- FAIL: TestAccComputeInstance_Basic (11.76s) FAIL",
+			want:            "=== RUN TestAccComputeInstance_Basic === PAUSE TestAccComputeInstance_Basic === CONT TestAccComputeInstance_Basic --- FAIL: TestAccComputeInstance_Basic (11.76s) FAIL",
 		},
-		"error message with no start and no end markers": {
-			rawErrorMessage: "=== RUN TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === PAUSE TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === CONT TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample --- PASS: TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample (11.76s) PASS",
-			want:            "=== RUN TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === PAUSE TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample === CONT TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample --- PASS: TestAccColabRuntimeTemplate_colabRuntimeTemplateBasicExample (11.76s) PASS",
+		"failure with no start and no stderr markers": {
+			rawErrorMessage: "=== RUN TestAccComputeInstance_Basic === PAUSE TestAccComputeInstance_Basic === CONT TestAccComputeInstance_Basic --- FAIL: TestAccComputeInstance_Basic (11.76s) FAIL",
+			want:            "=== RUN TestAccComputeInstance_Basic === PAUSE TestAccComputeInstance_Basic === CONT TestAccComputeInstance_Basic --- FAIL: TestAccComputeInstance_Basic (11.76s) FAIL",
 		},
 	}
 

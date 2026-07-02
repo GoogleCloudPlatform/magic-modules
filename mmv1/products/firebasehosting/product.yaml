@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'FirebaseHosting'
-display_name: 'Firebase Hosting'
-versions:
-  - name: 'beta'
-    base_url: 'https://firebasehosting.googleapis.com/v1beta1/'
+name: FirebaseHosting
+display_name: Firebase Hosting
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: beta
+    base_url: https://firebasehosting.googleapis.com/v1beta1/

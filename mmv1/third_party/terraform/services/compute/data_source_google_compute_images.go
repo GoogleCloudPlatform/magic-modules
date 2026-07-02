@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -100,7 +101,7 @@ func dataSourceGoogleComputeImagesRead(d *schema.ResourceData, meta interface{})
 
 	images := make([]map[string]interface{}, 0)
 
-	imageList, err := config.NewComputeClient(userAgent).Images.List(project).Filter(filter).Do()
+	imageList, err := NewClient(config, userAgent).Images.List(project).Filter(filter).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Images : %s", project), fmt.Sprintf("Images : %s", project))
 	}
@@ -132,4 +133,13 @@ func dataSourceGoogleComputeImagesRead(d *schema.ResourceData, meta interface{})
 	))
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_images",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeImages(),
+	}.Register()
 }

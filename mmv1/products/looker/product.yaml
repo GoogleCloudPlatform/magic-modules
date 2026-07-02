@@ -12,16 +12,16 @@
 # limitations under the License.
 
 ---
-name: 'Looker'
-display_name: 'Looker (Google Cloud core)'
-versions:
-  - name: 'ga'
-    base_url: 'https://looker.googleapis.com/v1/'
-scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+name: Looker
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+display_name: Looker (Google Cloud core)
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://looker.googleapis.com/v1/

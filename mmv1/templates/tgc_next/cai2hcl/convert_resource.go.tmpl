@@ -15,13 +15,24 @@
 package converters
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 )
 
-func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func ConvertResource(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]byte, error) {
+	if len(assets) == 0 {
+		return nil, nil
+	}
+
+	if len(assets) > 1 {
+		// TODO: special handling is needed
+		return nil, fmt.Errorf("multiple assets are not supported yet.")
+	}
+
+	asset := assets[0]
 	converters, ok := ConverterMap[asset.Type]
 	if !ok || len(converters) == 0 {
 		return nil, nil
@@ -38,18 +49,26 @@ func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, er
 {{- range $resourceType, $resources := $.ResourcesByCaiResourceType}}
 	{{- if gt (len $resources) 1 }}
 		case "{{ $resourceType }}":
+		{{- if eq $resourceType "compute.googleapis.com/SslCertificate" }}
+			if strings.Contains(asset.Name, "regions") {
+				converter = ConverterMap[asset.Type]["ComputeRegionSslCertificate"]
+			} else if typeVal, ok := asset.Resource.Data["type"]; ok && typeVal == "MANAGED" {
+				converter = ConverterMap[asset.Type]["ComputeManagedSslCertificate"]
+			} else {
+				converter = ConverterMap[asset.Type]["ComputeSslCertificate"]
+			}
+		{{- else }}
 		{{- range $i, $object := $resources }}
 			{{- if eq $i 0 }}
-			if strings.Contains(asset.Name, "{{$object.IdentityParam}}") {
-			{{- else if $object.IdentityParam }}
-			} else if strings.Contains(asset.Name, "{{$object.IdentityParam}}") {
+			if true {{- range $param := $object.IdentityParams }} && strings.Contains(asset.Name, "{{$param}}"){{- end }} {
 			{{- else }}
-			} else {
+			} else if true {{- range $param := $object.IdentityParams }} && strings.Contains(asset.Name, "{{$param}}"){{- end }} {
 			{{- end }}
 				converter = ConverterMap[asset.Type]["{{ $object.AliasName }}"]
 			{{- if eq $i (sub (len $resources) 1)}}
 			}
 			{{- end }}
+		{{- end }}
 		{{- end }}
 	{{- end }}
 {{- end }}
@@ -59,5 +78,18 @@ func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, er
 	if converter == nil {
 		return nil, nil
 	}
-	return converter.Convert(asset)
+
+	newBlocks, err := converter.Convert(assets, options)
+	if err != nil {
+		return nil, err
+	}
+	if len(newBlocks) > 0 {
+		resBytes, err := models.HclWriteBlocks(newBlocks)
+		if err != nil {
+			return nil, err
+		}
+		return resBytes, nil
+	}
+
+	return nil, nil
 }

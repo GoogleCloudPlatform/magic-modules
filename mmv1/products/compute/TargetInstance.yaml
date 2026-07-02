@@ -41,33 +41,46 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+custom_code:
+  post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.tmpl'
+# excluding identity due to zone value inconsistency
+exclude_identity_generation: true
 sweeper:
   url_substitutions:
     - zone: "southamerica-west1-a"
 include_in_tgc_next: true
-custom_code:
-  post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.tmpl'
-examples:
+samples:
   - name: 'target_instance_basic'
     primary_resource_id: 'default'
-    vars:
-      target_name: 'target'
-      instance_name: 'target-vm'
+    steps:
+      - name: 'target_instance_basic'
+        resource_id_vars:
+          target_name: 'target'
+          instance_name: 'target-vm'
+        test_vars_overrides:
+          # for backward compatible
+          target_name: '"target" + randomSuffix'
   - name: 'target_instance_custom_network'
     primary_resource_id: 'custom_network'
     min_version: 'beta'
-    vars:
-      target_name: 'custom-network'
-      instance_name: 'custom-network-target-vm'
+    steps:
+      - name: 'target_instance_custom_network'
+        min_version: 'beta'
+        resource_id_vars:
+          target_name: 'custom-network'
+          instance_name: 'custom-network-target-vm'
   - name: 'target_instance_with_security_policy'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      network_name: 'custom-default-network'
-      subnetname_name: 'custom-default-subnet'
-      instance_name: 'target-vm'
-      region_sec_policy: 'region-secpolicy'
-      target_name: 'target-instance'
+    steps:
+      - name: 'target_instance_with_security_policy'
+        min_version: 'beta'
+        resource_id_vars:
+          network_name: 'custom-default-network'
+          subnetname_name: 'custom-default-subnet'
+          instance_name: 'target-vm'
+          region_sec_policy: 'region-secpolicy'
+          target_name: 'target-instance'
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -97,10 +110,7 @@ properties:
     output: true
   - name: 'network'
     type: String
-    description:
-      'The URL of the network this target instance uses to forward traffic. If
-      not specified, the traffic will be forwarded to the network that the
-      default network interface belongs to.'
+    description: 'The URL of the network this target instance uses to forward traffic. If not specified, the traffic will be forwarded to the network that the default network interface belongs to.'
     min_version: 'beta'
     immutable: true
   - name: 'description'

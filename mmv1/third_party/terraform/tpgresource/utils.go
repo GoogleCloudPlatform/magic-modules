@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
@@ -41,9 +42,11 @@ type TerraformResourceData interface {
 	GetOkExists(string) (interface{}, bool)
 	GetOk(string) (interface{}, bool)
 	Get(string) interface{}
+	GetRawConfig() cty.Value
 	Set(string, interface{}) error
 	SetId(string)
 	Id() string
+	Identity() (*schema.IdentityData, error)
 	GetProviderMeta(interface{}) error
 	Timeout(key string) time.Duration
 }
@@ -56,6 +59,8 @@ type TerraformResourceDiff interface {
 	Clear(string) error
 	ForceNew(string) error
 	SetNew(string, interface{}) error
+	GetChangedKeysPrefix(string) []string
+	GetRawConfig() cty.Value
 }
 
 // Contains functions that don't really belong anywhere else.
@@ -149,6 +154,88 @@ func GetZoneFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (stri
 		return config.Zone, nil
 	}
 	return "", fmt.Errorf("%s: required field is not set", "zone")
+}
+
+// getDeletionPolicyFromDiff reads the "deletion_policy" field from the given diff and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetDeletionPolicyFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config, resourceDefault string) (string, error) {
+	//if IsNull() value, then the value has not been manually configured
+	if d.GetRawConfig().GetAttr("deletion_policy").IsNull() {
+		if config.DeletionPolicy != "" {
+			log.Printf("[DEBUG] `deletion_policy` detected as not set within resource configuration. Falling back to configured provider default, %s", config.DeletionPolicy)
+			return config.DeletionPolicy, nil
+		}
+		//return the provided resource default as the final backup
+		log.Printf("[DEBUG] `deletion_policy` detected as not set within resource or provider configuration. Falling back to resource default, %s", resourceDefault)
+		return resourceDefault, nil
+	}
+	//if not null, then use/maintain usage of manually configured value
+	//
+	//this has to happen after a check for the null is made,
+	//as "GetOk" will always return a value once the resource is set, preventing changes
+	res, ok := d.GetOk("deletion_policy")
+	if ok {
+		return res.(string), nil
+	}
+	return "", fmt.Errorf("An error has occured during %s configuration. Please report this issue to the provider developers.", "`deletion_policy`")
+}
+
+func DeletionPolicySchemaEntry(resourceDefault string) *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+		Description: fmt.Sprintf(`Whether Terraform will be prevented from destroying the instance. Defaults to "%s".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`, resourceDefault),
+	}
+}
+
+func DeletionPolicyReadDefault(d *schema.ResourceData, config *transport_tpg.Config, resourceDefault string) error {
+	if _, ok := d.GetOkExists("deletion_policy"); !ok {
+		//prioritize config's value if present
+		if config.DeletionPolicy != "" {
+			if err := d.Set("deletion_policy", config.DeletionPolicy); err != nil {
+				return fmt.Errorf("Error setting deletion_policy: %s", err)
+			}
+		} else {
+			if err := d.Set("deletion_policy", resourceDefault); err != nil {
+				return fmt.Errorf("Error setting deletion_policy: %s", err)
+			}
+		}
+	}
+	return nil
+}
+
+func DeletionPolicyPreUpdate(d *schema.ResourceData, resourceSchema func() *schema.Resource) bool {
+	clientSideFields := map[string]bool{"deletion_policy": true}
+	clientSideOnly := true
+	for field := range resourceSchema().Schema {
+		if d.HasChange(field) && !clientSideFields[field] {
+			return false
+		}
+	}
+	if clientSideOnly {
+		log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
+		return true
+	}
+	return false
+}
+
+func DeletionPolicyPreDelete(d *schema.ResourceData) (bool, error) {
+	if d.Get("deletion_policy").(string) == "PREVENT" {
+		return true, fmt.Errorf("cannot destroy %q without setting deletion_policy=\"DELETE\" and running `terraform apply`", d.Id())
+	}
+	if d.Get("deletion_policy").(string) == "ABANDON" {
+		log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing %q from Terraform state without deletion", d.Id())
+		return true, nil
+	}
+	return false, nil
 }
 
 func GetRouterLockName(region string, router string) string {
@@ -525,19 +612,6 @@ func PaginatedListRequest(project, baseUrl, userAgent string, config *transport_
 	return ls, nil
 }
 
-func GetInterconnectAttachmentLink(config *transport_tpg.Config, project, region, ic, userAgent string) (string, error) {
-	if !strings.Contains(ic, "/") {
-		icData, err := config.NewComputeClient(userAgent).InterconnectAttachments.Get(
-			project, region, ic).Do()
-		if err != nil {
-			return "", fmt.Errorf("Error reading interconnect attachment: %s", err)
-		}
-		ic = icData.SelfLink
-	}
-
-	return ic, nil
-}
-
 // Given two sets of references (with "from" values in self link form),
 // determine which need to be added or removed // during an update using
 // addX/removeX APIs.
@@ -820,7 +894,12 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 
 		// terraform-google-conversion doesn't provide a provider config in tests.
 		if config != nil {
-			// Attempt to draw values from the provider config if it's present.
+			// Draw base path values from the provider config. For other config fields, fall back to reflection.
+			if pName, found := strings.CutSuffix(m, "BasePath"); found {
+				// the field will look like ComputeBasePath, but the product name will be like compute (just lowercase, no underscores)
+				p := registry.GetProduct(strings.ToLower(pName))
+				return transport_tpg.BaseUrl(p, config)
+			}
 			if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
 				return f.String()
 			}
@@ -904,6 +983,20 @@ func DefaultProviderZone(_ context.Context, diff *schema.ResourceDiff, meta inte
 	}
 
 	return nil
+}
+
+func DefaultProviderDeletionPolicy(resourceDefault string) schema.CustomizeDiffFunc {
+	return func(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+		config := meta.(*transport_tpg.Config)
+		if dpolicy := diff.Get("deletion_policy"); dpolicy != nil {
+			dpolicy, err := GetDeletionPolicyFromDiff(diff, config, resourceDefault)
+			err = diff.SetNew("deletion_policy", dpolicy)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 }
 
 // id.UniqueId() returns a timestamp + incremental hash
@@ -1007,4 +1100,30 @@ func IpAddrSetHashFunc(v interface{}) int {
 	}
 	log.Printf("[DEBUG] computed hash value of %v from %v", Hashcode(ipnet.String()), ipnet.String())
 	return Hashcode(ipnet.String())
+}
+
+func LocationFromId(id string) string {
+	re := regexp.MustCompile(`/locations/([^/]+)/`)
+
+	match := re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+	re = regexp.MustCompile(`/regions/([^/]+)/`)
+
+	match = re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+
+	re = regexp.MustCompile(`/zones/([^/]+)/`)
+
+	match = re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return GetRegionFromZone(match[1])
+	}
+	return ""
 }

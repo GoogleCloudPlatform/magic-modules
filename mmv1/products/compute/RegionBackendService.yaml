@@ -26,6 +26,7 @@ references:
     'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
   api: 'https://cloud.google.com/compute/docs/reference/latest/regionBackendServices'
 docs:
+cai_resource_kind: 'RegionBackendService'
 base_url: 'projects/{{project}}/regions/{{region}}/backendServices'
 has_self_link: true
 timeouts:
@@ -45,11 +46,13 @@ iam_policy:
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
   min_version: 'beta'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/region_backend_service.go.tmpl'
   decoder: 'templates/terraform/decoders/region_backend_service.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_region_backend_service.go.tmpl'
 custom_diff:
   - 'customDiffRegionBackendService'
 schema_version: 1
@@ -61,106 +64,170 @@ sweeper:
     - region: "europe-west4"
     - region: "europe-west1"
     - region: "us-west1"
-examples:
+samples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
+    steps:
+      - name: 'region_backend_service_basic'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_external_iap'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'tf-test-region-service-external'
-  - name: 'region_backend_service_cache'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
+    steps:
+      - name: 'region_backend_service_external_iap'
+        resource_id_vars:
+          region_backend_service_name: 'tf-test-region-service-external'
   - name: 'region_backend_service_ilb_round_robin'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
+    steps:
+      - name: 'region_backend_service_ilb_round_robin'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_external'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
+    steps:
+      - name: 'region_backend_service_external'
+        min_version: 'beta'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_external_weighted'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
+    steps:
+      - name: 'region_backend_service_external_weighted'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_ilb_ring_hash'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
+    steps:
+      - name: 'region_backend_service_ilb_ring_hash'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_ilb_stateful_session_affinity'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
+    steps:
+      - name: 'region_backend_service_ilb_stateful_session_affinity'
+        min_version: 'beta'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_balancing_mode'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      rigm_name: 'rbs-rigm'
-      region_health_check_name: 'rbs-health-check'
-      network_name: 'rbs-net'
+    steps:
+      - name: 'region_backend_service_balancing_mode'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          rigm_name: 'rbs-rigm'
+          region_health_check_name: 'rbs-health-check'
+          network_name: 'rbs-net'
   - name: 'region_backend_service_connection_tracking'
     primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
+    steps:
+      - name: 'region_backend_service_connection_tracking'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_ip_address_selection_policy'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
+    steps:
+      - name: 'region_backend_service_ip_address_selection_policy'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_ilb_custom_metrics'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      default_neg_name: 'network-endpoint'
-      health_check_name: 'rbs-health-check'
-      network_name: 'network'
+    steps:
+      - name: 'region_backend_service_ilb_custom_metrics'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          default_neg_name: 'network-endpoint'
+          health_check_name: 'rbs-health-check'
+          network_name: 'network'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
   - name: 'region_backend_service_dynamic_backend_count'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'health-check'
-      instance_group_name: 'instance_group'
-      network_name: 'network'
     exclude_test: true
+    steps:
+      - name: 'region_backend_service_dynamic_backend_count'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'health-check'
+          instance_group_name: 'instance_group'
+          network_name: 'network'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
   - name: 'region_backend_service_dynamic_forwarding'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
+    steps:
+      - name: 'region_backend_service_dynamic_forwarding'
+        min_version: 'beta'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+  - name: 'region_backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'region_backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+        min_version: 'beta'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+  - name: 'region_backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'region_backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
+        min_version: 'beta'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
   - name: 'region_backend_service_ha_policy'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      network_name: 'rbs-net'
+    steps:
+      - name: 'region_backend_service_ha_policy'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          network_name: 'rbs-net'
   - name: 'region_backend_service_ha_policy_manual_leader'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      network_name: 'rbs-net'
-      subnetwork_name: 'rbs-subnet'
-      instance_name: 'rbs-instance'
-      neg_name: 'rbs-neg'
+    steps:
+      - name: 'region_backend_service_ha_policy_manual_leader'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          network_name: 'rbs-net'
+          subnetwork_name: 'rbs-subnet'
+          instance_name: 'rbs-instance'
+          neg_name: 'rbs-neg'
+  - name: 'region_backend_service_ha_policy_internal_lb'
+    primary_resource_id: 'default'
+    exclude_test: true
+    steps:
+      - name: 'region_backend_service_ha_policy_internal_lb'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          network_name: 'rbs-net'
+          subnetwork_name: 'rbs-subnet'
+          instance_name: 'rbs-instance'
+          neg_name: 'rbs-neg'
   - name: 'region_backend_service_tls_settings'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'health-check'
-      authentication_name: 'authentication'
+    steps:
+      - name: 'region_backend_service_tls_settings'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'health-check'
+          authentication_name: 'authentication'
+        test_vars_overrides:
+          # for backward compatible
+          authentication_name: '"authentication" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -752,7 +819,6 @@ properties:
         type: Integer
         description: |
           Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
-
         default_from_api: true
         send_empty_value: true
   - name: 'connectionDraining'
@@ -856,9 +922,7 @@ properties:
     max_size: 1
   - name: 'generated_id'
     type: Integer
-    description:
-      'The unique identifier for the resource. This identifier is defined by the
-      server.'
+    description: 'The unique identifier for the resource. This identifier is defined by the server.'
     api_name: id
     output: true
   - name: 'iap'
@@ -879,6 +943,7 @@ properties:
         description: |
           OAuth2 Client ID for IAP
         send_empty_value: true
+        diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress(" ")'
       - name: 'oauth2ClientSecret'
         type: String
         description: |
@@ -914,6 +979,7 @@ properties:
       - 'EXTERNAL_MANAGED'
       - 'INTERNAL'
       - 'INTERNAL_MANAGED'
+      - 'INTERNAL_SELF_MANAGED'
   - name: 'localityLbPolicy'
     type: Enum
     description: |
@@ -1389,7 +1455,6 @@ properties:
       Connection Tracking configuration for this BackendService.
       This is available only for Layer 4 Internal Load Balancing and
       Network Load Balancing.
-    min_version: 'beta'
     properties:
       - name: 'idleTimeoutSec'
         type: Integer
@@ -1552,6 +1617,28 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+      - name: 'forwardProxy'
+        type: NestedObject
+        description: |
+          Dynamic Forwarding Proxy configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling dynamic forwarding proxy.
+            immutable: true
+            required: true
+          - name: 'proxyMode'
+            type: Enum
+            min_version: beta
+            description: |
+              Determines the dynamic forwarding proxy mode
+            enum_values:
+              - 'DIRECT_FORWARDING'
+              - 'CLOUD_RUN'
+            required: true
   - name: 'haPolicy'
     type: NestedObject
     description: |
@@ -1571,6 +1658,7 @@ properties:
     properties:
       - name: 'fastIPMove'
         type: Enum
+        is_missing_in_cai: true
         description: |
           Specifies whether fast IP move is enabled, and if so, the mechanism to achieve it.
           Supported values are:
@@ -1598,6 +1686,7 @@ properties:
         properties:
           - name: 'backendGroup'
             type: ResourceRef
+            is_missing_in_cai: true
             description: |
               A fully-qualified URL of the zonal Network Endpoint Group (NEG) that the leader is
               attached to.

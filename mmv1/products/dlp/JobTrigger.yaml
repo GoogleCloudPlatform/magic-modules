@@ -12,123 +12,183 @@
 # limitations under the License.
 
 ---
-name: 'JobTrigger'
+name: JobTrigger
 description: |
   A job trigger configuration.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-job-triggers'
-  api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.jobTriggers'
+    Official Documentation: https://cloud.google.com/dlp/docs/creating-job-triggers
+  api: https://cloud.google.com/dlp/docs/reference/rest/v2/projects.jobTriggers
 docs:
-id_format: '{{parent}}/jobTriggers/{{name}}'
 base_url: '{{parent}}/jobTriggers'
 self_link: '{{parent}}/jobTriggers/{{name}}'
 create_url: '{{parent}}/jobTriggers'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
+id_format: '{{parent}}/jobTriggers/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  encoder: 'templates/terraform/encoders/dlp_job_trigger.go.tmpl'
-  update_encoder: 'templates/terraform/encoders/wrap_object.go.tmpl'
-  decoder: 'templates/terraform/decoders/dlp_job_trigger.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/dlp_import.go.tmpl'
 # Skip sweeper due to non-standard URL
 exclude_sweeper: true
-examples:
-  - name: 'dlp_job_trigger_basic'
-    primary_resource_id: 'basic'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_bigquery_row_limit'
-    primary_resource_id: 'bigquery_row_limit'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_bigquery_row_limit_percentage'
-    primary_resource_id: 'bigquery_row_limit_percentage'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_publish_to_dataplex_catalog'
-    primary_resource_id: 'publish_to_dataplex_catalog'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
-  - name: 'dlp_job_trigger_data_catalog_output'
-    primary_resource_id: 'data_catalog_output'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
-  - name: 'dlp_job_trigger_scc_output'
-    primary_resource_id: 'scc_output'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
-  - name: 'dlp_job_trigger_job_notification_emails'
-    primary_resource_id: 'job_notification_emails'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_deidentify'
-    primary_resource_id: 'deidentify'
-    vars:
-      name: 'tf_test'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'name': '"tf_test_" + acctest.RandString(t, 10)'
-  - name: 'dlp_job_trigger_hybrid'
-    primary_resource_id: 'hybrid_trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_inspect'
-    primary_resource_id: 'inspect'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_publish_to_stackdriver'
-    primary_resource_id: 'publish_to_stackdriver'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_with_id'
-    primary_resource_id: 'with_trigger_id'
-    vars:
-      name: 'id-'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_multiple_actions'
-    primary_resource_id: 'basic'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_cloud_storage_optional_timespan_autopopulation'
-    primary_resource_id: 'basic'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_timespan_config_big_query'
-    primary_resource_id: 'timespan_config_big_query'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+custom_code:
+  encoder: templates/terraform/encoders/dlp_job_trigger.go.tmpl
+  update_encoder: templates/terraform/encoders/wrap_object.go.tmpl
+  decoder: templates/terraform/decoders/dlp_job_trigger.go.tmpl
+  custom_import: templates/terraform/custom_import/dlp_import.go.tmpl
+samples:
+  - name: dlp_job_trigger_basic
+    primary_resource_id: basic
+    steps:
+      - name: dlp_job_trigger_basic
+        resource_id_vars:
+          trigger: trigger
+        test_vars_overrides:
+          # for backward compatible
+          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_bigquery_row_limit
+    primary_resource_id: bigquery_row_limit
+    steps:
+      - name: dlp_job_trigger_bigquery_row_limit
+        resource_id_vars:
+          trigger: trigger
+        test_vars_overrides:
+          # for backward compatible
+          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_bigquery_row_limit_percentage
+    primary_resource_id: bigquery_row_limit_percentage
+    steps:
+      - name: dlp_job_trigger_bigquery_row_limit_percentage
+        resource_id_vars:
+          trigger: trigger
+        test_vars_overrides:
+          # for backward compatible
+          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_publish_to_dataplex_catalog
+    primary_resource_id: publish_to_dataplex_catalog
+    exclude_basic_doc: true
+    steps:
+      - name: dlp_job_trigger_publish_to_dataplex_catalog
+        resource_id_vars:
+          trigger: trigger
+        test_vars_overrides:
+          # for backward compatible
+          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_data_catalog_output
+    primary_resource_id: data_catalog_output
+    exclude_basic_doc: true
+    steps:
+      - name: dlp_job_trigger_data_catalog_output
+        resource_id_vars:
+          trigger: trigger
+        test_vars_overrides:
+          # for backward compatible
+          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_scc_output
+    primary_resource_id: scc_output
+    exclude_basic_doc: true
+    steps:
+      - name: dlp_job_trigger_scc_output
+        resource_id_vars:
+          trigger: trigger
+        test_vars_overrides:
+          # for backward compatible
+          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_job_notification_emails
+    primary_resource_id: job_notification_emails
+    steps:
+      - name: dlp_job_trigger_job_notification_emails
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_deidentify
+    primary_resource_id: deidentify
+    steps:
+      - name: dlp_job_trigger_deidentify
+        resource_id_vars:
+          name: tf_test
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          name: '"tf_test_" + acctest.RandString(t, 10)'
+  - name: dlp_job_trigger_hybrid
+    primary_resource_id: hybrid_trigger
+    steps:
+      - name: dlp_job_trigger_hybrid
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_inspect
+    primary_resource_id: inspect
+    steps:
+      - name: dlp_job_trigger_inspect
+        resource_id_vars:
+          trigger: trigger
+        test_vars_overrides:
+          # for backward compatible
+          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_publish_to_stackdriver
+    primary_resource_id: publish_to_stackdriver
+    steps:
+      - name: dlp_job_trigger_publish_to_stackdriver
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_with_id
+    primary_resource_id: with_trigger_id
+    steps:
+      - name: dlp_job_trigger_with_id
+        resource_id_vars:
+          name: id-
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_multiple_actions
+    primary_resource_id: basic
+    steps:
+      - name: dlp_job_trigger_multiple_actions
+        resource_id_vars:
+          trigger: trigger
+        test_vars_overrides:
+          # for backward compatible
+          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_cloud_storage_optional_timespan_autopopulation
+    primary_resource_id: basic
+    steps:
+      - name: dlp_job_trigger_cloud_storage_optional_timespan_autopopulation
+        resource_id_vars:
+          trigger: trigger
+        test_vars_overrides:
+          # for backward compatible
+          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_timespan_config_big_query
+    primary_resource_id: timespan_config_big_query
+    steps:
+      - name: dlp_job_trigger_timespan_config_big_query
+        resource_id_vars:
+          trigger: trigger
+        test_vars_overrides:
+          # for backward compatible
+          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The parent of the trigger, either in the format `projects/{{project}}`
@@ -137,31 +197,31 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the job trigger. Set by the server.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'createTime'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: createTime
     type: String
     description: |
       The creation timestamp of an inspectTemplate. Set by the server.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The last update timestamp of an inspectTemplate. Set by the server.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A description of the job trigger.
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       User set display name of the job trigger.
-  - name: 'triggerId'
+  - name: triggerId
     type: String
     description: |
       The trigger id can contain uppercase and lowercase letters, numbers, and hyphens;
@@ -170,20 +230,20 @@ properties:
     url_param_only: true
     immutable: true
     default_from_api: true
-  - name: 'lastRunTime'
+  - name: lastRunTime
     type: Time
     description: The timestamp of the last time this trigger executed.
     output: true
-  - name: 'status'
+  - name: status
     type: Enum
     description: |
       Whether the trigger is currently active.
-    default_value: "HEALTHY"
+    default_value: HEALTHY
     enum_values:
-      - 'PAUSED'
-      - 'HEALTHY'
-      - 'CANCELLED'
-  - name: 'triggers'
+      - PAUSED
+      - HEALTHY
+      - CANCELLED
+  - name: triggers
     type: Array
     description: |
       What event needs to occur for a new job to be started.
@@ -191,12 +251,12 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'schedule'
+        - name: schedule
           type: NestedObject
           description: |
             Schedule for triggered jobs
           properties:
-            - name: 'recurrencePeriodDuration'
+            - name: recurrencePeriodDuration
               type: String
               description: |
                 With this option a job is started a regular periodic basis. For example: every day (86400 seconds).
@@ -206,113 +266,105 @@ properties:
                 This value must be set to a time duration greater than or equal to 1 day and can be no longer than 60 days.
 
                 A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
-        - name: 'manual'
+        - name: manual
           type: NestedObject
           description: |
             For use with hybrid jobs. Jobs must be manually created and finished.
           send_empty_value: true
           allow_empty_object: true
-          properties:
-            []
-  - name: 'inspectJob'
+          properties: []
+  - name: inspectJob
     type: NestedObject
     description: Controls what and how to inspect for findings.
     properties:
-      - name: 'inspectTemplateName'
+      - name: inspectTemplateName
         type: String
         description: The name of the template to run when this job is triggered.
-      - name: 'inspectConfig'
+      - name: inspectConfig
         type: NestedObject
         description: The core content of the template.
         properties:
-          - name: 'excludeInfoTypes'
+          - name: excludeInfoTypes
             type: Boolean
             description: When true, excludes type information of the findings.
-          - name: 'includeQuote'
+          - name: includeQuote
             type: Boolean
-            description:
-              When true, a contextual quote from the data that triggered a
-              finding is included in the response.
-          - name: 'minLikelihood'
+            description: When true, a contextual quote from the data that triggered a finding is included in the response.
+          - name: minLikelihood
             type: Enum
             description: |
               Only returns findings equal or above this threshold. See https://cloud.google.com/dlp/docs/likelihood for more info
-            default_value: "POSSIBLE"
+            default_value: POSSIBLE
             enum_values:
-              - 'VERY_UNLIKELY'
-              - 'UNLIKELY'
-              - 'POSSIBLE'
-              - 'LIKELY'
-              - 'VERY_LIKELY'
-          - name: 'limits'
+              - VERY_UNLIKELY
+              - UNLIKELY
+              - POSSIBLE
+              - LIKELY
+              - VERY_LIKELY
+          - name: limits
             type: NestedObject
-            description:
-              Configuration to control the number of findings returned.
+            description: Configuration to control the number of findings returned.
             properties:
-              - name: 'maxFindingsPerItem'
+              - name: maxFindingsPerItem
                 type: Integer
-                description:
-                  Max number of findings that will be returned for each item
-                  scanned. The maximum returned is 2000.
+                description: Max number of findings that will be returned for each item scanned. The maximum returned is 2000.
                 at_least_one_of:
-                  - 'inspect_job.0.inspect_config.0.limits.0.max_findings_per_item'
-                  - 'inspect_job.0.inspect_config.0.limits.0.max_findings_per_request'
-                  - 'inspect_job.0.inspect_config.0.limits.0.max_findings_per_info_type'
-              - name: 'maxFindingsPerRequest'
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_item
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_request
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_info_type
+              - name: maxFindingsPerRequest
                 type: Integer
-                description:
-                  Max number of findings that will be returned per request/job.
-                  The maximum returned is 2000.
+                description: Max number of findings that will be returned per request/job. The maximum returned is 2000.
                 at_least_one_of:
-                  - 'inspect_job.0.inspect_config.0.limits.0.max_findings_per_item'
-                  - 'inspect_job.0.inspect_config.0.limits.0.max_findings_per_request'
-                  - 'inspect_job.0.inspect_config.0.limits.0.max_findings_per_info_type'
-              - name: 'maxFindingsPerInfoType'
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_item
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_request
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_info_type
+              - name: maxFindingsPerInfoType
                 type: Array
                 description: |
                   Configuration of findings limit given for specified infoTypes.
                 at_least_one_of:
-                  - 'inspect_job.0.inspect_config.0.limits.0.max_findings_per_item'
-                  - 'inspect_job.0.inspect_config.0.limits.0.max_findings_per_request'
-                  - 'inspect_job.0.inspect_config.0.limits.0.max_findings_per_info_type'
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_item
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_request
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_info_type
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: 'infoType'
+                    - name: infoType
                       type: NestedObject
                       description: |
                         Type of information the findings limit applies to. Only one limit per infoType should be provided. If InfoTypeLimit does
                         not have an infoType, the DLP API applies the limit against all infoTypes that are found but not
                         specified in another InfoTypeLimit.
                       properties:
-                        - name: 'name'
+                        - name: name
                           type: String
                           description: |
                             Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                             at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
                           required: true
-                        - name: 'version'
+                        - name: version
                           type: String
                           description: |
                             Version of the information type to use. By default, the version is set to stable
-                        - name: 'sensitivityScore'
+                        - name: sensitivityScore
                           type: NestedObject
                           description: |
                             Optional custom sensitivity for this InfoType. This only applies to data profiling.
                           properties:
-                            - name: 'score'
+                            - name: score
                               type: Enum
                               description: |
                                 The sensitivity score applied to the resource.
                               required: true
                               enum_values:
-                                - 'SENSITIVITY_LOW'
-                                - 'SENSITIVITY_MODERATE'
-                                - 'SENSITIVITY_HIGH'
-                    - name: 'maxFindings'
+                                - SENSITIVITY_LOW
+                                - SENSITIVITY_MODERATE
+                                - SENSITIVITY_HIGH
+                    - name: maxFindings
                       type: Integer
                       description: Max findings limit for the given infoType.
-          - name: 'infoTypes'
+          - name: infoTypes
             type: Array
             description: |
               Restricts what infoTypes to look for. The values must correspond to InfoType values returned by infoTypes.list
@@ -323,31 +375,31 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'name'
+                - name: name
                   type: String
                   description: |
                     Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                     at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
                   required: true
-                - name: 'version'
+                - name: version
                   type: String
                   description: |
                     Version of the information type to use. By default, the version is set to stable
-                - name: 'sensitivityScore'
+                - name: sensitivityScore
                   type: NestedObject
                   description: |
                     Optional custom sensitivity for this InfoType. This only applies to data profiling.
                   properties:
-                    - name: 'score'
+                    - name: score
                       type: Enum
                       description: |
                         The sensitivity score applied to the resource.
                       required: true
                       enum_values:
-                        - 'SENSITIVITY_LOW'
-                        - 'SENSITIVITY_MODERATE'
-                        - 'SENSITIVITY_HIGH'
-          - name: 'ruleSet'
+                        - SENSITIVITY_LOW
+                        - SENSITIVITY_MODERATE
+                        - SENSITIVITY_HIGH
+          - name: ruleSet
             type: Array
             description: |
               Set of rules to apply to the findings for this InspectConfig. Exclusion rules, contained in the set are executed in the end,
@@ -355,38 +407,38 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'infoTypes'
+                - name: infoTypes
                   type: Array
                   description: |
                     List of infoTypes this rule set is applied to.
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'name'
+                      - name: name
                         type: String
                         description: |
                           Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                           at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
                         required: true
-                      - name: 'version'
+                      - name: version
                         type: String
                         description: |
                           Version of the information type to use. By default, the version is set to stable.
-                      - name: 'sensitivityScore'
+                      - name: sensitivityScore
                         type: NestedObject
                         description: |
                           Optional custom sensitivity for this InfoType. This only applies to data profiling.
                         properties:
-                          - name: 'score'
+                          - name: score
                             type: Enum
                             description: |
                               The sensitivity score applied to the resource.
                             required: true
                             enum_values:
-                              - 'SENSITIVITY_LOW'
-                              - 'SENSITIVITY_MODERATE'
-                              - 'SENSITIVITY_HIGH'
-                - name: 'rules'
+                              - SENSITIVITY_LOW
+                              - SENSITIVITY_MODERATE
+                              - SENSITIVITY_HIGH
+                - name: rules
                   type: Array
                   description: |
                     Set of rules to be applied to infoTypes. The rules are applied in order.
@@ -394,29 +446,27 @@ properties:
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'hotwordRule'
+                      - name: hotwordRule
                         type: NestedObject
                         description: Hotword-based detection rule.
                         properties:
-                          - name: 'hotwordRegex'
+                          - name: hotwordRegex
                             type: NestedObject
-                            description:
-                              Regular expression pattern defining what qualifies
-                              as a hotword.
+                            description: Regular expression pattern defining what qualifies as a hotword.
                             properties:
-                              - name: 'pattern'
+                              - name: pattern
                                 type: String
                                 description: |
                                   Pattern defining the regular expression. Its syntax
                                   (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
-                              - name: 'groupIndexes'
+                              - name: groupIndexes
                                 type: Array
                                 description: |
                                   The index of the submatch to extract as findings. When not specified,
                                   the entire match is returned. No more than 3 may be included.
                                 item_type:
                                   type: Integer
-                          - name: 'proximity'
+                          - name: proximity
                             type: NestedObject
                             description: |
                               Proximity of the finding within which the entire hotword must reside. The total length of the window cannot
@@ -425,30 +475,30 @@ properties:
                               `(\d{3}) \d{3}-\d{4}` could be adjusted upwards if the area code is known to be the local area code of a company
                               office using the hotword regex `(xxx)`, where `xxx` is the area code in question.
                             properties:
-                              - name: 'windowBefore'
+                              - name: windowBefore
                                 type: Integer
                                 description: |
                                   Number of characters before the finding to consider. Either this or window_after must be specified
-                              - name: 'windowAfter'
+                              - name: windowAfter
                                 type: Integer
                                 description: |
                                   Number of characters after the finding to consider. Either this or window_before must be specified
-                          - name: 'likelihoodAdjustment'
+                          - name: likelihoodAdjustment
                             type: NestedObject
                             description: |
                               Likelihood adjustment to apply to all matching findings.
                             properties:
-                              - name: 'fixedLikelihood'
+                              - name: fixedLikelihood
                                 type: Enum
                                 description: |
                                   Set the likelihood of a finding to a fixed value. Either this or relative_likelihood can be set.
                                 enum_values:
-                                  - 'VERY_UNLIKELY'
-                                  - 'UNLIKELY'
-                                  - 'POSSIBLE'
-                                  - 'LIKELY'
-                                  - 'VERY_LIKELY'
-                              - name: 'relativeLikelihood'
+                                  - VERY_UNLIKELY
+                                  - UNLIKELY
+                                  - POSSIBLE
+                                  - LIKELY
+                                  - VERY_LIKELY
+                              - name: relativeLikelihood
                                 type: Integer
                                 description: |
                                   Increase or decrease the likelihood by the specified number of levels. For example,
@@ -457,32 +507,28 @@ properties:
                                   Likelihood may never drop below VERY_UNLIKELY or exceed VERY_LIKELY, so applying an
                                   adjustment of 1 followed by an adjustment of -1 when base likelihood is VERY_LIKELY
                                   will result in a final likelihood of LIKELY. Either this or fixed_likelihood can be set.
-                      - name: 'exclusionRule'
+                      - name: exclusionRule
                         type: NestedObject
-                        description:
-                          The rule that specifies conditions when findings of
-                          infoTypes specified in InspectionRuleSet are removed
-                          from results.
+                        description: The rule that specifies conditions when findings of infoTypes specified in InspectionRuleSet are removed from results.
                         properties:
-                          - name: 'matchingType'
+                          - name: matchingType
                             type: Enum
                             description: |
                               How the rule is applied. See the documentation for more information: https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#MatchingType
                             required: true
                             enum_values:
-                              - 'MATCHING_TYPE_FULL_MATCH'
-                              - 'MATCHING_TYPE_PARTIAL_MATCH'
-                              - 'MATCHING_TYPE_INVERSE_MATCH'
-                          - name: 'dictionary'
+                              - MATCHING_TYPE_FULL_MATCH
+                              - MATCHING_TYPE_PARTIAL_MATCH
+                              - MATCHING_TYPE_INVERSE_MATCH
+                          - name: dictionary
                             type: NestedObject
                             description: Dictionary which defines the rule.
                             properties:
-                              - name: 'wordList'
+                              - name: wordList
                                 type: NestedObject
-                                description:
-                                  List of words or phrases to search for.
+                                description: List of words or phrases to search for.
                                 properties:
-                                  - name: 'words'
+                                  - name: words
                                     type: Array
                                     description: |
                                       Words or phrases defining the dictionary. The dictionary must contain at least one
@@ -490,41 +536,36 @@ properties:
                                     required: true
                                     item_type:
                                       type: String
-                              - name: 'cloudStoragePath'
+                              - name: cloudStoragePath
                                 type: NestedObject
-                                description:
-                                  Newline-delimited file of words in Cloud
-                                  Storage. Only a single file is accepted.
+                                description: Newline-delimited file of words in Cloud Storage. Only a single file is accepted.
                                 properties:
-                                  - name: 'path'
+                                  - name: path
                                     type: String
                                     description: |
                                       A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
                                     required: true
-                          - name: 'regex'
+                          - name: regex
                             type: NestedObject
-                            description:
-                              Regular expression which defines the rule.
+                            description: Regular expression which defines the rule.
                             properties:
-                              - name: 'pattern'
+                              - name: pattern
                                 type: String
                                 description: |
                                   Pattern defining the regular expression.
                                   Its syntax (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
                                 required: true
-                              - name: 'groupIndexes'
+                              - name: groupIndexes
                                 type: Array
                                 description: |
                                   The index of the submatch to extract as findings. When not specified, the entire match is returned. No more than 3 may be included.
                                 item_type:
                                   type: Integer
-                          - name: 'excludeInfoTypes'
+                          - name: excludeInfoTypes
                             type: NestedObject
-                            description:
-                              Set of infoTypes for which findings would affect
-                              this rule.
+                            description: Set of infoTypes for which findings would affect this rule.
                             properties:
-                              - name: 'infoTypes'
+                              - name: infoTypes
                                 type: Array
                                 description: |
                                   If a finding is matched by any of the infoType detectors listed here, the finding will be excluded from the scan results.
@@ -532,55 +573,51 @@ properties:
                                 item_type:
                                   type: NestedObject
                                   properties:
-                                    - name: 'name'
+                                    - name: name
                                       type: String
                                       description: |
                                         Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                                         at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
                                       required: true
-                                    - name: 'version'
+                                    - name: version
                                       type: String
                                       description: |
                                         Version of the information type to use. By default, the version is set to stable.
-                                    - name: 'sensitivityScore'
+                                    - name: sensitivityScore
                                       type: NestedObject
                                       description: |
                                         Optional custom sensitivity for this InfoType. This only applies to data profiling.
                                       properties:
-                                        - name: 'score'
+                                        - name: score
                                           type: Enum
                                           description: |
                                             The sensitivity score applied to the resource.
                                           required: true
                                           enum_values:
-                                            - 'SENSITIVITY_LOW'
-                                            - 'SENSITIVITY_MODERATE'
-                                            - 'SENSITIVITY_HIGH'
-                          - name: 'excludeByHotword'
+                                            - SENSITIVITY_LOW
+                                            - SENSITIVITY_MODERATE
+                                            - SENSITIVITY_HIGH
+                          - name: excludeByHotword
                             type: NestedObject
-                            description:
-                              Drop if the hotword rule is contained in the
-                              proximate context.
+                            description: Drop if the hotword rule is contained in the proximate context.
                             properties:
-                              - name: 'hotwordRegex'
+                              - name: hotwordRegex
                                 type: NestedObject
-                                description:
-                                  Regular expression pattern defining what
-                                  qualifies as a hotword.
+                                description: Regular expression pattern defining what qualifies as a hotword.
                                 properties:
-                                  - name: 'pattern'
+                                  - name: pattern
                                     type: String
                                     description: |
                                       Pattern defining the regular expression. Its syntax
                                       (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
-                                  - name: 'groupIndexes'
+                                  - name: groupIndexes
                                     type: Array
                                     description: |
                                       The index of the submatch to extract as findings. When not specified,
                                       the entire match is returned. No more than 3 may be included.
                                     item_type:
                                       type: Integer
-                              - name: 'proximity'
+                              - name: proximity
                                 type: NestedObject
                                 description: |
                                   Proximity of the finding within which the entire hotword must reside. The total length of the window cannot
@@ -589,22 +626,22 @@ properties:
                                   `(\d{3}) \d{3}-\d{4}` could be adjusted upwards if the area code is known to be the local area code of a company
                                   office using the hotword regex `(xxx)`, where `xxx` is the area code in question.
                                 properties:
-                                  - name: 'windowBefore'
+                                  - name: windowBefore
                                     type: Integer
                                     description: |
                                       Number of characters before the finding to consider. Either this or window_after must be specified
-                                  - name: 'windowAfter'
+                                  - name: windowAfter
                                     type: Integer
                                     description: |
                                       Number of characters after the finding to consider. Either this or window_before must be specified
-          - name: 'customInfoTypes'
+          - name: customInfoTypes
             type: Array
             description: |
               Custom info types to be used. See https://cloud.google.com/dlp/docs/creating-custom-infotypes to learn more.
             item_type:
               type: NestedObject
               properties:
-                - name: 'infoType'
+                - name: infoType
                   type: NestedObject
                   description: |
                     CustomInfoType can either be a new infoType, or an extension of built-in infoType, when the name matches one of existing
@@ -613,87 +650,87 @@ properties:
                     treated as a custom info type.
                   required: true
                   properties:
-                    - name: 'name'
+                    - name: name
                       type: String
                       description: |
                         Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names
                         listed at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
                       required: true
-                    - name: 'version'
+                    - name: version
                       type: String
                       description: |
                         Version of the information type to use. By default, the version is set to stable.
-                    - name: 'sensitivityScore'
+                    - name: sensitivityScore
                       type: NestedObject
                       description: |
                         Optional custom sensitivity for this InfoType. This only applies to data profiling.
                       properties:
-                        - name: 'score'
+                        - name: score
                           type: Enum
                           description: |
                             The sensitivity score applied to the resource.
                           required: true
                           enum_values:
-                            - 'SENSITIVITY_LOW'
-                            - 'SENSITIVITY_MODERATE'
-                            - 'SENSITIVITY_HIGH'
-                - name: 'likelihood'
+                            - SENSITIVITY_LOW
+                            - SENSITIVITY_MODERATE
+                            - SENSITIVITY_HIGH
+                - name: likelihood
                   type: Enum
                   description: |
                     Likelihood to return for this CustomInfoType. This base value can be altered by a detection rule if the finding meets the criteria
                     specified by the rule.
-                  default_value: "VERY_LIKELY"
+                  default_value: VERY_LIKELY
                   enum_values:
-                    - 'VERY_UNLIKELY'
-                    - 'UNLIKELY'
-                    - 'POSSIBLE'
-                    - 'LIKELY'
-                    - 'VERY_LIKELY'
-                - name: 'exclusionType'
+                    - VERY_UNLIKELY
+                    - UNLIKELY
+                    - POSSIBLE
+                    - LIKELY
+                    - VERY_LIKELY
+                - name: exclusionType
                   type: Enum
                   description: |
                     If set to EXCLUSION_TYPE_EXCLUDE this infoType will not cause a finding to be returned. It still can be used for rules matching.
                   enum_values:
-                    - 'EXCLUSION_TYPE_EXCLUDE'
-                - name: 'sensitivityScore'
+                    - EXCLUSION_TYPE_EXCLUDE
+                - name: sensitivityScore
                   type: NestedObject
                   description: |
                     Optional custom sensitivity for this InfoType. This only applies to data profiling.
                   properties:
-                    - name: 'score'
+                    - name: score
                       type: Enum
                       description: |
                         The sensitivity score applied to the resource.
                       required: true
                       enum_values:
-                        - 'SENSITIVITY_LOW'
-                        - 'SENSITIVITY_MODERATE'
-                        - 'SENSITIVITY_HIGH'
-                - name: 'regex'
+                        - SENSITIVITY_LOW
+                        - SENSITIVITY_MODERATE
+                        - SENSITIVITY_HIGH
+                - name: regex
                   type: NestedObject
                   description: Regular expression which defines the rule.
                   properties:
-                    - name: 'pattern'
+                    - name: pattern
                       type: String
                       description: |
                         Pattern defining the regular expression.
                         Its syntax (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
                       required: true
-                    - name: 'groupIndexes'
+                    - name: groupIndexes
                       type: Array
                       description: |
                         The index of the submatch to extract as findings. When not specified, the entire match is returned. No more than 3 may be included.
                       item_type:
                         type: Integer
-                - name: 'dictionary'
+                - name: dictionary
                   type: NestedObject
                   description: Dictionary which defines the rule.
                   properties:
-                    - name: 'wordList'
+                    - name: wordList
                       type: NestedObject
                       description: List of words or phrases to search for.
                       properties:
-                        - name: 'words'
+                        - name: words
                           type: Array
                           description: |
                             Words or phrases defining the dictionary. The dictionary must contain at least one
@@ -701,69 +738,65 @@ properties:
                           required: true
                           item_type:
                             type: String
-                    - name: 'cloudStoragePath'
+                    - name: cloudStoragePath
                       type: NestedObject
-                      description:
-                        Newline-delimited file of words in Cloud Storage. Only a
-                        single file is accepted.
+                      description: Newline-delimited file of words in Cloud Storage. Only a single file is accepted.
                       properties:
-                        - name: 'path'
+                        - name: path
                           type: String
                           description: |
                             A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
                           required: true
-                - name: 'storedType'
+                - name: storedType
                   type: NestedObject
-                  description:
-                    A reference to a StoredInfoType to use with scanning.
+                  description: A reference to a StoredInfoType to use with scanning.
                   properties:
-                    - name: 'name'
+                    - name: name
                       type: String
                       description: |
                         Resource name of the requested StoredInfoType, for example `organizations/433245324/storedInfoTypes/432452342`
                         or `projects/project-id/storedInfoTypes/432452342`.
                       required: true
-                    - name: 'createTime'
+                    - name: createTime
                       type: String
                       description: |
                         The creation timestamp of an inspectTemplate. Set by the server.
                       output: true
-                - name: 'surrogateType'
+                - name: surrogateType
                   type: NestedObject
                   description: |
                     Message for detecting output from deidentification transformations that support reversing.
                   # The fields below are necessary to include the "surrogateType" in the payload
                   send_empty_value: true
                   allow_empty_object: true
-                  properties:
-                    # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
-                    []
-      - name: 'storageConfig'
+                  properties: []
+                  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
+      - name: storageConfig
         type: NestedObject
         description: Information on where to inspect
         required: true
         properties:
-          - name: 'timespanConfig'
+          - name: timespanConfig
             type: NestedObject
             description: Configuration of the timespan of the items to include in scanning
             properties:
-              - name: 'startTime'
+              - name: startTime
                 type: String
                 description: Exclude files, tables, or rows older than this value. If not set, no lower time limit is applied.
                 conflicts:
                   - inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config
                 at_least_one_of:
-                  - 'inspect_job.0.storage_config.0.timespan_config.0.start_time'
-                  - 'inspect_job.0.storage_config.0.timespan_config.0.end_time'
-                  - 'inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config'
-              - name: 'endTime'
+                  - inspect_job.0.storage_config.0.timespan_config.0.start_time
+                  - inspect_job.0.storage_config.0.timespan_config.0.end_time
+                  - inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config
+              - name: endTime
                 type: String
                 description: Exclude files, tables, or rows newer than this value. If not set, no upper time limit is applied.
                 at_least_one_of:
-                  - 'inspect_job.0.storage_config.0.timespan_config.0.start_time'
-                  - 'inspect_job.0.storage_config.0.timespan_config.0.end_time'
-                  - 'inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config'
-              - name: 'enableAutoPopulationOfTimespanConfig'
+                  - inspect_job.0.storage_config.0.timespan_config.0.start_time
+                  - inspect_job.0.storage_config.0.timespan_config.0.end_time
+                  - inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config
+              - name: enableAutoPopulationOfTimespanConfig
                 type: Boolean
                 description: |
                   When the job is started by a JobTrigger we will automatically figure out a valid startTime to avoid
@@ -773,14 +806,14 @@ properties:
                 conflicts:
                   - inspect_job.0.storage_config.0.timespan_config.0.start_time
                 at_least_one_of:
-                  - 'inspect_job.0.storage_config.0.timespan_config.0.start_time'
-                  - 'inspect_job.0.storage_config.0.timespan_config.0.end_time'
-                  - 'inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config'
-              - name: 'timestampField'
+                  - inspect_job.0.storage_config.0.timespan_config.0.start_time
+                  - inspect_job.0.storage_config.0.timespan_config.0.end_time
+                  - inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config
+              - name: timestampField
                 type: NestedObject
                 description: Specification of the field containing the timestamp of scanned items.
                 properties:
-                  - name: 'name'
+                  - name: name
                     type: String
                     description: |
                       Specification of the field containing the timestamp of scanned items. Used for data sources like Datastore and BigQuery.
@@ -792,51 +825,45 @@ properties:
                       For Datastore. Valid data types of the timestamp field are: TIMESTAMP. Datastore entity will be scanned if the
                       timestamp property does not exist or its value is empty or invalid.
                     required: true
-          - name: 'datastoreOptions'
+          - name: datastoreOptions
             type: NestedObject
-            description:
-              Options defining a data set within Google Cloud Datastore.
+            description: Options defining a data set within Google Cloud Datastore.
             properties:
-              - name: 'partitionId'
+              - name: partitionId
                 type: NestedObject
                 description: |
                   Datastore partition ID. A partition ID identifies a grouping of entities. The grouping
                   is always by project and namespace, however the namespace ID may be empty.
                 required: true
                 properties:
-                  - name: 'projectId'
+                  - name: projectId
                     type: String
-                    description:
-                      The ID of the project to which the entities belong.
+                    description: The ID of the project to which the entities belong.
                     required: true
-                  - name: 'namespaceId'
+                  - name: namespaceId
                     type: String
-                    description:
-                      If not empty, the ID of the namespace to which the
-                      entities belong.
-              - name: 'kind'
+                    description: If not empty, the ID of the namespace to which the entities belong.
+              - name: kind
                 type: NestedObject
                 description: |
                   A representation of a Datastore kind.
                 required: true
                 properties:
-                  - name: 'name'
+                  - name: name
                     type: String
                     description: The name of the Datastore kind.
                     required: true
-          - name: 'cloudStorageOptions'
+          - name: cloudStorageOptions
             type: NestedObject
-            description:
-              Options defining a file or a set of files within a Google Cloud
-              Storage bucket.
+            description: Options defining a file or a set of files within a Google Cloud Storage bucket.
             properties:
-              - name: 'fileSet'
+              - name: fileSet
                 type: NestedObject
                 description: |
                   Set of files to scan.
                 required: true
                 properties:
-                  - name: 'url'
+                  - name: url
                     type: String
                     description: |
                       The Cloud Storage url of the file(s) to scan, in the format `gs://<bucket>/<path>`. Trailing wildcard
@@ -846,21 +873,21 @@ properties:
                       non-recursively (content in sub-directories will not be scanned). This means that `gs://mybucket/` is
                       equivalent to `gs://mybucket/*`, and `gs://mybucket/directory/` is equivalent to `gs://mybucket/directory/*`.
                     exactly_one_of:
-                      - 'inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.url'
-                      - 'inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.regex_file_set'
-                  - name: 'regexFileSet'
+                      - inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.url
+                      - inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.regex_file_set
+                  - name: regexFileSet
                     type: NestedObject
                     description: |
                       The regex-filtered set of files to scan.
                     exactly_one_of:
-                      - 'inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.url'
-                      - 'inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.regex_file_set'
+                      - inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.url
+                      - inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.regex_file_set
                     properties:
-                      - name: 'bucketName'
+                      - name: bucketName
                         type: String
                         description: The name of a Cloud Storage bucket.
                         required: true
-                      - name: 'includeRegex'
+                      - name: includeRegex
                         type: Array
                         description: |
                           A list of regular expressions matching file paths to include. All files in the bucket
@@ -869,29 +896,29 @@ properties:
                           match all files by default (this is equivalent to including .* in the list)
                         item_type:
                           type: String
-                      - name: 'excludeRegex'
+                      - name: excludeRegex
                         type: Array
                         description: |
                           A list of regular expressions matching file paths to exclude. All files in the bucket that match at
                           least one of these regular expressions will be excluded from the scan.
                         item_type:
                           type: String
-              - name: 'bytesLimitPerFile'
+              - name: bytesLimitPerFile
                 type: Integer
                 description: |
                   Max number of bytes to scan from a file. If a scanned file's size is bigger than this value
                   then the rest of the bytes are omitted.
-              - name: 'bytesLimitPerFilePercent'
+              - name: bytesLimitPerFilePercent
                 type: Integer
                 description: |
                   Max percentage of bytes to scan from a file. The rest are omitted. The number of bytes scanned is rounded down.
                   Must be between 0 and 100, inclusively. Both 0 and 100 means no limit.
-              - name: 'filesLimitPercent'
+              - name: filesLimitPercent
                 type: Integer
                 description: |
                   Limits the number of files to scan to this percentage of the input FileSet. Number of files scanned is rounded down.
                   Must be between 0 and 100, inclusively. Both 0 and 100 means no limit.
-              - name: 'fileTypes'
+              - name: fileTypes
                 type: Array
                 description: |
                   List of file type groups to include in the scan. If empty, all files are scanned and available data
@@ -903,72 +930,72 @@ properties:
                     This field only has a name and description because of MM
                     limitations. It should not appear in downstreams.
                   enum_values:
-                    - 'BINARY_FILE'
-                    - 'TEXT_FILE'
-                    - 'IMAGE'
-                    - 'WORD'
-                    - 'PDF'
-                    - 'AVRO'
-                    - 'CSV'
-                    - 'TSV'
-                    - 'POWERPOINT'
-                    - 'EXCEL'
-              - name: 'sampleMethod'
+                    - BINARY_FILE
+                    - TEXT_FILE
+                    - IMAGE
+                    - WORD
+                    - PDF
+                    - AVRO
+                    - CSV
+                    - TSV
+                    - POWERPOINT
+                    - EXCEL
+              - name: sampleMethod
                 type: Enum
                 description: |
                   How to sample bytes if not all bytes are scanned. Meaningful only when used in conjunction with bytesLimitPerFile.
                   If not specified, scanning would start from the top.
                 enum_values:
-                  - 'TOP'
-                  - 'RANDOM_START'
-          - name: 'bigQueryOptions'
+                  - TOP
+                  - RANDOM_START
+          - name: bigQueryOptions
             type: NestedObject
             description: Options defining BigQuery table and row identifiers.
             properties:
-              - name: 'tableReference'
+              - name: tableReference
                 type: NestedObject
                 description: |
                   Set of files to scan.
                 required: true
                 properties:
-                  - name: 'projectId'
+                  - name: projectId
                     type: String
                     description: |
                       The Google Cloud Platform project ID of the project containing the table.
                     required: true
-                  - name: 'datasetId'
+                  - name: datasetId
                     type: String
                     description: |
                       The dataset ID of the table.
                     required: true
-                  - name: 'tableId'
+                  - name: tableId
                     type: String
                     description: |
                       The name of the table.
                     required: true
-              - name: 'rowsLimit'
+              - name: rowsLimit
                 type: Integer
                 description: |
                   Max number of rows to scan. If the table has more rows than this value, the rest of the rows are omitted.
                   If not set, or if set to 0, all rows will be scanned. Only one of rowsLimit and rowsLimitPercent can be
                   specified. Cannot be used in conjunction with TimespanConfig.
-              - name: 'rowsLimitPercent'
+              - name: rowsLimitPercent
                 type: Integer
                 description: |
                   Max percentage of rows to scan. The rest are omitted. The number of rows scanned is rounded down.
                   Must be between 0 and 100, inclusively. Both 0 and 100 means no limit. Defaults to 0. Only one of
                   rowsLimit and rowsLimitPercent can be specified. Cannot be used in conjunction with TimespanConfig.
-              - name: 'sampleMethod'
+              - name: sampleMethod
                 type: Enum
                 description: |
                   How to sample rows if not all rows are scanned. Meaningful only when used in conjunction with either
                   rowsLimit or rowsLimitPercent. If not specified, rows are scanned in the order BigQuery reads them.
                   If TimespanConfig is set, set this to an empty string to avoid using the default value.
-                default_value: "TOP"
+                default_value: TOP
                 enum_values:
-                  - 'TOP'
-                  - 'RANDOM_START'
-              - name: 'identifyingFields'
+                  - TOP
+                  - RANDOM_START
+              - name: identifyingFields
                 type: Array
                 description: |
                   Specifies the BigQuery fields that will be returned with findings.
@@ -976,24 +1003,24 @@ properties:
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: 'name'
+                    - name: name
                       type: String
                       description: |
                         Name of a BigQuery field to be returned with the findings.
                       required: true
-              - name: 'includedFields'
+              - name: includedFields
                 type: Array
                 description: |
                   Limit scanning only to these fields.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: 'name'
+                    - name: name
                       type: String
                       description: |
                         Name describing the field to which scanning is limited.
                       required: true
-              - name: 'excludedFields'
+              - name: excludedFields
                 type: Array
                 description: |
                   References to fields excluded from scanning.
@@ -1001,23 +1028,23 @@ properties:
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: 'name'
+                    - name: name
                       type: String
                       description: |
                         Name describing the field excluded from scanning.
                       required: true
-          - name: 'hybridOptions'
+          - name: hybridOptions
             type: NestedObject
             description: |
               Configuration to control jobs where the content being inspected is outside of Google Cloud Platform.
             send_empty_value: true
             allow_empty_object: true
             properties:
-              - name: 'description'
+              - name: description
                 type: String
                 description: |
                   A short description of where the data is coming from. Will be stored once in the job. 256 max length.
-              - name: 'requiredFindingLabelKeys'
+              - name: requiredFindingLabelKeys
                 type: Array
                 description: |
                   These are labels that each inspection request must include within their 'finding_labels' map. Request
@@ -1028,12 +1055,12 @@ properties:
                   No more than 10 keys can be required.
                 item_type:
                   type: String
-              - name: 'tableOptions'
+              - name: tableOptions
                 type: NestedObject
                 description: |
                   If the container is a table, additional information to make findings meaningful such as the columns that are primary keys.
                 properties:
-                  - name: 'identifyingFields'
+                  - name: identifyingFields
                     type: Array
                     description: |
                       The columns that are the primary keys for table objects included in ContentItem. A copy of this
@@ -1042,12 +1069,12 @@ properties:
                     item_type:
                       type: NestedObject
                       properties:
-                        - name: 'name'
+                        - name: name
                           type: String
                           description: |
                             Name describing the field.
                           required: true
-              - name: 'labels'
+              - name: labels
                 type: KeyValuePairs
                 description: |
                   To organize findings, these labels will be added to each finding.
@@ -1061,14 +1088,14 @@ properties:
                   Examples:
                   * `"environment" : "production"`
                   * `"pipeline" : "etl"`
-      - name: 'actions'
+      - name: actions
         type: Array
         description: |
           Configuration block for the actions to execute on the completion of a job. Can be specified multiple times, but only one for each type. Each action block supports fields documented below. This argument is processed in [attribute-as-blocks mode](https://developer.hashicorp.com/terraform/language/attr-as-blocks).
         item_type:
           type: NestedObject
           properties:
-            - name: 'saveFindings'
+            - name: saveFindings
               type: NestedObject
               # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
@@ -1082,33 +1109,33 @@ properties:
               description: |
                 If set, the detailed findings will be persisted to the specified OutputStorageConfig. Only a single instance of this action can be specified. Compatible with: Inspect, Risk
               properties:
-                - name: 'outputConfig'
+                - name: outputConfig
                   type: NestedObject
                   description: |
                     Information on where to store output
                   required: true
                   properties:
-                    - name: 'table'
+                    - name: table
                       type: NestedObject
                       description: |
                         Information on the location of the target BigQuery Table.
                       properties:
-                        - name: 'projectId'
+                        - name: projectId
                           type: String
                           description: |
                             The Google Cloud Platform project ID of the project containing the table.
                           required: true
-                        - name: 'datasetId'
+                        - name: datasetId
                           type: String
                           description: |
                             Dataset ID of the table.
                           required: true
-                        - name: 'tableId'
+                        - name: tableId
                           type: String
                           description: |
                             Name of the table. If is not set a new one will be generated for you with the following format:
                             `dlp_googleapis_yyyy_mm_dd_[dlp_job_id]`. Pacific timezone will be used for generating the date details.
-                    - name: 'storagePath'
+                    - name: storagePath
                       type: NestedObject
                       description: |
                         Store findings in an existing Cloud Storage bucket. Files will be generated with the job ID and file part number
@@ -1118,13 +1145,13 @@ properties:
                         Supported for InspectJobs. The bucket must not be the same as the bucket being inspected. If storing findings to
                         Cloud Storage, the output schema field should not be set. If set, it will be ignored.
                       properties:
-                        - name: 'path'
+                        - name: path
                           type: String
                           description: |
                             A URL representing a file or path (no wildcards) in Cloud Storage.
                             Example: `gs://[BUCKET_NAME]/dictionary.txt`
                           required: true
-                    - name: 'outputSchema'
+                    - name: outputSchema
                       type: Enum
                       description: |
                         Schema used for writing the findings for Inspect jobs. This field is only used for
@@ -1136,12 +1163,12 @@ properties:
                         table with no schema, and no changes will be made to an existing table that has a schema.
                         Only for use with external storage.
                       enum_values:
-                        - 'BASIC_COLUMNS'
-                        - 'GCS_COLUMNS'
-                        - 'DATASTORE_COLUMNS'
-                        - 'BIG_QUERY_COLUMNS'
-                        - 'ALL_COLUMNS'
-            - name: 'pubSub'
+                        - BASIC_COLUMNS
+                        - GCS_COLUMNS
+                        - DATASTORE_COLUMNS
+                        - BIG_QUERY_COLUMNS
+                        - ALL_COLUMNS
+            - name: pubSub
               type: NestedObject
               # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
@@ -1155,12 +1182,12 @@ properties:
               description: |
                 Publish a message into a given Pub/Sub topic when the job completes.
               properties:
-                - name: 'topic'
+                - name: topic
                   type: String
                   description: |
                     Cloud Pub/Sub topic to send notifications to.
                   required: true
-            - name: 'publishSummaryToCscc'
+            - name: publishSummaryToCscc
               type: NestedObject
               description: |
                 Publish the result summary of a DlpJob to the Cloud Security Command Center.
@@ -1175,9 +1202,8 @@ properties:
               #   - deidentify
               #   - publish_to_stackdriver
               allow_empty_object: true
-              properties:
-                []
-            - name: 'publishFindingsToDataplexCatalog'
+              properties: []
+            - name: publishFindingsToDataplexCatalog
               type: NestedObject
               description: |
                 Publish findings of a DlpJob as an aspect to Dataplex Universal Catalog.
@@ -1192,9 +1218,8 @@ properties:
               #   - deidentify
               #   - publish_to_stackdriver
               allow_empty_object: true
-              properties:
-                []
-            - name: 'publishFindingsToCloudDataCatalog'
+              properties: []
+            - name: publishFindingsToCloudDataCatalog
               type: NestedObject
               description: |
                 Publish findings of a DlpJob to Data Catalog.
@@ -1210,9 +1235,8 @@ properties:
               #   - deidentify
               #   - publish_to_stackdriver
               allow_empty_object: true
-              properties:
-                []
-            - name: 'jobNotificationEmails'
+              properties: []
+            - name: jobNotificationEmails
               type: NestedObject
               description: |
                 Sends an email when the job completes. The email goes to IAM project owners and technical Essential Contacts.
@@ -1227,9 +1251,8 @@ properties:
               #   - deidentify
               #   - publish_to_stackdriver
               allow_empty_object: true
-              properties:
-                []
-            - name: 'deidentify'
+              properties: []
+            - name: deidentify
               type: NestedObject
               # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
@@ -1243,7 +1266,7 @@ properties:
               description: |
                 Create a de-identified copy of the requested table or files.
               properties:
-                - name: 'cloudStorageOutput'
+                - name: cloudStorageOutput
                   type: String
                   description: |
                     User settable Cloud Storage bucket and folders to store de-identified files.
@@ -1256,7 +1279,7 @@ properties:
 
                     Form of: gs://bucket/folder/ or gs://bucket
                   required: true
-                - name: 'fileTypesToTransform'
+                - name: fileTypesToTransform
                   type: Array
                   description: |
                     List of user-specified file type groups to transform. If specified, only the files with these filetypes will be transformed.
@@ -1270,55 +1293,53 @@ properties:
                       This field only has a name and description because of MM
                       limitations. It should not appear in downstreams.
                     enum_values:
-                      - 'IMAGE'
-                      - 'TEXT_FILE'
-                      - 'CSV'
-                      - 'TSV'
-                - name: 'transformationConfig'
+                      - IMAGE
+                      - TEXT_FILE
+                      - CSV
+                      - TSV
+                - name: transformationConfig
                   type: NestedObject
                   description: |
                     User specified deidentify templates and configs for structured, unstructured, and image files.
                   properties:
-                    - name: 'deidentifyTemplate'
+                    - name: deidentifyTemplate
                       type: String
                       description: |
                         If this template is specified, it will serve as the default de-identify template.
-                    - name: 'structuredDeidentifyTemplate'
+                    - name: structuredDeidentifyTemplate
                       type: String
                       description: |
                         If this template is specified, it will serve as the de-identify template for structured content such as delimited files and tables.
-                    - name: 'imageRedactTemplate'
+                    - name: imageRedactTemplate
                       type: String
                       description: |
                         If this template is specified, it will serve as the de-identify template for images.
-                - name: 'transformationDetailsStorageConfig'
+                - name: transformationDetailsStorageConfig
                   type: NestedObject
                   description: |
                     Config for storing transformation details.
                   properties:
-                    - name: 'table'
+                    - name: table
                       type: NestedObject
                       description: |
                         The BigQuery table in which to store the output.
                       required: true
                       properties:
-                        - name: 'datasetId'
+                        - name: datasetId
                           type: String
-                          description:
-                            The ID of the dataset containing this table.
+                          description: The ID of the dataset containing this table.
                           required: true
-                        - name: 'projectId'
+                        - name: projectId
                           type: String
-                          description:
-                            The ID of the project containing this table.
+                          description: The ID of the project containing this table.
                           required: true
-                        - name: 'tableId'
+                        - name: tableId
                           type: String
                           description: |
                             The ID of the table. The ID must contain only letters (a-z,
                             A-Z), numbers (0-9), or underscores (_). The maximum length
                             is 1,024 characters.
-            - name: 'publishToStackdriver'
+            - name: publishToStackdriver
               type: NestedObject
               description: |
                 Enable Stackdriver metric dlp.googleapis.com/findingCount.
@@ -1333,5 +1354,4 @@ properties:
               #   - deidentify
               #   - publish_to_stackdriver
               allow_empty_object: true
-              properties:
-                []
+              properties: []

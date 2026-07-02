@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/backupdr"
 )
 
 // This test cannot be run locally without seeding your environment with a backup vault and scheduling
@@ -208,6 +209,7 @@ resource "google_backup_dr_restore_workload" "restore" {
   compute_instance_target_environment {
     project = "%{project}"
     zone    = "us-central1-a"
+    use_project_service_account = true
   }
 
   compute_instance_restore_properties {
@@ -320,6 +322,7 @@ resource "google_backup_dr_restore_workload" "restore" {
   disk_target_environment {
     project = "%{project}"
     zone    = "us-central1-a"
+    use_project_service_account = true
   }
 
   disk_restore_properties {
@@ -344,6 +347,7 @@ resource "google_backup_dr_restore_workload" "restore" {
   region_disk_target_environment {
     project = "%{project}"
     region  = "us-central1"
+    use_project_service_account = true
     replica_zones = [
       "projects/%{project}/zones/us-central1-a",
       "projects/%{project}/zones/us-central1-b"

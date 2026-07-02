@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -100,7 +101,6 @@ func testAccProjectOrganizationPolicy_list_allowAll(t *testing.T) {
 
 func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
-	canonicalProject := canonicalProjectId(project)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -108,7 +108,7 @@ func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectOrganizationPolicyConfig_list_allowSome(project),
-				Check:  testAccCheckGoogleProjectOrganizationListPolicyAllowedValues(t, "list", []string{canonicalProject}),
+				Check:  testAccCheckGoogleProjectOrganizationListPolicyAllowedValues(t, "list", []string{"APPENGINE", "HTTP", "PUBSUB"}),
 			},
 			{
 				ResourceName:      "google_project_organization_policy.list",
@@ -216,7 +216,7 @@ func testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t *testing.T) fu
 
 			projectId := canonicalProjectId(rs.Primary.Attributes["project"])
 			constraint := resourcemanager.CanonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
-			policy, err := config.NewResourceManagerClient(config.UserAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
+			policy, err := rmClient.NewClient(config, config.UserAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
 				Constraint: constraint,
 			}).Do()
 
@@ -334,7 +334,7 @@ func getGoogleProjectOrganizationPolicyTestResource(t *testing.T, s *terraform.S
 	config := acctest.GoogleProviderConfig(t)
 	projectId := canonicalProjectId(rs.Primary.Attributes["project"])
 
-	return config.NewResourceManagerClient(config.UserAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
+	return rmClient.NewClient(config, config.UserAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
 		Constraint: rs.Primary.Attributes["constraint"],
 	}).Do()
 }
@@ -371,15 +371,15 @@ func testAccProjectOrganizationPolicyConfig_list_allowSome(pid string) string {
 	return fmt.Sprintf(`
 resource "google_project_organization_policy" "list" {
   project    = "%s"
-  constraint = "constraints/compute.trustedImageProjects"
+  constraint = "constraints/cloudscheduler.allowedTargetTypes"
 
   list_policy {
     allow {
-      values = ["projects/%s"]
+      values = ["APPENGINE", "HTTP", "PUBSUB"]
     }
   }
 }
-`, pid, pid)
+`, pid)
 }
 
 func testAccProjectOrganizationPolicyConfig_list_denySome(pid string) string {

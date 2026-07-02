@@ -1,5 +1,5 @@
 /*
- * Copyright (c) HashiCorp, Inc.
+ * Copyright IBM Corp. 2014, 2026
  * SPDX-License-Identifier: MPL-2.0
  */
 
@@ -18,9 +18,9 @@ class VcsTests {
 
         val gaProject = getSubProject(root, gaProjectName)
         val betaProject = getSubProject(root, betaProjectName)
-        val projectSweeperProject = getSubProject(root, betaProjectName)
+        val globalSweepersProject = getSubProject(root, globalSweepersProjectName)
 
-        val allProjects = arrayListOf(gaProject, betaProject, projectSweeperProject)
+        val allProjects = arrayListOf(gaProject, betaProject, globalSweepersProject)
 
         allProjects.forEach { p ->
             p.subProjects.forEach { sp->

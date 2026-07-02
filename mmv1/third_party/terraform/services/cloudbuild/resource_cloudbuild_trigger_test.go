@@ -6,6 +6,10 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudbuild"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -549,7 +553,7 @@ resource "google_cloudbuild_trigger" "build_trigger" {
 func testAccCloudBuildTrigger_webhook_config(name string) string {
 	return fmt.Sprintf(`
 resource "google_secret_manager_secret" "webhook_trigger_secret_key" {
-  secret_id = "webhook_trigger-secret-key"
+  secret_id = "%s"
 
   replication {
     user_managed {
@@ -608,13 +612,13 @@ resource "google_cloudbuild_trigger" "build_trigger" {
     google_secret_manager_secret_iam_policy.policy
   ]
 }
-`, name)
+`, name, name)
 }
 
 func testAccCloudBuildTrigger_webhook_config_update(name string) string {
 	return fmt.Sprintf(`
 resource "google_secret_manager_secret" "webhook_trigger_secret_key" {
-  secret_id = "webhook_trigger-secret-key"
+  secret_id = "%s"
 
   replication {
     user_managed {
@@ -673,7 +677,7 @@ resource "google_cloudbuild_trigger" "build_trigger" {
     google_secret_manager_secret_iam_policy.policy
   ]
 }
-`, name)
+`, name, name)
 }
 
 func testAccCloudBuildTrigger_customizeDiffTimeoutSum(name string) string {

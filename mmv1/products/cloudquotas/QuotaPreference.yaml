@@ -34,16 +34,19 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/google_cloud_quotas_quota_preference.go.tmpl'
-examples:
+samples:
   - name: 'cloudquotas_quota_preference_basic'
     primary_resource_id: 'preference'
-    vars:
-      name: 'compute_googleapis_com-CPUS-per-project_us-east1'
-    test_env_vars:
-      project: 'PROJECT_NAME'
     exclude_test: true
+    steps:
+      - name: 'cloudquotas_quota_preference_basic'
+        resource_id_vars:
+          name: 'compute_googleapis_com-CPUS-per-project_us-east1'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 parameters:
   - name: 'parent'
     type: String

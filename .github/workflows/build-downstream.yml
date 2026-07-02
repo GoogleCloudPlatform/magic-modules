@@ -1,4 +1,5 @@
 name: build
+
 permissions: read-all
 
 on:
@@ -17,14 +18,14 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.24'
+          go-version: '^1.26'
           cache-dependency-path: |
             mmv1/go.mod
             tpgtools/go.mod
@@ -83,7 +84,7 @@ jobs:
           INPUTS_REPO: ${{ inputs.repo  }}
 
       - name: Upload built artifacts
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: artifact-${{ inputs.repo  }}
           path: output.zip
