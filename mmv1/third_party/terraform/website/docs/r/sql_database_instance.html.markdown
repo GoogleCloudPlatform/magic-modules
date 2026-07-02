@@ -533,7 +533,7 @@ The optional `settings.data_cache_config` subblock supports:
 
 * `data_cache_enabled` - (Optional) Whether data cache is enabled for the instance. Defaults to `true` for MYSQL Enterprise Plus and PostgreSQL Enterprise Plus instances only. For SQL Server Enterprise Plus instances it defaults to `false`.
 
-The optional `settings.deny_maintenance_period` subblock supports:
+The optional `settings.deny_maintenance_period` subblock (multiple blocks can be defined to configure more than one deny period per year) supports:
 
 * `end_date` - (Required) "deny maintenance period" end date. If the year of the end date is empty, the year of the start date also must be empty. In this case, it means the no maintenance interval recurs every year. The date is in format yyyy-m-dd (the month is without leading zeros)i.e., 2020-1-01, or 2020-11-01, or mm-dd, i.e., 11-01
 

@@ -2802,6 +2802,14 @@ func TestAccSQLDatabaseInstance_DenyMaintenancePeriod(t *testing.T) {
 				Config: testGoogleSqlDatabaseInstance_DenyMaintenancePeriodConfig(databaseName, endDate, startDate, time),
 			},
 			{
+				Config: testGoogleSqlDatabaseInstance_DenyMaintenancePeriodConfig_multiple(databaseName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.instance", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -5631,6 +5639,30 @@ resource "google_sql_database_instance" "instance" {
     }
   }
 }`, databaseName, endDate, startDate, time)
+}
+
+func testGoogleSqlDatabaseInstance_DenyMaintenancePeriodConfig_multiple(databaseName string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-custom-4-26624"
+    deny_maintenance_period {
+      end_date     	= "2022-12-5"
+      start_date	= "2022-10-5"
+      time 		= "00:00:00"
+    }
+    deny_maintenance_period {
+      end_date     	= "2023-12-5"
+      start_date	= "2023-10-5"
+      time 		= "00:00:00"
+    }
+  }
+}`, databaseName)
 }
 
 func testGoogleSqlDatabaseInstance_DefaultEdition(databaseName, databaseVersion, tier string) string {
