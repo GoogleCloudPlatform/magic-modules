@@ -5,8 +5,4 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
     "key" = "value"
   }
   region       = "us-central1"
-
-  traffic_config {
-    traffic_split_always_latest {}
-  }
 }

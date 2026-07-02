@@ -161,6 +161,7 @@ samples:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/reasoning_engine_deletion_policy.go.tmpl'
   post_update: 'templates/terraform/post_update/sleep_10s.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/vertex_ai_reasoning_engine.go.tmpl'
 virtual_fields:
   - name: 'deletion_policy'
     description: |
@@ -258,6 +259,7 @@ properties:
           function: 'validation.StringIsJSON'
       - name: 'deploymentSpec'
         type: NestedObject
+        default_from_api: true
         description: |-
           Optional. The specification of a Reasoning Engine deployment.
         properties:
@@ -267,6 +269,7 @@ properties:
               Optional. Environment variables to be set with the Reasoning
               Engine deployment.
             is_set: true
+            custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_reasoning_engine_env.go.tmpl'
             item_type:
               type: NestedObject
               properties:
@@ -407,7 +410,7 @@ properties:
             default_from_api: true
           - name: 'agentServerMode'
             type: Enum
-            min_version: beta
+            min_version: 'beta'
             description: |-
               Optional. The agent server mode specifies what features are used when deploy the agent to agent engine.
               Possible values:
@@ -418,7 +421,7 @@ properties:
               - 'EXPERIMENTAL'
           - name: 'agentGatewayConfig'
             type: NestedObject
-            min_version: beta
+            min_version: 'beta'
             description: |-
               Optional. Agent Gateway configuration for a Reasoning Engine deployment.
             properties:
@@ -444,7 +447,7 @@ properties:
                       Required. The resource name of the Agent Gateway for outbound traffic.
           - name: 'keepAliveProbe'
             type: NestedObject
-            min_version: beta
+            min_version: 'beta'
             description: |-
               Optional. Specifies the configuration for keep-alive probe.
             properties:
@@ -468,7 +471,7 @@ properties:
                   Optional. Specifies the maximum duration (in seconds) to keep the instance alive via this probe. Can be a maximum of 3600 seconds (1 hour).
           - name: 'dedicatedIngressEndpointEnabled'
             type: Boolean
-            min_version: beta
+            min_version: 'beta'
             description: |-
               Optional. Whether to enable dedicated ingress endpoint for the deployment. If true, the deployment will be accessible via a dedicated endpoint. This is required to enable GKE V2 runtime.
       - name: 'packageSpec'
@@ -602,6 +605,37 @@ properties:
                     required: true
                     description: |
                       The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git ref.
+          - name: 'agentConfigSource'
+            type: NestedObject
+            min_version: 'beta'
+            description: |-
+              Optional. Specification for the deploying from agent config.
+            properties:
+              - name: 'adkConfig'
+                type: NestedObject
+                description: |-
+                  Required. Configuration for the Agent Development Kit (ADK).
+                properties:
+                  - name: 'jsonConfig'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. The value of the ADK config in JSON format.
+                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                    validation:
+                      function: 'validation.StringIsJSON'
+              - name: 'inlineSource'
+                type: NestedObject
+                description: |-
+                  Optional. Any additional files needed to interpret the config.
+                properties:
+                  - name: 'sourceArchive'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. Input only. The application source code archive, provided as a compressed tarball (.tar.gz) file.
       - name: 'serviceAccount'
         type: String
         description: |-
@@ -627,9 +661,14 @@ properties:
         description: |-
           The identity to use for the Reasoning Engine.
         output: true
+      - name: 'exampleStore'
+        type: String
+        min_version: 'beta'
+        description: |-
+          Optional. The resource name of the linked ExampleStore.
       - name: 'agentCard'
         type: String
-        min_version: beta
+        min_version: 'beta'
         description: |-
           Optional. The A2A Agent Card for the agent (if available).
         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
@@ -637,14 +676,20 @@ properties:
         custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
         validation:
           function: 'validation.StringIsJSON'
-      - name: 'exampleStore'
-        type: String
-        min_version: beta
+      - name: 'buildSpec'
+        type: NestedObject
+        min_version: 'beta'
         description: |-
-          Optional. The resource name of the linked ExampleStore. At query time, examples can be used to guide the performance of the agent.
+          Optional. Configuration for building container image.
+        properties:
+          - name: 'workerPool'
+            type: String
+            description: |-
+              Optional. The resource name of the Cloud Build WorkerPool to use for the build.
   - name: 'contextSpec'
     min_version: 'beta'
     type: NestedObject
+    default_from_api: true
     description: |-
       Optional. Configuration for how Agent Engine sub-resources should manage context.
     properties:
@@ -804,10 +849,9 @@ properties:
                         custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                         validation:
                           function: 'validation.StringIsJSON'
-          - name: 'exampleStoreConfig'
       - name: 'exampleStoreConfig'
         type: NestedObject
-        min_version: beta
+        min_version: 'beta'
         description: |-
           Optional. Specification for an Example Store, which manages few-shot examples for the Agent Engine.
         properties:
@@ -820,16 +864,10 @@ properties:
                 type: String
                 required: true
                 description: |-
-                  Required. The Gemini model used to generate embeddings to lookup similar examples. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
-  - name: 'url'
-    type: String
-    description: |-
-      The URL of the reasoning engine.
-    output: true
-    min_version: beta
+                  Required. The Gemini model used to generate embeddings to lookup similar examples.
   - name: 'trafficConfig'
     type: NestedObject
-    min_version: beta
+    min_version: 'beta'
     default_from_api: true
     description: |-
       Optional. Traffic distribution configuration for the Reasoning Engine.
@@ -837,33 +875,38 @@ properties:
       - name: 'trafficSplitManual'
         type: NestedObject
         description: |-
-          Manual traffic distribution configuration, where the user specifies the
+          Optional. Manual traffic distribution configuration, where the user specifies the
           Runtime Revision IDs and the percentage of traffic to send to each.
-        exactly_one_of:
-          - 'trafficSplitManual'
-          - 'trafficSplitAlwaysLatest'
         properties:
           - name: 'targets'
             type: Array
             description: |-
-              A list of traffic targets for the Runtimes Revisions. The sum of percentages must equal to 100.
+              Optional. A list of traffic targets for the Runtimes Revisions. The sum of
+              percentages must equal to 100.
             item_type:
               type: NestedObject
               properties:
                 - name: 'runtimeRevisionName'
                   type: String
                   description: |-
-                    The Runtime Revision name to which to send this portion of traffic.
+                    Required. The Runtime Revision name to which to send this portion of traffic.
                   required: true
                 - name: 'percent'
                   type: Integer
                   description: |-
-                    Specifies percent of the traffic to this Runtime Revision.
+                    Required. Specifies percent of the traffic to this Runtime Revision.
                   required: true
       - name: 'trafficSplitAlwaysLatest'
         type: NestedObject
-        allow_empty_object: true
-        send_empty_value: true
-        default_from_api: true
         description: |-
-          Traffic distribution configuration, where all traffic is sent to the latest Runtime Revision.
+          Optional. Traffic distribution configuration, where all traffic is sent to the
+          latest Runtime Revision.
+        properties: []
+        send_empty_value: true
+        allow_empty_object: true
+  - name: 'url'
+    type: String
+    min_version: 'beta'
+    description: |-
+      Output only. The URL of the reasoning engine.
+    output: true
