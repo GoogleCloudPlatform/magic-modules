@@ -1,7 +1,5 @@
 package gkehub2
 
-{{ if ne $.TargetVersionName "ga" }}
-
 import (
 	"testing"
 )
@@ -163,5 +161,3 @@ func TestShouldUpgradeRolloutSequence(t *testing.T) {
 		})
 	}
 }
-
-{{ end }}
