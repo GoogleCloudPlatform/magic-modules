@@ -3,14 +3,17 @@ package dns_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgdns "github.com/hashicorp/terraform-provider-google/google/services/dns"
 )
 
 func TestAccDnsManagedZoneListResource_queryIdentity(t *testing.T) {
@@ -34,6 +37,7 @@ func TestAccDnsManagedZoneListResource_queryIdentity(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dns_managed_zone.foobar", "project", project),
 					resource.TestCheckResourceAttr("google_dns_managed_zone.foobar", "name", zoneName),
 					resource.TestCheckResourceAttr("google_dns_managed_zone.foobar", "dns_name", dnsName),
+					testAccCheckDnsManagedZoneVisibleInList(t, project, zoneName),
 				),
 			},
 			{
@@ -49,6 +53,38 @@ func TestAccDnsManagedZoneListResource_queryIdentity(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckDnsManagedZoneVisibleInList(t *testing.T, project, zoneName string) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		observedNames := make([]string, 0)
+		err := resource.Retry(30*time.Second, func() *resource.RetryError {
+			resp, err := tpgdns.NewClient(config, config.UserAgent).ManagedZones.List(project).Do()
+			if err != nil {
+				return resource.RetryableError(fmt.Errorf("error listing managed zones for project %q: %w", project, err))
+			}
+
+			observedNames = observedNames[:0]
+			for _, zone := range resp.ManagedZones {
+				if zone == nil {
+					continue
+				}
+				observedNames = append(observedNames, zone.Name)
+				if zone.Name == zoneName {
+					return nil
+				}
+			}
+
+			return resource.RetryableError(fmt.Errorf("managed zone %q not visible yet; currently observed zones: %v", zoneName, observedNames))
+		})
+		if err != nil {
+			return fmt.Errorf("managed zone %q did not become query-visible before list step in project %q; last observed zones: %v; retry error: %w", zoneName, project, observedNames, err)
+		}
+
+		return nil
+	}
 }
 
 func testAccDnsManagedZoneListResource_basic(name, dnsName string) string {
