@@ -82,6 +82,7 @@ samples:
           template_metadata_custom_prompt_safety_error_message: This is a custom error message for prompt
           template_metadata_custom_llm_response_safety_error_code: 401
           template_metadata_enforcement_type: INSPECT_ONLY
+          template_metadata_filter_version_selector_alias: FILTER_VERSION_ALIAS_LATEST
         test_vars_overrides:
           templateId: '"modelarmor3"'
           location: '"us-central1"'
@@ -96,6 +97,7 @@ samples:
           template_metadata_custom_prompt_safety_error_message: '"This is a custom error message for prompt"'
           template_metadata_custom_llm_response_safety_error_code: 401
           template_metadata_enforcement_type: '"INSPECT_ONLY"'
+          template_metadata_filter_version_selector_alias: '"FILTER_VERSION_ALIAS_LATEST"'
   - name: modelarmor_template_label
     primary_resource_id: template-label-advanced-config
     steps:
@@ -314,3 +316,22 @@ properties:
           Possible values:
           INSPECT_ONLY
           INSPECT_AND_BLOCK
+      - name: filterVersionSelector
+        type: NestedObject
+        description: |-
+          Selects the filter version to use for this template. Set exactly one of
+          'alias' or 'version'.
+        properties:
+          - name: alias
+            type: String
+            description: |-
+              A predefined filter version alias. The template automatically follows the
+              version this alias points to.
+              Possible values:
+              FILTER_VERSION_ALIAS_STABLE
+              FILTER_VERSION_ALIAS_LATEST
+          - name: version
+            type: String
+            description: |-
+              Pins the template to a specific, immutable filter version. Expected
+              format is a case-sensitive string such as 'v1' or 'v2'.
