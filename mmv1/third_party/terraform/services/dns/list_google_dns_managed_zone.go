@@ -18,6 +18,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+var errStreamClosed = errors.New("stream closed")
+
 func init() {
 	registry.FrameworkListResource{
 		Name:        "google_dns_managed_zone",
@@ -96,13 +98,15 @@ func (listR *GoogleDnsManagedZoneResource) List(ctx context.Context, req list.Li
 			}
 
 			if !push(result) {
-				return errors.New("stream closed")
+				// A closed stream means the consumer has enough results; stop cleanly.
+				return errStreamClosed
 			}
 			return nil
 		})
 
 		if err != nil {
-			if err.Error() == "stream closed" {
+			// Stream closure is expected and should not be reported as an API error.
+			if errors.Is(err, errStreamClosed) {
 				return
 			}
 			streamDiags.AddError("API Error listing DNS managed zones", fmt.Sprintf("Failed to list DNS managed zones in project %q: %v", project, err))
@@ -172,11 +176,11 @@ func ListDnsManagedZones(config *transport_tpg.Config, project string, callback 
 			if err := rd.Set("project", project); err != nil {
 				return fmt.Errorf("error setting project on temporary resource data: %w", err)
 			}
-			rd.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, managedZone.Name))
 
 			if err := managedZoneSchema.Read(rd, config); err != nil {
 				return err
 			}
+			rd.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, managedZone.Name))
 			if err := rd.Set("name", managedZone.Name); err != nil {
 				return fmt.Errorf("error setting name on temporary resource data: %w", err)
 			}

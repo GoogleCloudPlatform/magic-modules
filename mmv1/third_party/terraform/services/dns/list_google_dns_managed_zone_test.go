@@ -40,11 +40,11 @@ func TestAccDnsManagedZoneListResource_queryIdentity(t *testing.T) {
 				Query:  true,
 				Config: testAccDnsManagedZoneListQuery(project),
 				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLengthAtLeast("google_dns_managed_zone.all", 1),
 					querycheck.ExpectIdentity("google_dns_managed_zone.all", map[string]knownvalue.Check{
 						"name":    knownvalue.StringExact(zoneName),
 						"project": knownvalue.StringExact(project),
 					}),
-					querycheck.ExpectLengthAtLeast("google_dns_managed_zone.all", 1),
 				},
 			},
 		},
