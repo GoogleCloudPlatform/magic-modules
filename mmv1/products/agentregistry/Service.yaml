@@ -49,7 +49,7 @@ samples:
           service: service
   - name: agent_registry_service_endpoint
     primary_resource_id: default
-    skip_func: acctest.SkipTestUntil(t, "2026-09-30")
+    skip_func: acctest.SkipTestUntil(t, "2026-09-30") # OPENAPI_SPEC is not supported by the production GA API yet
     steps:
       - name: agent_registry_service_endpoint
         resource_id_vars:
