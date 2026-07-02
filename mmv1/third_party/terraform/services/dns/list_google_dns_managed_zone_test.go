@@ -42,7 +42,7 @@ func TestAccDnsManagedZoneListResource_queryIdentity(t *testing.T) {
 			},
 			{
 				Query:  true,
-				Config: testAccDnsManagedZoneListQuery(project),
+				Config: testAccDnsManagedZoneListQuery(project, zoneName, dnsName),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("google_dns_managed_zone.all", 1),
 					querycheck.ExpectIdentity("google_dns_managed_zone.all", map[string]knownvalue.Check{
@@ -97,9 +97,16 @@ resource "google_dns_managed_zone" "foobar" {
 `, name, dnsName)
 }
 
-func testAccDnsManagedZoneListQuery(project string) string {
+func testAccDnsManagedZoneListQuery(project, zoneName, dnsName string) string {
 	return fmt.Sprintf(`
 provider "google" {}
+
+resource "google_dns_managed_zone" "foobar" {
+  name       = %q
+  dns_name   = %q
+  visibility = "public"
+  project    = %q
+}
 
 list "google_dns_managed_zone" "all" {
   provider = google
@@ -108,5 +115,5 @@ list "google_dns_managed_zone" "all" {
     project = %q
   }
 }
-`, project)
+`, zoneName, dnsName, project, project)
 }
