@@ -55,6 +55,22 @@ samples:
           backup_plan_id: bp-bpa-filestore
         test_env_vars:
           project: PROJECT_NAME
+  - name: backup_dr_bpa_netapp
+    primary_resource_id: my-backup-plan-association-netapp
+    steps:
+      - name: backup_dr_bpa_netapp
+        resource_id_vars:
+          backup_plan_association_id: my-bpa-netapp
+          netapp_volume_id: test-volume-bpa
+          netapp_pool_id: test-pool-bpa
+          network_name: test-network-bpa
+          backup_vault_id: bv-bpa-netapp
+          backup_plan_id: bp-bpa-netapp
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))
+          netapp_volume_id: '"tf_test_test_volume_bpa" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -87,13 +103,14 @@ properties:
       - A Backup Plan configured for 'compute.googleapis.com/Instance', can only protect instance type resources.
       - A Backup Plan configured for 'compute.googleapis.com/Disk' can be used to protect both standard Disks and Regional Disks resources.
       - A Backup Plan configured for 'file.googleapis.com/Instance' can only protect Filestore instances.
+      - A Backup Plan configured for 'netapp.googleapis.com/Volume' can only protect NetApp volumes.
     required: true
     diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
   - name: resourceType
     type: String
     description: |
       The resource type of workload on which backupplan is applied.
-      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "compute.googleapis.com/RegionDisk", and "file.googleapis.com/Instance"
+      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "compute.googleapis.com/RegionDisk", "file.googleapis.com/Instance", and "netapp.googleapis.com/Volume"
     required: true
   - name: createTime
     type: String
