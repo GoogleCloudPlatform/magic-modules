@@ -5,7 +5,6 @@ package sql
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -112,10 +111,7 @@ func flattenSqlUserListItem(user *sqladmin.User, d *schema.ResourceData, project
 		return fmt.Errorf("error setting project: %w", err)
 	}
 
-	iamEmail, databaseRoles, err := sqlUserOptionalFields(user)
-	if err != nil {
-		return err
-	}
+	iamEmail, databaseRoles := sqlUserOptionalFields(user)
 
 	if _, ok := ResourceSqlUser().Schema["iam_email"]; ok {
 		if err := d.Set("iam_email", iamEmail); err != nil {
@@ -125,15 +121,20 @@ func flattenSqlUserListItem(user *sqladmin.User, d *schema.ResourceData, project
 	if err := d.Set("sql_server_user_details", flattenSqlServerUserDetails(user.SqlserverUserDetails)); err != nil {
 		return fmt.Errorf("error setting sql_server_user_details: %w", err)
 	}
+	passwordPolicy := []map[string]interface{}{}
 	if user.PasswordPolicy != nil {
-		passwordPolicy := flattenPasswordPolicy(user.PasswordPolicy)
-		if len(passwordPolicy.([]map[string]interface{})[0]) != 0 {
-			if err := d.Set("password_policy", passwordPolicy); err != nil {
-				return fmt.Errorf("error setting password_policy: %w", err)
-			}
+		flattenedPasswordPolicy := flattenPasswordPolicy(user.PasswordPolicy).([]map[string]interface{})
+		if len(flattenedPasswordPolicy[0]) != 0 {
+			passwordPolicy = flattenedPasswordPolicy
 		}
 	}
+	if err := d.Set("password_policy", passwordPolicy); err != nil {
+		return fmt.Errorf("error setting password_policy: %w", err)
+	}
 	if _, ok := ResourceSqlUser().Schema["database_roles"]; ok {
+		if databaseRoles == nil {
+			databaseRoles = []string{}
+		}
 		if err := d.Set("database_roles", databaseRoles); err != nil {
 			return fmt.Errorf("error setting database_roles: %w", err)
 		}
@@ -148,28 +149,19 @@ func flattenSqlUserListItem(user *sqladmin.User, d *schema.ResourceData, project
 	})
 }
 
-func sqlUserOptionalFields(user *sqladmin.User) (string, []string, error) {
-	rawBytes, err := json.Marshal(user)
-	if err != nil {
-		return "", nil, fmt.Errorf("error marshalling sql user: %w", err)
-	}
+func sqlUserOptionalFields(user *sqladmin.User) (string, []string) {
+	// Prefer typed fields to avoid brittle JSON round-tripping and keep
+	// behavior aligned with sqladmin.User schema evolution.
+	databaseRoles := append([]string(nil), user.DatabaseRoles...)
+	return user.IamEmail, databaseRoles
+}
 
-	raw := map[string]interface{}{}
-	if err := json.Unmarshal(rawBytes, &raw); err != nil {
-		return "", nil, fmt.Errorf("error unmarshalling sql user: %w", err)
+func resourceDataForListedSqlUser(user *sqladmin.User, project string) (*schema.ResourceData, error) {
+	d := ResourceSqlUser().Data(&terraform.InstanceState{})
+	if err := flattenSqlUserListItem(user, d, project); err != nil {
+		return nil, err
 	}
-
-	iamEmail, _ := raw["iamEmail"].(string)
-	databaseRoles := make([]string, 0)
-	if roles, ok := raw["databaseRoles"].([]interface{}); ok {
-		for _, role := range roles {
-			if s, ok := role.(string); ok {
-				databaseRoles = append(databaseRoles, s)
-			}
-		}
-	}
-
-	return iamEmail, databaseRoles, nil
+	return d, nil
 }
 
 func ListSqlUsers(config *transport_tpg.Config, project, instance string, callback func(*schema.ResourceData) error) error {
@@ -211,10 +203,11 @@ func ListSqlUsers(config *transport_tpg.Config, project, instance string, callba
 		if user == nil {
 			continue
 		}
-		if err := flattenSqlUserListItem(user, d, project); err != nil {
+		itemData, err := resourceDataForListedSqlUser(user, project)
+		if err != nil {
 			return err
 		}
-		if err := callback(d); err != nil {
+		if err := callback(itemData); err != nil {
 			return err
 		}
 	}

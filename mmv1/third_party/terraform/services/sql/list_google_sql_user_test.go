@@ -19,7 +19,8 @@ func TestAccSqlUserListResource_queryIdentity(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	region := envvar.GetTestRegionFromEnv()
 	instance := fmt.Sprintf("tf-test-sql-%s", acctest.RandString(t, 10))
-	name := fmt.Sprintf("tf_test_user_%s", acctest.RandString(t, 8))
+	name1 := fmt.Sprintf("tf_test_user_%s", acctest.RandString(t, 8))
+	name2 := fmt.Sprintf("tf_test_user_%s", acctest.RandString(t, 8))
 
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
@@ -30,11 +31,14 @@ func TestAccSqlUserListResource_queryIdentity(t *testing.T) {
 		CheckDestroy:             testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlUserListBasic(region, instance, name),
+				Config: testAccSqlUserListBasic(region, instance, name1, name2),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_user.test", "name", name),
-					resource.TestCheckResourceAttr("google_sql_user.test", "instance", instance),
-					resource.TestCheckResourceAttr("google_sql_user.test", "project", project),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "name", name1),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "instance", instance),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "project", project),
+					resource.TestCheckResourceAttr("google_sql_user.user2", "name", name2),
+					resource.TestCheckResourceAttr("google_sql_user.user2", "instance", instance),
+					resource.TestCheckResourceAttr("google_sql_user.user2", "project", project),
 				),
 			},
 			{
@@ -42,19 +46,25 @@ func TestAccSqlUserListResource_queryIdentity(t *testing.T) {
 				Config: testAccSqlUserListQuery(project, instance),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectIdentity("google_sql_user.all_in_instance", map[string]knownvalue.Check{
-						"name":     knownvalue.StringExact(name),
+						"name":     knownvalue.StringExact(name1),
 						"instance": knownvalue.StringExact(instance),
 						"project":  knownvalue.StringExact(project),
 						"host":     knownvalue.StringExact(""),
 					}),
-					querycheck.ExpectLengthAtLeast("google_sql_user.all_in_instance", 1),
+					querycheck.ExpectIdentity("google_sql_user.all_in_instance", map[string]knownvalue.Check{
+						"name":     knownvalue.StringExact(name2),
+						"instance": knownvalue.StringExact(instance),
+						"project":  knownvalue.StringExact(project),
+						"host":     knownvalue.StringExact(""),
+					}),
+					querycheck.ExpectLengthAtLeast("google_sql_user.all_in_instance", 2),
 				},
 			},
 		},
 	})
 }
 
-func testAccSqlUserListBasic(region, instance, name string) string {
+func testAccSqlUserListBasic(region, instance, name1, name2 string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "test" {
   name                = %q
@@ -67,13 +77,20 @@ resource "google_sql_database_instance" "test" {
   }
 }
 
-resource "google_sql_user" "test" {
-  name     = %q
+resource "google_sql_user" "user1" {
+	name     = %q
+	instance = google_sql_database_instance.test.name
+	type     = "BUILT_IN"
+	password = "test-password-123"
+}
+
+resource "google_sql_user" "user2" {
+	name     = %q
   instance = google_sql_database_instance.test.name
   type     = "BUILT_IN"
   password = "test-password-123"
 }
-`, instance, region, name)
+`, instance, region, name1, name2)
 }
 
 func testAccSqlUserListQuery(project, instance string) string {
