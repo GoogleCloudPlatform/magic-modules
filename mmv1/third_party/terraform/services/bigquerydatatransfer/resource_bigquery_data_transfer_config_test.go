@@ -297,13 +297,13 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 // but it will get deleted by parallel tests, so they need to be run serially.
 func TestAccBigqueryDataTransferConfig(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"basic":                  testAccBigqueryDataTransferConfig_scheduledQuery_basic,
-		"update":                 testAccBigqueryDataTransferConfig_scheduledQuery_update,
-		"service_account":        testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account,
-		"no_destintation":        testAccBigqueryDataTransferConfig_scheduledQuery_no_destination,
-		"booleanParam":           testAccBigqueryDataTransferConfig_copy_booleanParam,
-		"update_params":          testAccBigqueryDataTransferConfig_force_new_update_params,
-		"update_service_account": testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account,
+		"basic":                   testAccBigqueryDataTransferConfig_scheduledQuery_basic,
+		"update":                  testAccBigqueryDataTransferConfig_scheduledQuery_update,
+		"service_account":         testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account,
+		"no_destintation":         testAccBigqueryDataTransferConfig_scheduledQuery_no_destination,
+		"booleanParam":            testAccBigqueryDataTransferConfig_copy_booleanParam,
+		"update_params":           testAccBigqueryDataTransferConfig_force_new_update_params,
+		"update_service_account":  testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account,
 		"disable_auto_scheduling": testAccBigqueryDataTransferConfig_scheduledQuery_disableAutoScheduling,
 		// Multiple connector.authentication.* fields have been deprecated and return 400 errors
 		// "salesforce":             testAccBigqueryDataTransferConfig_salesforce_basic,
@@ -1032,7 +1032,6 @@ resource "google_bigquery_data_transfer_config" "salesforce_config" {
 }
 `, randomSuffix, randomSuffix)
 }
-
 
 // Regression test for https://github.com/hashicorp/terraform-provider-google/issues/13221
 // The API omits scheduleOptions from responses when all of its fields have default
