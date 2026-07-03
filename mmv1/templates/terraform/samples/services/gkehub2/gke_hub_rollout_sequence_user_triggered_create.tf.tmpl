@@ -36,6 +36,7 @@ resource "google_gke_hub_fleet" "default" {
 data "google_container_engine_versions" "versions" {
   location = "us-central1-a"
   project = google_project.project.project_id
+  depends_on = [time_sleep.wait_120_seconds]
 }
 
 resource "time_static" "exclusion_start" {}
