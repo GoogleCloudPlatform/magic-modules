@@ -304,6 +304,7 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 		"booleanParam":           testAccBigqueryDataTransferConfig_copy_booleanParam,
 		"update_params":          testAccBigqueryDataTransferConfig_force_new_update_params,
 		"update_service_account": testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account,
+		"disable_auto_scheduling": testAccBigqueryDataTransferConfig_scheduledQuery_disableAutoScheduling,
 		// Multiple connector.authentication.* fields have been deprecated and return 400 errors
 		// "salesforce":             testAccBigqueryDataTransferConfig_salesforce_basic,
 	}
@@ -1030,4 +1031,85 @@ resource "google_bigquery_data_transfer_config" "salesforce_config" {
   }
 }
 `, randomSuffix, randomSuffix)
+}
+
+
+// Regression test for https://github.com/hashicorp/terraform-provider-google/issues/13221
+// The API omits scheduleOptions from responses when all of its fields have default
+// values (disableAutoScheduling = false), which previously caused a perpetual diff.
+// The provider also used to drop `disableAutoScheduling: false` from requests, making
+// it impossible to re-enable auto scheduling once disabled.
+func testAccBigqueryDataTransferConfig_scheduledQuery_disableAutoScheduling(t *testing.T) {
+	random_suffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDataTransferConfig_scheduledQueryDisableAutoScheduling(random_suffix, "false"),
+			},
+			{
+				// A block with only default values must not produce a perpetual diff.
+				Config:             testAccBigqueryDataTransferConfig_scheduledQueryDisableAutoScheduling(random_suffix, "false"),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+			{
+				Config: testAccBigqueryDataTransferConfig_scheduledQueryDisableAutoScheduling(random_suffix, "true"),
+			},
+			{
+				// Updating back to false must be sent to the API (send_empty_value).
+				Config: testAccBigqueryDataTransferConfig_scheduledQueryDisableAutoScheduling(random_suffix, "false"),
+			},
+			{
+				Config:             testAccBigqueryDataTransferConfig_scheduledQueryDisableAutoScheduling(random_suffix, "false"),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
+func testAccBigqueryDataTransferConfig_scheduledQueryDisableAutoScheduling(random_suffix, disable_auto_scheduling string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "permissions" {
+  project = data.google_project.project.project_id
+
+  role   = "roles/iam.serviceAccountTokenCreator"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
+}
+
+resource "google_bigquery_dataset" "my_dataset" {
+  depends_on = [google_project_iam_member.permissions]
+
+  dataset_id    = "my_dataset%s"
+  friendly_name = "foo"
+  description   = "bar"
+  location      = "US"
+}
+
+resource "google_bigquery_data_transfer_config" "query_config" {
+  depends_on = [google_project_iam_member.permissions]
+
+  display_name           = "my-query-%s"
+  location               = "US"
+  data_source_id         = "scheduled_query"
+  schedule               = "first sunday of quarter 00:00"
+  destination_dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+
+  schedule_options {
+    disable_auto_scheduling = %s
+  }
+
+  params = {
+    destination_table_name_template = "my_table"
+    write_disposition               = "WRITE_APPEND"
+    query                           = "SELECT 1 AS a"
+  }
+}
+`, random_suffix, random_suffix, disable_auto_scheduling)
 }

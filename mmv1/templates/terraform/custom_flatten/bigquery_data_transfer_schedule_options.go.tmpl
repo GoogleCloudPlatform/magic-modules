@@ -1,0 +1,18 @@
+// Custom flattener for the schedule_options field of BigQuery Data Transfer Config.
+// The API omits scheduleOptions from responses when all of its fields have
+// default values (e.g. disableAutoScheduling = false), so preserve the local
+// state to prevent a perpetual diff.
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return d.Get("schedule_options")
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return d.Get("schedule_options")
+	}
+	transformed := make(map[string]interface{})
+	transformed["disable_auto_scheduling"] = original["disableAutoScheduling"]
+	transformed["start_time"] = original["startTime"]
+	transformed["end_time"] = original["endTime"]
+	return []interface{}{transformed}
+}
