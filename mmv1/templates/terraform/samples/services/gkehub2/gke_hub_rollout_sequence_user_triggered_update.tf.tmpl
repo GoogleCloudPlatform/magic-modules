@@ -1,4 +1,31 @@
-data "google_project" "project" {}
+resource "google_project" "project" {
+  project_id      = "{{index $.ResourceIdVars "project_id"}}"
+  name            = "{{index $.ResourceIdVars "project_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_acct"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "gkehub" {
+  project            = google_project.project.project_id
+  service            = "gkehub.googleapis.com"
+}
+
+resource "google_project_service" "container" {
+  project            = google_project.project.project_id
+  service            = "container.googleapis.com"
+}
+
+resource "google_project_service" "compute" {
+  project            = google_project.project.project_id
+  service            = "compute.googleapis.com"
+}
+
+// wait for API enablement
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.gkehub, google_project_service.container, google_project_service.compute]
+}
 
 data "google_container_engine_versions" "versions" {
   location = "us-central1-a"
@@ -7,11 +34,13 @@ data "google_container_engine_versions" "versions" {
 resource "time_static" "exclusion_start" {}
 
 resource "google_container_cluster" "primary" {
+  project            = google_project.project.project_id
   name               = "{{index $.ResourceIdVars "cluster_name"}}"
   location           = "us-central1-a"
   initial_node_count = 1
   min_master_version = data.google_container_engine_versions.versions.release_channel_default_version["REGULAR"]
   deletion_protection = false
+  depends_on = [time_sleep.wait_120_seconds]
 
   release_channel {
     channel = "REGULAR"
@@ -36,11 +65,12 @@ resource "google_container_cluster" "primary" {
   }
 
   fleet {
-    project = data.google_project.project.number
+    project = google_project.project.number
   }
 }
 
 resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
+  project             = google_project.project.project_id
   rollout_sequence_id = "{{index $.ResourceIdVars "rollout_sequence_id"}}"
   display_name        = "User Triggered Rollout Sequence"
 
@@ -53,7 +83,7 @@ resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
   }
 
   stages {
-    fleet_projects = ["projects/{{index $.TestEnvVars "project_id"}}"]
+    fleet_projects = ["projects/${google_project.project.project_id}"]
     soak_duration  = "30s"
   }
 
@@ -63,5 +93,5 @@ resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
     }
   }
 
-  depends_on = [google_container_cluster.primary]
+  depends_on = [time_sleep.wait_120_seconds]
 }

@@ -217,8 +217,10 @@ samples:
       - name: 'gke_hub_rollout_sequence_create'
         resource_id_vars:
           rollout_sequence_id: 'rs-basic'
+          project_id: 'rs-basic-project'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
+          billing_acct: 'BILLING_ACCT'
         ignore_read_extra:
           - 'labels'
           - 'rollout_sequence_id'
@@ -226,8 +228,10 @@ samples:
       - name: 'gke_hub_rollout_sequence_update'
         resource_id_vars:
           rollout_sequence_id: 'rs-basic'
+          project_id: 'rs-basic-project'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
+          billing_acct: 'BILLING_ACCT'
         include_step_doc: true
   - name: 'gke_hub_rollout_sequence_user_triggered'
     primary_resource_id: 'rollout_sequence'
@@ -237,23 +241,27 @@ samples:
       - name: 'gke_hub_rollout_sequence_user_triggered_create'
         resource_id_vars:
           rollout_sequence_id: 'rs-user-triggered'
+          project_id: 'rs-user-triggered-project'
           network_name: 'rs-network'
           subnetwork_name: 'rs-subnet'
           cluster_name: 'rs-cluster'
           membership_id: 'rs-membership'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
+          billing_acct: 'BILLING_ACCT'
         ignore_read_extra:
           - 'min_control_plane_version'
       - name: 'gke_hub_rollout_sequence_user_triggered_update'
         resource_id_vars:
           rollout_sequence_id: 'rs-user-triggered'
+          project_id: 'rs-user-triggered-project'
           network_name: 'rs-network'
           subnetwork_name: 'rs-subnet'
           cluster_name: 'rs-cluster'
           membership_id: 'rs-membership'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
+          billing_acct: 'BILLING_ACCT'
         ignore_read_extra:
           - 'min_control_plane_version'
           - 'min_node_version'
