@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,25 +12,24 @@
 # limitations under the License.
 
 ---
-name: AnywhereCache
-deprecation_message: '`google_storage_anywhere_cache` is deprecated and will be removed in a future major release. Use `google_storage_rapid_cache` instead.'
+name: RapidCache
 description: |
-  The Google Cloud Storage (GCS) Anywhere Cache feature allows users to
+  The Google Cloud Storage (GCS) Rapid Cache feature allows users to
   create SSD backed zonal read cache for their buckets. These zonal
   caches are co-located with the customers compute engines to provide
   cost efficiency.
 base_url: b/{{bucket}}/anywhereCaches
-self_link: b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}
+self_link: b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}
 create_url: b/{{bucket}}/anywhereCaches/
-delete_url: b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}/disable
+delete_url: b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}/disable
 update_verb: PATCH
 delete_verb: POST
 identity:
   - bucket
-  - anywhereCacheId
+  - rapidCacheId
 kind: storage#anywhereCache
-id_format: '{{bucket}}/{{anywhere_cache_id}}'
-import_format: ['b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}']
+id_format: '{{bucket}}/{{rapid_cache_id}}'
+import_format: ['b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}']
 timeouts:
   insert_minutes: 240
   update_minutes: 240
@@ -44,14 +43,14 @@ async:
     resource_inside_response: true
 autogen_async: false
 custom_code:
-  custom_create: templates/terraform/custom_create/storage_anywhere_cache.go.tmpl
-  custom_update: templates/terraform/custom_update/storage_anywhere_cache.go.tmpl
+  custom_create: templates/terraform/custom_create/storage_rapid_cache.go.tmpl
+  custom_update: templates/terraform/custom_update/storage_rapid_cache.go.tmpl
 samples:
-  - name: storage_anywhere_cache_basic
+  - name: storage_rapid_cache_basic
     primary_resource_id: cache
     external_providers: [time]
     steps:
-      - name: storage_anywhere_cache_basic
+      - name: storage_rapid_cache_basic
         resource_id_vars:
           bucket_name: bucket-name
         ignore_read_extra:
@@ -70,21 +69,15 @@ properties:
     required: true
     immutable: true
     description: The zone in which the cache instance needs to be created. For example, `us-central1-a.`
-  - name: admissionPolicy
-    type: Enum
-    enum_values:
-      - admit-on-first-miss
-      - admit-on-second-miss
-    default_value: admit-on-first-miss
-    description: The cache admission policy dictates whether a block should be inserted upon a cache miss.
   - name: ttl
     type: String
     default_value: 86400s
     description: The TTL of all cache entries in whole seconds. e.g., "7200s". It defaults to `86400s`
-  - name: anywhereCacheId
+  - name: rapidCacheId
     type: String
+    api_name: anywhereCacheId
     output: true
-    description: The ID of the Anywhere cache instance.
+    description: The ID of the Rapid cache instance.
   - name: createTime
     type: Time
     output: true
