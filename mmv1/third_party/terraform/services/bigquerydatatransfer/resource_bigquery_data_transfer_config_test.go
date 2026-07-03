@@ -1059,6 +1059,14 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_disableAutoScheduling(t *t
 				Config: testAccBigqueryDataTransferConfig_scheduledQueryDisableAutoScheduling(random_suffix, "true"),
 			},
 			{
+				// With a non-default value the API returns scheduleOptions, so
+				// import restores the block fully.
+				ResourceName:            "google_bigquery_data_transfer_config.query_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
 				// Updating back to false must be sent to the API (send_empty_value).
 				Config: testAccBigqueryDataTransferConfig_scheduledQueryDisableAutoScheduling(random_suffix, "false"),
 			},
@@ -1066,6 +1074,17 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_disableAutoScheduling(t *t
 				Config:             testAccBigqueryDataTransferConfig_scheduledQueryDisableAutoScheduling(random_suffix, "false"),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
+			},
+			{
+				// With an all-default block the API omits scheduleOptions, so an
+				// imported state cannot recover the block (there is no prior state
+				// to preserve). The first plan after import shows a one-time diff
+				// that converges on apply; schedule_options is therefore excluded
+				// from import verification.
+				ResourceName:            "google_bigquery_data_transfer_config.query_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "schedule_options"},
 			},
 		},
 	})

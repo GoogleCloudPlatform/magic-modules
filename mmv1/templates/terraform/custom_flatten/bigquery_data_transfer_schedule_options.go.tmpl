@@ -1,18 +1,28 @@
 // Custom flattener for the schedule_options field of BigQuery Data Transfer Config.
 // The API omits scheduleOptions from responses when all of its fields have
-// default values (e.g. disableAutoScheduling = false), so preserve the local
-// state to prevent a perpetual diff.
+// default values (e.g. disableAutoScheduling = false). To avoid a perpetual
+// diff, preserve the prior state when the API omits the block — but only when
+// the prior state is itself all-default. If the prior state holds non-default
+// values, fall through to nil so an out-of-band reset back to defaults still
+// surfaces as drift.
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return d.Get("schedule_options")
+	if original, ok := v.(map[string]interface{}); ok && len(original) > 0 {
+		transformed := make(map[string]interface{})
+		transformed["disable_auto_scheduling"] = original["disableAutoScheduling"]
+		transformed["start_time"] = original["startTime"]
+		transformed["end_time"] = original["endTime"]
+		return []interface{}{transformed}
 	}
-	original := v.(map[string]interface{})
-	if len(original) == 0 {
-		return d.Get("schedule_options")
+	prev, ok := d.Get("schedule_options").([]interface{})
+	if !ok || len(prev) != 1 {
+		return nil
 	}
-	transformed := make(map[string]interface{})
-	transformed["disable_auto_scheduling"] = original["disableAutoScheduling"]
-	transformed["start_time"] = original["startTime"]
-	transformed["end_time"] = original["endTime"]
-	return []interface{}{transformed}
+	block, ok := prev[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	if block["disable_auto_scheduling"] == false && block["start_time"] == "" && block["end_time"] == "" {
+		return prev
+	}
+	return nil
 }
