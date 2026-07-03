@@ -213,6 +213,8 @@ virtual_fields:
 samples:
   - name: 'gke_hub_rollout_sequence_basic'
     primary_resource_id: 'rollout_sequence'
+    external_providers:
+      - 'time'
     steps:
       - name: 'gke_hub_rollout_sequence_create'
         resource_id_vars:

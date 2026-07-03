@@ -17,6 +17,12 @@ resource "time_sleep" "wait_120_seconds" {
   depends_on = [google_project_service.gkehub]
 }
 
+resource "google_gke_hub_fleet" "default" {
+  display_name = "rs-fleet"
+  project = google_project.project.project_id
+  depends_on = [time_sleep.wait_120_seconds]
+}
+
 resource "google_gke_hub_rollout_sequence" "{{$.PrimaryResourceId}}" {
   project             = google_project.project.project_id
   rollout_sequence_id = "{{index $.ResourceIdVars "rollout_sequence_id"}}"
@@ -38,5 +44,5 @@ resource "google_gke_hub_rollout_sequence" "{{$.PrimaryResourceId}}" {
       ]
     }
   }
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [google_gke_hub_fleet.default]
 }

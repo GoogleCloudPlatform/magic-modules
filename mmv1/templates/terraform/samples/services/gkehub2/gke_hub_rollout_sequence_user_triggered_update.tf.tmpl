@@ -27,8 +27,14 @@ resource "time_sleep" "wait_120_seconds" {
   depends_on = [google_project_service.gkehub, google_project_service.container, google_project_service.compute]
 }
 
+resource "google_gke_hub_fleet" "default" {
+  display_name = "rs-fleet"
+  project = google_project.project.project_id
+}
+
 data "google_container_engine_versions" "versions" {
   location = "us-central1-a"
+  project = google_project.project.project_id
 }
 
 resource "time_static" "exclusion_start" {}
@@ -40,7 +46,6 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   min_master_version = data.google_container_engine_versions.versions.release_channel_default_version["REGULAR"]
   deletion_protection = false
-  depends_on = [time_sleep.wait_120_seconds]
 
   release_channel {
     channel = "REGULAR"
@@ -67,6 +72,8 @@ resource "google_container_cluster" "primary" {
   fleet {
     project = google_project.project.number
   }
+
+  depends_on = [google_gke_hub_fleet.default]
 }
 
 resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
@@ -93,5 +100,5 @@ resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
     }
   }
 
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [google_container_cluster.primary]
 }
