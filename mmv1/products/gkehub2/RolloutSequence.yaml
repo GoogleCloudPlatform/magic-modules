@@ -217,7 +217,7 @@ samples:
       - name: 'gke_hub_rollout_sequence_create'
         resource_id_vars:
           rollout_sequence_id: 'rs-basic'
-          project_id: 'rs-basic-project'
+          project_id: 'rs-project'
         test_env_vars:
           org_id: 'ORG_ID'
           billing_acct: 'BILLING_ACCT'
@@ -228,7 +228,7 @@ samples:
       - name: 'gke_hub_rollout_sequence_update'
         resource_id_vars:
           rollout_sequence_id: 'rs-basic'
-          project_id: 'rs-basic-project'
+          project_id: 'rs-project'
         test_env_vars:
           org_id: 'ORG_ID'
           billing_acct: 'BILLING_ACCT'
@@ -241,7 +241,7 @@ samples:
       - name: 'gke_hub_rollout_sequence_user_triggered_create'
         resource_id_vars:
           rollout_sequence_id: 'rs-user-triggered'
-          project_id: 'rs-user-triggered-project'
+          project_id: 'rs-project'
           network_name: 'rs-network'
           subnetwork_name: 'rs-subnet'
           cluster_name: 'rs-cluster'
@@ -254,7 +254,7 @@ samples:
       - name: 'gke_hub_rollout_sequence_user_triggered_update'
         resource_id_vars:
           rollout_sequence_id: 'rs-user-triggered'
-          project_id: 'rs-user-triggered-project'
+          project_id: 'rs-project'
           network_name: 'rs-network'
           subnetwork_name: 'rs-subnet'
           cluster_name: 'rs-cluster'
