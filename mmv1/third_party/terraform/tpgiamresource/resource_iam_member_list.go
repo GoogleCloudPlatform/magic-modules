@@ -93,7 +93,7 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 			continue // resource isn't scoped by this dimension
 		}
 
-		listConfigFields = append(listConfigFields, tpgresource.ListConigfield{
+		listConfigFields = append(listConfigFields, tpgresource.ListConfigField{
 			Name:     sf.name,
 			Kind:     tpgresource.ListConfigKindString,
 			Optional: sf.optional,
