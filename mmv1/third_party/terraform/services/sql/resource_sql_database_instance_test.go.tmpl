@@ -1263,6 +1263,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testi
 			},
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy_deleted(networkName, projectId),
+				Check:  testAccCheckSqlDatabaseInstanceDeleteServiceConnectionPolicyByNetwork(t, projectId, "us-south1", networkName),
 			},
 		},
 	})
@@ -7664,6 +7665,80 @@ func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected 
 			}
 		}
 
+		return nil
+	}
+}
+
+func testAccCheckSqlDatabaseInstanceDeleteServiceConnectionPolicyByNetwork(t *testing.T, project string, region string, networkName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		url := fmt.Sprintf("https://networkconnectivity.googleapis.com/v1/projects/%s/locations/%s/serviceConnectionPolicies", project, region)
+
+		billingProject := ""
+		if config.BillingProject != "" {
+			billingProject = config.BillingProject
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			log.Printf("[DEBUG] Error listing existing service connection policies: %s", err)
+			return nil
+		}
+		if res == nil || res["serviceConnectionPolicies"] == nil {
+			return nil
+		}
+
+		policies, ok := res["serviceConnectionPolicies"].([]interface{})
+		if !ok {
+			return nil
+		}
+		for _, p := range policies {
+			policy, ok := p.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			network, ok := policy["network"].(string)
+			if !ok || (!strings.HasSuffix(network, "/networks/"+networkName) && !strings.Contains(network, "/"+networkName+"")) {
+				continue
+			}
+			name, ok := policy["name"].(string)
+			if !ok || name == "" {
+				continue
+			}
+			deleteUrl := fmt.Sprintf("https://networkconnectivity.googleapis.com/v1/%s", strings.TrimPrefix(name, "/"))
+			log.Printf("[DEBUG] Deleting service connection policy %q before deleting network", name)
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "DELETE",
+				Project:   billingProject,
+				RawURL:    deleteUrl,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+				log.Printf("[DEBUG] Error deleting service connection policy %s: %s", name, err)
+			}
+
+			for i := 0; i < 30; i++ {
+				time.Sleep(5 * time.Second)
+				_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   billingProject,
+					RawURL:    deleteUrl,
+					UserAgent: config.UserAgent,
+				})
+				if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+					log.Printf("[DEBUG] Service connection policy %q deleted successfully", name)
+					break
+				}
+			}
+		}
 		return nil
 	}
 }
