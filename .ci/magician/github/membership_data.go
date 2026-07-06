@@ -130,13 +130,17 @@ var (
 					startDate: newDate(2026, 5, 7),
 					endDate:   newDate(2026, 5, 11),
 				},
+				{
+					startDate: newDate(2026, 7, 5),
+					endDate:   newDate(2026, 8, 17),
+				},
 			},
 		},
 		"ScottSuarez": {
 			vacations: []Vacation{
 				{
 					startDate: newDate(2026, 4, 4),
-					endDate:   newDate(2026, 7, 13),
+					endDate:   newDate(2026, 7, 5),
 				},
 			},
 		},
