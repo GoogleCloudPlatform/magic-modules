@@ -32,13 +32,30 @@ var _ list.ListResource = &IamMemberListResource{}
 var _ list.ListResourceWithRawV5Schemas = &IamMemberListResource{}
 var _ list.ListResourceWithConfigure = &IamMemberListResource{}
 
+// scopeField is a GcP target-scope dimesion that an IAm member list resource
+// may expose in its list config block.
+type scopeField struct {
+	name     string
+	optional bool
+}
+
+// suportedScopeFields are the scope dimensions added to a list config
+// automatically when the menber resource's schma declares them.
+// project/region/zone are optional (provider block supplies defaults);
+// location is required (GCP has no provider-level location default).
+var supportedScopeFields = []scopeField{
+	{name: "project", optional: true},
+	{name: "region", optional: true},
+	{name: "zone", optional: true},
+	{name: "location", optional: false},
+}
+
 // IamMemberListCallConfig holds resource-specific pieces for transport.ListCall.
 type IamMemberListCallConfig struct {
 	ListPagesOptions    transport_tpg.ListPagesOptions
 	ParentResourceField string
 	EnableRoleFilter    bool
 	EnableMemberFilter  bool
-	EnableProjectField  bool
 }
 
 // IamMemberListResource lists IAM member rows by reading IAM policies on one or more policy targets.
@@ -66,6 +83,23 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 		},
 	}
 
+	// Auto-expose target-scope dimensions (project/region/zone/location) when the
+	// member resource declares them and they are not  already the parent field.
+	for _, sf := range supportedScopeFields {
+		if sf.name == listCallConfig.ParentResourceField {
+			continue // scope dimension is itself the parent (e.g. project-iam-member)
+		}
+		if _, ok := memberResource.Schema[sf.name]; !ok {
+			continue // resource isn't scoped by this dimension
+		}
+
+		listConfigFields = append(listConfigFields, tpgresource.ListConfigField{
+			Name:     sf.name,
+			Kind:     tpgresource.ListConfigKindString,
+			Optional: sf.optional,
+		})
+	}
+
 	if listCallConfig.EnableRoleFilter {
 		listConfigFields = append(listConfigFields, tpgresource.ListConfigField{
 			Name:     "role",
@@ -82,28 +116,14 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 		})
 	}
 
-	if listCallConfig.EnableProjectField {
-		listConfigFields = append(listConfigFields, tpgresource.ListConfigField{
-			Name:     "project",
-			Kind:     tpgresource.ListConfigKindString,
-			Optional: true,
-		})
-	}
-
 	iamResourceSchema := make(map[string]*schema.Schema)
 	for _, field := range listConfigFields {
 		if field.Name == "role" || field.Name == "member" {
 			continue
 		}
-		schemaField, ok := memberResource.Schema[field.Name]
-		if !ok {
-			if field.Name == "project" {
-				continue
-			}
-			panic(fmt.Sprintf("tpgiamresource: list config field %q not found in member resource schema", field.Name))
+		if schemaField, ok := memberResource.Schema[field.Name]; ok {
+			iamResourceSchema[field.Name] = schemaField
 		}
-
-		iamResourceSchema[field.Name] = schemaField
 	}
 
 	return &IamMemberListResource{
@@ -154,38 +174,22 @@ func (r *IamMemberListResource) RawV5Schemas(ctx context.Context, _ list.RawV5Sc
 func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req list.ListRequest) ([]*schema.ResourceData, error) {
 	baseRd := r.memberResource.TestResourceData()
 
-	var parent types.String
-
-	diags := req.Config.GetAttribute(ctx, path.Root(r.listCallConfig.ParentResourceField), &parent)
-	if diags.HasError() {
-		return nil, fmt.Errorf("%s", diags.Errors()[0].Detail())
-	}
-
-	if !parent.IsNull() && !parent.IsUnknown() {
-		if err := baseRd.Set(r.listCallConfig.ParentResourceField, parent.ValueString()); err != nil {
-			return nil, fmt.Errorf("setting %s: %w", r.listCallConfig.ParentResourceField, err)
+	// Set every target-identifying field (parent + scope dimensions like project/region/
+	// zone/location) from the list config onto the ResourceData the updater reads.
+	// Provider-default fallback for project/region/zone is handled downstream by the
+	// updater's GetProject/Getregion/GetZone when a value is omitted; location is
+	// Required in the list config so it is always supplied.
+	for name := range r.iamResourceSchema {
+		var v types.String
+		d := req.Config.GetAttribute(ctx, path.Root(name), &v)
+		if d.HasError() {
+			return nil, fmt.Errorf("%s", d.Errors()[0].Detail())
 		}
-	}
-
-	if r.listCallConfig.EnableProjectField {
-		var project types.String
-		diags := req.Config.GetAttribute(ctx, path.Root("project"), &project)
-		if diags.HasError() {
-			return nil, fmt.Errorf("%s", diags.Errors()[0].Detail())
+		if v.IsNull() || v.IsUnknown() {
+			continue
 		}
-		projectVal := ""
-		if !project.IsNull() && !project.IsUnknown() {
-			projectVal = project.ValueString()
-		} else if r.Client != nil {
-			projectVal = r.Client.Project
-		}
-
-		if projectVal == "" {
-			return nil, fmt.Errorf("project must be set in the list config or configured on the provider")
-		}
-
-		if err := baseRd.Set("project", projectVal); err != nil {
-			return nil, fmt.Errorf("setting project: %w", err)
+		if err := baseRd.Set(name, v.ValueString()); err != nil {
+			return nil, fmt.Errorf("setting %s: %w", name, err)
 		}
 	}
 
