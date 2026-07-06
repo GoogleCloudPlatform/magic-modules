@@ -40,13 +40,14 @@
 &lt;/ol&gt;
 &lt;h2 id="code-review"&gt;Code review&lt;a class="anchor" href="#code-review"&gt;#&lt;/a&gt;&lt;/h2&gt;
 &lt;ol&gt;
-&lt;li&gt;A reviewer will automatically be assigned to your PR.&lt;/li&gt;
+&lt;li&gt;(For Google-driven changes) Assign a service team engineer to review your change. Get their approval before proceeding with review by maintainers.&lt;/li&gt;
 &lt;li&gt;Creating a new pull request or pushing a new commit automatically triggers our CI pipelines and workflows. After CI starts, downstream diff generation takes about 10 minutes; &lt;a href="https://googlecloudplatform.github.io/magic-modules/test/test/"&gt;VCR tests&lt;/a&gt; can take up to 2 hours. If you are a community contributor, some tests will only run after approval from a reviewer.
 &lt;ul&gt;
 &lt;li&gt;While convenient, relying on CI to test iterative changes to PRs often adds extreme latency to reviews if there are errors in test configurations or at runtime. We &lt;strong&gt;strongly&lt;/strong&gt; recommend you &lt;a href="https://googlecloudplatform.github.io/magic-modules/test/run-tests/"&gt;test your changes locally before pushing&lt;/a&gt; even after the initial change.&lt;/li&gt;
 &lt;li&gt;VCR tests will first attempt to play back recorded HTTP requests (REPLAYING mode). If any tests fail, they will run in RECORDING mode to generate a new cassette; then, the same tests will run again in REPLAYING mode to detect any nondeterministic behavior in the test (which can cause flaky tests.)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;A maintainer will automatically be assigned to your PR for final review.&lt;/li&gt;
 &lt;li&gt;If your assigned reviewer does not respond to changes on a pull request within two US business days, ping them on the pull request.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;blockquote class='book-hint note'&gt;
@@ -152,7 +153,8 @@ This method of adding TGC support is currently experimental and not officially s
 &lt;li&gt;&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/"&gt;Generate the providers&lt;/a&gt; that include your change.&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://googlecloudplatform.github.io/magic-modules/test/run-tests/"&gt;Run provider tests locally&lt;/a&gt; that are relevant to the change you made&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/create-pr/"&gt;Create a pull request (PR)&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Make changes in response to &lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/create-pr/#code-review"&gt;code review&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;(For Google-driven changes) Do a &lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/"&gt;local review&lt;/a&gt; with a service team engineer&lt;/li&gt;
+&lt;li&gt;Make changes in response to maintainers&amp;rsquo; &lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/create-pr/#code-review"&gt;code review&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h2 id="after-your-change-is-merged"&gt;After your change is merged&lt;a class="anchor" href="#after-your-change-is-merged"&gt;#&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;After your change is merged, it can take a week or longer to be released to customers.&lt;/p&gt;</description></item><item><title>Deletion policy</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-policy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-policy/</guid><description>&lt;h1 id="deletion-policy"&gt;Deletion policy&lt;a class="anchor" href="#deletion-policy"&gt;#&lt;/a&gt;&lt;/h1&gt;
@@ -186,7 +188,55 @@ available properties, see &lt;a href="https://github.com/GoogleCloudPlatform/mag
 be the key for the field in the API request message, if a separate &lt;code&gt;api_name&lt;/code&gt;
 is not declared using the corresponding property.&lt;/p&gt;
 &lt;h3 id="type"&gt;&lt;code&gt;type&lt;/code&gt;&lt;a class="anchor" href="#type"&gt;#&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;Sets the expected data type of the field. All valid types are declared &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/d7777055cb7618648725abd16d3b05e5c138fc56/mmv1/api/type.go#L673"&gt;here&lt;/a&gt;.&lt;/p&gt;</description></item><item><title>Run tests</title><link>https://googlecloudplatform.github.io/magic-modules/test/run-tests/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/test/run-tests/</guid><description>&lt;h1 id="run-tests"&gt;Run tests&lt;a class="anchor" href="#run-tests"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;Sets the expected data type of the field. All valid types are declared &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/d7777055cb7618648725abd16d3b05e5c138fc56/mmv1/api/type.go#L673"&gt;here&lt;/a&gt;.&lt;/p&gt;</description></item><item><title>Review a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</guid><description>&lt;h1 id="review-a-pull-request"&gt;Review a pull request&lt;a class="anchor" href="#review-a-pull-request"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This page provides guidelines for reviewing a Magic Modules pull request (PR).&lt;/p&gt;
+&lt;p&gt;Google-driven changes must have a service team engineer review changes prior
+to review by repository maintainers. For community members, this is not required.&lt;/p&gt;
+&lt;h2 id="review"&gt;Review&lt;a class="anchor" href="#review"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;Read the PR description to understand the context and ensure the PR either
+&lt;ul&gt;
+&lt;li&gt;is linked to a GitHub issue or an internal bug
+&lt;ul&gt;
+&lt;li&gt;if not, check the &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues"&gt;issue tracker&lt;/a&gt; to see whether the feature has already been requested and add the issues in the description, if any.&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;Fixes {github_issue_link}&amp;rdquo; is preferred if an external issue is available because it will &lt;a href="https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue"&gt;auto-close the issue&lt;/a&gt; when the PR is merged. However, there&amp;rsquo;s no need to create an external issue solely for this purpose.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;establishes clear context itself via title or description.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;If the PR adds any new resource, ensure that the resource does not already exist in the &lt;a href="https://github.com/hashicorp/terraform-provider-google"&gt;GA provider&lt;/a&gt; or &lt;a href="https://github.com/hashicorp/terraform-provider-google-beta"&gt;beta provider&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Read through all the changes in the PR, generated code in the downstreams and the API documentation to ensure that:
+&lt;ol&gt;
+&lt;li&gt;the resource schema added in the PR matches the API structure.&lt;/li&gt;
+&lt;li&gt;the features are added in the correct version
+&lt;ul&gt;
+&lt;li&gt;features only available in beta are not included in the GA google provider.&lt;/li&gt;
+&lt;li&gt;features added to the GA provider are also included in the beta provider &amp;ndash; beta should be a strict superset of GA.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;no &lt;a href="https://googlecloudplatform.github.io/magic-modules/breaking-changes/make-a-breaking-change/"&gt;breaking changes&lt;/a&gt; are introduced without a valid justification. Add the &lt;code&gt;override-breaking-change&lt;/code&gt; label if there is a valid justification.
+&lt;ul&gt;
+&lt;li&gt;remember to check for changes in default behaviour like changing the flags on delete!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;verify the change &lt;strong&gt;fully&lt;/strong&gt; resolves the linked issues, if any. If it does not, change the &amp;ldquo;Fixes&amp;rdquo; message to &amp;ldquo;Part of&amp;rdquo;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Check the tests added/modified to ensure that:
+&lt;ol&gt;
+&lt;li&gt;all fields added/updated in the PR appear in at least one test.
+&lt;ul&gt;
+&lt;li&gt;It is advisable to test updating from a non-zero value to a zero value if feasible.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;all mutable fields are tested in at least one update test.&lt;/li&gt;
+&lt;li&gt;all resources in the acceptance tests have a &lt;code&gt;tf-test&lt;/code&gt; or &lt;code&gt;tf_test&lt;/code&gt; prefix in their primary id field.&lt;/li&gt;
+&lt;li&gt;all handwritten test Config steps include import steps following them&lt;/li&gt;
+&lt;li&gt;all related tests pass in GA for features promoted from beta to GA.
+&lt;blockquote class='book-hint note'&gt;
+&lt;p&gt;Note:
+Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features.&lt;/p&gt;</description></item><item><title>Run tests</title><link>https://googlecloudplatform.github.io/magic-modules/test/run-tests/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/test/run-tests/</guid><description>&lt;h1 id="run-tests"&gt;Run tests&lt;a class="anchor" href="#run-tests"&gt;#&lt;/a&gt;&lt;/h1&gt;
 &lt;h2 id="before-you-begin"&gt;Before you begin&lt;a class="anchor" href="#before-you-begin"&gt;#&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/"&gt;Generate the modified provider(s)&lt;/a&gt;&lt;/p&gt;
 &lt;ol&gt;
@@ -215,39 +265,7 @@ GOOGLE_BILLING_ACCOUNT&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;make &lt;span style="color:#ff5c57"&gt;test&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;make lint&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See &lt;a href="https://pkg.go.dev/cmd/go#hdr-Testing_flags"&gt;Go&amp;rsquo;s documentation&lt;/a&gt; for more information about &lt;code&gt;-run&lt;/code&gt; and other flags.&lt;/p&gt;</description></item><item><title>Write release notes</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/</guid><description>&lt;h1 id="write-release-notes"&gt;Write release notes&lt;a class="anchor" href="#write-release-notes"&gt;#&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;This guide explains best practices for composing accurate, end-user focused release notes for Magic Modules pull requests.&lt;/p&gt;
-&lt;p&gt;Every pull request must have at least one release note block in the opening comment. Release note blocks have the following format:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;``&lt;span style="color:#5af78e"&gt;`release-note:TYPE
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt;CONTENT
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt;`&lt;/span&gt;``&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Replace &lt;code&gt;TYPE&lt;/code&gt; with the correct release note type, and &lt;code&gt;CONTENT&lt;/code&gt; with a release note written according to the guidelines in the following sections.&lt;/p&gt;
-&lt;h2 id="general-guidelines"&gt;General guidelines&lt;a class="anchor" href="#general-guidelines"&gt;#&lt;/a&gt;&lt;/h2&gt;
-&lt;table&gt;
- &lt;thead&gt;
- &lt;tr&gt;
- &lt;th&gt;Do&lt;/th&gt;
- &lt;th&gt;Don&amp;rsquo;t&lt;/th&gt;
- &lt;/tr&gt;
- &lt;/thead&gt;
- &lt;tbody&gt;
- &lt;tr&gt;
- &lt;td&gt;Only have one &lt;code&gt;CONTENT&lt;/code&gt; line per release note block. Use multiple blocks if there are multiple related changes in a single PR.&lt;/td&gt;
- &lt;td&gt;Don&amp;rsquo;t add multiple lines to a single release note block. Avoid combining multiple distinct types of changes into one release block.&lt;/td&gt;
- &lt;/tr&gt;
- &lt;tr&gt;
- &lt;td&gt;If a change only affects the &lt;code&gt;google-beta&lt;/code&gt; provider add &lt;code&gt;(beta)&lt;/code&gt; to the end of the release note. If a change only affects the &lt;code&gt;google&lt;/code&gt; provider add &lt;code&gt;(ga)&lt;/code&gt; to the end of the release note.&lt;/td&gt;
- &lt;td&gt;Don&amp;rsquo;t add either suffix if the change affects both providers.&lt;/td&gt;
- &lt;/tr&gt;
- &lt;tr&gt;
- &lt;td&gt;Set an appropriate release note type.&lt;/td&gt;
- &lt;td&gt;Don&amp;rsquo;t leave the type as &lt;code&gt;REPLACEME&lt;/code&gt;.&lt;/td&gt;
- &lt;/tr&gt;
- &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h2 id="type-specific-guidelines-and-examples"&gt;Type-specific guidelines and examples&lt;a class="anchor" href="#type-specific-guidelines-and-examples"&gt;#&lt;/a&gt;&lt;/h2&gt;
-&lt;div class="book-tabs"&gt;
-&lt;input type="radio" class="toggle" name="tabs-0" id="tabs-0-0" checked="checked" /&gt;&lt;label for="tabs-0-0"&gt;New field(s)&lt;/label&gt;&lt;div class="book-tabs-content markdown-inner"&gt;
-&lt;p&gt;Write your release note in the following format:&lt;/p&gt;</description></item><item><title>MMv1 sample reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/sample/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/sample/</guid><description>&lt;h1 id="mmv1-sample-reference"&gt;MMv1 sample reference&lt;a class="anchor" href="#mmv1-sample-reference"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See &lt;a href="https://pkg.go.dev/cmd/go#hdr-Testing_flags"&gt;Go&amp;rsquo;s documentation&lt;/a&gt; for more information about &lt;code&gt;-run&lt;/code&gt; and other flags.&lt;/p&gt;</description></item><item><title>MMv1 sample reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/sample/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/sample/</guid><description>&lt;h1 id="mmv1-sample-reference"&gt;MMv1 sample reference&lt;a class="anchor" href="#mmv1-sample-reference"&gt;#&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;A sample is a collection of one or more &lt;code&gt;steps&lt;/code&gt;, where each step represents a distinct Terraform configuration and test step (for example, create, update).&lt;/p&gt;
 &lt;p&gt;Each sample supports the following attributes at the top level, with more granular control inside each step.&lt;/p&gt;
 &lt;hr&gt;
@@ -305,59 +323,39 @@ into the &lt;code&gt;OUTPUT_PATH&lt;/code&gt;, overriding and deleting any local
 &lt;/ul&gt;
 &lt;h4 id="cleaning-up-old-files"&gt;Cleaning up old files&lt;a class="anchor" href="#cleaning-up-old-files"&gt;#&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Magic Modules will only generate on top of whatever is in the downstream repository. This means that, from time
-to time, you may end up with stale files or changes in your downstream that cause compilation or tests to fail.&lt;/p&gt;</description></item><item><title>Review a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</guid><description>&lt;h1 id="review-a-pull-request"&gt;Review a pull request&lt;a class="anchor" href="#review-a-pull-request"&gt;#&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;This page provides guidelines for reviewing a Magic Modules pull request (PR).&lt;/p&gt;
-&lt;h2 id="special-cases"&gt;Special cases&lt;a class="anchor" href="#special-cases"&gt;#&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;The following types of PRs may require additional scrutiny and/or multiple reviewers.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;DCL to MMv1 migrations&lt;/li&gt;
-&lt;li&gt;Adding multi-actor fields (fields whose values can be altered as a side effect of changes made to a different resource)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id="review"&gt;Review&lt;a class="anchor" href="#review"&gt;#&lt;/a&gt;&lt;/h2&gt;
-&lt;ol&gt;
-&lt;li&gt;Read the PR description to understand the context and ensure the PR either
-&lt;ul&gt;
-&lt;li&gt;is linked to a GitHub issue or an internal bug
-&lt;ul&gt;
-&lt;li&gt;if not, check the &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues"&gt;issue tracker&lt;/a&gt; to see whether the feature has already been requested and add the issues in the description, if any.&lt;/li&gt;
-&lt;li&gt;&amp;ldquo;Fixes {github_issue_link}&amp;rdquo; is preferred if an external issue is available because it will &lt;a href="https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue"&gt;auto-close the issue&lt;/a&gt; when the PR is merged. However, there&amp;rsquo;s no need to create an external issue solely for this purpose.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;establishes clear context itself via title or description.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;If the PR adds any new resource, ensure that the resource does not already exist in the &lt;a href="https://github.com/hashicorp/terraform-provider-google"&gt;GA provider&lt;/a&gt; or &lt;a href="https://github.com/hashicorp/terraform-provider-google-beta"&gt;beta provider&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Read through all the changes in the PR, generated code in the downstreams and the API documentation to ensure that:
-&lt;ol&gt;
-&lt;li&gt;the resource schema added in the PR matches the API structure.&lt;/li&gt;
-&lt;li&gt;the features are added in the correct version
-&lt;ul&gt;
-&lt;li&gt;features only available in beta are not included in the GA google provider.&lt;/li&gt;
-&lt;li&gt;features added to the GA provider are also included in the beta provider &amp;ndash; beta should be a strict superset of GA.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;no &lt;a href="https://googlecloudplatform.github.io/magic-modules/breaking-changes/make-a-breaking-change/"&gt;breaking changes&lt;/a&gt; are introduced without a valid justification. Add the &lt;code&gt;override-breaking-change&lt;/code&gt; label if there is a valid justification.
-&lt;ul&gt;
-&lt;li&gt;remember to check for changes in default behaviour like changing the flags on delete!&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;verify the change &lt;strong&gt;fully&lt;/strong&gt; resolves the linked issues, if any. If it does not, change the &amp;ldquo;Fixes&amp;rdquo; message to &amp;ldquo;Part of&amp;rdquo;.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;li&gt;Check the tests added/modified to ensure that:
-&lt;ol&gt;
-&lt;li&gt;all fields added/updated in the PR appear in at least one test.
-&lt;ul&gt;
-&lt;li&gt;It is advisable to test updating from a non-zero value to a zero value if feasible.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;all mutable fields are tested in at least one update test.&lt;/li&gt;
-&lt;li&gt;all resources in the acceptance tests have a &lt;code&gt;tf-test&lt;/code&gt; or &lt;code&gt;tf_test&lt;/code&gt; prefix in their primary id field.&lt;/li&gt;
-&lt;li&gt;all handwritten test Config steps include import steps following them&lt;/li&gt;
-&lt;li&gt;all related tests pass in GA for features promoted from beta to GA.
-&lt;blockquote class='book-hint note'&gt;
-&lt;p&gt;Note:
-Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features.&lt;/p&gt;</description></item><item><title>Metadata (meta.yaml) reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</guid><description>&lt;h1 id="metadata-metayaml-reference"&gt;Metadata (meta.yaml) reference&lt;a class="anchor" href="#metadata-metayaml-reference"&gt;#&lt;/a&gt;&lt;/h1&gt;
+to time, you may end up with stale files or changes in your downstream that cause compilation or tests to fail.&lt;/p&gt;</description></item><item><title>Write release notes</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/</guid><description>&lt;h1 id="write-release-notes"&gt;Write release notes&lt;a class="anchor" href="#write-release-notes"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This guide explains best practices for composing accurate, end-user focused release notes for Magic Modules pull requests.&lt;/p&gt;
+&lt;p&gt;Every pull request must have at least one release note block in the opening comment. Release note blocks have the following format:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;``&lt;span style="color:#5af78e"&gt;`release-note:TYPE
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt;CONTENT
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt;`&lt;/span&gt;``&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Replace &lt;code&gt;TYPE&lt;/code&gt; with the correct release note type, and &lt;code&gt;CONTENT&lt;/code&gt; with a release note written according to the guidelines in the following sections.&lt;/p&gt;
+&lt;h2 id="general-guidelines"&gt;General guidelines&lt;a class="anchor" href="#general-guidelines"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Do&lt;/th&gt;
+ &lt;th&gt;Don&amp;rsquo;t&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Only have one &lt;code&gt;CONTENT&lt;/code&gt; line per release note block. Use multiple blocks if there are multiple related changes in a single PR.&lt;/td&gt;
+ &lt;td&gt;Don&amp;rsquo;t add multiple lines to a single release note block. Avoid combining multiple distinct types of changes into one release block.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;If a change only affects the &lt;code&gt;google-beta&lt;/code&gt; provider add &lt;code&gt;(beta)&lt;/code&gt; to the end of the release note. If a change only affects the &lt;code&gt;google&lt;/code&gt; provider add &lt;code&gt;(ga)&lt;/code&gt; to the end of the release note.&lt;/td&gt;
+ &lt;td&gt;Don&amp;rsquo;t add either suffix if the change affects both providers.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Set an appropriate release note type.&lt;/td&gt;
+ &lt;td&gt;Don&amp;rsquo;t leave the type as &lt;code&gt;REPLACEME&lt;/code&gt;.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="type-specific-guidelines-and-examples"&gt;Type-specific guidelines and examples&lt;a class="anchor" href="#type-specific-guidelines-and-examples"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;div class="book-tabs"&gt;
+&lt;input type="radio" class="toggle" name="tabs-0" id="tabs-0-0" checked="checked" /&gt;&lt;label for="tabs-0-0"&gt;New field(s)&lt;/label&gt;&lt;div class="book-tabs-content markdown-inner"&gt;
+&lt;p&gt;Write your release note in the following format:&lt;/p&gt;</description></item><item><title>Metadata (meta.yaml) reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</guid><description>&lt;h1 id="metadata-metayaml-reference"&gt;Metadata (meta.yaml) reference&lt;a class="anchor" href="#metadata-metayaml-reference"&gt;#&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;This page documents the properties available in meta.yaml files. These files make it easy to access data about the provider implementation without needing to compile the provider. They are used for coverage metrics and CAI-related overrides.&lt;/p&gt;
 &lt;p&gt;Meta.yaml files are auto-generated for MMv1 generated resources.&lt;/p&gt;
 &lt;p&gt;Handwritten resources will have handwritten meta.yaml files in the appropriate service directory in &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services"&gt;mmv1/third_party/terraform/services/&lt;/a&gt;. The file name will be &lt;code&gt;resource_PRODUCT_RESOURCE_meta.yaml(.tmpl)&lt;/code&gt;. For example, &lt;code&gt;resource_compute_instance_meta.yaml.tmpl&lt;/code&gt; Handwritten meta.yaml files with a &lt;code&gt;.tmpl&lt;/code&gt; extension can use version guards (&lt;code&gt;{{- if ne $.TargetVersionName &amp;quot;ga&amp;quot; }}...{{- else}}...{{- end}}&lt;/code&gt;) to exclude beta fields from the &lt;code&gt;google&lt;/code&gt; provider.&lt;/p&gt;</description></item><item><title>Add IAM support</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</guid><description>&lt;h1 id="add-iam-support"&gt;Add IAM support&lt;a class="anchor" href="#add-iam-support"&gt;#&lt;/a&gt;&lt;/h1&gt;
