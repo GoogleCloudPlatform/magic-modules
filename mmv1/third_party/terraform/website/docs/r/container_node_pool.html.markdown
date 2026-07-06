@@ -271,7 +271,13 @@ cluster.
 
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
 
-* `exclusion_until_end_of_support` - (Optional) When enabled, the node pool will not be automatically upgraded by GKE until the node pool version's end of support date.
+* `exclusion_until_end_of_support` - (Optional) When enabled, the node pool will not be automatically upgraded by GKE until the node pool version's end of support date. Structure is [documented below](#nested_exclusion_until_end_of_support).
+
+<a name="nested_exclusion_until_end_of_support"></a>The `exclusion_until_end_of_support` block supports:
+
+* `enabled` - (Optional) When true, the node pool will not be automatically upgraded by GKE until the node pool version's end of support date.
+* `start_time` - (Optional) The time when the maintenance policy is first created.
+* `end_time` - (Optional) The time when the maintenance policy is no longer effective, i.e., the node pool version's end of support date.
 
 <a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
 
