@@ -103,7 +103,7 @@ provider "google" {}
 
 list "google_dns_managed_zone" "all" {
   provider = google
-
+  limit = 1000
   config {
     project = %q
   }

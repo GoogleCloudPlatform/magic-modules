@@ -7,11 +7,9 @@ import (
 
 	frameworkdiag "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	googledns "google.golang.org/api/dns/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -42,14 +40,6 @@ func NewGoogleDnsManagedZoneListResource() list.ListResource {
 	listR.SDKv2Resource = ResourceDNSManagedZone()
 	listR.ListConfigFields = []tpgresource.ListConfigField{{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true}}
 	return listR
-}
-
-func (listR *GoogleDnsManagedZoneResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	listR.ListResourceMetadata.Metadata(ctx, req, resp)
-
-	resp.ResourceBehavior = resource.ResourceBehavior{
-		MutableIdentity: true,
-	}
 }
 
 func (listR *GoogleDnsManagedZoneResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
@@ -92,7 +82,7 @@ func (listR *GoogleDnsManagedZoneResource) List(ctx context.Context, req list.Li
 		err := ListDnsManagedZones(listR.Client, project, func(rd *schema.ResourceData) error {
 			result := req.NewListResult(ctx)
 
-			if err := listR.SetResult(ctx, req.IncludeResource, &result, rd); err != nil {
+			if err := listR.SetResult(ctx, req.IncludeResource, &result, rd, "name"); err != nil {
 				streamDiags.AddError("Failed to set result", err.Error())
 				return err
 			}
@@ -145,67 +135,29 @@ func ListDnsManagedZones(config *transport_tpg.Config, project string, callback 
 		return err
 	}
 
-	queryParams := make(map[string]string)
-	for {
-		reqURL, err := transport_tpg.AddQueryParams(url, queryParams)
-		if err != nil {
-			return err
-		}
+	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
+		Config:    config,
+		TempData:  tempData,
+		Resource:  managedZoneSchema,
+		ListURL:   url,
+		Filter:    "",
+		ItemName:  "managedZones",
+		UserAgent: userAgent,
+		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+			name, _ := res["name"].(string)
 
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			Project:   project,
-			RawURL:    reqURL,
-			UserAgent: userAgent,
-		})
-		if err != nil {
-			return err
-		}
+			d.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, name))
 
-		var listResp googledns.ManagedZonesListResponse
-		if err := tpgresource.Convert(res, &listResp); err != nil {
-			return fmt.Errorf("error parsing DNS managed zone list response: %w", err)
-		}
-
-		for _, managedZone := range listResp.ManagedZones {
-			rd := managedZoneSchema.Data(&terraform.InstanceState{})
-			if err := rd.Set("name", managedZone.Name); err != nil {
-				return fmt.Errorf("error setting name on temporary resource data: %w", err)
-			}
-			if err := rd.Set("project", project); err != nil {
-				return fmt.Errorf("error setting project on temporary resource data: %w", err)
-			}
-
-			if err := managedZoneSchema.Read(rd, config); err != nil {
+			if err := ResourceDNSManagedZoneFlatten(d, config, res, config, project, "", "", "", nil); err != nil {
 				return err
 			}
-			rd.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, managedZone.Name))
-			if err := rd.Set("name", managedZone.Name); err != nil {
-				return fmt.Errorf("error setting name on temporary resource data: %w", err)
-			}
-			if err := rd.Set("project", project); err != nil {
-				return fmt.Errorf("error setting project on temporary resource data: %w", err)
+
+			if err := d.Set("project", project); err != nil {
+				return fmt.Errorf("error setting project: %w", err)
 			}
 
-			if err := tpgresource.SetResourceIdentityAttributes(rd, map[string]interface{}{
-				"name":    managedZone.Name,
-				"project": project,
-			}); err != nil {
-				return fmt.Errorf("error setting identity: %w", err)
-			}
-
-			if err := callback(rd); err != nil {
-				return err
-			}
-		}
-
-		if listResp.NextPageToken == "" {
-			break
-		}
-
-		queryParams["pageToken"] = listResp.NextPageToken
-	}
-
-	return nil
+			return nil
+		},
+		Callback: callback,
+	})
 }
