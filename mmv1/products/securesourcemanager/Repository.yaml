@@ -174,3 +174,25 @@ properties:
         description: |
           README template name.
           Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.
+  - name: 'serviceAccount'
+    type: String
+    description: |
+      Repository level service account (BYOSA).
+  - name: 'scanConfig'
+    type: NestedObject
+    description: |
+      Provides configuration for scanning.
+    properties:
+      - name: 'secretScanConfig'
+        type: NestedObject
+        description: |
+          Configuration for secret scanning.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Enables secret scanning for the repository.
+          - name: 'inspectTemplate'
+            type: String
+            description: |
+              The DLP inspect template to use for secret scanning.
