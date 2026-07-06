@@ -20,8 +20,8 @@ references:
   api: https://cloud.google.com/netapp/volumes/docs/reference/rest/v1beta1/projects.locations/trial
 base_url: projects/{{project}}/locations/{{location}}/trial
 self_link: projects/{{project}}/locations/{{location}}/trial
-create_url: projects/{{project}}/locations/{{location}}/trial:subscribe
-delete_url: projects/{{project}}/locations/{{location}}/trial:end
+create_url: projects/{{project}}/locations/{{location}}/trial:subscribeTrial
+delete_url: projects/{{project}}/locations/{{location}}/trial:endTrial
 delete_verb: POST
 id_format: projects/{{project}}/locations/{{location}}/trial
 import_format:
