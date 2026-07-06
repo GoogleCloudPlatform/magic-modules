@@ -1,6 +1,6 @@
 ---
 title: "Review a pull request"
-weight: 10
+weight: 20
 aliases:
   - /contribute/review-pr
 ---
