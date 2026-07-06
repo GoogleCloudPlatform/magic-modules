@@ -1,6 +1,6 @@
 ---
 title: "Create a pull request"
-weight: 10
+weight: 20
 aliases:
   - /contribute/create-pr
 ---
