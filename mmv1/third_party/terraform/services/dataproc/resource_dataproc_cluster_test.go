@@ -355,7 +355,6 @@ func TestAccDataprocCluster_withConfidentialComputeType(t *testing.T) {
 					// Check confidential compute type
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential_type",
 						"cluster_config.0.gce_cluster_config.0.confidential_instance_config.0.confidential_instance_type", "SEV"),
-
 				),
 			},
 		},
