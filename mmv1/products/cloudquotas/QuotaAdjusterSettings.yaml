@@ -39,13 +39,20 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
+samples:
   - name: 'cloudquotas_quota_adjuster_settings_basic'
     primary_resource_id: 'adjuster_settings'
-    vars:
-      parent: "projects/104740170505"
-      enablement: "ENABLED"
     exclude_test: true
+    steps:
+      - name: 'cloudquotas_quota_adjuster_settings_basic'
+        resource_id_vars:
+          parent: "projects/104740170505"
+          enablement: "ENABLED"
+        test_vars_overrides:
+          # for backward compatible
+          parent: '"projects/104740170505" + randomSuffix'
+          # for backward compatible
+          enablement: '"ENABLED" + randomSuffix'
 parameters:
   - name: 'parent'
     type: String

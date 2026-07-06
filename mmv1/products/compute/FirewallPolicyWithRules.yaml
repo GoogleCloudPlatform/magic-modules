@@ -37,19 +37,28 @@ custom_code:
   post_create: 'templates/terraform/post_create/resource_compute_firewall_policy_with_rules.go.tmpl'
   post_delete: 'templates/terraform/post_delete/resource_compute_firewall_policy_with_rules.go.tmpl'
   post_update: 'templates/terraform/post_update/resource_compute_firewall_policy_with_rules.go.tmpl'
-examples:
+samples:
   - name: 'compute_firewall_policy_with_rules_full'
     primary_resource_id: 'primary'
-    vars:
-      address_group: 'address-group'
-      fw_policy: 'fw-policy'
-      network: 'network'
-      security_profile: 'sp'
-      security_profile_group: 'spg'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'compute_firewall_policy_with_rules_full'
+        resource_id_vars:
+          address_group: 'address-group'
+          fw_policy: 'fw-policy'
+          network: 'network'
+          security_profile: 'sp'
+          security_profile_group: 'spg'
+          tag_key: 'tag-key'
+          tag_value: 'tag-value'
+        test_vars_overrides:
+          # for backward compatible
+          network: '"network" + randomSuffix'
+          # for backward compatible
+          security_profile: '"sp" + randomSuffix'
+          # for backward compatible
+          security_profile_group: '"spg" + randomSuffix'
+        test_env_vars:
+          org_id: 'ORG_ID'
 parameters:
   - name: 'parent'
     type: String
@@ -102,9 +111,7 @@ properties:
           required: true
         - name: 'match'
           type: NestedObject
-          description:
-            A match condition that incoming traffic is evaluated against. If it
-            evaluates to true, the corresponding 'action' is enforced.
+          description: A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
           required: true
           properties:
             - name: 'srcIpRanges'
@@ -379,9 +386,7 @@ properties:
           output: true
         - name: 'match'
           type: NestedObject
-          description:
-            A match condition that incoming traffic is evaluated against. If it
-            evaluates to true, the corresponding 'action' is enforced.
+          description: A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
           output: true
           properties:
             - name: 'srcIpRanges'

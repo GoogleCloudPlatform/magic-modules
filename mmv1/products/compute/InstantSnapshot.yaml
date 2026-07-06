@@ -52,12 +52,14 @@ sweeper:
   url_substitutions:
     - zone: "us-central1-a"
 include_in_tgc_next: true
-examples:
+samples:
   - name: 'instant_snapshot_basic'
     primary_resource_id: 'default'
-    vars:
-      instance_name: 'instant-snapshot'
-      disk_name: 'example-disk'
+    steps:
+      - name: 'instant_snapshot_basic'
+        resource_id_vars:
+          instance_name: 'instant-snapshot'
+          disk_name: 'example-disk'
 parameters:
   - name: 'sourceDisk'
     type: ResourceRef
@@ -119,3 +121,18 @@ properties:
     output: true
     update_url: 'projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}/setLabels'
     update_verb: 'POST'
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+      Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the instant snapshot. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true

@@ -11,6 +11,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -108,7 +109,7 @@ func dataSourceGoogleStorageBucketObjectContentsRead(d *schema.ResourceData, met
 	}
 
 	// Prepare API call
-	objectsService := storage.NewObjectsService(config.NewStorageClient(userAgent))
+	objectsService := storage.NewObjectsService(NewClient(config, userAgent))
 	getObjectsCall := objectsService.List(bucket).Prefix(prefix).MatchGlob(matchGlob)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
@@ -185,4 +186,13 @@ func dataSourceGoogleStorageBucketObjectContentsRead(d *schema.ResourceData, met
 
 	d.SetId(dataSourceId)
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_bucket_object_contents",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageBucketObjectContents(),
+	}.Register()
 }

@@ -121,6 +121,31 @@ func flatten(data any, prefix string, result map[string]any) {
 	}
 }
 
+func getIdentifierSortKey(flattened map[string]any) string {
+	var idKeys []string
+	for k := range flattened {
+		parts := strings.Split(k, ".")
+		lastPart := parts[len(parts)-1]
+
+		if lastPart == "name" || strings.HasSuffix(lastPart, "_name") ||
+			lastPart == "id" || strings.HasSuffix(lastPart, "_id") ||
+			lastPart == "key" || strings.HasSuffix(lastPart, "_key") {
+			idKeys = append(idKeys, k)
+		}
+	}
+
+	if len(idKeys) == 0 {
+		return ""
+	}
+
+	sort.Strings(idKeys)
+	var vals []string
+	for _, k := range idKeys {
+		vals = append(vals, fmt.Sprintf("%v", flattened[k]))
+	}
+	return strings.Join(vals, ";")
+}
+
 func flattenSlice(prefix string, v []any, result map[string]any) {
 	if len(v) == 0 && prefix != "" {
 		result[prefix] = struct{}{}
@@ -128,6 +153,7 @@ func flattenSlice(prefix string, v []any, result map[string]any) {
 	}
 
 	type sortableElement struct {
+		sortKey   string
 		flatKeys  string
 		flattened map[string]any
 	}
@@ -136,18 +162,25 @@ func flattenSlice(prefix string, v []any, result map[string]any) {
 	for i, value := range v {
 		flattened := make(map[string]any)
 		flatten(value, "", flattened)
-		keys := make([]string, 0, len(flattened))
-		for k := range flattened {
-			keys = append(keys, k)
+
+		sortKey := getIdentifierSortKey(flattened)
+
+		keyVals := make([]string, 0, len(flattened))
+		for k, val := range flattened {
+			keyVals = append(keyVals, fmt.Sprintf("%s=%v", k, val))
 		}
-		sort.Strings(keys)
+		sort.Strings(keyVals)
 		sortable[i] = sortableElement{
-			flatKeys:  strings.Join(keys, ";"),
+			sortKey:   sortKey,
+			flatKeys:  strings.Join(keyVals, ";"),
 			flattened: flattened,
 		}
 	}
 
 	sort.Slice(sortable, func(i, j int) bool {
+		if sortable[i].sortKey != "" && sortable[j].sortKey != "" && sortable[i].sortKey != sortable[j].sortKey {
+			return sortable[i].sortKey < sortable[j].sortKey
+		}
 		return sortable[i].flatKeys < sortable[j].flatKeys
 	})
 

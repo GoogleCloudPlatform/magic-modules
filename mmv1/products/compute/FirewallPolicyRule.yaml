@@ -45,48 +45,73 @@ custom_code:
   post_create: 'templates/terraform/post_create/compute_firewall_policy_rule.go.tmpl'
   post_delete: 'templates/terraform/post_delete/compute_firewall_policy_rule.go.tmpl'
   post_update: 'templates/terraform/post_update/compute_firewall_policy_rule.go.tmpl'
-examples:
+samples:
   - name: 'firewall_policy_rule'
     primary_resource_id: 'primary'
-    vars:
-      address_group: 'address-group'
-      folder: 'folder'
-      fw_policy: 'fw-policy'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      service_acct: 'SERVICE_ACCT'
+    steps:
+      - name: 'firewall_policy_rule'
+        resource_id_vars:
+          address_group: 'address-group'
+          folder: 'folder'
+          fw_policy: 'fw-policy'
+          tag_key: 'tag-key'
+          tag_value: 'tag-value'
+        test_vars_overrides:
+          # for backward compatible
+          folder: '"folder" + randomSuffix'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          service_acct: 'SERVICE_ACCT'
   - name: 'firewall_policy_rule_network_scope'
     primary_resource_id: 'primary'
-    vars:
-      folder: 'folder'
-      fw_policy: 'fw-policy'
-      network: 'network'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
     min_version: beta
+    steps:
+      - name: 'firewall_policy_rule_network_scope'
+        resource_id_vars:
+          folder: 'folder'
+          fw_policy: 'fw-policy'
+          network: 'network'
+          tag_key: 'tag-key'
+          tag_value: 'tag-value'
+        test_vars_overrides:
+          # for backward compatible
+          folder: '"folder" + randomSuffix'
+          # for backward compatible
+          network: '"network" + randomSuffix'
+        test_env_vars:
+          org_id: 'ORG_ID'
+        min_version: beta
   - name: 'firewall_policy_rule_network_context'
     primary_resource_id: 'primary'
-    vars:
-      folder: 'folder'
-      fw_policy: 'fw-policy'
-      network: 'network'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'firewall_policy_rule_network_context'
+        resource_id_vars:
+          folder: 'folder'
+          fw_policy: 'fw-policy'
+          network: 'network'
+          tag_key: 'tag-key'
+          tag_value: 'tag-value'
+        test_vars_overrides:
+          # for backward compatible
+          folder: '"folder" + randomSuffix'
+          # for backward compatible
+          network: '"network" + randomSuffix'
+        test_env_vars:
+          org_id: 'ORG_ID'
   - name: 'firewall_policy_rule_secure_tags'
     primary_resource_id: 'primary'
-    vars:
-      folder: 'folder'
-      fw_policy: 'fw-policy'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'firewall_policy_rule_secure_tags'
+        resource_id_vars:
+          folder: 'folder'
+          fw_policy: 'fw-policy'
+          tag_key: 'tag-key'
+          tag_value: 'tag-value'
+        test_vars_overrides:
+          # for backward compatible
+          folder: '"folder" + randomSuffix'
+        test_env_vars:
+          org_id: 'ORG_ID'
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef

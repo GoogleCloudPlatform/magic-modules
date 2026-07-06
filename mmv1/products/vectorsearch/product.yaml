@@ -21,4 +21,3 @@ versions:
     name: ga
   - base_url: https://vectorsearch.googleapis.com/v1beta/
     name: beta
-resourceswithcaiassettype: {}

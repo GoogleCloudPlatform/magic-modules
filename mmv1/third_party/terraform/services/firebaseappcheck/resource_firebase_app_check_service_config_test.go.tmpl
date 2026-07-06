@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package firebaseappcheck_test
 {{- if ne $.TargetVersionName "ga" }}
 
@@ -9,6 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/firebase"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/firebasedatabase"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/firebaseappcheck"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 

@@ -12,291 +12,350 @@
 # limitations under the License.
 
 ---
-name: 'Stream'
+name: Stream
 description: |
   A resource representing streaming data from a source to a destination.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/datastream/docs/create-a-stream'
-  api: 'https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.streams'
+    Official Documentation: https://cloud.google.com/datastream/docs/create-a-stream
+  api: https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.streams
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/streams/{{stream_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/streams'
-self_link: 'projects/{{project}}/locations/{{location}}/streams/{{stream_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/streams?streamId={{stream_id}}&force={{create_without_validation}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/streams
+self_link: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
+create_url: projects/{{project}}/locations/{{location}}/streams?streamId={{stream_id}}&force={{create_without_validation}}
 update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/streams/{{stream_id}}'
+  - projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_diff:
+  - resourceDatastreamStreamCustomDiff
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
-custom_code:
-  constants: 'templates/terraform/constants/datastream_stream.go.tmpl'
-  encoder: 'templates/terraform/encoders/datastream_stream.go.tmpl'
-  post_create: 'templates/terraform/post_create/datastream_stream.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/datastream_stream.go.tmpl'
-  post_update: 'templates/terraform/post_update/datastream_stream.go.tmpl'
-  post_import: 'templates/terraform/post_import/datastream_stream.go.tmpl'
 include_in_tgc_next: true
 tgc_tests:
-  - name: 'TestAccDatastreamStream_mongoDb'
-    skip: 'Test data has mismatched steps'
-custom_diff:
-  - 'resourceDatastreamStreamCustomDiff'
-examples:
-  - name: 'datastream_stream_basic'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      source_connection_profile_id: 'source-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      bucket_name: 'my-bucket'
-      destination_connection_profile_id: 'destination-profile'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-    exclude_docs: true
-      # Random provider
-    skip_vcr: true
-  - name: 'datastream_stream_full'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      source_connection_profile_id: 'source-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      bucket_name: 'my-bucket'
-      destination_connection_profile_id: 'destination-profile'
-      stream_cmek: 'kms-name'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'stream_cmek': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-      # Random provider
-    skip_vcr: true
-  - name: 'datastream_stream_postgresql'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      source_connection_profile_id: 'source-profile'
-      destination_connection_profile_id: 'destination-profile'
-    exclude_test: true
-  - name: 'datastream_stream_oracle'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      source_connection_profile_id: 'source-profile'
-      destination_connection_profile_id: 'destination-profile'
-    exclude_test: true
-  - name: 'datastream_stream_sql_server'
-    primary_resource_id: 'default'
-    vars:
-      database_name: 'db'
-      database_password: 'password'
-      database_user: 'user'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-      source_connection_profile_id: 'source-profile'
-      sql_server_name: 'sql-server'
-      sql_server_root_password: 'root-password'
-      stream_id: 'stream'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    exclude_test: true
-  - name: 'datastream_stream_sql_server_change_tables'
-    primary_resource_id: 'default'
-    vars:
-      database_name: 'db'
-      database_password: 'password'
-      database_user: 'user'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-      source_connection_profile_id: 'source-profile'
-      sql_server_name: 'sql-server'
-      sql_server_root_password: 'root-password'
-      stream_id: 'stream'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    # Requires SQLServer Configuration
-    exclude_test: true
-  - name: 'datastream_stream_mysql_gtid'
-    primary_resource_id: 'default'
-    vars:
-      database_name: 'db'
-      database_password: 'password'
-      database_user: 'user'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-      source_connection_profile_id: 'source-profile'
-      mysql_name: 'mysql'
-      mysql_root_password: 'root-password'
-      stream_id: 'stream'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    # Requires MySQL Configuration
-    exclude_test: true
-  - name: 'datastream_stream_postgresql_bigquery_dataset_id'
-    primary_resource_id: 'default'
-    vars:
-      dataset_id: 'postgres'
-      stream_id: 'postgres-bigquery'
-      dest_connection_profile_id: 'dest-profile'
-      instance_name: 'instance-name'
-      sql_user_name: 'my-user'
-      source_connection_profile_id: 'source-profile'
-    external_providers: ["random", "time"]
+  - name: TestAccDatastreamStream_mongoDb
+    skip: Test data has mismatched steps
+custom_code:
+  encoder: templates/terraform/encoders/datastream_stream.go.tmpl
+  constants: templates/terraform/constants/datastream_stream.go.tmpl
+  post_create: templates/terraform/post_create/datastream_stream.go.tmpl
+  pre_update: templates/terraform/pre_update/datastream_stream.go.tmpl
+  post_update: templates/terraform/post_update/datastream_stream.go.tmpl
+  post_import: templates/terraform/post_import/datastream_stream.go.tmpl
+samples:
+  - name: datastream_stream_basic
+    primary_resource_id: default
+    external_providers: [random, time]
+    exclude_basic_doc: true
     # Random provider
     skip_vcr: true
-  - name: 'datastream_stream_bigquery'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      source_connection_profile_id: 'source-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-      bigquery_destination_table_kms_key_name: 'bigquery-kms-name'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'bigquery_destination_table_kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-      # Random provider
+    steps:
+      - name: datastream_stream_basic
+        resource_id_vars:
+          stream_id: my-stream
+          private_connection_id: my-connection
+          network_name: my-network
+          source_connection_profile_id: source-profile
+          database_instance_name: my-instance
+          deletion_protection: "true"
+          bucket_name: my-bucket
+          destination_connection_profile_id: destination-profile
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: datastream_stream_full
+    primary_resource_id: default
+    external_providers: [random, time]
+    # Random provider
     skip_vcr: true
-  - name: 'datastream_stream_bigquery_cross_project_source_hierachy'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      source_connection_profile_id: 'source-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-      # Random provider
+    steps:
+      - name: datastream_stream_full
+        resource_id_vars:
+          stream_id: my-stream
+          private_connection_id: my-connection
+          network_name: my-network
+          source_connection_profile_id: source-profile
+          database_instance_name: my-instance
+          deletion_protection: "true"
+          bucket_name: my-bucket
+          destination_connection_profile_id: destination-profile
+          stream_cmek: kms-name
+        test_vars_overrides:
+          deletion_protection: "false"
+          stream_cmek: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: datastream_stream_postgresql
+    primary_resource_id: default
+    exclude_test: true
+    steps:
+      - name: datastream_stream_postgresql
+        resource_id_vars:
+          stream_id: my-stream
+          source_connection_profile_id: source-profile
+          destination_connection_profile_id: destination-profile
+  - name: datastream_stream_oracle
+    primary_resource_id: default
+    exclude_test: true
+    steps:
+      - name: datastream_stream_oracle
+        resource_id_vars:
+          stream_id: my-stream
+          source_connection_profile_id: source-profile
+          destination_connection_profile_id: destination-profile
+  - name: datastream_stream_sql_server
+    primary_resource_id: default
+    exclude_test: true
+    steps:
+      - name: datastream_stream_sql_server
+        resource_id_vars:
+          database_name: db
+          database_password: password
+          database_user: user
+          deletion_protection: "true"
+          destination_connection_profile_id: destination-profile
+          source_connection_profile_id: source-profile
+          sql_server_name: sql-server
+          sql_server_root_password: root-password
+          stream_id: stream
+        test_vars_overrides:
+          deletion_protection: "false"
+          # for backward compatible
+          database_name: '"db" + randomSuffix'
+          # for backward compatible
+          database_password: '"password" + randomSuffix'
+          # for backward compatible
+          database_user: '"user" + randomSuffix'
+          # for backward compatible
+          stream_id: '"stream" + randomSuffix'
+  - name: datastream_stream_sql_server_change_tables
+    primary_resource_id: default
+    exclude_test: true
+    steps:
+      - name: datastream_stream_sql_server_change_tables
+        resource_id_vars:
+          database_name: db
+          database_password: password
+          database_user: user
+          deletion_protection: "true"
+          destination_connection_profile_id: destination-profile
+          source_connection_profile_id: source-profile
+          sql_server_name: sql-server
+          sql_server_root_password: root-password
+          stream_id: stream
+        test_vars_overrides:
+          deletion_protection: "false"
+          # Requires SQLServer Configuration
+          # for backward compatible
+          database_name: '"db" + randomSuffix'
+          # for backward compatible
+          database_password: '"password" + randomSuffix'
+          # for backward compatible
+          database_user: '"user" + randomSuffix'
+          # for backward compatible
+          stream_id: '"stream" + randomSuffix'
+  - name: datastream_stream_mysql_gtid
+    primary_resource_id: default
+    exclude_test: true
+    steps:
+      - name: datastream_stream_mysql_gtid
+        resource_id_vars:
+          database_name: db
+          database_password: password
+          database_user: user
+          deletion_protection: "true"
+          destination_connection_profile_id: destination-profile
+          source_connection_profile_id: source-profile
+          mysql_name: mysql
+          mysql_root_password: root-password
+          stream_id: stream
+        test_vars_overrides:
+          deletion_protection: "false"
+          # Requires MySQL Configuration
+          # for backward compatible
+          database_name: '"db" + randomSuffix'
+          # for backward compatible
+          database_password: '"password" + randomSuffix'
+          # for backward compatible
+          database_user: '"user" + randomSuffix'
+          # for backward compatible
+          mysql_name: '"mysql" + randomSuffix'
+          # for backward compatible
+          stream_id: '"stream" + randomSuffix'
+  - name: datastream_stream_postgresql_bigquery_dataset_id
+    primary_resource_id: default
+    external_providers: [random, time]
+    # Random provider
     skip_vcr: true
-  - name: 'datastream_stream_bigquery_append_only'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      source_connection_profile_id: 'source-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-      # Random provider
+    steps:
+      - name: datastream_stream_postgresql_bigquery_dataset_id
+        resource_id_vars:
+          dataset_id: postgres
+          stream_id: postgres-bigquery
+          dest_connection_profile_id: dest-profile
+          instance_name: instance-name
+          sql_user_name: my-user
+          source_connection_profile_id: source-profile
+        test_vars_overrides:
+          # for backward compatible
+          dataset_id: '"postgres" + randomSuffix'
+  - name: datastream_stream_bigquery
+    primary_resource_id: default
+    external_providers: [random, time]
+    # Random provider
     skip_vcr: true
-  - name: 'datastream_stream_bigquery_blmt'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'blmt-stream'
-      database_instance_name: 'blmt-instance'
-      deletion_protection: 'true'
-      source_connection_profile_id: 'blmt-source-profile'
-      destination_connection_profile_id: 'blmt-destination-profile'
-      blmt_bucket_name: 'blmt-bucket'
-      blmt_connection_id: 'blmt-connection'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random"]
+    steps:
+      - name: datastream_stream_bigquery
+        resource_id_vars:
+          stream_id: my-stream
+          private_connection_id: my-connection
+          network_name: my-network
+          source_connection_profile_id: source-profile
+          database_instance_name: my-instance
+          deletion_protection: "true"
+          destination_connection_profile_id: destination-profile
+          bigquery_destination_table_kms_key_name: bigquery-kms-name
+        test_vars_overrides:
+          deletion_protection: "false"
+          bigquery_destination_table_kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: datastream_stream_bigquery_cross_project_source_hierachy
+    primary_resource_id: default
+    external_providers: [random, time]
+    # Random provider
+    skip_vcr: true
+    steps:
+      - name: datastream_stream_bigquery_cross_project_source_hierachy
+        resource_id_vars:
+          stream_id: my-stream
+          private_connection_id: my-connection
+          network_name: my-network
+          source_connection_profile_id: source-profile
+          database_instance_name: my-instance
+          deletion_protection: "true"
+          destination_connection_profile_id: destination-profile
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: datastream_stream_bigquery_append_only
+    primary_resource_id: default
+    external_providers: [random, time]
+    # Random provider
+    skip_vcr: true
+    steps:
+      - name: datastream_stream_bigquery_append_only
+        resource_id_vars:
+          stream_id: my-stream
+          private_connection_id: my-connection
+          network_name: my-network
+          source_connection_profile_id: source-profile
+          database_instance_name: my-instance
+          deletion_protection: "true"
+          destination_connection_profile_id: destination-profile
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: datastream_stream_bigquery_blmt
+    primary_resource_id: default
+    external_providers: [random]
     skip_vcr: true
     # Involves complex dependency creation, which makes it impractical in this context
     exclude_test: true
-  - name: 'datastream_stream_rule_sets_bigquery'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'rules-stream'
-      source_connection_profile_id: 'rules-source-profile'
-      destination_connection_profile_id: 'rules-dest-profile'
-      dataset_id: 'rules-project:rules-dataset'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
+    steps:
+      - name: datastream_stream_bigquery_blmt
+        resource_id_vars:
+          stream_id: blmt-stream
+          database_instance_name: blmt-instance
+          deletion_protection: "true"
+          source_connection_profile_id: blmt-source-profile
+          destination_connection_profile_id: blmt-destination-profile
+          blmt_bucket_name: blmt-bucket
+          blmt_connection_id: blmt-connection
+        test_vars_overrides:
+          deletion_protection: "false"
+  - name: datastream_stream_rule_sets_bigquery
+    primary_resource_id: default
     skip_vcr: true
     # Involves complex dependency creation, which makes it impractical in this context
     exclude_test: true
-  - name: 'datastream_stream_salesforce'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'sf-stream'
-      source_connection_profile_id: 'source-profile'
-      destination_connection_profile_id: 'destination-profile'
+    steps:
+      - name: datastream_stream_rule_sets_bigquery
+        resource_id_vars:
+          stream_id: rules-stream
+          source_connection_profile_id: rules-source-profile
+          destination_connection_profile_id: rules-dest-profile
+          dataset_id: rules-project:rules-dataset
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+  - name: datastream_stream_salesforce
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_stream_spanner'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'spanner-stream'
-      source_connection_profile_id: 'source-profile'
-      destination_connection_profile_id: 'destination-profile'
+    steps:
+      - name: datastream_stream_salesforce
+        resource_id_vars:
+          stream_id: sf-stream
+          source_connection_profile_id: source-profile
+          destination_connection_profile_id: destination-profile
+  - name: datastream_stream_spanner
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_stream_mongodb'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'mongodb-stream'
-      source_connection_profile_id: 'source-profile'
-      destination_connection_profile_id: 'destination-profile'
+    steps:
+      - name: datastream_stream_spanner
+        resource_id_vars:
+          stream_id: spanner-stream
+          source_connection_profile_id: source-profile
+          destination_connection_profile_id: destination-profile
+  - name: datastream_stream_mongodb
+    primary_resource_id: default
     exclude_test: true
+    steps:
+      - name: datastream_stream_mongodb
+        resource_id_vars:
+          stream_id: mongodb-stream
+          source_connection_profile_id: source-profile
+          destination_connection_profile_id: destination-profile
 virtual_fields:
-  - name: 'desired_state'
+  - name: desired_state
     description: |
       Desired state of the Stream. Set this field to `RUNNING` to start the stream,
       `NOT_STARTED` to create the stream without starting and `PAUSED` to pause
       the stream from a `RUNNING` state.
       Possible values: NOT_STARTED, RUNNING, PAUSED. Default: NOT_STARTED
     type: String
-    default_value: "NOT_STARTED"
+    default_value: NOT_STARTED
 parameters:
-  - name: 'streamId'
+  - name: streamId
     type: String
-    description: |-
-      The stream identifier.
+    description: The stream identifier.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'create_without_validation'
+  - name: create_without_validation
     type: Boolean
-    description: |-
-      Create the stream without validating it.
+    description: Create the stream without validating it.
     url_param_only: true
     required: false
     immutable: true
     default_value: false
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The name of the location this stream is located in.
@@ -304,51 +363,51 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: The stream's name.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Labels.
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: Display name.
     required: true
-  - name: 'sourceConfig'
+  - name: sourceConfig
     type: NestedObject
     description: |
       Source connection profile configuration.
     required: true
     properties:
-      - name: 'sourceConnectionProfile'
+      - name: sourceConnectionProfile
         type: String
         description: |
           Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
         required: true
         immutable: true
-        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - name: 'mysqlSourceConfig'
+        diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+      - name: mysqlSourceConfig
         type: NestedObject
         description: |
           MySQL data source configuration.
         send_empty_value: true
         allow_empty_object: true
         exactly_one_of:
-          - 'source_config.0.mysql_source_config'
-          - 'source_config.0.oracle_source_config'
-          - 'source_config.0.postgresql_source_config'
-          - 'source_config.0.sql_server_source_config'
-          - 'source_config.0.salesforce_source_config'
-          - 'source_config.0.spanner_source_config'
-          - 'source_config.0.mongodb_source_config'
+          - source_config.0.mysql_source_config
+          - source_config.0.oracle_source_config
+          - source_config.0.postgresql_source_config
+          - source_config.0.sql_server_source_config
+          - source_config.0.salesforce_source_config
+          - source_config.0.spanner_source_config
+          - source_config.0.mongodb_source_config
         properties:
-          - name: 'includeObjects'
+          - name: includeObjects
             type: NestedObject
             description: |
               MySQL objects to retrieve from the source.
             properties:
-              - name: 'mysqlDatabases'
+              - name: mysqlDatabases
                 type: Array
                 description: |
                   MySQL databases on the server
@@ -358,12 +417,12 @@ properties:
                     MySQL database.
                   type: NestedObject
                   properties:
-                    - name: 'database'
+                    - name: database
                       type: String
                       description: |
                         Database name.
                       required: true
-                    - name: 'mysqlTables'
+                    - name: mysqlTables
                       type: Array
                       description: |
                         Tables in the database.
@@ -372,12 +431,12 @@ properties:
                           MySQL table.
                         type: NestedObject
                         properties:
-                          - name: 'table'
+                          - name: table
                             type: String
                             description: |
                               Table name.
                             required: true
-                          - name: 'mysqlColumns'
+                          - name: mysqlColumns
                             type: Array
                             description: |
                               MySQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -386,35 +445,35 @@ properties:
                                 MySQL Column.
                               type: NestedObject
                               properties:
-                                - name: 'column'
+                                - name: column
                                   type: String
                                   description: |
                                     Column name.
-                                - name: 'dataType'
+                                - name: dataType
                                   type: String
                                   description: |
                                     The MySQL data type. Full data types list can be found here:
                                     https://dev.mysql.com/doc/refman/8.0/en/data-types.html
-                                - name: 'length'
+                                - name: length
                                   type: Integer
                                   description: |
                                     Column length.
                                   output: true
-                                - name: 'collation'
+                                - name: collation
                                   type: String
                                   description: |
                                     Column collation.
-                                - name: 'primaryKey'
+                                - name: primaryKey
                                   type: Boolean
                                   description: |
                                     Whether or not the column represents a primary key.
                                   is_missing_in_cai: true
-                                - name: 'nullable'
+                                - name: nullable
                                   type: Boolean
                                   description: |
                                     Whether or not the column can accept a null value.
                                   is_missing_in_cai: true
-                                - name: 'ordinalPosition'
+                                - name: ordinalPosition
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
@@ -422,12 +481,12 @@ properties:
                             min_size: 1
                       min_size: 1
                 min_size: 1
-          - name: 'excludeObjects'
+          - name: excludeObjects
             type: NestedObject
             description: |
               MySQL objects to exclude from the stream.
             properties:
-              - name: 'mysqlDatabases'
+              - name: mysqlDatabases
                 type: Array
                 description: |
                   MySQL databases on the server
@@ -437,12 +496,12 @@ properties:
                     MySQL database.
                   type: NestedObject
                   properties:
-                    - name: 'database'
+                    - name: database
                       type: String
                       description: |
                         Database name.
                       required: true
-                    - name: 'mysqlTables'
+                    - name: mysqlTables
                       type: Array
                       description: |
                         Tables in the database.
@@ -451,12 +510,12 @@ properties:
                           MySQL table.
                         type: NestedObject
                         properties:
-                          - name: 'table'
+                          - name: table
                             type: String
                             description: |
                               Table name.
                             required: true
-                          - name: 'mysqlColumns'
+                          - name: mysqlColumns
                             type: Array
                             description: |
                               MySQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -465,35 +524,35 @@ properties:
                                 MySQL Column.
                               type: NestedObject
                               properties:
-                                - name: 'column'
+                                - name: column
                                   type: String
                                   description: |
                                     Column name.
-                                - name: 'dataType'
+                                - name: dataType
                                   type: String
                                   description: |
                                     The MySQL data type. Full data types list can be found here:
                                     https://dev.mysql.com/doc/refman/8.0/en/data-types.html
-                                - name: 'length'
+                                - name: length
                                   type: Integer
                                   description: |
                                     Column length.
                                   output: true
-                                - name: 'collation'
+                                - name: collation
                                   type: String
                                   description: |
                                     Column collation.
-                                - name: 'primaryKey'
+                                - name: primaryKey
                                   type: Boolean
                                   description: |
                                     Whether or not the column represents a primary key.
                                   is_missing_in_cai: true
-                                - name: 'nullable'
+                                - name: nullable
                                   type: Boolean
                                   description: |
                                     Whether or not the column can accept a null value.
                                   is_missing_in_cai: true
-                                - name: 'ordinalPosition'
+                                - name: ordinalPosition
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
@@ -501,7 +560,7 @@ properties:
                             min_size: 1
                       min_size: 1
                 min_size: 1
-          - name: 'maxConcurrentCdcTasks'
+          - name: maxConcurrentCdcTasks
             type: Integer
             description: |
               Maximum number of concurrent CDC tasks. The number should be non negative.
@@ -509,8 +568,8 @@ properties:
             default_from_api: true
             send_empty_value: true
             validation:
-              function: 'validation.IntAtLeast(0)'
-          - name: 'maxConcurrentBackfillTasks'
+              function: validation.IntAtLeast(0)
+          - name: maxConcurrentBackfillTasks
             type: Integer
             description: |
               Maximum number of concurrent backfill tasks. The number should be non negative.
@@ -518,17 +577,18 @@ properties:
             default_from_api: true
             send_empty_value: true
             validation:
-              function: 'validation.IntAtLeast(0)'
-          - name: 'binaryLogPosition'
+              function: validation.IntAtLeast(0)
+          - name: binaryLogPosition
             type: NestedObject
             allow_empty_object: true
             send_empty_value: true
+            default_from_api: true
             conflicts:
               - source_config.0.mysql_source_config.gtid
             description: |
               CDC reader reads from binary logs replication cdc method.
             properties: []
-          - name: 'gtid'
+          - name: gtid
             type: NestedObject
             allow_empty_object: true
             send_empty_value: true
@@ -537,27 +597,27 @@ properties:
             description: |
               CDC reader reads from gtid based replication.
             properties: []
-      - name: 'oracleSourceConfig'
+      - name: oracleSourceConfig
         type: NestedObject
         description: |
           MySQL data source configuration.
         send_empty_value: true
         allow_empty_object: true
         exactly_one_of:
-          - 'source_config.0.mysql_source_config'
-          - 'source_config.0.oracle_source_config'
-          - 'source_config.0.postgresql_source_config'
-          - 'source_config.0.sql_server_source_config'
-          - 'source_config.0.salesforce_source_config'
-          - 'source_config.0.spanner_source_config'
-          - 'source_config.0.mongodb_source_config'
+          - source_config.0.mysql_source_config
+          - source_config.0.oracle_source_config
+          - source_config.0.postgresql_source_config
+          - source_config.0.sql_server_source_config
+          - source_config.0.salesforce_source_config
+          - source_config.0.spanner_source_config
+          - source_config.0.mongodb_source_config
         properties:
-          - name: 'includeObjects'
+          - name: includeObjects
             type: NestedObject
             description: |
               Oracle objects to retrieve from the source.
             properties:
-              - name: 'oracleSchemas'
+              - name: oracleSchemas
                 type: Array
                 description: |
                   Oracle schemas/databases in the database server
@@ -567,12 +627,12 @@ properties:
                     MySQL database.
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
                       description: |
                         Schema name.
                       required: true
-                    - name: 'oracleTables'
+                    - name: oracleTables
                       type: Array
                       description: |
                         Tables in the database.
@@ -581,12 +641,12 @@ properties:
                           Oracle table.
                         type: NestedObject
                         properties:
-                          - name: 'table'
+                          - name: table
                             type: String
                             description: |
                               Table name.
                             required: true
-                          - name: 'oracleColumns'
+                          - name: oracleColumns
                             type: Array
                             description: |
                               Oracle columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -595,46 +655,46 @@ properties:
                                 Oracle Column.
                               type: NestedObject
                               properties:
-                                - name: 'column'
+                                - name: column
                                   type: String
                                   description: |
                                     Column name.
-                                - name: 'dataType'
+                                - name: dataType
                                   type: String
                                   description: |
                                     The Oracle data type. Full data types list can be found here:
                                     https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html
-                                - name: 'length'
+                                - name: length
                                   type: Integer
                                   description: |
                                     Column length.
                                   output: true
-                                - name: 'precision'
+                                - name: precision
                                   type: Integer
                                   description: |
                                     Column precision.
                                   output: true
-                                - name: 'scale'
+                                - name: scale
                                   type: Integer
                                   description: |
                                     Column scale.
                                   output: true
-                                - name: 'encoding'
+                                - name: encoding
                                   type: String
                                   description: |
                                     Column encoding.
                                   output: true
-                                - name: 'primaryKey'
+                                - name: primaryKey
                                   type: Boolean
                                   description: |
                                     Whether or not the column represents a primary key.
                                   output: true
-                                - name: 'nullable'
+                                - name: nullable
                                   type: Boolean
                                   description: |
                                     Whether or not the column can accept a null value.
                                   output: true
-                                - name: 'ordinalPosition'
+                                - name: ordinalPosition
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
@@ -642,12 +702,12 @@ properties:
                             min_size: 1
                       min_size: 1
                 min_size: 1
-          - name: 'excludeObjects'
+          - name: excludeObjects
             type: NestedObject
             description: |
               Oracle objects to exclude from the stream.
             properties:
-              - name: 'oracleSchemas'
+              - name: oracleSchemas
                 type: Array
                 description: |
                   Oracle schemas/databases in the database server
@@ -657,12 +717,12 @@ properties:
                     MySQL database.
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
                       description: |
                         Schema name.
                       required: true
-                    - name: 'oracleTables'
+                    - name: oracleTables
                       type: Array
                       description: |
                         Tables in the database.
@@ -671,12 +731,12 @@ properties:
                           Oracle table.
                         type: NestedObject
                         properties:
-                          - name: 'table'
+                          - name: table
                             type: String
                             description: |
                               Table name.
                             required: true
-                          - name: 'oracleColumns'
+                          - name: oracleColumns
                             type: Array
                             description: |
                               Oracle columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -685,46 +745,46 @@ properties:
                                 Oracle Column.
                               type: NestedObject
                               properties:
-                                - name: 'column'
+                                - name: column
                                   type: String
                                   description: |
                                     Column name.
-                                - name: 'dataType'
+                                - name: dataType
                                   type: String
                                   description: |
                                     The Oracle data type. Full data types list can be found here:
                                     https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html
-                                - name: 'length'
+                                - name: length
                                   type: Integer
                                   description: |
                                     Column length.
                                   output: true
-                                - name: 'precision'
+                                - name: precision
                                   type: Integer
                                   description: |
                                     Column precision.
                                   output: true
-                                - name: 'scale'
+                                - name: scale
                                   type: Integer
                                   description: |
                                     Column scale.
                                   output: true
-                                - name: 'encoding'
+                                - name: encoding
                                   type: String
                                   description: |
                                     Column encoding.
                                   output: true
-                                - name: 'primaryKey'
+                                - name: primaryKey
                                   type: Boolean
                                   description: |
                                     Whether or not the column represents a primary key.
                                   output: true
-                                - name: 'nullable'
+                                - name: nullable
                                   type: Boolean
                                   description: |
                                     Whether or not the column can accept a null value.
                                   output: true
-                                - name: 'ordinalPosition'
+                                - name: ordinalPosition
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
@@ -732,7 +792,7 @@ properties:
                             min_size: 1
                       min_size: 1
                 min_size: 1
-          - name: 'maxConcurrentCdcTasks'
+          - name: maxConcurrentCdcTasks
             type: Integer
             description: |
               Maximum number of concurrent CDC tasks. The number should be non negative.
@@ -740,8 +800,8 @@ properties:
             default_from_api: true
             send_empty_value: true
             validation:
-              function: 'validation.IntAtLeast(0)'
-          - name: 'maxConcurrentBackfillTasks'
+              function: validation.IntAtLeast(0)
+          - name: maxConcurrentBackfillTasks
             type: Integer
             description: |
               Maximum number of concurrent backfill tasks. The number should be non negative.
@@ -749,44 +809,42 @@ properties:
             default_from_api: true
             send_empty_value: true
             validation:
-              function: 'validation.IntAtLeast(0)'
-          - name: 'dropLargeObjects'
+              function: validation.IntAtLeast(0)
+          - name: dropLargeObjects
             type: NestedObject
             description: |
               Configuration to drop large object values.
             send_empty_value: true
             allow_empty_object: true
-            properties:
-              []
-          - name: 'streamLargeObjects'
+            properties: []
+          - name: streamLargeObjects
             type: NestedObject
             description: |
               Configuration to drop large object values.
             send_empty_value: true
             allow_empty_object: true
-            properties:
-              []
-      - name: 'postgresqlSourceConfig'
+            properties: []
+      - name: postgresqlSourceConfig
         type: NestedObject
         description: |
           PostgreSQL data source configuration.
         send_empty_value: true
         allow_empty_object: true
         exactly_one_of:
-          - 'source_config.0.mysql_source_config'
-          - 'source_config.0.oracle_source_config'
-          - 'source_config.0.postgresql_source_config'
-          - 'source_config.0.sql_server_source_config'
-          - 'source_config.0.salesforce_source_config'
-          - 'source_config.0.spanner_source_config'
-          - 'source_config.0.mongodb_source_config'
+          - source_config.0.mysql_source_config
+          - source_config.0.oracle_source_config
+          - source_config.0.postgresql_source_config
+          - source_config.0.sql_server_source_config
+          - source_config.0.salesforce_source_config
+          - source_config.0.spanner_source_config
+          - source_config.0.mongodb_source_config
         properties:
-          - name: 'includeObjects'
+          - name: includeObjects
             type: NestedObject
             description: |
               PostgreSQL objects to retrieve from the source.
             properties:
-              - name: 'postgresqlSchemas'
+              - name: postgresqlSchemas
                 type: Array
                 description: |
                   PostgreSQL schemas on the server
@@ -796,12 +854,12 @@ properties:
                     PostgreSQL schema.
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
                       description: |
                         Database name.
                       required: true
-                    - name: 'postgresqlTables'
+                    - name: postgresqlTables
                       type: Array
                       description: |
                         Tables in the schema.
@@ -810,12 +868,12 @@ properties:
                           PostgreSQL table.
                         type: NestedObject
                         properties:
-                          - name: 'table'
+                          - name: table
                             type: String
                             description: |
                               Table name.
                             required: true
-                          - name: 'postgresqlColumns'
+                          - name: postgresqlColumns
                             type: Array
                             description: |
                               PostgreSQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -824,51 +882,51 @@ properties:
                                 PostgreSQL Column.
                               type: NestedObject
                               properties:
-                                - name: 'column'
+                                - name: column
                                   type: String
                                   description: |
                                     Column name.
-                                - name: 'dataType'
+                                - name: dataType
                                   type: String
                                   description: |
                                     The PostgreSQL data type. Full data types list can be found here:
                                     https://www.postgresql.org/docs/current/datatype.html
-                                - name: 'length'
+                                - name: length
                                   type: Integer
                                   description: |
                                     Column length.
                                   output: true
-                                - name: 'precision'
+                                - name: precision
                                   type: Integer
                                   description: |
                                     Column precision.
                                   output: true
-                                - name: 'scale'
+                                - name: scale
                                   type: Integer
                                   description: |
                                     Column scale.
                                   output: true
-                                - name: 'primaryKey'
+                                - name: primaryKey
                                   type: Boolean
                                   description: |
                                     Whether or not the column represents a primary key.
-                                - name: 'nullable'
+                                - name: nullable
                                   type: Boolean
                                   description: |
                                     Whether or not the column can accept a null value.
-                                - name: 'ordinalPosition'
+                                - name: ordinalPosition
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
                             min_size: 1
                       min_size: 1
                 min_size: 1
-          - name: 'excludeObjects'
+          - name: excludeObjects
             type: NestedObject
             description: |
               PostgreSQL objects to exclude from the stream.
             properties:
-              - name: 'postgresqlSchemas'
+              - name: postgresqlSchemas
                 type: Array
                 description: |
                   PostgreSQL schemas on the server
@@ -878,12 +936,12 @@ properties:
                     PostgreSQL schema.
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
                       description: |
                         Database name.
                       required: true
-                    - name: 'postgresqlTables'
+                    - name: postgresqlTables
                       type: Array
                       description: |
                         Tables in the schema.
@@ -892,12 +950,12 @@ properties:
                           PostgreSQL table.
                         type: NestedObject
                         properties:
-                          - name: 'table'
+                          - name: table
                             type: String
                             description: |
                               Table name.
                             required: true
-                          - name: 'postgresqlColumns'
+                          - name: postgresqlColumns
                             type: Array
                             description: |
                               PostgreSQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -906,58 +964,58 @@ properties:
                                 PostgreSQL Column.
                               type: NestedObject
                               properties:
-                                - name: 'column'
+                                - name: column
                                   type: String
                                   description: |
                                     Column name.
-                                - name: 'dataType'
+                                - name: dataType
                                   type: String
                                   description: |
                                     The PostgreSQL data type. Full data types list can be found here:
                                     https://www.postgresql.org/docs/current/datatype.html
-                                - name: 'length'
+                                - name: length
                                   type: Integer
                                   description: |
                                     Column length.
                                   output: true
-                                - name: 'precision'
+                                - name: precision
                                   type: Integer
                                   description: |
                                     Column precision.
                                   output: true
-                                - name: 'scale'
+                                - name: scale
                                   type: Integer
                                   description: |
                                     Column scale.
                                   output: true
-                                - name: 'primaryKey'
+                                - name: primaryKey
                                   type: Boolean
                                   description: |
                                     Whether or not the column represents a primary key.
-                                - name: 'nullable'
+                                - name: nullable
                                   type: Boolean
                                   description: |
                                     Whether or not the column can accept a null value.
-                                - name: 'ordinalPosition'
+                                - name: ordinalPosition
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
                             min_size: 1
                       min_size: 1
                 min_size: 1
-          - name: 'replicationSlot'
+          - name: replicationSlot
             type: String
             description: |
               The name of the logical replication slot that's configured with
               the pgoutput plugin.
             required: true
-          - name: 'publication'
+          - name: publication
             type: String
             description: |
               The name of the publication that includes the set of all tables
               that are defined in the stream's include_objects.
             required: true
-          - name: 'maxConcurrentBackfillTasks'
+          - name: maxConcurrentBackfillTasks
             type: Integer
             description: |
               Maximum number of concurrent backfill tasks. The number should be non
@@ -965,28 +1023,28 @@ properties:
             default_from_api: true
             send_empty_value: true
             validation:
-              function: 'validation.IntAtLeast(0)'
-      - name: 'sqlServerSourceConfig'
+              function: validation.IntAtLeast(0)
+      - name: sqlServerSourceConfig
         type: NestedObject
         description: |
           SQL Server data source configuration.
         send_empty_value: true
         allow_empty_object: true
         exactly_one_of:
-          - 'source_config.0.mysql_source_config'
-          - 'source_config.0.oracle_source_config'
-          - 'source_config.0.postgresql_source_config'
-          - 'source_config.0.sql_server_source_config'
-          - 'source_config.0.salesforce_source_config'
-          - 'source_config.0.spanner_source_config'
-          - 'source_config.0.mongodb_source_config'
+          - source_config.0.mysql_source_config
+          - source_config.0.oracle_source_config
+          - source_config.0.postgresql_source_config
+          - source_config.0.sql_server_source_config
+          - source_config.0.salesforce_source_config
+          - source_config.0.spanner_source_config
+          - source_config.0.mongodb_source_config
         properties:
-          - name: 'includeObjects'
+          - name: includeObjects
             type: NestedObject
             description: |
               SQL Server objects to retrieve from the source.
             properties:
-              - name: 'schemas'
+              - name: schemas
                 type: Array
                 description: |
                   SQL Server schemas/databases in the database server
@@ -996,12 +1054,12 @@ properties:
                     SQL Server database.
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
                       description: |
                         Schema name.
                       required: true
-                    - name: 'tables'
+                    - name: tables
                       type: Array
                       description: |
                         Tables in the database.
@@ -1010,12 +1068,12 @@ properties:
                           SQL Server table.
                         type: NestedObject
                         properties:
-                          - name: 'table'
+                          - name: table
                             type: String
                             description: |
                               Table name.
                             required: true
-                          - name: 'columns'
+                          - name: columns
                             type: Array
                             description: |
                               SQL Server columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1024,41 +1082,41 @@ properties:
                                 SQL Server Column.
                               type: NestedObject
                               properties:
-                                - name: 'column'
+                                - name: column
                                   type: String
                                   description: |
                                     Column name.
-                                - name: 'dataType'
+                                - name: dataType
                                   type: String
                                   description: |
                                     The SQL Server data type. Full data types list can be found here:
                                     https://learn.microsoft.com/en-us/sql/t-sql/data-types/data-types-transact-sql?view=sql-server-ver16
-                                - name: 'length'
+                                - name: length
                                   type: Integer
                                   description: |
                                     Column length.
                                   output: true
-                                - name: 'precision'
+                                - name: precision
                                   type: Integer
                                   description: |
                                     Column precision.
                                   output: true
-                                - name: 'scale'
+                                - name: scale
                                   type: Integer
                                   description: |
                                     Column scale.
                                   output: true
-                                - name: 'primaryKey'
+                                - name: primaryKey
                                   type: Boolean
                                   description: |
                                     Whether or not the column represents a primary key.
                                   output: true
-                                - name: 'nullable'
+                                - name: nullable
                                   type: Boolean
                                   description: |
                                     Whether or not the column can accept a null value.
                                   output: true
-                                - name: 'ordinalPosition'
+                                - name: ordinalPosition
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
@@ -1066,12 +1124,12 @@ properties:
                             min_size: 1
                       min_size: 1
                 min_size: 1
-          - name: 'excludeObjects'
+          - name: excludeObjects
             type: NestedObject
             description: |
               SQL Server objects to exclude from the stream.
             properties:
-              - name: 'schemas'
+              - name: schemas
                 type: Array
                 description: |
                   SQL Server schemas/databases in the database server
@@ -1081,12 +1139,12 @@ properties:
                     SQL Server database.
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
                       description: |
                         Schema name.
                       required: true
-                    - name: 'tables'
+                    - name: tables
                       type: Array
                       description: |
                         Tables in the database.
@@ -1095,12 +1153,12 @@ properties:
                           SQL Server table.
                         type: NestedObject
                         properties:
-                          - name: 'table'
+                          - name: table
                             type: String
                             description: |
                               Table name.
                             required: true
-                          - name: 'columns'
+                          - name: columns
                             type: Array
                             description: |
                               SQL Server columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1109,41 +1167,41 @@ properties:
                                 SQL Server Column.
                               type: NestedObject
                               properties:
-                                - name: 'column'
+                                - name: column
                                   type: String
                                   description: |
                                     Column name.
-                                - name: 'dataType'
+                                - name: dataType
                                   type: String
                                   description: |
                                     The SQL Server data type. Full data types list can be found here:
                                     https://learn.microsoft.com/en-us/sql/t-sql/data-types/data-types-transact-sql?view=sql-server-ver16
-                                - name: 'length'
+                                - name: length
                                   type: Integer
                                   description: |
                                     Column length.
                                   output: true
-                                - name: 'precision'
+                                - name: precision
                                   type: Integer
                                   description: |
                                     Column precision.
                                   output: true
-                                - name: 'scale'
+                                - name: scale
                                   type: Integer
                                   description: |
                                     Column scale.
                                   output: true
-                                - name: 'primaryKey'
+                                - name: primaryKey
                                   type: Boolean
                                   description: |
                                     Whether or not the column represents a primary key.
                                   output: true
-                                - name: 'nullable'
+                                - name: nullable
                                   type: Boolean
                                   description: |
                                     Whether or not the column can accept a null value.
                                   output: true
-                                - name: 'ordinalPosition'
+                                - name: ordinalPosition
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
@@ -1151,59 +1209,57 @@ properties:
                             min_size: 1
                       min_size: 1
                 min_size: 1
-          - name: 'maxConcurrentCdcTasks'
+          - name: maxConcurrentCdcTasks
             type: Integer
             description: |
               Max concurrent CDC tasks.
             default_from_api: true
             send_empty_value: true
             validation:
-              function: 'validation.IntAtLeast(0)'
-          - name: 'maxConcurrentBackfillTasks'
+              function: validation.IntAtLeast(0)
+          - name: maxConcurrentBackfillTasks
             type: Integer
             description: |
               Max concurrent backfill tasks.
             default_from_api: true
             send_empty_value: true
             validation:
-              function: 'validation.IntAtLeast(0)'
-          - name: 'transactionLogs'
+              function: validation.IntAtLeast(0)
+          - name: transactionLogs
             type: NestedObject
             description: |
               CDC reader reads from transaction logs.
             send_empty_value: true
             allow_empty_object: true
-            properties:
-              []
-          - name: 'changeTables'
+            properties: []
+          - name: changeTables
             type: NestedObject
             description: |
               CDC reader reads from change tables.
             send_empty_value: true
             allow_empty_object: true
-            properties:
-              []
-      - name: 'salesforceSourceConfig'
+            properties: []
+      - name: salesforceSourceConfig
         type: NestedObject
         description: |
           Salesforce data source configuration.
         send_empty_value: true
         allow_empty_object: true
         exactly_one_of:
-          - 'source_config.0.mysql_source_config'
-          - 'source_config.0.oracle_source_config'
-          - 'source_config.0.postgresql_source_config'
-          - 'source_config.0.sql_server_source_config'
-          - 'source_config.0.salesforce_source_config'
-          - 'source_config.0.spanner_source_config'
-          - 'source_config.0.mongodb_source_config'
+          - source_config.0.mysql_source_config
+          - source_config.0.oracle_source_config
+          - source_config.0.postgresql_source_config
+          - source_config.0.sql_server_source_config
+          - source_config.0.salesforce_source_config
+          - source_config.0.spanner_source_config
+          - source_config.0.mongodb_source_config
         properties:
-          - name: 'includeObjects'
+          - name: includeObjects
             type: NestedObject
             description: |
               Salesforce objects to retrieve from the source.
             properties:
-              - name: 'objects'
+              - name: objects
                 type: Array
                 description: |
                   Salesforce objects in Salesforce Org.
@@ -1214,11 +1270,11 @@ properties:
                     Salesforce objects.
                   type: NestedObject
                   properties:
-                    - name: 'objectName'
+                    - name: objectName
                       type: String
                       description: |
                         Name of object in Salesforce Org.
-                    - name: 'fields'
+                    - name: fields
                       type: Array
                       description: |
                         Fields in the Salesforce object. When unspecified as part of include/exclude objects, includes/excludes everything/nothing.
@@ -1228,16 +1284,16 @@ properties:
                           Salesforce field.
                         type: NestedObject
                         properties:
-                          - name: 'name'
+                          - name: name
                             type: String
                             description: |
                               Field name.
-          - name: 'excludeObjects'
+          - name: excludeObjects
             type: NestedObject
             description: |
               Salesforce objects to exclude from the stream.
             properties:
-              - name: 'objects'
+              - name: objects
                 type: Array
                 description: |
                   Salesforce objects in data source.
@@ -1248,11 +1304,11 @@ properties:
                     Salesforce objects.
                   type: NestedObject
                   properties:
-                    - name: 'objectName'
+                    - name: objectName
                       type: String
                       description: |
                         Name of object in Salesforce Org.
-                    - name: 'fields'
+                    - name: fields
                       type: Array
                       description: |
                         Fields in the Salesforce object. When unspecified as part of include/exclude objects, includes/excludes everything/nothing.
@@ -1262,68 +1318,68 @@ properties:
                           Salesforce field.
                         type: NestedObject
                         properties:
-                          - name: 'name'
+                          - name: name
                             type: String
                             description: |
                               Field name.
-          - name: 'pollingInterval'
+          - name: pollingInterval
             type: String
             description: |
               Salesforce objects polling interval. The interval at which new changes will be polled for each object. The duration must be between 5 minutes and 24 hours.
             required: true
-      - name: 'spannerSourceConfig'
+      - name: spannerSourceConfig
         type: NestedObject
         description: |
           Spanner data source configuration.
         send_empty_value: true
         allow_empty_object: true
         exactly_one_of:
-          - 'source_config.0.mysql_source_config'
-          - 'source_config.0.oracle_source_config'
-          - 'source_config.0.postgresql_source_config'
-          - 'source_config.0.sql_server_source_config'
-          - 'source_config.0.salesforce_source_config'
-          - 'source_config.0.spanner_source_config'
-          - 'source_config.0.mongodb_source_config'
+          - source_config.0.mysql_source_config
+          - source_config.0.oracle_source_config
+          - source_config.0.postgresql_source_config
+          - source_config.0.sql_server_source_config
+          - source_config.0.salesforce_source_config
+          - source_config.0.spanner_source_config
+          - source_config.0.mongodb_source_config
         properties:
-          - name: 'changeStreamName'
+          - name: changeStreamName
             type: String
             description: |
               The Spanner change stream name to use.
-          - name: 'spannerRpcPriority'
+          - name: spannerRpcPriority
             type: Enum
             description: |
               The RPC priority to use for Spanner queries.
             enum_values:
-              - 'LOW'
-              - 'MEDIUM'
-              - 'HIGH'
-          - name: 'fgacRole'
+              - LOW
+              - MEDIUM
+              - HIGH
+          - name: fgacRole
             type: String
             description: |
               The FGAC role to use for Spanner queries.
-          - name: 'maxConcurrentCdcTasks'
+          - name: maxConcurrentCdcTasks
             type: Integer
             description: |
               Max concurrent CDC tasks.
             default_from_api: true
             send_empty_value: true
             validation:
-              function: 'validation.IntAtLeast(0)'
-          - name: 'maxConcurrentBackfillTasks'
+              function: validation.IntAtLeast(0)
+          - name: maxConcurrentBackfillTasks
             type: Integer
             description: |
               Max concurrent backfill tasks.
             default_from_api: true
             send_empty_value: true
             validation:
-              function: 'validation.IntAtLeast(0)'
-          - name: 'includeObjects'
+              function: validation.IntAtLeast(0)
+          - name: includeObjects
             type: NestedObject
             description: |
               Spanner objects to retrieve from the source.
             properties:
-              - name: 'schemas'
+              - name: schemas
                 type: Array
                 description: |
                   Spanner schemas in the database
@@ -1334,12 +1390,12 @@ properties:
                     Spanner schema
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
                       description: |
                         Schema name.
                       required: true
-                    - name: 'tables'
+                    - name: tables
                       type: Array
                       description: |
                         Tables in the schema.
@@ -1349,12 +1405,12 @@ properties:
                           Spanner table.
                         type: NestedObject
                         properties:
-                          - name: 'table'
+                          - name: table
                             type: String
                             description: |
                               Table name.
                             required: true
-                          - name: 'columns'
+                          - name: columns
                             type: Array
                             description: |
                               Spanner columns in the table. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1364,32 +1420,32 @@ properties:
                                 Spanner column.
                               type: NestedObject
                               properties:
-                                - name: 'column'
+                                - name: column
                                   type: String
                                   description: |
                                     Column name.
-                                - name: 'dataType'
+                                - name: dataType
                                   type: String
                                   description: |
                                     The Spanner data type. Full data types list can be found here:
                                     https://docs.cloud.google.com/spanner/docs/reference/standard-sql/data-types
                                   output: true
-                                - name: 'isPrimaryKey'
+                                - name: isPrimaryKey
                                   type: Boolean
                                   description: |
                                     Whether or not the column is a primary key.
                                   output: true
-                                - name: 'ordinalPosition'
+                                - name: ordinalPosition
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
                                   output: true
-          - name: 'excludeObjects'
+          - name: excludeObjects
             type: NestedObject
             description: |
               Spanner objects to retrieve from the source.
             properties:
-              - name: 'schemas'
+              - name: schemas
                 type: Array
                 description: |
                   Spanner schemas in the database
@@ -1400,12 +1456,12 @@ properties:
                     Spanner schema
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
                       description: |
                         Schema name.
                       required: true
-                    - name: 'tables'
+                    - name: tables
                       type: Array
                       description: |
                         Tables in the schema.
@@ -1415,12 +1471,12 @@ properties:
                           Spanner table.
                         type: NestedObject
                         properties:
-                          - name: 'table'
+                          - name: table
                             type: String
                             description: |
                               Table name.
                             required: true
-                          - name: 'columns'
+                          - name: columns
                             type: Array
                             description: |
                               Spanner columns in the table. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1430,253 +1486,253 @@ properties:
                                 Spanner column.
                               type: NestedObject
                               properties:
-                                - name: 'column'
+                                - name: column
                                   type: String
                                   description: |
                                     Column name.
-                                - name: 'dataType'
+                                - name: dataType
                                   type: String
                                   description: |
                                     The Spanner data type. Full data types list can be found here:
                                     https://docs.cloud.google.com/spanner/docs/reference/standard-sql/data-types
                                   output: true
-                                - name: 'isPrimaryKey'
+                                - name: isPrimaryKey
                                   type: Boolean
                                   description: |
                                     Whether the column is a primary key.
                                   output: true
-                                - name: 'ordinalPosition'
+                                - name: ordinalPosition
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
                                   output: true
-          - name: 'backfillDataBoostEnabled'
+          - name: backfillDataBoostEnabled
             type: Boolean
             description: |
               Whether to use DataBoost for backfill queries.
-      - name: 'mongodbSourceConfig'
+      - name: mongodbSourceConfig
         description: |
           MongoDB source configuration.
         type: NestedObject
         send_empty_value: true
         allow_empty_object: true
         exactly_one_of:
-          - 'source_config.0.mysql_source_config'
-          - 'source_config.0.oracle_source_config'
-          - 'source_config.0.postgresql_source_config'
-          - 'source_config.0.sql_server_source_config'
-          - 'source_config.0.salesforce_source_config'
-          - 'source_config.0.spanner_source_config'
-          - 'source_config.0.mongodb_source_config'
+          - source_config.0.mysql_source_config
+          - source_config.0.oracle_source_config
+          - source_config.0.postgresql_source_config
+          - source_config.0.sql_server_source_config
+          - source_config.0.salesforce_source_config
+          - source_config.0.spanner_source_config
+          - source_config.0.mongodb_source_config
         properties:
-          - name: 'includeObjects'
+          - name: includeObjects
             type: NestedObject
             description: |
               MongoDB collections to include in the stream.
             properties:
               - type: Array
-                name: 'databases'
+                name: databases
                 description: |
                   MongoDB databases in the cluster.
                 item_type:
                   type: NestedObject
                   properties:
                     - type: String
-                      name: 'database'
+                      name: database
                       description: |
                         Database name.
                     - type: Array
-                      name: 'collections'
+                      name: collections
                       description: |
                         Collections in the database.
                       item_type:
                         type: NestedObject
                         properties:
                           - type: String
-                            name: 'collection'
+                            name: collection
                             description: |
                               Collection name.
                           - type: Array
-                            name: 'fields'
+                            name: fields
                             description: |
                               Fields in the collection.
                             item_type:
                               type: NestedObject
                               properties:
-                                - type: 'String'
-                                  name: 'field'
+                                - type: String
+                                  name: field
                                   description: |
                                     Field name.
-          - name: 'excludeObjects'
+          - name: excludeObjects
             type: NestedObject
             description: |
               MongoDB collections to include in the stream.
             properties:
               - type: Array
-                name: 'databases'
+                name: databases
                 description: |
                   MongoDB databases in the cluster.
                 item_type:
                   type: NestedObject
                   properties:
                     - type: String
-                      name: 'database'
+                      name: database
                       description: |
                         Database name.
                     - type: Array
-                      name: 'collections'
+                      name: collections
                       description: |
                         Collections in the database.
                       item_type:
                         type: NestedObject
                         properties:
                           - type: String
-                            name: 'collection'
+                            name: collection
                             description: |
                               Collection name.
                           - type: Array
-                            name: 'fields'
+                            name: fields
                             description: |
                               Fields in the collection.
                             item_type:
                               type: NestedObject
                               properties:
-                                - type: 'String'
-                                  name: 'field'
+                                - type: String
+                                  name: field
                                   description: |
                                     Field name.
-          - name: 'maxConcurrentBackfillTasks'
+          - name: maxConcurrentBackfillTasks
             type: Integer
             description: |
               Optional. Maximum number of concurrent backfill tasks. The number
               should be non-negative and less than or equal to 50. If not set
               (or set to 0), the system''s default value is used
-  - name: 'destinationConfig'
+  - name: destinationConfig
     type: NestedObject
     description: |
       Destination connection profile configuration.
     required: true
     properties:
-      - name: 'destinationConnectionProfile'
+      - name: destinationConnectionProfile
         type: String
         description: |
           Destination connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
         required: true
         immutable: true
-        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - name: 'gcsDestinationConfig'
+        diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+      - name: gcsDestinationConfig
         type: NestedObject
         description: |
           A configuration for how data should be loaded to Cloud Storage.
         exactly_one_of:
-          - 'destination_config.0.gcs_destination_config'
-          - 'destination_config.0.bigquery_destination_config'
+          - destination_config.0.gcs_destination_config
+          - destination_config.0.bigquery_destination_config
         properties:
-          - name: 'path'
+          - name: path
             type: String
             description: |
               Path inside the Cloud Storage bucket to write data to.
-          - name: 'fileRotationMb'
+          - name: fileRotationMb
             type: Integer
             description: |
               The maximum file size to be saved in the bucket.
             default_from_api: true
-          - name: 'fileRotationInterval'
+          - name: fileRotationInterval
             type: String
             description: |
               The maximum duration for which new events are added before a file is closed and a new file is created.
-              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". Defaults to 900s.
+              Values within the range of 15-60 seconds are allowed.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
             default_from_api: true
-          - name: 'avroFileFormat'
+          - name: avroFileFormat
             type: NestedObject
             description: |
               AVRO file format configuration.
             send_empty_value: true
             allow_empty_object: true
             exactly_one_of:
-              - 'destination_config.0.gcs_destination_config.0.avro_file_format'
-              - 'destination_config.0.gcs_destination_config.0.json_file_format'
-            properties:
-              []
-          - name: 'jsonFileFormat'
+              - destination_config.0.gcs_destination_config.0.avro_file_format
+              - destination_config.0.gcs_destination_config.0.json_file_format
+            properties: []
+          - name: jsonFileFormat
             type: NestedObject
             description: |
               JSON file format configuration.
             exactly_one_of:
-              - 'destination_config.0.gcs_destination_config.0.avro_file_format'
-              - 'destination_config.0.gcs_destination_config.0.json_file_format'
+              - destination_config.0.gcs_destination_config.0.avro_file_format
+              - destination_config.0.gcs_destination_config.0.json_file_format
             properties:
-              - name: 'schemaFileFormat'
+              - name: schemaFileFormat
                 type: Enum
                 description: |
                   The schema file format along JSON data files.
                 enum_values:
-                  - 'NO_SCHEMA_FILE'
-                  - 'AVRO_SCHEMA_FILE'
-              - name: 'compression'
+                  - NO_SCHEMA_FILE
+                  - AVRO_SCHEMA_FILE
+              - name: compression
                 type: Enum
                 description: |
                   Compression of the loaded JSON file.
                 enum_values:
-                  - 'NO_COMPRESSION'
-                  - 'GZIP'
-      - name: 'bigqueryDestinationConfig'
+                  - NO_COMPRESSION
+                  - GZIP
+      - name: bigqueryDestinationConfig
         type: NestedObject
         description: |
           A configuration for how data should be loaded to Google BigQuery.
         exactly_one_of:
-          - 'destination_config.0.gcs_destination_config'
-          - 'destination_config.0.bigquery_destination_config'
+          - destination_config.0.gcs_destination_config
+          - destination_config.0.bigquery_destination_config
         properties:
-          - name: 'dataFreshness'
+          - name: dataFreshness
             type: String
             description: |
               The guaranteed data freshness (in seconds) when querying tables created by the stream.
               Editing this field will only affect new tables created in the future, but existing tables
               will not be impacted. Lower values mean that queries will return fresher data, but may result in higher cost.
               A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". Defaults to 900s.
-          - name: 'singleTargetDataset'
+          - name: singleTargetDataset
             type: NestedObject
             description: |
               A single target dataset to which all data will be streamed.
             exactly_one_of:
-              - 'destination_config.0.bigquery_destination_config.0.single_target_dataset'
-              - 'destination_config.0.bigquery_destination_config.0.source_hierarchy_datasets'
+              - destination_config.0.bigquery_destination_config.0.single_target_dataset
+              - destination_config.0.bigquery_destination_config.0.source_hierarchy_datasets
             properties:
-              - name: 'datasetId'
+              - name: datasetId
                 type: String
                 description: |
                   Dataset ID in the format projects/{project}/datasets/{dataset_id} or
                   {project}:{dataset_id}
                 required: true
-                diff_suppress_func: 'resourceDatastreamStreamDatabaseIdDiffSuppress'
-                custom_expand: 'templates/terraform/custom_expand/datastream_stream_dataset_id.go.tmpl'
-          - name: 'sourceHierarchyDatasets'
+                diff_suppress_func: resourceDatastreamStreamDatabaseIdDiffSuppress
+                custom_expand: templates/terraform/custom_expand/datastream_stream_dataset_id.go.tmpl
+          - name: sourceHierarchyDatasets
             type: NestedObject
             description: |
               Destination datasets are created so that hierarchy of the destination data objects matches the source hierarchy.
             exactly_one_of:
-              - 'destination_config.0.bigquery_destination_config.0.single_target_dataset'
-              - 'destination_config.0.bigquery_destination_config.0.source_hierarchy_datasets'
+              - destination_config.0.bigquery_destination_config.0.single_target_dataset
+              - destination_config.0.bigquery_destination_config.0.source_hierarchy_datasets
             properties:
-              - name: 'datasetTemplate'
+              - name: datasetTemplate
                 type: NestedObject
                 description: |
                   Dataset template used for dynamic dataset creation.
                 required: true
                 properties:
-                  - name: 'location'
+                  - name: location
                     type: String
                     description: |
                       The geographic location where the dataset should reside.
                       See https://cloud.google.com/bigquery/docs/locations for supported locations.
                     required: true
-                  - name: 'datasetIdPrefix'
+                  - name: datasetIdPrefix
                     type: String
                     description: |
                       If supplied, every created dataset will have its name prefixed by the provided value.
                       The prefix and name will be separated by an underscore. i.e. _.
-                  - name: 'kmsKeyName'
+                  - name: kmsKeyName
                     type: String
                     description: |
                       Describes the Cloud KMS encryption key that will be used to protect destination BigQuery
@@ -1684,45 +1740,45 @@ properties:
                       encryption key. i.e. projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{cryptoKey}.
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
                     immutable: true
-              - name: 'projectId'
+              - name: projectId
                 type: String
                 description: |
                   Optional. The project id of the BigQuery dataset. If not specified, the project will be inferred from the stream resource.
-          - name: 'blmtConfig'
+          - name: blmtConfig
             type: NestedObject
-            description: 'BigLake Managed Tables configuration for BigQuery streams.'
+            description: BigLake Managed Tables configuration for BigQuery streams.
             properties:
-              - name: 'bucket'
+              - name: bucket
                 type: String
                 description: |
-                      The Cloud Storage bucket name.
+                  The Cloud Storage bucket name.
                 required: true
-              - name: 'connectionName'
+              - name: connectionName
                 type: String
                 description: |
-                      The bigquery connection. Format: `{project}.{location}.{name}`
+                  The bigquery connection. Format: `{project}.{location}.{name}`
                 required: true
-              - name: 'fileFormat'
+              - name: fileFormat
                 type: String
                 description: |
-                      The file format.
+                  The file format.
                 required: true
                 enum_values:
                   - FILE_FORMAT_UNSPECIFIED
                   - PARQUET
-              - name: 'tableFormat'
+              - name: tableFormat
                 type: String
                 description: |
-                      The table format.
+                  The table format.
                 required: true
                 enum_values:
                   - TABLE_FORMAT_UNSPECIFIED
                   - ICEBERG
-              - name: 'rootPath'
+              - name: rootPath
                 type: String
                 description: |
-                      The root path inside the Cloud Storage bucket.
-          - name: 'merge'
+                  The root path inside the Cloud Storage bucket.
+          - name: merge
             type: NestedObject
             description: |
               Merge mode defines that all changes to a table will be merged at the destination Google BigQuery
@@ -1733,9 +1789,8 @@ properties:
             allow_empty_object: true
             conflicts:
               - destination_config.0.bigquery_destination_config.0.append_only
-            properties:
-              []
-          - name: 'appendOnly'
+            properties: []
+          - name: appendOnly
             type: NestedObject
             description: |
               AppendOnly mode defines that the stream of changes (INSERT, UPDATE-INSERT, UPDATE-DELETE and DELETE
@@ -1746,28 +1801,27 @@ properties:
             allow_empty_object: true
             conflicts:
               - destination_config.0.bigquery_destination_config.0.merge
-            properties:
-              []
-  - name: 'state'
+            properties: []
+  - name: state
     type: String
     description: The state of the stream.
     output: true
-  - name: 'backfillAll'
+  - name: backfillAll
     type: NestedObject
     description: |
       Backfill strategy to automatically backfill the Stream's objects. Specific objects can be excluded.
     send_empty_value: true
     allow_empty_object: true
     exactly_one_of:
-      - 'backfill_all'
-      - 'backfill_none'
+      - backfill_all
+      - backfill_none
     properties:
-      - name: 'mysqlExcludedObjects'
+      - name: mysqlExcludedObjects
         type: NestedObject
         description: |
           MySQL data source objects to avoid backfilling.
         properties:
-          - name: 'mysqlDatabases'
+          - name: mysqlDatabases
             type: Array
             description: |
               MySQL databases on the server
@@ -1777,12 +1831,12 @@ properties:
                 MySQL database.
               type: NestedObject
               properties:
-                - name: 'database'
+                - name: database
                   type: String
                   description: |
                     Database name.
                   required: true
-                - name: 'mysqlTables'
+                - name: mysqlTables
                   type: Array
                   description: |
                     Tables in the database.
@@ -1791,12 +1845,12 @@ properties:
                       MySQL table.
                     type: NestedObject
                     properties:
-                      - name: 'table'
+                      - name: table
                         type: String
                         description: |
                           Table name.
                         required: true
-                      - name: 'mysqlColumns'
+                      - name: mysqlColumns
                         type: Array
                         description: |
                           MySQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1805,35 +1859,35 @@ properties:
                             MySQL Column.
                           type: NestedObject
                           properties:
-                            - name: 'column'
+                            - name: column
                               type: String
                               description: |
                                 Column name.
-                            - name: 'dataType'
+                            - name: dataType
                               type: String
                               description: |
                                 The MySQL data type. Full data types list can be found here:
                                 https://dev.mysql.com/doc/refman/8.0/en/data-types.html
-                            - name: 'length'
+                            - name: length
                               type: Integer
                               description: |
                                 Column length.
                               output: true
-                            - name: 'collation'
+                            - name: collation
                               type: String
                               description: |
                                 Column collation.
-                            - name: 'primaryKey'
+                            - name: primaryKey
                               type: Boolean
                               description: |
                                 Whether or not the column represents a primary key.
                               is_missing_in_cai: true
-                            - name: 'nullable'
+                            - name: nullable
                               type: Boolean
                               description: |
                                 Whether or not the column can accept a null value.
                               is_missing_in_cai: true
-                            - name: 'ordinalPosition'
+                            - name: ordinalPosition
                               type: Integer
                               description: |
                                 The ordinal position of the column in the table.
@@ -1841,12 +1895,12 @@ properties:
                         min_size: 1
                   min_size: 1
             min_size: 1
-      - name: 'postgresqlExcludedObjects'
+      - name: postgresqlExcludedObjects
         type: NestedObject
         description: |
           PostgreSQL data source objects to avoid backfilling.
         properties:
-          - name: 'postgresqlSchemas'
+          - name: postgresqlSchemas
             type: Array
             description: |
               PostgreSQL schemas on the server
@@ -1856,12 +1910,12 @@ properties:
                 PostgreSQL schema.
               type: NestedObject
               properties:
-                - name: 'schema'
+                - name: schema
                   type: String
                   description: |
                     Database name.
                   required: true
-                - name: 'postgresqlTables'
+                - name: postgresqlTables
                   type: Array
                   description: |
                     Tables in the schema.
@@ -1870,12 +1924,12 @@ properties:
                       PostgreSQL table.
                     type: NestedObject
                     properties:
-                      - name: 'table'
+                      - name: table
                         type: String
                         description: |
                           Table name.
                         required: true
-                      - name: 'postgresqlColumns'
+                      - name: postgresqlColumns
                         type: Array
                         description: |
                           PostgreSQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1884,51 +1938,51 @@ properties:
                             PostgreSQL Column.
                           type: NestedObject
                           properties:
-                            - name: 'column'
+                            - name: column
                               type: String
                               description: |
                                 Column name.
-                            - name: 'dataType'
+                            - name: dataType
                               type: String
                               description: |
                                 The PostgreSQL data type. Full data types list can be found here:
                                 https://www.postgresql.org/docs/current/datatype.html
-                            - name: 'length'
+                            - name: length
                               type: Integer
                               description: |
                                 Column length.
                               output: true
-                            - name: 'precision'
+                            - name: precision
                               type: Integer
                               description: |
                                 Column precision.
                               output: true
-                            - name: 'scale'
+                            - name: scale
                               type: Integer
                               description: |
                                 Column scale.
                               output: true
-                            - name: 'primaryKey'
+                            - name: primaryKey
                               type: Boolean
                               description: |
                                 Whether or not the column represents a primary key.
-                            - name: 'nullable'
+                            - name: nullable
                               type: Boolean
                               description: |
                                 Whether or not the column can accept a null value.
-                            - name: 'ordinalPosition'
+                            - name: ordinalPosition
                               type: Integer
                               description: |
                                 The ordinal position of the column in the table.
                         min_size: 1
                   min_size: 1
             min_size: 1
-      - name: 'oracleExcludedObjects'
+      - name: oracleExcludedObjects
         type: NestedObject
         description: |
           PostgreSQL data source objects to avoid backfilling.
         properties:
-          - name: 'oracleSchemas'
+          - name: oracleSchemas
             type: Array
             description: |
               Oracle schemas/databases in the database server
@@ -1938,12 +1992,12 @@ properties:
                 MySQL database.
               type: NestedObject
               properties:
-                - name: 'schema'
+                - name: schema
                   type: String
                   description: |
                     Schema name.
                   required: true
-                - name: 'oracleTables'
+                - name: oracleTables
                   type: Array
                   description: |
                     Tables in the database.
@@ -1952,12 +2006,12 @@ properties:
                       Oracle table.
                     type: NestedObject
                     properties:
-                      - name: 'table'
+                      - name: table
                         type: String
                         description: |
                           Table name.
                         required: true
-                      - name: 'oracleColumns'
+                      - name: oracleColumns
                         type: Array
                         description: |
                           Oracle columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1966,46 +2020,46 @@ properties:
                             Oracle Column.
                           type: NestedObject
                           properties:
-                            - name: 'column'
+                            - name: column
                               type: String
                               description: |
                                 Column name.
-                            - name: 'dataType'
+                            - name: dataType
                               type: String
                               description: |
                                 The Oracle data type. Full data types list can be found here:
                                 https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html
-                            - name: 'length'
+                            - name: length
                               type: Integer
                               description: |
                                 Column length.
                               output: true
-                            - name: 'precision'
+                            - name: precision
                               type: Integer
                               description: |
                                 Column precision.
                               output: true
-                            - name: 'scale'
+                            - name: scale
                               type: Integer
                               description: |
                                 Column scale.
                               output: true
-                            - name: 'encoding'
+                            - name: encoding
                               type: String
                               description: |
                                 Column encoding.
                               output: true
-                            - name: 'primaryKey'
+                            - name: primaryKey
                               type: Boolean
                               description: |
                                 Whether or not the column represents a primary key.
                               output: true
-                            - name: 'nullable'
+                            - name: nullable
                               type: Boolean
                               description: |
                                 Whether or not the column can accept a null value.
                               output: true
-                            - name: 'ordinalPosition'
+                            - name: ordinalPosition
                               type: Integer
                               description: |
                                 The ordinal position of the column in the table.
@@ -2013,12 +2067,12 @@ properties:
                         min_size: 1
                   min_size: 1
             min_size: 1
-      - name: 'sqlServerExcludedObjects'
+      - name: sqlServerExcludedObjects
         type: NestedObject
         description: |
           SQL Server data source objects to avoid backfilling.
         properties:
-          - name: 'schemas'
+          - name: schemas
             type: Array
             description: |
               SQL Server schemas/databases in the database server
@@ -2028,12 +2082,12 @@ properties:
                 SQL Server database.
               type: NestedObject
               properties:
-                - name: 'schema'
+                - name: schema
                   type: String
                   description: |
                     Schema name.
                   required: true
-                - name: 'tables'
+                - name: tables
                   type: Array
                   description: |
                     Tables in the database.
@@ -2042,12 +2096,12 @@ properties:
                       SQL Server table.
                     type: NestedObject
                     properties:
-                      - name: 'table'
+                      - name: table
                         type: String
                         description: |
                           Table name.
                         required: true
-                      - name: 'columns'
+                      - name: columns
                         type: Array
                         description: |
                           SQL Server columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -2056,41 +2110,41 @@ properties:
                             SQL Server Column.
                           type: NestedObject
                           properties:
-                            - name: 'column'
+                            - name: column
                               type: String
                               description: |
                                 Column name.
-                            - name: 'dataType'
+                            - name: dataType
                               type: String
                               description: |
                                 The SQL Server data type. Full data types list can be found here:
                                 https://learn.microsoft.com/en-us/sql/t-sql/data-types/data-types-transact-sql?view=sql-server-ver16
-                            - name: 'length'
+                            - name: length
                               type: Integer
                               description: |
                                 Column length.
                               output: true
-                            - name: 'precision'
+                            - name: precision
                               type: Integer
                               description: |
                                 Column precision.
                               output: true
-                            - name: 'scale'
+                            - name: scale
                               type: Integer
                               description: |
                                 Column scale.
                               output: true
-                            - name: 'primaryKey'
+                            - name: primaryKey
                               type: Boolean
                               description: |
                                 Whether or not the column represents a primary key.
                               output: true
-                            - name: 'nullable'
+                            - name: nullable
                               type: Boolean
                               description: |
                                 Whether or not the column can accept a null value.
                               output: true
-                            - name: 'ordinalPosition'
+                            - name: ordinalPosition
                               type: Integer
                               description: |
                                 The ordinal position of the column in the table.
@@ -2098,12 +2152,12 @@ properties:
                         min_size: 1
                   min_size: 1
             min_size: 1
-      - name: 'salesforceExcludedObjects'
+      - name: salesforceExcludedObjects
         type: NestedObject
         description: |
           Salesforce objects to avoid backfilling.
         properties:
-          - name: 'objects'
+          - name: objects
             type: Array
             description: |
               Salesforce objects in Salesforce Org.
@@ -2114,11 +2168,11 @@ properties:
                 Salesforce objects.
               type: NestedObject
               properties:
-                - name: 'objectName'
+                - name: objectName
                   type: String
                   description: |
                     Name of object in Salesforce Org.
-                - name: 'fields'
+                - name: fields
                   type: Array
                   description: |
                     Fields in the Salesforce object. When unspecified as part of include/exclude objects, includes/excludes everything/nothing.
@@ -2128,16 +2182,16 @@ properties:
                       Salesforce field.
                     type: NestedObject
                     properties:
-                      - name: 'name'
+                      - name: name
                         type: String
                         description: |
                           Field name.
-      - name: 'spannerExcludedObjects'
+      - name: spannerExcludedObjects
         type: NestedObject
         description: |
           Spanner objects to avoid backfilling.
         properties:
-          - name: 'schemas'
+          - name: schemas
             type: Array
             description: |
               Spanner schemas in the database
@@ -2148,12 +2202,12 @@ properties:
                 Spanner schema
               type: NestedObject
               properties:
-                - name: 'schema'
+                - name: schema
                   type: String
                   description: |
                     Schema name.
                   required: true
-                - name: 'tables'
+                - name: tables
                   type: Array
                   description: |
                     Tables in the schema.
@@ -2163,12 +2217,12 @@ properties:
                       Spanner table.
                     type: NestedObject
                     properties:
-                      - name: 'table'
+                      - name: table
                         type: String
                         description: |
                           Table name.
                         required: true
-                      - name: 'columns'
+                      - name: columns
                         type: Array
                         description: |
                           Spanner columns in the table. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -2178,34 +2232,34 @@ properties:
                             Spanner column.
                           type: NestedObject
                           properties:
-                            - name: 'column'
+                            - name: column
                               type: String
                               description: |
                                 Column name.
                               required: true
-                            - name: 'dataType'
+                            - name: dataType
                               type: String
                               description: |
                                 The Spanner data type. Full data types list can be found here:
                                 https://docs.cloud.google.com/spanner/docs/reference/standard-sql/data-types
                               output: true
-                            - name: 'isPrimaryKey'
+                            - name: isPrimaryKey
                               type: Boolean
                               description: |
                                 Whether the column is a primary key.
                               output: true
-                            - name: 'ordinalPosition'
+                            - name: ordinalPosition
                               type: Integer
                               description: |
                                 The ordinal position of the column in the table.
                               output: true
-      - name: 'mongodbExcludedObjects'
+      - name: mongodbExcludedObjects
         type: NestedObject
         description: |
           MongoDB data source objects to avoid backfilling.
         properties:
           - type: Array
-            name: 'databases'
+            name: databases
             description: |
               MongoDB databases in the cluster.
             required: true
@@ -2214,12 +2268,12 @@ properties:
               type: NestedObject
               properties:
                 - type: String
-                  name: 'database'
+                  name: database
                   required: true
                   description: |
                     Database name.
                 - type: Array
-                  name: 'collections'
+                  name: collections
                   min_size: 1
                   description: |
                     Collections in the database.
@@ -2227,197 +2281,196 @@ properties:
                     type: NestedObject
                     properties:
                       - type: String
-                        name: 'collection'
+                        name: collection
                         required: true
                         description: |
                           Collection name.
                       - type: Array
-                        name: 'fields'
+                        name: fields
                         min_size: 1
                         description: |
                           Fields in the collection.
                         item_type:
                           type: NestedObject
                           properties:
-                            - type: 'String'
-                              name: 'field'
+                            - type: String
+                              name: field
                               description: |
                                 Field name.
-  - name: 'backfillNone'
+  - name: backfillNone
     type: NestedObject
     description: |
       Backfill strategy to disable automatic backfill for the Stream's objects.
     send_empty_value: true
     allow_empty_object: true
     exactly_one_of:
-      - 'backfill_all'
-      - 'backfill_none'
-    properties:
-      []
-  - name: 'customerManagedEncryptionKey'
+      - backfill_all
+      - backfill_none
+    properties: []
+  - name: customerManagedEncryptionKey
     type: String
     description: |
       A reference to a KMS encryption key. If provided, it will be used to encrypt the data. If left blank, data
       will be encrypted using an internal Stream-specific encryption key provisioned through KMS.
     immutable: true
     is_missing_in_cai: true
-  - name: 'ruleSets'
+  - name: ruleSets
     type: Array
-    description: 'Rule sets to apply to the stream.'
+    description: Rule sets to apply to the stream.
     item_type:
       type: NestedObject
       properties:
-        - name: 'customizationRules'
+        - name: customizationRules
           type: Array
-          description: 'List of customization rules to apply.'
+          description: List of customization rules to apply.
           required: true
           item_type:
             type: NestedObject
             properties:
-              - name: 'bigqueryPartitioning'
+              - name: bigqueryPartitioning
                 type: NestedObject
-                description: 'BigQuery partitioning rule.'
+                description: BigQuery partitioning rule.
                 properties:
-                  - name: 'integerRangePartition'
+                  - name: integerRangePartition
                     type: NestedObject
                     properties:
-                      - name: 'column'
+                      - name: column
                         type: String
-                        description: 'The partitioning column.'
+                        description: The partitioning column.
                         required: true
-                      - name: 'start'
+                      - name: start
                         type: Integer
-                        description: 'The starting value for range partitioning (inclusive).'
+                        description: The starting value for range partitioning (inclusive).
                         required: true
-                      - name: 'end'
+                      - name: end
                         type: Integer
-                        description: 'The ending value for range partitioning (exclusive).'
+                        description: The ending value for range partitioning (exclusive).
                         required: true
-                      - name: 'interval'
+                      - name: interval
                         type: Integer
-                        description: 'The interval of each range within the partition.'
+                        description: The interval of each range within the partition.
                         required: true
-                  - name: 'timeUnitPartition'
+                  - name: timeUnitPartition
                     type: NestedObject
                     properties:
-                      - name: 'column'
+                      - name: column
                         type: String
-                        description: 'The partitioning column.'
+                        description: The partitioning column.
                         required: true
-                      - name: 'partitioningTimeGranularity'
+                      - name: partitioningTimeGranularity
                         type: Enum
-                        description: 'Partition granularity.'
+                        description: Partition granularity.
                         enum_values:
-                          - 'PARTITIONING_TIME_GRANULARITY_UNSPECIFIED'
-                          - 'PARTITIONING_TIME_GRANULARITY_HOUR'
-                          - 'PARTITIONING_TIME_GRANULARITY_DAY'
-                          - 'PARTITIONING_TIME_GRANULARITY_MONTH'
-                          - 'PARTITIONING_TIME_GRANULARITY_YEAR'
-                  - name: 'ingestionTimePartition'
+                          - PARTITIONING_TIME_GRANULARITY_UNSPECIFIED
+                          - PARTITIONING_TIME_GRANULARITY_HOUR
+                          - PARTITIONING_TIME_GRANULARITY_DAY
+                          - PARTITIONING_TIME_GRANULARITY_MONTH
+                          - PARTITIONING_TIME_GRANULARITY_YEAR
+                  - name: ingestionTimePartition
                     type: NestedObject
                     allow_empty_object: true
                     send_empty_value: true
                     properties:
-                      - name: 'partitioningTimeGranularity'
+                      - name: partitioningTimeGranularity
                         type: Enum
-                        description: 'Partition granularity.'
+                        description: Partition granularity.
                         enum_values:
-                          - 'PARTITIONING_TIME_GRANULARITY_UNSPECIFIED'
-                          - 'PARTITIONING_TIME_GRANULARITY_HOUR'
-                          - 'PARTITIONING_TIME_GRANULARITY_DAY'
-                          - 'PARTITIONING_TIME_GRANULARITY_MONTH'
-                          - 'PARTITIONING_TIME_GRANULARITY_YEAR'
-                  - name: 'requirePartitionFilter'
+                          - PARTITIONING_TIME_GRANULARITY_UNSPECIFIED
+                          - PARTITIONING_TIME_GRANULARITY_HOUR
+                          - PARTITIONING_TIME_GRANULARITY_DAY
+                          - PARTITIONING_TIME_GRANULARITY_MONTH
+                          - PARTITIONING_TIME_GRANULARITY_YEAR
+                  - name: requirePartitionFilter
                     type: Boolean
-                    description: 'If true, queries over the table require a partition filter.'
-              - name: 'bigqueryClustering'
+                    description: If true, queries over the table require a partition filter.
+              - name: bigqueryClustering
                 type: NestedObject
-                description: 'BigQuery clustering rule.'
+                description: BigQuery clustering rule.
                 properties:
-                  - name: 'columns'
+                  - name: columns
                     type: Array
-                    description: 'Column names to set as clustering columns.'
+                    description: Column names to set as clustering columns.
                     required: true
                     item_type:
                       type: String
-        - name: 'objectFilter'
+        - name: objectFilter
           type: NestedObject
-          description: 'Object filter to apply the customization rules to.'
+          description: Object filter to apply the customization rules to.
           required: true
           properties:
-            - name: 'sourceObjectIdentifier'
+            - name: sourceObjectIdentifier
               type: NestedObject
-              description: 'Specific source object identifier.'
+              description: Specific source object identifier.
               properties:
-                - name: 'oracleIdentifier'
+                - name: oracleIdentifier
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
-                      description: 'The schema name.'
+                      description: The schema name.
                       required: true
-                    - name: 'table'
+                    - name: table
                       type: String
-                      description: 'The table name.'
+                      description: The table name.
                       required: true
-                - name: 'mysqlIdentifier'
+                - name: mysqlIdentifier
                   type: NestedObject
                   properties:
-                    - name: 'database'
+                    - name: database
                       type: String
-                      description: 'The database name.'
+                      description: The database name.
                       required: true
-                    - name: 'table'
+                    - name: table
                       type: String
-                      description: 'The table name.'
+                      description: The table name.
                       required: true
-                - name: 'postgresqlIdentifier'
+                - name: postgresqlIdentifier
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
-                      description: 'The schema name.'
+                      description: The schema name.
                       required: true
-                    - name: 'table'
+                    - name: table
                       type: String
-                      description: 'The table name.'
+                      description: The table name.
                       required: true
-                - name: 'sqlServerIdentifier'
+                - name: sqlServerIdentifier
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
-                      description: 'The schema name.'
+                      description: The schema name.
                       required: true
-                    - name: 'table'
+                    - name: table
                       type: String
-                      description: 'The table name.'
+                      description: The table name.
                       required: true
-                - name: 'salesforceIdentifier'
+                - name: salesforceIdentifier
                   type: NestedObject
                   properties:
-                    - name: 'objectName'
+                    - name: objectName
                       type: String
-                      description: 'The Salesforce object name.'
+                      description: The Salesforce object name.
                       required: true
-                - name: 'spannerIdentifier'
+                - name: spannerIdentifier
                   type: NestedObject
                   properties:
-                    - name: 'schema'
+                    - name: schema
                       type: String
-                      description: 'The schema name.'
-                    - name: 'table'
+                      description: The schema name.
+                    - name: table
                       type: String
-                      description: 'The table name.'
+                      description: The table name.
                       required: true
-                - name: 'mongodbIdentifier'
+                - name: mongodbIdentifier
                   type: NestedObject
                   properties:
-                    - name: 'database'
+                    - name: database
                       type: String
-                      description: 'The MongoDB database name.'
+                      description: The MongoDB database name.
                       required: true
-                    - name: 'collection'
+                    - name: collection
                       type: String
-                      description: 'The MongoDB collection name.'
+                      description: The MongoDB collection name.
                       required: true

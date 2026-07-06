@@ -15,68 +15,78 @@
 name: Traffic
 description: Controls traffic configuration for a backend.
 base_url: projects/{{project}}/locations/{{location}}/backends/{{backend}}
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/backends/{{backend}}/traffic
 create_url: projects/{{project}}/locations/{{location}}/backends/{{backend}}/traffic?update_mask=*
+update_mask: true
 create_verb: PATCH
 update_verb: PATCH
-exclude_delete: true  # Traffic config cannot be deleted
-exclude_sweeper: true
 id_format: projects/{{project}}/locations/{{location}}/backends/{{backend}}/traffic
 import_format:
-  - "projects/{{project}}/locations/{{location}}/backends/{{backend}}/traffic"
-  - "{{project}}/{{location}}/{{backend}}"
-  - "{{location}}/{{backend}}"
-examples:
-  - name: firebase_app_hosting_traffic_target
-    primary_resource_id: example
-    vars:
-      backend_id: "traffic-tg"
-      build_id: "target-build"
-      service_act_id: "firebase-app-hosting-compute"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-traffic-tg"'
-  - name: firebase_app_hosting_traffic_rollout_policy
-    primary_resource_id: example
-    vars:
-      backend_id: "traffic-rp"
-      service_act_id: "firebase-app-hosting-compute"
-      branch: "main"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-traffic-rp"'
-  - name: firebase_app_hosting_traffic_rollout_policy_disabled
-    primary_resource_id: example
-    vars:
-      backend_id: "traffic-rpd"
-      service_act_id: "firebase-app-hosting-compute"
-      branch: "main"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-traffic-rpd"'
-autogen_async: true
+  - projects/{{project}}/locations/{{location}}/backends/{{backend}}/traffic
+  - '{{project}}/{{location}}/{{backend}}'
+  - '{{location}}/{{backend}}'
+exclude_sweeper: true
 async:
+  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 20
       update_minutes: 20
       delete_minutes: 20
-    base_url: "{{op_id}}"
+    base_url: '{{op_id}}'
   actions:
     - create
     - delete
     - update
-  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
+exclude_delete: true # Traffic config cannot be deleted
+autogen_async: true
+samples:
+  - name: firebase_app_hosting_traffic_target
+    primary_resource_id: example
+    steps:
+      - name: firebase_app_hosting_traffic_target
+        resource_id_vars:
+          backend_id: traffic-tg
+          build_id: target-build
+          service_act_id: firebase-app-hosting-compute
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          # prevent tests from colliding with each other
+          service_act_id: '"tf-test-traffic-tg"'
+  - name: firebase_app_hosting_traffic_rollout_policy
+    primary_resource_id: example
+    steps:
+      - name: firebase_app_hosting_traffic_rollout_policy
+        resource_id_vars:
+          backend_id: traffic-rp
+          service_act_id: firebase-app-hosting-compute
+          branch: main
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          # prevent tests from colliding with each other
+          service_act_id: '"tf-test-traffic-rp"'
+          # for backward compatible
+          branch: '"main" + randomSuffix'
+  - name: firebase_app_hosting_traffic_rollout_policy_disabled
+    primary_resource_id: example
+    steps:
+      - name: firebase_app_hosting_traffic_rollout_policy_disabled
+        resource_id_vars:
+          backend_id: traffic-rpd
+          service_act_id: firebase-app-hosting-compute
+          branch: main
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          # prevent tests from colliding with each other
+          service_act_id: '"tf-test-traffic-rpd"'
+          # for backward compatible
+          branch: '"main" + randomSuffix'
 parameters:
   - name: location
     type: String
@@ -140,13 +150,11 @@ properties:
             - name: build
               type: String
               output: true
-              description: |-
-                The build that traffic is being routed to.
+              description: The build that traffic is being routed to.
             - name: percent
               type: Integer
               output: true
-              description: |-
-                The percentage of traffic to send to the build. Currently must be 100 or 0.
+              description: The percentage of traffic to send to the build. Currently must be 100 or 0.
   - name: target
     type: NestedObject
     description: |-
@@ -168,31 +176,26 @@ properties:
             - name: build
               type: String
               required: true
-              description: |-
-                The build that traffic is being routed to.
+              description: The build that traffic is being routed to.
             - name: percent
               type: Integer
               required: true
-              description: |-
-                The percentage of traffic to send to the build. Currently must be 100 or 0.
+              description: The percentage of traffic to send to the build. Currently must be 100 or 0.
   - name: rolloutPolicy
     type: NestedObject
-    description: |-
-      The policy for how builds and rollouts are triggered and rolled out.
+    description: The policy for how builds and rollouts are triggered and rolled out.
     exactly_one_of:
       - rolloutPolicy
       - target
     properties:
       - name: disabled
         type: Boolean
-        description: |-
-          A flag that, if true, prevents rollouts from being created via this RolloutPolicy.
+        description: A flag that, if true, prevents rollouts from being created via this RolloutPolicy.
         default_value: false
       - name: disabledTime
         type: Time
         output: true
-        description: |-
-          If disabled is set, the time at which the rollouts were disabled.
+        description: If disabled is set, the time at which the rollouts were disabled.
       - name: codebaseBranch
         type: String
         description: |-

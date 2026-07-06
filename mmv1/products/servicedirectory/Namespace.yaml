@@ -12,41 +12,45 @@
 # limitations under the License.
 
 ---
-name: 'Namespace'
+name: Namespace
 description: |
   A container for `services`. Namespaces allow administrators to group services
   together and define permissions for a collection of services.
 references:
   guides:
-    'Configuring a namespace': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_namespace'
-  api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1/projects.locations.namespaces'
+    Configuring a namespace: https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_namespace
+  api: https://cloud.google.com/service-directory/docs/reference/rest/v1/projects.locations.namespaces
 docs:
 base_url: '{{name}}'
 self_link: '{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/namespaces?namespaceId={{namespace_id}}'
-update_verb: 'PATCH'
+create_url: projects/{{project}}/locations/{{location}}/namespaces?namespaceId={{namespace_id}}
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  exclude_import_test: true
+  method_name_separator: ':'
+  fetch_iam_policy_verb: POST
+  parent_resource_attribute: name
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}'
+  - projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-iam_policy:
-  exclude_import_test: true
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'name'
-custom_code:
-  custom_import: 'templates/terraform/custom_import/service_directory_namespace.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'service_directory_namespace_basic'
-    primary_resource_id: 'example'
-    vars:
-      namespace_id: 'example-namespace'
+# exluding resource_identity due to namespace_id field
+exclude_identity_generation: true
+custom_code:
+  custom_import: templates/terraform/custom_import/service_directory_namespace.go.tmpl
+samples:
+  - name: service_directory_namespace_basic
+    primary_resource_id: example
+    steps:
+      - name: service_directory_namespace_basic
+        resource_id_vars:
+          namespace_id: example-namespace
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location for the Namespace.
@@ -54,7 +58,7 @@ parameters:
     required: true
     immutable: true
     ignore_read: true
-  - name: 'namespaceId'
+  - name: namespaceId
     type: String
     description: |
       The Resource ID must be 1-63 characters long, including digits,
@@ -63,15 +67,15 @@ parameters:
     required: true
     immutable: true
     validation:
-      function: 'verify.ValidateRFC1035Name(2, 63)'
+      function: verify.ValidateRFC1035Name(2, 63)
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name for the namespace
       in the format `projects/*/locations/*/namespaces/*`.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Resource labels associated with this Namespace. No more than 64 user

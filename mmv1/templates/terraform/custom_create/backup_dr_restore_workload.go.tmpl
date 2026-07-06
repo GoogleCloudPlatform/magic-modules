@@ -95,6 +95,9 @@ if v, ok := d.GetOkExists("compute_instance_target_environment"); ok {
         if val, ok := m["zone"]; ok {
             env["zone"] = val.(string)
         }
+        if val, ok := m["use_project_service_account"]; ok {
+            env["useProjectServiceAccount"] = val.(bool)
+        }
         if len(env) > 0 {
             obj["computeInstanceTargetEnvironment"] = env
         }
@@ -112,6 +115,9 @@ if v, ok := d.GetOkExists("disk_target_environment"); ok {
         }
         if val, ok := m["zone"]; ok {
             env["zone"] = val.(string)
+        }
+        if val, ok := m["use_project_service_account"]; ok {
+            env["useProjectServiceAccount"] = val.(bool)
         }
         if len(env) > 0 {
             obj["diskTargetEnvironment"] = env
@@ -133,6 +139,9 @@ if v, ok := d.GetOkExists("region_disk_target_environment"); ok {
         }
         if zones, ok := m["replica_zones"]; ok {
             env["replicaZones"] = zones
+        }
+        if val, ok := m["use_project_service_account"]; ok {
+            env["useProjectServiceAccount"] = val.(bool)
         }
         if len(env) > 0 {
             obj["regionDiskTargetEnvironment"] = env
@@ -422,7 +431,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
                     niObj["subnetwork"] = v.(string)
                 }
                 if v, ok := niMap["ip_address"]; ok && v != "" {
-                    niObj["ipAddress"] = v.(string)
+                    niObj["networkIP"] = v.(string)
                 }
                 if v, ok := niMap["ipv6_address"]; ok && v != "" {
                     niObj["ipv6Address"] = v.(string)
@@ -463,7 +472,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
                             acObj["name"] = n.(string)
                         }
                         if ei, ok := acMap["external_ip"]; ok && ei != "" {
-                            acObj["externalIp"] = ei.(string)
+                            acObj["natIP"] = ei.(string)
                         }
                         if eiv6, ok := acMap["external_ipv6"]; ok && eiv6 != "" {
                             acObj["externalIpv6"] = eiv6.(string)
@@ -506,7 +515,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
                             iacObj["name"] = n.(string)
                         }
                         if ei, ok := iacMap["external_ip"]; ok && ei != "" {
-                            iacObj["externalIp"] = ei.(string)
+                            iacObj["natIP"] = ei.(string)
                         }
                         if eiv6, ok := iacMap["external_ipv6"]; ok && eiv6 != "" {
                             iacObj["externalIpv6"] = eiv6.(string)
@@ -614,7 +623,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
                 aa := aaList[0].(map[string]interface{})
                 aaObj := make(map[string]interface{})
                 if cat, ok := aa["consume_allocation_type"]; ok && cat != "" {
-                    aaObj["consumeAllocationType"] = cat.(string)
+                    aaObj["consumeReservationType"] = cat.(string)
                 }
                 if k, ok := aa["key"]; ok && k != "" {
                     aaObj["key"] = k.(string)
@@ -623,7 +632,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
                     aaObj["values"] = v.([]interface{})
                 }
                 if len(aaObj) > 0 {
-                    props["allocationAffinity"] = aaObj
+                    props["reservationAffinity"] = aaObj
                 }
             }
         }
@@ -896,7 +905,7 @@ if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 // ==================== Build Restore URL & Execute Request ====================
 // Construct the restore URL using base path and url params
 url := fmt.Sprintf("%sprojects/%s/locations/%s/backupVaults/%s/dataSources/%s/backups/%s:restore",
-    config.BackupDRBasePath,
+    transport_tpg.BaseUrl(Product, config),
     project,
     d.Get("location").(string),
     d.Get("backup_vault_id").(string),

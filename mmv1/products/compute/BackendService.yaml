@@ -49,6 +49,9 @@ iam_policy:
   iam_conditions_request_type: 'QUERY_PARAM'
   min_version: 'beta'
 include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccComputeBackendService_backendServiceCustomMetrics_update'
+    skip: 'Test framework problem with single vs multiple block parsing of custom_metrics'
 custom_code:
   constants: 'templates/terraform/constants/backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/backend_service.go.tmpl'
@@ -57,101 +60,149 @@ custom_code:
   post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/compute_backend_service.go.tmpl'
 schema_version: 1
-examples:
+samples:
   - name: 'backend_service_basic'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_basic'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          http_health_check_name: 'health-check'
   - name: 'backend_service_external_iap'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'tf-test-backend-service-external'
+    steps:
+      - name: 'backend_service_external_iap'
+        resource_id_vars:
+          backend_service_name: 'tf-test-backend-service-external'
   - name: 'backend_service_cache_simple'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_cache_simple'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          http_health_check_name: 'health-check'
   - name: 'backend_service_cache_include_http_headers'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
+    steps:
+      - name: 'backend_service_cache_include_http_headers'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
   - name: 'backend_service_cache_include_named_cookies'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
+    steps:
+      - name: 'backend_service_cache_include_named_cookies'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
   - name: 'backend_service_cache'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_cache'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          http_health_check_name: 'health-check'
   - name: 'backend_service_cache_bypass_cache_on_request_headers'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_cache_bypass_cache_on_request_headers'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          http_health_check_name: 'health-check'
   - name: 'backend_service_traffic_director_round_robin'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_traffic_director_round_robin'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_traffic_director_ring_hash'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_traffic_director_ring_hash'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_stateful_session_affinity'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_stateful_session_affinity'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_network_endpoint'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      neg_name: 'network-endpoint'
+    steps:
+      - name: 'backend_service_network_endpoint'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          neg_name: 'network-endpoint'
   - name: 'backend_service_in_flight'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_in_flight'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_external_managed'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_external_managed'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_ip_address_selection_policy'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
+    steps:
+      - name: 'backend_service_ip_address_selection_policy'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
   - name: 'backend_service_custom_metrics'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      default_neg_name: 'network-endpoint'
-      health_check_name: 'health-check'
-      network_name: 'network'
+    steps:
+      - name: 'backend_service_custom_metrics'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          default_neg_name: 'network-endpoint'
+          health_check_name: 'health-check'
+          network_name: 'network'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
   - name: 'backend_service_tls_settings'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-      authentication_name: 'authentication'
+    steps:
+      - name: 'backend_service_tls_settings'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
+          authentication_name: 'authentication'
+        test_vars_overrides:
+          # for backward compatible
+          authentication_name: '"authentication" + randomSuffix'
   - name: 'backend_service_dynamic_backends'
     primary_resource_id: 'default'
-    vars:
-      url_map_name: 'url_map'
     exclude_test: true
+    steps:
+      - name: 'backend_service_dynamic_backends'
+        resource_id_vars:
+          url_map_name: 'url_map'
   - name: 'backend_service_dynamic_forwarding'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
+    steps:
+      - name: 'backend_service_dynamic_forwarding'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -650,7 +701,6 @@ properties:
               - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
             item_type:
               type: String
-            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
           - name: 'queryStringWhitelist'
             type: Array
             description: |
@@ -662,7 +712,6 @@ properties:
               delimiters.
             is_set: true
             send_empty_value: true
-            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
             at_least_one_of:
               - 'cdn_policy.0.cache_key_policy.0.include_host'
               - 'cdn_policy.0.cache_key_policy.0.include_protocol'
@@ -861,9 +910,7 @@ properties:
     max_size: 1
   - name: 'generated_id'
     type: Integer
-    description:
-      'The unique identifier for the resource. This identifier is defined by the
-      server.'
+    description: 'The unique identifier for the resource. This identifier is defined by the server.'
     api_name: id
     output: true
   - name: 'iap'
@@ -884,6 +931,7 @@ properties:
         description: |
           OAuth2 Client ID for IAP
         send_empty_value: true
+        diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress(" ")'
       - name: 'oauth2ClientSecret'
         type: String
         description: |

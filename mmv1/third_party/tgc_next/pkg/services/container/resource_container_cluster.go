@@ -12,9 +12,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/container/v1"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
 )
+
+func init() {
+	registry.Schema{
+		Name:        "google_container_cluster",
+		ProductName: "container",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceContainerCluster(),
+	}.Register()
+}
 
 // ContainerClusterAssetType is the CAI asset type name for container cluster.
 const ContainerClusterAssetType string = "container.googleapis.com/Cluster"
@@ -95,6 +105,9 @@ var (
 		"addons_config.0.lustre_csi_driver_config",
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
+		"addons_config.0.slice_controller_config",
+		"addons_config.0.pod_snapshot_config",
+		"addons_config.0.slurm_operator_config",
 	}
 
 	privateClusterConfigKeys = []string{
@@ -525,6 +538,23 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"pod_snapshot_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `Configuration for the Pod Snapshot feature.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether the Pod Snapshot feature is enabled for this cluster.`,
+									},
+								},
+							},
+						},
 						"stateful_ha_config": {
 							Type:          schema.TypeList,
 							Optional:      true,
@@ -533,6 +563,20 @@ func ResourceContainerCluster() *schema.Resource {
 							MaxItems:      1,
 							Description:   `The status of the Stateful HA addon, which provides automatic configurable failover for stateful applications. Defaults to disabled; set enabled = true to enable.`,
 							ConflictsWith: []string{"enable_autopilot"},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"slice_controller_config": {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
@@ -584,6 +628,22 @@ func ResourceContainerCluster() *schema.Resource {
 												},
 											},
 										},
+									},
+								},
+							},
+						},
+						"slurm_operator_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Slurm Operator addon, which creates slurm related CRDs and KCP pods to manage them. Defaults to disabled for Standard clusters; set enabled = true to enable. It can not be enabled for Autopilot clusters.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
 									},
 								},
 							},
@@ -985,6 +1045,53 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `Enable NET_ADMIN for this cluster.`,
 			},
 
+			"autopilot_privileged_admission": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "The customer allowlist Cloud Storage paths for the cluster. These paths are used with the `--autopilot-privileged-admission` flag to authorize privileged workloads in Autopilot clusters. To allow default partner allowlists, set to []. To allow no allowlists, set to [\"\"].",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringMatch(regexp.MustCompile(`^((?:gke|gs)://.+)?$`), "allowlist path must start with either gke:// or gs://"),
+				},
+			},
+
+			"autopilot_cluster_policy_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Configuration for Autopilot cluster policy.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"no_standard_node_pools": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether standard node pools are disabled.`,
+						},
+						"no_system_impersonation": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether system impersonation is disabled.`,
+						},
+						"no_system_mutation": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether system mutation is disabled.`,
+						},
+						"no_unsafe_webhooks": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Whether unsafe webhooks are disabled.`,
+						},
+					},
+				},
+			},
+
 			"authenticator_groups_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1141,6 +1248,24 @@ func ResourceContainerCluster() *schema.Resource {
 												},
 											},
 										},
+									},
+								},
+							},
+						},
+						"disruption_budget": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Time window for maintenance operations.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"minor_version_disruption_interval": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"patch_version_disruption_interval": {
+										Type:     schema.TypeString,
+										Optional: true,
 									},
 								},
 							},
@@ -1479,6 +1604,18 @@ func ResourceContainerCluster() *schema.Resource {
 
 			"node_config": schemaNodeConfig(),
 
+			"node_pool": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				ForceNew: true, // TODO: Add ability to add/remove nodePools
+				Elem: &schema.Resource{
+					Schema: schemaNodePool,
+				},
+				Description:   `List of node pools associated with this cluster. See google_container_node_pool for schema. Warning: node pools defined inside a cluster can't be changed (or added/removed) after cluster creation without deleting and recreating the entire cluster. Unless you absolutely need the ability to say "these are the only node pools associated with this cluster", use the google_container_node_pool resource instead of this property.`,
+				ConflictsWith: []string{"enable_autopilot"},
+			},
+
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
 			"node_pool_auto_config": {
@@ -1785,6 +1922,11 @@ func ResourceContainerCluster() *schema.Resource {
 										Optional:    true,
 										Description: `List of secondary ranges names within this subnetwork that can be used for pod IPs.`,
 										Elem:        &schema.Schema{Type: schema.TypeString},
+									},
+									"status": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Status of the subnetwork, If in draining status, subnet will not be selected for new node pools.`,
 									},
 								},
 							},
@@ -2558,6 +2700,26 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"node_creation_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `NodeCreationConfig defines the settings of node creation mode.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"node_creation_mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"VIA_KUBELET", "VIA_CONTROL_PLANE"}, false),
+							Description: `NodeCreationMode defines the settings of node creation mode.
+ Accepted values are:
+* VIA_KUBELET: Kubelet registers itself.
+* VIA_CONTROL_PLANE: gcp-controller-manager automatically creates the node object after CSR approval.`,
+						},
+					},
+				},
+			},
 			"rbac_binding_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -2578,6 +2740,25 @@ func ResourceContainerCluster() *schema.Resource {
 						},
 					},
 				},
+			},
+
+			"skip_node_pool_refresh": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `If true, the provider will not refresh the inline node_pool state from the API during cluster reads. Set this to true only when all node pools are managed via separate google_container_node_pool resources; it substantially improves plan/apply performance on clusters with a high node pool count. Must not be set to true when inline node_pool blocks are defined on this resource.`,
+			},
+
+			"dataplane_optimization_mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `The desired dataplane optimization mode.`,
+			},
+
+			"ignore_node_count_changes": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `When true, the provider ignores external changes (drift) to the node count by skipping GCE API queries to the Instance Group Managers. This is a performance optimization for large clusters that saves API quota. Setting this to true will result in missing managed_instance_group_urls in the state for all node pools in the cluster.`,
 			},
 		},
 	}

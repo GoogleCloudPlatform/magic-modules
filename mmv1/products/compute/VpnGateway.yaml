@@ -27,6 +27,7 @@ docs:
 base_url: 'projects/{{project}}/regions/{{region}}/targetVpnGateways'
 has_self_link: true
 immutable: true
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -40,36 +41,49 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
+samples:
   - name: 'target_vpn_gateway_basic'
     primary_resource_id: 'target_gateway'
-    vars:
-      target_vpn_gateway_name: 'vpn-1'
-      network_name: 'network-1'
-      address_name: 'vpn-static-ip'
-      esp_forwarding_rule_name: 'fr-esp'
-      udp500_forwarding_rule_name: 'fr-udp500'
-      udp4500_forwarding_rule_name: 'fr-udp4500'
-      vpn_tunnel_name: 'tunnel1'
-      route_name: 'route1'
+    steps:
+      - name: 'target_vpn_gateway_basic'
+        resource_id_vars:
+          target_vpn_gateway_name: 'vpn-1'
+          network_name: 'network-1'
+          address_name: 'vpn-static-ip'
+          esp_forwarding_rule_name: 'fr-esp'
+          udp500_forwarding_rule_name: 'fr-udp500'
+          udp4500_forwarding_rule_name: 'fr-udp4500'
+          vpn_tunnel_name: 'tunnel1'
+          route_name: 'route1'
+        test_vars_overrides:
+          # for backward compatible
+          vpn_tunnel_name: '"tunnel1" + randomSuffix'
+          # for backward compatible
+          route_name: '"route1" + randomSuffix'
   - name: 'target_vpn_gateway_tags'
     primary_resource_id: 'target_gateway_tags'
-    vars:
-      target_vpn_gateway_name: 'vpn-1'
-      network_name: 'network-1'
-      address_name: 'vpn-static-ip'
-      esp_forwarding_rule_name: 'fr-esp'
-      udp500_forwarding_rule_name: 'fr-udp500'
-      udp4500_forwarding_rule_name: 'fr-udp4500'
-      vpn_tunnel_name: 'tunnel1'
-      route_name: 'route1'
-      tag_key: 'tagkey'
-      tag_value: 'tagvalue'
-      org_id: '123456789'
-    test_vars_overrides:
-      'tag_key': '"tf-test-key-" + acctest.RandString(t, 10)'
-      'tag_value': '"tf-test-value-" + acctest.RandString(t, 10)'
-      'org_id': 'envvar.GetTestOrgFromEnv(t)'
+    steps:
+      - name: 'target_vpn_gateway_tags'
+        resource_id_vars:
+          target_vpn_gateway_name: 'vpn-1'
+          network_name: 'network-1'
+          address_name: 'vpn-static-ip'
+          esp_forwarding_rule_name: 'fr-esp'
+          udp500_forwarding_rule_name: 'fr-udp500'
+          udp4500_forwarding_rule_name: 'fr-udp4500'
+          vpn_tunnel_name: 'tunnel1'
+          route_name: 'route1'
+          tag_key: 'tagkey'
+          tag_value: 'tagvalue'
+          org_id: '123456789'
+        test_vars_overrides:
+          'tag_key': '"tf-test-key-" + acctest.RandString(t, 10)'
+          'tag_value': '"tf-test-value-" + acctest.RandString(t, 10)'
+          'org_id': 'envvar.GetTestOrgFromEnv(t)'
+          # for backward compatible
+          vpn_tunnel_name: '"tunnel1" + randomSuffix'
+          # for backward compatible
+          route_name: '"route1" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -112,7 +126,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs

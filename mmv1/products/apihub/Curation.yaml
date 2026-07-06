@@ -15,23 +15,28 @@
 name: Curation
 description: Description
 base_url: projects/{{project}}/locations/{{location}}/curations
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/curations/{{curation_id}}
 create_url: projects/{{project}}/locations/{{location}}/curations?curationId={{curation_id}}
+update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/curations/{{curation_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/curations/{{curation_id}}
-autogen_async: true
 autogen_status: Q3VyYXRpb24=
-examples:
+autogen_async: true
+samples:
   - name: apihub_curation_basic
     primary_resource_id: apihub_curation_basic
-    vars:
-      curation_id: 'test'
-    # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
     exclude_test: true
-    external_providers: ["time"]
+    external_providers: [time]
+    steps:
+      - name: apihub_curation_basic
+        resource_id_vars:
+          curation_id: test
+        # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
+        test_vars_overrides:
+          # for backward compatible
+          curation_id: '"test" + randomSuffix'
 parameters:
   - name: location
     type: String

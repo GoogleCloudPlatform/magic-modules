@@ -23,35 +23,43 @@ import_format:
 autogen_status: VW5pdE9wZXJhdGlvbg==
 custom_code:
   post_create: templates/terraform/post_create/saas_runtime_unit_operation_wait.go.tmpl
-examples:
+samples:
   - name: saas_runtime_unit_operation_basic
     primary_resource_id: provision_unit_operation
     bootstrap_iam:
       - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
         role: roles/saasservicemgmt.serviceAgent
     min_version: beta
-    ignore_read_extra:
-      - etag
-      - error_category
-      - state
-      - update_time
-      - conditions
-    vars:
-      actuation_service_account: actuator
-      deprovision_operation_name: deprovision-unit-operation
-      provision_operation_name: provision-unit-operation
-      release_name: example-release
-      saas_name: example-saas
-      tenant_name: example-tenant
-      tenant_project_name: tenant
-      unit_name: example-unit
-      unitkind_name: vm-unitkind
-      upgrade_operation_name: upgrade-unit-operation
-    test_env_vars:
-      billing_account: BILLING_ACCT
-      org_id: ORG_ID
-      project: PROJECT_NAME
-      project_number: PROJECT_NUMBER
+    steps:
+      - name: saas_runtime_unit_operation_basic
+        min_version: beta
+        ignore_read_extra:
+          - etag
+          - error_category
+          - state
+          - update_time
+          - conditions
+        resource_id_vars:
+          actuation_service_account: actuator
+          deprovision_operation_name: deprovision-unit-operation
+          provision_operation_name: provision-unit-operation
+          release_name: example-release
+          saas_name: example-saas
+          tenant_name: example-tenant
+          tenant_project_name: tenant
+          unit_name: example-unit
+          unitkind_name: vm-unitkind
+          upgrade_operation_name: upgrade-unit-operation
+        test_vars_overrides:
+          # for backward compatible
+          actuation_service_account: '"actuator" + randomSuffix'
+          # for backward compatible
+          tenant_project_name: '"tenant" + randomSuffix'
+        test_env_vars:
+          billing_account: BILLING_ACCT
+          org_id: ORG_ID
+          project: PROJECT_NAME
+          project_number: PROJECT_NUMBER
 virtual_fields:
   - name: wait_for_completion
     type: Boolean

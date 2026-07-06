@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -88,6 +89,7 @@ var (
 		"settings.0.ip_configuration.0.ssl_mode",
 		"settings.0.ip_configuration.0.server_ca_mode",
 		"settings.0.ip_configuration.0.server_ca_pool",
+		"settings.0.ip_configuration.0.server_certificate_rotation_mode",
 		"settings.0.ip_configuration.0.custom_subject_alternative_names",
 	}
 
@@ -120,6 +122,17 @@ var (
 		"settings.0.insights_config.0.query_plans_per_minute",
 		"settings.0.insights_config.0.enhanced_query_insights_enabled",
 	}
+
+{{- if ne $.TargetVersionName "ga" }}
+    performanceCaptureConfigKeys = []string{
+		"settings.0.performance_capture_config.0.enabled",
+		"settings.0.performance_capture_config.0.probing_interval_seconds",
+		"settings.0.performance_capture_config.0.probe_threshold",
+		"settings.0.performance_capture_config.0.running_threads_threshold",
+		"settings.0.performance_capture_config.0.seconds_behind_source_threshold",
+		"settings.0.performance_capture_config.0.transaction_duration_threshold",
+	}
+{{- end }}
 
 	sqlServerAuditConfigurationKeys = []string{
 		"settings.0.sql_server_audit_config.0.bucket",
@@ -232,6 +245,8 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			pitrSupportDbCustomizeDiff,
 			nodeCountCustomDiff,
 			autoUpgradeEnabledCustomizeDiff,
+			activeDirectoryCustomizeDiff,
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -326,6 +341,28 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 										Type:        schema.TypeString,
 										Required:    true,
 										Description: `Domain name of the Active Directory for SQL Server (e.g., mydomain.com).`,
+									},
+									"mode": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"MANAGED_ACTIVE_DIRECTORY", "CUSTOMER_MANAGED_ACTIVE_DIRECTORY"}, false),
+										Description:  `The mode of the Active Directory configuration. Can be MANAGED_ACTIVE_DIRECTORY or CUSTOMER_MANAGED_ACTIVE_DIRECTORY.`,
+									},
+									"dns_servers": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: `Domain controller IPv4 addresses used to bootstrap Active Directory.`,
+									},
+									"admin_credential_secret_name": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The secret manager key storing the administrator credential. (e.g., projects/{project}/secrets/{secret}).`,
+									},
+									"organizational_unit": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The organizational unit distinguished name. This is the full hierarchical path to the organizational unit.`,
 									},
 								},
 							},
@@ -542,7 +579,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							DiffSuppressFunc: caseDiffDashSuppress,
 							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HYPERDISK_BALANCED.`,
 						},
-{{- if ne $.TargetVersionName "ga" }}
 						"data_disk_provisioned_iops": {
 							Type:        schema.TypeInt,
 							Optional:    true,
@@ -555,7 +591,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Computed:    true,
 							Description: `Provisioned throughput measured in MiB per second for the data disk. This field is only used for HYPERDISK_BALANCED disk types.`,
 						},
-{{- end }}
 						"connection_pool_config": {
 							Type:     schema.TypeSet,
 							Optional: true,
@@ -630,6 +665,18 @@ API (for read pools, effective_availability_type may differ from availability_ty
 													Optional:    true,
 													Description: `Whether PSC connectivity is enabled for this instance.`,
 												},
+												"psc_auto_dns_enabled": {
+												        Type:        schema.TypeBool,
+												        Optional:    true,
+												        Computed:    true,
+												        Description: `Whether PSC auto DNS is enabled for this instance.`,
+												},
+												"psc_write_endpoint_dns_enabled": {
+												        Type:        schema.TypeBool,
+												        Optional:    true,
+												        Computed:    true,
+												        Description: `Whether PSC write endpoint DNS is enabled for this instance.`,
+												},
 												"allowed_consumer_projects": {
 													Type:     schema.TypeSet,
 													Optional: true,
@@ -702,6 +749,14 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Optional:     true,
 										Description:  `The resource name of the server CA pool for an instance with "CUSTOMER_MANAGED_CAS_CA" as the "server_ca_mode".`,
 										AtLeastOneOf: ipConfigurationKeys,
+									},
+									"server_certificate_rotation_mode": {
+										Type:            schema.TypeString,
+										Optional:        true,
+										ValidateFunc:    validation.StringInSlice([]string{"NO_AUTOMATIC_ROTATION", "AUTOMATIC_ROTATION_DURING_MAINTENANCE"}, false),
+										Description:     `Settings for how the server certificate gets rotated.`,
+										AtLeastOneOf:     ipConfigurationKeys,
+										DiffSuppressFunc: serverCertificateRotationModeDiffSuppress,
 									},
 									"custom_subject_alternative_names": {
 										Type:         schema.TypeSet,
@@ -836,6 +891,82 @@ API (for read pools, effective_availability_type may differ from availability_ty
 								},
 							},
 							Description: `Configuration of Query Insights.`,
+						},
+{{- if ne $.TargetVersionName "ga" }}
+						"performance_capture_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `Enable or disable the Performance Capture.`,
+									},
+									"probing_interval_seconds": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The time interval in seconds between any two probes.`,
+									},
+									"probe_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of consecutive readings above threshold that triggers instance state capture.`,
+									},
+									"running_threads_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of server threads running to trigger the capture on primary.`,
+									},
+									"seconds_behind_source_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of seconds replica must be lagging behind primary to trigger capture on replica.`,
+									},
+									"transaction_duration_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The amount of time in seconds that a transaction needs to have been open before getting recorded.`,
+									},
+								},
+							},
+							Description: `Configuration of Performance Capture.`,
+						},
+{{- end }}
+						"entraid_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							DiffSuppressFunc: entraidDiffSuppressFunc,
+							Description: `The Microsoft Entra ID configuration for the SQL Server instance.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"application_id": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The application ID for the Entra ID configuration.`,
+									},
+									"tenant_id": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The tenant ID for the Entra ID configuration.`,
+									},
+								},
+							},
 						},
 						"password_validation_policy": {
 							Type:     schema.TypeList,
@@ -1022,7 +1153,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 			"database_version": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, MYSQL_8_4, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, POSTGRES_15, POSTGRES_16, POSTGRES_17, POSTGRES_18, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
+				Description:      `The MySQL, PostgreSQL or SQL Server version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, MYSQL_8_4, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, POSTGRES_15, POSTGRES_16, POSTGRES_17, POSTGRES_18, SQLSERVER_2022_STANDARD, SQLSERVER_2022_ENTERPRISE, SQLSERVER_2022_EXPRESS, SQLSERVER_2022_WEB, SQLSERVER_2025_STANDARD, SQLSERVER_2025_ENTERPRISE, SQLSERVER_2025_EXPRESS, SQLSERVER_2025_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
 				DiffSuppressFunc: databaseVersionDiffSuppress,
 			},
 			"encryption_key_name": {
@@ -1381,13 +1512,11 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Required:    true,
 							Description: `The name of the instance from which the point in time should be restored.`,
 						},
-						{{- if ne $.TargetVersionName "ga" }}
 						"source_project": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: `The project ID of the source project`,
                         },
-						{{- end }}
 						"point_in_time": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -1456,9 +1585,17 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Optional:    true,
 							Description: `The name of the target instance to restore to.`,
 						},
+						"region": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The region of the target instance to restore to.`,
+						},
 					},
 				},
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1491,6 +1628,25 @@ func autoUpgradeEnabledCustomizeDiff(_ context.Context, d *schema.ResourceDiff, 
 	} else if oldValueI != nil && oldValueI.(bool) && (newValueI == nil || !(newValueI.(bool))) {
 		if err := d.ForceNew("settings.0.auto_upgrade_enabled"); err != nil {
 			return fmt.Errorf("The setting auto_upgrade_enabled cannot be set to false after being set true: %s", err)
+		}
+	}
+	return nil
+}
+
+func activeDirectoryCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if v, ok := d.GetOk("settings.0.active_directory_config"); ok {
+		l := v.([]interface{})
+		if len(l) > 0 && l[0] != nil {
+			config := l[0].(map[string]interface{})
+			if mode, ok := config["mode"].(string); ok && mode == "CUSTOMER_MANAGED_ACTIVE_DIRECTORY" {
+				dnsServers, _ := config["dns_servers"].([]interface{})
+				secretName, _ := config["admin_credential_secret_name"].(string)
+				ou, _ := config["organizational_unit"].(string)
+
+				if len(dnsServers) == 0 || secretName == "" || ou == "" {
+					return fmt.Errorf("dns_servers, admin_credential_secret_name, and organizational_unit must all be provided when mode is CUSTOMER_MANAGED_ACTIVE_DIRECTORY")
+				}
+			}
 		}
 	}
 	return nil
@@ -1570,12 +1726,10 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	cloneContext, cloneSourceInstance := expandCloneContext(d.Get("clone").([]interface{}))
 	
-	{{- if ne $.TargetVersionName "ga" }}
 	cloneSourceProject := expandCloneSourceProject(d.Get("clone").([]interface{}))
 	if cloneSourceProject == "" {
 		cloneSourceProject = project
 	}
-	{{- end }}
 	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}))
 
 	if valueI, ok := d.GetOk("settings.0.auto_upgrade_enabled"); ok && !(valueI.(bool)) {
@@ -1637,24 +1791,18 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		RetryFunc: func() (operr error) {
 			if cloneContext != nil {
 				cloneContext.DestinationInstanceName = name
-				{{- if ne $.TargetVersionName "ga" }}
 				// if cloneSourceProject isn't equal to the project, then it's a cross project clone request.
 				if (cloneSourceProject != project) {
 					cloneContext.DestinationProject = project
 					cloneContext.DestinationNetwork = network
 				}
-				{{- end }}
 				clodeReq := sqladmin.InstancesCloneRequest{CloneContext: cloneContext}
-				{{- if ne $.TargetVersionName "ga" }}
-				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(cloneSourceProject, cloneSourceInstance, &clodeReq).Do()
-				{{- else }}
-				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(project, cloneSourceInstance, &clodeReq).Do()
-				{{- end }}
+				op, operr = NewClient(config, userAgent).Instances.Clone(cloneSourceProject, cloneSourceInstance, &clodeReq).Do()
 			} else if pointInTimeRestoreContext != nil {
 				parent := fmt.Sprintf("projects/%s", project)
-				op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreContext).Do()
+				op, operr = NewClient(config, userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreContext).Do()
 			} else {
-				op, operr = config.NewSqlAdminClient(userAgent).Instances.Insert(project, instance).Do()
+				op, operr = NewClient(config, userAgent).Instances.Insert(project, instance).Do()
 			}
 			return operr
 		},
@@ -1686,7 +1834,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		var users *sqladmin.UsersListResponse
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance.Name).Do()
+				users, err = NewClient(config, userAgent).Users.List(project, instance.Name).Do()
 				return err
 			},
 			Timeout:              d.Timeout(schema.TimeoutRead),
@@ -1699,7 +1847,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 			if u.Name == "root" && u.Host == "%" {
 				err = transport_tpg.Retry(transport_tpg.RetryOptions{
 					RetryFunc: func() error {
-						op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance.Name).Host(u.Host).Name(u.Name).Do()
+						op, err = NewClient(config, userAgent).Users.Delete(project, instance.Name).Host(u.Host).Name(u.Name).Do()
 						if err == nil {
 							err = SqlAdminOperationWaitTime(config, op, project, "Delete default root User", userAgent, d.Timeout(schema.TimeoutCreate))
 						}
@@ -1717,7 +1865,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if patchData != nil {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, instance.Name, patchData).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, instance.Name, patchData).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -1749,7 +1897,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		var op *sqladmin.Operation
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, name, instanceUpdate).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Update(project, name, instanceUpdate).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -1808,6 +1956,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		ActiveDirectoryConfig:         expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
 		DenyMaintenancePeriods:        expandDenyMaintenancePeriod(_settings["deny_maintenance_period"].([]interface{})),
 		SqlServerAuditConfig:          expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
+		EntraidConfig:        		   expandEntraidConfig(_settings["entraid_config"].([]interface{})),
 		TimeZone:                      _settings["time_zone"].(string),
 		AvailabilityType:              _settings["availability_type"].(string),
 		ConnectorEnforcement:          _settings["connector_enforcement"].(string),
@@ -1815,10 +1964,8 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		DataApiAccess:                 _settings["data_api_access"].(string),
 		DataDiskSizeGb:                int64(_settings["disk_size"].(int)),
 		DataDiskType:                  _settings["disk_type"].(string),
-{{- if ne $.TargetVersionName "ga" }}
 		DataDiskProvisionedIops:       int64(_settings["data_disk_provisioned_iops"].(int)),
 		DataDiskProvisionedThroughput: int64(_settings["data_disk_provisioned_throughput"].(int)),
-{{- end }}
 		PricingPlan:                   _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled:     _settings["deletion_protection_enabled"].(bool),
 		EnableGoogleMlIntegration:     _settings["enable_google_ml_integration"].(bool),
@@ -1834,6 +1981,9 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		InsightsConfig:                expandInsightsConfig(_settings["insights_config"].([]interface{})),
 		PasswordValidationPolicy:      expandPasswordValidationPolicy(_settings["password_validation_policy"].([]interface{})),
 		ConnectionPoolConfig:          expandConnectionPoolConfig(_settings["connection_pool_config"].(*schema.Set).List()),
+{{- if ne $.TargetVersionName "ga" }}
+		PerformanceCaptureConfig:      expandPerformanceCaptureConfig(_settings["performance_capture_config"].([]interface{})),
+{{- end }}
 		ReadPoolAutoScaleConfig:       expandReadPoolAutoScaleConfig(_settings["read_pool_auto_scale_config"].([]interface{})),
 	}
 
@@ -1897,7 +2047,6 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 	}, _cloneConfiguration["source_instance_name"].(string)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func expandCloneSourceProject(configured []interface{}) (string) {
 	if len(configured) == 0 || configured[0] == nil {
 		return ""
@@ -1905,7 +2054,6 @@ func expandCloneSourceProject(configured []interface{}) (string) {
 	_cloneConfiguration := configured[0].(map[string]interface{})
 	return _cloneConfiguration["source_project"].(string)
 }
-{{- end }}
 
 func expandMaintenanceWindow(configured []interface{}) *sqladmin.MaintenanceWindow {
 	if len(configured) == 0 || configured[0] == nil {
@@ -1960,6 +2108,7 @@ func expandIpConfiguration(configured []interface{}, databaseVersion string) *sq
 		SslMode:                                 _ipConfiguration["ssl_mode"].(string),
 		ServerCaMode:                            _ipConfiguration["server_ca_mode"].(string),
 		ServerCaPool:                            _ipConfiguration["server_ca_pool"].(string),
+		ServerCertificateRotationMode:           _ipConfiguration["server_certificate_rotation_mode"].(string),
 		CustomSubjectAlternativeNames:           tpgresource.ConvertStringArr(_ipConfiguration["custom_subject_alternative_names"].(*schema.Set).List()),
 	}
 }
@@ -1985,8 +2134,10 @@ func expandPscConfig(configured []interface{}) *sqladmin.PscConfig {
 	for _, _pscConfig := range configured {
 		_entry := _pscConfig.(map[string]interface{})
 		return &sqladmin.PscConfig{
-			PscEnabled:              _entry["psc_enabled"].(bool),
-			AllowedConsumerProjects: tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
+			PscEnabled:                 _entry["psc_enabled"].(bool),
+			PscAutoDnsEnabled:          _entry["psc_auto_dns_enabled"].(bool),
+			PscWriteEndpointDnsEnabled: _entry["psc_write_endpoint_dns_enabled"].(bool),
+			AllowedConsumerProjects:    tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
 			NetworkAttachmentUri:    _entry["network_attachment_uri"].(string),
 			PscAutoConnections:      expandPscAutoConnectionConfig(_entry["psc_auto_connections"].([]interface{})),
 		}
@@ -2111,14 +2262,29 @@ func expandBackupRetentionSettings(configured interface{}) *sqladmin.BackupReten
 
 func expandActiveDirectoryConfig(configured interface{}) *sqladmin.SqlActiveDirectoryConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 
 	config := l[0].(map[string]interface{})
-	return &sqladmin.SqlActiveDirectoryConfig{
+	adConfig := &sqladmin.SqlActiveDirectoryConfig{
 		Domain: config["domain"].(string),
 	}
+
+	if v, ok := config["mode"].(string); ok && v != "" {
+		adConfig.Mode = v
+	}
+	if v, ok := config["dns_servers"].([]interface{}); ok && len(v) > 0 {
+		adConfig.DnsServers = tpgresource.ConvertStringArr(v)
+	}
+	if v, ok := config["admin_credential_secret_name"].(string); ok && v != "" {
+		adConfig.AdminCredentialSecretName = v
+	}
+	if v, ok := config["organizational_unit"].(string); ok && v != "" {
+		adConfig.OrganizationalUnit = v
+	}
+
+	return adConfig
 }
 
 func expandDenyMaintenancePeriod(configured []interface{}) []*sqladmin.DenyMaintenancePeriod {
@@ -2138,6 +2304,22 @@ func expandDenyMaintenancePeriod(configured []interface{}) []*sqladmin.DenyMaint
 	}
 	return denyMaintenancePeriod
 
+}
+
+func expandEntraidConfig(configured []interface{}) *sqladmin.SqlServerEntraIdConfig {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	entraidConfig := configured[0].(map[string]interface{})
+	appID, _ := entraidConfig["application_id"].(string)
+	tenantID, _ := entraidConfig["tenant_id"].(string)
+
+	return &sqladmin.SqlServerEntraIdConfig{
+		ApplicationId: appID,
+		TenantId:      tenantID,
+		ForceSendFields: []string{"ApplicationId", "TenantId"},
+	}
 }
 
 func expandSqlServerAdvancedMachineFeatures(configured interface{}) *sqladmin.AdvancedMachineFeatures {
@@ -2185,6 +2367,25 @@ func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 		ForceSendFields: []string{"EnhancedQueryInsightsEnabled"},
 	}
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func expandPerformanceCaptureConfig(configured []interface{}) *sqladmin.PerformanceCaptureConfig {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_performanceCaptureConfig := configured[0].(map[string]interface{})
+	return &sqladmin.PerformanceCaptureConfig{
+		Enabled:                      _performanceCaptureConfig["enabled"].(bool),
+		ProbingIntervalSeconds:       int64(_performanceCaptureConfig["probing_interval_seconds"].(int)),
+		ProbeThreshold:               int64(_performanceCaptureConfig["probe_threshold"].(int)),
+		RunningThreadsThreshold:      int64(_performanceCaptureConfig["running_threads_threshold"].(int)),
+		SecondsBehindSourceThreshold: int64(_performanceCaptureConfig["seconds_behind_source_threshold"].(int)),
+		TransactionDurationThreshold: int64(_performanceCaptureConfig["transaction_duration_threshold"].(int)),
+		ForceSendFields:              []string{"Enabled"},
+	}
+}
+{{- end }}
 
 func expandPasswordValidationPolicy(configured []interface{}) *sqladmin.PasswordValidationPolicy {
 	if len(configured) == 0 || configured[0] == nil {
@@ -2261,7 +2462,7 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	var instance *sqladmin.DatabaseInstance
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			instance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, d.Get("name").(string)).Do()
+			instance, rerr = NewClient(config, userAgent).Instances.Get(project, d.Get("name").(string)).Do()
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutRead),
@@ -2375,6 +2576,11 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
                 return fmt.Errorf("Error setting dns_names: %s", err)
         }
 	d.SetId(instance.Name)
+	
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+	    return err
+	}
+	
 
 	return nil
 }
@@ -2388,6 +2594,11 @@ const (
 )
 
 func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceSqlDatabaseInstance) {
+	    return ResourceSqlDatabaseInstance().Read(d, meta)
+	}
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -2431,7 +2642,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{ActivationPolicy: "ALWAYS"}}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2456,7 +2667,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{DatabaseVersion: databaseVersion}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2520,7 +2731,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
-			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
+			op, err = NewClient(config, userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
 			return err
 		}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -2551,7 +2762,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{MaintenanceVersion: maintenance_version}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2575,12 +2786,12 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		switch replicaDRKind {
 		case replicaDRByPromote:
 			retryFunc = func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.PromoteReplica(project, d.Get("name").(string)).Do()
+				op, rerr = NewClient(config, userAgent).Instances.PromoteReplica(project, d.Get("name").(string)).Do()
 				return rerr
 			}
 		case replicaDRBySwitchover:
 			retryFunc = func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Switchover(project, d.Get("name").(string)).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Switchover(project, d.Get("name").(string)).Do()
 				return rerr
 			}
 		default:
@@ -2614,7 +2825,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{Edition: edition, Tier: tier, DataCacheConfig: dataCacheConfig}}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2631,6 +2842,39 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		if err != nil {
 			return err
 		}
+	}
+
+	if d.HasChange("settings.0.entraid_config") {
+    	entraidConfig := expandEntraidConfig(d.Get("settings.0.entraid_config").([]interface{}))
+
+    	patchSettings := &sqladmin.Settings{
+        	EntraidConfig: entraidConfig,
+    	}
+
+    	instance := &sqladmin.DatabaseInstance{
+        	Settings: patchSettings,
+    	}
+
+    	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+        	RetryFunc: func() (rerr error) {
+            	op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+            	return rerr
+        	},
+        	Timeout:              d.Timeout(schema.TimeoutUpdate),
+        	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+    	})
+    	if err != nil {
+        	return fmt.Errorf("Error, failed to patch entraid_config for %s: %s", instance.Name, err)
+    	}
+    	err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance Entra ID", userAgent, d.Timeout(schema.TimeoutUpdate))
+    	if err != nil {
+        	return err
+    	}
+
+    	err = resourceSqlDatabaseInstanceRead(d, meta)
+    	if err != nil {
+        	return err
+    	}
 	}
 
 	instance = &sqladmin.DatabaseInstance{
@@ -2709,7 +2953,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
+			op, rerr = NewClient(config, userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2747,7 +2991,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
           instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{TimeZone: timezone}}
           err = transport_tpg.Retry(transport_tpg.RetryOptions{
             RetryFunc: func() (rerr error) {
-            op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+            op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
             return err
           },
           Timeout: d.Timeout(schema.TimeoutUpdate),
@@ -2777,6 +3021,34 @@ func maintenanceVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) 
 	} else {
 		return false
 	}
+}
+
+// entraidDiffSuppressFunc handles a specific behavior of the Google SQL API where 
+// disabling Microsoft Entra ID integration (by sending empty strings for application_id 
+// and tenant_id) causes the API to omit the 'entraid_config' block entirely from the response.
+// 
+// Without this suppressor, Terraform would see a "Permanent Diff": 
+// - Configuration: entraid_config { application_id = "", tenant_id = "" } (Count: 1)
+// - State (from API): null/absent (Count: 0)
+//
+// This function suppresses the diff only when the config intentionally defines an 
+// "empty" block that the API has subsequently removed.
+func entraidDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+    if strings.HasSuffix(k, "entraid_config.#") {
+		// Only suppress when transitioning from 'Absent' in State (0) 
+        // to 'Present' in Config (1).
+        if old == "0" && new == "1" {
+            // Check if the proposed values are actually empty
+            // This ensures we only suppress 'empty' blocks, not 'real' ones
+            appId := d.Get("settings.0.entraid_config.0.application_id").(string)
+            tenantId := d.Get("settings.0.entraid_config.0.tenant_id").(string)
+
+            if appId == "" && tenantId == "" {
+                return true // "Shhh, it's fine that the API deleted this block."
+            }
+        }
+    }
+    return false // "Show the diff for everything else!"
 }
 
 // enhancedBackupManagerDiffSuppressFunc suppresses diff changes to settings.backup_configuration
@@ -2810,7 +3082,23 @@ func databaseVersionDiffSuppress(_, oldVersion, newVersion string, _ *schema.Res
 	return false
 }
 
+func serverCertificateRotationModeDiffSuppress(_, oldMode, newMode string, _ *schema.ResourceData) bool {
+	// If the value is not set in the configuration (new is empty)
+	// and the API returns the default UNSPECIFIED value, suppress the diff.
+	if newMode == "" && oldMode == "SERVER_CERTIFICATE_ROTATION_MODE_UNSPECIFIED" {
+		return true
+	}
+	return false
+}
+
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+	
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+	    return err
+	}else if ok{
+	    return nil
+	}
+	
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -2842,7 +3130,7 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	}
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).FinalBackupDescription(finalBackupDescription).Do()
+			op, rerr = NewClient(config, userAgent).Instances.Delete(project, d.Get("name").(string)).FinalBackupDescription(finalBackupDescription).Do()
 			if rerr != nil {
 				return rerr
 			}
@@ -2901,10 +3189,8 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		"data_api_access":                  settings.DataApiAccess,
 		"disk_type":                        settings.DataDiskType,
 		"disk_size":                        settings.DataDiskSizeGb,
-{{- if ne $.TargetVersionName "ga" }}
 		"data_disk_provisioned_iops":       settings.DataDiskProvisionedIops,
 		"data_disk_provisioned_throughput": settings.DataDiskProvisionedThroughput,
-{{- end }}
 		"pricing_plan":                     settings.PricingPlan,
 		"user_labels":                      settings.UserLabels,
 		"password_validation_policy":       settings.PasswordValidationPolicy,
@@ -2938,6 +3224,10 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		data["sql_server_audit_config"] = flattenSqlServerAuditConfig(settings.SqlServerAuditConfig)
 	}
 
+	if settings.EntraidConfig != nil {
+		data["entraid_config"] = flattenEntraidConfig(settings.EntraidConfig)
+	}
+
 	if settings.BackupConfiguration != nil {
 		data["backup_configuration"] = flattenBackupConfiguration(settings.BackupConfiguration)
 	}
@@ -2950,7 +3240,10 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		data["database_flags"] = flattenDatabaseFlags(settings.DatabaseFlags)
 	}
 
-	if settings.ConnectionPoolConfig != nil {
+	// When connection_pooling_enabled=false the API returns nil for ConnectionPoolConfig.
+	// We still need to flatten if the user has configured the block to avoid a permadiff.
+	poolConfigSet, _ := d.Get("settings.0.connection_pool_config").(*schema.Set)
+	if settings.ConnectionPoolConfig != nil || (poolConfigSet != nil && poolConfigSet.Len() > 0) {
 		data["connection_pool_config"] = flattenConnectionPoolConfig(settings.ConnectionPoolConfig)
 	}
 
@@ -2969,6 +3262,12 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 	if settings.InsightsConfig != nil {
 		data["insights_config"] = flattenInsightsConfig(settings.InsightsConfig)
 	}
+
+{{- if ne $.TargetVersionName "ga" }}
+	if settings.PerformanceCaptureConfig != nil {
+		data["performance_capture_config"] = flattenPerformanceCaptureConfig(settings.PerformanceCaptureConfig)
+	}
+{{- end }}
 
 	if settings.ReadPoolAutoScaleConfig != nil {
 		data["read_pool_auto_scale_config"] = flattenReadPoolAutoScaleConfig(settings.ReadPoolAutoScaleConfig)
@@ -3072,7 +3371,11 @@ func flattenActiveDirectoryConfig(sqlActiveDirectoryConfig *sqladmin.SqlActiveDi
 	}
 	return []map[string]interface{}{
 		{
-			"domain": sqlActiveDirectoryConfig.Domain,
+			"domain":                       sqlActiveDirectoryConfig.Domain,
+			"mode":                         sqlActiveDirectoryConfig.Mode,
+			"dns_servers":                  sqlActiveDirectoryConfig.DnsServers,
+			"admin_credential_secret_name": sqlActiveDirectoryConfig.AdminCredentialSecretName,
+			"organizational_unit":          sqlActiveDirectoryConfig.OrganizationalUnit,
 		},
 	}
 }
@@ -3113,6 +3416,18 @@ func flattenSqlServerAuditConfig(sqlServerAuditConfig *sqladmin.SqlServerAuditCo
 			"bucket":             sqlServerAuditConfig.Bucket,
 			"retention_interval": sqlServerAuditConfig.RetentionInterval,
 			"upload_interval":    sqlServerAuditConfig.UploadInterval,
+		},
+	}
+}
+
+func flattenEntraidConfig(entraidConfig *sqladmin.SqlServerEntraIdConfig) []map[string]interface{} {
+	if entraidConfig == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"application_id": entraidConfig.ApplicationId,
+			"tenant_id":      entraidConfig.TenantId,
 		},
 	}
 }
@@ -3193,6 +3508,7 @@ func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration, d *schema
 		"ssl_mode":                                      ipConfiguration.SslMode,
 		"server_ca_mode":                                ipConfiguration.ServerCaMode,
 		"server_ca_pool":                                ipConfiguration.ServerCaPool,
+		"server_certificate_rotation_mode":              ipConfiguration.ServerCertificateRotationMode,
 		"custom_subject_alternative_names":		 ipConfiguration.CustomSubjectAlternativeNames,
 	}
 
@@ -3227,8 +3543,10 @@ func flattenPscAutoConnections(pscAutoConnections []*sqladmin.PscAutoConnectionC
 
 func flattenPscConfigs(pscConfig *sqladmin.PscConfig) interface{} {
 	data := map[string]interface{}{
-		"psc_enabled":               pscConfig.PscEnabled,
-		"allowed_consumer_projects": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(pscConfig.AllowedConsumerProjects)),
+		"psc_enabled":                    pscConfig.PscEnabled,
+		"psc_auto_dns_enabled":           pscConfig.PscAutoDnsEnabled,
+		"psc_write_endpoint_dns_enabled": pscConfig.PscWriteEndpointDnsEnabled,
+		"allowed_consumer_projects":      schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(pscConfig.AllowedConsumerProjects)),
 		"network_attachment_uri":    pscConfig.NetworkAttachmentUri,
 		"psc_auto_connections":      flattenPscAutoConnections(pscConfig.PscAutoConnections),
 	}
@@ -3367,6 +3685,21 @@ func flattenInsightsConfig(insightsConfig *sqladmin.InsightsConfig) interface{} 
 	return []map[string]interface{}{data}
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+func flattenPerformanceCaptureConfig(performanceCaptureConfig *sqladmin.PerformanceCaptureConfig) interface{} {
+	data := map[string]interface{}{
+		"enabled":                         performanceCaptureConfig.Enabled,
+		"probing_interval_seconds":        performanceCaptureConfig.ProbingIntervalSeconds,
+		"probe_threshold":                 performanceCaptureConfig.ProbeThreshold,
+		"running_threads_threshold":       performanceCaptureConfig.RunningThreadsThreshold,
+		"seconds_behind_source_threshold": performanceCaptureConfig.SecondsBehindSourceThreshold,
+		"transaction_duration_threshold":  performanceCaptureConfig.TransactionDurationThreshold,
+	}
+
+	return []map[string]interface{}{data}
+}
+{{- end }}
+
 func flattenTargetMetrics(targetMetrics []*sqladmin.TargetMetric) []interface{} {
 	if len(targetMetrics) == 0 { // Handles nil or empty slice
         	return make([]interface{}, 0) // Explicitly return empty slice
@@ -3443,7 +3776,7 @@ func sqlDatabaseInstanceServiceNetworkPrecheck(d *schema.ResourceData, config *t
 		return err
 	}
 
-	response, err := config.NewServiceNetworkingClient(userAgent).Services.Connections.List("services/servicenetworking.googleapis.com").Network(serviceNetworkingNetworkName).Do()
+	response, err := servicenetworking.NewClient(config, userAgent).Services.Connections.List("services/servicenetworking.googleapis.com").Network(serviceNetworkingNetworkName).Do()
 	if err != nil {
 		// It is possible that the actor creating the SQL Instance might not have permissions to call servicenetworking.services.connections.list
 		log.Printf("[WARNING] Failed to list Service Networking of the project. Skipped Service Networking precheck.")
@@ -3485,7 +3818,7 @@ func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *transp
 	var op *sqladmin.Operation
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
-			op, operr = config.NewSqlAdminClient(userAgent).Instances.RestoreBackup(project, instanceId, backupRequest).Do()
+			op, operr = NewClient(config, userAgent).Instances.RestoreBackup(project, instanceId, backupRequest).Do()
 			return operr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -3515,6 +3848,7 @@ func expandPointInTimeRestoreContext(configured []interface{}) *sqladmin.PointIn
 		Datasource:     _pitrc["datasource"].(string),
 		AllocatedIpRange: _pitrc["allocated_ip_range"].(string),
 		TargetInstance: _pitrc["target_instance"].(string),
+		Region: _pitrc["region"].(string),
 	}
 }
 
@@ -3526,7 +3860,7 @@ func sqlDatabaseInstancePointInTimeRestore(d *schema.ResourceData, config *trans
 	var op *sqladmin.Operation
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
-			op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, expandPointInTimeRestoreContext(pointInTimeRestoreContext)).Do()
+			op, operr = NewClient(config, userAgent).Instances.PointInTimeRestore(parent, expandPointInTimeRestoreContext(pointInTimeRestoreContext)).Do()
 			return operr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -3658,4 +3992,13 @@ func normalizeDRReplicaName(drReplicaName, project string) string {
 		return drReplicaName
 	}
 	return fmt.Sprintf("%s:%s", project, drReplicaName)
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_sql_database_instance",
+		ProductName: "sql",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceSqlDatabaseInstance(),
+	}.Register()
 }

@@ -12,49 +12,69 @@
 # limitations under the License.
 
 ---
-name: 'Parameter'
+name: Parameter
 description: |
   A Parameter resource is a logical parameter.
 references:
   guides:
-  api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters'
+  api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters
 docs:
-base_url: 'projects/{{project}}/locations/global/parameters'
-self_link: 'projects/{{project}}/locations/global/parameters/{{parameter_id}}'
-create_url: 'projects/{{project}}/locations/global/parameters?parameter_id={{parameter_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/global/parameters
+self_link: projects/{{project}}/locations/global/parameters/{{parameter_id}}
+create_url: projects/{{project}}/locations/global/parameters?parameter_id={{parameter_id}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/global/parameters/{{parameter_id}}'
+  - projects/{{project}}/locations/global/parameters/{{parameter_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-examples:
-  - name: 'parameter_config_basic'
-    primary_resource_id: 'parameter-basic'
-    vars:
-      parameter_id: 'parameter'
-  - name: 'parameter_with_format'
-    primary_resource_id: 'parameter-with-format'
-    vars:
-      parameter_id: 'parameter'
-  - name: 'parameter_with_labels'
-    primary_resource_id: 'parameter-with-labels'
-    vars:
-      parameter_id: 'parameter'
-  - name: 'parameter_with_kms_key'
-    primary_resource_id: 'parameter-with-kms-key'
-    vars:
-      parameter_id: 'parameter'
-      kms_key: 'kms-key'
-    test_vars_overrides:
-      'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+custom_code:
+samples:
+  - name: parameter_config_basic
+    primary_resource_id: parameter-basic
+    steps:
+      - name: parameter_config_basic
+        resource_id_vars:
+          parameter_id: parameter
+        test_vars_overrides:
+          # for backward compatible
+          parameter_id: '"parameter" + randomSuffix'
+  - name: parameter_with_format
+    primary_resource_id: parameter-with-format
+    steps:
+      - name: parameter_with_format
+        resource_id_vars:
+          parameter_id: parameter
+        test_vars_overrides:
+          # for backward compatible
+          parameter_id: '"parameter" + randomSuffix'
+  - name: parameter_with_labels
+    primary_resource_id: parameter-with-labels
+    steps:
+      - name: parameter_with_labels
+        resource_id_vars:
+          parameter_id: parameter
+        test_vars_overrides:
+          # for backward compatible
+          parameter_id: '"parameter" + randomSuffix'
+  - name: parameter_with_kms_key
+    primary_resource_id: parameter-with-kms-key
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+      - member: serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com
+        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    steps:
+      - name: parameter_with_kms_key
+        resource_id_vars:
+          parameter_id: parameter
+          kms_key: kms-key
+        test_vars_overrides:
+          kms_key: kms.BootstrapKMSKey(t).CryptoKey.Name
+          # for backward compatible
+          parameter_id: '"parameter" + randomSuffix'
 parameters:
-  - name: 'parameterId'
+  - name: parameterId
     type: String
     description: |
       This must be unique within the project.
@@ -62,29 +82,29 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the Parameter. Format:
       `projects/{{project}}/locations/global/parameters/{{parameter_id}}`
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The time at which the Parameter was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The time at which the Parameter was updated.
     output: true
-  - name: 'policyMember'
+  - name: policyMember
     type: NestedObject
     description: |
       Policy member strings of a Google Cloud resource.
     output: true
     properties:
-      - name: 'iamPolicyUidPrincipal'
+      - name: iamPolicyUidPrincipal
         type: String
         description: |
           IAM policy binding member referring to a Google Cloud resource by system-assigned unique identifier.
@@ -92,7 +112,7 @@ properties:
           new resource. Format:
           `principal://parametermanager.googleapis.com/projects/{{project}}/uid/locations/global/parameters/{{uid}}`
         output: true
-      - name: 'iamPolicyNamePrincipal'
+      - name: iamPolicyNamePrincipal
         type: String
         description: |
           IAM policy binding member referring to a Google Cloud resource by user-assigned name. If a
@@ -100,7 +120,7 @@ properties:
           new resource. Format:
           `principal://parametermanager.googleapis.com/projects/{{project}}/name/locations/global/parameters/{{parameter_id}}`
         output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       The labels assigned to this Parameter.
@@ -115,17 +135,17 @@ properties:
 
       An object containing a list of "key": value pairs. Example:
       { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-  - name: 'format'
+  - name: format
     type: Enum
     description: |
       The format type of the parameter resource.
-    default_value: 'UNFORMATTED'
+    default_value: UNFORMATTED
     immutable: true
     enum_values:
-      - 'UNFORMATTED'
-      - 'YAML'
-      - 'JSON'
-  - name: 'kmsKey'
+      - UNFORMATTED
+      - YAML
+      - JSON
+  - name: kmsKey
     type: String
     description: |
       The resource name of the Cloud KMS CryptoKey used to encrypt parameter version payload. Format

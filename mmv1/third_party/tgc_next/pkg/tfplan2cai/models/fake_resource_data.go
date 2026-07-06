@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -41,13 +42,20 @@ type getResult struct {
 
 // Compare to https://github.com/hashicorp/terraform-plugin-sdk/blob/97b4465/helper/schema/resource_data.go#L15
 type FakeResourceData struct {
-	reader schema.FieldReader
-	schema map[string]*schema.Schema
+	reader   schema.FieldReader
+	schema   map[string]*schema.Schema
+	identity *schema.IdentityData
+	id       string
+	state    map[string]string
 }
 
 // Id returns the ID of the resource from state.
 func (d *FakeResourceData) Id() string {
-	return ""
+	return d.id
+}
+
+func (d *FakeResourceData) Identity() (*schema.IdentityData, error) {
+	return d.identity, nil
 }
 
 func (d *FakeResourceData) getRaw(key string) getResult {
@@ -107,6 +115,10 @@ func (d *FakeResourceData) GetOk(name string) (interface{}, bool) {
 	return r.Value, exists
 }
 
+func (d *FakeResourceData) GetRawConfig() cty.Value {
+	return cty.NullVal(cty.String)
+}
+
 func (d *FakeResourceData) GetOkExists(key string) (interface{}, bool) {
 	r := d.getRaw(key)
 	exists := r.Exists && !r.Computed
@@ -115,9 +127,12 @@ func (d *FakeResourceData) GetOkExists(key string) (interface{}, bool) {
 
 // These methods are required by some mappers but we don't actually have (or need)
 // implementations for them.
-func (d *FakeResourceData) HasChange(string) bool             { return false }
-func (d *FakeResourceData) Set(string, interface{}) error     { return nil }
-func (d *FakeResourceData) SetId(string)                      {}
+func (d *FakeResourceData) HasChange(string) bool { return false }
+func (d *FakeResourceData) Set(key string, value interface{}) error {
+	d.state[key] = fmt.Sprintf("%v", value)
+	return nil
+}
+func (d *FakeResourceData) SetId(id string)                   { d.id = id }
 func (d *FakeResourceData) GetProviderMeta(interface{}) error { return nil }
 func (d *FakeResourceData) Timeout(key string) time.Duration  { return time.Duration(1) }
 

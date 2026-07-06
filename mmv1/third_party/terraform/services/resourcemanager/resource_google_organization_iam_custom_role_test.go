@@ -8,6 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -133,7 +135,7 @@ func testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t *testing.T) fu
 				continue
 			}
 
-			role, err := config.NewIamClient(config.UserAgent).Organizations.Roles.Get(rs.Primary.ID).Do()
+			role, err := iambeta.NewClient(config, config.UserAgent).Organizations.Roles.Get(rs.Primary.ID).Do()
 
 			if err != nil {
 				return err
@@ -161,7 +163,7 @@ func testAccCheckGoogleOrganizationIamCustomRole(t *testing.T, n, title, descrip
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		role, err := config.NewIamClient(config.UserAgent).Organizations.Roles.Get(rs.Primary.ID).Do()
+		role, err := iambeta.NewClient(config, config.UserAgent).Organizations.Roles.Get(rs.Primary.ID).Do()
 
 		if err != nil {
 			return err
@@ -201,7 +203,7 @@ func testAccCheckGoogleOrganizationIamCustomRoleDeletionStatus(t *testing.T, n s
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		role, err := config.NewIamClient(config.UserAgent).Organizations.Roles.Get(rs.Primary.ID).Do()
+		role, err := iambeta.NewClient(config, config.UserAgent).Organizations.Roles.Get(rs.Primary.ID).Do()
 
 		if err != nil {
 			return err

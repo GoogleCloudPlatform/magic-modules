@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -109,7 +110,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 	log.Printf("[DEBUG] Loading zone: %s", z)
-	zone, err := config.NewComputeClient(userAgent).Zones.Get(project, z).Do()
+	zone, err := NewClient(config, userAgent).Zones.Get(project, z).Do()
 	if err != nil {
 		return fmt.Errorf("Error loading zone '%s': %s", z, err)
 	}
@@ -129,7 +130,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 	var relativeUrl string
 
 	if strings.Contains(sourceInstanceTemplate, "global/instanceTemplates") {
-		instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, tpl.Name).Do()
+		instanceTemplate, err := NewClient(config, userAgent).InstanceTemplates.Get(project, tpl.Name).Do()
 		if err != nil {
 			return err
 		}
@@ -207,7 +208,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 	}
 
 	log.Printf("[INFO] Requesting instance creation")
-	op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).SourceInstanceTemplate(relativeUrl).Do()
+	op, err := NewClient(config, userAgent).Instances.Insert(project, zone.Name, instance).SourceInstanceTemplate(relativeUrl).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
 	}
@@ -233,7 +234,7 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_t
 	disks := []*compute.AttachedDisk{}
 	re := regexp.MustCompile(`projects/[^/]+/regions/[^/]+/disks/[^/]+$`)
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
-		bootDisk, err := expandBootDisk(d, config, project)
+		bootDisk, err := expandBootDiskTyped(d, config, project)
 		if err != nil {
 			return nil, err
 		}
@@ -269,7 +270,7 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_t
 	}
 
 	if _, hasScratchDisk := d.GetOk("scratch_disk"); hasScratchDisk {
-		scratchDisks, err := expandScratchDisks(d, config, project)
+		scratchDisks, err := expandScratchDisksTyped(d, config, project)
 		if err != nil {
 			return nil, err
 		}
@@ -294,7 +295,7 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_t
 	if attachedDisksCount > 0 {
 		for i := 0; i < attachedDisksCount; i++ {
 			diskConfig := d.Get(fmt.Sprintf("attached_disk.%d", i)).(map[string]interface{})
-			disk, err := expandAttachedDisk(diskConfig, d, config)
+			disk, err := expandAttachedDiskTyped(diskConfig, d, config)
 			if err != nil {
 				return nil, err
 			}
@@ -323,4 +324,13 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_t
 	}
 
 	return disks, nil
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_compute_instance_from_template",
+		ProductName: "compute",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceComputeInstanceFromTemplate(),
+	}.Register()
 }

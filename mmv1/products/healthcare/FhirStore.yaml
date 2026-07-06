@@ -12,78 +12,91 @@
 # limitations under the License.
 
 ---
-name: 'FhirStore'
-kind: 'healthcare#fhirStore'
+name: FhirStore
 description: |
   A FhirStore is a datastore inside a Healthcare dataset that conforms to the FHIR (https://www.hl7.org/fhir/STU3/)
   standard for Healthcare information exchange
 references:
   guides:
-    'Creating a FHIR store': 'https://cloud.google.com/healthcare/docs/how-tos/fhir'
-  api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.fhirStores'
+    Creating a FHIR store: https://cloud.google.com/healthcare/docs/how-tos/fhir
+  api: https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.fhirStores
 docs:
-id_format: '{{dataset}}/fhirStores/{{name}}'
 base_url: '{{dataset}}/fhirStores?fhirStoreId={{name}}'
 self_link: '{{dataset}}/fhirStores/{{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
+kind: healthcare#fhirStore
+id_format: '{{dataset}}/fhirStores/{{name}}'
 import_format:
   - '{{dataset}}/fhirStores/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/healthcare_fhir_store.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'healthcare_fhir_store_basic'
-    primary_resource_id: 'default'
-    vars:
-      dataset_name: 'example-dataset'
-      fhir_store_name: 'example-fhir-store'
-      pubsub_topic: 'fhir-notifications'
-  - name: 'healthcare_fhir_store_streaming_config'
-    primary_resource_id: 'default'
-    vars:
-      dataset_name: 'example-dataset'
-      fhir_store_name: 'example-fhir-store'
-      pubsub_topic: 'fhir-notifications'
-      bq_dataset_name: 'bq_example_dataset'
+custom_code:
+  decoder: templates/terraform/decoders/long_name_to_self_link.go.tmpl
+  custom_import: templates/terraform/custom_import/healthcare_fhir_store.go.tmpl
+samples:
+  - name: healthcare_fhir_store_basic
+    primary_resource_id: default
+    steps:
+      - name: healthcare_fhir_store_basic
+        resource_id_vars:
+          dataset_name: example-dataset
+          fhir_store_name: example-fhir-store
+          pubsub_topic: fhir-notifications
+  - name: healthcare_fhir_store_streaming_config
+    primary_resource_id: default
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
-        role: "roles/bigquery.dataEditor"
-      - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
-        role: "roles/bigquery.jobUser"
-  - name: 'healthcare_fhir_store_notification_config'
-    primary_resource_id: 'default'
-    vars:
-      dataset_name: 'example-dataset'
-      fhir_store_name: 'example-fhir-store'
-      pubsub_topic: 'fhir-notifications'
-    exclude_docs: true
-  - name: 'healthcare_fhir_store_notification_configs'
-    primary_resource_id: 'default'
-    vars:
-      dataset_name: 'example-dataset'
-      fhir_store_name: 'example-fhir-store'
-      pubsub_topic: 'fhir-notifications'
-  - name: 'healthcare_fhir_store_consent_config'
-    primary_resource_id: 'default'
-    min_version: "beta"
-    vars:
-      dataset_name: 'example-dataset'
-      fhir_store_name: 'example-fhir-store'
-      pubsub_topic: 'fhir-notifications'
-  - name: 'healthcare_fhir_store_validation_config'
-    primary_resource_id: 'default'
-    vars:
-      dataset_name: 'example-dataset'
-      fhir_store_name: 'example-fhir-store'
-      pubsub_topic: 'fhir-notifications'
+      - member: serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com
+        role: roles/bigquery.dataEditor
+      - member: serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com
+        role: roles/bigquery.jobUser
+    steps:
+      - name: healthcare_fhir_store_streaming_config
+        resource_id_vars:
+          dataset_name: example-dataset
+          fhir_store_name: example-fhir-store
+          pubsub_topic: fhir-notifications
+          bq_dataset_name: bq_example_dataset
+  - name: healthcare_fhir_store_notification_config
+    primary_resource_id: default
+    exclude_basic_doc: true
+    steps:
+      - name: healthcare_fhir_store_notification_config
+        resource_id_vars:
+          dataset_name: example-dataset
+          fhir_store_name: example-fhir-store
+          pubsub_topic: fhir-notifications
+  - name: healthcare_fhir_store_notification_configs
+    primary_resource_id: default
+    steps:
+      - name: healthcare_fhir_store_notification_configs
+        resource_id_vars:
+          dataset_name: example-dataset
+          fhir_store_name: example-fhir-store
+          pubsub_topic: fhir-notifications
+  - name: healthcare_fhir_store_consent_config
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: healthcare_fhir_store_consent_config
+        min_version: beta
+        resource_id_vars:
+          dataset_name: example-dataset
+          fhir_store_name: example-fhir-store
+          pubsub_topic: fhir-notifications
+  - name: healthcare_fhir_store_validation_config
+    primary_resource_id: default
+    steps:
+      - name: healthcare_fhir_store_validation_config
+        resource_id_vars:
+          dataset_name: example-dataset
+          fhir_store_name: example-fhir-store
+          pubsub_topic: fhir-notifications
 parameters:
-  - name: 'dataset'
+  - name: dataset
     type: ResourceRef
     description: |
       Identifies the dataset addressed by this request. Must be in the format
@@ -91,10 +104,10 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    resource: 'Dataset'
-    imports: 'selfLink'
+    resource: Dataset
+    imports: selfLink
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name for the FhirStore.
@@ -103,19 +116,19 @@ properties:
     required: true
     immutable: true
   # Version is duplicated because it is optional in beta but required in GA.
-  - name: 'version'
+  - name: version
     type: Enum
     description: |
       The FHIR specification version.
-    exact_version: 'beta'
+    exact_version: beta
     required: false
     immutable: true
-    default_value: "STU3"
+    default_value: STU3
     enum_values:
-      - 'DSTU2'
-      - 'STU3'
-      - 'R4'
-  - name: 'version'
+      - DSTU2
+      - STU3
+      - R4
+  - name: version
     type: Enum
     description: |
       The FHIR specification version.
@@ -123,74 +136,74 @@ properties:
     required: true
     immutable: true
     enum_values:
-      - 'DSTU2'
-      - 'STU3'
-      - 'R4'
-  - name: 'consentConfig'
+      - DSTU2
+      - STU3
+      - R4
+  - name: consentConfig
     type: NestedObject
     description: |
       Specifies whether this store has consent enforcement. Not available for DSTU2 FHIR version due to absence of Consent resources. Not supported for R5 FHIR version.
     min_version: beta
     properties:
-      - name: 'version'
+      - name: version
         type: Enum
         description: |
           Specifies which consent enforcement version is being used for this FHIR store. This field can only be set once by either [fhirStores.create][] or [fhirStores.patch][]. After that, you must call [fhirStores.applyConsents][] to change the version.
         required: true
         enum_values:
-          - 'CONSENT_ENFORCEMENT_VERSION_UNSPECIFIED'
-          - 'V1'
-      - name: 'accessEnforced'
+          - CONSENT_ENFORCEMENT_VERSION_UNSPECIFIED
+          - V1
+      - name: accessEnforced
         type: Boolean
         description: |
           The default value is false. If set to true, when accessing FHIR resources, the consent headers will be verified against consents given by patients. See the ConsentEnforcementVersion for the supported consent headers.
-      - name: 'consentHeaderHandling'
+      - name: consentHeaderHandling
         type: NestedObject
         description: |
           Different options to configure the behaviour of the server when handling the X-Consent-Scope header.
         properties:
-          - name: 'profile'
+          - name: profile
             type: Enum
             description: |
               Specifies the default server behavior when the header is empty. If not specified, the ScopeProfile.PERMIT_EMPTY_SCOPE option is used.
             enum_values:
-              - 'SCOPE_PROFILE_UNSPECIFIED'
-              - 'PERMIT_EMPTY_SCOPE'
-              - 'REQUIRED_ON_READ'
-            default_value: "PERMIT_EMPTY_SCOPE"
-      - name: 'accessDeterminationLogConfig'
+              - SCOPE_PROFILE_UNSPECIFIED
+              - PERMIT_EMPTY_SCOPE
+              - REQUIRED_ON_READ
+            default_value: PERMIT_EMPTY_SCOPE
+      - name: accessDeterminationLogConfig
         type: NestedObject
         description: |
           Specifies how the server logs the consent-aware requests. If not specified, the AccessDeterminationLogConfig.LogLevel.MINIMUM option is used.
         properties:
-          - name: 'logLevel'
+          - name: logLevel
             type: Enum
             description: |
               Controls the amount of detail to include as part of the audit logs.
             enum_values:
-              - 'LOG_LEVEL_UNSPECIFIED'
-              - 'DISABLED'
-              - 'MINIMUM'
-              - 'VERBOSE'
-            default_value: "MINIMUM"
-      - name: 'enforcedAdminConsents'
+              - LOG_LEVEL_UNSPECIFIED
+              - DISABLED
+              - MINIMUM
+              - VERBOSE
+            default_value: MINIMUM
+      - name: enforcedAdminConsents
         type: Array
         description: |
           The versioned names of the enforced admin Consent resource(s), in the format projects/{projectId}/locations/{location}/datasets/{datasetId}/fhirStores/{fhirStoreId}/fhir/Consent/{resourceId}/_history/{version_id}. For FHIR stores with disableResourceVersioning=true, the format is projects/{projectId}/locations/{location}/datasets/{datasetId}/fhirStores/{fhirStoreId}/fhir/Consent/{resourceId}. This field can only be updated using [fhirStores.applyAdminConsents][].
         output: true
         item_type:
           type: String
-  - name: 'validationConfig'
+  - name: validationConfig
     type: NestedObject
     description: |
       Configuration for how to validate incoming FHIR resources against configured profiles.
     properties:
-      - name: 'disableProfileValidation'
+      - name: disableProfileValidation
         type: Boolean
         default_value: false
         description: |
           Whether to disable profile validation for this FHIR store. The default value is false. Set this to true to disable checking incoming resources for conformance against structure definitions in this FHIR store.
-      - name: 'enabledImplementationGuides'
+      - name: enabledImplementationGuides
         type: Array
         description: |
           A list of implementation guide URLs in this FHIR store that are used to configure the profiles to use for validation.
@@ -206,31 +219,31 @@ properties:
           - slicing, when using "value" as the discriminator type
         item_type:
           type: String
-      - name: 'disableRequiredFieldValidation'
+      - name: disableRequiredFieldValidation
         type: Boolean
         default_value: false
         description: |
           Whether to disable required fields validation for incoming resources. The default value is false. Set this to true to disable checking incoming resources for conformance against required fields requirement defined in the FHIR specification. This property only affects resource types that do not have profiles configured for them, any rules in enabled implementation guides will still be enforced.
-      - name: 'disableReferenceTypeValidation'
+      - name: disableReferenceTypeValidation
         type: Boolean
         default_value: false
         description: |
           Whether to disable reference type validation for incoming resources. The default value is false. Set this to true to disable checking incoming resources for conformance against reference type requirement defined in the FHIR specification. This property only affects resource types that do not have profiles configured for them, any rules in enabled implementation guides will still be enforced.
-      - name: 'disableFhirpathValidation'
+      - name: disableFhirpathValidation
         type: Boolean
         default_value: false
         description: |
           Whether to disable FHIRPath validation for incoming resources. The default value is false. Set this to true to disable checking incoming resources for conformance against FHIRPath requirement defined in the FHIR specification. This property only affects resource types that do not have profiles configured for them, any rules in enabled implementation guides will still be enforced.
-  - name: 'complexDataTypeReferenceParsing'
+  - name: complexDataTypeReferenceParsing
     type: Enum
     description: |
       Enable parsing of references within complex FHIR data types such as Extensions. If this value is set to ENABLED, then features like referential integrity and Bundle reference rewriting apply to all references. If this flag has not been specified the behavior of the FHIR store will not change, references in complex data types will not be parsed. New stores will have this value set to ENABLED by default after a notification period. Warning: turning on this flag causes processing existing resources to fail if they contain references to non-existent resources.
     default_from_api: true
     enum_values:
-      - 'COMPLEX_DATA_TYPE_REFERENCE_PARSING_UNSPECIFIED'
-      - 'DISABLED'
-      - 'ENABLED'
-  - name: 'enableUpdateCreate'
+      - COMPLEX_DATA_TYPE_REFERENCE_PARSING_UNSPECIFIED
+      - DISABLED
+      - ENABLED
+  - name: enableUpdateCreate
     type: Boolean
     description: |
       Whether this FHIR store has the updateCreate capability. This determines if the client can use an Update
@@ -240,7 +253,7 @@ properties:
       identifiers, those IDs will be part of the FHIR resource path recorded in Cloud audit logs and Cloud Pub/Sub
       notifications.
     required: false
-  - name: 'disableReferentialIntegrity'
+  - name: disableReferentialIntegrity
     type: Boolean
     description: |
       Whether to disable referential integrity in this FHIR store. This field is immutable after FHIR store
@@ -252,7 +265,7 @@ properties:
       ** Changing this property may recreate the FHIR store (removing all data) **
     required: false
     immutable: true
-  - name: 'disableResourceVersioning'
+  - name: disableResourceVersioning
     type: Boolean
     description: |
       Whether to disable resource versioning for this FHIR store. This field can not be changed after the creation
@@ -264,7 +277,7 @@ properties:
       ** Changing this property may recreate the FHIR store (removing all data) **
     required: false
     immutable: true
-  - name: 'enableHistoryImport'
+  - name: enableHistoryImport
     type: Boolean
     description: |
       Whether to allow the bulk import API to accept history bundles and directly insert historical resource
@@ -277,14 +290,14 @@ properties:
       ** This property can be changed manually in the Google Cloud Healthcare admin console without recreating the FHIR store **
     required: false
     immutable: true
-  - name: 'enableHistoryModifications'
+  - name: enableHistoryModifications
     type: Boolean
     description: |
       Whether to allow the ExecuteBundle API to accept history bundles, and directly insert and overwrite historical
       resource versions into the FHIR store. If set to false, using history bundles fails with an error.
-    min_version: 'beta'
+    min_version: beta
     required: false
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       User-supplied key-value pairs used to organize FHIR stores.
@@ -299,14 +312,13 @@ properties:
 
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-
     required: false
-  - name: 'notificationConfig'
+  - name: notificationConfig
     type: NestedObject
     required: false
     deprecation_message: '`notification_config` is deprecated and will be removed in a future major release. Use `notification_configs` instead.'
     properties:
-      - name: 'pubsubTopic'
+      - name: pubsubTopic
         type: String
         description: |
           The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
@@ -316,13 +328,13 @@ properties:
           project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
           Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
         required: true
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: |
       The fully qualified name of this dataset
     ignore_read: true
     output: true
-  - name: 'streamConfigs'
+  - name: streamConfigs
     type: Array
     description: |-
       A list of streaming configs that configure the destinations of streaming export for every resource mutation in
@@ -334,7 +346,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'resourceTypes'
+        - name: resourceTypes
           type: Array
           description: |
             Supply a FHIR resource type (such as "Patient" or "Observation"). See
@@ -342,7 +354,7 @@ properties:
             an empty list as an intent to stream all the supported resource types in this FHIR store.
           item_type:
             type: String
-        - name: 'bigqueryDestination'
+        - name: bigqueryDestination
           type: NestedObject
           description: |
             The destination BigQuery structure that contains both the dataset location and corresponding schema config.
@@ -352,18 +364,18 @@ properties:
             See the [streaming config reference](https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.fhirStores#streamconfig) for more details.
           required: true
           properties:
-            - name: 'datasetUri'
+            - name: datasetUri
               type: String
               description: |
                 BigQuery URI to a dataset, up to 2000 characters long, in the format bq://projectId.bqDatasetId
               required: true
-            - name: 'schemaConfig'
+            - name: schemaConfig
               type: NestedObject
               description: |
                 The configuration for the exported BigQuery schema.
               required: true
               properties:
-                - name: 'schemaType'
+                - name: schemaType
                   type: Enum
                   description: |
                     Specifies the output schema type.
@@ -371,12 +383,12 @@ properties:
                       See https://github.com/FHIR/sql-on-fhir/blob/master/sql-on-fhir.md.
                      * ANALYTICS_V2: Analytics V2, similar to schema defined by the FHIR community, with added support for extensions with one or more occurrences and contained resources in stringified JSON.
                      * LOSSLESS: A data-driven schema generated from the fields present in the FHIR data being exported, with no additional simplification.
-                  default_value: "ANALYTICS"
+                  default_value: ANALYTICS
                   enum_values:
-                    - 'ANALYTICS'
-                    - 'ANALYTICS_V2'
-                    - 'LOSSLESS'
-                - name: 'recursiveStructureDepth'
+                    - ANALYTICS
+                    - ANALYTICS_V2
+                    - LOSSLESS
+                - name: recursiveStructureDepth
                   type: Integer
                   description: |
                     The depth for all recursive structures in the output analytics schema. For example, concept in the CodeSystem
@@ -384,40 +396,39 @@ properties:
                     concept.concept but not concept.concept.concept. If not specified or set to 0, the server will use the default
                     value 2. The maximum depth allowed is 5.
                   required: true
-                - name: 'lastUpdatedPartitionConfig'
+                - name: lastUpdatedPartitionConfig
                   type: NestedObject
                   description: |
                     The configuration for exported BigQuery tables to be partitioned by FHIR resource's last updated time column.
                   properties:
-                    - name: 'type'
+                    - name: type
                       type: Enum
                       description: |
                         Type of partitioning.
                       required: true
                       enum_values:
-                        - 'PARTITION_TYPE_UNSPECIFIED'
-                        - 'HOUR'
-                        - 'DAY'
-                        - 'MONTH'
-                        - 'YEAR'
-                    - name: 'expirationMs'
+                        - PARTITION_TYPE_UNSPECIFIED
+                        - HOUR
+                        - DAY
+                        - MONTH
+                        - YEAR
+                    - name: expirationMs
                       type: String
                       description: |
                         Number of milliseconds for which to keep the storage for a partition.
-  - name: 'defaultSearchHandlingStrict'
+  - name: defaultSearchHandlingStrict
     type: Boolean
     description: |
       If true, overrides the default search behavior for this FHIR store to handling=strict which returns an error for unrecognized search parameters.
       If false, uses the FHIR specification default handling=lenient which ignores unrecognized search parameters.
       The handling can always be changed from the default on an individual API call by setting the HTTP header Prefer: handling=strict or Prefer: handling=lenient.
-  - name: 'notificationConfigs'
+  - name: notificationConfigs
     type: Array
-    description: |-
-      A list of notifcation configs that configure the notification for every resource mutation in this FHIR store.
+    description: A list of notifcation configs that configure the notification for every resource mutation in this FHIR store.
     item_type:
       type: NestedObject
       properties:
-        - name: 'pubsubTopic'
+        - name: pubsubTopic
           type: String
           description: |
             The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
@@ -427,7 +438,7 @@ properties:
             project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
             Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
           required: true
-        - name: 'sendFullResource'
+        - name: sendFullResource
           type: Boolean
           description: |
             Whether to send full FHIR resource to this Pub/Sub topic for Create and Update operation.
@@ -435,7 +446,7 @@ properties:
             full FHIR resource. When a resource change is too large or during heavy traffic, only the resource name will be
             sent. Clients should always check the "payloadType" label from a Pub/Sub message to determine whether
             it needs to fetch the full resource as a separate operation.
-        - name: 'sendPreviousResourceOnDelete'
+        - name: sendPreviousResourceOnDelete
           type: Boolean
           description: |
             Whether to send full FHIR resource to this Pub/Sub topic for deleting FHIR resource. Note that setting this to

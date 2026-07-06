@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package networkconnectivity_test
 
 import (
@@ -10,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networkconnectivity"
 )
 
 func TestAccNetworkConnectivityHub_BasicHubLongForm(t *testing.T) {

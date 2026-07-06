@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -101,7 +102,7 @@ func dataSourceArtifactRegistryVersionsRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	basePath, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}")
+	basePath, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config))
 	if err != nil {
 		return fmt.Errorf("Error setting Artifact Registry base path: %s", err)
 	}
@@ -233,4 +234,13 @@ func validateViewArtifactRegistryVersions(val interface{}, key string) ([]string
 	}
 
 	return nil, errs
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_artifact_registry_versions",
+		ProductName: "artifactregistry",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceArtifactRegistryVersions(),
+	}.Register()
 }

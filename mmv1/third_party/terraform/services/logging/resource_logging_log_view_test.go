@@ -6,14 +6,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/logging"
 )
 
 func TestAccLoggingLogView_loggingLogViewBasicExampleUpdate(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
+		"log_view_name": "tf-test-my-view" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -53,7 +57,7 @@ resource "google_logging_project_bucket_config" "logging_log_view" {
 }
 
 resource "google_logging_log_view" "logging_log_view" {
-  name        = "tf-test-view%{random_suffix}"
+  name        = "%{log_view_name}"
   bucket      = google_logging_project_bucket_config.logging_log_view.id
   description = "An updated logging view configured with Terraform"
   filter      = "SOURCE(\"projects/myproject\") AND resource.type = \"gce_instance\""

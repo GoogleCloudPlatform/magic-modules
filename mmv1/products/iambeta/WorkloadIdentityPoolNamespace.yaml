@@ -12,41 +12,44 @@
 # limitations under the License.
 
 ---
-name: 'WorkloadIdentityPoolNamespace'
+name: WorkloadIdentityPoolNamespace
 description: |
   Represents a namespace for a workload identity pool. Namespaces are used to segment identities
   within the pool.
 references:
   guides:
-    'Configure managed workload identity authentication for Compute Engine': 'https://cloud.google.com/iam/docs/create-managed-workload-identities'
-    'Configure managed workload identity authentication for GKE': 'https://cloud.google.com/iam/docs/create-managed-workload-identities-gke'
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools.namespaces'
-min_version: beta
-base_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces'
-self_link: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces/{{workload_identity_pool_namespace_id}}'
-create_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces?workloadIdentityPoolNamespaceId={{workload_identity_pool_namespace_id}}'
-update_verb: 'PATCH'
+    Configure managed workload identity authentication for Compute Engine: https://cloud.google.com/iam/docs/create-managed-workload-identities
+    Configure managed workload identity authentication for GKE: https://cloud.google.com/iam/docs/create-managed-workload-identities-gke
+  api: https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools.namespaces
+base_url: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces
+self_link: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces/{{workload_identity_pool_namespace_id}}
+create_url: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces?workloadIdentityPoolNamespaceId={{workload_identity_pool_namespace_id}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces/{{workload_identity_pool_namespace_id}}'
+  - projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces/{{workload_identity_pool_namespace_id}}
 autogen_async: true
 custom_code:
-  constants: 'templates/terraform/constants/iam_workload_identity_pool_namespace.go.tmpl'
-  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool_namespace.go.tmpl'
-examples:
-  - name: 'iam_workload_identity_pool_namespace_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_namespace_id: 'example-namespace'
-  - name: 'iam_workload_identity_pool_namespace_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_namespace_id: 'example-namespace'
+  decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
+  constants: templates/terraform/constants/iam_workload_identity_pool_namespace.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/iam_workload_identity_pool_namespace.go.tmpl
+samples:
+  - name: iam_workload_identity_pool_namespace_basic
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_namespace_basic
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_namespace_id: example-namespace
+  - name: iam_workload_identity_pool_namespace_full
+    primary_resource_id: example
+    steps:
+      - name: iam_workload_identity_pool_namespace_full
+        resource_id_vars:
+          workload_identity_pool_id: example-pool
+          workload_identity_pool_namespace_id: example-namespace
 parameters:
-  - name: 'workload_identity_pool_id'
+  - name: workload_identity_pool_id
     type: String
     required: true
     immutable: true
@@ -55,7 +58,7 @@ parameters:
       The ID to use for the pool, which becomes the final component of the resource name. This
       value should be 4-32 characters, and may contain the characters [a-z0-9-]. The prefix
       `gcp-` is reserved for use by Google, and may not be specified.
-  - name: 'workload_identity_pool_namespace_id'
+  - name: workload_identity_pool_namespace_id
     type: String
     required: true
     immutable: true
@@ -67,22 +70,21 @@ parameters:
       * start with an alphanumeric character
       * end with an alphanumeric character
 
-
       The prefix `gcp-` will be reserved for future uses.
     validation:
-      function: 'ValidateWorkloadIdentityPoolNamespaceId'
+      function: ValidateWorkloadIdentityPoolNamespaceId
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the namespace as
       `projects/{project_number}/locations/global/workloadIdentityPools/{workload_identity_pool_id}/namespaces/{workload_identity_pool_namespace_id}`.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A description of the namespace. Cannot exceed 256 characters.
-  - name: 'state'
+  - name: state
     type: Enum
     description: |
       The current state of the namespace.
@@ -93,24 +95,24 @@ properties:
       until it is permanently deleted.
     output: true
     enum_values:
-      - 'ACTIVE'
-      - 'DELETED'
-  - name: 'disabled'
+      - ACTIVE
+      - DELETED
+  - name: disabled
     type: Boolean
     description: |
       Whether the namespace is disabled. If disabled, credentials may no longer be issued for
       identities within this namespace, however existing credentials will still be accepted until
       they expire.
-  - name: 'ownerService'
+  - name: ownerService
     type: NestedObject
     description: |
       Defines the owner that is allowed to mutate this resource. If present, this resource can only
       be mutated by the owner.
     output: true
     properties:
-      - name: 'principalSubject'
+      - name: principalSubject
         type: String
         description: |
-           The service agent principal subject, e.g.
-           `serviceAccount:service-1234@gcp-sa-gkehub.iam.gserviceaccount.com`.
+          The service agent principal subject, e.g.
+          `serviceAccount:service-1234@gcp-sa-gkehub.iam.gserviceaccount.com`.
         output: true

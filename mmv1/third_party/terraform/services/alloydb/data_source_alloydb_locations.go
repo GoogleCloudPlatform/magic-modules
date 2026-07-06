@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -82,7 +83,7 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		billingProject = bp
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations")
 	if err != nil {
 		return fmt.Errorf("Error setting api endpoint")
 	}
@@ -130,7 +131,7 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		if res["nextPageToken"] == nil || res["nextPageToken"].(string) == "" {
 			break
 		}
-		url, err = tpgresource.ReplaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations?pageToken="+res["nextPageToken"].(string))
+		url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations?pageToken="+res["nextPageToken"].(string))
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -151,4 +152,13 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 	}
 	d.SetId(fmt.Sprintf("projects/%s/locations", project))
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_alloydb_locations",
+		ProductName: "alloydb",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAlloydbLocations(),
+	}.Register()
 }

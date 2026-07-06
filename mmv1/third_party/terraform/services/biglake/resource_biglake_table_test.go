@@ -6,13 +6,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/biglake"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccBiglakeTable_biglakeTable_update(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"bucket":        "tf_test_my_bucket" + randomSuffix,
+		"catalog":       "tf_test_my_catalog" + randomSuffix,
+		"database":      "tf_test_my_database" + randomSuffix,
+		"name":          "tf_test_my_table" + randomSuffix,
+		"random_suffix": randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -45,11 +53,11 @@ func TestAccBiglakeTable_biglakeTable_update(t *testing.T) {
 func testAccBiglakeTable_biglakeTable_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_biglake_catalog" "catalog" {
-	name = "tf_test_my_catalog%{random_suffix}"
+	name = "%{catalog}"
 	location = "US"
 }
 resource "google_storage_bucket" "bucket" {
-	name                        = "tf_test_my_bucket%{random_suffix}"
+	name                        = "%{bucket}"
 	location                    = "US"
 	force_destroy               = true
 	uniform_bucket_level_access = true
@@ -65,7 +73,7 @@ resource "google_storage_bucket_object" "data_folder" {
 	bucket  = google_storage_bucket.bucket.name
 }
 resource "google_biglake_database" "database" {
-	name = "tf_test_my_database%{random_suffix}"
+	name = "%{database}"
 	catalog = google_biglake_catalog.catalog.id
 	type = "HIVE"
 	hive_options {
@@ -76,7 +84,7 @@ resource "google_biglake_database" "database" {
 	}
 }
 resource "google_biglake_table" "table" {
-    name = "tf_test_my_table%{random_suffix}"
+    name = "%{name}"
     database = google_biglake_database.database.id
     type = "HIVE"
     hive_options {

@@ -15,7 +15,7 @@
 name: 'Index'
 description: |
   Cloud Firestore indexes enable simple and complex queries against documents in a database.
-   Both Firestore Native and Datastore Mode indexes are supported.
+   Firestore Native, Firestore with MongoDB compatibility and Datastore Mode indexes are all supported.
    This resource manages composite indexes and not single field indexes.
    To manage single field indexes, use the `google_firestore_field` resource instead.
 references:
@@ -52,92 +52,121 @@ custom_code:
   encoder: 'templates/terraform/encoders/index.go.tmpl'
   custom_import: 'templates/terraform/custom_import/index_self_link_as_name_set_project.go.tmpl'
   custom_create: 'templates/terraform/custom_create/firestore_index.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/firestore_index.go.tmpl'
 error_retry_predicates:
   - 'transport_tpg.FirestoreIndex409Retry'
-examples:
+samples:
   - name: 'firestore_index_basic'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
     external_providers: ["random", "time"]
+    steps:
+      - name: 'firestore_index_basic'
+        resource_id_vars:
+          database_id: 'database-id'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_datastore_mode'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-dm'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_datastore_mode'
+        resource_id_vars:
+          database_id: 'database-id-dm'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_vector'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-vector'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_vector'
+        resource_id_vars:
+          database_id: 'database-id-vector'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_name_descending'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_name_descending'
+        resource_id_vars:
+          database_id: 'database-id'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_mongodb_compatible_scope'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-mongodb-compatible'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_mongodb_compatible_scope'
+        resource_id_vars:
+          database_id: 'database-id-mongodb-compatible'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_sparse_any'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-sparse-any'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_sparse_any'
+        resource_id_vars:
+          database_id: 'database-id-sparse-any'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_unique'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-unique'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+      - name: 'firestore_index_unique'
+        resource_id_vars:
+          database_id: 'database-id-unique'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_skip_wait'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-skip-wait'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'skip_wait'
+    steps:
+      - name: 'firestore_index_skip_wait'
+        resource_id_vars:
+          database_id: 'database-id-skip-wait'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        ignore_read_extra:
+          - 'skip_wait'
   - name: 'firestore_index_deletion_policy'
     primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-deletion-policy'
-      deletion_policy: '"PREVENT"'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    # Example will show delete_protection as true, but in test we will actually set to false
-    # so the test can cleanup after itself.
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+      - name: 'firestore_index_deletion_policy'
+        resource_id_vars:
+          database_id: 'database-id-deletion-policy'
+          deletion_policy: '"PREVENT"'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        # Example will show delete_protection as true, but in test we will actually set to false
+        # so the test can cleanup after itself.
+        test_vars_overrides:
+          'deletion_policy': '"DELETE"'
+        ignore_read_extra:
+          - 'deletion_policy'
+  - name: 'firestore_index_text_search'
+    primary_resource_id: 'my-index'
+    steps:
+      - name: 'firestore_index_text_search'
+        resource_id_vars:
+          database_id: 'text-search-database-id'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_suppress_geojson_indexing'
+    primary_resource_id: 'my-index'
+    steps:
+      - name: 'firestore_index_suppress_geojson_indexing'
+        resource_id_vars:
+          database_id: 'suppress-geojson-indexing-database-id'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_geo_search'
+    primary_resource_id: 'my-index'
+    steps:
+      - name: 'firestore_index_geo_search'
+        resource_id_vars:
+          database_id: 'geo-search-database-id'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
 virtual_fields:
   - name: "skip_wait"
     type: Boolean
     default_value: false
     description: "Whether to skip waiting for the index to be created."
     ignore_read: true
-  - name: 'deletion_policy'
-    type: Enum
-    default_value: 'DELETE'
-    ignore_read: true
-    enum_values:
-      - 'DELETE'
-      - 'PREVENT'
-    description: |
-      Deletion behavior for this index.
-      If the deletion policy is `PREVENT`, the index cannot be deleted and a terraform destroy will fail.
-      If the deletion policy is `DELETE`, the index will both be removed from Terraform state and deleted from Google Cloud upon destruction.
-      The default value is `DELETE`.
 parameters:
 # Firestore uses a custom create function. Any new fields must be explicitly handled there.
 properties:
@@ -191,20 +220,11 @@ properties:
   - name: 'multikey'
     type: Boolean
     default_value: false
-    description:
-      Optional. Whether the index is multikey. By default, the index
-      is not multikey. For non-multikey indexes, none of the paths in the
-      index definition reach or traverse an array, except via an explicit
-      array index. For multikey indexes, at most one of the paths in the index
-      definition reach or traverse an array, except via an explicit array
-      index. Violations will result in errors. Note this field only applies to
-      indexes with MONGODB_COMPATIBLE_API ApiScope.
+    description: Optional. Whether the index is multikey. By default, the index is not multikey. For non-multikey indexes, none of the paths in the index definition reach or traverse an array, except via an explicit array index. For multikey indexes, at most one of the paths in the index definition reach or traverse an array, except via an explicit array index. Violations will result in errors. Note this field only applies to indexes with MONGODB_COMPATIBLE_API ApiScope.
   - name: 'unique'
     type: Boolean
     default_from_api: true
-    description:
-      Whether it is an unique index. Unique index ensures all values for the
-      indexed field(s) are unique across documents.
+    description: Whether it is an unique index. Unique index ensures all values for the indexed field(s) are unique across documents.
   - name: 'fields'
     type: Array
     description: |
@@ -225,26 +245,68 @@ properties:
             Name of the field.
         - name: 'order'
           type: Enum
-          # TODO: Exactly one of order, arrayConfig, or vectorConfig must be set
+          # TODO: Exactly one of order, arrayConfig, searchConfig or vectorConfig must be set
           description: |
             Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
-            Only one of `order`, `arrayConfig`, and `vectorConfig` can be specified.
+            Only one of `order`, `arrayConfig`, `searchConfig` and `vectorConfig` can be specified.
           enum_values:
             - 'ASCENDING'
             - 'DESCENDING'
         - name: 'arrayConfig'
           type: Enum
-          # TODO: Exactly one of order, arrayConfig, or vectorConfig must be set
+          # TODO: Exactly one of order, arrayConfig, searchConfig or vectorConfig must be set
           description: |
-            Indicates that this field supports operations on arrayValues. Only one of `order`, `arrayConfig`, and
+            Indicates that this field supports operations on arrayValues. Only one of `order`, `arrayConfig`, `searchConfig` and
             `vectorConfig` can be specified.
           enum_values:
             - 'CONTAINS'
+        - name: 'searchConfig'
+          type: NestedObject
+          # TODO: Exactly one of order, arrayConfig, searchConfig or vectorConfig must be set
+          description: |
+            Indicates that this field supports text or geo-search operations. Only one of `order`, `arrayConfig`, `searchConfig` and
+            `vectorConfig` can be specified.
+          properties:
+            - name: 'textSpec'
+              type: NestedObject
+              description: |
+                The specification for building a text search index for a field.
+              properties:
+                - name: 'indexSpecs'
+                  type: Array
+                  description: |
+                    Specifications for how the field should be indexed. Repeated so that the field can be indexed in multiple ways.
+                  required: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'indexType'
+                        type: String
+                        description: |
+                          Ways to index the text field value.
+                      - name: 'matchType'
+                        type: String
+                        description: |
+                          How to match the text field value.
+            - name: 'geoSpec'
+              type: NestedObject
+              description: |
+                The specification for building a geo search index for a field.
+              send_empty_value: true
+              custom_flatten: 'templates/terraform/custom_flatten/firestore_index_geospec.go.tmpl'
+              properties:
+                - name: 'geoJsonIndexingDisabled'
+                  type: Boolean
+                  description: |
+                    If true, disables GeoJSON indexing for the field. By default, GeoJSON points are indexed.
+                    Firestore GeoPoints are indexed regardless of the value of this field.
+                  send_empty_value: true
+                  required: true
         - name: 'vectorConfig'
           type: NestedObject
-          # TODO: Exactly one of order, arrayConfig, or vectorConfig must be set
+          # TODO: Exactly one of order, arrayConfig, searchConfig or vectorConfig must be set
           description: |
-            Indicates that this field supports vector search operations. Only one of `order`, `arrayConfig`, and
+            Indicates that this field supports vector search operations. Only one of `order`, `arrayConfig`, `searchConfig` and
             `vectorConfig` can be specified. Vector Fields should come after the field path `__name__`.
           properties:
             - name: 'dimension'
@@ -258,9 +320,8 @@ properties:
                 Indicates the vector index is a flat index.
               send_empty_value: true
               allow_empty_object: true
-              properties:
-                # Meant to be an empty object with no properties.
-                []
+              properties: []
+              # Meant to be an empty object with no properties.
     # Most composite indexes require at least two fields, but it is possible
     # for a user to require a single field index such as `__name__ DESC`.
     min_size: 1

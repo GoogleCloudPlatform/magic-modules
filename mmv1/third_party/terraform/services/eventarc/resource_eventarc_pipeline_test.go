@@ -5,6 +5,10 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/eventarc"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -13,13 +17,19 @@ import (
 func TestAccEventarcPipeline_update(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
+		"project_id":      envvar.GetTestProjectFromEnv(),
+		"pipeline_name":   "tf-test-some-pipeline" + randomSuffix,
+		"topic_name":      "tf-test-some-topic" + randomSuffix,
 		"service_account": envvar.GetTestServiceAccountFromEnv(t),
-		"key_name":        acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name,
-		"key2_name":       acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key2").CryptoKey.Name,
-		"random_suffix":   acctest.RandString(t, 10),
+		"key_name":        kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name,
+		"key2_name":       kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key2").CryptoKey.Name,
+		"random_suffix":   randomSuffix,
 	}
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -75,12 +85,12 @@ func TestAccEventarcPipeline_update(t *testing.T) {
 func testAccEventarcPipeline_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_pubsub_topic" "topic_update" {
-  name = "tf-test-topic2%{random_suffix}"
+  name = "%{topic_name}-2"
 }
 
 resource "google_eventarc_pipeline" "primary" {
   location        = "us-central1"
-  pipeline_id     = "tf-test-some-pipeline%{random_suffix}"
+  pipeline_id     = "%{pipeline_name}"
   crypto_key_name = "%{key2_name}"
   display_name    = "updated pipeline"
   logging_config {
@@ -140,12 +150,12 @@ EOF
 func testAccEventarcPipeline_unset(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_pubsub_topic" "topic_update" {
-  name = "tf-test-topic2%{random_suffix}"
+  name = "%{topic_name}-2"
 }
 
 resource "google_eventarc_pipeline" "primary" {
   location        = "us-central1"
-  pipeline_id     = "tf-test-some-pipeline%{random_suffix}"
+  pipeline_id     = "%{pipeline_name}"
   destinations {
     topic = google_pubsub_topic.topic_update.id
   }

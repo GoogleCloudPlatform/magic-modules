@@ -1,11 +1,10 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package storage
 
 import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -70,7 +69,7 @@ func datasourceGoogleStorageBucketObjectsRead(d *schema.ResourceData, meta inter
 
 	for {
 		bucket := d.Get("bucket").(string)
-		url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{StorageBasePath}}b/%s/o", bucket))
+		url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"b/%s/o", bucket))
 		if err != nil {
 			return err
 		}
@@ -154,4 +153,13 @@ func flattenDatasourceGoogleBucketObjectsList(v interface{}) []map[string]interf
 	}
 
 	return bucketObjects
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_bucket_objects",
+		ProductName: "storage",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageBucketObjects(),
+	}.Register()
 }

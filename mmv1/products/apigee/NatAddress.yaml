@@ -12,19 +12,19 @@
 # limitations under the License.
 
 ---
-name: 'NatAddress'
+name: NatAddress
 description: |
   Apigee NAT (network address translation) address. A NAT address is a static external IP address used for Internet egress traffic. This is not avaible for Apigee hybrid.
 references:
   guides:
-    'Provisioning NAT IPs': 'https://cloud.google.com/apigee/docs/api-platform/security/nat-provisioning'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses'
+    Provisioning NAT IPs: https://cloud.google.com/apigee/docs/api-platform/security/nat-provisioning
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses
 docs:
 base_url: '{{instance_id}}/natAddresses'
+immutable: false
 self_link: '{{instance_id}}/natAddresses/{{name}}'
 create_url: '{{instance_id}}/natAddresses'
 delete_url: '{{instance_id}}/natAddresses/{{name}}'
-immutable: false
 import_format:
   - '{{instance_id}}/natAddresses/{{name}}'
   - '{{instance_id}}/{{name}}'
@@ -32,45 +32,54 @@ timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-autogen_async: true
+exclude_sweeper: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
+autogen_async: true
 custom_code:
-  constants: 'templates/terraform/constants/apigee_nat_address.go.tmpl'
-  encoder: 'templates/terraform/encoders/apigee_nat_address.go.tmpl'
-  decoder: 'templates/terraform/decoders/apigee_nat_address.go.tmpl'
-  post_create: 'templates/terraform/post_create/apigee_nat_address.go.tmpl'
-  custom_update: 'templates/terraform/custom_update/apigee_nat_address.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/apigee_nat_address.go.tmpl'
-exclude_sweeper: true
-examples:
-  - name: 'apigee_nat_address_basic'
-    vars:
-      nat_address_name: 'my-nat-address'
+  encoder: templates/terraform/encoders/apigee_nat_address.go.tmpl
+  decoder: templates/terraform/decoders/apigee_nat_address.go.tmpl
+  constants: templates/terraform/constants/apigee_nat_address.go.tmpl
+  post_create: templates/terraform/post_create/apigee_nat_address.go.tmpl
+  custom_update: templates/terraform/custom_update/apigee_nat_address.go.tmpl
+  custom_import: templates/terraform/custom_import/apigee_nat_address.go.tmpl
+samples:
+  - name: apigee_nat_address_basic
     exclude_test: true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - name: 'apigee_nat_address_basic_test'
-    primary_resource_id: 'apigee_nat_address'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    steps:
+      - name: apigee_nat_address_basic
+        resource_id_vars:
+          nat_address_name: my-nat-address
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
+  - name: apigee_nat_address_basic_test
+    primary_resource_id: apigee_nat_address
+    exclude_basic_doc: true
+    # Resource creation race
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_nat_address_with_activate'
-    vars:
-      nat_address_name: 'my-nat-address'
-      nat_address_activate: 'true'
+    external_providers: [time]
+    steps:
+      - name: apigee_nat_address_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  - name: apigee_nat_address_with_activate
     exclude_test: true
+    steps:
+      - name: apigee_nat_address_with_activate
+        resource_id_vars:
+          nat_address_name: my-nat-address
+          nat_address_activate: "true"
+        test_vars_overrides:
+          # for backward compatible
+          nat_address_activate: '"true" + randomSuffix'
 parameters:
-  - name: 'instanceId'
+  - name: instanceId
     type: String
     description: |
       The Apigee instance associated with the Apigee environment,
@@ -79,24 +88,24 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Resource ID of the NAT address.
     required: true
     immutable: true
-  - name: 'activate'
+  - name: activate
     type: Boolean
     description: |
       Flag that specifies whether the reserved NAT address should be activate.
     required: false
     default_value: false
-  - name: 'ipAddress'
+  - name: ipAddress
     type: String
     description: |
       The allocated NAT IP address.
     output: true
-  - name: 'state'
+  - name: state
     type: String
     description: |
       State of the NAT IP address.

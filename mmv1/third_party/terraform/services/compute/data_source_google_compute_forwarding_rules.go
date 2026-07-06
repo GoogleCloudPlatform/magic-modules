@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -55,7 +57,7 @@ func dataSourceGoogleComputeForwardingRulesRead(d *schema.ResourceData, meta int
 	id := fmt.Sprintf("projects/%s/regions/%s/forwardingRules", project, region)
 	d.SetId(id)
 
-	forwardingRulesAggregatedList, err := config.NewComputeClient(userAgent).ForwardingRules.List(project, region).Do()
+	forwardingRulesAggregatedList, err := NewClient(config, userAgent).ForwardingRules.List(project, region).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Forwarding Rules Not Found : %s", project))
 	}
@@ -99,4 +101,13 @@ func dataSourceGoogleComputeForwardingRulesRead(d *schema.ResourceData, meta int
 	}
 
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_forwarding_rules",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeForwardingRules(),
+	}.Register()
 }

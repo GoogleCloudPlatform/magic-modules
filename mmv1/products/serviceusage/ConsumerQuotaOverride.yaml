@@ -14,7 +14,7 @@
 ---
 name: ConsumerQuotaOverride
 api_resource_type_kind: QuotaOverride
-api_resource_field: "."
+api_resource_field: .
 description: |
   A consumer override is applied to the consumer on its own authority to limit its own quota usage.
   Consumer overrides cannot be used to grant more quota than would be allowed by admin overrides,
@@ -51,36 +51,60 @@ async:
 autogen_async: true
 custom_code:
   test_check_destroy: templates/terraform/custom_check_destroy/consumer_quota_override.go.tmpl
-examples:
+samples:
   - name: consumer_quota_override
     primary_resource_id: override
     min_version: beta
-    vars:
-      project_id: quota
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: consumer_quota_override
+        min_version: beta
+        resource_id_vars:
+          project_id: quota
+        test_vars_overrides:
+          # for backward compatible
+          project_id: '"quota" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
   - name: consumer_quota_override_zero_value
     primary_resource_id: override
     min_version: beta
-    exclude_docs: true
-    vars:
-      project_id: quota
-    test_env_vars:
-      org_id: ORG_ID
+    exclude_basic_doc: true
+    steps:
+      - name: consumer_quota_override_zero_value
+        min_version: beta
+        resource_id_vars:
+          project_id: quota
+        test_vars_overrides:
+          # for backward compatible
+          project_id: '"quota" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
   - name: region_consumer_quota_override
     primary_resource_id: override
     min_version: beta
-    vars:
-      project_id: quota
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: region_consumer_quota_override
+        min_version: beta
+        resource_id_vars:
+          project_id: quota
+        test_vars_overrides:
+          # for backward compatible
+          project_id: '"quota" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
   - name: consumer_quota_override_custom_dimension
     primary_resource_id: override
     min_version: beta
-    vars:
-      project_id: quota
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: consumer_quota_override_custom_dimension
+        min_version: beta
+        resource_id_vars:
+          project_id: quota
+        test_vars_overrides:
+          # for backward compatible
+          project_id: '"quota" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
   - name: name
     type: String

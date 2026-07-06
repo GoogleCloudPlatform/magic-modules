@@ -35,6 +35,7 @@ docs:
 base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups'
 has_self_link: true
 immutable: true
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -54,60 +55,90 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west4"
     - region: "asia-northeast3"
-examples:
+samples:
   - name: 'region_network_endpoint_group_functions'
     primary_resource_id: 'function_neg'
-    vars:
-      neg_name: 'function-neg'
-      function_name: 'function-neg'
-      bucket_name: 'cloudfunctions-function-example-bucket'
-      zip_path: 'path/to/index.zip'
-    test_vars_overrides:
-      'zip_path': 'acctest.CreateZIPArchiveForCloudFunctionSource(t, "./test-fixtures/http_trigger.js")'
+    steps:
+      - name: 'region_network_endpoint_group_functions'
+        resource_id_vars:
+          neg_name: 'function-neg'
+          function_name: 'function-neg'
+          bucket_name: 'cloudfunctions-function-example-bucket'
+          zip_path: 'path/to/index.zip'
+        test_vars_overrides:
+          'zip_path': 'acctest.CreateZIPArchiveForCloudFunctionSource(t, "./test-fixtures/http_trigger.js")'
   - name: 'region_network_endpoint_group_cloudrun'
     primary_resource_id: 'cloudrun_neg'
-    vars:
-      neg_name: 'cloudrun-neg'
+    steps:
+      - name: 'region_network_endpoint_group_cloudrun'
+        resource_id_vars:
+          neg_name: 'cloudrun-neg'
   - name: 'region_network_endpoint_group_appengine'
     primary_resource_id: 'appengine_neg'
-    vars:
-      neg_name: 'appengine-neg'
+    steps:
+      - name: 'region_network_endpoint_group_appengine'
+        resource_id_vars:
+          neg_name: 'appengine-neg'
   - name: 'region_network_endpoint_group_appengine_empty'
     primary_resource_id: 'appengine_neg'
-    vars:
-      neg_name: 'appengine-neg'
+    steps:
+      - name: 'region_network_endpoint_group_appengine_empty'
+        resource_id_vars:
+          neg_name: 'appengine-neg'
   - name: 'region_network_endpoint_group_psc'
     primary_resource_id: 'psc_neg'
-    vars:
-      neg_name: 'psc-neg'
+    steps:
+      - name: 'region_network_endpoint_group_psc'
+        resource_id_vars:
+          neg_name: 'psc-neg'
   - name: 'region_network_endpoint_group_psc_service_attachment'
     primary_resource_id: 'psc_neg_service_attachment'
-    vars:
-      neg_name: 'psc-neg'
-      network_name: 'psc-network'
-      subnetwork_name: 'psc-subnetwork'
-      psc_subnetwork_name: 'psc-subnetwork-nat'
-      backend_service_name: 'psc-backend'
-      forwarding_rule_name: 'psc-forwarding-rule'
-      service_attachment_name: 'psc-service-attachment'
-      health_check_name: 'psc-healthcheck'
+    steps:
+      - name: 'region_network_endpoint_group_psc_service_attachment'
+        resource_id_vars:
+          neg_name: 'psc-neg'
+          network_name: 'psc-network'
+          subnetwork_name: 'psc-subnetwork'
+          psc_subnetwork_name: 'psc-subnetwork-nat'
+          backend_service_name: 'psc-backend'
+          forwarding_rule_name: 'psc-forwarding-rule'
+          service_attachment_name: 'psc-service-attachment'
+          health_check_name: 'psc-healthcheck'
   - name: 'region_network_endpoint_group_internet_ip_port'
     primary_resource_id: 'region_network_endpoint_group_internet_ip_port'
-    vars:
-      neg_name: 'ip-port-neg'
-      network_name: 'network'
+    steps:
+      - name: 'region_network_endpoint_group_internet_ip_port'
+        resource_id_vars:
+          neg_name: 'ip-port-neg'
+          network_name: 'network'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
   - name: 'region_network_endpoint_group_internet_fqdn_port'
     primary_resource_id: 'region_network_endpoint_group_internet_fqdn_port'
-    vars:
-      neg_name: 'ip-port-neg'
-      network_name: 'network'
+    steps:
+      - name: 'region_network_endpoint_group_internet_fqdn_port'
+        resource_id_vars:
+          neg_name: 'ip-port-neg'
+          network_name: 'network'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
   - name: 'region_network_endpoint_group_portmap'
     primary_resource_id: 'region_network_endpoint_group_portmap'
     min_version: 'beta'
-    vars:
-      network_name: 'network'
-      subnetwork_name: 'subnetwork'
-      neg_name: 'portmap-neg'
+    steps:
+      - name: 'region_network_endpoint_group_portmap'
+        min_version: 'beta'
+        resource_id_vars:
+          network_name: 'network'
+          subnetwork_name: 'subnetwork'
+          neg_name: 'portmap-neg'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
+          # for backward compatible
+          subnetwork_name: '"subnetwork" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef

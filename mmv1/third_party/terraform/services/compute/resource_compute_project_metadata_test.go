@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 // Add two key value pairs
@@ -121,8 +123,8 @@ func testAccCheckComputeProjectMetadataDestroyProducer(t *testing.T) func(s *ter
 				continue
 			}
 
-			project, err := config.NewComputeClient(config.UserAgent).Projects.Get(rs.Primary.ID).Do()
-			if err == nil && len(project.CommonInstanceMetadata.Items) > 0 {
+			project, err := compute.NewClient(config, config.UserAgent).Projects.Get(rs.Primary.ID).Do()
+			if err == nil && project.CommonInstanceMetadata != nil && len(project.CommonInstanceMetadata.Items) > 0 {
 				return fmt.Errorf("Error, metadata items still exist in %s", rs.Primary.ID)
 			}
 		}
@@ -152,8 +154,8 @@ resource "google_project_service" "compute" {
   depends_on = [time_sleep.wait_60_seconds]
 }
 
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_240_seconds" {
+  create_duration = "240s"
   depends_on = [google_project_service.compute]
 }
 
@@ -163,7 +165,7 @@ resource "google_compute_project_metadata" "fizzbuzz" {
     banana = "orange"
     sofa   = "darwinism"
   }
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_240_seconds]
 }
 `, projectID, projectID, org, billing)
 }
@@ -189,8 +191,8 @@ resource "google_project_service" "compute" {
   depends_on = [time_sleep.wait_60_seconds]
 }
 
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_240_seconds" {
+  create_duration = "240s"
   depends_on = [google_project_service.compute]
 }
 
@@ -200,7 +202,7 @@ resource "google_compute_project_metadata" "fizzbuzz" {
     kiwi    = "papaya"
     finches = "darwinism"
   }
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_240_seconds]
 }
 `, projectID, projectID, org, billing)
 }
@@ -226,8 +228,8 @@ resource "google_project_service" "compute" {
   depends_on = [time_sleep.wait_60_seconds]
 }
 
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_240_seconds" {
+  create_duration = "240s"
   depends_on = [google_project_service.compute]
 }
 
@@ -238,7 +240,7 @@ resource "google_compute_project_metadata" "fizzbuzz" {
     genghis_khan = "french bread"
     happy        = "smiling"
   }
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_240_seconds]
 }
 `, projectID, projectID, org, billing)
 }
@@ -264,8 +266,8 @@ resource "google_project_service" "compute" {
   depends_on = [time_sleep.wait_60_seconds]
 }
 
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_240_seconds" {
+  create_duration = "240s"
   depends_on = [google_project_service.compute]
 }
 
@@ -276,7 +278,7 @@ resource "google_compute_project_metadata" "fizzbuzz" {
     paris = "french bread"
     happy = "laughing"
   }
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_240_seconds]
 }
 `, projectID, projectID, org, billing)
 }

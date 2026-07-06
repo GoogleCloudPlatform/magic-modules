@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 name: Chronicle
 display_name: Chronicle
 scopes:
- - https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
- - name: ga
-   base_url: https://{{location}}-chronicle.googleapis.com/v1/
- - name: beta
-   base_url: https://{{location}}-chronicle.googleapis.com/v1beta/
+  - name: ga
+    base_url: https://{{location}}-chronicle.googleapis.com/v1/
+  - name: beta
+    base_url: https://{{location}}-chronicle.googleapis.com/v1beta/

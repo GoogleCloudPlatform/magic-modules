@@ -1,0 +1,123 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Environment
+description: >
+  An environment is logical container for different networks or customers that are managed by the SOC or MSSP. This is useful for SOCs who provide services to several different networks, customers or business units within the organization. The Platform comes with a predefined environment named Default Environment.
+
+min_version: 'beta'
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.environments'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments/{{environment_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments/{{environment_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments/{{environment_id}}
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/chronicle_environment.go.tmpl'
+autogen_status: RW52aXJvbm1lbnQ=
+samples:
+  - name: chronicle_environment_update
+    primary_resource_id: sample
+    min_version: beta
+    steps:
+      - name: "chronicle_environment_basic"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'deletion_protection'
+      - name: "chronicle_environment_full"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'deletion_protection'
+virtual_fields:
+  - name: 'deletion_protection'
+    type: Boolean
+    default_value: true
+    description: 'Whether Terraform will be prevented from destroying the environment. Deleting an environment will remove all its data and all playbooks, environments, integrations instances, reports and agents related to the environment. Once you delete an environment, it cannot be reversed. Deleting environments via terraform destroy or terraform apply will only succeed if this field is false in the Terraform state.'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: environmentId
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Id of the environment record.
+properties:
+  - name: displayName
+    type: String
+    required: true
+    description: |-
+      Name of the environment
+      MAX_NAME_LENGTH = 256
+    immutable: true
+  - name: description
+    type: String
+    required: true
+    description: |-
+      MAX_NAME_LENGTH = 256
+      Description of the environment.
+  - name: contact
+    type: String
+    required: true
+    description: |-
+      MAX_NAME_LENGTH = 256
+      Name of the contact for the environment.
+  - name: contactEmails
+    type: String
+    required: true
+    description: |-
+      MAX_NAME_LENGTH = 256
+      Email of the contact for the environment. Multiple emails can be sepereated with the `;` character.
+  - name: contactPhone
+    type: String
+    required: true
+    description: |-
+      MAX_NAME_LENGTH = 256
+      Phone number of the contact for the environment.
+  - name: aliasesJson
+    type: String
+    description: Environment nicknames.
+  - name: dataAccessScopesJson
+    type: String
+    description: data access scopes.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The unique name(ID) of the Environment.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/environments/{environment}
+    output: true
+  - name: retentionDuration
+    type: Integer
+    required: true
+    immutable: true
+    description: Environment data retention in months.

@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: repo
           fetch-depth: 0
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: repo
           fetch-depth: 0
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: repo
           fetch-depth: 0
@@ -90,7 +90,7 @@ jobs:
           cd repo
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # For PRs, get only changed files
-            yamlfiles=$(git diff --name-only origin/${GITHUB_BASE_REF} -- mmv1/products)
+            yamlfiles=$(git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF} -- mmv1/products)
             if [ ! -z "$yamlfiles" ]; then
               echo "yamlfiles=${yamlfiles//$'\n'/ }" >> $GITHUB_OUTPUT
             fi
@@ -115,7 +115,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: repo
           fetch-depth: 0
@@ -132,7 +132,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.24'
+          go-version: '^1.26'
           cache-dependency-path: |
             repo/mmv1/go.mod
 

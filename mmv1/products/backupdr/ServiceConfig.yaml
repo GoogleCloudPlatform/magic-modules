@@ -12,48 +12,45 @@
 # limitations under the License.
 
 ---
-name: 'ServiceConfig'
+name: ServiceConfig
 description: |
   Initializes a Project-level default Backupdr config. It creates default Backupvault and default Backup Plan in same project for customers to protect instances.
 references:
   guides:
-  api: 'https://cloud.google.com/backup-disaster-recovery/docs/reference/rest/v1/projects.locations.serviceConfig'
-
-base_url: 'projects/{{project}}/locations/{{location}}/serviceConfig'
-
-create_url: 'projects/{{project}}/locations/{{location}}/serviceConfig:initialize'
-
-exclude_read: true
-exclude_delete: true
+  api: https://cloud.google.com/backup-disaster-recovery/docs/reference/rest/v1/projects.locations.serviceConfig
+base_url: projects/{{project}}/locations/{{location}}/serviceConfig
+immutable: true
+create_url: projects/{{project}}/locations/{{location}}/serviceConfig:initialize
 exclude_import: true
 exclude_sweeper: true
-
-immutable: true
-
 async:
-  actions: ['create']
   operation:
     base_url: '{{op_id}}'
-
-examples:
-  - name: "backup_dr_service_config"
-    primary_resource_id: "my-service-config"
-    exclude_import_test: true
-    vars:
-      resource_type: 'compute.googleapis.com/Instance'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-
+  actions: [create]
+exclude_delete: true
+exclude_read: true
+samples:
+  - name: backup_dr_service_config
+    primary_resource_id: my-service-config
+    steps:
+      - name: backup_dr_service_config
+        exclude_import_test: true
+        resource_id_vars:
+          resource_type: compute.googleapis.com/Instance
+        test_vars_overrides:
+          # for backward compatible
+          resource_type: '"compute.googleapis.com/Instance" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     url_param_only: true
     description: |
       The location in which the Service config is to be initialized.
-
 properties:
-  - name: 'resourceType'
+  - name: resourceType
     type: String
     required: true
     description: The resource type to which the default service config will be applied.

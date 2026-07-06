@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package storage_test
 
 import (
@@ -8,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccStorageAnywhereCache_update(t *testing.T) {
@@ -60,9 +59,10 @@ resource "google_storage_bucket" "bucket" {
 }
 
 resource "google_storage_anywhere_cache" "cache" {
-  bucket = google_storage_bucket.bucket.name
-  zone = "us-central1-f"
-  ttl = "3601s"
+  bucket          = google_storage_bucket.bucket.name
+  zone            = "us-central1-f"
+  ttl             = "3601s"
+  ingest_on_write = false
 }
 `, context)
 }
@@ -76,10 +76,11 @@ resource "google_storage_bucket" "bucket" {
 }
 
 resource "google_storage_anywhere_cache" "cache" {
-  bucket = google_storage_bucket.bucket.name
-  zone = "us-central1-f"
+  bucket           = google_storage_bucket.bucket.name
+  zone             = "us-central1-f"
   admission_policy = "admit-on-second-miss"
-  ttl = "3620s"
+  ttl              = "3620s"
+  ingest_on_write  = true
 }
 `, context)
 }

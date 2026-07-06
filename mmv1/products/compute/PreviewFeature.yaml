@@ -24,7 +24,6 @@ references:
 docs:
 base_url: 'projects/{{project}}/global/previewFeatures'
 has_self_link: false
-
 create_url: 'projects/{{project}}/global/previewFeatures/{{name}}'
 create_verb: 'PATCH'
 update_url: 'projects/{{project}}/global/previewFeatures/{{name}}'
@@ -35,7 +34,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -44,11 +42,12 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-
-examples:
+samples:
   - name: 'preview_feature_basic'
     primary_resource_id: 'gce_preview_feature'
-
+    skip_test: 'Needs to be fixed; test cannot run against the primary project'
+    steps:
+      - name: 'preview_feature_basic'
 parameters:
   - name: 'name'
     type: String
@@ -57,7 +56,6 @@ parameters:
     url_param_only: true
     description: |
       The name of the preview feature.
-
 properties:
   - name: 'activationStatus'
     type: Enum

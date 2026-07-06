@@ -12,294 +12,316 @@
 # limitations under the License.
 
 ---
-name: 'Listing'
+name: Listing
 description: A Bigquery Analytics Hub data exchange listing
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
-  api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges.listings'
+    Official Documentation: https://cloud.google.com/bigquery/docs/analytics-hub-introduction
+  api: https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges.listings
 docs:
-id_format: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings'
-self_link: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings?listing_id={{listing_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings
+self_link: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}
+create_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings?listing_id={{listing_id}}
 update_mask: true
+update_verb: PATCH
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: POST
+  parent_resource_attribute: listing_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}
+    - '{{listing_id}}'
+id_format: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
+  - projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-iam_policy:
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'listing_id'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
-    - '{{listing_id}}'
-custom_code:
-  pre_update: 'templates/terraform/pre_update/bigqueryanalyticshub_listing.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/bigquery_analytics_hub_listing.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
-examples:
-  - name: 'bigquery_analyticshub_listing_basic'
-    primary_resource_id: 'listing'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      desc: 'example data exchange'
-  - name: 'bigquery_analyticshub_listing_restricted'
-    primary_resource_id: 'listing'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      desc: 'example data exchange'
-  - name: 'bigquery_analyticshub_listing_dcr'
-    primary_resource_id: 'listing'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'dcr_data_exchange'
-      listing_id: 'dcr_listing'
-      desc: 'example dcr data exchange'
-  - name: 'bigquery_analyticshub_listing_log_linked_dataset_query_user'
-    primary_resource_id: 'listing'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'tf_test_log_email_de'
-      listing_id: 'tf_test_log_email_listing'
-      dataset_id: 'tf_test_log_email_ds'
-      description: 'Example for log email test'
-  - name: 'bigquery_analyticshub_listing_pubsub'
-    primary_resource_id: 'listing'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'tf_test_pubsub_data_exchange'
-      listing_id: 'tf_test_pubsub_listing'
-      pubsub_topic_name: 'test_pubsub'
-      description: 'Example for pubsub topic source'
-  - name: 'bigquery_analyticshub_listing_dcr_routine'
-    primary_resource_id: 'listing'
-    region_override: 'US'
-    min_version: beta
-    vars:
-      data_exchange_id: 'tf_test_data_exchange'
-      listing_id: 'tf_test_listing_routine'
-      dataset_id: 'tf_test_dataset'
-      routine_id: 'tf_test_routine'
-      desc: 'Example for listing with routine'
-  - name: 'bigquery_analyticshub_public_listing'
-    primary_resource_id: 'listing'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      desc: 'example public listing'
-  - name: 'bigquery_analyticshub_listing_marketplace'
-    primary_resource_id: 'listing'
-    region_override: 'us'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      desc: 'example data exchange'
-    ignore_read_extra:
-      - 'delete_commercial'
-  - name: 'bigquery_analyticshub_listing_multiregion'
-    primary_resource_id: 'listing'
-    min_version: beta
+custom_code:
+  pre_update: templates/terraform/pre_update/bigqueryanalyticshub_listing.go.tmpl
+  pre_delete: templates/terraform/pre_delete/bigquery_analytics_hub_listing.go.tmpl
+samples:
+  - name: bigquery_analyticshub_listing_basic
+    primary_resource_id: listing
+    region_override: US
+    steps:
+      - name: bigquery_analyticshub_listing_basic
+        resource_id_vars:
+          data_exchange_id: my_data_exchange
+          listing_id: my_listing
+          desc: example data exchange
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example data exchange" + randomSuffix'
+  - name: bigquery_analyticshub_listing_restricted
+    primary_resource_id: listing
+    region_override: US
+    steps:
+      - name: bigquery_analyticshub_listing_restricted
+        resource_id_vars:
+          data_exchange_id: my_data_exchange
+          listing_id: my_listing
+          desc: example data exchange
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example data exchange" + randomSuffix'
+  - name: bigquery_analyticshub_listing_dcr
+    primary_resource_id: listing
+    region_override: US
+    steps:
+      - name: bigquery_analyticshub_listing_dcr
+        resource_id_vars:
+          data_exchange_id: dcr_data_exchange
+          listing_id: dcr_listing
+          desc: example dcr data exchange
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example dcr data exchange" + randomSuffix'
+  - name: bigquery_analyticshub_listing_log_linked_dataset_query_user
+    primary_resource_id: listing
+    region_override: US
+    steps:
+      - name: bigquery_analyticshub_listing_log_linked_dataset_query_user
+        resource_id_vars:
+          data_exchange_id: tf_test_log_email_de
+          listing_id: tf_test_log_email_listing
+          dataset_id: tf_test_log_email_ds
+          description: Example for log email test
+        test_vars_overrides:
+          # for backward compatible
+          description: '"Example for log email test" + randomSuffix'
+  - name: bigquery_analyticshub_listing_pubsub
+    primary_resource_id: listing
+    region_override: US
+    steps:
+      - name: bigquery_analyticshub_listing_pubsub
+        resource_id_vars:
+          data_exchange_id: tf_test_pubsub_data_exchange
+          listing_id: tf_test_pubsub_listing
+          pubsub_topic_name: test_pubsub
+          description: Example for pubsub topic source
+        test_vars_overrides:
+          # for backward compatible
+          description: '"Example for pubsub topic source" + randomSuffix'
+  - name: bigquery_analyticshub_listing_dcr_routine
+    primary_resource_id: listing
+    region_override: US
+    steps:
+      - name: bigquery_analyticshub_listing_dcr_routine
+        resource_id_vars:
+          data_exchange_id: tf_test_data_exchange
+          listing_id: tf_test_listing_routine
+          dataset_id: tf_test_dataset
+          routine_id: tf_test_routine
+          desc: Example for listing with routine
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"Example for listing with routine" + randomSuffix'
+  - name: bigquery_analyticshub_public_listing
+    primary_resource_id: listing
+    region_override: US
+    steps:
+      - name: bigquery_analyticshub_public_listing
+        resource_id_vars:
+          data_exchange_id: my_data_exchange
+          listing_id: my_listing
+          desc: example public listing
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example public listing" + randomSuffix'
+  - name: bigquery_analyticshub_listing_marketplace
+    primary_resource_id: listing
+    region_override: us
+    steps:
+      - name: bigquery_analyticshub_listing_marketplace
+        resource_id_vars:
+          data_exchange_id: my_data_exchange
+          listing_id: my_listing
+          desc: example data exchange
+        test_vars_overrides:
+          # for backward compatible
+          desc: '"example data exchange" + randomSuffix'
+        ignore_read_extra:
+          - delete_commercial
+  - name: bigquery_analyticshub_listing_multiregion
+    primary_resource_id: listing
     exclude_test: true
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      description: 'example listing for multiregion'
+    steps:
+      - name: bigquery_analyticshub_listing_multiregion
+        resource_id_vars:
+          data_exchange_id: my_data_exchange
+          listing_id: my_listing
+          description: example listing for multiregion
+        test_vars_overrides:
+          # for backward compatible
+          description: '"example listing for multiregion" + randomSuffix'
 virtual_fields:
-  - name: 'delete_commercial'
+  - name: delete_commercial
     type: Boolean
-    description: |-
-      If the listing is commercial then this field must be set to true, otherwise a failure is thrown. This acts as a safety guard to avoid deleting commercial listings accidentally.
+    description: If the listing is commercial then this field must be set to true, otherwise a failure is thrown. This acts as a safety guard to avoid deleting commercial listings accidentally.
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
-    description: |-
-      The resource name of the listing. e.g. "projects/myproject/locations/US/dataExchanges/123/listings/456"
+    description: The resource name of the listing. e.g. "projects/myproject/locations/US/dataExchanges/123/listings/456"
     output: true
-  - name: 'data_exchange_id'
+  - name: data_exchange_id
     type: String
-    description: |-
-      The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
+    description: The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'listing_id'
+  - name: listing_id
     type: String
-    description: |-
-      The ID of the listing. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
+    description: The ID of the listing. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The name of the location this data exchange listing.
     url_param_only: true
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-  - name: 'displayName'
+    diff_suppress_func: tpgresource.CaseDiffSuppress
+  - name: displayName
     type: String
-    description: |-
-      Human-readable display name of the listing. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), ampersands (&) and can't start or end with spaces.
+    description: Human-readable display name of the listing. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), ampersands (&) and can't start or end with spaces.
     required: true
-  - name: 'description'
+  - name: description
     type: String
-    description: |-
-      Short description of the listing. The description must not contain Unicode non-characters and C0 and C1 control codes except tabs (HT), new lines (LF), carriage returns (CR), and page breaks (FF).
-  - name: 'primaryContact'
+    description: Short description of the listing. The description must not contain Unicode non-characters and C0 and C1 control codes except tabs (HT), new lines (LF), carriage returns (CR), and page breaks (FF).
+  - name: primaryContact
     type: String
-    description: |-
-      Email or URL of the primary point of contact of the listing.
-  - name: 'documentation'
+    description: Email or URL of the primary point of contact of the listing.
+  - name: documentation
     type: String
-    description: |-
-      Documentation describing the listing.
-  - name: 'icon'
+    description: Documentation describing the listing.
+  - name: icon
     type: String
-    description: |-
-      Base64 encoded image representing the listing.
-  - name: 'requestAccess'
+    description: Base64 encoded image representing the listing.
+  - name: requestAccess
     type: String
-    description: |-
-      Email or URL of the request access of the listing. Subscribers can use this reference to request access.
-  - name: 'dataProvider'
+    description: Email or URL of the request access of the listing. Subscribers can use this reference to request access.
+  - name: dataProvider
     type: NestedObject
     description: Details of the data provider who owns the source data.
     properties:
-      - name: 'name'
+      - name: name
         type: String
         description: Name of the data provider.
         required: true
-      - name: 'primaryContact'
+      - name: primaryContact
         type: String
         description: Email or URL of the data provider.
-  - name: 'publisher'
+  - name: publisher
     type: NestedObject
-    description:
-      Details of the publisher who owns the listing and who can share the source
-      data.
+    description: Details of the publisher who owns the listing and who can share the source data.
     properties:
-      - name: 'name'
+      - name: name
         type: String
         description: Name of the listing publisher.
         required: true
-      - name: 'primaryContact'
+      - name: primaryContact
         type: String
         description: Email or URL of the listing publisher.
-  - name: 'categories'
+  - name: categories
     type: Array
     description: |
       Categories of the listing. Up to two categories are allowed.
     item_type:
       type: String
-  - name: 'bigqueryDataset'
+  - name: bigqueryDataset
     type: NestedObject
     description: Shared dataset i.e. BigQuery dataset source.
     exactly_one_of:
-      - 'pubsubTopic'
-      - 'bigqueryDataset'
+      - pubsubTopic
+      - bigqueryDataset
     properties:
-      - name: 'dataset'
+      - name: dataset
         type: String
-        description:
-          Resource name of the dataset source for this listing. e.g.
-          projects/myproject/datasets/123
+        description: Resource name of the dataset source for this listing. e.g. projects/myproject/datasets/123
         required: true
         immutable: true
-        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - name: 'selectedResources'
+        diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+      - name: selectedResources
         type: Array
         description: Resource in this dataset that is selectively shared. This field is required for data clean room exchanges.
         immutable: true
         item_type:
           type: NestedObject
           properties:
-            - name: 'table'
+            - name: table
               type: String
               description: |
                 Format: For table: projects/{projectId}/datasets/{datasetId}/tables/{tableId} Example:"projects/test_project/datasets/test_dataset/tables/test_table"
               immutable: true
-              diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+              diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
               exactly_one_of:
-                - 'table'
-                - 'routine'
-            - name: 'routine'
-              min_version: beta
+                - table
+                - routine
+            - name: routine
               type: String
               description: |
                 Format: For routine: projects/{projectId}/datasets/{datasetId}/routines/{routineId} Example:"projects/test_project/datasets/test_dataset/routines/test_routine"
               immutable: true
-              diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+              diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
               exactly_one_of:
-                - 'table'
-                - 'routine'
-      - name: 'replicaLocations'
+                - table
+                - routine
+      - name: replicaLocations
         type: Array
         is_set: true
-        min_version: 'beta'
-        set_hash_func: 'tpgresource.CaseInsensitiveHash'
+        set_hash_func: tpgresource.CaseInsensitiveHash
         description: |
           A list of regions where the publisher has created shared dataset replicas.
         item_type:
           type: String
-          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-      - name: 'effectiveReplicas'
+          diff_suppress_func: tpgresource.CaseDiffSuppress
+      - name: effectiveReplicas
         type: Array
         description: |
           Server owned effective state of replicas. Contains both primary and secondary replicas.
           Each replica includes a system-computed (output-only) state and primary designation.
         output: true
-        min_version: 'beta'
         item_type:
           type: NestedObject
           properties:
-            - name: 'location'
+            - name: location
               type: String
               description: |
                 The geographic location where the replica resides.
               output: true
-              min_version: beta
-            - name: 'replicaState'
+            - name: replicaState
               type: String
               description: |
                 Output-only. Assigned by Analytics Hub based on real BigQuery replication state.
                 Possible values: REPLICA_STATE_UNSPECIFIED, READY_TO_USE, UNAVAILABLE
               output: true
-              min_version: beta
-            - name: 'primaryState'
+            - name: primaryState
               type: String
               description: |
                 Output-only. Indicates that this replica is the primary replica.
                 Possible values: PRIMARY_STATE_UNSPECIFIED, PRIMARY_REPLICA
               output: true
-              min_version: beta
-  - name: 'pubsubTopic'
+  - name: pubsubTopic
     type: NestedObject
     description: Pub/Sub topic source.
     exactly_one_of:
-      - 'pubsubTopic'
-      - 'bigqueryDataset'
+      - pubsubTopic
+      - bigqueryDataset
     properties:
-      - name: 'topic'
+      - name: topic
         type: String
-        description: |-
-          Resource name of the Pub/Sub topic source for this listing. e.g. projects/myproject/topics/topicId
+        description: Resource name of the Pub/Sub topic source for this listing. e.g. projects/myproject/topics/topicId
         required: true
         immutable: true
-        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - name: 'dataAffinityRegions'
+        diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+      - name: dataAffinityRegions
         type: Array
         is_set: true
         description: |-
@@ -307,60 +329,55 @@ properties:
           See https://cloud.google.com/about/locations for full listing of possible Cloud regions.
         item_type:
           type: String
-  - name: 'restrictedExportConfig'
+  - name: restrictedExportConfig
     type: NestedObject
     description: If set, restricted export configuration will be propagated and enforced on the linked dataset.
     properties:
-      - name: 'enabled'
+      - name: enabled
         type: Boolean
-        description:
-          If true, enable restricted export.
-      - name: 'restrictDirectTableAccess'
+        description: If true, enable restricted export.
+      - name: restrictDirectTableAccess
         type: Boolean
-        description:
-          If true, restrict direct table access(read api/tabledata.list) on linked table.
+        description: If true, restrict direct table access(read api/tabledata.list) on linked table.
         output: true
-      - name: 'restrictQueryResult'
+      - name: restrictQueryResult
         type: Boolean
-        description:
-          If true, restrict export of query result derived from restricted linked dataset table.
-  - name: 'logLinkedDatasetQueryUserEmail'
+        description: If true, restrict export of query result derived from restricted linked dataset table.
+  - name: logLinkedDatasetQueryUserEmail
     type: Boolean
-    description:
-      If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user. Once enabled, this setting cannot be turned off.
-  - name: 'state'
+    description: If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user. Once enabled, this setting cannot be turned off.
+  - name: state
     type: String
-    description: |-
-      Current state of the listing.
+    description: Current state of the listing.
     output: true
-  - name: 'discoveryType'
+  - name: discoveryType
     type: Enum
     enum_values:
-      - 'DISCOVERY_TYPE_PRIVATE'
-      - 'DISCOVERY_TYPE_PUBLIC'
+      - DISCOVERY_TYPE_PRIVATE
+      - DISCOVERY_TYPE_PUBLIC
     default_from_api: true
     description: Specifies the type of discovery on the discovery page. Cannot be set for a restricted listing. Note that this does not control the visibility of the exchange/listing which is defined by IAM permission.
-  - name: 'allowOnlyMetadataSharing'
+  - name: allowOnlyMetadataSharing
     type: Boolean
     immutable: true
     description: If true, the listing is only available to get the resource metadata. Listing is non subscribable.
-  - name: 'commercialInfo'
+  - name: commercialInfo
     type: NestedObject
     description: |
       Commercial info contains the information about the commercial data products associated with the listing.
     output: true
     properties:
-      - name: 'cloudMarketplace'
+      - name: cloudMarketplace
         type: NestedObject
         description: Details of the Marketplace Data Product associated with the Listing.
         output: true
         properties:
-          - name: 'service'
+          - name: service
             type: String
             description: |
               Resource name of the commercial service associated with the Marketplace Data Product. e.g. example.com
             output: true
-          - name: 'commercialState'
+          - name: commercialState
             type: String
             description: |
               Commercial state of the Marketplace Data Product.

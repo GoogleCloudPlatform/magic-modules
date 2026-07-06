@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -15,6 +16,7 @@ func ResourceSiteVerificationOwner() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSiteVerificationOwnerCreate,
 		Read:   resourceSiteVerificationOwnerRead,
+		Update: resourceSiteVerificationOwnerUpdate,
 		Delete: resourceSiteVerificationOwnerDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -40,6 +42,9 @@ func ResourceSiteVerificationOwner() *schema.Resource {
 				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `The id of the Web Resource to add this owner to, in the form "webResource/<web-resource-id>".`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -56,7 +61,7 @@ func resourceSiteVerificationOwnerCreate(d *schema.ResourceData, meta interface{
 
 	log.Printf("[DEBUG] Reading existing WebResource")
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{SiteVerificationBasePath}}{{web_resource_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{web_resource_id}}")
 	if err != nil {
 		return err
 	}
@@ -134,7 +139,7 @@ func resourceSiteVerificationOwnerRead(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{SiteVerificationBasePath}}{{web_resource_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{web_resource_id}}")
 	if err != nil {
 		return err
 	}
@@ -179,10 +184,29 @@ func resourceSiteVerificationOwnerRead(d *schema.ResourceData, meta interface{})
 		return nil
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
+// UDP update start
+func resourceSiteVerificationOwnerUpdate(d *schema.ResourceData, meta interface{}) error {
+	// Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+	return resourceSiteVerificationOwnerRead(d, meta)
+}
+
+//UDP update end
+
 func resourceSiteVerificationOwnerDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -191,7 +215,7 @@ func resourceSiteVerificationOwnerDelete(d *schema.ResourceData, meta interface{
 
 	billingProject := ""
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{SiteVerificationBasePath}}{{web_resource_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{web_resource_id}}")
 	if err != nil {
 		return err
 	}
@@ -272,4 +296,13 @@ func resourceSiteVerificationOwnerImport(d *schema.ResourceData, meta interface{
 	log.Printf("[DEBUG] Finished importing Owner %q", d.Id())
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_site_verification_owner",
+		ProductName: "siteverification",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceSiteVerificationOwner(),
+	}.Register()
 }

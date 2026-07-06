@@ -12,52 +12,48 @@
 # limitations under the License.
 
 ---
-name: 'TeamFolder'
+name: TeamFolder
 description: |
   A resource represents a Dataform TeamFolder
-min_version: beta
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dataform/docs/'
-  api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.teamFolders'
-self_link: 'projects/{{project}}/locations/{{region}}/teamFolders/{{teamfolder_id}}'
-create_url: 'projects/{{project}}/locations/{{region}}/teamFolders'
-id_format: 'projects/{{project}}/locations/{{region}}/teamFolders/{{teamfolder_id}}'
-import_format:
-  - 'projects/{{project}}/locations/{{region}}/teamFolders/{{teamfolder_id}}'
-  - '{{name}}'
-update_verb: 'PATCH'
+    Official Documentation: https://cloud.google.com/dataform/docs/
+  api: https://cloud.google.com/dataform/reference/rest/v1/projects.locations.teamFolders
+self_link: projects/{{project}}/locations/{{region}}/teamFolders/{{teamfolder_id}}
+create_url: projects/{{project}}/locations/{{region}}/teamFolders
 update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{region}}/teamFolders/{{teamfolder_id}}
+import_format:
+  - projects/{{project}}/locations/{{region}}/teamFolders/{{teamfolder_id}}
+  - '{{name}}'
 custom_code:
-  post_create: 'templates/terraform/post_create/dataform_folder.tmpl'
+  post_create: templates/terraform/post_create/dataform_folder.tmpl
+samples:
+  - name: dataform_team_folder_basic
+    primary_resource_id: dataform_team_folder_basic
+    steps:
+      - name: dataform_team_folder_basic
 parameters:
-  - name: 'region'
+  - name: region
     type: String
-    description: 'A reference to the region'
-    min_version: 'beta'
+    description: A reference to the region
     required: true
     url_param_only: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: The TeamFolder's name.
-    min_version: 'beta'
     output: true
     immutable: true
-  - name: 'teamfolder_id'
-    api_name: 'name'
+  - name: teamfolder_id
+    api_name: name
     type: String
     description: The unique identifier for the TeamFolder.
-    min_version: 'beta'
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: Required. The TeamFolder's user-friendly name.
-    min_version: 'beta'
     required: true
-examples:
-  - name: 'dataform_team_folder_basic'
-    primary_resource_id: 'dataform_team_folder_basic'
-    min_version: 'beta'

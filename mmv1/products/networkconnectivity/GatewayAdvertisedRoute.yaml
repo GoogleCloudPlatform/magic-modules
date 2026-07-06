@@ -13,46 +13,52 @@
 
 ---
 # API resource name
-name: 'GatewayAdvertisedRoute'
+name: GatewayAdvertisedRoute
 # Resource description for the provider documentation.
 description: |
   A gateway advertised route is a route that a gateway spoke advertises somewhere.
 references:
   guides:
-    'QUICKSTART_TITLE': 'https://docs.cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/ncc-gateway-overview'
-  api: 'https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.spokes.gatewayAdvertisedRoutes'
+    QUICKSTART_TITLE: https://docs.cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/ncc-gateway-overview
+  api: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.spokes.gatewayAdvertisedRoutes
+base_url: projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes
 min_version: beta
-base_url: 'projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes'
-self_link: 'projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes?gatewayAdvertisedRouteId={{name}}'
-update_verb: 'PATCH'
+self_link: projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes?gatewayAdvertisedRouteId={{name}}
 update_mask: true
+update_verb: PATCH
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
-examples:
-  - name: 'network_connectivity_gateway_advertised_route_basic'
+autogen_async: true
+samples:
+  - name: network_connectivity_gateway_advertised_route_basic
     min_version: beta
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'gateway-advertised-route-name'
-      spoke_name: 'spoke-name'
-      network_name: 'net-spoke'
-      hub_name: 'hub'
+    primary_resource_id: default
+    steps:
+      - name: network_connectivity_gateway_advertised_route_basic
+        min_version: beta
+        resource_id_vars:
+          resource_name: gateway-advertised-route-name
+          spoke_name: spoke-name
+          network_name: net-spoke
+          hub_name: hub
+        test_vars_overrides:
+          # for backward compatible
+          hub_name: '"hub" + randomSuffix'
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The location for the resource
-  - name: 'spoke'
+  - name: spoke
     type: String
     required: true
     immutable: true
@@ -60,63 +66,63 @@ parameters:
     description: |
       The name of the spoke
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: The name of the gateway advertised route. Route names must be unique.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
-  - name: 'createTime'
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
+  - name: createTime
     type: String
     description: The time the gateway advertised route was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: The time the gateway advertised route was last updated.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     immutable: true
     description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
-  - name: 'description'
+  - name: description
     type: String
     description: An optional description of the gateway advertised route.
     immutable: true
-  - name: 'uniqueId'
+  - name: uniqueId
     type: String
     description: |
       The Google-generated UUID for the gateway advertised route.
       This value is unique across all gateway advertised route resources.
       If a gateway advertised route is deleted and another with the same name is created, the new route is assigned a different uniqueId.
     output: true
-  - name: 'state'
+  - name: state
     type: Enum
     description: The current lifecycle state of this gateway advertised route.
     enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'CREATING'
-      - 'ACTIVE'
-      - 'DELETING'
-      - 'ACCEPTING'
-      - 'REJECTING'
-      - 'UPDATING'
-      - 'INACTIVE'
-      - 'OBSOLETE'
-      - 'FAILED'
+      - STATE_UNSPECIFIED
+      - CREATING
+      - ACTIVE
+      - DELETING
+      - ACCEPTING
+      - REJECTING
+      - UPDATING
+      - INACTIVE
+      - OBSOLETE
+      - FAILED
     output: true
-  - name: 'ipRange'
+  - name: ipRange
     type: String
     description: |
       This route's advertised IP address range. Must be a valid CIDR-formatted prefix.
       If an IP address is provided without a subnet mask, it is interpreted as, for IPv4, a /32 singular IP address range, and, for IPv6, /128
     immutable: true
-  - name: 'recipient'
+  - name: recipient
     type: Enum
-    description: 'the recipient of this advertised route'
+    description: the recipient of this advertised route
     enum_values:
-      - 'RECIPIENT_UNSPECIFIED'
-      - 'ADVERTISE_TO_HUB'
-  - name: 'priority'
+      - RECIPIENT_UNSPECIFIED
+      - ADVERTISE_TO_HUB
+  - name: priority
     type: Integer
     description: |
       The priority of this advertised route. You can choose a value from 0 to 65335.

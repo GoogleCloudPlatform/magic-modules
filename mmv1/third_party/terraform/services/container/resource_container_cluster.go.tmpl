@@ -6,6 +6,7 @@ import (
 	"log"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -99,10 +101,12 @@ var (
 		"addons_config.0.parallelstore_csi_driver_config",
 		"addons_config.0.lustre_csi_driver_config",
 		"addons_config.0.slice_controller_config",
+		"addons_config.0.pod_snapshot_config",
+		"addons_config.0.slurm_operator_config",
+		"addons_config.0.agent_sandbox_config",
 	{{- if ne $.TargetVersionName "ga" }}
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
-		"addons_config.0.pod_snapshot_config",
 	{{- end }}
 	}
 
@@ -229,26 +233,27 @@ func ResourceContainerCluster() *schema.Resource {
 		Delete: resourceContainerClusterDelete,
 
 		CustomizeDiff: customdiff.All(
+            		tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			resourceNodeConfigEmptyGuestAccelerator,
 			customdiff.ForceNewIfChange("enable_l4_ilb_subsetting", isBeenEnabled),
 			customdiff.ForceNewIfChange("enable_fqdn_network_policy", isBeenEnabled),
 			containerClusterAutopilotCustomizeDiff,
+			containerClusterAutopilotPrivilegedAdmissionCustomizeDiff,
 			containerClusterNodeVersionRemoveDefaultCustomizeDiff,
 			containerClusterNetworkPolicyEmptyCustomizeDiff,
 			containerClusterSurgeSettingsCustomizeDiff,
 			containerClusterEnableK8sBetaApisCustomizeDiff,
 			containerClusterNodeVersionCustomizeDiff,
+			containerClusterSkipNodePoolRefreshCustomizeDiff,
 			tpgresource.SetDiffForLabelsWithCustomizedName("resource_labels"),
-			{{ if ne $.TargetVersionName `ga` }}
 			clusterAcceleratorNetworkProfileCustomizeDiff,
-			{{- end }}
 		),
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(40 * time.Minute),
-			Read:   schema.DefaultTimeout(40 * time.Minute),
-			Update: schema.DefaultTimeout(60 * time.Minute),
-			Delete: schema.DefaultTimeout(40 * time.Minute),
+			Create: schema.DefaultTimeout(90 * time.Minute),
+			Read:   schema.DefaultTimeout(90 * time.Minute),
+			Update: schema.DefaultTimeout(90 * time.Minute),
+			Delete: schema.DefaultTimeout(90 * time.Minute),
 		},
 
 		SchemaVersion: 2,
@@ -517,6 +522,29 @@ func ResourceContainerCluster() *schema.Resource {
 										Description: `If set to true, the Lustre CSI driver will initialize LNet (the virtual network layer for Lustre kernel module) using port 6988.
 										This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.`,
 									},
+									"disable_multi_nic": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Description: `When set to true, this disables multi-NIC support for the Lustre CSI driver. By default, GKE enables multi-NIC support, which
+										allows the Lustre CSI driver to automatically detect and configure all suitable network interfaces on a node to maximize I/O performance for demanding workloads.`,
+									},
+								},
+							},
+						},
+						"pod_snapshot_config": {
+							Type: schema.TypeList,
+							Optional: true,
+							Computed: true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems: 1,
+							Description: `Configuration for the Pod Snapshot feature.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type: schema.TypeBool,
+										Required: true,
+										Description: `Whether the Pod Snapshot feature is enabled for this cluster.`,
+									},
 								},
 							},
 						},
@@ -558,23 +586,6 @@ func ResourceContainerCluster() *schema.Resource {
 									"enabled": {
 										Type:     schema.TypeBool,
 										Required: true,
-									},
-								},
-							},
-						},
-						"pod_snapshot_config": {
-							Type: schema.TypeList,
-							Optional: true,
-							Computed: true,
-							AtLeastOneOf: addonsConfigKeys,
-							MaxItems: 1,
-							Description: `Configuration for the Pod Snapshot feature.`,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"enabled": {
-										Type: schema.TypeBool,
-										Required: true,
-										Description: `Whether the Pod Snapshot feature is enabled for this cluster.`,
 									},
 								},
 							},
@@ -675,6 +686,39 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"slurm_operator_config": {
+							Type:          schema.TypeList,
+							Optional:      true,
+							Computed:      true,
+							AtLeastOneOf:  addonsConfigKeys,
+							MaxItems:      1,
+							Description:   `The status of the Slurm Operator addon, which creates slurm related CRDs and KCP pods to manage them. Defaults to disabled for Standard clusters; set enabled = true to enable. It can not be enabled for Autopilot clusters.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"agent_sandbox_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Agent Sandbox addon. It is disabled by default. Set enabled = true to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether the Agent Sandbox feature is enabled.`,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -760,7 +804,7 @@ func ResourceContainerCluster() *schema.Resource {
 										Default:          "pd-standard",
 										Description:      `Type of the disk attached to each node.`,
 										DiffSuppressFunc: suppressDiffForAutopilot,
-										ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd", "pd-balanced"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd", "pd-balanced", "hyperdisk-balanced"}, false),
 									},
 									"image_type": {
 										Type:             schema.TypeString,
@@ -1110,6 +1154,17 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `Enable NET_ADMIN for this cluster.`,
             },
 
+			"autopilot_privileged_admission": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "The customer allowlist Cloud Storage paths for the cluster. These paths are used with the `--autopilot-privileged-admission` flag to authorize privileged workloads in Autopilot clusters. To allow default partner allowlists, set to []. To allow no allowlists, set to [\"\"].",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringMatch(regexp.MustCompile(`^((?:gke|gs)://.+)?$`), "allowlist path must start with either gke:// or gs://"),
+				},
+			},
+
 			"authenticator_groups_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1145,10 +1200,10 @@ func ResourceContainerCluster() *schema.Resource {
 						"enable_components": {
 							Type:        schema.TypeList,
 							Required:    true,
-							Description: `GKE components exposing logs. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, KCP_CONNECTION, KCP_SSHD, KCP_HPA, SCHEDULER, and WORKLOADS.`,
+							Description: `GKE components exposing logs. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, KCP_CONNECTION, KCP_SSHD, KCP_HPA, KCP_VPA, SCHEDULER, and WORKLOADS.`,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
-								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "KCP_CONNECTION", "KCP_SSHD", "KCP_HPA", "SCHEDULER", "WORKLOADS"}, false),
+								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "KCP_CONNECTION", "KCP_SSHD", "KCP_HPA", "KCP_VPA", "SCHEDULER", "WORKLOADS"}, false),
 							},
 						},
 					},
@@ -1272,6 +1327,32 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"disruption_budget": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems:    1,
+							Description: `Cluster disruption intervals for minor version and patch version upgrade`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"minor_version_disruption_interval": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"patch_version_disruption_interval": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"last_minor_version_disruption_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"last_disruption_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1347,6 +1428,24 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+{{- if ne $.TargetVersionName "ga" }}
+			"managed_machine_learning_diagnostics_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Configuration for the GKE Managed Machine Learning Diagnostics pipeline.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `Enable Managed Machine Learning Diagnostics.`,
+						},
+					},
+				},
+			},
+{{- end }}
 			"monitoring_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1748,7 +1847,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-{{ if ne $.TargetVersionName `ga` -}}
 			"secret_sync_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1787,7 +1885,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-{{- end }}
 			"project": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -2019,6 +2116,12 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				Description: `If true, deletes the default node pool upon cluster creation. If you're using google_container_node_pool resources with no default node pool, this should be set to true, alongside setting initial_node_count to at least 1.`,
 				ConflictsWith: []string{"enable_autopilot"},
+			},
+
+			"skip_node_pool_refresh": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `If true, the provider will not refresh the inline node_pool state from the API during cluster reads. Set this to true only when all node pools are managed via separate google_container_node_pool resources; it substantially improves plan/apply performance on clusters with a high node pool count. Must not be set to true when inline node_pool blocks are defined on this resource.`,
 			},
 
 			"control_plane_endpoints_config": {
@@ -2297,8 +2400,9 @@ func ResourceContainerCluster() *schema.Resource {
             "state": {
               Type:         schema.TypeString,
               Required:     true,
-              ValidateFunc: validation.StringInSlice([]string{"ENCRYPTED", "DECRYPTED"}, false),
-              Description:  `ENCRYPTED or DECRYPTED.`,
+              ValidateFunc: validation.StringInSlice([]string{"ENCRYPTED", "ALL_OBJECTS_ENCRYPTION_ENABLED", "DECRYPTED"}, false),
+              Description:  `ENCRYPTED, ALL_OBJECTS_ENCRYPTION_ENABLED or DECRYPTED.`,
+              DiffSuppressFunc: DatabaseEncryptionSuppress,
             },
             "key_name": {
               Type:        schema.TypeString,
@@ -2401,6 +2505,12 @@ func ResourceContainerCluster() *schema.Resource {
 				Description:      `The desired datapath provider for this cluster. By default, uses the IPTables-based kube-proxy implementation.`,
 				ValidateFunc:     validation.StringInSlice([]string{"DATAPATH_PROVIDER_UNSPECIFIED", "LEGACY_DATAPATH", "ADVANCED_DATAPATH"}, false),
 				DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("DATAPATH_PROVIDER_UNSPECIFIED"),
+			},
+			"dataplane_optimization_mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `The desired dataplane optimization mode.`,
 			},
 			"enable_cilium_clusterwide_network_policy": {
 				Type:        schema.TypeBool,
@@ -2748,6 +2858,26 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"node_creation_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `NodeCreationConfig defines the settings of node creation mode.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"node_creation_mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"VIA_KUBELET", "VIA_CONTROL_PLANE"}, false),
+							Description:  `NodeCreationMode defines the settings of node creation mode.
+ Accepted values are:
+* VIA_KUBELET: Kubelet registers itself.
+* VIA_CONTROL_PLANE: gcp-controller-manager automatically creates the node object after CSR approval.`,
+						},
+					},
+				},
+			},
 			"rbac_binding_config": {
 			  Type:        schema.TypeList,
 			  Optional:    true,
@@ -2768,6 +2898,45 @@ func ResourceContainerCluster() *schema.Resource {
             },
           },
         },
+			},
+			"autopilot_cluster_policy_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `Configuration for the cluster policy.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"no_system_mutation": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `If true, prevents creation and mutation of resources in GKE managed namespaces and cluster-scoped GKE managed resources.`,
+						},
+						"no_system_impersonation": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `If true, prevents impersonation and CSRs for GKE System users.`,
+						},
+						"no_unsafe_webhooks": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `If true, unsafe webhooks are not allowed.`,
+						},
+						"no_standard_node_pools": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `If true, prevents standard node pools and requires only autopilot node pools.`,
+						},
+					},
+				},
+			},
+	//UDP schema start
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+	//UDP schema end
+			"ignore_node_count_changes": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `When true, the provider ignores external changes (drift) to the node count by skipping GCE API queries to the Instance Group Managers. This is a performance optimization for large clusters that saves API quota. Setting this to true will result in missing managed_instance_group_urls in the state for all node pools in the cluster.`,
 			},
 		},
 	}
@@ -2885,6 +3054,22 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			AllowNetAdmin: allowed,
 		}
 	}
+	var autopilotClusterPolicyConfig *container.ClusterPolicyConfig
+	if v, ok := d.GetOk("autopilot_cluster_policy_config"); ok {
+		autopilotClusterPolicyConfig = expandAutopilotClusterPolicyConfig(v)
+	}
+
+	var privilegedAdmissionConfig *container.PrivilegedAdmissionConfig
+	if v, ok := d.GetOk("autopilot_privileged_admission"); ok {
+		allowlistPaths := tpgresource.ConvertStringArr(v.([]interface{}))
+		// CustomizeDiff might cause this field to be set to the fallback
+		// default on first creation, which is bad. We edge case that out.
+		if !slices.Equal(allowlistPaths, []string{"gke://*"}) {
+			privilegedAdmissionConfig = &container.PrivilegedAdmissionConfig{
+				AllowlistPaths: allowlistPaths,
+			}
+		}
+	}
 
 	cluster := &container.Cluster{
 		Name:                           clusterName,
@@ -2903,6 +3088,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		NetworkPolicy:           expandNetworkPolicy(d.Get("network_policy")),
 		AddonsConfig:            expandClusterAddonsConfig(d.Get("addons_config")),
 {{- if ne $.TargetVersionName "ga" }}
+		ManagedMachineLearningDiagnosticsConfig: expandManagedMachineLearningDiagnosticsConfig(d.Get("managed_machine_learning_diagnostics_config")),
+{{- end }}
+{{- if ne $.TargetVersionName "ga" }}
 		ManagedOpentelemetryConfig: expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")),
 {{- end }}
 		EnableKubernetesAlpha:   d.Get("enable_kubernetes_alpha").(bool),
@@ -2912,14 +3100,14 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 {{- end }}
 		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 		SecretManagerConfig: 	 expandSecretManagerConfig(d.Get("secret_manager_config")),
-{{- if ne $.TargetVersionName "ga" }}
 		SecretSyncConfig: 	 expandSecretSyncConfig(d.Get("secret_sync_config")),
-{{- end }}
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
 		Autopilot: &container.Autopilot{
 			Enabled:         d.Get("enable_autopilot").(bool),
 			WorkloadPolicyConfig: workloadPolicyConfig,
+			PrivilegedAdmissionConfig: privilegedAdmissionConfig,
+			ClusterPolicyConfig: autopilotClusterPolicyConfig,
 			ForceSendFields: []string{"Enabled"},
 		},
 		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
@@ -2932,6 +3120,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			EnableIntraNodeVisibility:            d.Get("enable_intranode_visibility").(bool),
 			DefaultSnatStatus:                    expandDefaultSnatStatus(d.Get("default_snat_status")),
 			DatapathProvider:                     d.Get("datapath_provider").(string),
+			DataplaneV2Config:                    expandDataplaneV2Config(d.Get("dataplane_optimization_mode")),
 			EnableCiliumClusterwideNetworkPolicy: d.Get("enable_cilium_clusterwide_network_policy").(bool),
 			PrivateIpv6GoogleAccess:              d.Get("private_ipv6_google_access").(string),
 			InTransitEncryptionConfig:            d.Get("in_transit_encryption_config").(string),
@@ -3108,6 +3297,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
       cluster.AnonymousAuthenticationConfig = expandAnonymousAuthenticationConfig(v)
   }
 
+  if v, ok := d.GetOk("node_creation_config"); ok {
+      cluster.NodeCreationConfig = expandNodeCreationConfig(v)
+  }
+
   if v, ok := d.GetOk("rbac_binding_config"); ok {
     cluster.RbacBindingConfig = expandRBACBindingConfig(v)
   }
@@ -3157,7 +3350,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	var op *container.Operation
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			clusterCreateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Create(parent, req)
+			clusterCreateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Create(parent, req)
 			if config.UserProjectOverride {
 				clusterCreateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -3191,7 +3384,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		// Try a GET on the cluster so we can see the state in debug logs. This will help classify error states.
-		clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(containerClusterFullName(project, location, clusterName))
+		clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(containerClusterFullName(project, location, clusterName))
 		if config.UserProjectOverride {
 			clusterGetCall.Header().Add("X-Goog-User-Project", project)
 		}
@@ -3213,7 +3406,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		parent := fmt.Sprintf("%s/nodePools/%s", containerClusterFullName(project, location, clusterName), "default-pool")
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				clusterNodePoolDeleteCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Delete(parent)
+				clusterNodePoolDeleteCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Delete(parent)
 				if config.UserProjectOverride {
 					clusterNodePoolDeleteCall.Header().Add("X-Goog-User-Project", project)
 				}
@@ -3256,7 +3449,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+				clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 				if config.UserProjectOverride {
 					clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 				}
@@ -3288,7 +3481,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+				clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 				if config.UserProjectOverride {
 					clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 				}
@@ -3316,7 +3509,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
-				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+				clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 				if config.UserProjectOverride {
 					clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 				}
@@ -3381,7 +3574,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		waitErr := ContainerOperationWait(config, op, project, location, "resuming GKE cluster", userAgent, d.Timeout(schema.TimeoutRead))
 		if waitErr != nil {
 			// Try a GET on the cluster so we can see the state in debug logs. This will help classify error states.
-			clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(containerClusterFullName(project, location, clusterName))
+			clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(containerClusterFullName(project, location, clusterName))
 			if config.UserProjectOverride {
 				clusterGetCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -3398,7 +3591,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	name := containerClusterFullName(project, location, clusterName)
-	clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(name)
+	clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
 	if config.UserProjectOverride {
 		clusterGetCall.Header().Add("X-Goog-User-Project", project)
 	}
@@ -3485,6 +3678,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("binary_authorization", flattenBinaryAuthorization(cluster.BinaryAuthorization)); err != nil {
 		return err
 	}
+	var allowlistPaths []string
 	if autopilot := cluster.Autopilot; autopilot != nil {
 		if err := d.Set("enable_autopilot", autopilot.Enabled); err != nil {
 			return fmt.Errorf("Error setting enable_autopilot: %s", err)
@@ -3494,6 +3688,19 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
                 return fmt.Errorf("Error setting allow_net_admin: %s", err)
             }
         }
+		if autopilot.PrivilegedAdmissionConfig != nil && len(autopilot.PrivilegedAdmissionConfig.AllowlistPaths) > 0 {
+			allowlistPaths = autopilot.PrivilegedAdmissionConfig.AllowlistPaths
+		}
+		if autopilot.ClusterPolicyConfig != nil {
+			if err := d.Set("autopilot_cluster_policy_config", flattenClusterPolicyConfig(autopilot.ClusterPolicyConfig)); err != nil {
+				return err
+			}
+		}
+	}
+	// Always set autopilot_privileged_admission due to it being a computed
+	// field. Otherwise, normal cluster creation will always cause a diff.
+	if err := d.Set("autopilot_privileged_admission", allowlistPaths); err != nil {
+		return fmt.Errorf("Error setting autopilot_privileged_admission: %w", err)
 	}
 	if cluster.ShieldedNodes != nil {
 		if err := d.Set("enable_shielded_nodes", cluster.ShieldedNodes.Enabled); err != nil {
@@ -3529,6 +3736,11 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	if err := d.Set("datapath_provider", cluster.NetworkConfig.DatapathProvider); err != nil {
 		return fmt.Errorf("Error setting datapath_provider: %s", err)
+	}
+	if cluster.NetworkConfig.DataplaneV2Config != nil {
+		if err := d.Set("dataplane_optimization_mode", cluster.NetworkConfig.DataplaneV2Config.ScalabilityMode); err != nil {
+			return fmt.Errorf("Error setting dataplane_optimization_mode: %s", err)
+		}
 	}
 	if err := d.Set("enable_cilium_clusterwide_network_policy", cluster.NetworkConfig.EnableCiliumClusterwideNetworkPolicy); err != nil {
 		return fmt.Errorf("Error setting enable_cilium_clusterwide_network_policy: %s", err)
@@ -3632,12 +3844,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(cluster.SecretManagerConfig)); err != nil {
 		return err
 	}
-{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("secret_sync_config", flattenSecretSyncConfig(cluster.SecretSyncConfig)); err != nil {
 		return err
 	}
-{{- end }}
-
 	if err := tpgresource.SetLabels(cluster.ResourceLabels, d, "resource_labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
@@ -3681,6 +3890,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 {{ if ne $.TargetVersionName "ga" }}
+	if err := d.Set("managed_machine_learning_diagnostics_config", flattenManagedMachineLearningDiagnosticsConfig(cluster.ManagedMachineLearningDiagnosticsConfig)); err != nil {
+		return err
+	}
+{{- end }}
+
+{{ if ne $.TargetVersionName "ga" }}
 	if err := d.Set("managed_opentelemetry_config", flattenManagedOpenTelemetryConfig(cluster.ManagedOpentelemetryConfig)); err != nil {
 		return err
 	}
@@ -3718,14 +3933,28 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
+	if err := d.Set("node_creation_config", flattenNodeCreationConfig(cluster.NodeCreationConfig)); err != nil {
+		return err
+	}
+
 	if err := d.Set("rbac_binding_config", flattenRBACBindingConfig(cluster.RbacBindingConfig)); err != nil {
     return err
   }
 
+        
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+        return err
+    }
+    
 	return nil
 }
 
 func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) error {
+    
+    if tpgresource.DeletionPolicyPreUpdate(d, ResourceContainerCluster) {
+        return ResourceContainerCluster().Read(d, meta)
+    }
+    
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -3755,7 +3984,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	updateFunc := func(req *container.UpdateClusterRequest, updateDescription string) func() error {
 		return func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -3892,6 +4121,31 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's autopilot workload policy config allow_net_admin has been set to %v", d.Id(), allowed)
 	}
 
+	if d.HasChange("autopilot_privileged_admission") {
+		v := d.Get("autopilot_privileged_admission")
+
+		allowlistPaths := tpgresource.ConvertStringArr(v.([]interface{}))
+		if len(allowlistPaths) == 0 {
+			allowlistPaths = []string{"gke://*"}
+		}
+
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredPrivilegedAdmissionConfig: &container.PrivilegedAdmissionConfig{
+					AllowlistPaths: allowlistPaths,
+				},
+			},
+		}
+
+	    updateF := updateFunc(req, "updating privileged admission for GKE autopilot workload policy config")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+		    return err
+	    }
+
+		log.Printf("[INFO] GKE cluster %s's autopilot privileged admission allowlist has been updated", d.Id())
+	}
+
 	if d.HasChange("binary_authorization") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -3937,7 +4191,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating release_channel")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -3969,7 +4223,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating gke_auto_upgrade_config")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4005,7 +4259,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating enable_intranode_visibility")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4037,7 +4291,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating private_ipv6_google_access")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4074,7 +4328,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating enable_l4_ilb_subsetting")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4108,7 +4362,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating disable_l4_lb_firewall_reconciliation")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4142,7 +4396,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating in_transit_encryption_config")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4256,7 +4510,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating default_snat_status")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4336,7 +4590,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating enable_legacy_abac")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterSetLegacyAbacCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.SetLegacyAbac(name, req)
+			clusterSetLegacyAbacCall := NewClient(config, userAgent).Projects.Locations.Clusters.SetLegacyAbac(name, req)
 			if config.UserProjectOverride {
 				clusterSetLegacyAbacCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4371,7 +4625,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 					DesiredLoggingService:    logging,
 				},
 			}
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4401,7 +4655,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating network_policy")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterSetNetworkPolicyCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.SetNetworkPolicy(name, req)
+			clusterSetNetworkPolicyCall := NewClient(config, userAgent).Projects.Locations.Clusters.SetNetworkPolicy(name, req)
 			if config.UserProjectOverride {
 				clusterSetNetworkPolicyCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4611,7 +4865,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterSetMaintenancePolicyCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.SetMaintenancePolicy(name, req)
+			clusterSetMaintenancePolicyCall := NewClient(config, userAgent).Projects.Locations.Clusters.SetMaintenancePolicy(name, req)
 			if config.UserProjectOverride {
 				clusterSetMaintenancePolicyCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4656,7 +4910,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating notification_config")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4707,7 +4961,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4734,7 +4988,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4761,7 +5015,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4789,7 +5043,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4817,7 +5071,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4844,7 +5098,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -4861,7 +5115,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s secret manager csi add-on has been updated", d.Id())
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("secret_sync_config") {
 		req := &container.UpdateClusterRequest{}
 		if c, ok := d.GetOk("secret_sync_config"); !ok {
@@ -4881,7 +5134,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 		}
 	}
-{{- end }}
 
 	if d.HasChange("workload_identity_config") {
 		// Because GKE uses a non-RESTful update function, when removing the
@@ -4964,6 +5216,23 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
+	if d.HasChange("managed_machine_learning_diagnostics_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredManagedMachineLearningDiagnosticsConfig: expandManagedMachineLearningDiagnosticsConfig(d.Get("managed_machine_learning_diagnostics_config")),
+			},
+		}
+		updateF := updateFunc(req, "updating GKE cluster managed machine learning diagnostics config")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s managed machine learning diagnostics config has been updated", d.Id())
+	}
+{{- end }}
+
+{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("managed_opentelemetry_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -4989,7 +5258,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterSetResourceLabelsCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.SetResourceLabels(name, req)
+			clusterSetResourceLabelsCall := NewClient(config, userAgent).Projects.Locations.Clusters.SetResourceLabels(name, req)
 			if config.UserProjectOverride {
 				clusterSetResourceLabelsCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -5010,7 +5279,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("remove_default_node_pool") && d.Get("remove_default_node_pool").(bool) {
 		name := fmt.Sprintf("%s/nodePools/%s", containerClusterFullName(project, location, clusterName), "default-pool")
-		clusterNodePoolDeleteCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Delete(name)
+		clusterNodePoolDeleteCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Delete(name)
 		if config.UserProjectOverride {
 			clusterNodePoolDeleteCall.Header().Add("X-Goog-User-Project", project)
 		}
@@ -5038,7 +5307,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -5119,7 +5388,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Print("[INFO] Enable Kubernetes Beta APIs")
 		if v, ok := d.GetOk("enable_k8s_beta_apis"); ok {
 			name := containerClusterFullName(project, location, clusterName)
-			clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(name)
+			clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
 			if config.UserProjectOverride {
 				clusterGetCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -5355,6 +5624,21 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
+	if d.HasChange("node_creation_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredNodeCreationConfig: expandNodeCreationConfig(
+					d.Get("node_creation_config"),
+				),
+			},
+		}
+		updateF := updateFunc(req, "updating node creation config")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+	}
+
   if d.HasChange("rbac_binding_config") {
     req := &container.UpdateClusterRequest{
       Update: &container.ClusterUpdate{
@@ -5371,6 +5655,21 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
     log.Printf("[INFO] GKE cluster %s's RBAC binding config has been updated", d.Id())
   }
 
+	if d.HasChange("autopilot_cluster_policy_config") {
+		if v, ok := d.GetOk("autopilot_cluster_policy_config"); ok {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredAutopilotClusterPolicyConfig: expandAutopilotClusterPolicyConfig(v),
+				},
+			}
+			updateF := updateFunc(req, "updating autopilot_cluster_policy_config")
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+			log.Printf("[INFO] GKE cluster %s autopilot_cluster_policy_config has been updated", d.Id())
+		}
+	}
+
 	d.Partial(false)
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -5383,7 +5682,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating cluster_telemetry")
 			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
 			if config.UserProjectOverride {
 				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
@@ -5462,7 +5761,14 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) error {
-	if d.Get("deletion_protection").(bool) {
+    
+    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+        return err
+    }else if ok{
+        return nil
+    }
+    	
+    	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with cluster deletion.")
 	}
 	config := meta.(*transport_tpg.Config)
@@ -5501,7 +5807,7 @@ func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) er
 		count++
 
 		name := containerClusterFullName(project, location, clusterName)
-		clusterDeleteCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Delete(name)
+		clusterDeleteCall := NewClient(config, userAgent).Projects.Locations.Clusters.Delete(name)
 		if config.UserProjectOverride {
 			clusterDeleteCall.Header().Add("X-Goog-User-Project", project)
 		}
@@ -5545,7 +5851,7 @@ var containerClusterRestingStates = RestingStates{
 func containerClusterAwaitRestingState(config *transport_tpg.Config, project, location, clusterName, userAgent string, timeout time.Duration) (state string, err error) {
 	err = retry.Retry(timeout, func() *retry.RetryError {
 		name := containerClusterFullName(project, location, clusterName)
-		clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(name)
+		clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
 		if config.UserProjectOverride {
 			clusterGetCall.Header().Add("X-Goog-User-Project", project)
 		}
@@ -5718,7 +6024,37 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
             ac.LustreCsiDriverConfig.EnableLegacyLustrePort = val.(bool)
             ac.LustreCsiDriverConfig.ForceSendFields = append(ac.LustreCsiDriverConfig.ForceSendFields, "EnableLegacyLustrePort")
         }
+
+		// Check for disable_multi_nic
+		if val, ok := lustreConfig["disable_multi_nic"]; ok {
+			ac.LustreCsiDriverConfig.DisableMultiNic = val.(bool)
+			ac.LustreCsiDriverConfig.ForceSendFields = append(ac.LustreCsiDriverConfig.ForceSendFields, "DisableMultiNic")
+		}
     }
+
+	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+	
+	if v, ok := config["slurm_operator_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.SlurmOperatorConfig = &container.SlurmOperatorConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
+	if v, ok := config["agent_sandbox_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.AgentSandboxConfig = &container.AgentSandboxConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
@@ -5733,14 +6069,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	if v, ok := config["kalm_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.KalmConfig = &container.KalmConfig{
-			Enabled:         addon["enabled"].(bool),
-			ForceSendFields: []string{"Enabled"},
-		}
-	}
-
-	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
-		addon := v.([]interface{})[0].(map[string]interface{})
-		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
 			Enabled:         addon["enabled"].(bool),
 			ForceSendFields: []string{"Enabled"},
 		}
@@ -5874,7 +6202,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	if err != nil {
 		return nil
 	}
-	clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(name)
+	clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
 	if config.UserProjectOverride {
 		clusterGetCall.Header().Add("X-Goog-User-Project", project)
 	}
@@ -5933,6 +6261,18 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 		}
 	}
 
+	var budget *container.DisruptionBudget
+	if disruptionBudget, ok := maintenancePolicy["disruption_budget"]; ok && len(disruptionBudget.([]interface{})) > 0 {
+		db := disruptionBudget.([]interface{})[0].(map[string]interface{})
+		budget = &container.DisruptionBudget{}
+		if _, ok := db["minor_version_disruption_interval"]; ok {
+			budget.MinorVersionDisruptionInterval = db["minor_version_disruption_interval"].(string)
+		}
+		if _, ok := db["patch_version_disruption_interval"]; ok {
+			budget.PatchVersionDisruptionInterval = db["patch_version_disruption_interval"].(string)
+		}
+	}
+
 	if dailyMaintenanceWindow, ok := maintenancePolicy["daily_maintenance_window"]; ok && len(dailyMaintenanceWindow.([]interface{})) > 0 {
 		dmw := dailyMaintenanceWindow.([]interface{})[0].(map[string]interface{})
 		startTime := dmw["start_time"].(string)
@@ -5943,6 +6283,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 					StartTime: startTime,
 				},
 			},
+			DisruptionBudget: budget,
 			ResourceVersion: resourceVersion,
 		}
 	}
@@ -5959,6 +6300,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 					Recurrence: rw["recurrence"].(string),
 				},
 			},
+			DisruptionBudget: budget,
 			ResourceVersion: resourceVersion,
 		}
 	}
@@ -6061,6 +6403,20 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	npd.MinCpuPlatform = cpu
 
 	return npd
+}
+
+func expandAutopilotClusterPolicyConfig(configured interface{}) *container.ClusterPolicyConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.ClusterPolicyConfig{
+		NoSystemMutation: config["no_system_mutation"].(bool),
+		NoSystemImpersonation: config["no_system_impersonation"].(bool),
+		NoUnsafeWebhooks: config["no_unsafe_webhooks"].(bool),
+		NoStandardNodePools: config["no_standard_node_pools"].(bool),
+	}
 }
 
 func expandUpgradeSettings(configured interface{}, d *schema.ResourceData) *container.UpgradeSettings {
@@ -6285,6 +6641,15 @@ func flattenAnonymousAuthenticationConfig(aac *container.AnonymousAuthentication
 	return []map[string]interface{}{result}
 }
 
+func flattenNodeCreationConfig(ncc *container.NodeCreationConfig) []map[string]interface{} {
+	if ncc == nil {
+		return nil
+	}
+	result := make(map[string]interface{})
+	result["node_creation_mode"] = ncc.NodeCreationMode
+	return []map[string]interface{}{result}
+}
+
 func flattenAdditionalPodRangesConfig(ipAllocationPolicy *container.IPAllocationPolicy) []map[string]interface{} {
 	if ipAllocationPolicy == nil {
 		return nil
@@ -6326,7 +6691,7 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 				},
 			}
 
-			if vv, ok := pubsub["filter"]; ok && len(vv.([]interface{})) > 0 {
+			if vv, ok := pubsub["filter"]; ok && len(vv.([]interface{})) > 0 && vv.([]interface{})[0] != nil {
 				filter := vv.([]interface{})[0].(map[string]interface{})
 				eventType := filter["event_type"].([]interface{})
 				nc.Pubsub.Filter = &container.Filter{
@@ -6429,6 +6794,23 @@ func expandAnonymousAuthenticationConfig(configured interface{}) *container.Anon
 	return &result
 }
 
+func expandNodeCreationConfig(configured interface{}) *container.NodeCreationConfig {
+	l, ok := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil || !ok {
+		return nil
+	}
+
+	nodeCreationConfig := l[0].(map[string]interface{})
+	result := container.NodeCreationConfig{}
+
+	if v, ok := nodeCreationConfig["node_creation_mode"]; ok {
+		if mode, ok := v.(string); ok && mode != "" {
+			result.NodeCreationMode = mode
+		}
+	}
+	return &result
+}
+
 func expandManCidrBlocks(configured interface{}) []*container.CidrBlock {
 	config, ok := configured.(*schema.Set)
 	if !ok {
@@ -6445,6 +6827,30 @@ func expandManCidrBlocks(configured interface{}) []*container.CidrBlock {
 	}
 	return result
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func expandManagedMachineLearningDiagnosticsConfig(configured interface{}) *container.ManagedMachineLearningDiagnosticsConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.ManagedMachineLearningDiagnosticsConfig{
+		Enabled: config["enabled"].(bool),
+	}
+}
+
+func flattenManagedMachineLearningDiagnosticsConfig(c *container.ManagedMachineLearningDiagnosticsConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"enabled": c.Enabled,
+		},
+	}
+}
+{{- end }}
 
 {{- if ne $.TargetVersionName "ga" }}
 func expandManagedOpenTelemetryConfig(configured interface{}) *container.ManagedOpenTelemetryConfig {
@@ -6538,17 +6944,17 @@ func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.Contro
 	dns := &container.DNSEndpointConfig{}
 	if v := d.Get("control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic"); v != nil {
 		dns.AllowExternalTraffic = v.(bool)
-		dns.ForceSendFields = []string{"AllowExternalTraffic"}
+		dns.ForceSendFields = append(dns.ForceSendFields, "AllowExternalTraffic")
 	}
 
 	if v := d.Get("control_plane_endpoints_config.0.dns_endpoint_config.0.enable_k8s_tokens_via_dns"); v != nil {
 		dns.EnableK8sTokensViaDns = v.(bool)
-		dns.ForceSendFields = []string{"EnableK8sTokensViaDns"}
+		dns.ForceSendFields = append(dns.ForceSendFields, "EnableK8sTokensViaDns")
 	}
 
 	if v := d.Get("control_plane_endpoints_config.0.dns_endpoint_config.0.enable_k8s_certs_via_dns"); v != nil {
 		dns.EnableK8sCertsViaDns = v.(bool)
-		dns.ForceSendFields = []string{"EnableK8sCertsViaDns"}
+		dns.ForceSendFields = append(dns.ForceSendFields, "EnableK8sCertsViaDns")
 	}
 
 	ip := &container.IPEndpointsConfig{
@@ -6680,6 +7086,19 @@ func expandDefaultSnatStatus(configured interface{}) *container.DefaultSnatStatu
 
 }
 
+func expandDataplaneV2Config(v interface{}) *container.DataplaneV2Config {
+	if v == nil {
+		return nil
+	}
+	s := v.(string)
+	if s == "" {
+		return nil
+	}
+	return &container.DataplaneV2Config{
+		ScalabilityMode: s,
+	}
+}
+
 func expandWorkloadIdentityConfig(configured interface{}) *container.WorkloadIdentityConfig {
 	l := configured.([]interface{})
 	v := &container.WorkloadIdentityConfig{}
@@ -6774,7 +7193,6 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 	return sc
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -6805,7 +7223,6 @@ func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig 
 	}
 	return sc
 }
-{{- end }}
 
 func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint {
 	if v == nil {
@@ -7373,6 +7790,30 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 			{
 				"enabled": lustreConfig.Enabled,
 				"enable_legacy_lustre_port":lustreConfig.EnableLegacyLustrePort,
+				"disable_multi_nic": lustreConfig.DisableMultiNic,
+			},
+		}
+	}
+	if c.PodSnapshotConfig != nil {
+		result["pod_snapshot_config"] = []map[string]interface{}{
+			{
+				"enabled": c.PodSnapshotConfig.Enabled,
+			},
+		}
+	}
+
+	if c.SlurmOperatorConfig != nil {
+		result["slurm_operator_config"] = []map[string]interface{}{
+			{
+				"enabled": c.SlurmOperatorConfig.Enabled,
+			},
+		}
+	}
+
+	if c.AgentSandboxConfig != nil {
+		result["agent_sandbox_config"] = []map[string]interface{}{
+			{
+				"enabled": c.AgentSandboxConfig.Enabled,
 			},
 		}
 	}
@@ -7394,20 +7835,21 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 			},
 		}
 	}
-
-	if c.PodSnapshotConfig != nil {
-		result["pod_snapshot_config"] = []map[string]interface{}{
-			{
-				"enabled": c.PodSnapshotConfig.Enabled,
-			},
-		}
-	}
 {{- end }}
 
 	return []map[string]interface{}{result}
 }
 
 func flattenClusterNodePools(d *schema.ResourceData, config *transport_tpg.Config, c []*container.NodePool) ([]map[string]interface{}, error) {
+	// Performance escape hatch: when the user opts in via skip_node_pool_refresh,
+	// do not materialize the (potentially huge) inline node_pool list into state.
+	// A CustomizeDiff guard prevents this combining with inline node_pool blocks.
+	// Users who flip this on accept that cluster.node_pool will read as empty.
+	if v, ok := d.GetOk("skip_node_pool_refresh"); ok && v.(bool) {
+		log.Printf("[DEBUG] Skipping flattenClusterNodePools because skip_node_pool_refresh=true.")
+		return nil, nil
+	}
+
 	nodePools := make([]map[string]interface{}, 0, len(c))
 
 	for i, np := range c {
@@ -7725,6 +8167,25 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 			exclusions = append(exclusions, exclusion)
 		}
 	}
+	var budget []map[string]interface{}
+	if mp.DisruptionBudget != nil {
+	    m := make(map[string]interface{})
+		if mp.DisruptionBudget.MinorVersionDisruptionInterval != "" {
+			m["minor_version_disruption_interval"] = mp.DisruptionBudget.MinorVersionDisruptionInterval
+		}
+		if mp.DisruptionBudget.PatchVersionDisruptionInterval != "" {
+			m["patch_version_disruption_interval"] = mp.DisruptionBudget.PatchVersionDisruptionInterval
+		}
+		if mp.DisruptionBudget.LastMinorVersionDisruptionTime != "" {
+			m["last_minor_version_disruption_time"] = mp.DisruptionBudget.LastMinorVersionDisruptionTime
+		}
+		if mp.DisruptionBudget.LastDisruptionTime != "" {
+			m["last_disruption_time"] = mp.DisruptionBudget.LastDisruptionTime
+		}
+		if len(m) > 0 {
+			budget = append(budget, m)
+		}
+	}
 
 	if mp.Window.DailyMaintenanceWindow != nil {
 		return []map[string]interface{}{
@@ -7736,6 +8197,7 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 					},
 				},
 				"maintenance_exclusion": exclusions,
+				"disruption_budget": budget,
 			},
 		}
 	}
@@ -7750,6 +8212,7 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 					},
 				},
 				"maintenance_exclusion": exclusions,
+				"disruption_budget": budget,
 			},
 		}
 	}
@@ -7842,6 +8305,20 @@ func flattenUpgradeSettings(a *container.UpgradeSettings) []map[string]interface
 	r["blue_green_settings"] = flattenBlueGreenSettings(a.BlueGreenSettings)
 
 	return []map[string]interface{}{r}
+}
+
+func flattenClusterPolicyConfig(c *container.ClusterPolicyConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"no_system_mutation": c.NoSystemMutation,
+			"no_system_impersonation": c.NoSystemImpersonation,
+			"no_unsafe_webhooks": c.NoUnsafeWebhooks,
+			"no_standard_node_pools": c.NoStandardNodePools,
+		},
+	}
 }
 
 func flattenBlueGreenSettings(a *container.BlueGreenSettings) []map[string]interface{} {
@@ -7967,7 +8444,6 @@ func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]i
 	return []map[string]interface{}{result}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenSecretSyncConfig(c *container.SecretSyncConfig) []map[string]interface{} {
 	if c == nil {
 		return []map[string]interface{}{
@@ -7994,8 +8470,6 @@ func flattenSecretSyncConfig(c *container.SecretSyncConfig) []map[string]interfa
 	result["rotation_config"] = rotationList
 	return []map[string]interface{}{result}
 }
-{{- end }}
-
 
 func flattenResourceUsageExportConfig(c *container.ResourceUsageExportConfig) []map[string]interface{} {
 	if c == nil {
@@ -8454,6 +8928,42 @@ func containerClusterAutopilotCustomizeDiff(_ context.Context, d *schema.Resourc
 	return nil
 }
 
+func containerClusterAutopilotPrivilegedAdmissionCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	toStrings := func(val interface{}) []string {
+		if val == nil {
+			return nil
+		}
+		return tpgresource.ConvertStringArr(val.([]interface{}))
+	}
+
+	rawConfig := d.GetRawConfig()
+	if !rawConfig.IsNull() && rawConfig.IsKnown() && rawConfig.Type().HasAttribute("autopilot_privileged_admission") {
+		if rawConfig.GetAttr("autopilot_privileged_admission").IsNull() {
+			old, _ := d.GetChange("autopilot_privileged_admission")
+			oldStrs := toStrings(old)
+
+			// Defaulting only needed if the cluster field was not empty.
+			if len(oldStrs) > 0 {
+				if err := d.SetNew("autopilot_privileged_admission", []string{"gke://*"}); err != nil {
+					return fmt.Errorf("Error setting autopilot_privileged_admission: %s", err)
+				}
+			}
+
+			return nil
+		}
+	}
+
+	new := d.Get("autopilot_privileged_admission")
+	newStrs := toStrings(new)
+	if len(newStrs) == 0 || slices.Equal(newStrs, []string{"gke://*"}) {
+		if err := d.SetNew("autopilot_privileged_admission", []string{"gke://*"}); err != nil {
+			return fmt.Errorf("Error setting autopilot_privileged_admission: %s", err)
+		}
+	}
+
+	return nil
+}
+
 // node_version only applies to the default node pool, so it should conflict with remove_default_node_pool = true
 func containerClusterNodeVersionRemoveDefaultCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	// node_version is computed, so we can only check this on initial creation
@@ -8509,7 +9019,18 @@ func SecretManagerCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	return false
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+func DatabaseEncryptionSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// The API sometimes returns ALL_OBJECTS_ENCRYPTION_ENABLED when the user sets ENCRYPTED
+	// and vice versa (depending on the cluster version and underlying resource storage).
+	if old == "ALL_OBJECTS_ENCRYPTION_ENABLED" && new == "ENCRYPTED" {
+		return true
+	}
+	if old == "ENCRYPTED" && new == "ALL_OBJECTS_ENCRYPTION_ENABLED" {
+                return true
+	}
+        return false
+}
+
 func SecretSyncCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "secret_sync_config.#" && old == "1" && new == "0" {
 		if v, ok := r.GetOk("secret_sync_config"); ok {
@@ -8523,7 +9044,6 @@ func SecretSyncCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	}
 	return false
 }
-{{- end }}
 
 func containerClusterNetworkPolicyDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
 	// if network_policy configuration is empty, we store it as populated and enabled=false, and
@@ -8614,6 +9134,28 @@ func containerClusterNodeVersionCustomizeDiff(_ context.Context,diff *schema.Res
 	return containerClusterNodeVersionCustomizeDiffFunc(diff)
 }
 
+// containerClusterSkipNodePoolRefreshCustomizeDiff errors at plan time if the
+// user enables skip_node_pool_refresh while also declaring inline node_pool
+// blocks. Without this guard, the inline blocks would diff against the empty
+// state produced by the skip path and trigger ForceNew cluster replacement.
+func containerClusterSkipNodePoolRefreshCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	if !diff.Get("skip_node_pool_refresh").(bool) {
+		return nil
+	}
+	rawConfig := diff.GetRawConfig()
+	if rawConfig.IsNull() {
+		return nil
+	}
+	nodePool := rawConfig.GetAttr("node_pool")
+	if nodePool.IsNull() || !nodePool.IsKnown() {
+		return nil
+	}
+	if nodePool.LengthInt() > 0 {
+		return fmt.Errorf("skip_node_pool_refresh cannot be true when inline node_pool blocks are defined; use google_container_node_pool resources instead, or unset skip_node_pool_refresh")
+	}
+	return nil
+}
+
 func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	oldValueName, _ := diff.GetChange("name")
 	if oldValueName != "" {
@@ -8638,7 +9180,6 @@ func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformReso
 	return nil
 }
 
-{{ if ne $.TargetVersionName `ga` }}
 func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
 	// 1. SKIP ON CREATE
 	if diff.Id() == "" {
@@ -8787,4 +9328,34 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 
 	return nil
 }
-{{- end }}
+
+func expandAgentSandboxConfig(v interface{}) *container.AgentSandboxConfig {
+    l := v.([]interface{})
+    if len(l) == 0 || l[0] == nil {
+        return nil
+    }
+    raw := l[0].(map[string]interface{})
+    return &container.AgentSandboxConfig{
+        Enabled: raw["enabled"].(bool),
+    }
+}
+
+func flattenAgentSandboxConfig(v *container.AgentSandboxConfig) []interface{} {
+    if v == nil {
+        return nil
+    }
+    return []interface{}{
+        map[string]interface{}{
+            "enabled": v.Enabled,
+        },
+    }
+}
+
+func init() {
+	registry.Schema{
+		Name: "google_container_cluster",
+		ProductName: "container",
+		Type: registry.SchemaTypeResource,
+		Schema: ResourceContainerCluster(),
+	}.Register()
+}

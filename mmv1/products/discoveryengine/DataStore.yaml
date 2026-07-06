@@ -51,41 +51,55 @@ sweeper:
   url_substitutions:
     - region: "eu"
     - region: "global"
-examples:
+samples:
   - name: 'discoveryengine_datastore_basic'
     primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
+    steps:
+      - name: 'discoveryengine_datastore_basic'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_kms_key_name'
     primary_resource_id: 'kms_key_name'
-    vars:
-      data_store_id: 'data-store-id'
-      kms_key_name: 'kms-key'
-    test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+    steps:
+      - name: 'discoveryengine_datastore_kms_key_name'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+          kms_key_name: 'kms-key'
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
-    vars:
-      data_store_id: 'data-store-id'
+    steps:
+      - name: 'discoveryengine_datastore_document_processing_config'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_document_processing_config_ocr'
     primary_resource_id: 'document_processing_config_ocr'
-    vars:
-      data_store_id: 'data-store-id'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'discoveryengine_datastore_document_processing_config_ocr'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_document_processing_config_layout'
     primary_resource_id: 'document_processing_config_layout'
-    vars:
-      data_store_id: 'data-store-id'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'discoveryengine_datastore_document_processing_config_layout'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_document_processing_config_layout_full'
     primary_resource_id: 'document_processing_config_layout_full'
-    vars:
-      data_store_id: 'data-store-id'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'discoveryengine_datastore_document_processing_config_layout_full'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_advanced_site_search_config'
     primary_resource_id: 'advanced_site_search_config'
-    vars:
-      data_store_id: 'data-store-id'
+    steps:
+      - name: 'discoveryengine_datastore_advanced_site_search_config'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
 parameters:
   - name: 'location'
     type: String
@@ -120,7 +134,6 @@ parameters:
       before any documents can be ingested.
       This flag cannot be specified if `data_store.starting_schema` is
       specified.
-
     url_param_only: true
     default_value: false
 properties:
@@ -171,7 +184,7 @@ properties:
     type: Enum
     description: |
       The content config of the data store.
-    required: true
+    required: false
     immutable: true
     enum_values:
       - 'NO_CONTENT'
@@ -242,7 +255,6 @@ properties:
                 description: |
                   Whether to include appending different levels of headings to chunks from the middle of the document to prevent context loss.
                   Default value: False.
-
                 required: false
       - name: 'defaultParsingConfig'
         type: NestedObject
@@ -263,8 +275,7 @@ properties:
               - 'default_parsing_config.0.digital_parsing_config'
               - 'default_parsing_config.0.ocr_parsing_config'
               - 'default_parsing_config.0.layout_parsing_config'
-            properties:
-              []
+            properties: []
           - name: 'ocrParsingConfig'
             type: NestedObject
             description: |
@@ -352,8 +363,7 @@ properties:
                 - 'default_parsing_config.0.digital_parsing_config'
                 - 'default_parsing_config.0.ocr_parsing_config'
                 - 'default_parsing_config.0.layout_parsing_config'
-              properties:
-                []
+              properties: []
             - name: 'ocrParsingConfig'
               type: NestedObject
               description: |

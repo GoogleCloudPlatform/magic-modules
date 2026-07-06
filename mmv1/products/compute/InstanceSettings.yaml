@@ -46,9 +46,13 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/compute_instance_settings_fingerprint.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/clear_instance_settings.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-examples:
+# excluding identity due to zone value inconsistency
+exclude_identity_generation: true
+samples:
   - name: 'instance_settings_basic'
     primary_resource_id: 'gce_instance_settings'
+    steps:
+      - name: 'instance_settings_basic'
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -61,13 +65,13 @@ properties:
   - name: 'fingerprint'
     type: Fingerprint
     description: |
-        The fingerprint used for optimistic locking of this resource.  Used
-        internally during updates.
+      The fingerprint used for optimistic locking of this resource.  Used
+      internally during updates.
     output: true
   - name: 'metadata'
     type: NestedObject
     description: |
-        The metadata key/value pairs assigned to all the instances in the corresponding scope.
+      The metadata key/value pairs assigned to all the instances in the corresponding scope.
     properties:
       - name: 'items'
         type: KeyValuePairs

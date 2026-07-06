@@ -15,6 +15,7 @@ package resource
 
 import (
 	"fmt"
+	"log"
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -44,6 +45,9 @@ type Sample struct {
 	// Whether to skip generating tests for this resource
 	ExcludeTest bool `yaml:"exclude_test,omitempty"`
 
+	// Whether to EXCLUDE the first step from doc generation
+	ExcludeBasicDoc bool `yaml:"exclude_basic_doc,omitempty"`
+
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
@@ -72,10 +76,6 @@ type Sample struct {
 	// If set, this will override the default resource type implied from the
 	// object parent
 	PrimaryResourceType string `yaml:"primary_resource_type,omitempty"`
-
-	// The name of the primary resource for use in IAM tests. IAM tests need
-	// a reference to the primary resource to create IAM policies for
-	PrimaryResourceName string `yaml:"primary_resource_name,omitempty"`
 
 	// Steps
 	Steps []*Step
@@ -108,6 +108,28 @@ func (s *Sample) TestSteps() []*Step {
 	return google.Reject(s.Steps, func(st *Step) bool {
 		return st.MinVersion != "" && slices.Index(product.ORDER, s.TargetVersionName) < slices.Index(product.ORDER, st.MinVersion)
 	})
+}
+
+// TestDependencies returns a map of service names to import aliases that are required
+// by this sample's steps.
+func (s *Sample) TestDependencies(resourcePrefixPkgMap map[string]string) map[string]string {
+	deps := map[string]string{}
+	if len(s.BootstrapIam) > 0 {
+		deps["services/resourcemanager"] = ""
+	}
+	for _, step := range s.TestSteps() {
+		for pkg, alias := range step.TestDependencies(resourcePrefixPkgMap) {
+			if depsAlias, ok := deps[pkg]; ok && alias != depsAlias {
+				if (alias == "_" && depsAlias == "") || (alias == "" && depsAlias == "_") {
+					deps[pkg] = ""
+					continue
+				}
+				log.Fatalf("Conflicting aliases (%s vs %s) for pkg dependency %s for sample %s", depsAlias, alias, pkg, s.Name)
+			}
+			deps[pkg] = alias
+		}
+	}
+	return deps
 }
 
 func (s *Sample) ResourceType(terraformName string) string {

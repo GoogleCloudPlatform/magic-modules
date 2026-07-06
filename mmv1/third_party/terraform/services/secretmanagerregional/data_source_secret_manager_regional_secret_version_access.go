@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -108,12 +109,12 @@ func dataSourceSecretManagerRegionalRegionalSecretVersionAccessRead(d *schema.Re
 
 	// set version if provided, else set version to latest
 	if versionNum != "" {
-		url, err = tpgresource.ReplaceVars(d, config, "{{SecretManagerRegionalBasePath}}projects/{{project}}/locations/{{location}}/secrets/{{secret}}/versions/{{version}}")
+		url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/secrets/{{secret}}/versions/{{version}}")
 		if err != nil {
 			return err
 		}
 	} else {
-		url, err = tpgresource.ReplaceVars(d, config, "{{SecretManagerRegionalBasePath}}projects/{{project}}/locations/{{location}}/secrets/{{secret}}/versions/latest")
+		url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/secrets/{{secret}}/versions/latest")
 		if err != nil {
 			return err
 		}
@@ -169,4 +170,13 @@ func dataSourceSecretManagerRegionalRegionalSecretVersionAccessRead(d *schema.Re
 
 	d.SetId(nameValue.(string))
 	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_secret_manager_regional_secret_version_access",
+		ProductName: "secretmanagerregional",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceSecretManagerRegionalRegionalSecretVersionAccess(),
+	}.Register()
 }
