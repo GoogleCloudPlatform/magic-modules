@@ -1027,54 +1027,53 @@ func ResourceDataprocCluster() *schema.Resource {
 																Elem:        &schema.Schema{Type: schema.TypeInt},
 																Description: `Preference of this instance selection. Lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.`,
 															},
-																"disk_config": {
-																	Type:        schema.TypeList,
-																	Optional:    true,
-																	ForceNew:    true,
-																	Description: `Optional. Disk configuration to apply to the instances in this instance selection.`,
-																	MaxItems:    1,
-																	Elem: &schema.Resource{
-																		Schema: map[string]*schema.Schema{
-																			"boot_disk_size_gb": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `Size of the primary disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
-																				ForceNew:     true,
-																			},
-																			"boot_disk_type": {
-																				Type:         schema.TypeString,
-																				Optional:     true,
-																				Description:  `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard".`,
-																				ForceNew:     true,
-																			},
-																			"boot_disk_provisioned_iops": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
-																				ForceNew:     true,
-																			},
-																			"boot_disk_provisioned_throughput": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
-																				ForceNew:     true,
-																			},
-																			"local_ssd_interface": {
-																				Type:         schema.TypeString,
-																				Optional:     true,
-																				Description:  `Interface type of local SSDs (no Local SSDs or NVMe). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
-																				ForceNew:     true,
-																			},
-																			"num_local_ssds": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.`,
-																				ForceNew:     true,
-																			},
+															"disk_config": {
+																Type:        schema.TypeList,
+																Optional:    true,
+																ForceNew:    true,
+																Description: `Optional. Disk configuration to apply to the instances in this instance selection.`,
+																MaxItems:    1,
+																Elem: &schema.Resource{
+																	Schema: map[string]*schema.Schema{
+																		"boot_disk_size_gb": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Size of the primary disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
+																			ForceNew:    true,
+																		},
+																		"boot_disk_type": {
+																			Type:        schema.TypeString,
+																			Optional:    true,
+																			Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard".`,
+																			ForceNew:    true,
+																		},
+																		"boot_disk_provisioned_iops": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																			ForceNew:    true,
+																		},
+																		"boot_disk_provisioned_throughput": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																			ForceNew:    true,
+																		},
+																		"local_ssd_interface": {
+																			Type:        schema.TypeString,
+																			Optional:    true,
+																			Description: `Interface type of local SSDs (no Local SSDs or NVMe). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
+																			ForceNew:    true,
+																		},
+																		"num_local_ssds": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.`,
+																			ForceNew:    true,
 																		},
 																	},
 																},
-
+															},
 														},
 													},
 												},
@@ -1324,54 +1323,53 @@ func ResourceDataprocCluster() *schema.Resource {
 																Elem:        &schema.Schema{Type: schema.TypeInt},
 																Description: `Preference of this instance selection. Lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.`,
 															},
-																"disk_config": {
-																	Type:        schema.TypeList,
-																	Optional:    true,
-																	ForceNew:    true,
-																	Description: `Optional. Disk configuration to apply to the instances in this instance selection.`,
-																	MaxItems:    1,
-																	Elem: &schema.Resource{
-																		Schema: map[string]*schema.Schema{
-																			"boot_disk_size_gb": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `Size of the primary disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
-																				ForceNew:     true,
-																			},
-																			"boot_disk_type": {
-																				Type:         schema.TypeString,
-																				Optional:     true,
-																				Description:  `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard".`,
-																				ForceNew:     true,
-																			},
-																			"boot_disk_provisioned_iops": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
-																				ForceNew:     true,
-																			},
-																			"boot_disk_provisioned_throughput": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
-																				ForceNew:     true,
-																			},
-																			"local_ssd_interface": {
-																				Type:         schema.TypeString,
-																				Optional:     true,
-																				Description:  `Interface type of local SSDs (no Local SSDs or NVMe). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
-																				ForceNew:     true,
-																			},
-																			"num_local_ssds": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.`,
-																				ForceNew:     true,
-																			},
+															"disk_config": {
+																Type:        schema.TypeList,
+																Optional:    true,
+																ForceNew:    true,
+																Description: `Optional. Disk configuration to apply to the instances in this instance selection.`,
+																MaxItems:    1,
+																Elem: &schema.Resource{
+																	Schema: map[string]*schema.Schema{
+																		"boot_disk_size_gb": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Size of the primary disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
+																			ForceNew:    true,
+																		},
+																		"boot_disk_type": {
+																			Type:        schema.TypeString,
+																			Optional:    true,
+																			Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard".`,
+																			ForceNew:    true,
+																		},
+																		"boot_disk_provisioned_iops": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																			ForceNew:    true,
+																		},
+																		"boot_disk_provisioned_throughput": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																			ForceNew:    true,
+																		},
+																		"local_ssd_interface": {
+																			Type:        schema.TypeString,
+																			Optional:    true,
+																			Description: `Interface type of local SSDs (no Local SSDs or NVMe). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
+																			ForceNew:    true,
+																		},
+																		"num_local_ssds": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.`,
+																			ForceNew:    true,
 																		},
 																	},
 																},
-
+															},
 														},
 													},
 												},
@@ -1559,54 +1557,53 @@ func ResourceDataprocCluster() *schema.Resource {
 																Elem:        &schema.Schema{Type: schema.TypeInt},
 																Description: `Preference of this instance selection. Lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.`,
 															},
-																"disk_config": {
-																	Type:        schema.TypeList,
-																	Optional:    true,
-																	ForceNew:    true,
-																	Description: `Optional. Disk configuration to apply to the instances in this instance selection.`,
-																	MaxItems:    1,
-																	Elem: &schema.Resource{
-																		Schema: map[string]*schema.Schema{
-																			"boot_disk_size_gb": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `Size of the primary disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
-																				ForceNew:     true,
-																			},
-																			"boot_disk_type": {
-																				Type:         schema.TypeString,
-																				Optional:     true,
-																				Description:  `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard".`,
-																				ForceNew:     true,
-																			},
-																			"boot_disk_provisioned_iops": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
-																				ForceNew:     true,
-																			},
-																			"boot_disk_provisioned_throughput": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
-																				ForceNew:     true,
-																			},
-																			"local_ssd_interface": {
-																				Type:         schema.TypeString,
-																				Optional:     true,
-																				Description:  `Interface type of local SSDs (no Local SSDs or NVMe). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
-																				ForceNew:     true,
-																			},
-																			"num_local_ssds": {
-																				Type:         schema.TypeInt,
-																				Optional:     true,
-																				Description:  `The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.`,
-																				ForceNew:     true,
-																			},
+															"disk_config": {
+																Type:        schema.TypeList,
+																Optional:    true,
+																ForceNew:    true,
+																Description: `Optional. Disk configuration to apply to the instances in this instance selection.`,
+																MaxItems:    1,
+																Elem: &schema.Resource{
+																	Schema: map[string]*schema.Schema{
+																		"boot_disk_size_gb": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Size of the primary disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
+																			ForceNew:    true,
+																		},
+																		"boot_disk_type": {
+																			Type:        schema.TypeString,
+																			Optional:    true,
+																			Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard".`,
+																			ForceNew:    true,
+																		},
+																		"boot_disk_provisioned_iops": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																			ForceNew:    true,
+																		},
+																		"boot_disk_provisioned_throughput": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																			ForceNew:    true,
+																		},
+																		"local_ssd_interface": {
+																			Type:        schema.TypeString,
+																			Optional:    true,
+																			Description: `Interface type of local SSDs (no Local SSDs or NVMe). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
+																			ForceNew:    true,
+																		},
+																		"num_local_ssds": {
+																			Type:        schema.TypeInt,
+																			Optional:    true,
+																			Description: `The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.`,
+																			ForceNew:    true,
 																		},
 																	},
 																},
-
+															},
 														},
 													},
 												},
