@@ -1261,6 +1261,9 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testi
 				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy_deleted(networkName, projectId),
+			},
 		},
 	})
 }
@@ -7300,6 +7303,33 @@ resource "google_sql_database_instance" "instance" {
   ]
 }
 `, projectId, projectId, projectId, projectId, networkName, projectId, instanceName, projectId)
+}
+
+func testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy_deleted(networkName string, projectId string) string {
+	return fmt.Sprintf(`
+resource "google_project_service_identity" "gcp_sa_cloud_sql" {
+  project    = "%s"
+  service    = "sqladmin.googleapis.com"
+}
+
+resource "google_project_iam_member" "sa_consumer_network_admin" {
+  project = "%s"
+  role    = "roles/networkconnectivity.consumerNetworkAdmin"
+  member  = google_project_service_identity.gcp_sa_cloud_sql.member
+}
+
+resource "google_project_iam_member" "sa_network_viewer" {
+  project = "%s"
+  role    = "roles/compute.networkViewer"
+  member  = google_project_service_identity.gcp_sa_cloud_sql.member
+}
+
+resource "google_compute_network" "default" {
+  project                 = "%s"
+  name                    = "%s"
+  auto_create_subnetworks = true
+}
+`, projectId, projectId, projectId, projectId, networkName)
 }
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, projectId string, orgId string, billingAccount string) string {
