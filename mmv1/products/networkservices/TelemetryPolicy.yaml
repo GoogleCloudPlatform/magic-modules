@@ -46,6 +46,11 @@ samples:
         resource_id_vars:
           name: my-telemetry-policy
           mesh_name: my-mesh
+      - name: network_services_telemetry_policy_basic_update
+        config_path: templates/terraform/samples/services/networkservices/network_services_telemetry_policy_basic_update.tf.tmpl
+        resource_id_vars:
+          name: my-telemetry-policy
+          mesh_name: my-mesh
   - name: network_services_telemetry_policy_full
     primary_resource_id: default
     steps:

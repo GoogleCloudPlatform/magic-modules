@@ -1,0 +1,21 @@
+resource "google_network_services_mesh" "default" {
+  name     = "{{index $.ResourceIdVars "mesh_name"}}"
+}
+
+resource "google_network_services_telemetry_policy" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.ResourceIdVars "name"}}"
+  location     = "global"
+  display_name = "my-updated-telemetry-policy"
+
+  telemetry_target {
+    resources = [google_network_services_mesh.default.id]
+  }
+
+  metrics_configuration {
+    enabled = false
+  }
+
+  labels = {
+    foo = "bar2"
+  }
+}
