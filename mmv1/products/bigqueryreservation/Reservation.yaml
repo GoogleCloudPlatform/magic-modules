@@ -259,3 +259,8 @@ properties:
     resource: ReservationGroup
     imports: name
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      The labels associated with this reservation. You can use these to
+      organize and group your reservations.
