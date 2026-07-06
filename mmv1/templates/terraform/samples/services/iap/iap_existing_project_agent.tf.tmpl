@@ -1,0 +1,15 @@
+resource "google_agent_registry_service" "default" {
+  location     = "us-central1"
+  service_id   = "tf-test-agent-%{random_suffix}"
+  description  = "My basic agent registry service for IAM test"
+  display_name = "My Service"
+
+  interfaces {
+    url              = "https://www.google.com/service"
+    protocol_binding = "GRPC"
+  }
+
+  agent_spec {
+    type = "NO_SPEC"
+  }
+}
