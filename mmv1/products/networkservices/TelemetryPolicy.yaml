@@ -59,7 +59,7 @@ parameters:
     description: |
       Name of the TelemetryPolicy resource.
     required: true
-    ignore_read: true
+    url_param_only: true
   - name: location
     type: String
     description: |
@@ -136,16 +136,10 @@ properties:
                 The attribute name.
             - name: literalValue
               type: String
-              exactly_one_of:
-                - literal_value
-                - from_header_value
               description: |
                 The literal value of the attribute.
             - name: fromHeaderValue
               type: String
-              exactly_one_of:
-                - literal_value
-                - from_header_value
               description: |
                 The from header value of the attribute.
       - name: parentBasedSampling
@@ -170,5 +164,6 @@ properties:
     properties:
       - name: enabled
         type: Boolean
+        required: true
         description: |
           Indicates whether metrics are enabled or disabled.
