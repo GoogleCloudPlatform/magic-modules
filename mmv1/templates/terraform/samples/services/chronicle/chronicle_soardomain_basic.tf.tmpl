@@ -1,0 +1,8 @@
+resource "google_chronicle_soar_domain" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  
+  display_name = "test.com"
+  environments_json = "[\"Default Environment\"]"
+}
