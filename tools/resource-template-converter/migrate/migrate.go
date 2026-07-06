@@ -15,7 +15,7 @@ import (
 // PATCH-START: existing structs
 // PATCH-END: existing structs
 
-func MigrateFile(filePath, serviceName string, onlyMigration, onlyFormat bool) error {
+func MigrateFile(filePath, serviceName string, onlyMigration, onlyFormat, explicitConfigPath, isEAP bool) error {
 	originalBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
@@ -83,17 +83,29 @@ func MigrateFile(filePath, serviceName string, onlyMigration, onlyFormat bool) e
 				}
 
 				var newConfigPath string
-				if configPathVal != "" && serviceName != "" {
-					templateName := filepath.Base(configPathVal)
-					calculatedPath := path.Join("templates/terraform/samples/services", serviceName, templateName)
-					defaultPath := path.Join("templates/terraform/samples/services", serviceName, fmt.Sprintf("%s.tf.tmpl", nameVal))
-					if calculatedPath != defaultPath {
+				if serviceName != "" {
+					var templateName string
+					if configPathVal != "" {
+						templateName = filepath.Base(configPathVal)
+					} else {
+						templateName = fmt.Sprintf("%s.tf.tmpl", nameVal)
+					}
+					var calculatedPath, defaultPath string
+					if isEAP {
+						calculatedPath = path.Join("samples", serviceName, templateName)
+						defaultPath = path.Join("samples", serviceName, fmt.Sprintf("%s.tf.tmpl", nameVal))
+					} else {
+						calculatedPath = path.Join("templates/terraform/samples/services", serviceName, templateName)
+						defaultPath = path.Join("templates/terraform/samples/services", serviceName, fmt.Sprintf("%s.tf.tmpl", nameVal))
+					}
+					if explicitConfigPath || calculatedPath != defaultPath {
 						newConfigPath = calculatedPath
 					}
 				}
 
 				samplesContent := []*yaml.Node{}
 				stepContent := []*yaml.Node{}
+				hasConfigPath := false
 
 				for i := 0; i < len(exampleMapNode.Content); i += 2 {
 					keyNode := exampleMapNode.Content[i]
@@ -109,6 +121,7 @@ func MigrateFile(filePath, serviceName string, onlyMigration, onlyFormat bool) e
 						stepContent = append(stepContent, cloneNode(keyNode), cloneNode(valNode))
 
 					case "config_path":
+						hasConfigPath = true
 						if newConfigPath != "" {
 							valNode.Value = newConfigPath
 							valNode.Style = 0
@@ -136,12 +149,28 @@ func MigrateFile(filePath, serviceName string, onlyMigration, onlyFormat bool) e
 					}
 				}
 
+				if explicitConfigPath && !hasConfigPath && newConfigPath != "" {
+					keyNode := &yaml.Node{
+						Kind:  yaml.ScalarNode,
+						Tag:   "!!str",
+						Value: "config_path",
+					}
+					valNode := &yaml.Node{
+						Kind:  yaml.ScalarNode,
+						Tag:   "!!str",
+						Value: newConfigPath,
+					}
+					stepContent = append(stepContent, keyNode, valNode)
+				}
+
 				// Construct Step Mapping Node
 				stepMapNode := &yaml.Node{
 					Kind:    yaml.MappingNode,
 					Tag:     "!!map",
 					Content: stepContent,
 				}
+
+				sortMappingNode(stepMapNode, nestedKeyOrders["steps"])
 
 				// Construct Steps Sequence Node
 				stepsSeqNode := &yaml.Node{

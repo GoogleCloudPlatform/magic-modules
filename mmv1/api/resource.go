@@ -1841,6 +1841,9 @@ func (r Resource) SamplePrimaryResourceId() string {
 			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
 		})
 	}
+	if len(samples) == 0 {
+		return ""
+	}
 	return samples[0].PrimaryResourceId
 }
 

@@ -33,7 +33,8 @@ This page explains how you can contribute code and documentation to the	`magic-m
 1. [Generate the providers]({{< ref "/develop/generate-providers" >}}) that include your change.
 1. [Run provider tests locally]({{< ref "/test/run-tests" >}}) that are relevant to the change you made
 1. [Create a pull request (PR)]({{< ref "/code-review/create-pr" >}})
-1. Make changes in response to [code review]({{< ref "/code-review/create-pr#code-review" >}})
+1. (For Google-driven changes) Do a [local review]({{< ref "/code-review/review-pr" >}}) with a service team engineer
+1. Make changes in response to maintainers' [code review]({{< ref "/code-review/create-pr#code-review" >}})
 
 ## After your change is merged
 

@@ -1,0 +1,6 @@
+// SemanticGovernancePolicyEngine post-Read state dispatch. Logic lives in
+// sgpePostReadDispatch (constants template) so it can be unit-tested directly
+// via the sgpeResourceID interface (see the resource's internal test).
+if err := sgpePostReadDispatch(d, res); err != nil {
+	return err
+}
