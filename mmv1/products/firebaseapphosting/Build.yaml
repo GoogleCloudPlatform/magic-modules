@@ -33,6 +33,8 @@ async:
   operation:
     timeouts:
       insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
     base_url: '{{op_id}}'
   actions:
     - create
