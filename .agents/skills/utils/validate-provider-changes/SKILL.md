@@ -1,6 +1,6 @@
 ---
 name: validate-provider-changes
-description: "Validate that changes to the generated providers don't introduce breaking changes or fields with missing tests or documentation. Use this skill any time that the downstream providers are modified, after running basic unit tests but before running acceptance tests."
+description: "Validate that changes to the generated providers don't introduce breaking changes or fields with missing tests or missing documentation. Use this skill when the user wants to check for breaking changes, missing tests, or missing documentation, or other problems in the downstream providers."
 ---
 
 # `validate-provider-changes`
