@@ -15,6 +15,10 @@ fields:
   - api_field: 'iosSettings.allowedBundleIds'
   - api_field: 'iosSettings.appleDeveloperId.keyId'
   - api_field: 'iosSettings.appleDeveloperId.privateKey'
+  - api_field: 'iosSettings.appleDeveloperId.privateKey'
+    field: 'ios_settings.apple_developer_id.private_key_wo'
+  - field: 'ios_settings.apple_developer_id.private_key_wo_version'
+    provider_only: true
   - api_field: 'iosSettings.appleDeveloperId.teamId'
   - api_field: 'labels'
   - api_field: 'name'

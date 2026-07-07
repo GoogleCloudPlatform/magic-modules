@@ -430,7 +430,11 @@ func (r *KeyIosSettingsAppleDeveloperId) Empty() bool {
 }
 
 func (r *KeyIosSettingsAppleDeveloperId) String() string {
-	return dcl.SprintResource(r)
+	var rCopy KeyIosSettingsAppleDeveloperId = *r
+	if rCopy.PrivateKey != nil {
+		rCopy.PrivateKey = dcl.String("[REDACTED]")
+	}
+	return dcl.SprintResource(&rCopy)
 }
 
 func (r *KeyIosSettingsAppleDeveloperId) HashCode() string {
