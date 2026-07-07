@@ -1,12 +1,12 @@
 ---
-name: check-schema-diff
-description: "Run comprehensive checks (breaking changes, missing tests, and missing documentation) on Magic Modules schema changes between the current branch and a base branch (usually main) using the local diff-processor."
+name: validate-provider-changes
+description: "Validate that changes to the generated providers don't introduce breaking changes or fields with missing tests or documentation. Use this skill any time that the downstream providers are modified, after running basic unit tests but before running acceptance tests."
 ---
 
-# `check-schema-diff`
+# `validate-provider-changes`
 
 > **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your required task.
-> This skill allows you to run local breaking changes, missing tests, and missing documentation checks on Magic Modules schema changes.
+> This skill allows you to run local breaking changes, missing tests, and missing documentation checks on Magic Modules schema and provider changes.
 
 ## Prerequisites
 
@@ -15,26 +15,34 @@ description: "Run comprehensive checks (breaking changes, missing tests, and mis
 
 ## Execution Steps
 
-### 1. Run the Schema Diff Checker
+### 1. Run the Provider Changes Validator
+
 Run the script to compare your current local changes (committed or uncommitted) against the base branch (defaults to the merge base with `origin/main` or `main`):
+
 ```bash
-./.agents/skills/utils/check-schema-diff/scripts/check_schema_diff.sh
+./.agents/skills/utils/validate-provider-changes/scripts/validate_provider_changes.sh
 ```
 
 To compare against a specific branch or commit (e.g. `HEAD` to check uncommitted changes against the current commit):
+
 ```bash
-./.agents/skills/utils/check-schema-diff/scripts/check_schema_diff.sh HEAD
+./.agents/skills/utils/validate-provider-changes/scripts/validate_provider_changes.sh HEAD
 ```
+
 Or to compare against a base branch:
+
 ```bash
-./.agents/skills/utils/check-schema-diff/scripts/check_schema_diff.sh <base_branch_or_commit>
+./.agents/skills/utils/validate-provider-changes/scripts/validate_provider_changes.sh <base_branch_or_commit>
 ```
 
 ### 2. Analyze the Output
+
 The tool runs three checks across both GA and Beta provider versions:
+
 - **Breaking Changes:** Detects backwards-incompatible schema changes.
 - **Missing Tests:** Identifies new or changed fields that are not covered by any acceptance tests.
 - **Missing Documentation:** Identifies new fields that are not documented in the resource/datasource markdown files.
 
 ### 3. Verification & Handoff
+
 If any issues (breaking changes, missing tests, or missing docs) are detected, present them clearly to the user. Discuss potential mitigations and fixes before proceeding.
