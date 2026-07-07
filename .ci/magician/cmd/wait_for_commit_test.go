@@ -87,6 +87,8 @@ func TestExecWaitForCommit(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			sb := newSandbox(t)
+			sb.RequireAllowlist()
+			sb.AllowPassthrough("git")
 			originDir := t.TempDir()
 			sb.Runner.MustRun("git", []string{"init", "--bare", "-b", "main", originDir}, nil)
 			sb.Runner.MustRun("git", []string{"remote", "add", "origin", originDir}, nil)
