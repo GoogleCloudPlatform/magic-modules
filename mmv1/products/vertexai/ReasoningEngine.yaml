@@ -257,6 +257,10 @@ properties:
 
           Depending on the template/framework used (`agent_framework`), the required class methods and their parameters differ:
 
+          **Warning**: The configuration snippets below are illustrative, may not be exhaustive, and could stop working over time. For the most up-to-date method lists and schemas, please consult the respective SDK source code:
+          * For Google ADK: See [ADK Python SDK cli_deploy.py](https://github.com/google/adk-python/blob/68a780306e3bdd648a882ef34c0abf8e5148353e/src/google/adk/cli/cli_deploy.py#L109).
+          * For Langchain: See [Vertex AI Python SDK langchain.py](https://github.com/googleapis/python-aiplatform/blob/c8a38a085931b01f4d6071f0ab7a64cb42851829/agentplatform/agent_engines/templates/langchain.py#L642-L717).
+
           ### 1. Langchain Template
           * `query` (api_mode = "sync" or empty)
           * `stream_query` (api_mode = "stream")
