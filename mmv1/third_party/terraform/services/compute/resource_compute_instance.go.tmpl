@@ -1733,15 +1733,12 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
-							AtLeastOneOf: workloadIdentityConfigKeys,
 							Description:  `Identity SPIFFE id.`,
 						},
 						"identity_certificate_enabled": {
 							Type:         schema.TypeBool,
 							Optional:     true,
 							ForceNew:     true,
-							Computed:     true,
-							AtLeastOneOf: workloadIdentityConfigKeys,
 							Description:  `Specifies whether identity certificates are enabled.`,
 						},
 					},
@@ -2603,17 +2600,6 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compu
     }
     {{- end }}
 
-	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
-
-                
-    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-        return err
-    }
-
-	if err := d.Set("workload_identity_config", flattenWorkloadIdentityConfig(instance.WorkloadIdentityConfig)); err != nil {
-		return fmt.Errorf("Error setting workload_identity_config: %s", err)
-	}
-    
 	return nil
 }
 
