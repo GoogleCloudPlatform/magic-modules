@@ -211,6 +211,19 @@ properties:
       - name: disableDtmf
         type: Boolean
         description: Whether to disable DTMF (dual-tone multi-frequency).
+      - name: instagramConfig
+        type: NestedObject
+        description: Configuration specific to Instagram deployments.
+        properties:
+          - name: instagramAccountId
+            type: String
+            required: true
+            description: The Instagram Account ID.
+      - name: noiseSuppressionLevel
+        type: String
+        description: |-
+          The noise suppression level of the channel profile.
+          Available values are "low", "moderate", "high", "very_high".
       - name: personaProperty
         type: NestedObject
         description: Represents the persona property of a channel.
@@ -239,6 +252,37 @@ properties:
               CHAT_AND_VOICE
               VOICE_ONLY
               CHAT_ONLY
+          - name: securitySettings
+            type: NestedObject
+            description: Security settings for the web widget.
+            properties:
+              - name: allowedOrigins
+                type: Array
+                description: |-
+                  The origins that are allowed to host the web widget. An origin is
+                  defined by RFC 6454. If empty, all origins are allowed.
+                  A maximum of 100 origins is allowed.
+                  Example: "https://example.com"
+                item_type:
+                  type: String
+              - name: enableOriginCheck
+                type: Boolean
+                description: |-
+                  Indicates whether origin check for the web widget is enabled.
+                  If true, the web widget will check the origin of the website that
+                  loads the web widget and only allow it to be loaded in the same origin
+                  or any of the allowed origins.
+              - name: enablePublicAccess
+                type: Boolean
+                description: |-
+                  Indicates whether public access to the web widget is enabled.
+                  If true, the web widget will be publicly accessible.
+                  If false, the web widget must be integrated with your own
+                  authentication and authorization system to return valid credentials for
+                  accessing the CES agent.
+              - name: enableRecaptcha
+                type: Boolean
+                description: Indicates whether reCAPTCHA verification for the web widget is enabled.
           - name: theme
             type: String
             description: |-
@@ -250,6 +294,21 @@ properties:
           - name: webWidgetTitle
             type: String
             description: The title of the web widget.
+      - name: whatsappConfig
+        type: NestedObject
+        description: Configuration specific to WhatsApp deployments.
+        properties:
+          - name: phoneNumber
+            type: String
+            description: The phone number in E.164 format.
+          - name: phoneNumberId
+            type: String
+            required: true
+            description: The Meta phone number ID.
+          - name: wabaId
+            type: String
+            required: true
+            description: The WhatsApp Business Account ID.
   - name: deploymentCount
     type: Integer
     description: Number of deployments in the app.
@@ -268,6 +327,42 @@ properties:
       operation. If the etag is empty, the update will overwrite any concurrent
       changes.
     output: true
+  - name: errorHandlingSettings
+    type: NestedObject
+    description: Settings to describe how errors should be handled in the app.
+    properties:
+      - name: errorHandlingStrategy
+        type: String
+        description: |-
+          The strategy to use for error handling.
+          Possible values:
+          ERROR_HANDLING_STRATEGY_UNSPECIFIED
+          NONE
+          FALLBACK_RESPONSE
+          END_SESSION
+      - name: fallbackResponseConfig
+        type: NestedObject
+        description: Configuration for handling fallback responses.
+        properties:
+          - name: customFallbackMessages
+            type: KeyValuePairs
+            description: |-
+              The fallback messages in case of system errors (e.g. LLM errors),
+              mapped by supported language code.
+          - name: maxFallbackAttempts
+            type: Integer
+            description: |-
+              The maximum number of fallback attempts to make before the agent emitting
+              EndSession Signal.
+      - name: endSessionConfig
+        type: NestedObject
+        description: |-
+          Configuration for ending the session in case of system errors (e.g. LLM
+          errors).
+        properties:
+          - name: escalateSession
+            type: Boolean
+            description: Whether to escalate the session in EndSession.
   - name: evaluationMetricsThresholds
     type: NestedObject
     description: Threshold settings for metrics in an Evaluation.
@@ -285,6 +380,15 @@ properties:
                 description: |-
                   The success threshold for individual tool invocation parameter
                   correctness. Must be a float between 0 and 1. Default is 1.0.
+          - name: toolMatchingSettings
+            type: NestedObject
+            description: Settings for matching tool calls.
+            properties:
+              - name: extraToolCallBehavior
+                type: String
+                description: |-
+                  Defines the behavior when an extra tool call is encountered.
+                  Possible values: EXTRA_TOOL_CALL_BEHAVIOR_UNSPECIFIED, FAIL, ALLOW.
           - name: turnLevelMetricsThresholds
             type: NestedObject
             description: Turn level metrics thresholds.
@@ -294,11 +398,26 @@ properties:
                 description: |-
                   The success threshold for overall tool invocation correctness. Must be
                   a float between 0 and 1. Default is 1.0.
+              - name: semanticSimilarityChannel
+                type: String
+                description: |-
+                  The semantic similarity channel to use for evaluation.
+                  Possible values: SEMANTIC_SIMILARITY_CHANNEL_UNSPECIFIED, TEXT, AUDIO.
               - name: semanticSimilaritySuccessThreshold
                 type: Integer
                 description: |-
                   The success threshold for semantic similarity. Must be an integer
                   between 0 and 4. Default is >= 3.
+      - name: goldenHallucinationMetricBehavior
+        type: String
+        description: |-
+          The hallucination metric behavior for golden evaluations.
+          Possible values: HALLUCINATION_METRIC_BEHAVIOR_UNSPECIFIED, DISABLED, ENABLED.
+      - name: scenarioHallucinationMetricBehavior
+        type: String
+        description: |-
+          The hallucination metric behavior for scenario evaluations.
+          Possible values: HALLUCINATION_METRIC_BEHAVIOR_UNSPECIFIED, DISABLED, ENABLED.
   - name: globalInstruction
     type: String
     description: |-
@@ -343,6 +462,11 @@ properties:
           `default_language_code`.
         item_type:
           type: String
+  - name: locked
+    type: Boolean
+    description: |-
+      Indicates whether the app is locked for changes. If the app is locked,
+      modifications to the app resources will be rejected.
   - name: loggingSettings
     type: NestedObject
     default_from_api: true
@@ -404,6 +528,36 @@ properties:
           - name: disableConversationLogging
             type: Boolean
             description: Whether to disable conversation logging for the sessions.
+          - name: retentionWindow
+            type: String
+            description: |-
+              Controls the retention window for the conversation.
+              If not set, the conversation will be retained for 365 days.
+      - name: evaluationAudioRecordingConfig
+        type: NestedObject
+        description: |-
+          Configuration for how audio interactions should be recorded for the
+          evaluation. By default, audio recording is not enabled for evaluation
+          sessions.
+        properties:
+          - name: gcsBucket
+            type: String
+            description: The Cloud Storage bucket to store the session audio recordings.
+          - name: gcsPathPrefix
+            type: String
+            description: The Cloud Storage path prefix for audio recordings.
+      - name: metricAnalysisSettings
+        type: NestedObject
+        description: |-
+          Settings to describe the conversation data collection behaviors for the LLM
+          analysis pipeline for the app.
+        properties:
+          - name: llmMetricsOptedOut
+            type: Boolean
+            description: |-
+              Whether to collect conversation data for llm analysis metrics. If true,
+              conversation data will not be collected for llm analysis metrics;
+              otherwise, conversation data will be collected.
       - name: redactionConfig
         type: NestedObject
         description: Configuration to instruct how sensitive data should be handled.
@@ -427,6 +581,35 @@ properties:
               detection of sensitive data types.
               Format:
               `projects/{project}/locations/{location}/inspectTemplates/{inspect_template}`
+      - name: unredactedAudioRecordingConfig
+        type: NestedObject
+        description: |-
+          Configures an additional recording of unredacted audio. This can be used to
+          maintain a raw audio copy when audio redaction is
+          enabled, typically for auditing or monitoring purposes.
+        properties:
+          - name: gcsBucket
+            type: String
+            description: The Cloud Storage bucket to store the session audio recordings.
+          - name: gcsPathPrefix
+            type: String
+            description: The Cloud Storage path prefix for audio recordings.
+      - name: unredactedBigqueryExportSettings
+        type: NestedObject
+        description: |-
+          Configures the BigQuery export behaviors for the app.
+          The unredacted conversation data will be exported to BigQuery tables if it
+          is enabled.
+        properties:
+          - name: dataset
+            type: String
+            description: The BigQuery dataset to export the data to.
+          - name: enabled
+            type: Boolean
+            description: Indicates whether the BigQuery export is enabled.
+          - name: project
+            type: String
+            description: The project ID of the BigQuery dataset to export the data to.
   - name: metadata
     type: KeyValuePairs
     description: |-
@@ -622,6 +805,18 @@ properties:
                 function: validation.StringIsJSON
               custom_expand: templates/terraform/custom_expand/json_value.tmpl
               custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            - name: maxItems
+              type: Integer
+              description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
+            - name: maximum
+              type: Double
+              description: Maximum value of the element of primitive type.
+            - name: minItems
+              type: Integer
+              description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
+            - name: minimum
+              type: Double
+              description: Minimum value of the element of primitive type.
   - name: clientCertificateSettings
     type: NestedObject
     description: The default client certificate settings for the app.
@@ -644,3 +839,18 @@ properties:
         description: |-
           The passphrase to decrypt the private key.
           Should be left unset if the private key is not encrypted.
+  - name: vpcScSettings
+    type: NestedObject
+    description: VPC-SC settings for the app.
+    properties:
+      - name: allowedOrigins
+        type: Array
+        description: |-
+          The allowed HTTP(s) origins that OpenAPI tools in the App are able to
+          directly call when VPC Service Controls are enabled. These strings must
+          match the origin exactly, including the port if specified. For example,
+          "https://example.com" or "https://example.com:443".
+          This list does not yet apply to Python tools that may make direct HTTP
+          calls.
+        item_type:
+          type: String

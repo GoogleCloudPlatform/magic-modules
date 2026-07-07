@@ -175,6 +175,11 @@ properties:
             description: |-
               Whether the callback is disabled. Disabled callbacks are ignored by the
               agent.
+          - name: proactiveExecutionEnabled
+            type: Boolean
+            description: |-
+              If enabled, the callback will also be executed on intermediate model
+              outputs. This setting only affects after model callback.
           - name: pythonCode
             type: String
             required: true
@@ -193,6 +198,11 @@ properties:
             description: |-
               Whether the callback is disabled. Disabled callbacks are ignored by the
               agent.
+          - name: proactiveExecutionEnabled
+            type: Boolean
+            description: |-
+              If enabled, the callback will also be executed on intermediate model
+              outputs. This setting only affects after model callback.
           - name: pythonCode
             type: String
             required: true
@@ -211,6 +221,11 @@ properties:
             description: |-
               Whether the callback is disabled. Disabled callbacks are ignored by the
               agent.
+          - name: proactiveExecutionEnabled
+            type: Boolean
+            description: |-
+              If enabled, the callback will also be executed on intermediate model
+              outputs. This setting only affects after model callback.
           - name: pythonCode
             type: String
             required: true
@@ -229,6 +244,11 @@ properties:
             description: |-
               Whether the callback is disabled. Disabled callbacks are ignored by the
               agent.
+          - name: proactiveExecutionEnabled
+            type: Boolean
+            description: |-
+              If enabled, the callback will also be executed on intermediate model
+              outputs. This setting only affects after model callback.
           - name: pythonCode
             type: String
             required: true
@@ -426,6 +446,30 @@ properties:
               This field is for display purposes to show the user what prompt
               the system uses by default. It is OUTPUT_ONLY.
             output: true
+  - name: modelArmor
+    type: NestedObject
+    description: |-
+      Guardrail that uses Cloud Model Armor to sanitize the prompt or response.
+      If the prompt or response is sanitized, the guardrail is triggered.
+    properties:
+      - name: failOpen
+        type: Boolean
+        description: |-
+          If true, the guardrail will not trigger if it receives any errors from
+          the model armor service. By default, the guardrail will trigger if it
+          receives any errors from the model armor service.
+      - name: modelArmorTemplate
+        type: String
+        required: true
+        description: |-
+          Model armor template resource name.
+          Format: `projects/{project_id}/locations/{location}/templates/{template_id}`
+      - name: sanitizationScope
+        type: String
+        required: true
+        description: |-
+          When to run the sanitization check with model armor.
+          Possible values: SANITIZATION_SCOPE_UNSPECIFIED, PROMPT, RESPONSE, PROMPT_AND_RESPONSE.
   - name: modelSafety
     type: NestedObject
     description: |-

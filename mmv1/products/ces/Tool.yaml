@@ -1103,6 +1103,12 @@ properties:
             description: Configurations for authentication using a custom service account.
             output: true
             properties:
+              - name: scopes
+                type: Array
+                description: The OAuth scopes to grant.
+                output: true
+                item_type:
+                  type: String
               - name: serviceAccount
                 type: String
                 description: |-
@@ -1278,6 +1284,12 @@ properties:
             description: Configurations for authentication using a custom service account.
             output: true
             properties:
+              - name: scopes
+                type: Array
+                description: The OAuth scopes to grant.
+                output: true
+                item_type:
+                  type: String
               - name: serviceAccount
                 type: String
                 description: |-
@@ -1399,6 +1411,16 @@ properties:
       - name: pythonCode
         type: String
         description: The Python code to execute for the tool.
+      - name: serviceDirectoryConfig
+        type: NestedObject
+        description: Service Directory configuration for VPC-SC, used to resolve service names within a perimeter.
+        properties:
+          - name: service
+            type: String
+            description: |-
+              The name of [Service Directory](https://cloud.google.com/service-directory) service.
+              Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}
+            required: true
   - name: updateTime
     type: String
     description: Timestamp when the tool was last updated.
@@ -1629,6 +1651,16 @@ properties:
               - name: pythonCode
                 type: String
                 description: Optional. The Python code to execute for the tool.
+              - name: serviceDirectoryConfig
+                type: NestedObject
+                description: Service Directory configuration for VPC-SC, used to resolve service names within a perimeter.
+                properties:
+                  - name: service
+                    type: String
+                    description: |-
+                      The name of [Service Directory](https://cloud.google.com/service-directory) service.
+                      Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}
+                    required: true
               - name: description
                 type: String
                 description: |-

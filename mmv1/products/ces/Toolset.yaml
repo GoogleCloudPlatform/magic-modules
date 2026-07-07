@@ -192,6 +192,98 @@ parameters:
     url_param_only: true
     required: true
 properties:
+  - name: connectorToolset
+    type: NestedObject
+    description: A toolset that generates tools from an Integration Connectors Connection.
+    properties:
+      - name: connection
+        type: String
+        required: true
+        description: |-
+          The full resource name of the referenced Integration Connectors Connection.
+          Format: `projects/{project}/locations/{location}/connections/{connection}`
+      - name: authConfig
+        type: NestedObject
+        description: |-
+          Configures how authentication is handled in Integration Connectors. By default, an admin authentication is passed in the Integration Connectors API requests. You can override it with a different end-user authentication config. Note: The Connection must have authentication override enabled in order to specify an EUC configuration here - otherwise, the Toolset creation will fail.
+        properties:
+          - name: oauth2AuthCodeConfig
+            type: NestedObject
+            description: Oauth 2.0 Authorization Code authentication configuration.
+            properties:
+              - name: oauthToken
+                type: String
+                required: true
+                description: |-
+                  Oauth token parameter name to pass through.
+                  Must be in the format `$context.variables.<name_of_variable>`.
+          - name: oauth2JwtBearerConfig
+            type: NestedObject
+            description: JWT Profile Oauth 2.0 Authorization Grant authentication configuration.
+            properties:
+              - name: clientKey
+                type: String
+                required: true
+                description: |-
+                  Client parameter name to pass through.
+                  Must be in the format `$context.variables.<name_of_variable>`.
+              - name: issuer
+                type: String
+                required: true
+                description: |-
+                  Issuer parameter name to pass through.
+                  Must be in the format `$context.variables.<name_of_variable>`.
+              - name: subject
+                type: String
+                required: true
+                description: |-
+                  Subject parameter name to pass through.
+                  Must be in the format `$context.variables.<name_of_variable>`.
+      - name: connectorActions
+        type: Array
+        required: true
+        description: The list of connector actions/entity operations to generate tools for.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: connectionActionId
+              type: String
+              description: ID of a Connection action for the tool to use.
+            - name: entityOperation
+              type: NestedObject
+              description: Entity operation configuration for the tool to use.
+              properties:
+                - name: entityId
+                  type: String
+                  required: true
+                  description: ID of the entity.
+                - name: operation
+                  type: Enum
+                  required: true
+                  description: |-
+                    Operation to perform on the entity.
+                    Possible values:
+                    LIST
+                    GET
+                    CREATE
+                    UPDATE
+                    DELETE
+                  enum_values:
+                    - LIST
+                    - GET
+                    - CREATE
+                    - UPDATE
+                    - DELETE
+            - name: inputFields
+              type: Array
+              description: Entity fields to use as inputs for the operation.
+              item_type:
+                type: String
+            - name: outputFields
+              type: Array
+              description: Entity fields to return from the operation.
+              item_type:
+                type: String
   - name: createTime
     type: String
     description: Timestamp when the toolset was created.
@@ -579,6 +671,22 @@ properties:
           set in the session variables. See
           https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/tool/open-api#openapi-injection
           for more details.
+      - name: toolOverrides
+        type: Array
+        description: Overrides for individual tools within this toolset.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: descriptionOverride
+              type: String
+              description: Optional. Description override for the tool.
+            - name: nameOverride
+              type: String
+              description: Optional. Name override for the tool.
+            - name: tool
+              type: String
+              required: true
+              description: Required. The name of the tool to override.
   - name: toolFakeConfig
     type: NestedObject
     description: Configuration for tools behavior in fake mode.
@@ -594,6 +702,12 @@ properties:
             type: String
             required: true
             description: Python code which will be invoked in tool fake mode.
+  - name: timeout
+    type: String
+    description: |-
+      The timeout for the toolset execution. If not set, the default timeout is
+      30 seconds for SYNCHRONOUS toolsets and 60 seconds for ASYNCHRONOUS
+      toolsets.
   - name: updateTime
     type: String
     description: Timestamp when the toolset was last updated.

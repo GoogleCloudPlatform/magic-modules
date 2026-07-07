@@ -91,6 +91,11 @@ properties:
           description: |-
             Whether the callback is disabled. Disabled callbacks are ignored by the
             agent.
+        - name: proactiveExecutionEnabled
+          type: Boolean
+          description: |-
+            If enabled, the callback will also be executed on intermediate model
+            outputs. This setting only affects after model callback.
         - name: pythonCode
           type: String
           required: true
@@ -114,6 +119,11 @@ properties:
           description: |-
             Whether the callback is disabled. Disabled callbacks are ignored by the
             agent.
+        - name: proactiveExecutionEnabled
+          type: Boolean
+          description: |-
+            If enabled, the callback will also be executed on intermediate model
+            outputs. This setting only affects after model callback.
         - name: pythonCode
           type: String
           required: true
@@ -137,6 +147,11 @@ properties:
           description: |-
             Whether the callback is disabled. Disabled callbacks are ignored by the
             agent.
+        - name: proactiveExecutionEnabled
+          type: Boolean
+          description: |-
+            If enabled, the callback will also be executed on intermediate model
+            outputs. This setting only affects after model callback.
         - name: pythonCode
           type: String
           required: true
@@ -159,6 +174,11 @@ properties:
           description: |-
             Whether the callback is disabled. Disabled callbacks are ignored by the
             agent.
+        - name: proactiveExecutionEnabled
+          type: Boolean
+          description: |-
+            If enabled, the callback will also be executed on intermediate model
+            outputs. This setting only affects after model callback.
         - name: pythonCode
           type: String
           required: true
@@ -182,6 +202,11 @@ properties:
           description: |-
             Whether the callback is disabled. Disabled callbacks are ignored by the
             agent.
+        - name: proactiveExecutionEnabled
+          type: Boolean
+          description: |-
+            If enabled, the callback will also be executed on intermediate model
+            outputs. This setting only affects after model callback.
         - name: pythonCode
           type: String
           required: true
@@ -205,6 +230,11 @@ properties:
           description: |-
             Whether the callback is disabled. Disabled callbacks are ignored by the
             agent.
+        - name: proactiveExecutionEnabled
+          type: Boolean
+          description: |-
+            If enabled, the callback will also be executed on intermediate model
+            outputs. This setting only affects after model callback.
         - name: pythonCode
           type: String
           required: true
@@ -313,6 +343,12 @@ properties:
         description: |-
           The mapping of the app variables names to the Dialogflow session
           parameters names to be sent to the Dialogflow agent as input.
+      - name: languageCodeVariable
+        type: String
+        description: |-
+          The name of the variable that contains the language code to be used for
+          the Dialogflow session. If unspecified, the default language code of the
+          Dialogflow agent will be used.
       - name: outputVariableMapping
         type: KeyValuePairs
         description: |-
@@ -347,6 +383,60 @@ properties:
           description: The tools IDs to filter the toolset.
           item_type:
             type: String
+  - name: transferRules
+    type: Array
+    description: Agent transfer rules. If multiple rules match, the first one in the list will be used.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: childAgent
+          type: String
+          required: true
+          description: |-
+            The resource name of the child agent the rule applies to.
+            Format: `projects/{project}/locations/{location}/apps/{app}/agents/{agent}`
+        - name: deterministicTransfer
+          type: NestedObject
+          description: Deterministic transfer rule. When the condition evaluates to true, the transfer occurs.
+          properties:
+            - name: expressionCondition
+              type: NestedObject
+              description: A rule that evaluates a session state condition. If the condition evaluates to true, the transfer occurs.
+              properties:
+                - name: expression
+                  type: String
+                  required: true
+                  description: The string representation of cloud.api.Expression condition.
+            - name: pythonCodeCondition
+              type: NestedObject
+              description: A rule that uses Python code block to evaluate the conditions. If the condition evaluates to true, the transfer occurs.
+              properties:
+                - name: pythonCode
+                  type: String
+                  required: true
+                  description: The python code to execute.
+        - name: direction
+          type: String
+          required: true
+          description: |-
+            The direction of the transfer.
+            Possible values:
+              - DIRECTION_UNSPECIFIED
+              - PARENT_TO_CHILD
+              - CHILD_TO_PARENT
+        - name: disablePlannerTransfer
+          type: NestedObject
+          description: A rule that prevents the planner from transferring to the target agent.
+          properties:
+            - name: expressionCondition
+              type: NestedObject
+              required: true
+              description: If the condition evaluates to true, planner will not be allowed to transfer to the target agent.
+              properties:
+                - name: expression
+                  type: String
+                  required: true
+                  description: The string representation of cloud.api.Expression condition.
   - name: updateTime
     type: String
     description: Timestamp when the agent was last updated.
