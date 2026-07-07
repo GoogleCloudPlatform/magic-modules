@@ -172,36 +172,52 @@ resource "google_ces_agent" "ces_agent_basic" {
     description = "Example callback"
     disabled    = true
     python_code = "def before_agent_callback(callback_context): return None"
+    proactive_execution_enabled = true
   }
 
   after_agent_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def after_agent_callback(callback_context): return None"
+    proactive_execution_enabled = true
   }
 
   before_model_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def before_model_callback(callback_context, llm_request): return None"
+    proactive_execution_enabled = true
   }
 
   after_model_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def after_model_callback(callback_context, llm_response): return None"
+    proactive_execution_enabled = true
   }
 
   before_tool_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def before_tool_callback(tool, input, callback_context): return None"
+    proactive_execution_enabled = true
   }
 
   after_tool_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def after_tool_callback(tool, input, callback_context, tool_response): return None"
+    proactive_execution_enabled = true
+  }
+
+  transfer_rules {
+    direction = "TRANSFER_TO_AGENT"
+    child_agent = google_ces_agent.ces_child_agent.id
+    deterministic_transfer {
+      expression_condition {
+        expression = "true"
+      }
+    }
   }
 
   tools = [
@@ -341,36 +357,52 @@ resource "google_ces_agent" "ces_agent_basic" {
     description = "Example callback"
     disabled    = false
     python_code = "def before_agent_callback(callback_context): return None"
+    proactive_execution_enabled = false
   }
 
   after_agent_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def after_agent_callback(callback_context): return None"
+    proactive_execution_enabled = false
   }
 
   before_model_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def before_model_callback(callback_context, llm_request): return None"
+    proactive_execution_enabled = false
   }
 
   after_model_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def after_model_callback(callback_context, llm_response): return None"
+    proactive_execution_enabled = false
   }
 
   before_tool_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def before_tool_callback(tool, input, callback_context): return None"
+    proactive_execution_enabled = false
   }
 
   after_tool_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def after_tool_callback(tool, input, callback_context, tool_response): return None"
+    proactive_execution_enabled = false
+  }
+
+  transfer_rules {
+    direction = "TRANSFER_TO_AGENT"
+    child_agent = google_ces_agent.ces_child_agent.id
+    deterministic_transfer {
+      expression_condition {
+        expression = "false"
+      }
+    }
   }
 
   // tools = [
@@ -468,6 +500,7 @@ resource "google_ces_agent" "ces_agent_remote_dialogflow_agent" {
     output_variable_mapping = {
         "example" : 1
     }
+    language_code_variable = "lang"
   }
 }
 `, context)
@@ -509,6 +542,7 @@ resource "google_ces_agent" "ces_agent_remote_dialogflow_agent" {
     output_variable_mapping = {
         "example" : 2
     }
+    language_code_variable = "lang-updated"
   }
 }
 `, context)
