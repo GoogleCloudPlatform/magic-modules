@@ -16,7 +16,7 @@ resource "google_bigquery_analytics_hub_query_template" "{{$.PrimaryResourceId}}
   query_template_id = "{{index $.ResourceIdVars "query_template_id"}}"
   display_name = "{{index $.ResourceIdVars "query_template_id"}}"
   description = "{{index $.Vars "desc"}}"
-  primary_contact = "{{index $.Vars "primary_contact"}}"
+  primary_contact   = data.google_client_openid_userinfo.me.email
   documentation = "This TVF takes a table t1 as input and returns all columns. Useful for basic data pass-through."
   routine {
     routine_type="TABLE_VALUED_FUNCTION"
