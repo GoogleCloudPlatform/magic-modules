@@ -1,0 +1,161 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: DataObject
+description: |-
+  A DataObject is a single item of data (with optional vectors) stored in a
+  Vector Search Collection. Each DataObject conforms to the parent
+  Collection's `data_schema` and `vector_schema`.
+
+  For large datasets, prefer bulk ingestion via the `importDataObjects`
+  API before any Index is created on the Collection: once an Index exists,
+  `importDataObjects` is no longer available and DataObjects must be
+  created one at a time (as this resource does) or in small online
+  batches.
+base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataObjects
+self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataObjects/{{data_object_id}}
+create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataObjects?dataObjectId={{data_object_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataObjects/{{data_object_id}}
+# NOTE: DataObject CRUD RPCs are synchronous (they return the resource
+# directly, not a google.longrunning.Operation), so this resource has NO
+# `async:` block and `autogen_async` is set to `false`.
+autogen_status: RGF0YU9iamVjdA==
+autogen_async: false
+samples:
+  - name: vectorsearch_data_object_basic
+    primary_resource_id: example-data-object
+    steps:
+      - name: vectorsearch_data_object_basic
+        resource_id_vars:
+          data_object_id: example-data-object
+          collection_id: example-collection
+  - name: vectorsearch_data_object_with_vectors
+    primary_resource_id: example-vectors-data-object
+    steps:
+      - name: vectorsearch_data_object_with_vectors
+        resource_id_vars:
+          data_object_id: example-vectors-data-object
+          collection_id: example-vectors-collection
+      # Update step: exercises in-place updates of the DataObject's
+      # `data` and `vectors` fields (the only mutable properties on
+      # google_vector_search_data_object).
+      - name: vectorsearch_data_object_with_vectors_update
+        resource_id_vars:
+          data_object_id: example-vectors-data-object
+          collection_id: example-vectors-collection
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: collectionId
+    type: String
+    required: true
+    description: |-
+      The ID of the parent Collection.
+    immutable: true
+    url_param_only: true
+  - name: dataObjectId
+    type: String
+    required: true
+    description: |-
+      ID of the DataObject to create.
+      The id must be 1-63 characters long, and comply with
+      [RFC1035](https://www.ietf.org/rfc/rfc1035.txt).
+      Specifically, it must be 1-63 characters long and match the regular
+      expression `[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: name
+    type: String
+    description: Identifier. name of resource
+    output: true
+  - name: createTime
+    type: String
+    description: '[Output only] Create time stamp'
+    output: true
+  - name: updateTime
+    type: String
+    description: '[Output only] Update time stamp'
+    output: true
+  - name: data
+    type: String
+    description: |-
+      The JSON data of the DataObject. Must be a JSON object whose field
+      names match the fields defined in the parent Collection's
+      `data_schema`.
+    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
+    validation:
+      function: validation.StringIsJSON
+  - name: vectors
+    type: Map
+    key_name: field_name
+    default_from_api: true
+    description: |-
+      The vectors of the DataObject, keyed by the vector field name as
+      defined in the parent Collection's `vector_schema`.
+
+      If a vector field is configured with a `vertex_embedding_config` on
+      the Collection, the server will populate the vector automatically
+      from the corresponding text in `data` and the field should be
+      omitted here.
+    value_type:
+      type: NestedObject
+      properties:
+        - name: dense
+          type: NestedObject
+          description: A dense vector.
+          conflicts:
+            - sparse
+          properties:
+            - name: values
+              type: Array
+              required: true
+              description: The float values of the dense vector.
+              item_type:
+                type: Double
+        - name: sparse
+          type: NestedObject
+          description: A sparse vector.
+          conflicts:
+            - dense
+          properties:
+            - name: values
+              type: Array
+              required: true
+              description: The non-zero float values of the sparse vector.
+              item_type:
+                type: Double
+            - name: indices
+              type: Array
+              required: true
+              description: |-
+                The indices corresponding to the entries in `values`. Must
+                have the same length as `values`.
+              item_type:
+                type: Integer
+  - name: etag
+    type: String
+    description: |-
+      The etag of the DataObject, used for optimistic concurrency
+      control on updates and deletes.
+    default_from_api: true
