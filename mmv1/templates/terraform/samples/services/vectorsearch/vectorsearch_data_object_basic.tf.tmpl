@@ -1,8 +1,14 @@
-# NOTE: For large datasets we recommend bulk ingestion via the
-# `importDataObjects` API on the Collection *before* creating any Index.
-# Once an Index exists on the Collection, `importDataObjects` is no
-# longer available and DataObjects must be created individually (as this
-# resource does) or in small online batches.
+# NOTE: This resource issues one CreateDataObject request per block.
+# It does NOT batch across resources. Terraform will parallelize a
+# 'for_each' up to '-parallelism', but each item is still a separate
+# HTTP call.
+#
+# For bulk ingestion of many items, prefer one of these out-of-band
+# paths instead of Terraform:
+#   * 'importDataObjects' (from Cloud Storage) -- highest throughput,
+#     but only available *before* any Index is created on the Collection.
+#   * 'batchCreate' (up to ~1000 items per call) -- available at any
+#     time, but must be driven from client code, not Terraform.
 resource "google_vector_search_collection" "parent" {
   location      = "us-central1"
   collection_id = "{{index $.ResourceIdVars "collection_id"}}"
@@ -37,10 +43,10 @@ EOF
   }
 }
 
-# Because the parent Collection's `text_embedding` field is configured
-# with a `vertex_embedding_config`, the server will populate the vector
-# automatically from `data.title` and `data.plot` -- no explicit
-# `vectors` block is required.
+# Because the parent Collection's 'text_embedding' field is configured
+# with a 'vertex_embedding_config', the server will populate the vector
+# automatically from 'data.title' and 'data.plot' -- no explicit
+# 'vectors' block is required.
 resource "google_vector_search_data_object" "{{$.PrimaryResourceId}}" {
   location       = "us-central1"
   collection_id  = google_vector_search_collection.parent.collection_id

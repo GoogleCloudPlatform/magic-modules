@@ -18,11 +18,25 @@ description: |-
   Vector Search Collection. Each DataObject conforms to the parent
   Collection's `data_schema` and `vector_schema`.
 
-  For large datasets, prefer bulk ingestion via the `importDataObjects`
-  API before any Index is created on the Collection: once an Index exists,
-  `importDataObjects` is no longer available and DataObjects must be
-  created one at a time (as this resource does) or in small online
-  batches.
+  This resource always issues one `CreateDataObject` request per Terraform
+  resource block. It does NOT use the `batchCreate` REST endpoint --
+  Terraform's resource lifecycle is inherently per-object, so batching
+  across resources is not modeled. When you use `for_each` or `count`,
+  Terraform will still issue individual requests, up to `-parallelism`
+  in parallel.
+
+  For ingesting more than a few hundred items, prefer one of the
+  following out-of-band paths instead of Terraform:
+
+    * `importDataObjects` (bulk ingest from Cloud Storage) -- highest
+      throughput, but only available *before* any Index is created on
+      the Collection.
+    * `batchCreate` (up to ~1000 items per call) -- available at any
+      time, but must be driven from your own client code, not Terraform.
+
+  Once an Index exists on the Collection, `importDataObjects` is no
+  longer available and DataObjects must be created via `CreateDataObject`
+  (as this resource does) or via `batchCreate`.
 base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataObjects
 self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataObjects/{{data_object_id}}
 create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataObjects?dataObjectId={{data_object_id}}
