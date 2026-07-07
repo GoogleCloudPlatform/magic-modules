@@ -173,6 +173,9 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 		}
 		hclData["private_ipv6_google_access"] = nc["privateIpv6GoogleAccess"]
 		hclData["datapath_provider"] = nc["datapathProvider"]
+		if dvc, ok := nc["dataplaneV2Config"].(map[string]interface{}); ok {
+			hclData["dataplane_optimization_mode"] = dvc["scalabilityMode"]
+		}
 		if v := nc["enableMultiNetworking"]; v != nil && v != false {
 			hclData["enable_multi_networking"] = v
 		}

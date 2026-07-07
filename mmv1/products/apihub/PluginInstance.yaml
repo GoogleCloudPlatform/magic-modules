@@ -21,19 +21,8 @@ create_url: projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/insta
 id_format: projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/instances/{{plugin_instance_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/instances/{{plugin_instance_id}}
-examples:
-  - name: apihub_plugin_instance_basic
-    primary_resource_id: apihub_plugin_instance_basic
-    vars:
-      curation_id: 'test'
-    # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
-    test_vars_overrides:
-      # for backward compatible
-      curation_id: '"test" + randomSuffix'
-    exclude_test: true
-    external_providers: ["time"]
-autogen_async: true
 async:
+  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 20
@@ -44,11 +33,24 @@ async:
     - create
     - delete
     - update
-  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: UGx1Z2luSW5zdGFuY2U=
+autogen_async: true
+samples:
+  - name: apihub_plugin_instance_basic
+    primary_resource_id: apihub_plugin_instance_basic
+    exclude_test: true
+    external_providers: [time]
+    steps:
+      - name: apihub_plugin_instance_basic
+        resource_id_vars:
+          curation_id: test
+        # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
+        test_vars_overrides:
+          # for backward compatible
+          curation_id: '"test" + randomSuffix'
 parameters:
   - name: location
     type: String
@@ -185,7 +187,6 @@ properties:
       - name: authType
         type: String
         description: |2-
-
           Possible values:
           AUTH_TYPE_UNSPECIFIED
           NO_AUTH
@@ -321,7 +322,6 @@ properties:
               type: String
               default_from_api: true
               description: |2-
-
                 Possible values:
                 CURATION_TYPE_UNSPECIFIED
                 DEFAULT_CURATION_FOR_API_METADATA

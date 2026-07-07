@@ -39,6 +39,8 @@ examples:
     primary_resource_id: 'policy'
     vars:
       policy_name: 'tf-test-policy'
+iam_policy:
+  parent_resource_attribute: 'name'
 parameters:
 properties:
   - name: 'creationTimestamp'

@@ -25,6 +25,7 @@ base_url: projects/{{project}}/global/machineImages
 min_version: beta
 immutable: true
 has_self_link: true
+generate_list_resource: true
 collection_url_key: items
 iam_policy:
   allowed_iam_role: roles/compute.admin

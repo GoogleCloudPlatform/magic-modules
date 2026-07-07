@@ -39,6 +39,11 @@ async:
   result:
     resource_inside_response: false
 include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesRateLimitOptions'
+    skip: 'data issue with this test'
+  - name: 'TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpdate'
+    skip: 'data issue with this test'
 custom_code:
   constants: 'templates/terraform/constants/region_security_policy.go.tmpl'
 # excluding identity due to name value inconsistency

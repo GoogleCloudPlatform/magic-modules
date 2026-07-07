@@ -1,0 +1,4 @@
+resource "google_vertex_ai_model_garden_enable_model" "{{$.PrimaryResourceId}}" {
+  provider             = google-beta
+  publisher_model_name = "{{index $.Vars "publisher_model_name"}}"
+}

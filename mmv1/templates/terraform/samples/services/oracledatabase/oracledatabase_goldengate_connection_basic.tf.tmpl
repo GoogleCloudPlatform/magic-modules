@@ -1,8 +1,8 @@
 resource "google_oracle_database_goldengate_connection" "{{$.PrimaryResourceId}}" {
   goldengate_connection_id = "{{index $.ResourceIdVars "goldengate_connection_id"}}"
-  location                 = "us-east4"
+  location                 = "asia-south1"
   project                  = "{{index $.ResourceIdVars "project"}}"
-  gcp_oracle_zone          = "us-east4-b-r1"
+  gcp_oracle_zone          = "asia-south1-b-r1"
 
 
   properties {

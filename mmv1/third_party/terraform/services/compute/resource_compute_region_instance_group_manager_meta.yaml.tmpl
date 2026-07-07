@@ -108,9 +108,7 @@ fields:
   - api_field: 'id'
     field: 'instance_group_manager_id'
   - api_field: 'instanceLifecyclePolicy.defaultActionOnFailure'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'instanceLifecyclePolicy.onFailedHealthCheck'
-{{- end }}
   - api_field: 'instanceLifecyclePolicy.forceUpdateOnRepair'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'instanceLifecyclePolicy.onRepair.allowChangingZone'

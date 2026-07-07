@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'PubsubLite'
-display_name: 'Cloud Pub/Sub'
-versions:
-  - name: 'ga'
-    base_url: 'https://{{region}}-pubsublite.googleapis.com/v1/admin/'
-    cai_base_url: 'https://pubsublite.googleapis.com/v1/admin/'
+name: PubsubLite
+display_name: Cloud Pub/Sub
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://{{region}}-pubsublite.googleapis.com/v1/admin/
+    cai_base_url: https://pubsublite.googleapis.com/v1/admin/

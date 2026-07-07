@@ -1,0 +1,22 @@
+resource "google_chronicle_findings_refinement" "my-findings-refinement" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  display_name = "{{index $.ResourceIdVars "display_name"}}" 
+  type = "DETECTION_EXCLUSION" 
+  query = "network.dns.response = true" 
+  outcome_filters {
+    outcome_variable = "risk_score"
+    outcome_filter_operator = "EQUAL"
+    outcome_value = "value"
+  }
+}
+
+resource "google_chronicle_findings_refinement_deployment" "{{$.PrimaryResourceId}}" {
+ provider = google-beta
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ findings_refinement = element(split("/", resource.google_chronicle_findings_refinement.my-findings-refinement.name), length(split("/", resource.google_chronicle_findings_refinement.my-findings-refinement.name)) - 1)
+ enabled = "{{index $.Vars "enabled"}}"
+ archived = false
+}

@@ -1,0 +1,34 @@
+func parseDurationAsSeconds(v string) (int, bool) {
+	if len(v) == 0 {
+		return 0, false
+	}
+	n, err := strconv.Atoi(v[:len(v)-1])
+	if err != nil {
+		return 0, false
+	}
+	switch v[len(v)-1] {
+	case 's':
+		return n, true
+	case 'm':
+		return n * 60, true
+	case 'h':
+		return n * 3600, true
+	case 'd':
+		return n * 86400, true
+	default:
+		return 0, false
+	}
+}
+
+// Like tpgresource.DurationDiffSuppress, but supports 'd'
+func rolloutSequenceDurationDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	oldSeconds, ok := parseDurationAsSeconds(old)
+	if !ok {
+		return false
+	}
+	newSeconds, ok := parseDurationAsSeconds(new)
+	if !ok {
+		return false
+	}
+	return oldSeconds == newSeconds
+}
