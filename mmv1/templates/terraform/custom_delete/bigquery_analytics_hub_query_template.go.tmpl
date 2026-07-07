@@ -1,3 +1,5 @@
+deletionPolicy := d.Get("deletion_policy").(string)
+
 url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigqueryAnalyticsHubBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/dataExchanges/{{"{{"}}data_exchange_id{{"}}"}}/queryTemplates/{{"{{"}}query_template_id{{"}}"}}")
 if err != nil {
 	return err
@@ -23,8 +25,8 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 })
 
 if err != nil {
-	if transport_tpg.IsGoogleApiErrorWithCode(err, 400) && (strings.Contains(err.Error(), "must be in DRAFTED state")) {
-		log.Printf("[WARN] QueryTemplate %q cannot be deleted because it is no longer in DRAFTED state. Removing from state.", d.Id())
+	if deletionPolicy == "DELETE_IF_DRAFTED" && transport_tpg.IsGoogleApiErrorWithCode(err, 400) && strings.Contains(err.Error(), "must be in DRAFTED state") {
+		log.Printf("[WARN] QueryTemplate %q is not in DRAFTED state. Abandoning resource due to deletion_policy 'DELETE_IF_DRAFTED'.", d.Id())
 		d.SetId("")
 		return nil
 	}

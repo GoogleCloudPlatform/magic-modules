@@ -14,13 +14,16 @@
 ---
 name: "QueryTemplate"
 min_version: beta
+deletion_policy_default: "DELETE_IF_DRAFTED"
+deletion_policy_custom_docs: true
 description: |
   Represents a BigQuery Query Template within a Data Exchange.
   This resource defines a reusable SQL routine (e.g., a TVF) that can be
   shared or executed via the Data Exchange.
 references:
   guides:
-    "Official Documentation": "https://cloud.google.com/bigquery/docs/analytics-hub-introduction"
+    "Use query templates": "https://docs.cloud.google.com/bigquery/docs/query-templates"
+  api: "https://docs.cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges.queryTemplates"
 self_link: "projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}"
 id_format: "projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}"
 create_url: "projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates?queryTemplateId={{query_template_id}}"
@@ -44,32 +47,42 @@ samples:
           query_template_id: "my_query_template"
         vars:
           desc: "example of query template"
-          primary_contact: "admin@example.com"
           table_name: "t1"
           submit: "false"
         ignore_read_extra:
           - "submit"
+          - "deletion_policy"
       - name: "bigquery_analyticshub_querytemplate_basic"
         resource_id_vars:
           data_exchange_id: "my_data_exchange"
           query_template_id: "my_query_template"
         vars:
           desc: "updated example of query template"
-          primary_contact: "adminupdated@example.com"
           table_name: "t1updated"
           submit: "true"
         ignore_read_extra:
           - "submit"
+          - "deletion_policy"
 
 custom_code:
+  constants: "templates/terraform/constants/bigquery_analytics_hub_query_template.go.tmpl"
   post_update: "templates/terraform/post_update/bigquery_analytics_hub_query_template.go.tmpl"
-  pre_update: "templates/terraform/pre_update/bigquery_analytics_hub_query_template.go.tmpl"
   post_create: "templates/terraform/post_create/bigquery_analytics_hub_query_template.go.tmpl"
   custom_delete: "templates/terraform/custom_delete/bigquery_analytics_hub_query_template.go.tmpl"
+custom_diff:
+  - 'resourceBigqueryAnalyticsHubQueryTemplateCustomDiff'
 virtual_fields:
   - name: "submit"
     type: Boolean
     description: "If set to `true`, the QueryTemplate will be submitted for approval and cannot be updated afterwards. This is a one-time action."
+  - name: "deletion_policy"
+    type: String
+    exclude: true
+    description: |
+      Sets the policy for deleting the QueryTemplate.
+      * `ABANDON`: Untracks the resource from Terraform state but leaves it intact in BigQuery.
+      * `DELETE`: Deletes the QueryTemplate from BigQuery.
+      * `DELETE_IF_DRAFTED`: Deletes the QueryTemplate only if it is in a `DRAFTED` state; otherwise, it abandons it.
 properties:
   - name: "name"
     type: String
@@ -113,6 +126,7 @@ properties:
     type: String
     description: |
       Email or URL of the primary point of contact of the QueryTemplate.
+    immutable: true
   - name: "documentation"
     type: String
     description: "Documentation describing the QueryTemplate."
