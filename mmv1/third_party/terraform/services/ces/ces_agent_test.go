@@ -211,16 +211,28 @@ resource "google_ces_agent" "ces_agent_basic" {
   }
 
   transfer_rules {
-    direction = "TRANSFER_TO_AGENT"
+    direction = "PARENT_TO_CHILD"
     child_agent = google_ces_agent.ces_child_agent.id
     deterministic_transfer {
       expression_condition {
         expression = "true"
       }
+    }
+  }
+
+  transfer_rules {
+    direction = "PARENT_TO_CHILD"
+    child_agent = google_ces_agent.ces_child_agent.id
+    deterministic_transfer {
       python_code_condition {
         python_code = "def condition(context):\n    return True"
       }
     }
+  }
+
+  transfer_rules {
+    direction = "PARENT_TO_CHILD"
+    child_agent = google_ces_agent.ces_child_agent.id
     disable_planner_transfer {
       expression_condition {
         expression = "true"
@@ -404,16 +416,28 @@ resource "google_ces_agent" "ces_agent_basic" {
   }
 
   transfer_rules {
-    direction = "TRANSFER_TO_AGENT"
+    direction = "PARENT_TO_CHILD"
     child_agent = google_ces_agent.ces_child_agent.id
     deterministic_transfer {
       expression_condition {
         expression = "false"
       }
+    }
+  }
+
+  transfer_rules {
+    direction = "PARENT_TO_CHILD"
+    child_agent = google_ces_agent.ces_child_agent.id
+    deterministic_transfer {
       python_code_condition {
         python_code = "def condition(context):\n    return False"
       }
     }
+  }
+
+  transfer_rules {
+    direction = "PARENT_TO_CHILD"
+    child_agent = google_ces_agent.ces_child_agent.id
     disable_planner_transfer {
       expression_condition {
         expression = "false"
