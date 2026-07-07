@@ -67,6 +67,7 @@ resource "google_ces_deployment" "my-deployment" {
         channel_type = "API"
         disable_barge_in_control = true
         disable_dtmf = true
+        noise_suppression_level = "NOISE_SUPPRESSION_LEVEL_UNSPECIFIED"
         persona_property {
             persona = "CHATTY"
         }
@@ -82,6 +83,36 @@ resource "google_ces_deployment" "my-deployment" {
                 enable_recaptcha = true
             }
         }
+        instagram_config {
+            instagram_account_id = "insta-id-1"
+        }
+        whatsapp_config {
+            phone_number = "12345678"
+            phone_number_id = "phone-id-1"
+            waba_id = "waba-id-1"
+        }
+    }
+    experiment_config {
+        version_release {
+            state = "STATE_UNSPECIFIED"
+            traffic_allocations {
+                app_version = "projects/example-project/locations/us/apps/example-app/versions/example-version"
+                traffic_percentage = 100
+                id = "1"
+            }
+        }
+    }
+    instagram_credentials {
+        auth_code = "insta-auth-code"
+        conversation_profile_id = "insta-profile-id"
+    }
+    whatsapp_credentials {
+        auth_code = "wa-auth-code"
+        business_account_id = "wa-business-id"
+        conversation_profile_id = "wa-profile-id"
+        phone_number = "wa-phone"
+        pin = "wa-pin"
+        waba_id = "wa-waba-id"
     }
 }
 `, context)
@@ -106,6 +137,7 @@ resource "google_ces_deployment" "my-deployment" {
         channel_type = "WEB_UI"
         disable_barge_in_control = true
         disable_dtmf = true
+        noise_suppression_level = "NOISE_SUPPRESSION_LEVEL_UNSPECIFIED"
         persona_property {
             persona = "CONCISE"
         }
@@ -121,6 +153,36 @@ resource "google_ces_deployment" "my-deployment" {
                 enable_recaptcha = false
             }
         }
+        instagram_config {
+            instagram_account_id = "insta-id-2"
+        }
+        whatsapp_config {
+            phone_number = "87654321"
+            phone_number_id = "phone-id-2"
+            waba_id = "waba-id-2"
+        }
+    }
+    experiment_config {
+        version_release {
+            state = "STATE_UNSPECIFIED"
+            traffic_allocations {
+                app_version = "projects/example-project/locations/us/apps/example-app/versions/example-version"
+                traffic_percentage = 50
+                id = "1"
+            }
+        }
+    }
+    instagram_credentials {
+        auth_code = "insta-auth-code-updated"
+        conversation_profile_id = "insta-profile-id-updated"
+    }
+    whatsapp_credentials {
+        auth_code = "wa-auth-code-updated"
+        business_account_id = "wa-business-id-updated"
+        conversation_profile_id = "wa-profile-id-updated"
+        phone_number = "wa-phone-updated"
+        pin = "wa-pin-updated"
+        waba_id = "wa-waba-id-updated"
     }
 }
 `, context)

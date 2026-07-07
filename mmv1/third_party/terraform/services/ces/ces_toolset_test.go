@@ -864,6 +864,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
+  timeout  = "30s"
   mcp_toolset {
     server_address = "https://api.example.com/mcp/"
     tls_config {
@@ -880,6 +881,11 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
             service_account = "${google_service_account.ces_test_service_account.email}"
             scopes = ["https://www.googleapis.com/auth/cloud-platform"]
         }
+    }
+    tool_overrides {
+        tool = "my-tool"
+        name_override = "my-tool-alias"
+        description_override = "overridden tool description"
     }
   }
 }
@@ -912,6 +918,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
+  timeout  = "45s"
   mcp_toolset {
     server_address = "https://api.example.com/mcp/"
     tls_config {
@@ -928,6 +935,11 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
             service_account = "${google_service_account.ces_test_service_account.email}"
             scopes = ["https://www.googleapis.com/auth/cloud-platform"]
         }
+    }
+    tool_overrides {
+        tool = "my-tool"
+        name_override = "my-tool-alias-updated"
+        description_override = "overridden tool description updated"
     }
   }
 }
@@ -1446,6 +1458,153 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
     }
     api_authentication {
         service_agent_id_token_auth_config {}
+    }
+  }
+}
+`, context)
+}
+
+func TestAccCESToolset_cesToolsetConnectorToolsetExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESToolsetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESToolset_cesToolsetConnectorToolsetExample_full(context),
+			},
+			{
+				ResourceName:            "google_ces_toolset.ces_toolset_connector",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+			{
+				Config: testAccCESToolset_cesToolsetConnectorToolsetExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_toolset.ces_toolset_connector", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_toolset.ces_toolset_connector",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+		},
+	})
+}
+
+func testAccCESToolset_cesToolsetConnectorToolsetExample_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "ces_app_for_toolset" {
+  app_id = "tf-test-app-id%{random_suffix}"
+  location = "us"
+  description = "App used as parent for CES Toolset example"
+  display_name = "tf-test-my-app%{random_suffix}"
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_toolset" "ces_toolset_connector" {
+  toolset_id = "connector-toolset-%{random_suffix}"
+  location = "us"
+  app      = google_ces_app.ces_app_for_toolset.app_id
+  display_name = "Connector toolset display name"
+
+  connector_toolset {
+    connection = "projects/example-project/locations/us/connections/my-connection"
+    auth_config {
+        oauth2_auth_code_config {
+            oauth_token = "$context.variables.connector_oauth_token"
+        }
+        oauth2_jwt_bearer_config {
+            client_key = "example_client_key"
+            issuer = "example_issuer"
+            subject = "example_subject"
+        }
+    }
+    connector_actions {
+        connection_action_id = "action-id-1"
+        input_fields = jsonencode({
+            input_key = "input_val"
+        })
+        output_fields = jsonencode({
+            output_key = "output_val"
+        })
+        entity_operation {
+            entity_id = "entity-1"
+            operation = "CREATE"
+        }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCESToolset_cesToolsetConnectorToolsetExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "ces_app_for_toolset" {
+  app_id = "tf-test-app-id%{random_suffix}"
+  location = "us"
+  description = "App used as parent for CES Toolset example"
+  display_name = "tf-test-my-app%{random_suffix}"
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_toolset" "ces_toolset_connector" {
+  toolset_id = "connector-toolset-%{random_suffix}"
+  location = "us"
+  app      = google_ces_app.ces_app_for_toolset.app_id
+  display_name = "Connector toolset display name updated"
+
+  connector_toolset {
+    connection = "projects/example-project/locations/us/connections/my-connection-updated"
+    auth_config {
+        oauth2_auth_code_config {
+            oauth_token = "$context.variables.connector_oauth_token_updated"
+        }
+        oauth2_jwt_bearer_config {
+            client_key = "example_client_key_updated"
+            issuer = "example_issuer_updated"
+            subject = "example_subject_updated"
+        }
+    }
+    connector_actions {
+        connection_action_id = "action-id-2"
+        input_fields = jsonencode({
+            input_key = "input_val_updated"
+        })
+        output_fields = jsonencode({
+            output_key = "output_val_updated"
+        })
+        entity_operation {
+            entity_id = "entity-2"
+            operation = "UPDATE"
+        }
     }
   }
 }

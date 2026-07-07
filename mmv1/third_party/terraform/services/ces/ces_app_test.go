@@ -80,6 +80,22 @@ resource "google_ces_app" "ces_app_basic" {
   display_name = "tf-test-my-app-%{random_suffix}"
   pinned = false
   tool_execution_mode = "SEQUENTIAL"
+  locked = false
+
+  vpc_sc_settings {
+    allowed_origins = ["https://origin1.com"]
+  }
+
+  error_handling_settings {
+    error_handling_strategy = "FAIL_BACK_TO_FALLBACK_RESPONSE"
+    fallback_response_config {
+      max_fallback_attempts = 3
+      custom_fallback_messages = ["Sorry, I encountered an error."]
+    }
+    end_session_config {
+      escalate_session = true
+    }
+  }
 
   language_settings {
     default_language_code    = "en-US"
@@ -136,6 +152,27 @@ resource "google_ces_app" "ces_app_basic" {
 
     conversation_logging_settings {
       disable_conversation_logging = true
+      retention_window = 30
+    }
+
+    evaluation_audio_recording_config {
+      gcs_bucket = "gs://fake-bucket"
+      gcs_path_prefix = "eval-recordings/"
+    }
+
+    metric_analysis_settings {
+      llm_metrics_opted_out = false
+    }
+
+    unredacted_audio_recording_config {
+      gcs_bucket = "gs://fake-bucket"
+      gcs_path_prefix = "unredacted-recordings/"
+    }
+
+    unredacted_bigquery_export_settings {
+      enabled = true
+      project = "projects/fake-project"
+      dataset = "projects/fake-project/datasets/fake_unredacted"
     }
   }
 
@@ -149,11 +186,17 @@ resource "google_ces_app" "ces_app_basic" {
       turn_level_metrics_thresholds {
         semantic_similarity_success_threshold        = 3
         overall_tool_invocation_correctness_threshold = 1.0
+        semantic_similarity_channel                  = "SEMANTIC_SIMILARITY_CHANNEL_UNSPECIFIED"
       }
       expectation_level_metrics_thresholds {
         tool_invocation_parameter_correctness_threshold = 1.0
       }
+      tool_matching_settings {
+        extra_tool_call_behavior = "EXTRA_TOOL_CALL_BEHAVIOR_UNSPECIFIED"
+      }
     }
+    golden_hallucination_metric_behavior = "GOLDEN_HALLUCINATION_METRIC_BEHAVIOR_UNSPECIFIED"
+    scenario_hallucination_metric_behavior = "SCENARIO_HALLUCINATION_METRIC_BEHAVIOR_UNSPECIFIED"
   }
 
   variable_declarations {
@@ -168,6 +211,10 @@ resource "google_ces_app" "ces_app_basic" {
       enum = ["VALUE_A", "VALUE_B"]
       ref = "#/defs/MyDefinition"
       unique_items = true
+      max_items = 10
+      maximum = 100.0
+      min_items = 1
+      minimum = 0.0
       defs = jsonencode({
         SimpleString = {
           type        = "STRING"
@@ -210,6 +257,7 @@ resource "google_ces_app" "ces_app_basic" {
     channel_type = "WEB_UI"
     disable_barge_in_control = false
     disable_dtmf = true
+    noise_suppression_level = "NOISE_SUPPRESSION_LEVEL_UNSPECIFIED"
     persona_property {
       persona = "CONCISE"
     }
@@ -218,6 +266,20 @@ resource "google_ces_app" "ces_app_basic" {
       modality = "CHAT_ONLY"
       theme    = "LIGHT"
       web_widget_title = "Help Assistant"
+      security_settings {
+        enable_public_access = true
+        enable_origin_check = true
+        allowed_origins = ["https://origin1.com"]
+        enable_recaptcha = false
+      }
+    }
+    instagram_config {
+      instagram_account_id = "insta-id-1"
+    }
+    whatsapp_config {
+      phone_number = "12345678"
+      phone_number_id = "phone-id-1"
+      waba_id = "waba-id-1"
     }
   }
 
@@ -272,6 +334,22 @@ resource "google_ces_app" "ces_app_basic" {
   display_name = "tf-test-my-app%{random_suffix}"
   pinned = true
   tool_execution_mode = "PARALLEL"
+  locked = true
+
+  vpc_sc_settings {
+    allowed_origins = ["https://origin1.com", "https://origin2.com"]
+  }
+
+  error_handling_settings {
+    error_handling_strategy = "FAIL_BACK_TO_FALLBACK_RESPONSE"
+    fallback_response_config {
+      max_fallback_attempts = 2
+      custom_fallback_messages = ["Error encountered. Please retry."]
+    }
+    end_session_config {
+      escalate_session = false
+    }
+  }
 
   language_settings {
     default_language_code    = "en-US"
@@ -328,6 +406,27 @@ resource "google_ces_app" "ces_app_basic" {
 
     conversation_logging_settings {
       disable_conversation_logging = true
+      retention_window = 60
+    }
+
+    evaluation_audio_recording_config {
+      gcs_bucket = "gs://fake-bucket-updated"
+      gcs_path_prefix = "eval-recordings-updated/"
+    }
+
+    metric_analysis_settings {
+      llm_metrics_opted_out = true
+    }
+
+    unredacted_audio_recording_config {
+      gcs_bucket = "gs://fake-bucket-updated"
+      gcs_path_prefix = "unredacted-recordings-updated/"
+    }
+
+    unredacted_bigquery_export_settings {
+      enabled = false
+      project = "projects/fake-project-updated"
+      dataset = "projects/fake-project-updated/datasets/fake_unredacted_updated"
     }
   }
 
@@ -341,11 +440,17 @@ resource "google_ces_app" "ces_app_basic" {
       turn_level_metrics_thresholds {
         semantic_similarity_success_threshold        = 4
         overall_tool_invocation_correctness_threshold = 0.1
+        semantic_similarity_channel                  = "SEMANTIC_SIMILARITY_CHANNEL_UNSPECIFIED"
       }
       expectation_level_metrics_thresholds {
         tool_invocation_parameter_correctness_threshold = 0.1
       }
+      tool_matching_settings {
+        extra_tool_call_behavior = "EXTRA_TOOL_CALL_BEHAVIOR_UNSPECIFIED"
+      }
     }
+    golden_hallucination_metric_behavior = "GOLDEN_HALLUCINATION_METRIC_BEHAVIOR_UNSPECIFIED"
+    scenario_hallucination_metric_behavior = "SCENARIO_HALLUCINATION_METRIC_BEHAVIOR_UNSPECIFIED"
   }
 
   variable_declarations {
@@ -360,6 +465,10 @@ resource "google_ces_app" "ces_app_basic" {
         enum = ["VALUE_B", "VALUE_C"]
         ref = "#/defs/MyDefinition"
         unique_items = false
+        max_items = 20
+        maximum = 200.0
+        min_items = 2
+        minimum = 10.0
         defs = jsonencode({
           SimpleString = {
             type        = "STRING"
@@ -402,6 +511,7 @@ resource "google_ces_app" "ces_app_basic" {
     channel_type = "WEB_UI"
     disable_barge_in_control = false
     disable_dtmf = true
+    noise_suppression_level = "NOISE_SUPPRESSION_LEVEL_UNSPECIFIED"
     persona_property {
       persona = "CONCISE"
     }
@@ -410,6 +520,20 @@ resource "google_ces_app" "ces_app_basic" {
       modality = "CHAT_ONLY"
       theme    = "LIGHT"
       web_widget_title = "Help Assistant"
+      security_settings {
+        enable_public_access = false
+        enable_origin_check = true
+        allowed_origins = ["https://origin1.com", "https://origin2.com"]
+        enable_recaptcha = true
+      }
+    }
+    instagram_config {
+      instagram_account_id = "insta-id-2"
+    }
+    whatsapp_config {
+      phone_number = "87654321"
+      phone_number_id = "phone-id-2"
+      waba_id = "waba-id-2"
     }
   }
 

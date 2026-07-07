@@ -211,6 +211,25 @@ resource "google_ces_example" "my-example" {
                 var2 = "val2"
             })
         }
+        chunks {
+            blob {
+                data = base64encode("This is some blob data.")
+                mime_type = "text/plain"
+            }
+        }
+        chunks {
+            default_variables = jsonencode({
+                var_key = "var_val"
+            })
+        }
+        chunks {
+            payload = jsonencode({
+                payload_key = "payload_val"
+            })
+        }
+        chunks {
+            transcript = "This is a chat transcript segment."
+        }
         role = "agent"
     }
 }
@@ -379,6 +398,25 @@ resource "google_ces_example" "my-example" {
                 var1 = "val1"
                 var2 = "val2"
             })
+        }
+        chunks {
+            blob {
+                data = base64encode("This is some blob data updated.")
+                mime_type = "text/html"
+            }
+        }
+        chunks {
+            default_variables = jsonencode({
+                var_key = "var_val_updated"
+            })
+        }
+        chunks {
+            payload = jsonencode({
+                payload_key = "payload_val_updated"
+            })
+        }
+        chunks {
+            transcript = "This is a chat transcript segment updated."
         }
         role = "agent"
     }
