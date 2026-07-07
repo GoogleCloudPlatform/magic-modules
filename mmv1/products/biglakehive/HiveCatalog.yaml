@@ -1,0 +1,117 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: HiveCatalog
+description: |
+  Hive Catalogs in Biglake Metastore
+references:
+  guides:
+    QUICKSTART_TITLE: https://docs.cloud.google.com/lakehouse/docs/about-spark-hive-metastore
+# hive/v1beta is added here instead of into the base url of the product.yaml.
+# This is because the IAM policy does not contain this prefix, so it must be separated.
+base_url: hive/v1beta/projects/{{project}}/catalogs
+# Marks the resource as beta-only. Ensure a beta version block is present in
+# provider.yaml.
+min_version: beta
+self_link: hive/v1beta/projects/{{project}}/catalogs/{{name}}
+create_url: hive/v1beta/projects/{{project}}/catalogs?hiveCatalogId={{name}}&primary_location={{primary_location}}
+update_mask: true
+update_verb: PATCH
+# The IAM policy is shared with Iceberg Catalog (biglakeiceberg).
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: GET
+  allowed_iam_role: roles/biglake.editor
+  parent_resource_attribute: name
+  base_url: v1/projects/{{project}}/catalogs/{{name}}
+  import_format:
+    - projects/{{project}}/catalogs/{{name}}
+    - '{{name}}'
+samples:
+  - name: biglake_hive_catalog
+    primary_resource_id: my_hive_catalog
+    steps:
+      - name: biglake_hive_catalog
+        resource_id_vars:
+          name: my_hive_catalog
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: PROJECT
+          USER_PROJECT_OVERRIDE: "true"
+  - name: biglake_hive_catalog_full
+    primary_resource_id: my_hive_catalog
+    steps:
+      - name: biglake_hive_catalog_full
+        resource_id_vars:
+          name: my_hive_catalog
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: PROJECT
+          USER_PROJECT_OVERRIDE: "true"
+parameters:
+  - name: name
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Name of the Hive Catalog.
+  - name: primary_location
+    type: String
+    url_param_only: true
+    immutable: true
+    required: true
+    description: |
+      The primary location for mirroring the remote catalog metadata. It must be
+      a BigLake-supported location, and it should be proximate to the remote
+      catalog's location.
+properties:
+  - name: location_uri
+    api_name: locationUri
+    type: String
+    required: true
+    description: |
+      Cloud Storage location path where the catalog data will be stored. Format: gs://bucket/path/to/catalog
+  - name: description
+    type: String
+    description: |
+      Description of the Hive catalog.
+  - name: create_time
+    api_name: createTime
+    type: String
+    description: Output only. The creation time of the catalog.
+    output: true
+  - name: update_time
+    api_name: updateTime
+    type: String
+    description: Output only. The update time of the catalog.
+    output: true
+  - name: replicas
+    type: Array
+    item_type:
+      type: NestedObject
+      properties:
+        - name: region
+          type: String
+          description: The region of the replica, e.g., `us-east1`.
+          output: true
+        - name: state
+          type: Enum
+          description: If the catalog is replicated to multiple regions, this enum describes the current state of the replica. STATE_UNSPECIFIED - The replica state is unknown. STATE_PRIMARY - The replica is the writable primary. STATE_PRIMARY_IN_PROGRESS - The replica has been recently assigned as the primary, but not all databases are writeable yet. STATE_SECONDARY - The replica is a read-only secondary replica.
+          output: true
+          enum_values:
+            - STATE_UNSPECIFIED
+            - STATE_PRIMARY
+            - STATE_PRIMARY_IN_PROGRESS
+            - STATE_SECONDARY
+    description: Output only. The replicas for the catalog metadata.
+    output: true

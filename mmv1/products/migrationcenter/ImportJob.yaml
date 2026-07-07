@@ -30,26 +30,26 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: SW1wb3J0Sm9i
+autogen_status: SW1wb3J0Sm9iQXV0b2dlblYyQWdlbnQ=
 autogen_async: true
 samples:
-  - name: 'migration_center_import_job_basic'
-    primary_resource_id: 'default'
+  - name: migration_center_import_job_basic
+    primary_resource_id: default
     steps:
-      - name: 'migration_center_import_job_basic'
+      - name: migration_center_import_job_basic
         resource_id_vars:
-          import_job_id: 'import-job-test'
-          source_id: 'source-test'
+          import_job_id: import-job-test
+          source_id: source-test
         vars:
-          display_name: 'Terraform integration test display'
-          label_value: 'value'
-      - name: 'migration_center_import_job_basic'
+          display_name: Terraform integration test display
+          label_value: value
+      - name: migration_center_import_job_basic
         resource_id_vars:
-          import_job_id: 'import-job-test'
-          source_id: 'source-test'
+          import_job_id: import-job-test
+          source_id: source-test
         vars:
-          display_name: 'Terraform integration test display updated'
-          label_value: 'value_updated'
+          display_name: Terraform integration test display updated
+          label_value: value_updated
 parameters:
   - name: location
     type: String

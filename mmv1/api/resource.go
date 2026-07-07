@@ -13,6 +13,7 @@
 package api
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/fs"
 	"log"
@@ -666,13 +667,14 @@ func (r Resource) ServiceVersion() string {
 
 func extractVersionFromBaseUrl(baseUrl string) string {
 	parts := strings.Split(baseUrl, "/")
-	// starts with v...
-	if parts[0] != "" && parts[0][0] == 'v' {
-		return parts[0]
-	}
-	// starts with /v...
-	if parts[0] == "" && parts[1][0] == 'v' {
-		return parts[1]
+	// Do not check more than 3 parts
+	// This supports just enough for a prefix before the version
+	maxParts := min(3, len(parts))
+	for i := 0; i < maxParts-1; i++ {
+		part := parts[i]
+		if versionRegexp.MatchString(part) {
+			return part
+		}
 	}
 	return ""
 }
@@ -701,6 +703,22 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	return nested
 }
 
+// appendSynthesizedProviderDefaultFields appends synthesized Type entries for "project", "zone", and "region"
+// when they appear in the given scope (a list of identifier names) but are not already present in props.
+func (r Resource) appendSynthesizedProviderDefaultFields(props []*Type, scope []string) []*Type {
+	found := map[string]bool{}
+	for _, p := range props {
+		found[google.Underscore(p.Name)] = true
+	}
+	hasField := map[string]bool{"project": r.HasProject(), "zone": r.HasZone(), "region": r.HasRegion()}
+	for _, field := range []string{"project", "zone", "region"} {
+		if slices.Contains(scope, field) && !found[field] && hasField[field] {
+			props = append(props, &Type{Name: field, Type: "string"})
+		}
+	}
+	return props
+}
+
 func (r Resource) IdentityProperties() []*Type {
 	props := make([]*Type, 0)
 	identities := r.Identity
@@ -708,20 +726,25 @@ func (r Resource) IdentityProperties() []*Type {
 		identities = nil
 	}
 	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, identities, r.BaseUrl)[0])
-	optionalValues := map[string]bool{"project": false, "zone": false, "region": false}
+	// Collapse any nested objects marked with flatten_object so that identifiers
+	// nested under them (e.g. datasetReference.datasetId -> dataset_id) are
+	// matched against the import format.
+	allProps := make([]*Type, 0)
 	for _, p := range r.AllProperties() {
-		if slices.Contains(importFormat, google.Underscore(p.Name)) {
-			props = append(props, p)
-			optionalValues[p.Name] = true
+		if p.FlattenObject {
+			allProps = google.Concat(allProps, p.RootProperties())
+		} else {
+			allProps = append(allProps, p)
 		}
 	}
 
-	hasField := map[string]bool{"project": r.HasProject(), "zone": r.HasZone(), "region": r.HasRegion()}
-	for _, field := range []string{"project", "zone", "region"} { // prevents duplicates
-		if slices.Contains(importFormat, field) && !optionalValues[field] && hasField[field] {
-			props = append(props, &Type{Name: field, Type: "string"})
+	for _, p := range allProps {
+		if slices.Contains(importFormat, google.Underscore(p.Name)) {
+			props = append(props, p)
 		}
 	}
+
+	props = r.appendSynthesizedProviderDefaultFields(props, importFormat)
 
 	if len(r.CustomCode.CustomIdentity) > 0 {
 		for _, fieldName := range r.CustomCode.CustomIdentity {
@@ -734,9 +757,10 @@ func (r Resource) IdentityProperties() []*Type {
 
 func (r Resource) ListScopeProperties() []*Type {
 	scope := r.ExtractIdentifiers(r.CollectionUrl())
-	return google.Select(r.IdentityProperties(), func(p *Type) bool {
+	props := google.Select(r.AllUserProperties(), func(p *Type) bool {
 		return slices.Contains(scope, google.Underscore(p.Name))
 	})
+	return r.appendSynthesizedProviderDefaultFields(props, scope)
 }
 
 func (r Resource) ListResultDisplayNameKeyStrings() []string {
@@ -1313,7 +1337,7 @@ func (r Resource) PackageName() string {
 // general defined timeouts, or default Timeouts
 func (r Resource) GetTimeouts() *Timeouts {
 	timeoutsFiltered := r.Timeouts
-	if timeoutsFiltered == nil {
+	if timeoutsFiltered == nil || timeoutsFiltered.IsZero() {
 		if async := r.GetAsync(); async != nil && async.Operation != nil {
 			timeoutsFiltered = async.Operation.Timeouts
 		}
@@ -1387,6 +1411,21 @@ func (r Resource) TerraformName() string {
 		return r.LegacyName
 	}
 	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
+}
+
+func (r Resource) AutogenVersion() int {
+	if r.AutogenStatus == "" {
+		return 0
+	}
+	decodedBytes, err := base64.StdEncoding.DecodeString(r.AutogenStatus)
+	if err != nil {
+		return 1
+	}
+	decoded := string(decodedBytes)
+	if strings.HasSuffix(decoded, "AutogenV2Agent") {
+		return 2
+	}
+	return 1
 }
 
 func (r Resource) ImportIdFormatsFromResource() []string {
@@ -1802,6 +1841,9 @@ func (r Resource) SamplePrimaryResourceId() string {
 			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
 		})
 	}
+	if len(samples) == 0 {
+		return ""
+	}
 	return samples[0].PrimaryResourceId
 }
 
@@ -2099,23 +2141,23 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 	}
 }
 
-// TestServiceDependencies returns a map of service names to import aliases that are required
+// TestDependencies returns a map of service names to import aliases that are required
 // by this resource's samples.
-func (r Resource) TestServiceDependencies() map[string]string {
+func (r Resource) TestDependencies() map[string]string {
 	deps := map[string]string{}
 	for _, s := range r.TestSamples() {
-		for service, alias := range s.TestServiceDependencies(r.Runtime.ResourcePrefixServiceMap) {
-			if depsAlias, ok := deps[service]; ok && alias != depsAlias {
+		for pkg, alias := range s.TestDependencies(r.Runtime.ResourcePrefixPkgMap) {
+			if depsAlias, ok := deps[pkg]; ok && alias != depsAlias {
 				if (alias == "_" && depsAlias == "") || (alias == "" && depsAlias == "_") {
-					deps[service] = ""
+					deps[pkg] = ""
 					continue
 				}
-				log.Fatalf("Conflicting aliases (%s vs %s) for service dependency %s for resource %s", depsAlias, alias, service, r.ApiName)
+				log.Fatalf("Conflicting aliases (%s vs %s) for pkg dependency %s for resource %s", depsAlias, alias, pkg, r.ApiName)
 			}
-			deps[service] = alias
+			deps[pkg] = alias
 		}
 	}
-	delete(deps, strings.ToLower(r.ProductMetadata.Name))
+	delete(deps, "services/"+strings.ToLower(r.ProductMetadata.Name))
 	return deps
 }
 

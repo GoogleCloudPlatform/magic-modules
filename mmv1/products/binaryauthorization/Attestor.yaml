@@ -34,20 +34,24 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/binaryauthorization_attestor.go.tmpl'
 include_in_tgc_next: true
-examples:
+samples:
   - name: 'binary_authorization_attestor_basic'
     primary_resource_id: 'attestor'
-    vars:
-      attestor_name: 'test-attestor'
-      note_name: 'test-attestor-note'
+    steps:
+      - name: 'binary_authorization_attestor_basic'
+        resource_id_vars:
+          attestor_name: 'test-attestor'
+          note_name: 'test-attestor-note'
   - name: 'binary_authorization_attestor_kms'
     primary_resource_id: 'attestor'
-    vars:
-      attestor_name: 'test-attestor'
-      note_name: 'test-attestor-note'
-      key_name: 'test-attestor-key'
-      keyring_name: 'test-attestor-key-ring'
     exclude_test: true
+    steps:
+      - name: 'binary_authorization_attestor_kms'
+        resource_id_vars:
+          attestor_name: 'test-attestor'
+          note_name: 'test-attestor-note'
+          key_name: 'test-attestor-key'
+          keyring_name: 'test-attestor-key-ring'
 parameters:
 properties:
   - name: 'name'

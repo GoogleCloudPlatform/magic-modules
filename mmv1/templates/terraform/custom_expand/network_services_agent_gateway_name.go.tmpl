@@ -1,0 +1,20 @@
+func expandNetworkServicesAgentGatewayName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return nil, err
+	}
+	
+	location := d.Get("location").(string)
+	name := v.(string)
+	
+	// If name is already a full resource name, return it as-is.
+	if strings.HasPrefix(name, "projects/") {
+		return name, nil
+	}
+	
+	return fmt.Sprintf("projects/%s/locations/%s/agentGateways/%s", project, location, name), nil
+}

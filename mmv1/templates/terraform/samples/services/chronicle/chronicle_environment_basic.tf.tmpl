@@ -1,0 +1,15 @@
+resource "google_chronicle_environment" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name = "MyEnvironment"
+  description = "MyEnvironment is managed with Terraform"
+  contact = "Contact"
+  contact_emails = "example@example.com"
+  contact_phone = "00000"
+  aliases_json            = jsonencode([])
+  data_access_scopes_json = jsonencode([])
+  retention_duration = 3
+
+  deletion_protection  = false
+}

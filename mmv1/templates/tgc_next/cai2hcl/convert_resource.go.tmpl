@@ -15,13 +15,24 @@
 package converters
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 )
 
-func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func ConvertResource(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]byte, error) {
+	if len(assets) == 0 {
+		return nil, nil
+	}
+
+	if len(assets) > 1 {
+		// TODO: special handling is needed
+		return nil, fmt.Errorf("multiple assets are not supported yet.")
+	}
+
+	asset := assets[0]
 	converters, ok := ConverterMap[asset.Type]
 	if !ok || len(converters) == 0 {
 		return nil, nil
@@ -67,5 +78,18 @@ func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, er
 	if converter == nil {
 		return nil, nil
 	}
-	return converter.Convert(asset)
+
+	newBlocks, err := converter.Convert(assets, options)
+	if err != nil {
+		return nil, err
+	}
+	if len(newBlocks) > 0 {
+		resBytes, err := models.HclWriteBlocks(newBlocks)
+		if err != nil {
+			return nil, err
+		}
+		return resBytes, nil
+	}
+
+	return nil, nil
 }

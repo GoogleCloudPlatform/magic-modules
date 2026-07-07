@@ -38,79 +38,90 @@ async:
     base_url: '{{op_id}}'
 autogen_async: true
 include_in_tgc_next: true
-examples:
+custom_code:
+  pre_create: templates/terraform/pre_create/dms_migration_job.go.tmpl
+  post_update: templates/terraform/post_update/dms_migration_job.go.tmpl
+samples:
   - name: database_migration_service_migration_job_mysql_to_mysql
     primary_resource_id: mysqltomysql
-    vars:
-      destination_cp: destination-cp
-      destination_csql: destination-csql
-      migration_id: my-migrationid
-      source_cp: source-cp
-      source_csql: source-csql
-      source_sqldb_cert: cert
-      source_sqldb_pass: password
-      source_sqldb_user: username
-    test_vars_overrides:
-      # for backward compatible
-      source_sqldb_cert: '"cert" + randomSuffix'
-      # for backward compatible
-      source_sqldb_pass: '"password" + randomSuffix'
-      # for backward compatible
-      source_sqldb_user: '"username" + randomSuffix'
+    steps:
+      - name: database_migration_service_migration_job_mysql_to_mysql
+        resource_id_vars:
+          destination_cp: destination-cp
+          destination_csql: destination-csql
+          migration_id: my-migrationid
+          source_cp: source-cp
+          source_csql: source-csql
+          source_sqldb_cert: cert
+          source_sqldb_pass: password
+          source_sqldb_user: username
+        test_vars_overrides:
+          # for backward compatible
+          source_sqldb_cert: '"cert" + randomSuffix'
+          # for backward compatible
+          source_sqldb_pass: '"password" + randomSuffix'
+          # for backward compatible
+          source_sqldb_user: '"username" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_postgres
     primary_resource_id: psqltopsql
-    vars:
-      destination_cp: destination-cp
-      destination_csql: destination-csql
-      migration_id: my-migrationid
-      source_cp: source-cp
-      source_csql: source-csql
-      source_sqldb_cert: cert
-      source_sqldb_pass: password
-      source_sqldb_user: username
-    test_vars_overrides:
-      # for backward compatible
-      source_sqldb_cert: '"cert" + randomSuffix'
-      # for backward compatible
-      source_sqldb_pass: '"password" + randomSuffix'
-      # for backward compatible
-      source_sqldb_user: '"username" + randomSuffix'
+    steps:
+      - name: database_migration_service_migration_job_postgres_to_postgres
+        resource_id_vars:
+          destination_cp: destination-cp
+          destination_csql: destination-csql
+          migration_id: my-migrationid
+          source_cp: source-cp
+          source_csql: source-csql
+          source_sqldb_cert: cert
+          source_sqldb_pass: password
+          source_sqldb_user: username
+        test_vars_overrides:
+          # for backward compatible
+          source_sqldb_cert: '"cert" + randomSuffix'
+          # for backward compatible
+          source_sqldb_pass: '"password" + randomSuffix'
+          # for backward compatible
+          source_sqldb_user: '"username" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_postgres_objects
     primary_resource_id: psqltopsqlobjects
-    vars:
-      destination_cp: destination-cp
-      destination_csql: destination-csql
-      migration_id: my-migrationid
-      source_cp: source-cp
-      source_csql: source-csql
-      source_sqldb_cert: cert
-      source_sqldb_pass: password
-      source_sqldb_user: username
-    test_vars_overrides:
-      # for backward compatible
-      source_sqldb_cert: '"cert" + randomSuffix'
-      # for backward compatible
-      source_sqldb_pass: '"password" + randomSuffix'
-      # for backward compatible
-      source_sqldb_user: '"username" + randomSuffix'
+    steps:
+      - name: database_migration_service_migration_job_postgres_to_postgres_objects
+        resource_id_vars:
+          destination_cp: destination-cp
+          destination_csql: destination-csql
+          migration_id: my-migrationid
+          source_cp: source-cp
+          source_csql: source-csql
+          source_sqldb_cert: cert
+          source_sqldb_pass: password
+          source_sqldb_user: username
+        test_vars_overrides:
+          # for backward compatible
+          source_sqldb_cert: '"cert" + randomSuffix'
+          # for backward compatible
+          source_sqldb_pass: '"password" + randomSuffix'
+          # for backward compatible
+          source_sqldb_user: '"username" + randomSuffix'
   - name: database_migration_service_migration_job_postgres_to_alloydb
     primary_resource_id: psqltoalloydb
-    vars:
-      destination_alloydb: destination-alloydb
-      destination_cp: destination-cp
-      migration_id: my-migrationid
-      source_cp: source-cp
-      source_csql: source-csql
-      source_sqldb_cert: cert
-      source_sqldb_pass: password
-      source_sqldb_user: username
-    test_vars_overrides:
-      # for backward compatible
-      source_sqldb_cert: '"cert" + randomSuffix'
-      # for backward compatible
-      source_sqldb_pass: '"password" + randomSuffix'
-      # for backward compatible
-      source_sqldb_user: '"username" + randomSuffix'
+    steps:
+      - name: database_migration_service_migration_job_postgres_to_alloydb
+        resource_id_vars:
+          destination_alloydb: destination-alloydb
+          destination_cp: destination-cp
+          migration_id: my-migrationid
+          source_cp: source-cp
+          source_csql: source-csql
+          source_sqldb_cert: cert
+          source_sqldb_pass: password
+          source_sqldb_user: username
+        test_vars_overrides:
+          # for backward compatible
+          source_sqldb_cert: '"cert" + randomSuffix'
+          # for backward compatible
+          source_sqldb_pass: '"password" + randomSuffix'
+          # for backward compatible
+          source_sqldb_user: '"username" + randomSuffix'
 parameters:
   - name: migrationJobId
     type: String
@@ -144,6 +155,12 @@ properties:
     type: KeyValueLabels
     description: |
       The resource labels for migration job to use to annotate any related underlying resources such as Compute Engine VMs.
+  - name: stopOnWarnings
+    type: Boolean
+    description: |
+      If set to true, will stop the Terraform apply if there are validation warnings.
+    client_side: true
+    default_value: true
   - name: state
     type: Enum
     description: |
@@ -156,6 +173,17 @@ properties:
       - COMPLETED
       - STOPPED
       - FAILED
+  - name: desiredState
+    type: Enum
+    api_name: state
+    description: |
+      The desired state of the migration job. If set to `RUNNING`, the migration job will be started.
+    client_side: true
+    default_from_api: true
+    custom_flatten: templates/terraform/custom_flatten/dms_migration_job_state.go.tmpl
+    enum_values:
+      - NOT_STARTED
+      - RUNNING
   - name: phase
     type: Enum
     description: |
@@ -254,10 +282,12 @@ properties:
       - name: isNativeLogical
         type: Boolean
         required: true
+        immutable: true
         description: |
           Whether the migration uses native logical replication.
       - name: maxAdditionalSubscriptions
         type: Integer
+        immutable: true
         description: |
           Maximum number of additional subscriptions to use for the migration job.
   - name: dumpPath

@@ -468,6 +468,7 @@ resource "google_bigquery_routine" "python_function" {
     runtime_connection = "${google_bigquery_connection.test.name}"
     runtime_version = "python-3.11"
     max_batching_rows = "10"
+    container_request_concurrency = "1"
   }
 
 }

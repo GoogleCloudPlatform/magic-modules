@@ -29,32 +29,37 @@ update_mask: true
 autogen_status: UnVsZQ==
 deletion_policy_default: "DEFAULT"
 deletion_policy_custom_docs: true
-examples:
+samples:
   - name: 'chronicle_rule_basic'
     primary_resource_id: example
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    ignore_read_extra:
-      - 'deletion_policy'
-    exclude_import_test: true
+    steps:
+      - name: 'chronicle_rule_basic'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'deletion_policy'
+        exclude_import_test: true
   - name: 'chronicle_rule_with_force_deletion'
     primary_resource_id: example
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    ignore_read_extra:
-      - 'deletion_policy'
-    exclude_import_test: true
+    steps:
+      - name: 'chronicle_rule_with_force_deletion'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'deletion_policy'
+        exclude_import_test: true
   - name: 'chronicle_rule_with_data_access_scope'
     primary_resource_id: example
-    vars:
-      data_access_scope_id: scope-name
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    exclude_import_test: true
-
+    steps:
+      - name: 'chronicle_rule_with_data_access_scope'
+        resource_id_vars:
+          data_access_scope_id: scope-name
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        exclude_import_test: true
 custom_code:
+  constants: 'templates/terraform/constants/chronicle_rule.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/chronicle_rule.go.tmpl'
-
 virtual_fields:
   - name: 'deletion_policy'
     description: |
@@ -75,7 +80,6 @@ virtual_fields:
     type: String
     # excluded from generation due to Universal Deletion Policy
     exclude: true
-
 parameters:
   - name: location
     type: String
@@ -107,6 +111,7 @@ properties:
       Rule Id is the ID of the Rule.
   - name: text
     type: String
+    diff_suppress_func: 'chronicleRuleTextDiffSuppress'
     description: |-
       The YARA-L content of the rule.
       Populated in FULL view.
@@ -172,7 +177,6 @@ properties:
     type: String
     output: true
     description: |2-
-
       Possible values:
       RULE_TYPE_UNSPECIFIED
       SINGLE_EVENT

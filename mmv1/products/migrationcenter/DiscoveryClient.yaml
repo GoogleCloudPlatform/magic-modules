@@ -30,36 +30,36 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: RGlzY292ZXJ5Q2xpZW50
+autogen_status: RGlzY292ZXJ5Q2xpZW50QXV0b2dlblYyQWdlbnQ=
 autogen_async: true
 samples:
-  - name: 'migration_center_discovery_client_basic'
-    primary_resource_id: 'default'
+  - name: migration_center_discovery_client_basic
+    primary_resource_id: default
     steps:
-      - name: 'migration_center_discovery_client_basic'
+      - name: migration_center_discovery_client_basic
         resource_id_vars:
-          discovery_client_id: 'discovery-client-test'
-          source_id: 'source-test'
-          sa_id: 'sa-test'
-          sa_id_2: 'sa-test-two'
+          discovery_client_id: discovery-client-test
+          source_id: source-test
+          sa_id: sa-test
+          sa_id_2: sa-test-two
         vars:
-          service_account: 'google_service_account.default.email'
-          display_name: 'Terraform integration test display'
-          description: 'Terraform integration test description'
-          ttl: '86400s'
-          label_value: 'value'
-      - name: 'migration_center_discovery_client_update'
+          service_account: google_service_account.default.email
+          display_name: Terraform integration test display
+          description: Terraform integration test description
+          ttl: 86400s
+          label_value: value
+      - name: migration_center_discovery_client_update
         resource_id_vars:
-          discovery_client_id: 'discovery-client-test'
-          source_id: 'source-test'
-          sa_id: 'sa-test'
-          sa_id_2: 'sa-test-two'
+          discovery_client_id: discovery-client-test
+          source_id: source-test
+          sa_id: sa-test
+          sa_id_2: sa-test-two
         vars:
-          service_account: 'google_service_account.default_2.email'
-          display_name: 'Terraform integration test display updated'
-          description: 'Terraform integration test description updated'
-          expire_time: '2030-01-02T00:00:00Z'
-          label_value: 'value_updated'
+          service_account: google_service_account.default_2.email
+          display_name: Terraform integration test display updated
+          description: Terraform integration test description updated
+          expire_time: "2030-01-02T00:00:00Z"
+          label_value: value_updated
 parameters:
   - name: location
     type: String

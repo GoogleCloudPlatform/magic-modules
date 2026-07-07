@@ -12,187 +12,246 @@
 # limitations under the License.
 
 ---
-name: 'IcebergTable'
+name: IcebergTable
 description: |
   IcebergTables are the primary objects in an IcebergCatalog.
-supports_indirect_user_project_override: true
-base_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables'
-self_link: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
-id_format: 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+base_url: iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables
+self_link: iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}
+update_url: iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}
+update_verb: POST
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: GET
+  allowed_iam_role: roles/biglake.editor
+  parent_resource_attribute: name
+  sample_config_body: templates/terraform/iam/example_config_body/biglake_iceberg_table.tf.tmpl
+  base_url: v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}
+  import_format:
+    - projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}
+    - '{{name}}'
+  additional_parent_resource_attributes:
+    - catalog
+    - namespace
+id_format: projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}
 import_format:
-  - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+  - projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}
   - '{{project}}/{{catalog}}/{{namespace}}/{{name}}'
   - '{{catalog}}/{{namespace}}/{{name}}'
-
+supports_indirect_user_project_override: true
 custom_code:
-  post_read: 'templates/terraform/post_read/biglake_iceberg_table.go.tmpl'
-  constants: 'templates/terraform/constants/biglake_iceberg_table.go.tmpl'
-  update_encoder: 'templates/terraform/encoders/biglake_iceberg_table.go.tmpl'
-
-update_verb: 'POST'
-update_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
-
-iam_policy:
-  base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
-  parent_resource_attribute: 'name'
-
-
-  additional_parent_resource_attributes:
-    - 'catalog'
-    - 'namespace'
-  method_name_separator: ":"
-  fetch_iam_policy_verb: 'GET'
-  import_format:
-    - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
-    - '{{name}}'
-  allowed_iam_role: 'roles/biglake.editor'
-  example_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_table.tf.tmpl'
-
-examples:
-  - name: 'biglake_iceberg_table_basic'
-    primary_resource_id: 'my_iceberg_table'
-    vars:
-      bucket_name: 'my-bucket'
-      namespace_id: 'my_namespace'
-      table_name: 'my_table'
-  - name: 'biglake_iceberg_table_update'
-    primary_resource_id: 'my_iceberg_table'
+  encoder: templates/terraform/encoders/biglake_iceberg_table_create.go.tmpl
+  update_encoder: templates/terraform/encoders/biglake_iceberg_table.go.tmpl
+  constants: templates/terraform/constants/biglake_iceberg_table.go.tmpl
+  pre_create: templates/terraform/pre_create/biglake_iceberg_table.go.tmpl
+  pre_read: templates/terraform/pre_read/biglake_iceberg_table.go.tmpl
+  post_read: templates/terraform/post_read/biglake_iceberg_table.go.tmpl
+  pre_update: templates/terraform/pre_update/biglake_iceberg_table.go.tmpl
+  pre_delete: templates/terraform/pre_delete/biglake_iceberg_table.go.tmpl
+samples:
+  - name: biglake_iceberg_table_basic
+    primary_resource_id: my_iceberg_table
+    steps:
+      - name: biglake_iceberg_table_basic
+        resource_id_vars:
+          bucket_name: my-bucket
+          namespace_id: my_namespace
+          table_name: my_table
+  - name: biglake_iceberg_table_sort_order
+    primary_resource_id: my_iceberg_table
+    steps:
+      - name: biglake_iceberg_table_sort_order
+        resource_id_vars:
+          bucket_name: my-bucket
+          namespace_id: my_namespace
+          table_name: my_table
+  - name: biglake_iceberg_table_update
+    primary_resource_id: my_iceberg_table
     skip_test: true
-    vars:
-      bucket_name: 'my-bucket'
-      namespace_id: 'my_namespace'
-      table_name: 'my_table'
-
+    steps:
+      - name: biglake_iceberg_table_update
+        resource_id_vars:
+          bucket_name: my-bucket
+          namespace_id: my_namespace
+          table_name: my_table
 parameters:
-  - name: 'catalog'
+  - name: catalog
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The name of the IcebergCatalog.
-  - name: 'namespace'
+  - name: namespace
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The parent namespace of the table.
-
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the table.
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the table.
     immutable: true
     default_from_api: true
-  - name: 'schema'
+  - name: schema
     type: NestedObject
     required: true
     description: |
       The schema of the table.
     properties:
-      - name: 'type'
+      - name: type
         type: String
         description: |
           The type of the schema.
-        default_value: 'struct'
-      - name: 'schema_id'
-        api_name: 'schema-id'
+        default_value: struct
+      - name: schema_id
+        api_name: schema-id
         type: Integer
         output: true
         description: |
           The unique identifier of the schema.
-      - name: 'identifier_field_ids'
-        api_name: 'identifier-field-ids'
+      - name: identifier_field_ids
+        api_name: identifier-field-ids
         type: Array
         item_type:
           type: Integer
         default_from_api: true
         description: |
           The field IDs that make up the identifier for the table.
-      - name: 'fields'
+      - name: fields
         type: Array
         required: true
         item_type:
           type: NestedObject
           properties:
-            - name: 'id'
+            - name: id
               type: Integer
               required: true
               description: |
                 The unique identifier of the field.
-            - name: 'name'
+            - name: name
               type: String
               required: true
               description: |
                 The name of the field.
-            - name: 'type'
+            - name: type
               type: String
               required: true
               description: |
                 The type of the field.
-            - name: 'required'
+            - name: required
               type: Boolean
               required: true
               send_empty_value: true
               description: |
                 Whether the field is required.
-            - name: 'doc'
+            - name: doc
               type: String
               description: |
                 A description of the field.
-  - name: 'partition_spec'
-    api_name: 'partition-spec'
+  - name: partition_spec
+    api_name: partition-spec
     type: NestedObject
     default_from_api: true
     description: |
       The partition spec of the table.
     properties:
-      - name: 'spec_id'
-        api_name: 'spec-id'
+      - name: spec_id
+        api_name: spec-id
         type: Integer
         output: true
         description: |
           The unique identifier of the partition spec.
-      - name: 'fields'
+      - name: fields
         type: Array
         required: true
         item_type:
           type: NestedObject
           properties:
-            - name: 'field_id'
-              api_name: 'field-id'
+            - name: field_id
+              api_name: field-id
               type: Integer
               output: true
               description: |
                 The unique identifier of the partition field.
-            - name: 'source_id'
-              api_name: 'source-id'
+            - name: source_id
+              api_name: source-id
               type: Integer
               required: true
               description: |
                 The source field ID for the partition field.
-            - name: 'name'
+            - name: name
               type: String
               required: true
               description: |
                 The name of the partition field.
-            - name: 'transform'
+            - name: transform
               type: String
               required: true
               description: |
                 The transform to apply to the source field.
-  - name: 'properties'
+  # The Iceberg REST Catalog API uses three different names for one concept:
+  # the create request body field is "write-order" (hence api_name), the read
+  # response returns "sort-orders" + "default-sort-order-id" (bridged in
+  # post_read), and updates use "add-sort-order"/"set-default-sort-order" commit
+  # actions. The user-facing field stays "sort_order" to match the read shape and
+  # to mirror the existing "partition_spec" field. default_from_api is set
+  # because the API always returns a sort order (order-id 0, the unsorted order)
+  # even when none is configured, which would otherwise diff against an empty
+  # config.
+  - name: sortOrder
+    api_name: write-order
+    type: NestedObject
+    default_from_api: true
+    description: |
+      The sort order of the table.
+    properties:
+      - name: orderId
+        api_name: order-id
+        type: Integer
+        output: true
+        description: |
+          The unique identifier of the sort order.
+      - name: fields
+        type: Array
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: sourceId
+              api_name: source-id
+              type: Integer
+              required: true
+              description: |
+                The source field ID for the sort field.
+            - name: transform
+              type: String
+              required: true
+              description: |
+                The transform to apply to the source field.
+            - name: direction
+              type: String
+              required: true
+              description: |
+                The sort direction for the sort field. Possible values: "asc", "desc".
+            - name: nullOrder
+              api_name: null-order
+              type: String
+              required: true
+              description: |
+                The null ordering for the sort field. Possible values: "nulls-first", "nulls-last".
+  - name: properties
     type: KeyValuePairs
     description: |
       User-defined properties for the table.
     required: false
     default_from_api: true
-    diff_suppress_func: 'icebergTablePropertiesDiffSuppress'
+    diff_suppress_func: icebergTablePropertiesDiffSuppress

@@ -21,12 +21,14 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard_id}}
-autogen_status: UWFTY29yZWNhcmQ=
-examples:
+autogen_status: UWFTY29yZWNhcmRBdXRvZ2VuVjJBZ2VudA==
+samples:
   - name: contact_center_insights_qa_scorecard_basic
     primary_resource_id: default
-    vars:
-      scorecard_id: qa-scorecard
+    steps:
+      - name: contact_center_insights_qa_scorecard_basic
+        resource_id_vars:
+          scorecard_id: qa-scorecard
 parameters:
   - name: location
     type: String
