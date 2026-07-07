@@ -78,3 +78,71 @@ resource "google_chronicle_rule" "example" {
 }
 `, context)
 }
+
+func TestAccChronicleRule_newlineDiffSuppress(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"chronicle_id":  envvar.GetTestChronicleInstanceIdFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckChronicleRuleDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccChronicleRule_newline_basic(context),
+			},
+			{
+				Config:             testAccChronicleRule_newline_update(context),
+				ExpectNonEmptyPlan: false, // Assert that NO changes are planned
+			},
+		},
+	})
+}
+
+func testAccChronicleRule_newline_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_chronicle_rule" "example" {
+ location = "us"
+ instance = "%{chronicle_id}"
+ text = <<-EOT
+             rule test_rule {
+                 meta:
+                     author = "test"
+                 events:
+                     $userid = $e.principal.user.userid
+                 match:
+                     $userid over 10m
+                 condition:
+                     $e
+             }
+         EOT
+}
+`, context)
+}
+
+func testAccChronicleRule_newline_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_chronicle_rule" "example" {
+ location = "us"
+ instance = "%{chronicle_id}"
+ text = <<-EOT
+             rule test_rule {
+                 meta:
+                     author = "test"
+                 events:
+                     $userid = $e.principal.user.userid
+                 match:
+                     $userid over 10m
+                 condition:
+                     $e
+             }
+
+
+         EOT
+}
+`, context)
+}
