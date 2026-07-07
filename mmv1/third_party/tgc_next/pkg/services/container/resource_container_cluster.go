@@ -42,21 +42,6 @@ func Rfc3339TimeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return false
 }
 
-func durationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if old == "" || new == "" {
-		return false
-	}
-	oldDuration, err := time.ParseDuration(old)
-	if err != nil {
-		return false
-	}
-	newDuration, err := time.ParseDuration(new)
-	if err != nil {
-		return false
-	}
-	return oldDuration == newDuration
-}
-
 func validateDuration(v interface{}, k string) (ws []string, errors []error) {
 	s := v.(string)
 	_, err := time.ParseDuration(s)
@@ -1252,7 +1237,7 @@ func ResourceContainerCluster() *schema.Resource {
 									"window_duration": {
 										Required:         true,
 										Type:             schema.TypeString,
-										DiffSuppressFunc: durationDiffSuppress,
+										DiffSuppressFunc: tpgresource.DurationDiffSuppress,
 										ValidateFunc:     validateDuration,
 									},
 									"window_start_time": {

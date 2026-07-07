@@ -759,7 +759,7 @@ This block also contains several computed attributes, documented below.
 * `maintenance_exclusion` - (Optional) structure documented below
 * `disruption_budget` - (Optional) structure documented below
 
-In beta, one or the other of `recurring_window`, `recurring_maintenance_window` and `daily_maintenance_window` is required if a `maintenance_policy` block is supplied.
+In beta, one of `recurring_window`, `recurring_maintenance_window` and `daily_maintenance_window` is required if a `maintenance_policy` block is supplied.
 
 * `daily_maintenance_window` - Time window specified for daily maintenance operations.
     Specify `start_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) format "HH:MM”,
