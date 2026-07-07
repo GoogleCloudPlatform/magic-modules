@@ -839,6 +839,8 @@ func TestAccCESGuardrail_cesGuardrailModelArmorExample_update(t *testing.T) {
 
 func testAccCESGuardrail_cesGuardrailModelArmorExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_ces_app" "ces_app_for_guardrail" {
   app_id = "tf-test-app-id%{random_suffix}"
   location = "us"
@@ -869,7 +871,7 @@ resource "google_ces_guardrail" "ces_guardrail_model_armor" {
   }
   enabled = true
   model_armor {
-    model_armor_template = "projects/example/locations/us/templates/template-id"
+    model_armor_template = "projects/\${data.google_project.project.project_id}/locations/us/templates/template-id"
     sanitization_scope   = "PROMPT"
     fail_open            = true
   }
@@ -879,6 +881,8 @@ resource "google_ces_guardrail" "ces_guardrail_model_armor" {
 
 func testAccCESGuardrail_cesGuardrailModelArmorExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_ces_app" "ces_app_for_guardrail" {
   app_id = "tf-test-app-id%{random_suffix}"
   location = "us"
@@ -909,7 +913,7 @@ resource "google_ces_guardrail" "ces_guardrail_model_armor" {
   }
   enabled = true
   model_armor {
-    model_armor_template = "projects/example/locations/us/templates/template-id-updated"
+    model_armor_template = "projects/\${data.google_project.project.project_id}/locations/us/templates/template-id-updated"
     sanitization_scope   = "PROMPT_AND_RESPONSE"
     fail_open            = false
   }

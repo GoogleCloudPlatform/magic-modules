@@ -97,7 +97,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_service_account_auth_config" 
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         service_account_auth_config {
@@ -158,7 +158,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_service_account_auth_config" 
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service-updated"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service-updated"
     }
     api_authentication {
         service_account_auth_config {
@@ -254,7 +254,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_oauth_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         oauth_config {
@@ -314,7 +314,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_oauth_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         oauth_config {
@@ -413,7 +413,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_service_agent_id_token_auth_c
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         service_agent_id_token_auth_config {
@@ -468,7 +468,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_service_agent_id_token_auth_c
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         service_agent_id_token_auth_config {
@@ -562,7 +562,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_api_key_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         api_key_config {
@@ -620,7 +620,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_api_key_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         api_key_config {
@@ -724,7 +724,7 @@ resource "google_ces_toolset" "ces_toolset_bearer_token_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
       bearer_token_config {
@@ -787,7 +787,7 @@ resource "google_ces_toolset" "ces_toolset_bearer_token_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
        bearer_token_config {
@@ -874,7 +874,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         service_account_auth_config {
@@ -928,7 +928,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service-updated"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service-updated"
     }
     api_authentication {
         service_account_auth_config {
@@ -1016,7 +1016,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_oauth_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         oauth_config {
@@ -1063,7 +1063,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_oauth_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         oauth_config {
@@ -1149,7 +1149,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_bearer_token_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         bearer_token_config {
@@ -1192,7 +1192,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_bearer_token_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         bearer_token_config {
@@ -1276,7 +1276,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_api_key_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         api_key_config {
@@ -1323,7 +1323,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_api_key_config" {
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         api_key_config {
@@ -1410,7 +1410,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         service_agent_id_token_auth_config {}
@@ -1454,7 +1454,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
         }
     }
     service_directory_config {
-      service = "projects/example/locations/us/namespaces/namespace/services/service"
+      service = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/namespaces/namespace/services/service"
     }
     api_authentication {
         service_agent_id_token_auth_config {}
@@ -1528,29 +1528,22 @@ resource "google_ces_toolset" "ces_toolset_connector" {
   display_name = "Connector toolset display name"
 
   connector_toolset {
-    connection = "projects/example-project/locations/us/connections/my-connection"
+    connection = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/connections/my-connection"
     auth_config {
         oauth2_auth_code_config {
             oauth_token = "$context.variables.connector_oauth_token"
         }
-        oauth2_jwt_bearer_config {
-            client_key = "example_client_key"
-            issuer = "example_issuer"
-            subject = "example_subject"
-        }
     }
     connector_actions {
         connection_action_id = "action-id-1"
-        input_fields = jsonencode({
-            input_key = "input_val"
-        })
-        output_fields = jsonencode({
-            output_key = "output_val"
-        })
+        input_fields = ["input_field_1"]
+    }
+    connector_actions {
         entity_operation {
             entity_id = "entity-1"
             operation = "CREATE"
         }
+        output_fields = ["output_field_1"]
     }
   }
 }
@@ -1582,29 +1575,24 @@ resource "google_ces_toolset" "ces_toolset_connector" {
   display_name = "Connector toolset display name updated"
 
   connector_toolset {
-    connection = "projects/example-project/locations/us/connections/my-connection-updated"
+    connection = "projects/\${google_ces_app.ces_app_for_toolset.project}/locations/us/connections/my-connection-updated"
     auth_config {
-        oauth2_auth_code_config {
-            oauth_token = "$context.variables.connector_oauth_token_updated"
-        }
         oauth2_jwt_bearer_config {
-            client_key = "example_client_key_updated"
-            issuer = "example_issuer_updated"
-            subject = "example_subject_updated"
+            client_key = "$context.variables.connector_client_key"
+            issuer = "$context.variables.connector_issuer"
+            subject = "$context.variables.connector_subject"
         }
     }
     connector_actions {
         connection_action_id = "action-id-2"
-        input_fields = jsonencode({
-            input_key = "input_val_updated"
-        })
-        output_fields = jsonencode({
-            output_key = "output_val_updated"
-        })
+        input_fields = ["input_field_1_updated"]
+    }
+    connector_actions {
         entity_operation {
             entity_id = "entity-2"
             operation = "UPDATE"
         }
+        output_fields = ["output_field_1_updated"]
     }
   }
 }

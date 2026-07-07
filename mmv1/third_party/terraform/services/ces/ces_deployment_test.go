@@ -50,6 +50,8 @@ func TestAccCESDeployment_update(t *testing.T) {
 
 func testAccCESDeployment_cesDeploymentBasicExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_ces_app" "my-app" {
     location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
@@ -62,7 +64,7 @@ resource "google_ces_deployment" "my-deployment" {
     location     = "us"
     display_name = "tf-test-my-deployment%{random_suffix}"
     app          = google_ces_app.my-app.name
-    app_version  = "projects/example-project/locations/us/apps/example-app/versions/example-version"
+    app_version  = "projects/\${data.google_project.project.project_id}/locations/us/apps/\${google_ces_app.my-app.app_id}/versions/example-version"
     channel_profile {
         channel_type = "API"
         disable_barge_in_control = true
@@ -96,7 +98,7 @@ resource "google_ces_deployment" "my-deployment" {
         version_release {
             state = "STATE_UNSPECIFIED"
             traffic_allocations {
-                app_version = "projects/example-project/locations/us/apps/example-app/versions/example-version"
+                app_version = "projects/\${data.google_project.project.project_id}/locations/us/apps/\${google_ces_app.my-app.app_id}/versions/example-version"
                 traffic_percentage = 100
                 id = "1"
             }
@@ -120,6 +122,8 @@ resource "google_ces_deployment" "my-deployment" {
 
 func testAccCESDeployment_cesDeploymentBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_ces_app" "my-app" {
     location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
@@ -132,7 +136,7 @@ resource "google_ces_deployment" "my-deployment" {
     location     = "us"
     display_name = "tf-test-my-deployment%{random_suffix}"
     app          = google_ces_app.my-app.name
-    app_version  = "projects/example-project/locations/us/apps/example-app/versions/example-version"
+    app_version  = "projects/\${data.google_project.project.project_id}/locations/us/apps/\${google_ces_app.my-app.app_id}/versions/example-version"
     channel_profile {
         channel_type = "WEB_UI"
         disable_barge_in_control = true
@@ -166,7 +170,7 @@ resource "google_ces_deployment" "my-deployment" {
         version_release {
             state = "STATE_UNSPECIFIED"
             traffic_allocations {
-                app_version = "projects/example-project/locations/us/apps/example-app/versions/example-version"
+                app_version = "projects/\${data.google_project.project.project_id}/locations/us/apps/\${google_ces_app.my-app.app_id}/versions/example-version"
                 traffic_percentage = 50
                 id = "1"
             }
