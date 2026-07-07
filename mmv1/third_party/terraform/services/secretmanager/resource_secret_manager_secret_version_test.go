@@ -1,12 +1,47 @@
 package secretmanager_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+func TestAccSecretManagerSecretVersion_importBlockWithResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecretManagerSecretVersionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSecretManagerSecretVersion_basic(context),
+			},
+			{
+				ResourceName:            "google_secret_manager_secret_version.secret-version-basic",
+				ImportState:             true,
+				ImportStateKind:         resource.ImportBlockWithResourceIdentity,
+				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version", "project"},
+				Config:                  testAccSecretManagerSecretVersion_basic(context),
+			},
+		},
+	})
+}
 
 func TestAccSecretManagerSecretVersion_update(t *testing.T) {
 	t.Parallel()
@@ -147,4 +182,41 @@ resource "google_secret_manager_secret_version" "secret-version-basic" {
 	depends_on = [google_secret_manager_secret.secret-basic]
 }
 `, context)
+}
+
+func testAccCheckSecretManagerSecretVersionDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_secret_manager_secret_version" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(secretmanager.Product, config)+"{{name}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err == nil {
+				return fmt.Errorf("SecretManagerSecretVersion still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
 }
