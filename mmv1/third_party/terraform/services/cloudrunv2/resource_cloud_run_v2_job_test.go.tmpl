@@ -11,6 +11,7 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudrunv2"
     "github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
@@ -480,12 +481,15 @@ func testAccCloudRunV2Job_cloudrunv2JobWithNfsVolume(context map[string]interfac
 func TestAccCloudRunV2Job_cloudrunv2JobWithTags(t *testing.T) {
   t.Parallel()
 
-  tagKey := acctest.BootstrapSharedTestTagKey(t, "cloud-run-tagkey")
+  org := envvar.GetTestOrgFromEnv(t)
+  tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "cloud-run-tagkey", "organizations/"+org, make(map[string]interface{}))
+  sharedTagkey := tagKeyResult["shared_tag_key"]
+  tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "cloud-run-tagvalue", sharedTagkey, org)
+
   context := map[string]interface{}{}
-  context["org"] = envvar.GetTestOrgFromEnv(t)
   context["random_suffix"] = acctest.RandString(t, 10)
-  context["tagKey"] = tagKey
-  context["tagValue"] = acctest.BootstrapSharedTestTagValue(t, "cloud-run-tagvalue", tagKey)
+  context["tag_key_id"] = tagKeyResult["name"]
+  context["tag_value_id"] = tagValueResult["name"]
 
   acctest.VcrTest(t, resource.TestCase{
     PreCheck: func() { acctest.AccTestPreCheck(t) },
@@ -512,7 +516,7 @@ resource "google_cloud_run_v2_job" "default" {
   location = "us-central1"
   deletion_protection = false
   tags = {
-    "%{org}/%{tagKey}" = "%{tagValue}"
+    "%{tag_key_id}" = "%{tag_value_id}"
   }
   template {
     template {
