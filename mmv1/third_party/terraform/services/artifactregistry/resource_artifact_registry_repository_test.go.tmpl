@@ -532,6 +532,35 @@ func TestAccArtifactRegistryRepository_remote(t *testing.T) {
 	})
 }
 
+func TestAccArtifactRegistryRepository_remoteNoCache(t *testing.T) {
+	t.Parallel()
+
+	repositoryID := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckArtifactRegistryRepositoryDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccArtifactRegistryRepository_remoteNoCache(repositoryID, "connector repo"),
+			},
+			{
+				ResourceName:      "google_artifact_registry_repository.rr-test-nocache",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccArtifactRegistryRepository_remoteNoCacheRemoved(repositoryID, "connector repo"),
+			},
+			{
+				Config:   testAccArtifactRegistryRepository_remoteNoCacheRemoved(repositoryID, "connector repo"),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
 func testAccArtifactRegistryRepository_virtual(repositoryID string, upstreamRepositoryID string, two_policies bool) string {
   policy_a := `
     upstream_policies {
@@ -587,6 +616,45 @@ resource "google_artifact_registry_repository" "rr-test" {
   description = "remote repo"
   format = "DOCKER"
   mode = "REMOTE_REPOSITORY"
+
+  remote_repository_config {
+    description = "%s"
+    docker_repository {
+      public_repository = "DOCKER_HUB"
+    }
+  }
+}
+`, repositoryID, remoteDescription)
+}
+
+func testAccArtifactRegistryRepository_remoteNoCache(repositoryID string, remoteDescription string) string {
+	return fmt.Sprintf(`
+resource "google_artifact_registry_repository" "rr-test-nocache" {
+  repository_id = "%s"
+  location      = "us-central1"
+  description   = "remote repo no cache"
+  format        = "DOCKER"
+  mode          = "REMOTE_REPOSITORY"
+
+  remote_repository_config {
+    description = "%s"
+    docker_repository {
+      public_repository = "DOCKER_HUB"
+    }
+    no_cache {}
+  }
+}
+`, repositoryID, remoteDescription)
+}
+
+func testAccArtifactRegistryRepository_remoteNoCacheRemoved(repositoryID string, remoteDescription string) string {
+	return fmt.Sprintf(`
+resource "google_artifact_registry_repository" "rr-test-nocache" {
+  repository_id = "%s"
+  location      = "us-central1"
+  description   = "remote repo no cache"
+  format        = "DOCKER"
+  mode          = "REMOTE_REPOSITORY"
 
   remote_repository_config {
     description = "%s"
