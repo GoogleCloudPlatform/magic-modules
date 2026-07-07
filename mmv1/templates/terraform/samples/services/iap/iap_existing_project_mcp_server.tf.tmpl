@@ -1,0 +1,16 @@
+resource "google_agent_registry_service" "default" {
+  location     = "us-central1"
+  service_id   = "tf-test-mcp-%{random_suffix}"
+  description  = "My MCP agent registry service for IAM test"
+  display_name = "My Service"
+
+  interfaces {
+    url              = "https://tf-test-mcp-%{random_suffix}.example.com"
+    protocol_binding = "JSONRPC"
+  }
+
+  mcp_server_spec {
+    type    = "TOOL_SPEC"
+    content = "{\"tools\":[]}"
+  }
+}
