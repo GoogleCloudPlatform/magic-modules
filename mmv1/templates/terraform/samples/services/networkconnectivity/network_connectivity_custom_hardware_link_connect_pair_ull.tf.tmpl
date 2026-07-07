@@ -1,0 +1,21 @@
+resource "google_network_connectivity_custom_hardware_instance" "instance" {
+  provider = google-beta
+  custom_hardware_instance_id = "{{index $.ResourceIdVars "resource_name"}}-inst"
+  location                    = "us-south1"
+  labels = {
+    env = "{{index $.Vars "env_label"}}"
+  }
+}
+
+resource "google_network_connectivity_custom_hardware_link_connect_pair" "pair" {
+  provider = google-beta
+  custom_hardware_link_connect_pair_id = "{{index $.ResourceIdVars "resource_name"}}"
+  location                             = "us-south1-d"
+  custom_hardware_instance             = google_network_connectivity_custom_hardware_instance.instance.id
+  link_type                            = "LINK_TYPE_ULL"
+  link_speed                           = "LINK_SPEED10_G"
+  full_diversity_disabled              = true
+  labels = {
+    env = "{{index $.Vars "env_label"}}"
+  }
+}
