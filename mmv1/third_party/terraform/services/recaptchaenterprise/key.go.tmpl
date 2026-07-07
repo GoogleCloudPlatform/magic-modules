@@ -344,9 +344,10 @@ func (r *KeyWebSettingsChallengeSettingsActionSettings) HashCode() string {
 }
 
 type KeyAndroidSettings struct {
-	empty                bool     `json:"-"`
-	AllowAllPackageNames *bool    `json:"allowAllPackageNames"`
-	AllowedPackageNames  []string `json:"allowedPackageNames"`
+	empty                                bool     `json:"-"`
+	AllowAllPackageNames                 *bool    `json:"allowAllPackageNames"`
+	AllowedPackageNames                  []string `json:"allowedPackageNames"`
+	SupportNonGoogleAppStoreDistribution *bool    `json:"supportNonGoogleAppStoreDistribution"`
 }
 
 type jsonKeyAndroidSettings KeyAndroidSettings
@@ -367,6 +368,8 @@ func (r *KeyAndroidSettings) UnmarshalJSON(data []byte) error {
 		r.AllowAllPackageNames = res.AllowAllPackageNames
 
 		r.AllowedPackageNames = res.AllowedPackageNames
+
+		r.SupportNonGoogleAppStoreDistribution = res.SupportNonGoogleAppStoreDistribution
 
 	}
 	return nil
@@ -392,10 +395,54 @@ func (r *KeyAndroidSettings) HashCode() string {
 	return fmt.Sprintf("%x", hash)
 }
 
+type KeyIosSettingsAppleDeveloperId struct {
+	empty      bool    `json:"-"`
+	KeyId      *string `json:"keyId"`
+	PrivateKey *string `json:"privateKey"`
+	TeamId     *string `json:"teamId"`
+}
+
+type jsonKeyIosSettingsAppleDeveloperId KeyIosSettingsAppleDeveloperId
+
+func (r *KeyIosSettingsAppleDeveloperId) UnmarshalJSON(data []byte) error {
+	var res jsonKeyIosSettingsAppleDeveloperId
+	if err := json.Unmarshal(data, &res); err != nil {
+		return err
+	}
+
+	var m map[string]interface{}
+	json.Unmarshal(data, &m)
+
+	if len(m) == 0 {
+		*r = *EmptyKeyIosSettingsAppleDeveloperId
+	} else {
+		r.KeyId = res.KeyId
+		r.PrivateKey = res.PrivateKey
+		r.TeamId = res.TeamId
+	}
+	return nil
+}
+
+var EmptyKeyIosSettingsAppleDeveloperId *KeyIosSettingsAppleDeveloperId = &KeyIosSettingsAppleDeveloperId{empty: true}
+
+func (r *KeyIosSettingsAppleDeveloperId) Empty() bool {
+	return r.empty
+}
+
+func (r *KeyIosSettingsAppleDeveloperId) String() string {
+	return dcl.SprintResource(r)
+}
+
+func (r *KeyIosSettingsAppleDeveloperId) HashCode() string {
+	hash := sha256.Sum256([]byte(r.String()))
+	return fmt.Sprintf("%x", hash)
+}
+
 type KeyIosSettings struct {
-	empty             bool     `json:"-"`
-	AllowAllBundleIds *bool    `json:"allowAllBundleIds"`
-	AllowedBundleIds  []string `json:"allowedBundleIds"`
+	empty             bool                            `json:"-"`
+	AllowAllBundleIds *bool                           `json:"allowAllBundleIds"`
+	AllowedBundleIds  []string                        `json:"allowedBundleIds"`
+	AppleDeveloperId  *KeyIosSettingsAppleDeveloperId `json:"appleDeveloperId"`
 }
 
 type jsonKeyIosSettings KeyIosSettings
@@ -416,6 +463,8 @@ func (r *KeyIosSettings) UnmarshalJSON(data []byte) error {
 		r.AllowAllBundleIds = res.AllowAllBundleIds
 
 		r.AllowedBundleIds = res.AllowedBundleIds
+
+		r.AppleDeveloperId = res.AppleDeveloperId
 
 	}
 	return nil
