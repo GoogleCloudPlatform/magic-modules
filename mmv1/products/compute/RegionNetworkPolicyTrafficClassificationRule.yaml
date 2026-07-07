@@ -152,7 +152,7 @@ properties:
       - name: 'type'
         type: Enum
         description: |
-          Always APPLY_TRAFFIC_CLASSIFICATION for Traffic Classification Rules.
+          Always apply_traffic_classification for Traffic Classification Rules.
         enum_values:
           - 'apply_traffic_classification'
         default_value: 'apply_traffic_classification'

@@ -70,6 +70,7 @@ resource "google_compute_region_network_policy_traffic_classification_rule" "pri
   region                  = "%{region}"
 
   action {
+    type = "apply_traffic_classification"
     traffic_class = "TC1"
     dscp_mode = "AUTO"
   }
@@ -106,6 +107,7 @@ resource "google_compute_region_network_policy_traffic_classification_rule" "pri
   region                  = "%{region}"
 
   action {
+    type = "apply_traffic_classification"
     dscp_mode = "CUSTOM"
     dscp_value = 47
     traffic_class = "TC5"
