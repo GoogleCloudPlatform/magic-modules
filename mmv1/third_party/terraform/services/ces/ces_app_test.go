@@ -152,7 +152,7 @@ resource "google_ces_app" "ces_app_basic" {
 
     conversation_logging_settings {
       disable_conversation_logging = true
-      retention_window = 30
+      retention_window = "30s"
     }
 
     evaluation_audio_recording_config {
@@ -200,51 +200,84 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   variable_declarations {
-    name        = "test"
-    description = "test"
+    name        = "var_number"
+    description = "Number variable"
     schema {
-      description = "schema description"
-      type        = "ARRAY"
-      title = ""
+      type        = "NUMBER"
+      title       = "Number Var"
       nullable    = true
-      required = ["some_property"]
-      enum = ["VALUE_A", "VALUE_B"]
-      ref = "#/defs/MyDefinition"
+      maximum     = 100.0
+      minimum     = 0.0
+      default     = jsonencode(50.0)
+    }
+  }
+
+  variable_declarations {
+    name        = "var_array"
+    description = "Array variable"
+    schema {
+      type         = "ARRAY"
+      title        = "Array Var"
       unique_items = true
-      max_items = 10
-      maximum = 100.0
-      min_items = 1
-      minimum = 0.0
+      max_items    = 10
+      min_items    = 1
+      items        = jsonencode({
+        type = "STRING"
+      })
+    }
+  }
+
+  variable_declarations {
+    name        = "var_object"
+    description = "Object variable with defs"
+    schema {
+      type = "OBJECT"
       defs = jsonencode({
-        SimpleString = {
-          type        = "STRING"
-          description = "A simple string definition"
-      }})
+        CustomType = {
+          type = "STRING"
+          enum = ["VALUE_A", "VALUE_B"]
+        }
+      })
+      properties = jsonencode({
+        custom_prop = {
+          ref = "#/defs/CustomType"
+        }
+      })
+    }
+  }
+
+  variable_declarations {
+    name        = "var_complex"
+    description = "Complex variable with anyOf"
+    schema {
+      type = "OBJECT"
       any_of = jsonencode([
         {
-          type        = "STRING"
-          description = "any_of option 1: string"
-        },])
-      default = jsonencode(
-        false)
+          type = "STRING"
+        },
+        {
+          type = "INTEGER"
+        }
+      ])
+      additional_properties = jsonencode({
+        type = "BOOLEAN"
+      })
+    }
+  }
+
+  variable_declarations {
+    name        = "var_tuple"
+    description = "Tuple-like array with prefixItems"
+    schema {
+      type = "ARRAY"
       prefix_items = jsonencode([
         {
-          type        = "ARRAY"
-          description = "prefix item 1"
-        },])
-      additional_properties = jsonencode(
+          type = "STRING"
+        },
         {
-          type        = "BOOLEAN"
-        })
-      properties = jsonencode({
-        name = {
-          type        = "STRING"
-          description = "A name"
-      }})
-      items = jsonencode({
-          type        = "ARRAY"
-          description = "An array"
-      })
+          type = "NUMBER"
+        }
+      ])
     }
   }
 
@@ -406,7 +439,7 @@ resource "google_ces_app" "ces_app_basic" {
 
     conversation_logging_settings {
       disable_conversation_logging = true
-      retention_window = 60
+      retention_window = "60s"
     }
 
     evaluation_audio_recording_config {
@@ -454,53 +487,86 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   variable_declarations {
-      name        = "test-updated"
-      description = "test-updated"
-      schema {
-        description = "schema description updated"
-        type        = "ARRAY"
-        title = "updated"
-        nullable    = true
-        required = ["some_property_updated"]
-        enum = ["VALUE_B", "VALUE_C"]
-        ref = "#/defs/MyDefinition"
-        unique_items = false
-        max_items = 20
-        maximum = 200.0
-        min_items = 2
-        minimum = 10.0
-        defs = jsonencode({
-          SimpleString = {
-            type        = "STRING"
-            description = "A simple string definition updated"
-        }})
-        any_of = jsonencode([
-          {
-            type        = "STRING"
-            description = "any_of option 1: string_updated"
-          },])
-        default = jsonencode(
-          false)
-        prefix_items = jsonencode([
-          {
-            type        = "ARRAY"
-            description = "prefix item 1 updated"
-          },])
-        additional_properties = jsonencode(
-          {
-            type        = "BOOLEAN"
-          })
-        properties = jsonencode({
-          name = {
-            type        = "STRING"
-            description = "A name updated"
-        }})
-        items = jsonencode({
-            type        = "ARRAY"
-            description = "An array updated"
-        })
-      }
+    name        = "var_number"
+    description = "Number variable updated"
+    schema {
+      type        = "NUMBER"
+      title       = "Number Var Updated"
+      nullable    = false
+      maximum     = 200.0
+      minimum     = 10.0
+      default     = jsonencode(150.0)
     }
+  }
+
+  variable_declarations {
+    name        = "var_array"
+    description = "Array variable updated"
+    schema {
+      type         = "ARRAY"
+      title        = "Array Var Updated"
+      unique_items = false
+      max_items    = 20
+      min_items    = 2
+      items        = jsonencode({
+        type = "INTEGER"
+      })
+    }
+  }
+
+  variable_declarations {
+    name        = "var_object"
+    description = "Object variable with defs updated"
+    schema {
+      type = "OBJECT"
+      defs = jsonencode({
+        CustomType = {
+          type = "STRING"
+          enum = ["VALUE_B", "VALUE_C"]
+        }
+      })
+      properties = jsonencode({
+        custom_prop = {
+          ref = "#/defs/CustomType"
+        }
+      })
+    }
+  }
+
+  variable_declarations {
+    name        = "var_complex"
+    description = "Complex variable with anyOf updated"
+    schema {
+      type = "OBJECT"
+      any_of = jsonencode([
+        {
+          type = "BOOLEAN"
+        },
+        {
+          type = "NUMBER"
+        }
+      ])
+      additional_properties = jsonencode({
+        type = "STRING"
+      })
+    }
+  }
+
+  variable_declarations {
+    name        = "var_tuple"
+    description = "Tuple-like array with prefixItems updated"
+    schema {
+      type = "ARRAY"
+      prefix_items = jsonencode([
+        {
+          type = "INTEGER"
+        },
+        {
+          type = "BOOLEAN"
+        }
+      ])
+    }
+  }
 
   global_instruction = "You are a virtual assistant for an e-commerce platform. Be friendly and helpful updated."
 
