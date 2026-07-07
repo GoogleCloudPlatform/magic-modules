@@ -15,28 +15,26 @@ description: "Run comprehensive checks (breaking changes, missing tests, and mis
 
 ## Execution Steps
 
-### 1. Make the script executable (if not already)
-Ensure the script is executable:
-```bash
-chmod +x .agents/skills/utils/check-schema-diff/scripts/check_schema_diff.sh
-```
-
-### 2. Run the Schema Diff Checker
+### 1. Run the Schema Diff Checker
 Run the script to compare your current local changes (committed or uncommitted) against the base branch (defaults to the merge base with `origin/main` or `main`):
 ```bash
 ./.agents/skills/utils/check-schema-diff/scripts/check_schema_diff.sh
 ```
 
-To compare against a specific branch or commit, pass it as an argument:
+To compare against a specific branch or commit (e.g. `HEAD` to check uncommitted changes against the current commit):
+```bash
+./.agents/skills/utils/check-schema-diff/scripts/check_schema_diff.sh HEAD
+```
+Or to compare against a base branch:
 ```bash
 ./.agents/skills/utils/check-schema-diff/scripts/check_schema_diff.sh <base_branch_or_commit>
 ```
 
-### 3. Analyze the Output
+### 2. Analyze the Output
 The tool runs three checks across both GA and Beta provider versions:
 - **Breaking Changes:** Detects backwards-incompatible schema changes.
 - **Missing Tests:** Identifies new or changed fields that are not covered by any acceptance tests.
 - **Missing Documentation:** Identifies new fields that are not documented in the resource/datasource markdown files.
 
-### 4. Verification & Handoff
+### 3. Verification & Handoff
 If any issues (breaking changes, missing tests, or missing docs) are detected, present them clearly to the user. Discuss potential mitigations and fixes before proceeding.
