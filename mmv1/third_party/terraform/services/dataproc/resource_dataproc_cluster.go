@@ -1636,9 +1636,14 @@ by Dataproc`,
 											Schema: map[string]*schema.Schema{
 												"user_service_account_mapping": {
 													Type:        schema.TypeMap,
-													Required:    true,
+													Optional:    true,
 													Elem:        &schema.Schema{Type: schema.TypeString},
 													Description: `User to service account mappings for multi-tenancy.`,
+												},
+												"enable_ssh": {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Description: `Whether to enable SSH access for the cluster.`,
 												},
 											},
 										},
@@ -2635,6 +2640,10 @@ func expandIdentityConfig(cfg map[string]interface{}) *dataproc.IdentityConfig {
 		}
 		conf.UserServiceAccountMapping = m
 	}
+	if v, ok := cfg["enable_ssh"]; ok {
+		conf.EnableSsh = v.(bool)
+		conf.ForceSendFields = append(conf.ForceSendFields, "EnableSsh")
+	}
 	return conf
 }
 
@@ -3425,6 +3434,7 @@ func flattenIdentityConfig(d *schema.ResourceData, ifg *dataproc.IdentityConfig)
 	}
 	data := map[string]interface{}{
 		"user_service_account_mapping": d.Get("cluster_config.0.security_config.0.identity_config.0.user_service_account_mapping").(map[string]interface{}),
+		"enable_ssh":                   ifg.EnableSsh,
 	}
 
 	return []map[string]interface{}{data}
