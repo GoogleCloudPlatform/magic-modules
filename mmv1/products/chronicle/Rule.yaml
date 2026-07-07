@@ -176,7 +176,7 @@ properties:
   - name: type
     type: String
     output: true
-    description: |2-
+    description: |-
       Possible values:
       RULE_TYPE_UNSPECIFIED
       SINGLE_EVENT
