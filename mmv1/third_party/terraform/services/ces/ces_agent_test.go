@@ -217,6 +217,14 @@ resource "google_ces_agent" "ces_agent_basic" {
       expression_condition {
         expression = "true"
       }
+      python_code_condition {
+        python_code = "def condition(context):\n    return True"
+      }
+    }
+    disable_planner_transfer {
+      expression_condition {
+        expression = "true"
+      }
     }
   }
 
@@ -399,6 +407,14 @@ resource "google_ces_agent" "ces_agent_basic" {
     direction = "TRANSFER_TO_AGENT"
     child_agent = google_ces_agent.ces_child_agent.id
     deterministic_transfer {
+      expression_condition {
+        expression = "false"
+      }
+      python_code_condition {
+        python_code = "def condition(context):\n    return False"
+      }
+    }
+    disable_planner_transfer {
       expression_condition {
         expression = "false"
       }
