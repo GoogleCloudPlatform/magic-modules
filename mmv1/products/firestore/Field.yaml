@@ -53,6 +53,8 @@ error_retry_predicates:
   - transport_tpg.FirestoreField409RetryUnderlyingDataChanged
 autogen_async: true
 custom_code:
+  custom_create: templates/terraform/custom_create/firestore_field.go.tmpl
+  custom_update: templates/terraform/custom_update/firestore_field.go.tmpl
   encoder: templates/terraform/encoders/firestore_field.go.tmpl
   custom_delete: templates/terraform/custom_delete/firestore_field_delete.go.tmpl
   custom_import: templates/terraform/custom_import/firestore_field.go.tmpl
@@ -135,6 +137,25 @@ samples:
           project_id: PROJECT_NAME
         test_vars_overrides:
           delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+  - name: firestore_field_skip_wait
+    primary_resource_id: skip_wait
+    steps:
+      - name: firestore_field_skip_wait
+        ignore_read_extra:
+          - skip_wait
+        resource_id_vars:
+          database_id: database-id
+          delete_protection_state: DELETE_PROTECTION_ENABLED
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+virtual_fields:
+  - name: skip_wait
+    type: Boolean
+    default_value: false
+    description: Whether to skip waiting for the field operation to complete.
+    ignore_read: true
 parameters:
 properties:
   - name: database
