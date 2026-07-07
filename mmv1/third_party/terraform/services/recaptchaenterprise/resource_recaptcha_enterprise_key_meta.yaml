@@ -13,7 +13,6 @@ fields:
     provider_only: true
   - api_field: 'iosSettings.allowAllBundleIds'
   - api_field: 'iosSettings.allowedBundleIds'
-  - api_field: 'iosSettings.appleDeveloperId'
   - api_field: 'iosSettings.appleDeveloperId.keyId'
   - api_field: 'iosSettings.appleDeveloperId.privateKey'
   - api_field: 'iosSettings.appleDeveloperId.teamId'
