@@ -530,6 +530,7 @@ properties:
             description: Whether to disable conversation logging for the sessions.
           - name: retentionWindow
             type: String
+            default_from_api: true
             description: |-
               Controls the retention window for the conversation.
               If not set, the conversation will be retained for 365 days.
