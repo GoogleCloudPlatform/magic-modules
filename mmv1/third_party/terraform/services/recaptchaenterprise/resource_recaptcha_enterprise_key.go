@@ -152,6 +152,12 @@ func RecaptchaEnterpriseKeyAndroidSettingsSchema() *schema.Resource {
 				Description: "Android package names of apps allowed to use the key. Example: 'com.companyname.appname'",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+
+			"support_non_google_app_store_distribution": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Set to true for keys that are used in an Android application that is available for download in app stores in addition to the Google Play Store.",
+			},
 		},
 	}
 }
@@ -170,6 +176,33 @@ func RecaptchaEnterpriseKeyIosSettingsSchema() *schema.Resource {
 				Optional:    true,
 				Description: "iOS bundle ids of apps allowed to use the key. Example: 'com.companyname.productname.appname'",
 				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
+			"apple_developer_id": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Apple Developer account details for the app that is protected by the reCAPTCHA Key.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Apple Developer Key ID (10-character string).",
+						},
+						"private_key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Sensitive:   true,
+							Description: "The Apple Developer Private Key (.p8 file contents).",
+						},
+						"team_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Apple Developer Team ID (10-character string).",
+						},
+					},
+				},
 			},
 		},
 	}
@@ -603,8 +636,9 @@ func expandRecaptchaEnterpriseKeyAndroidSettings(o interface{}) *KeyAndroidSetti
 	}
 	obj := objArr[0].(map[string]interface{})
 	return &KeyAndroidSettings{
-		AllowAllPackageNames: dcl.Bool(obj["allow_all_package_names"].(bool)),
-		AllowedPackageNames:  tpgdclresource.ExpandStringArray(obj["allowed_package_names"]),
+		AllowAllPackageNames:                 dcl.Bool(obj["allow_all_package_names"].(bool)),
+		AllowedPackageNames:                  tpgdclresource.ExpandStringArray(obj["allowed_package_names"]),
+		SupportNonGoogleAppStoreDistribution: dcl.Bool(obj["support_non_google_app_store_distribution"].(bool)),
 	}
 }
 
@@ -613,12 +647,42 @@ func flattenRecaptchaEnterpriseKeyAndroidSettings(obj *KeyAndroidSettings) inter
 		return nil
 	}
 	transformed := map[string]interface{}{
-		"allow_all_package_names": obj.AllowAllPackageNames,
-		"allowed_package_names":   obj.AllowedPackageNames,
+		"allow_all_package_names":                   obj.AllowAllPackageNames,
+		"allowed_package_names":                     obj.AllowedPackageNames,
+		"support_non_google_app_store_distribution": obj.SupportNonGoogleAppStoreDistribution,
 	}
 
 	return []interface{}{transformed}
 
+}
+
+func expandRecaptchaEnterpriseKeyIosSettingsAppleDeveloperId(o interface{}) *KeyIosSettingsAppleDeveloperId {
+	if o == nil {
+		return EmptyKeyIosSettingsAppleDeveloperId
+	}
+	objArr := o.([]interface{})
+	if len(objArr) == 0 || objArr[0] == nil {
+		return EmptyKeyIosSettingsAppleDeveloperId
+	}
+	obj := objArr[0].(map[string]interface{})
+	return &KeyIosSettingsAppleDeveloperId{
+		KeyId:      dcl.String(obj["key_id"].(string)),
+		PrivateKey: dcl.String(obj["private_key"].(string)),
+		TeamId:     dcl.String(obj["team_id"].(string)),
+	}
+}
+
+func flattenRecaptchaEnterpriseKeyIosSettingsAppleDeveloperId(obj *KeyIosSettingsAppleDeveloperId) interface{} {
+	if obj == nil || obj.Empty() {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"key_id":      obj.KeyId,
+		"private_key": obj.PrivateKey,
+		"team_id":     obj.TeamId,
+	}
+
+	return []interface{}{transformed}
 }
 
 func expandRecaptchaEnterpriseKeyIosSettings(o interface{}) *KeyIosSettings {
@@ -633,6 +697,7 @@ func expandRecaptchaEnterpriseKeyIosSettings(o interface{}) *KeyIosSettings {
 	return &KeyIosSettings{
 		AllowAllBundleIds: dcl.Bool(obj["allow_all_bundle_ids"].(bool)),
 		AllowedBundleIds:  tpgdclresource.ExpandStringArray(obj["allowed_bundle_ids"]),
+		AppleDeveloperId:  expandRecaptchaEnterpriseKeyIosSettingsAppleDeveloperId(obj["apple_developer_id"]),
 	}
 }
 
@@ -643,6 +708,7 @@ func flattenRecaptchaEnterpriseKeyIosSettings(obj *KeyIosSettings) interface{} {
 	transformed := map[string]interface{}{
 		"allow_all_bundle_ids": obj.AllowAllBundleIds,
 		"allowed_bundle_ids":   obj.AllowedBundleIds,
+		"apple_developer_id":   flattenRecaptchaEnterpriseKeyIosSettingsAppleDeveloperId(obj.AppleDeveloperId),
 	}
 
 	return []interface{}{transformed}
