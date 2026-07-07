@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -39,6 +40,15 @@ func Rfc3339TimeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		return true
 	}
 	return false
+}
+
+func validateDuration(v interface{}, k string) (ws []string, errors []error) {
+	s := v.(string)
+	_, err := time.ParseDuration(s)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q is not a valid duration: %s", k, err))
+	}
+	return
 }
 
 var (
@@ -1159,6 +1169,7 @@ func ResourceContainerCluster() *schema.Resource {
 							ExactlyOneOf: []string{
 								"maintenance_policy.0.daily_maintenance_window",
 								"maintenance_policy.0.recurring_window",
+								"maintenance_policy.0.recurring_maintenance_window",
 							},
 							MaxItems:    1,
 							Description: `Time window specified for daily maintenance operations. Specify start_time in RFC3339 format "HH:MM”, where HH : [00-23] and MM : [00-59] GMT.`,
@@ -1184,6 +1195,7 @@ func ResourceContainerCluster() *schema.Resource {
 							ExactlyOneOf: []string{
 								"maintenance_policy.0.daily_maintenance_window",
 								"maintenance_policy.0.recurring_window",
+								"maintenance_policy.0.recurring_maintenance_window",
 							},
 							Description: `Time window for recurring maintenance operations.`,
 							Elem: &schema.Resource{
@@ -1197,6 +1209,74 @@ func ResourceContainerCluster() *schema.Resource {
 										Type:         schema.TypeString,
 										Required:     true,
 										ValidateFunc: verify.ValidateRFC3339Date,
+									},
+									"recurrence": {
+										Type:             schema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: rfc5545RecurrenceDiffSuppress,
+									},
+								},
+							},
+						},
+						"recurring_maintenance_window": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							ExactlyOneOf: []string{
+								"maintenance_policy.0.daily_maintenance_window",
+								"maintenance_policy.0.recurring_window",
+								"maintenance_policy.0.recurring_maintenance_window",
+							},
+							Description: `Time window for recurring maintenance operations.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"delay_until": {
+										Type:     schema.TypeList,
+										Optional: true,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"year": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"month": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"day": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+											},
+										},
+									},
+									"window_duration": {
+										Required:         true,
+										Type:             schema.TypeString,
+										DiffSuppressFunc: tpgresource.DurationDiffSuppress,
+										ValidateFunc:     validateDuration,
+									},
+									"window_start_time": {
+										Required: true,
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"hours": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"minutes": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"seconds": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+											},
+										},
 									},
 									"recurrence": {
 										Type:             schema.TypeString,
