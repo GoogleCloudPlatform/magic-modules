@@ -65,7 +65,6 @@ samples:
           routine_id: 'routine_id'
   - name: 'bigquery_routine_table_type'
     primary_resource_id: 'sproc'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
     steps:
       - name: 'bigquery_routine_table_type'
         resource_id_vars:
