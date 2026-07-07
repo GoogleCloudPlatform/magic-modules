@@ -448,7 +448,6 @@ service/firebase:
   - google_firebase_storage.*
   - google_firebase_web.*
   - google_firebaserules_.*
-  - google_firebase_remote_config_.*
 service/firebaseailogic:
   team: firebase-terraform
   resources:
