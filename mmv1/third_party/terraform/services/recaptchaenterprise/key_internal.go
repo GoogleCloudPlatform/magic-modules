@@ -1890,13 +1890,11 @@ func compareKeyIosSettingsAppleDeveloperIdNewStyle(d, a interface{}, fn dcl.Fiel
 		diffs = append(diffs, ds...)
 	}
 
-	if !dcl.IsEmptyValueIndirect(actual.PrivateKey) {
-		if ds, err := dcl.Diff(desired.PrivateKey, actual.PrivateKey, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("PrivateKey")); len(ds) != 0 || err != nil {
-			if err != nil {
-				return nil, err
-			}
-			diffs = append(diffs, ds...)
+	if ds, err := dcl.Diff(desired.PrivateKey, actual.PrivateKey, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("PrivateKey")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
 		}
+		diffs = append(diffs, ds...)
 	}
 
 	if ds, err := dcl.Diff(desired.TeamId, actual.TeamId, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("TeamId")); len(ds) != 0 || err != nil {
