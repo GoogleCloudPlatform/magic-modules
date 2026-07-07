@@ -15,6 +15,7 @@
 name: SoarDomain
 description: >
   A SOAR domain designate a domain as internal, ensuring that entities associated with it are treated as organizational assets rather than external threats during ingestion.
+
 min_version: 'beta'
 references:
   guides:
@@ -29,7 +30,6 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarDomains/{{soar_domain_id}}
 autogen_status: U29hckRvbWFpbg==
-
 samples:
   - name: chronicle_soardomain_update
     primary_resource_id: example
@@ -41,7 +41,6 @@ samples:
       - name: "chronicle_soardomain_full"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
-
 parameters:
   - name: location
     type: String
