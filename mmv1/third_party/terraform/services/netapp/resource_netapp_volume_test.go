@@ -1,4 +1,3 @@
-
 package netapp_test
 
 import (
@@ -13,8 +12,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
-    "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
-    "github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -599,7 +598,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 		if !ok {
 			return fmt.Errorf("Not found: %v", vault)
 		}
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}NetappBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/backupVaults/{{"{{"}}name{{"}}"}}/backups")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{name}}/backups")
 		if err != nil {
 			return fmt.Errorf("Error : %v", err)
 		}
@@ -636,7 +635,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 			return backupDataList[i].createTime.After(backupDataList[j].createTime)
 		})
 		for i := range backupDataList {
-			baseUrl, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}NetappBasePath{{"}}"}}")
+			baseUrl, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetappBasePath}}")
 			if err != nil {
 				return fmt.Errorf("Error : %v", err)
 			}
@@ -995,7 +994,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 			"time": {},
 		},
 		Steps: []resource.TestStep{
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithoutSquashMode(context),
 			},
 			{
@@ -1004,7 +1003,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithoutSquashModeUpdate(context),
 			},
 			{
@@ -1013,7 +1012,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithRootSquashModeUpdate(context),
 			},
 			{
@@ -1022,7 +1021,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithNoRootSquashModeUpdate(context),
 			},
 			{
@@ -1040,7 +1039,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithSquashMode_mutipleExportRules(context),
 			},
 			{
@@ -1049,7 +1048,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithSquashMode_switchMutipleExportRules(context),
 			},
 			{
@@ -1434,15 +1433,15 @@ func TestSuppressSquashModeDiff(t *testing.T) {
 		New      string
 		Expected bool
 	}{
-        "Old is NO_ROOT_SQUASH, New is empty": {
-            Old: "NO_ROOT_SQUASH", New: "", Expected: true,
-        },
-        "Old is ROOT_SQUASH, New is empty": {
-            Old: "ROOT_SQUASH", New: "", Expected: true,
-        },
-        "user explicitly sets a value": {
-            Old: "NO_ROOT_SQUASH", New: "SOME_OTHER_MODE", Expected: false,
-        },
+		"Old is NO_ROOT_SQUASH, New is empty": {
+			Old: "NO_ROOT_SQUASH", New: "", Expected: true,
+		},
+		"Old is ROOT_SQUASH, New is empty": {
+			Old: "ROOT_SQUASH", New: "", Expected: true,
+		},
+		"user explicitly sets a value": {
+			Old: "NO_ROOT_SQUASH", New: "SOME_OTHER_MODE", Expected: false,
+		},
 	}
 
 	for name, tc := range cases {
@@ -1460,7 +1459,7 @@ func TestSuppressHasRootAccessDiff(t *testing.T) {
 		New      string
 		Expected bool
 	}{
-		"new is empty": {Old: "true", New: "", Expected: true},
+		"new is empty":                 {Old: "true", New: "", Expected: true},
 		"user explicitly sets a value": {Old: "true", New: "false", Expected: false},
 	}
 	for name, tc := range cases {
