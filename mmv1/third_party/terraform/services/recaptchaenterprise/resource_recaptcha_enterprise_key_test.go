@@ -63,7 +63,7 @@ func TestAccRecaptchaEnterpriseKey_IosAppleDeveloperId(t *testing.T) {
 				ResourceName:            "google_recaptcha_enterprise_key.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "ios_settings.0.apple_developer_id.0.private_key"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "ios_settings.0.apple_developer_id.0.private_key_wo", "ios_settings.0.apple_developer_id.0.private_key_wo_version"},
 			},
 			{
 				Config: testAccRecaptchaEnterpriseKey_IosAppleDeveloperIdUpdate(context),
@@ -72,7 +72,7 @@ func TestAccRecaptchaEnterpriseKey_IosAppleDeveloperId(t *testing.T) {
 				ResourceName:            "google_recaptcha_enterprise_key.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "ios_settings.0.apple_developer_id.0.private_key"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "ios_settings.0.apple_developer_id.0.private_key_wo", "ios_settings.0.apple_developer_id.0.private_key_wo_version"},
 			},
 		},
 	})
@@ -126,9 +126,10 @@ resource "google_recaptcha_enterprise_key" "primary" {
     allow_all_bundle_ids = true
     allowed_bundle_ids   = []
     apple_developer_id {
-      key_id      = "1234567890"
-      private_key = "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCg=="
-      team_id     = "0987654321"
+      key_id                 = "1234567890"
+      private_key_wo         = "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCg=="
+      private_key_wo_version = 1
+      team_id                = "0987654321"
     }
   }
 
@@ -149,9 +150,10 @@ resource "google_recaptcha_enterprise_key" "primary" {
     allow_all_bundle_ids = false
     allowed_bundle_ids   = ["com.example.ios"]
     apple_developer_id {
-      key_id      = "0987654321"
-      private_key = "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCg=="
-      team_id     = "1234567890"
+      key_id                 = "0987654321"
+      private_key_wo         = "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCg=="
+      private_key_wo_version = 2
+      team_id                = "1234567890"
     }
   }
 
