@@ -43,64 +43,56 @@ async:
 custom_code:
 include_in_tgc_next: true
 samples:
-  - name: 'network_security_security_profile_basic'
+  - name: 'network_security_security_profile_group_basic'
     primary_resource_id: 'default'
     steps:
-      - name: 'network_security_security_profile_basic'
+      - name: 'network_security_security_profile_group_basic'
         resource_id_vars:
-          resource_name: 'my-security-profile'
+          security_profile_group_name: 'sec-profile-group'
+          security_profile_name: 'sec-profile'
         test_env_vars:
           org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_overrides'
-    primary_resource_id: 'default'
-    steps:
-      - name: 'network_security_security_profile_overrides'
-        resource_id_vars:
-          resource_name: 'my-security-profile'
-        test_env_vars:
-          org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_mirroring'
-    primary_resource_id: 'default'
-    steps:
-      - name: 'network_security_security_profile_mirroring'
-        resource_id_vars:
-          resource_name: 'my-security-profile'
-          network_name: 'my-network'
-          deployment_group_id: 'my-dg'
-          endpoint_group_id: 'my-eg'
-        test_env_vars:
-          org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_intercept'
+  - name: 'network_security_security_profile_group_mirroring'
     min_version: 'beta'
     primary_resource_id: 'default'
     steps:
-      - name: 'network_security_security_profile_intercept'
+      - name: 'network_security_security_profile_group_mirroring'
         min_version: 'beta'
         resource_id_vars:
-          resource_name: 'my-security-profile'
-          network_name: 'my-network'
-          deployment_group_id: 'my-dg'
-          endpoint_group_id: 'my-eg'
+          network_name: 'network'
+          deployment_group_id: 'deployment-group'
+          endpoint_group_id: 'endpoint-group'
+          security_profile_name: 'sec-profile'
+          security_profile_group_name: 'sec-profile-group'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
         test_env_vars:
           org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_url_filtering'
+  - name: 'network_security_security_profile_group_intercept'
+    min_version: 'beta'
     primary_resource_id: 'default'
-    tgc_skip_test: The ENUM value URL_FILTERING in type field is transformed to UNKNOWN_ENUM_VALUE_ProfileType_5 in CAI asset. The reason could be that URL_FILTERING is not supported in CAI yet. Will check if the value in CAI assets will be correct later.
     steps:
-      - name: 'network_security_security_profile_url_filtering'
+      - name: 'network_security_security_profile_group_intercept'
+        min_version: 'beta'
         resource_id_vars:
-          resource_name: 'my-security-profile'
+          network_name: 'network'
+          deployment_group_id: 'deployment-group'
+          endpoint_group_id: 'endpoint-group'
+          security_profile_name: 'sec-profile'
+          security_profile_group_name: 'sec-profile-group'
+        test_vars_overrides:
+          # for backward compatible
+          network_name: '"network" + randomSuffix'
         test_env_vars:
           org_id: 'ORG_ID'
-  - name: network_security_security_profile_broker
+  - name: 'network_security_security_profile_group_url_filtering'
     primary_resource_id: 'default'
     steps:
-      - name: network_security_security_profile_broker
+      - name: 'network_security_security_profile_group_url_filtering'
         resource_id_vars:
-          resource_name: 'my-security-profile'
-          network_name: 'my-network'
-          deployment_group_id: 'my-dg'
-          endpoint_group_id: 'my-eg'
+          security_profile_group_name: 'sec-profile-group'
+          security_profile_name: 'sec-profile'
         test_env_vars:
           org_id: 'ORG_ID'
   - name: "security_profile_group_wildfire_basic"
@@ -112,7 +104,19 @@ samples:
           threat_profile_name: "threat-profile"
           profile_name: "wildfire-profile"
           profile_group_name: "profile-group"
+        vars:
           group_description: "Initial profile group description"
+          wildfire_profile: "google_network_security_security_profile.wildfire.id"
+        test_env_vars:
+          org_id: "ORG_ID"
+      - name: "security_profile_group_wildfire_basic"
+        resource_id_vars:
+          threat_profile_name: "threat-profile"
+          profile_name: "wildfire-profile"
+          profile_group_name: "profile-group"
+        vars:
+          group_description: "Updated profile group description"
+          wildfire_profile: "google_network_security_security_profile.wildfire2.id"
         test_env_vars:
           org_id: "ORG_ID"
 parameters:

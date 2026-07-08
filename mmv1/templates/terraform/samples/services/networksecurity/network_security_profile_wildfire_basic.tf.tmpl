@@ -107,19 +107,20 @@ resource "google_network_security_security_profile" "{{$.PrimaryResourceId}}" {
   type        = "WILDFIRE_ANALYSIS"
 
   wildfire_analysis_profile {
+    wildfire_realtime_lookup = {{index $.Vars "realtime_lookup"}}
     wildfire_inline_cloud_analysis_rules {
-      action = "ALERT"
+      action = "{{index $.Vars "inline_action"}}"
       custom_file_types {
         file_types = ["PE"]
       }
-      direction           = "DOWNLOAD"
+      direction           = "{{index $.Vars "inline_direction"}}"
       file_selection_mode = "CUSTOM_FILE_TYPES"
     }
     wildfire_submission_rules {
       custom_file_types {
         file_types = ["PE"]
       }
-      direction           = "UPLOAD"
+      direction           = "{{index $.Vars "submission_direction"}}"
       file_selection_mode = "CUSTOM_FILE_TYPES"
     }
   }

@@ -124,6 +124,10 @@ samples:
           ext_authority: "ext11.com"
           ext_timeout: "0.1s"
           ext_fail_open: false
+          realtime_lookup: false
+          inline_action: "ALERT"
+          inline_direction: "DOWNLOAD"
+          submission_direction: "UPLOAD"
         test_env_vars:
           project: "PROJECT_NAME"
           org_id: "ORG_ID"
@@ -141,6 +145,10 @@ samples:
           ext_authority: "ext11-updated.com"
           ext_timeout: "0.4s"
           ext_fail_open: true
+          realtime_lookup: true
+          inline_action: "DENY"
+          inline_direction: "BOTH"
+          submission_direction: "BOTH"
         test_env_vars:
           project: "PROJECT_NAME"
           org_id: "ORG_ID"
