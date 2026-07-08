@@ -24,6 +24,10 @@ self_link: '{{name}}'
 create_url: projects/{{project}}/locations/{{location}}/generators?generatorId={{generator_id}}
 update_mask: true
 update_verb: PATCH
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 custom_code:
   pre_create: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
   post_create: templates/terraform/post_create/set_computed_name.tmpl
@@ -38,6 +42,10 @@ samples:
       - name: dialogflow_generator_basic
         resource_id_vars:
           profile_name: dialogflow-profile
+  - name: dialogflow_generator_agent_coaching
+    primary_resource_id: agent_coaching_generator
+    steps:
+      - name: dialogflow_generator_agent_coaching
 parameters:
   - name: location
     type: String
@@ -63,7 +71,13 @@ properties:
       Optional. Human readable description of the generator.
   - name: summarizationContext
     type: NestedObject
-    required: true
+    exactly_one_of:
+      - summarization_context
+      - free_form_context
+      - agent_coaching_context
+      - translation_context
+      - agent_feedback_context
+      - customer_message_generation_context
     description: |
       Input of prebuilt Summarization feature.
     properties:
@@ -210,6 +224,239 @@ properties:
         type: String
         description: |
           Optional. The target language of the generated summary. The language code for conversation will be used if this field is empty. Supported 2.0 and later versions.
+  - name: freeFormContext
+    type: NestedObject
+    exactly_one_of:
+      - summarization_context
+      - free_form_context
+      - agent_coaching_context
+      - translation_context
+      - agent_feedback_context
+      - customer_message_generation_context
+    description: |
+      Free form text input to LLM.
+    properties:
+      - name: text
+        type: String
+        description: |
+          Optional. Free form text input to LLM.
+  - name: agentCoachingContext
+    type: NestedObject
+    exactly_one_of:
+      - summarization_context
+      - free_form_context
+      - agent_coaching_context
+      - translation_context
+      - agent_feedback_context
+      - customer_message_generation_context
+    description: |
+      Agent coaching context.
+    properties:
+      - name: overarchingGuidance
+        type: String
+        description: |
+          Optional. The overarching guidance for the agent coaching. This should be set only for v1.5 and later versions.
+      - name: version
+        type: String
+        description: |
+          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["2.5"].
+      - name: outputLanguageCode
+        type: String
+        description: |
+          Optional. Output language code.
+      - name: searchConfig
+        type: NestedObject
+        description: |
+          Optional. Search configuration for agent coaching. This is used for general articles search.
+        properties:
+          - name: searchEngine
+            type: String
+            description: |
+              Required. The search engine to use for the agent coaching articles/instructions. Format: `projects/{project}/locations/global/collections/default_collection/engines/{engine_id}`
+          - name: datastores
+            type: Array
+            description: |
+              Optional. The datastore ids linked to the search engine.
+            item_type:
+              type: String
+      - name: instructions
+        type: Array
+        description: |
+          Optional. Customized instructions for agent coaching.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: displayName
+              type: String
+              description: |
+                Optional. Display name for the instruction.
+            - name: displayDetails
+              type: String
+              description: |
+                Optional. The detailed description of this instruction.
+            - name: condition
+              type: String
+              description: |
+                Optional. The condition of the instruction.
+            - name: agentAction
+              type: String
+              description: |
+                Optional. The action that human agent should take.
+            - name: systemAction
+              type: String
+              description: |
+                Optional. The action that system should take.
+            - name: triggeringEvent
+              type: Enum
+              description: |
+                Optional. The trigger event of the instruction.
+              enum_values:
+                - END_OF_UTTERANCE
+                - MANUAL_CALL
+                - CUSTOMER_MESSAGE
+                - AGENT_MESSAGE
+  - name: translationContext
+    type: NestedObject
+    exactly_one_of:
+      - summarization_context
+      - free_form_context
+      - agent_coaching_context
+      - translation_context
+      - agent_feedback_context
+      - customer_message_generation_context
+    description: |
+      Translation context.
+    properties:
+      - name: agentLanguageCode
+        type: String
+        required: true
+        description: |
+          Required. The language code used by the agent. At least one of agent_language_code and customer_language_code must be English (en-US).
+      - name: customerLanguageCode
+        type: String
+        required: true
+        description: |
+          Required. The language code used by the customer. At least one of agent_language_code and customer_language_code must be English (en-US).
+      - name: version
+        type: String
+        description: |
+          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["1.0"].
+      - name: translationCustomization
+        type: NestedObject
+        description: |
+          Optional. Customized translation for specific glossaries and sentences.
+        properties:
+          - name: glossaryTerms
+            type: Array
+            description: |
+              Optional. Translation of a specific glossary in both agent and customer languages.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: agentLanguageGlossary
+                  type: String
+                  required: true
+                  description: |
+                    Required. The glossary in agent language.
+                - name: customerLanguageGlossary
+                  type: String
+                  required: true
+                  description: |
+                    Required. The glossary in customer language.
+          - name: sentenceTranslations
+            type: Array
+            description: |
+              Optional. Translation of a specific sentence in both agent and customer languages.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: agentLanguageSentence
+                  type: String
+                  required: true
+                  description: |
+                    Required. The sentence in agent language.
+                - name: customerLanguageSentence
+                  type: String
+                  required: true
+                  description: |
+                    Required. The sentence in customer language.
+  - name: agentFeedbackContext
+    type: NestedObject
+    exactly_one_of:
+      - summarization_context
+      - free_form_context
+      - agent_coaching_context
+      - translation_context
+      - agent_feedback_context
+      - customer_message_generation_context
+    description: |
+      Agent feedback context.
+    properties:
+      - name: version
+        type: String
+        description: |
+          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["1.0"].
+      - name: instructions
+        type: Array
+        description: |
+          Optional. Instructions to generate feedback from.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: displayName
+              type: String
+              description: |
+                Optional. Display name for the instruction.
+            - name: displayDetails
+              type: String
+              description: |
+                Optional. The detailed description of this instruction.
+            - name: condition
+              type: String
+              description: |
+                Optional. The condition of the instruction.
+            - name: agentAction
+              type: String
+              description: |
+                Optional. The action that human agent should take.
+            - name: systemAction
+              type: String
+              description: |
+                Optional. The action that system should take.
+            - name: triggeringEvent
+              type: Enum
+              description: |
+                Optional. The trigger event of the instruction.
+              enum_values:
+                - END_OF_UTTERANCE
+                - MANUAL_CALL
+                - CUSTOMER_MESSAGE
+                - AGENT_MESSAGE
+  - name: customerMessageGenerationContext
+    type: NestedObject
+    exactly_one_of:
+      - summarization_context
+      - free_form_context
+      - agent_coaching_context
+      - translation_context
+      - agent_feedback_context
+      - customer_message_generation_context
+    description: |
+      Customer message generation context.
+    properties:
+      - name: version
+        type: String
+        description: |
+          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["1.0"].
+      - name: customization
+        type: NestedObject
+        description: |
+          Optional. Customizations for customer message generation.
+        properties:
+          - name: scenario
+            type: String
+            description: |
+              Optional. Scenario for generating customer messages.
   - name: inferenceParameter
     type: NestedObject
     description: |
@@ -240,7 +487,18 @@ properties:
       - MANUAL_CALL
       - CUSTOMER_MESSAGE
       - AGENT_MESSAGE
+      - TOOL_CALL_COMPLETION
   - name: publishedModel
     type: String
+    exactly_one_of:
+      - published_model
+      - tuned_model
     description: |
       Optional. The published Large Language Model name. * To use the latest model version, specify the model name without version number. Example: text-bison * To use a stable model version, specify the version number as well. Example: text-bison@002.
+  - name: tunedModel
+    type: String
+    exactly_one_of:
+      - published_model
+      - tuned_model
+    description: |
+      Optional. Tuned Large Language Model endpoint from Vertex. Format: `projects/<Project Id>/locations/<Location Id>/endpoints/<Endpoint Id>`.
