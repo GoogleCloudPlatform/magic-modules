@@ -49,9 +49,179 @@ properties:
     type: NestedObject
     description: |
       Specification for OpenAPI tool.
+      This field is part of a union field `specification`: Only one of `openApiSpec`, `dataStoreSpec`, `functionSpec`, or `connectorSpec` may be set.
     properties:
+      - name: authentication
+        type: NestedObject
+        description: |
+          Optional. Authentication information required by the API.
+        properties:
+          - name: apiKeyConfig
+            type: NestedObject
+            description: |
+              Config for API key auth.
+              This field is part of a union field `auth_config`: Only one of `apiKeyConfig`, `oauthConfig`, `serviceAgentAuthConfig`, or `bearerTokenConfig` may be set.
+            properties:
+              - name: keyName
+                type: String
+                description: |
+                  The parameter name or the header name of the API key.
+                required: true
+              - name: apiKey
+                type: String
+                description: |
+                  Optional. The API key.
+                sensitive: true
+              - name: requestLocation
+                type: String
+                description: |
+                  Key location in the request.
+                required: true
+          - name: oauthConfig
+            type: NestedObject
+            description: |
+              Config for OAuth.
+              This field is part of a union field `auth_config`: Only one of `apiKeyConfig`, `oauthConfig`, `serviceAgentAuthConfig`, or `bearerTokenConfig` may be set.
+            properties:
+              - name: oauthGrantType
+                type: String
+                description: |
+                  OAuth grant types.
+                required: true
+              - name: clientId
+                type: String
+                description: |
+                  The client ID from the OAuth provider.
+                required: true
+              - name: clientSecret
+                type: String
+                description: |
+                  Optional. The client secret from the OAuth provider.
+                sensitive: true
+              - name: tokenEndpoint
+                type: String
+                description: |
+                  The token endpoint in the OAuth provider to exchange for an access token.
+                required: true
+              - name: scopes
+                type: Array
+                description: |
+                  Optional. The OAuth scopes to grant.
+                item_type:
+                  type: String
+          - name: serviceAgentAuthConfig
+            type: NestedObject
+            description: |
+              Config for service agent auth.
+              This field is part of a union field `auth_config`: Only one of `apiKeyConfig`, `oauthConfig`, `serviceAgentAuthConfig`, or `bearerTokenConfig` may be set.
+            properties:
+              - name: serviceAgentAuth
+                type: String
+                description: |
+                  Optional. Indicate the auth token type generated from the Diglogflow service agent.
+          - name: bearerTokenConfig
+            type: NestedObject
+            description: |
+              Config for bearer token auth.
+              This field is part of a union field `auth_config`: Only one of `apiKeyConfig`, `oauthConfig`, `serviceAgentAuthConfig`, or `bearerTokenConfig` may be set.
+            properties:
+              - name: token
+                type: String
+                description: |
+                  Optional. The text token appended to the text Bearer to the request Authorization header.
+                sensitive: true
       - name: textSchema
         type: String
         description: |
           Required. The OpenAPI schema in YAML or JSON format.
         required: true
+  - name: dataStoreSpec
+    type: NestedObject
+    description: |
+      Data store search tool specification.
+      This field is part of a union field `specification`: Only one of `openApiSpec`, `dataStoreSpec`, `functionSpec`, or `connectorSpec` may be set.
+    properties:
+      - name: dataStoreConnections
+        type: Array
+        description: |
+          List of data stores to search.
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: dataStoreType
+              type: String
+              description: |
+                The type of the connected data store.
+            - name: dataStore
+              type: String
+              description: |
+                The full name of the referenced data store.
+            - name: documentProcessingMode
+              type: String
+              description: |
+                The document processing mode for the data store connection.
+  - name: functionSpec
+    type: NestedObject
+    description: |
+      Client side executed function specification.
+      This field is part of a union field `specification`: Only one of `openApiSpec`, `dataStoreSpec`, `functionSpec`, or `connectorSpec` may be set.
+    properties:
+      - name: inputSchema
+        type: String
+        description: |
+          Optional. The JSON schema describing the input of the function.
+      - name: outputSchema
+        type: String
+        description: |
+          Optional. The JSON schema describing the output of the function.
+  - name: connectorSpec
+    type: NestedObject
+    description: |
+      Integration connectors tool specification.
+      This field is part of a union field `specification`: Only one of `openApiSpec`, `dataStoreSpec`, `functionSpec`, or `connectorSpec` may be set.
+    properties:
+      - name: name
+        type: String
+        required: true
+        description: |
+          The full resource name of the referenced Integration Connectors Connection.
+      - name: actions
+        type: Array
+        required: true
+        description: |
+          Actions for the tool to use.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: inputFields
+              type: Array
+              description: |
+                Entity fields to use as inputs for the operation.
+              item_type:
+                type: String
+            - name: outputFields
+              type: Array
+              description: |
+                Entity fields to return from the operation.
+              item_type:
+                type: String
+            - name: connectionActionId
+              type: String
+              description: |
+                ID of a Connection action for the tool to use.
+            - name: entityOperation
+              type: NestedObject
+              description: |
+                Entity operation configuration for the tool to use.
+              properties:
+                - name: entityId
+                  type: String
+                  description: |
+                    ID of the entity.
+                  required: true
+                - name: operation
+                  type: String
+                  description: |
+                    The operation to perform on the entity.
+                  required: true
