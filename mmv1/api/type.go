@@ -1457,7 +1457,7 @@ func (t *Type) ProviderOnly() bool {
 		return true
 	}
 
-	if t.UrlParamOnly || t.ClientSide {
+	if t.ClientSide {
 		return true
 	}
 
