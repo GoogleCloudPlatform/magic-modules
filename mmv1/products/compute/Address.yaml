@@ -36,6 +36,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/addresses'
 has_self_link: true
+generate_list_resource: true
 immutable: true
 timeouts:
   insert_minutes: 20
@@ -60,49 +61,63 @@ sweeper:
     - region: "us-east1"
     - region: "europe-west1"
     - region: "us-west1"
-examples:
+samples:
   - name: 'address_basic'
     primary_resource_id: 'ip_address'
-    vars:
-      address_name: 'my-address'
+    steps:
+      - name: 'address_basic'
+        resource_id_vars:
+          address_name: 'my-address'
   - name: 'address_with_subnetwork'
     primary_resource_id: 'internal_with_subnet_and_address'
-    vars:
-      address_name: 'my-internal-address'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnet'
+    steps:
+      - name: 'address_with_subnetwork'
+        resource_id_vars:
+          address_name: 'my-internal-address'
+          network_name: 'my-network'
+          subnetwork_name: 'my-subnet'
   - name: 'address_with_gce_endpoint'
     primary_resource_id: 'internal_with_gce_endpoint'
-    vars:
-      address_name: 'my-internal-address-'
+    steps:
+      - name: 'address_with_gce_endpoint'
+        resource_id_vars:
+          address_name: 'my-internal-address-'
   - name: 'address_with_shared_loadbalancer_vip'
     primary_resource_id: 'internal_with_shared_loadbalancer_vip'
-    vars:
-      address_name: 'my-internal-address'
     # It is almost identical to internal_with_gce_endpoint
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'address_with_shared_loadbalancer_vip'
+        resource_id_vars:
+          address_name: 'my-internal-address'
   # TODO: Remove this example when instance is supported
   - name: 'instance_with_ip'
     primary_resource_id: 'static'
-    vars:
-      address_name: 'ipv4-address'
-      instance_name: 'vm-instance'
+    steps:
+      - name: 'instance_with_ip'
+        resource_id_vars:
+          address_name: 'ipv4-address'
+          instance_name: 'vm-instance'
   - name: 'compute_address_ipsec_interconnect'
     primary_resource_id: 'ipsec-interconnect-address'
-    vars:
-      address_name: 'test-address'
-      network_name: 'test-network'
+    steps:
+      - name: 'compute_address_ipsec_interconnect'
+        resource_id_vars:
+          address_name: 'test-address'
+          network_name: 'test-network'
   - name: 'compute_address_enhanced_byoip'
     primary_resource_id: 'default'
-    vars:
-      address_name: 'test-address'
-      sub_pdp_name: 'test-sub-pdp'
-      sub_pdp_ip_cidr: '"136.124.3.120/32"'
-      root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
-    test_vars_overrides:
-      sub_pdp_ip_cidr: 'fmt.Sprintf("136.124.3.%d/32", 120 + acctest.RandIntRange(t, 0, 7))'
-      root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
     tgc_skip_test: fix later
+    steps:
+      - name: 'compute_address_enhanced_byoip'
+        resource_id_vars:
+          address_name: 'test-address'
+          sub_pdp_name: 'test-sub-pdp'
+          sub_pdp_ip_cidr: '"136.124.3.120/32"'
+          root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
+        test_vars_overrides:
+          sub_pdp_ip_cidr: 'fmt.Sprintf("136.124.3.%d/32", 120 + acctest.RandIntRange(t, 0, 7))'
+          root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
 parameters:
   - name: 'region'
     type: ResourceRef

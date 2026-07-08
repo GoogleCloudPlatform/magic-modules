@@ -43,6 +43,7 @@ async:
     resource_inside_response: true
 autogen_async: false
 custom_code:
+  constants: templates/terraform/constants/storage_anywhere_cache.go.tmpl
   custom_create: templates/terraform/custom_create/storage_anywhere_cache.go.tmpl
   custom_update: templates/terraform/custom_update/storage_anywhere_cache.go.tmpl
 samples:
@@ -71,11 +72,15 @@ properties:
     description: The zone in which the cache instance needs to be created. For example, `us-central1-a.`
   - name: admissionPolicy
     type: Enum
+    default_value: admit-on-first-miss
+    deprecation_message: '`admit-on-second-miss` is deprecated and will be removed in a future major release. The backend will ignore this attribute and treat it as `admit-on-first-miss`.'
+    description: |
+      The cache admission policy dictates whether a block should be inserted upon a cache miss.
+      Note: "admit-on-second-miss" is deprecated and will fallback to "admit-on-first-miss".
     enum_values:
       - admit-on-first-miss
       - admit-on-second-miss
-    default_value: admit-on-first-miss
-    description: The cache admission policy dictates whether a block should be inserted upon a cache miss.
+    diff_suppress_func: StorageAnywhereCacheAdmissionPolicyDiffSuppress
   - name: ttl
     type: String
     default_value: 86400s

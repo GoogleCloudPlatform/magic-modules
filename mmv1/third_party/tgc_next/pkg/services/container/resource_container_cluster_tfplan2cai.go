@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
@@ -137,6 +138,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 			EnableIntraNodeVisibility:            d.Get("enable_intranode_visibility").(bool),
 			DefaultSnatStatus:                    expandDefaultSnatStatus(d.Get("default_snat_status")),
 			DatapathProvider:                     d.Get("datapath_provider").(string),
+			DataplaneV2Config:                    expandDataplaneV2Config(d.Get("dataplane_optimization_mode")),
 			EnableCiliumClusterwideNetworkPolicy: d.Get("enable_cilium_clusterwide_network_policy").(bool),
 			PrivateIpv6GoogleAccess:              d.Get("private_ipv6_google_access").(string),
 			InTransitEncryptionConfig:            d.Get("in_transit_encryption_config").(string),
@@ -734,6 +736,35 @@ func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transp
 			},
 			ResourceVersion: resourceVersion,
 		}
+	}
+	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
+		rmw := recurringMaintenanceWindow.([]interface{})[0].(map[string]interface{})
+		duration, _ := time.ParseDuration(rmw["window_duration"].(string))
+
+		policy := &container.MaintenancePolicy{
+			Window: &container.MaintenanceWindow{
+				MaintenanceExclusions: exclusions,
+				RecurringMaintenanceWindow: &container.RecurringMaintenanceWindow{
+					WindowStartTime: &container.TimeOfDay{
+						Hours:   int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["hours"].(int)),
+						Minutes: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["minutes"].(int)),
+						Seconds: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["seconds"].(int)),
+					},
+					WindowDuration: fmt.Sprintf("%ds", int(duration.Seconds())),
+					Recurrence:     rmw["recurrence"].(string),
+				},
+			},
+			ResourceVersion: resourceVersion,
+		}
+
+		if _, ok := rmw["delay_until"]; ok && len(rmw["delay_until"].([]interface{})) == 1 {
+			policy.Window.RecurringMaintenanceWindow.DelayUntil = &container.Date{
+				Year:  int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["year"].(int)),
+				Month: int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["month"].(int)),
+				Day:   int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["day"].(int)),
+			}
+		}
+		return policy
 	}
 	return nil
 }
@@ -1715,5 +1746,18 @@ func expandNodeCreationConfig(v interface{}) *container.NodeCreationConfig {
 	config := l[0].(map[string]interface{})
 	return &container.NodeCreationConfig{
 		NodeCreationMode: config["node_creation_mode"].(string),
+	}
+}
+
+func expandDataplaneV2Config(v interface{}) *container.DataplaneV2Config {
+	if v == nil {
+		return nil
+	}
+	s := v.(string)
+	if s == "" {
+		return nil
+	}
+	return &container.DataplaneV2Config{
+		ScalabilityMode: s,
 	}
 }

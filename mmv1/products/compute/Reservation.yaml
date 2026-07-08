@@ -48,6 +48,7 @@ collection_url_key: 'items'
 include_in_tgc_next: true
 cai_resource_kind: 'Reservation'
 custom_code:
+  decoder: templates/terraform/decoders/compute_reservation_share_settings_decoder.go.tmpl
   tgc_decoder: 'templates/tgc_next/decoders/reservation.go.tmpl'
   constants: 'templates/terraform/constants/reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
@@ -60,47 +61,65 @@ sweeper:
     - zone: "us-central1-a"
     - zone: "us-west1-a"
     - zone: "us-central1-f"
-examples:
+samples:
   - name: 'reservation_basic'
     primary_resource_id: 'gce_reservation'
-    vars:
-      reservation_name: 'gce-reservation'
+    steps:
+      - name: 'reservation_basic'
+        resource_id_vars:
+          reservation_name: 'gce-reservation'
   - name: 'reservation_basic_beta'
     primary_resource_id: 'gce_reservation'
-    vars:
-      reservation_name: 'gce-reservation'
     min_version: 'beta'
+    steps:
+      - name: 'reservation_basic_beta'
+        resource_id_vars:
+          reservation_name: 'gce-reservation'
+        min_version: 'beta'
   - name: 'reservation_source_instance_template'
     primary_resource_id: 'gce_reservation_source_instance_template'
-    vars:
-      instance-template: 'instance-template'
-      reservation_name: 'gce-reservation-source-instance-template'
+    steps:
+      - name: 'reservation_source_instance_template'
+        resource_id_vars:
+          instance-template: 'instance-template'
+          reservation_name: 'gce-reservation-source-instance-template'
   - name: 'reservation_sharing_policy'
     primary_resource_id: 'gce_reservation_sharing_policy'
-    vars:
-      instance-template: 'instance-template'
-      reservation_name: 'gce-reservation-sharing-policy'
+    steps:
+      - name: 'reservation_sharing_policy'
+        resource_id_vars:
+          instance-template: 'instance-template'
+          reservation_name: 'gce-reservation-sharing-policy'
   - name: 'shared_reservation_basic'
     primary_resource_id: 'gce_reservation'
-    vars:
-      reservation_name: 'gce-shared-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
     external_providers: ["time"]
+    steps:
+      - name: 'shared_reservation_basic'
+        resource_id_vars:
+          reservation_name: 'gce-shared-reservation'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
+        ignore_read_extra:
+          - share_settings.0.project_map
   - name: 'shared_reservation_beta'
     primary_resource_id: 'gce_reservation'
-    vars:
-      reservation_name: 'gce-shared-reservation-beta'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
     min_version: 'beta'
     external_providers: ["time"]
+    steps:
+      - name: 'shared_reservation_beta'
+        resource_id_vars:
+          reservation_name: 'gce-shared-reservation-beta'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
+        min_version: 'beta'
+        ignore_read_extra:
+          - share_settings.0.projects
 virtual_fields:
   - name: 'block_names'
     type: Array
@@ -167,8 +186,8 @@ properties:
     type: NestedObject
     description: |
       The share setting for reservations.
-    ignore_read: true
     default_from_api: true
+    is_missing_in_cai: true
     properties:
       - name: 'shareType'
         type: Enum
@@ -184,6 +203,7 @@ properties:
         description: |
           A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
         key_name: 'id'
+        diff_suppress_func: 'computeReservationProjectMapDiffSuppress'
         value_type:
           type: NestedObject
           properties:
@@ -195,6 +215,7 @@ properties:
         type: Array
         description: |
           List of project IDs with which the reservation is shared.
+        diff_suppress_func: 'computeReservationProjectsDiffSuppress'
         item_type:
           type: String
         min_version: 'beta'
@@ -558,7 +579,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs
