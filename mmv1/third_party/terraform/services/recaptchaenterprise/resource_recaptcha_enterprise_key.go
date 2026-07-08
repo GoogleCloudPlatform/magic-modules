@@ -190,27 +190,17 @@ func RecaptchaEnterpriseKeyIosSettingsSchema() *schema.Resource {
 							Required:    true,
 							Description: "The Apple Developer Key ID (10-character string).",
 						},
-						"private_key": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Sensitive:    true,
-							Description:  "The Apple Developer Private Key (.p8 file contents).",
-							ExactlyOneOf: []string{"ios_settings.0.apple_developer_id.0.private_key", "ios_settings.0.apple_developer_id.0.private_key_wo"},
-						},
 						"private_key_wo": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Sensitive:    true,
-							WriteOnly:    true,
-							Description:  "The Apple Developer Private Key (.p8 file contents). Note: This property is write-only and will not be read from the API. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)",
-							ExactlyOneOf: []string{"ios_settings.0.apple_developer_id.0.private_key", "ios_settings.0.apple_developer_id.0.private_key_wo"},
-							RequiredWith: []string{"ios_settings.0.apple_developer_id.0.private_key_wo_version"},
+							Type:        schema.TypeString,
+							Required:    true,
+							Sensitive:   true,
+							WriteOnly:   true,
+							Description: "The Apple Developer Private Key (.p8 file contents). Note: This property is write-only and will not be read from the API. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)",
 						},
 						"private_key_wo_version": {
-							Type:         schema.TypeInt,
-							Optional:     true,
-							Description:  "Triggers update of private_key_wo write-only. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)",
-							RequiredWith: []string{"ios_settings.0.apple_developer_id.0.private_key_wo"},
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "Triggers update of private_key_wo write-only. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)",
 						},
 						"team_id": {
 							Type:        schema.TypeString,
@@ -681,13 +671,9 @@ func expandRecaptchaEnterpriseKeyIosSettingsAppleDeveloperId(o interface{}) *Key
 		return EmptyKeyIosSettingsAppleDeveloperId
 	}
 	obj := objArr[0].(map[string]interface{})
-	privateKey := obj["private_key"].(string)
-	if wo, ok := obj["private_key_wo"]; ok && wo != nil && wo.(string) != "" {
-		privateKey = wo.(string)
-	}
 	return &KeyIosSettingsAppleDeveloperId{
 		KeyId:      dcl.String(obj["key_id"].(string)),
-		PrivateKey: dcl.String(privateKey),
+		PrivateKey: dcl.String(obj["private_key_wo"].(string)),
 		TeamId:     dcl.String(obj["team_id"].(string)),
 	}
 }
@@ -697,9 +683,8 @@ func flattenRecaptchaEnterpriseKeyIosSettingsAppleDeveloperId(obj *KeyIosSetting
 		return nil
 	}
 	transformed := map[string]interface{}{
-		"key_id":      obj.KeyId,
-		"private_key": obj.PrivateKey,
-		"team_id":     obj.TeamId,
+		"key_id":  obj.KeyId,
+		"team_id": obj.TeamId,
 	}
 
 	return []interface{}{transformed}

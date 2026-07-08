@@ -438,7 +438,7 @@ func (r *KeyIosSettingsAppleDeveloperId) String() string {
 }
 
 func (r *KeyIosSettingsAppleDeveloperId) HashCode() string {
-	hash := sha256.Sum256([]byte(r.String()))
+	hash := sha256.Sum256([]byte(dcl.SprintResource(r)))
 	return fmt.Sprintf("%x", hash)
 }
 
