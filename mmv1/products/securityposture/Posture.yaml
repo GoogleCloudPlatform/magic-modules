@@ -127,6 +127,7 @@ properties:
     output: true
   - name: 'policySets'
     type: Array
+    is_set: true
     description: |
       List of policy sets for the posture.
     required: true
@@ -146,6 +147,7 @@ properties:
             Description of the policy set.
         - name: 'policies'
           type: Array
+          is_set: true
           description: |
             List of security policy
           required: true
