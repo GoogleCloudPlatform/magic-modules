@@ -168,7 +168,7 @@ The following environment variables are required:
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
 
-		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, gh, rnr, ctlr, vt)
+		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, "/workspace", gh, rnr, ctlr, vt)
 	},
 }
 
@@ -180,7 +180,7 @@ func listTTVRequiredEnvironmentVariables() string {
 	return result
 }
 
-func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
+func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch, workspace string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := newBranch + "-old"
 
@@ -251,13 +251,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
 
-	if hasPanics, err := handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
+	if hasPanics, err := handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, workspace, replayingResult, vcr.Replaying, gh, rnr); err != nil {
 		return fmt.Errorf("error handling panics: %w", err)
 	} else if hasPanics {
 		return nil
 	}
 
-	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
+	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha, workspace, replayingResult, vcr.Replaying, gh, rnr); err != nil {
 		return fmt.Errorf("error handling build failures: %w", err)
 	} else if hasBuildFailures {
 		return nil
@@ -293,7 +293,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
 		}
 	}
-	if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
+	if err := appendVCRResultToDiffComment(prNumber, comment, workspace, gh, rnr); err != nil {
 		return fmt.Errorf("error appending comment: %w", err)
 	}
 	if len(replayingResult.FailedTests) > 0 {
@@ -324,13 +324,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
 
-		if hasPanics, err := handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
+		if hasPanics, err := handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, workspace, recordingResult, vcr.Recording, gh, rnr); err != nil {
 			return fmt.Errorf("error handling panics: %w", err)
 		} else if hasPanics {
 			return nil
 		}
 
-		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
+		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha, workspace, recordingResult, vcr.Recording, gh, rnr); err != nil {
 			return fmt.Errorf("error handling build failures: %w", err)
 		} else if hasBuildFailures {
 			return nil
@@ -400,7 +400,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		if mentionStr != "" {
 			recordReplayComment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", recordReplayComment, mentionStr, mmCommitSha)
 		}
-		if err := appendVCRResultToDiffComment(prNumber, recordReplayComment, gh, rnr); err != nil {
+		if err := appendVCRResultToDiffComment(prNumber, recordReplayComment, workspace, gh, rnr); err != nil {
 			return fmt.Errorf("error appending comment: %w", err)
 		}
 	}
@@ -553,7 +553,7 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 	return result, testDirs, replayingErr
 }
 
-func handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
+func handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, workspace string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.Panics) > 0 {
 		comment := "> [!CAUTION]\n"
 		comment += "> **Panic occurred during VCR tests**\n>\n"
@@ -575,7 +575,7 @@ func handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha string, result vc
 		}
 		comment = header + comment
 
-		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
+		if err := appendVCRResultToDiffComment(prNumber, comment, workspace, gh, rnr); err != nil {
 			return true, fmt.Errorf("error appending comment: %v", err)
 		}
 		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStepUrl, mmCommitSha); err != nil {
@@ -586,7 +586,7 @@ func handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha string, result vc
 	return false, nil
 }
 
-func handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
+func handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha, workspace string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.BuildFailures) > 0 {
 		comment := "> [!CAUTION]\n"
 		comment += "> **Build Failure during VCR tests**\n>\n"
@@ -611,7 +611,7 @@ func handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha string, re
 		}
 		comment = header + comment
 
-		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
+		if err := appendVCRResultToDiffComment(prNumber, comment, workspace, gh, rnr); err != nil {
 			return true, fmt.Errorf("error appending comment: %v", err)
 		}
 		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStepUrl, mmCommitSha); err != nil {
@@ -654,11 +654,15 @@ func getMentions(prNumber string, gh GithubClient) string {
 // appendVCRResultToDiffComment appends content to the existing diff report comment
 // identified by the ID in /workspace/diff_comment_id.txt.
 // If the file is missing or the comment cannot be fetched, it falls back to posting a new comment.
-func appendVCRResultToDiffComment(prNumber string, content string, gh GithubClient, rnr ExecRunner) error {
+func appendVCRResultToDiffComment(prNumber string, content string, workspace string, gh GithubClient, rnr ExecRunner) error {
 	var diffComment *github.PullRequestComment
 
+	if workspace == "" {
+		workspace = "/workspace"
+	}
+
 	// Try to find by ID from file
-	if idStr, err := rnr.ReadFile("/workspace/diff_comment_id.txt"); err == nil {
+	if idStr, err := rnr.ReadFile(filepath.Join(workspace, "diff_comment_id.txt")); err == nil {
 		if id, err := strconv.Atoi(strings.TrimSpace(idStr)); err == nil {
 			if comment, err := gh.GetPullRequestComment(id); err == nil {
 				diffComment = &comment
