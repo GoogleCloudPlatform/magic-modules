@@ -40,6 +40,8 @@ samples:
     primary_resource_id: default
     steps:
       - name: region_target_tcp_proxy_basic
+        test_context_vars:
+          region: envvar.GetTestRegionFromEnv()
         resource_id_vars:
           health_check_name: health-check
           region_backend_service_name: backend-service
