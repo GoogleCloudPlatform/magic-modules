@@ -1,4 +1,3 @@
-{{ if ne $.TargetVersionName `ga` -}}
 package networkconnectivity_test
 
 import (
@@ -164,6 +163,3 @@ resource "google_network_connectivity_gateway_advertised_route" "gateway-adverti
 }
 `, context)
 }
-
-
-{{- end }}

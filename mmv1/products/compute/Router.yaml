@@ -82,11 +82,9 @@ samples:
         ignore_read_extra:
           - 'advertisedIpRanges'
   - name: 'router_ncc_gw'
-    min_version: beta
     primary_resource_id: 'foobar'
     steps:
       - name: 'router_ncc_gw'
-        min_version: beta
         resource_id_vars:
           router_name: 'my-router'
           network_name: 'net-spoke'
@@ -259,7 +257,6 @@ properties:
     type: ResourceRef
     description: |
       A URI of an NCC Gateway spoke
-    min_version: 'beta'
     immutable: true
     resource: 'Spoke'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name_network_connectivity.tmpl'
