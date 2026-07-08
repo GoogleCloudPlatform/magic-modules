@@ -46,6 +46,10 @@ samples:
     primary_resource_id: agent_coaching_generator
     steps:
       - name: dialogflow_generator_agent_coaching
+  - name: dialogflow_generator_with_tools
+    primary_resource_id: generator_with_tools
+    steps:
+      - name: dialogflow_generator_with_tools
 parameters:
   - name: location
     type: String
@@ -502,3 +506,9 @@ properties:
       - tuned_model
     description: |
       Optional. Tuned Large Language Model endpoint from Vertex. Format: `projects/<Project Id>/locations/<Location Id>/endpoints/<Endpoint Id>`.
+  - name: tools
+    type: Array
+    description: |
+      Optional. A list of tools this generator can use. Format: `projects/<Project Id>/locations/<Location Id>/tools/<Tool Id>`.
+    item_type:
+      type: String
