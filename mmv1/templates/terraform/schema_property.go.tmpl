@@ -103,6 +103,9 @@ Default value: {{ .ItemType.DefaultValue -}}
   {{ else if eq .ItemType.Type "String" -}}
       Elem: &schema.Schema{
         Type: schema.Type{{ .ItemTypeClass -}},
+        {{- if .ItemType.DiffSuppressFunc }}
+        DiffSuppressFunc: {{ .ItemType.DiffSuppressFunc }},
+        {{- end }}
         {{ template "ItemValidation" . -}}
       },
   {{ else if eq .ItemType.Type "Enum" -}}
