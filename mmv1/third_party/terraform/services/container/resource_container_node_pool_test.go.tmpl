@@ -5724,7 +5724,7 @@ resource "google_container_cluster" "cluster" {
     host_maintenance_policy {
       maintenance_interval = "PERIODIC"
     }
-    machine_type = "e2-standard-2"
+    machine_type = "n2-standard-2"
   }
   network    = "%s"
   subnetwork = "%s"
@@ -5740,7 +5740,7 @@ resource "google_container_node_pool" "np" {
     host_maintenance_policy {
       maintenance_interval = "PERIODIC"
     }
-    machine_type = "e2-standard-2"
+    machine_type = "n2-standard-2"
   }
 }
 `, cluster, networkName, subnetworkName, np)
