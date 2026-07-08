@@ -25,6 +25,7 @@ references:
     'Introduction': 'https://cloud.google.com/agentspace/docs/introduction-to-connectors-and-data-stores'
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.discoveryengine.v1alpha#dataconnectorservice'
 base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
+generate_list_resource: true
 self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
 create_url: 'projects/{{project}}/locations/{{location}}:setUpDataConnectorV2?collectionId={{collection_id}}&collectionDisplayName={{collection_display_name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'

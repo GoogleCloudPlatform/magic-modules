@@ -22,6 +22,7 @@ references:
   api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines
 docs:
 base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}
 create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines?engineId={{engine_id}}
 delete_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}

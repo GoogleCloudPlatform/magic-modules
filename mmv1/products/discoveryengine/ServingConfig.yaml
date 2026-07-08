@@ -19,6 +19,7 @@ description: |
 references:
   api: https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1/projects.locations.collections.engines.servingConfigs
 base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs/{{serving_config_id}}
 # Update API is also used as create API.
 create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs/{{serving_config_id}}?updateMask=filterControlIds,boostControlIds,synonymsControlIds,redirectControlIds,promoteControlIds
