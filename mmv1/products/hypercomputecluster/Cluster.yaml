@@ -21,6 +21,10 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
 async:
   operation:
     timeouts:

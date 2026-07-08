@@ -629,3 +629,97 @@ properties:
             type: Boolean
             description: |-
               If true, no memory revisions will be created for any requests to the Memory Bank.
+          - name: 'customizationConfigs'
+            type: Array
+            description: |-
+              Optional. Customization configs for how Agent Engine sub-resources manage context at different scope levels.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'scopeKeys'
+                  type: Array
+                  description: |-
+                    Optional. List of scope keys that this customization config applies to.
+                  item_type:
+                    type: String
+                - name: 'memoryTopics'
+                  type: Array
+                  description: |-
+                    Optional. List of topics that the memory should be associated with.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'managedMemoryTopic'
+                        type: NestedObject
+                        # Note: exactly_one_of within array elements is not enforced client-side by MM; relies on backend API server validation.
+                        exactly_one_of:
+                          - managedMemoryTopic
+                          - customMemoryTopic
+                        description: |-
+                          Optional. Managed memory topic.
+                        properties:
+                          - name: 'managedTopicEnum'
+                            type: String
+                            description: |-
+                              Managed topic enum (e.g. USER_PREFERENCES, EXPLICIT_INSTRUCTIONS).
+                      - name: 'customMemoryTopic'
+                        type: NestedObject
+                        description: |-
+                          Optional. Custom memory topic.
+                        properties:
+                          - name: 'label'
+                            type: String
+                            description: |-
+                              Label of custom memory topic.
+                          - name: 'description'
+                            type: String
+                            description: |-
+                              Description of custom memory topic.
+                - name: 'consolidationConfig'
+                  type: NestedObject
+                  description: |-
+                    Optional. Configuration for how many memory revisions Memory Bank considers when consolidating each memory candidate.
+                  properties:
+                    - name: 'revisionsPerCandidateCount'
+                      type: Integer
+                      description: |-
+                        Number of revisions to consider per candidate count.
+                - name: 'enableThirdPersonMemories'
+                  type: Boolean
+                  description: |-
+                    Optional. Generate memories in the third person if set to true.
+          - name: 'structuredMemoryConfigs'
+            type: Array
+            description: |-
+              Optional. Structured memory configurations for Agent Engine sub-resources.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'scopeKeys'
+                  type: Array
+                  description: |-
+                    Optional. List of scope keys that this structured memory config applies to.
+                  item_type:
+                    type: String
+                - name: 'schemaConfigs'
+                  type: Array
+                  description: |-
+                    Optional. List of schema configs that this structured memory config applies to.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'id'
+                        type: String
+                        description: |-
+                          Required. Unique ID identifying the memory schema.
+                        required: true
+                      - name: 'memorySchema'
+                        type: String
+                        api_name: 'schema'
+                        description: |-
+                          Optional. The memory schema defined as an OpenAPI Schema Object JSON string.
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                        validation:
+                          function: 'validation.StringIsJSON'

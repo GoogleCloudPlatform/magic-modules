@@ -161,11 +161,11 @@ In addition to the arguments listed above, the following computed attributes are
 This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
-- `create` - Default is {{$.Timeouts.InsertMinutes}} minutes.
+- `create` - Default is {{$.GetTimeouts.InsertMinutes}} minutes.
 {{- if or $.Updatable $.RootLabels }}
-- `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.
+- `update` - Default is {{$.GetTimeouts.UpdateMinutes}} minutes.
 {{- end }}
-- `delete` - Default is {{$.Timeouts.DeleteMinutes}} minutes.
+- `delete` - Default is {{$.GetTimeouts.DeleteMinutes}} minutes.
 {{ if $.ProductMetadata.Version.RepEnabled }}
 ## Regional Endpoint Policies
 

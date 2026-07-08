@@ -1,0 +1,65 @@
+resource "google_service_account" "service_account" {
+  account_id   = "{{index $.ResourceIdVars "sa_email"}}"
+  display_name = "Test Service Account for GAE"
+}
+
+resource "google_project_iam_member" "gae_api" {
+  project = google_service_account.service_account.project
+  role    = "roles/compute.networkUser"
+  member  = "serviceAccount:${google_service_account.service_account.email}"
+}
+
+resource "google_project_iam_member" "storage_viewer" {
+  project = google_service_account.service_account.project
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.service_account.email}"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name     = "{{index $.ResourceIdVars "bucket_name"}}"
+  location = "US"
+}
+
+resource "google_storage_bucket_object" "requirements" {
+  name   = "requirements.txt"
+  bucket = google_storage_bucket.bucket.name
+  source = "./test-fixtures/hello-world-flask/requirements.txt"
+}
+
+resource "google_storage_bucket_object" "main" {
+  name   = "main.py"
+  bucket = google_storage_bucket.bucket.name
+  source = "./test-fixtures/hello-world-flask/main.py"
+}
+
+resource "google_app_engine_standard_app_version" "{{$.PrimaryResourceId}}" {
+  version_id   = "v1"
+  service      = "{{index $.ResourceIdVars "service_id"}}"
+  runtime      = "python310"
+
+  deployment {
+    files {
+      name       = "main.py"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.main.name}"
+    }
+    files {
+      name       = "requirements.txt"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.requirements.name}"
+    }
+  }
+
+  entrypoint {
+    shell = "gunicorn -b :$PORT main:app"
+  }
+
+# Testing the app_engine_bundled_services field
+  app_engine_bundled_services = ["BUNDLED_SERVICE_TYPE_MAIL", "BUNDLED_SERVICE_TYPE_DATASTORE_V3"]
+
+  delete_service_on_destroy = true
+  service_account = google_service_account.service_account.email
+
+  depends_on = [
+    google_project_iam_member.gae_api,
+    google_project_iam_member.storage_viewer,
+  ]
+}
