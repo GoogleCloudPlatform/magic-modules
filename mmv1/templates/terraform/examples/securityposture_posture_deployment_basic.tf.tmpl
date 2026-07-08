@@ -26,7 +26,7 @@ resource "google_securityposture_posture" "posture_1" {
             policy_id = "resource_locations_policy"
             constraint {
                 org_policy_constraint {
-                    canned_constraint_id = "constraints/gcp.resourceLocations"
+                    canned_constraint_id = "gcp.resourceLocations"
                     policy_rules {
                         values {
                             allowed_values = ["in:us-locations"]
