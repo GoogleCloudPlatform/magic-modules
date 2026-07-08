@@ -19,7 +19,7 @@
 
 package {{ lower $.ProductMetadata.Name }}
 
-{{- $hasIntegerIdentity := false -}}
+{{ $hasIntegerIdentity := false -}}
 {{- range $id := $.IdentityProperties -}}
   {{- if eq $id.Type "Integer" -}}
     {{- $hasIntegerIdentity = true -}}
