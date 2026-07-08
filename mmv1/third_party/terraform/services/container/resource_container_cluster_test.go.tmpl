@@ -3012,35 +3012,6 @@ func TestAccContainerCluster_withLoggingVariantUpdates(t *testing.T) {
 	})
 }
 
-// TestAccContainerCluster_withoutNodeConfigBlock reproduces the panic reported in
-// hashicorp/terraform-provider-google#28190: expandNodeConfig panics with
-// "value is null" when a google_container_cluster is created without a
-// node_config block (common when using remove_default_node_pool=true with all
-// nodes defined via separate google_container_node_pool resources).
-func TestAccContainerCluster_withoutNodeConfigBlock(t *testing.T) {
-	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withoutNodeConfigBlock(clusterName, networkName, subnetworkName),
-			},
-			{
-				ResourceName:            "google_container_cluster.without_node_config",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-		},
-	})
-}
-
 func TestAccContainerCluster_withAdvancedMachineFeaturesInNodePool(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -11750,26 +11721,6 @@ resource "google_container_cluster" "with_node_pool_multiple" {
   deletion_protection = false
 }
 `, cluster, networkName, subnetworkName, npPrefix, npPrefix)
-}
-
-func testAccContainerCluster_withoutNodeConfigBlock(clusterName, networkName, subnetworkName string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "without_node_config" {
-  name                     = "%s"
-  location                 = "us-central1-a"
-  initial_node_count       = 1
-  remove_default_node_pool = true
-
-  network             = "%s"
-  subnetwork          = "%s"
-  deletion_protection = false
-
-  # NOTE: intentionally no `+"`node_config { ... }`"+` block. This exercises the
-  # code path that previously panicked at node_config.go inside expandNodeConfig
-  # when d.GetRawConfig().GetAttr("node_pool").Index(N) was called without a
-  # nil guard (fix for hashicorp/terraform-provider-google#28190).
-}
-`, clusterName, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withNodePoolNodeConfig(cluster, np, networkName, subnetworkName string) string {

@@ -1875,7 +1875,11 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		// panics with "value is null". Skip the raw-config sub-fixes below
 		// cleanly in that case. See hashicorp/terraform-provider-google#28190.
 		skipRawConfigSubFixes := false
-		if prefix != "" {
+		if rawConfigNPRoot.IsNull() || !rawConfigNPRoot.Type().IsObjectType() {
+			// No raw config at all (e.g. programmatic SDK bridges such as
+			// Crossplane's upjet-generated provider); GetAttr would panic.
+			skipRawConfigSubFixes = true
+		} else if prefix != "" {
 			parts := strings.Split(prefix, ".") // "node_pool.N." -> ["node_pool" "N", ""]
 			npIndex, err := strconv.Atoi(parts[1])
 			if err != nil { // no error return from expander
