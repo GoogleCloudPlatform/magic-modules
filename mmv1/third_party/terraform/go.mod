@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/bigquery v1.74.0
 	cloud.google.com/go/bigtable v1.47.0
 	cloud.google.com/go/datacatalog v1.26.1
-	github.com/OpenLineage/openlineage/byool/terraform/openlineage-base-resource v0.0.2-prerelease
+	github.com/OpenLineage/openlineage/client/go v1.51.0
 	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
@@ -57,7 +57,6 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.31.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.55.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.55.0 // indirect
-	github.com/OpenLineage/openlineage/client/go v1.48.0-prerelease // indirect
 	github.com/ProtonMail/go-crypto v1.4.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apache/arrow/go/v15 v15.0.2 // indirect
