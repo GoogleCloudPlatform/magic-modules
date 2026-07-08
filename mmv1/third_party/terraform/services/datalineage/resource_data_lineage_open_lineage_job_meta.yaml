@@ -1,0 +1,45 @@
+# Copyright IBM Corp. 2014, 2026
+# SPDX-License-Identifier: MPL-2.0
+resource: google_data_lineage_open_lineage_job
+generation_type: mmv1
+source_file: products/datalineage/OpenLineageJob.yaml
+api_service_name: datalineage.googleapis.com
+api_version: v1
+api_resource_type_kind: OpenLineageJob
+fields:
+    - api_field: description
+    - api_field: input.catalog.framework
+    - api_field: input.catalog.name
+    - api_field: input.catalog.type
+    - api_field: input.name
+    - api_field: input.namespace
+    - api_field: input.symlink.name
+    - api_field: input.symlink.namespace
+    - api_field: input.symlink.type
+    - api_field: knowledge_catalog.process
+    - api_field: knowledge_catalog.run
+    - api_field: name
+    - api_field: namespace
+    - api_field: output.catalog.framework
+    - api_field: output.catalog.name
+    - api_field: output.catalog.type
+    - api_field: output.column_lineage.dataset_input.field
+    - api_field: output.column_lineage.dataset_input.name
+    - api_field: output.column_lineage.dataset_input.namespace
+    - api_field: output.column_lineage.dataset_input.transformation.subtype
+    - api_field: output.column_lineage.dataset_input.transformation.type
+    - api_field: output.column_lineage.field.input.field
+    - api_field: output.column_lineage.field.input.name
+    - api_field: output.column_lineage.field.input.namespace
+    - api_field: output.column_lineage.field.input.transformation.subtype
+    - api_field: output.column_lineage.field.input.transformation.type
+    - api_field: output.column_lineage.field.name
+    - api_field: output.name
+    - api_field: output.namespace
+    - api_field: output.symlink.name
+    - api_field: output.symlink.namespace
+    - api_field: output.symlink.type
+    - api_field: owner.name
+    - api_field: owner.type
+    - field: deletion_policy
+      provider_only: true
