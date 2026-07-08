@@ -1,0 +1,13 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if hub, ok := d.GetOk("hub"); ok && hub.(string) != "" {
+        // b/509697933
+		// If a value for hub is present in the configuration/state, 
+		// force the network value to be an empty string in the Terraform state.
+		return ""
+	}
+	
+	if v == nil {
+		return ""
+	}
+	return v
+}
