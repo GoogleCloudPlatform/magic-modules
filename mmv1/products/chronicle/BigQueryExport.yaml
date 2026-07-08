@@ -37,8 +37,8 @@ samples:
         vars:
           location: 'us'
         test_env_vars:
-          chronicle_id: 'chronicle_id'
-          project_name: 'project_name'
+          chronicle_id: 'CHRONICLE_ID'
+          project_name: 'PROJECT_NAME'
   - name: chronicle_bigquery_export_full
     primary_resource_id: example
     skip_vcr: true
