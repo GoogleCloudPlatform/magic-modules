@@ -49,6 +49,8 @@ samples:
     primary_resource_id: 'default'
     steps:
       - name: 'compute_network_edge_security_service_basic'
+        vars:
+          region: 'us-east1'
         resource_id_vars:
           resource_name: 'my-edge-security-service'
         test_env_vars:
