@@ -1013,10 +1013,8 @@ properties:
     description: 'Workload identity config.'
     properties:
       - name: 'identity'
-        api_name: 'identity'
         type: String
         description: 'Identity SPIFFE id.'
       - name: 'identityCertificateEnabled'
-        api_name: 'identityCertificateEnabled'
         type: Boolean
         description: 'Specifies whether identity certificates are enabled.'
