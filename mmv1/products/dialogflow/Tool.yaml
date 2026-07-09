@@ -49,8 +49,7 @@ properties:
   - name: displayName
     type: String
     description: |
-      Required. The human-readable name of the tool, unique within the project and location.
-    required: true
+      Optional. The human-readable name of the tool, unique within the project and location.
   - name: description
     type: String
     description: |
