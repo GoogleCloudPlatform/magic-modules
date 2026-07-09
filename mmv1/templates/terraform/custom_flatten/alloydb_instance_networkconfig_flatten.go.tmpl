@@ -33,13 +33,46 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 func flattenAlloydbInstanceEmptyNetworkConfig(d *schema.ResourceData) interface{} {
 	// The API returns nil/empty for networkConfig when enable_public_ip and
 	// enable_outbound_public_ip are both false (the default). Keep the user's
-	// existing state values to avoid a permadiff.
+	// existing boolean values to avoid a permadiff.
 	return []interface{}{
 		map[string]interface{}{
-			"enable_public_ip":             d.Get("network_config.0.enable_public_ip"),
-			"enable_outbound_public_ip":    d.Get("network_config.0.enable_outbound_public_ip"),
-			"authorized_external_networks": d.Get("network_config.0.authorized_external_networks"),
-			"allocated_ip_range_override":  d.Get("network_config.0.allocated_ip_range_override"),
+			"enable_public_ip":          d.Get("network_config.0.enable_public_ip"),
+			"enable_outbound_public_ip": d.Get("network_config.0.enable_outbound_public_ip"),
 		},
 	}
+}
+
+func flattenAlloydbInstanceNetworkConfigAuthorizedExternalNetworks(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			// Do not include empty json objects coming back from the api
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"cidr_range": flattenAlloydbInstanceNetworkConfigAuthorizedExternalNetworksCidrRange(original["cidrRange"], d, config),
+		})
+	}
+	return transformed
+}
+
+func flattenAlloydbInstanceNetworkConfigAuthorizedExternalNetworksCidrRange(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAlloydbInstanceNetworkConfigEnablePublicIp(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAlloydbInstanceNetworkConfigEnableOutboundPublicIp(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAlloydbInstanceNetworkConfigAllocatedIpRangeOverride(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
 }
