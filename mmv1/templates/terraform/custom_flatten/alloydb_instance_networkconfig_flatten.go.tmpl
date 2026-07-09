@@ -1,0 +1,45 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return flattenAlloydbInstanceEmptyNetworkConfig(d)
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return flattenAlloydbInstanceEmptyNetworkConfig(d)
+	}
+	transformed := make(map[string]interface{})
+	transformed["authorized_external_networks"] =
+		flattenAlloydbInstanceNetworkConfigAuthorizedExternalNetworks(original["authorizedExternalNetworks"], d, config)
+	transformed["enable_public_ip"] =
+		flattenAlloydbInstanceNetworkConfigEnablePublicIp(original["enablePublicIp"], d, config)
+	transformed["enable_outbound_public_ip"] =
+		flattenAlloydbInstanceNetworkConfigEnableOutboundPublicIp(original["enableOutboundPublicIp"], d, config)
+	transformed["allocated_ip_range_override"] =
+		flattenAlloydbInstanceNetworkConfigAllocatedIpRangeOverride(original["allocatedIpRangeOverride"], d, config)
+	return []interface{}{transformed}
+}
+
+func flattenAlloydbInstanceEmptyNetworkConfig(d *schema.ResourceData) interface{} {
+	// The API returns nil/empty for networkConfig when enable_public_ip and
+	// enable_outbound_public_ip are both false (the default). Keep the user's
+	// existing state values to avoid a permadiff.
+	return []interface{}{
+		map[string]interface{}{
+			"enable_public_ip":             d.Get("network_config.0.enable_public_ip"),
+			"enable_outbound_public_ip":    d.Get("network_config.0.enable_outbound_public_ip"),
+			"authorized_external_networks": d.Get("network_config.0.authorized_external_networks"),
+			"allocated_ip_range_override":  d.Get("network_config.0.allocated_ip_range_override"),
+		},
+	}
+}

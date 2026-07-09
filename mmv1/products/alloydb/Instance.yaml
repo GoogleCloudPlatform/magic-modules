@@ -452,6 +452,7 @@ properties:
   - name: networkConfig
     type: NestedObject
     default_from_api: true
+    custom_flatten: templates/terraform/custom_flatten/alloydb_instance_networkconfig_flatten.go.tmpl
     description: |
       Instance level network configuration.
     properties:
@@ -471,12 +472,16 @@ properties:
               description: CIDR range for one authorized network of the instance.
       - name: enablePublicIp
         type: Boolean
+        send_empty_value: true
+        default_from_api: true
         description: |
           Enabling public ip for the instance. If a user wishes to disable this,
           please also clear the list of the authorized external networks set on
           the same instance.
       - name: enableOutboundPublicIp
         type: Boolean
+        send_empty_value: true
+        default_from_api: true
         description: |
           Enabling outbound public ip for the instance.
       - name: allocatedIpRangeOverride
