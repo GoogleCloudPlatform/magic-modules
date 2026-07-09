@@ -79,10 +79,11 @@ virtual_fields:
     type: String
     exclude: true
     description: |
-      Sets the policy for deleting the QueryTemplate.
+      Sets the policy for deleting the QueryTemplate. Defaults to `DELETE_IF_DRAFTED`.
       * `ABANDON`: Untracks the resource from Terraform state but leaves it intact in BigQuery.
       * `DELETE`: Deletes the QueryTemplate from BigQuery.
       * `DELETE_IF_DRAFTED`: Deletes the QueryTemplate only if it is in a `DRAFTED` state; otherwise, it abandons it.
+      * `PREVENT`: Prevents deletion of the QueryTemplate.
 properties:
   - name: "name"
     type: String
