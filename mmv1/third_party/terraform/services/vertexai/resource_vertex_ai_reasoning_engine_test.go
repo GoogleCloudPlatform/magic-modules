@@ -713,3 +713,92 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 }
 `, context)
 }
+
+func TestAccVertexAIReasoningEngine_apiParity(t *testing.T) {
+	t.Skip("Skipping API parity test requiring pre-created worker_pool, agent_gateway, example_store, and runtime_revision_name")
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_apiParity(context),
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_apiParity(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_vertex_ai_reasoning_engine" "primary" {
+  display_name = "tf-test-reasoning-engine-%{random_suffix}"
+  description  = "Reasoning engine testing API parity fields"
+  region       = "us-central1"
+
+  context_spec {
+    example_store_config {
+      similarity_search_config {
+        embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
+      }
+    }
+  }
+  spec {
+    agent_card = jsonencode({
+      name        = "test-agent"
+      description = "a test agent card"
+    })
+    build_spec {
+      worker_pool = "projects/${data.google_project.project.project_id}/locations/us-central1/workerPools/test-pool"
+    }
+    deployment_spec {
+      agent_gateway_config {
+        agent_to_anywhere_config {
+          agent_gateway = "projects/${data.google_project.project.project_id}/locations/us-central1/agentGateways/test-gateway"
+        }
+        client_to_agent_config {
+          agent_gateway = "projects/${data.google_project.project.project_id}/locations/us-central1/agentGateways/test-gateway"
+        }
+      }
+      agent_server_mode                  = "EXPERIMENTAL"
+      dedicated_ingress_endpoint_enabled = false
+      keep_alive_probe {
+        http_get {
+          path = "/is_busy"
+          port = 8080
+        }
+        max_seconds = 60
+      }
+    }
+    example_store = "projects/${data.google_project.project.project_id}/locations/us-central1/exampleStores/test-store"
+    source_code_spec {
+      agent_config_source {
+        adk_config {
+          json_config = jsonencode({
+            adk_version = "1.0"
+          })
+        }
+        inline_source {
+          source_archive = "H4sICAAAAAAC/3Rlc3QudGFyLmd6AA=="
+        }
+      }
+    }
+  }
+  traffic_config {
+    traffic_split_manual {
+      targets {
+        percent               = 100
+        runtime_revision_name = "projects/${data.google_project.project.project_id}/locations/us-central1/reasoningEngines/%{random_suffix}/runtimeRevisions/1"
+      }
+    }
+  }
+}
+`, context)
+}
