@@ -2,6 +2,7 @@ package container
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -643,11 +644,17 @@ func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transp
 	if err != nil {
 		return nil
 	}
-	clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
-	if config.UserProjectOverride {
-		clusterGetCall.Header().Add("X-Goog-User-Project", project)
+	var cluster *container.Cluster
+	client := NewClient(config, userAgent)
+	if client != nil {
+		clusterGetCall := client.Projects.Locations.Clusters.Get(name)
+		if config.UserProjectOverride {
+			clusterGetCall.Header().Add("X-Goog-User-Project", project)
+		}
+		cluster, _ = clusterGetCall.Do()
+	} else {
+		log.Printf("[WARN] GKE client is nil, skipping cluster GET call")
 	}
-	cluster, _ := clusterGetCall.Do()
 	resourceVersion := ""
 	exclusions := make(map[string]container.TimeWindow)
 	if cluster != nil && cluster.MaintenancePolicy != nil {
