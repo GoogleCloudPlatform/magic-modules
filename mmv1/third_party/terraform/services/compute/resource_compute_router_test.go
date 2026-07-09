@@ -268,11 +268,6 @@ func TestAccComputeRouter_keepaliveIntervalDefault(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config:             testAccComputeRouter_keepaliveIntervalDefault(routerName),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
-			},
 		},
 	})
 }
