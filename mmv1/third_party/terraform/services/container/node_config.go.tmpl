@@ -4479,6 +4479,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			if d.HasChange(prefix + "node_config.0.image_type") {
 				req.Update.DesiredImageType = d.Get(prefix + "node_config.0.image_type").(string)
 			} else {
+			  // If only updating the node_image_config (DesiredImage and/or DesiredImage) and
+			  // the image_type unspecified, then it is an use case of custom image feature, where
+			  // the DesiredImageType should be CUSTOM_CONTAINERD (go/gke-custom-image-builder-ug-edit)
 			  req.Update.DesiredImageType = "CUSTOM_CONTAINERD"
 			}
 
