@@ -695,6 +695,7 @@ properties:
     properties:
       - name: 'memoryBankConfig'
         type: NestedObject
+        default_from_api: true
         description: |-
           Specification for a Memory Bank, which manages memories for the Agent Engine.
         properties:
