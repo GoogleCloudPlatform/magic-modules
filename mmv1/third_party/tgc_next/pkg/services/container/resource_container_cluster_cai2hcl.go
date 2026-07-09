@@ -173,6 +173,9 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 		}
 		hclData["private_ipv6_google_access"] = nc["privateIpv6GoogleAccess"]
 		hclData["datapath_provider"] = nc["datapathProvider"]
+		if dvc, ok := nc["dataplaneV2Config"].(map[string]interface{}); ok {
+			hclData["dataplane_optimization_mode"] = dvc["scalabilityMode"]
+		}
 		if v := nc["enableMultiNetworking"]; v != nil && v != false {
 			hclData["enable_multi_networking"] = v
 		}
@@ -1119,6 +1122,36 @@ func flattenMaintenancePolicy(v interface{}) []map[string]interface{} {
 
 			transformed["recurring_window"] = []map[string]interface{}{windowMap}
 		}
+
+		if recurringMaintenanceWindow, ok := window["recurringMaintenanceWindow"].(map[string]interface{}); ok && recurringMaintenanceWindow != nil {
+			windowMap := map[string]interface{}{}
+			windowMap["window_start_time"] = []map[string]interface{}{}
+			startTime, _ := recurringMaintenanceWindow["windowStartTime"].(map[string]interface{})
+			windowMap["window_start_time"] = []map[string]interface{}{
+				{
+					"hours":   startTime["hours"],
+					"minutes": startTime["minutes"],
+					"seconds": startTime["seconds"],
+				},
+			}
+
+			delay, _ := recurringMaintenanceWindow["delayUntil"].(map[string]interface{})
+			if delay != nil {
+				windowMap["delayUntil"] = []map[string]interface{}{
+					{
+						"year":  delay["year"],
+						"month": delay["month"],
+						"day":   delay["day"],
+					},
+				}
+			}
+
+			windowMap["window_duration"] = recurringMaintenanceWindow["windowDuration"]
+			windowMap["recurrence"] = recurringMaintenanceWindow["recurrence"]
+
+			transformed["recurring_maintenance_window"] = []map[string]interface{}{windowMap}
+		}
+
 	}
 
 	if disruptionBudget, ok := mp["disruptionBudget"].(map[string]interface{}); ok && disruptionBudget != nil {
@@ -1137,8 +1170,9 @@ func flattenMaintenancePolicy(v interface{}) []map[string]interface{} {
 	}
 
 	_, hasDaily := transformed["daily_maintenance_window"]
-	_, hasRecurring := transformed["recurring_window"]
-	if !hasDaily && !hasRecurring {
+	_, hasRecurringWindow := transformed["recurring_window"]
+	_, hasRecurringMaintenance := transformed["recurring_maintenance_window"]
+	if !hasDaily && !hasRecurringWindow && !hasRecurringMaintenance {
 		return nil
 	}
 

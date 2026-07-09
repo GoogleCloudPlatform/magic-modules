@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Container'
-display_name: 'Kubernetes Engine'
-versions:
-  - name: 'ga'
-    base_url: 'https://container.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://container.googleapis.com/v1beta1/'
+name: Container
+display_name: Kubernetes Engine
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://container.googleapis.com/v1/
+  - name: beta
+    base_url: https://container.googleapis.com/v1beta1/

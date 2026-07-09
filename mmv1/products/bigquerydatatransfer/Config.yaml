@@ -44,29 +44,34 @@ custom_diff:
   - 'sensitiveParamCustomizeDiff'
   - 'paramsCustomizeDiff'
 error_retry_predicates:
-
   - 'transport_tpg.IamMemberMissing'
-examples:
+samples:
   - name: 'bigquerydatatransfer_config_scheduled_query'
     primary_resource_id: 'query_config'
-    vars:
-      display_name: 'my-query'
-      dataset_id: 'my_dataset'
     exclude_test: true
+    steps:
+      - name: 'bigquerydatatransfer_config_scheduled_query'
+        resource_id_vars:
+          display_name: 'my-query'
+          dataset_id: 'my_dataset'
   - name: 'bigquerydatatransfer_config_cmek'
     primary_resource_id: 'query_config_cmek'
-    vars:
-      dataset_id: 'example_dataset'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
-      display_name: 'display-name'
     exclude_test: true
+    steps:
+      - name: 'bigquerydatatransfer_config_cmek'
+        resource_id_vars:
+          dataset_id: 'example_dataset'
+          key_name: 'example-key'
+          keyring_name: 'example-keyring'
+          display_name: 'display-name'
   - name: 'bigquerydatatransfer_config_salesforce'
     primary_resource_id: 'salesforce_config'
-    vars:
-      display_name: 'my-salesforce-config'
-      dataset_id: 'my_dataset'
     exclude_test: true
+    steps:
+      - name: 'bigquerydatatransfer_config_salesforce'
+        resource_id_vars:
+          display_name: 'my-salesforce-config'
+          dataset_id: 'my_dataset'
 parameters:
   - name: 'location'
     type: String
@@ -239,7 +244,7 @@ properties:
           - 'sensitive_params.0.secretAccessKeyWo'
         conflicts:
           - 'sensitive_params.0.secretAccessKeyWo'
-      - name: 'secretAccessKeyWo'  # Wo is convention for write-only properties
+      - name: 'secretAccessKeyWo' # Wo is convention for write-only properties
         type: String
         description: |
           The Secret Access Key of the AWS account transferring data from.

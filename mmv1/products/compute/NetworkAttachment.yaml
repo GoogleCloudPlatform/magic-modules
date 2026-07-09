@@ -38,26 +38,31 @@ collection_url_key: 'items'
 custom_code:
 # excluding identity due to region value inconsistency
 exclude_identity_generation: true
-examples:
+samples:
   - name: 'network_attachment_basic'
     primary_resource_id: 'default'
-    vars:
-      resource_name: 'basic-network-attachment'
-      network_name: 'basic-network'
-      subnetwork_name: 'basic-subnetwork'
-      accepted_producer_project_name: 'prj-accepted'
-      rejected_producer_project_name: 'prj-rejected'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+    steps:
+      - name: 'network_attachment_basic'
+        resource_id_vars:
+          resource_name: 'basic-network-attachment'
+          network_name: 'basic-network'
+          subnetwork_name: 'basic-subnetwork'
+          accepted_producer_project_name: 'prj-accepted'
+          rejected_producer_project_name: 'prj-rejected'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
   - name: 'network_attachment_instance_usage'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      resource_name: 'basic-network-attachment'
-      network_name: 'basic-network'
-      subnetwork_name: 'basic-subnetwork'
-      instance_name: 'basic-instance'
+    steps:
+      - name: 'network_attachment_instance_usage'
+        min_version: 'beta'
+        resource_id_vars:
+          resource_name: 'basic-network-attachment'
+          network_name: 'basic-network'
+          subnetwork_name: 'basic-subnetwork'
+          instance_name: 'basic-instance'
 parameters:
   - name: 'name'
     type: String

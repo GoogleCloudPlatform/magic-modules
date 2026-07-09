@@ -49,15 +49,19 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-examples:
+samples:
   - name: 'discoveryengine_dataconnector_servicenow_basic'
     primary_resource_id: 'servicenow-basic'
-    vars:
-      collection_id: 'collection-id'
+    steps:
+      - name: 'discoveryengine_dataconnector_servicenow_basic'
+        resource_id_vars:
+          collection_id: 'collection-id'
   - name: 'discoveryengine_dataconnector_jira_with_actions'
     primary_resource_id: 'jira-with-actions'
-    vars:
-      collection_id: 'collection-id'
+    steps:
+      - name: 'discoveryengine_dataconnector_jira_with_actions'
+        resource_id_vars:
+          collection_id: 'collection-id'
 parameters:
   - name: 'location'
     type: String

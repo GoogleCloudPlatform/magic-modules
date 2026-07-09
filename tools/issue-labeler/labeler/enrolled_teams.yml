@@ -7,10 +7,15 @@ service/accessapproval:
 service/accesscontextmanager:
   resources:
   - google_access_context_manager_.*
+service/agentidentity:
+  resources:
+  - google_agent_identity_.*
+service/agentregistry:
+  resources:
+  - google_agent_registry_.*
 service/aiplatform-agent-engine:
   resources:
   - google_vertex_ai_reasoning_engine.*
-  - google_vertex_ai_online_evaluator
 service/aiplatform-colab-enterprise:
   resources:
   - google_colab_.*
@@ -28,6 +33,7 @@ service/aiplatform-matching-engine:
 service/aiplatform-metadata:
   resources:
   - google_vertex_ai_metadata_store
+  - google_vertex_ai_schedule
 service/aiplatform-prediction:
   resources:
   - google_vertex_ai_cache_config
@@ -35,12 +41,16 @@ service/aiplatform-prediction:
   - google_vertex_ai_deployment_resource_pool
   - google_ml_engine_model
   - google_vertex_ai_endpoint_with_model_garden_deployment
+  - google_vertex_ai_model_garden_enable_model
 service/aiplatform-rag-engine:
   resources:
   - google_vertex_ai_rag_engine_config
+service/aiplatform-semantic-governance:
+  resources:
+  - google_vertex_ai_semantic_governance.*
 service/aiplatform-tensorboard:
   resources:
-  - google_vertex_ai_tensorboard
+  - google_vertex_ai_tensorboard.*
 service/alloydb:
   resources:
   - google_alloydb_.*
@@ -120,7 +130,6 @@ service/cloudbilling:
 service/cloudbuild:
   resources:
   - google_cloudbuild_.*
-  - google_cloudbuildv2_.*
 service/clouddeploy:
   resources:
   - google_clouddeploy_.*
@@ -246,6 +255,7 @@ service/compute-managed:
   - google_compute_region_instance_group_manager.*
   - google_compute_per_instance_config.*
   - google_compute_region_per_instance_config.*
+  - google_compute_bulk_per_instance_config.*
   - google_compute_resize_request.*
   - google_compute_region_resize_request.*
 service/compute-nat:
@@ -378,9 +388,11 @@ service/deploymentmanager:
 service/developerconnect:
   resources:
   - google_developer_connect_.*
+  - google_cloudbuildv2_.*
 service/dialogflow:
   resources:
   - google_dialogflow_conversation_profile
+  - google_dialogflow_sip_trunk
 service/dialogflow-cx:
   resources:
   - google_dialogflow_cx_.*
@@ -496,6 +508,7 @@ service/iam-core:
   - google_iam_role
   - google_iam_.*_policy_binding
   - google_iam_principal_access_boundary_policy
+  - google_iam_.*_access_policy
   - google_iam_testable_permissions
 service/iam-serviceaccount:
   resources:
@@ -527,6 +540,9 @@ service/integrationconnectors:
 service/integrations:
   resources:
   - google_integrations_.*
+service/licensemanager:
+  resources:
+  - google_license_manager_configuration
 service/logging:
   resources:
   - google_logging_.*
@@ -605,6 +621,9 @@ service/network-security-distributed-firewall:
   - google_compute_firewall.*
   - google_compute_network_firewall_policy.*
   - google_compute_region_network_firewall_policy.*
+service/networkconnectivity-customhardware:
+  resources:
+  - google_network_connectivity_custom_hardware_.*
 service/networkconnectivity-private-range:
   resources:
   - google_network_connectivity_internal_range
@@ -636,6 +655,9 @@ service/networksecurity-swp:
   - google_network_security_gateway_security_policy_rule
   - google_network_security_url_lists
   - google_network_security_tls_inspection_policy
+service/networkservices-agent-gateway:
+  resources:
+  - google_network_services_agent_gateway
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*
@@ -672,6 +694,7 @@ service/orgpolicy:
 service/osconfig:
   resources:
   - google_os_config_.*
+  - google_compute_.*_vm_extension_policy
 service/oslogin:
   resources:
   - google_os_login_.*

@@ -27,6 +27,7 @@ has_self_link: true
 immutable: true
 datasource_experimental:
   generate: true
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -45,26 +46,32 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west1"
     - region: "us-west1"
-examples:
+samples:
   - name: 'region_target_http_proxy_basic'
     primary_resource_id: 'default'
-    vars:
-      region_target_http_proxy_name: 'test-proxy'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
-      region_health_check_name: 'http-health-check'
+    steps:
+      - name: 'region_target_http_proxy_basic'
+        resource_id_vars:
+          region_target_http_proxy_name: 'test-proxy'
+          region_url_map_name: 'url-map'
+          region_backend_service_name: 'backend-service'
+          region_health_check_name: 'http-health-check'
   - name: 'region_target_http_proxy_http_keep_alive_timeout'
     primary_resource_id: 'default'
-    vars:
-      region_target_http_proxy_name: 'test-http-keep-alive-timeout-proxy'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
-      region_health_check_name: 'http-health-check'
+    steps:
+      - name: 'region_target_http_proxy_http_keep_alive_timeout'
+        resource_id_vars:
+          region_target_http_proxy_name: 'test-http-keep-alive-timeout-proxy'
+          region_url_map_name: 'url-map'
+          region_backend_service_name: 'backend-service'
+          region_health_check_name: 'http-health-check'
   - name: 'region_target_http_proxy_https_redirect'
     primary_resource_id: 'default'
-    vars:
-      region_target_http_proxy_name: 'test-https-redirect-proxy'
-      region_url_map_name: 'url-map'
+    steps:
+      - name: 'region_target_http_proxy_https_redirect'
+        resource_id_vars:
+          region_target_http_proxy_name: 'test-https-redirect-proxy'
+          region_url_map_name: 'url-map'
 parameters:
   - name: 'region'
     type: ResourceRef

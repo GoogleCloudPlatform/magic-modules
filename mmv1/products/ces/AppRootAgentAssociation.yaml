@@ -49,12 +49,14 @@ custom_code:
   custom_delete: 'templates/terraform/custom_delete/ces_app_root_agent_association.go.tmpl'
   custom_import: 'templates/terraform/custom_import/ces_app_root_agent_association.go.tmpl'
   post_read: 'templates/terraform/post_read/ces_app_root_agent_association.go.tmpl'
-examples:
+samples:
   - name: 'ces_app_root_agent_association_basic'
     primary_resource_id: 'association'
-    vars:
-      app_id: 'app-id'
-      agent_id: 'agent-id'
+    steps:
+      - name: 'ces_app_root_agent_association_basic'
+        resource_id_vars:
+          app_id: 'app-id'
+          agent_id: 'agent-id'
 parameters:
   - name: location
     type: String

@@ -601,7 +601,7 @@ func schemaNodeConfig() *schema.Schema {
 								Required:     true,
 								ForceNew:     true,
 								Description:  `Corresponds to the type of reservation consumption.`,
-								ValidateFunc: validation.StringInSlice([]string{"UNSPECIFIED", "NO_RESERVATION", "ANY_RESERVATION", "SPECIFIC_RESERVATION"}, false),
+								ValidateFunc: validation.StringInSlice([]string{"UNSPECIFIED", "NO_RESERVATION", "ANY_RESERVATION", "SPECIFIC_RESERVATION", "ANY_RESERVATION_THEN_FAIL"}, false),
 							},
 							"key": {
 								Type:        schema.TypeString,
@@ -912,6 +912,18 @@ func schemaNodeConfig() *schema.Schema {
                                                                 Optional:    true,
                                                                 Description: `Defines the maximum allowed grace period (in seconds) to use when terminating pods in response to a soft eviction threshold being met.`,
                                                         },
+							"shutdown_grace_period_seconds": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Computed:    true,
+								Description: `Controls the total duration of time (in seconds) the node delays shutdown.`,
+							},
+							"shutdown_grace_period_critical_pods_seconds": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Computed:    true,
+								Description: `Controls the portion of total grace period (in seconds) that is specifically reserved for terminating critical pods.`,
+							},
 							"eviction_soft": {
 								Type:        schema.TypeList,
 								Optional:    true,
@@ -1224,6 +1236,42 @@ func schemaNodeConfig() *schema.Schema {
 									},
 								},
 							},
+							"custom_node_init": {
+								Type:             schema.TypeList,
+								Optional:         true,
+								MaxItems: 1,
+								Description:      `The custom node init settings.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"init_script": {
+											Type:             schema.TypeList,
+											Optional:         true,
+											MaxItems: 1,
+											Description:      `The init script configuration.`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"gcs_uri": {
+														Type:        schema.TypeString,
+														Optional:    true,
+														Description: `The GCS URI of the init script.`,
+													},
+													"gcs_generation": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Computed:    true,
+														Description: `The GCS generation of the init script.`,
+													},
+													"gcp_secret_manager_secret_uri": {
+														Type:        schema.TypeString,
+														Optional:    true,
+														Description: `The Secret Manager secret URI of the init script.`,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1275,6 +1323,7 @@ func schemaNodeConfig() *schema.Schema {
 							"performance_monitoring_unit": {
 								Type: schema.TypeString,
 								Optional: true,
+								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("STANDARD"),
 								ValidateFunc: verify.ValidateEnum([]string{"ARCHITECTURAL", "STANDARD", "ENHANCED"}),
 								Description: `Level of Performance Monitoring Unit (PMU) requested. If unset, no access to the PMU is assumed.`,
 							},
@@ -1875,6 +1924,21 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 			}
 		}
 		// end cpu_cfs_quota fix
+
+		// start shutdown_grace_period ForceSendFields fix
+		if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
+			if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
+				vSGP := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_seconds")
+				if vSGP != cty.NullVal(cty.Number) && !vSGP.IsNull() {
+					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+				}
+				vSGPC := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_critical_pods_seconds")
+				if vSGPC != cty.NullVal(cty.Number) && !vSGPC.IsNull() {
+					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
+				}
+			}
+		}
+		// end shutdown_grace_period ForceSendFields fix
 	}
 
 	if v, ok := nodeConfig["linux_node_config"]; ok {
@@ -2079,6 +2143,12 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	if evictionMaxPodGracePeriodSeconds, ok := cfg["eviction_max_pod_grace_period_seconds"]; ok {
                 kConfig.EvictionMaxPodGracePeriodSeconds = int64(evictionMaxPodGracePeriodSeconds.(int))
         }
+	if shutdownGracePeriodSeconds, ok := cfg["shutdown_grace_period_seconds"]; ok {
+		kConfig.ShutdownGracePeriodSeconds = int64(shutdownGracePeriodSeconds.(int))
+	}
+	if shutdownGracePeriodCriticalPodsSeconds, ok := cfg["shutdown_grace_period_critical_pods_seconds"]; ok {
+		kConfig.ShutdownGracePeriodCriticalPodsSeconds = int64(shutdownGracePeriodCriticalPodsSeconds.(int))
+	}
 	if v, ok := cfg["eviction_soft"]; ok && len(v.([]interface{})) > 0 {
 		es := v.([]interface{})[0].(map[string]interface{})
 		evictionSoft := &container.EvictionSignals{}
@@ -2261,6 +2331,10 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 		linuxNodeConfig.AccurateTimeConfig = expandAccurateTimeConfig(v)
 	}
 
+	if v, ok := cfg["custom_node_init"]; ok {
+		linuxNodeConfig.CustomNodeInit = expandCustomNodeInit(v)
+	}
+
 	return linuxNodeConfig
 }
 
@@ -2393,6 +2467,52 @@ func expandAccurateTimeConfig(v interface{}) *container.AccurateTimeConfig {
 	}
 
 	return accurateTimeConfig
+}
+
+func expandCustomNodeInit(v interface{}) *container.CustomNodeInit {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.CustomNodeInit{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	customNodeInit := &container.CustomNodeInit{}
+	if v, ok := cfg["init_script"]; ok {
+		customNodeInit.InitScript = expandInitScript(v)
+	}
+	return customNodeInit
+}
+
+func expandInitScript(v interface{}) *container.InitScript {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.InitScript{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	initScript := &container.InitScript{}
+	if v, ok := cfg["gcs_uri"]; ok {
+		initScript.GcsUri = v.(string)
+	}
+	if v, ok := cfg["gcs_generation"]; ok {
+		initScript.GcsGeneration = int64(v.(int))
+	}
+	if v, ok := cfg["gcp_secret_manager_secret_uri"]; ok {
+		initScript.GcpSecretManagerSecretUri = v.(string)
+	}
+	return initScript
 }
 
 func expandSwapConfig(v interface{}) *container.SwapConfig {
@@ -3323,6 +3443,8 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 			"single_process_oom_kill":                c.SingleProcessOomKill,
 			"max_parallel_image_pulls":               c.MaxParallelImagePulls,
 			"eviction_max_pod_grace_period_seconds":  c.EvictionMaxPodGracePeriodSeconds,
+			"shutdown_grace_period_seconds":          c.ShutdownGracePeriodSeconds,
+			"shutdown_grace_period_critical_pods_seconds": c.ShutdownGracePeriodCriticalPodsSeconds,
 			"eviction_soft":                          flattenEvictionSignals(c.EvictionSoft),
 			"eviction_soft_grace_period":             flattenEvictionGracePeriod(c.EvictionSoftGracePeriod),
 			"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c.EvictionMinimumReclaim),
@@ -3430,6 +3552,7 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 			"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c.NodeKernelModuleLoading),
 			"swap_config":                  flattenSwapConfig(c.SwapConfig),
 			"accurate_time_config":         flattenAccurateTimeConfig(c.AccurateTimeConfig),
+			"custom_node_init":             flattenCustomNodeInit(c.CustomNodeInit),
 		})
 	}
 	return result
@@ -3440,6 +3563,28 @@ func flattenAccurateTimeConfig(c *container.AccurateTimeConfig) []map[string]int
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"enable_ptp_kvm_time_sync": c.EnablePtpKvmTimeSync,
+		})
+	}
+	return result
+}
+
+func flattenCustomNodeInit(c *container.CustomNodeInit) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"init_script": flattenInitScript(c.InitScript),
+		})
+	}
+	return result
+}
+
+func flattenInitScript(c *container.InitScript) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"gcs_uri":                       c.GcsUri,
+			"gcs_generation":                c.GcsGeneration,
+			"gcp_secret_manager_secret_uri": c.GcpSecretManagerSecretUri,
 		})
 	}
 	return result
