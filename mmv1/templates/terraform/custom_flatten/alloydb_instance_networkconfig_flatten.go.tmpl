@@ -11,11 +11,8 @@
 	limitations under the License.
 */ -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return flattenAlloydbInstanceEmptyNetworkConfig(d)
-	}
-	original := v.(map[string]interface{})
-	if len(original) == 0 {
+	original, ok := v.(map[string]interface{})
+	if !ok || len(original) == 0 {
 		return flattenAlloydbInstanceEmptyNetworkConfig(d)
 	}
 	transformed := make(map[string]interface{})
