@@ -1,0 +1,15 @@
+resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
+  location = "{{index $.ResourceIdVars "location"}}"
+  display_name = "my-tool"
+  tool_key     = "my_tool"
+  description = "A basic tool with OpenAPI spec"
+  open_api_spec {
+    text_schema = <<EOF
+openapi: 3.0.0
+info:
+  title: My Tool
+  version: 1.0.0
+paths: {}
+EOF
+  }
+}

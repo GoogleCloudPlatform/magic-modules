@@ -1,0 +1,10 @@
+resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
+  location = "{{index $.ResourceIdVars "location"}}"
+  display_name = "function-tool"
+  tool_key     = "function_tool"
+  description = "A tool with Function spec"
+  function_spec {
+    input_schema = "{\"type\": \"object\"}"
+    output_schema = "{\"type\": \"object\"}"
+  }
+}

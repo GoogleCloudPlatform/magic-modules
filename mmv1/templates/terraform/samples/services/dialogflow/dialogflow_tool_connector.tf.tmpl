@@ -1,6 +1,7 @@
 resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
   location = "{{index $.ResourceIdVars "location"}}"
   display_name = "connector-tool"
+  tool_key     = "connector_tool"
   description = "A tool with Connector spec"
   connector_spec {
     name = "projects/test-project/locations/{{index $.ResourceIdVars "location"}}/connections/test-connection"

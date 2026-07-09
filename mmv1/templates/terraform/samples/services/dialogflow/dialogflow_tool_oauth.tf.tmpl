@@ -1,0 +1,24 @@
+resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
+  location = "{{index $.ResourceIdVars "location"}}"
+  display_name = "oauth-tool"
+  tool_key     = "oauth_tool"
+  description = "A tool with OpenAPI spec and OAuth"
+  open_api_spec {
+    text_schema = <<EOF
+openapi: 3.0.0
+info:
+  title: My Tool
+  version: 1.0.0
+paths: {}
+EOF
+    authentication {
+      oauth_config {
+        oauth_grant_type = "CLIENT_CREDENTIALS"
+        client_id = "client-id"
+        client_secret = "client-secret"
+        token_endpoint = "https://example.com/token"
+        scopes = ["scope1", "scope2"]
+      }
+    }
+  }
+}
