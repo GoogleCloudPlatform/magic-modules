@@ -26,11 +26,15 @@ func dataSourceOracleDatabaseExascaleDbStorageVaultRead(d *schema.ResourceData, 
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
+	d.SetId(id)
 	err = resourceOracleDatabaseExascaleDbStorageVaultRead(d, meta)
 	if err != nil {
 		return err
 	}
-	d.SetId(id)
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	return nil
 
 	return nil
 }
