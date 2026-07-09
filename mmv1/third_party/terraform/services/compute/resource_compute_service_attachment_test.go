@@ -73,10 +73,12 @@ func TestAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(t *test
 					"google_compute_service_attachment.psc_ilb_service_attachment", "enable_proxy_protocol", "false"),
 			},
 			{
-				ResourceName:            "google_compute_service_attachment.psc_ilb_service_attachment",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"target_service", "region"},
+				ResourceName:      "google_compute_service_attachment.psc_ilb_service_attachment",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// send_propagated_connection_limit_if_zero is a virtual field with no API
+				// representation, so it can't be reconstructed on import.
+				ImportStateVerifyIgnore: []string{"target_service", "region", "send_propagated_connection_limit_if_zero"},
 			},
 		},
 	})
