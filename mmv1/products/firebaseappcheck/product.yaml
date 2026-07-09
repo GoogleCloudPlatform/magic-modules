@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'FirebaseAppCheck'
-display_name: 'Firebase App Check'
-versions:
-  - name: 'ga'
-    base_url: 'https://firebaseappcheck.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://firebaseappcheck.googleapis.com/v1beta/'
+name: FirebaseAppCheck
+display_name: Firebase App Check
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://firebaseappcheck.googleapis.com/v1/
+  - name: beta
+    base_url: https://firebaseappcheck.googleapis.com/v1beta/

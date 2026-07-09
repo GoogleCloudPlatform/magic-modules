@@ -45,11 +45,13 @@ async:
 collection_url_key: 'items'
 custom_code:
 include_in_tgc_next: true
-examples:
+samples:
   - name: 'https_health_check_basic'
     primary_resource_id: 'default'
-    vars:
-      https_health_check_name: 'authentication-health-check'
+    steps:
+      - name: 'https_health_check_basic'
+        resource_id_vars:
+          https_health_check_name: 'authentication-health-check'
 parameters:
 properties:
   - name: 'checkIntervalSec'

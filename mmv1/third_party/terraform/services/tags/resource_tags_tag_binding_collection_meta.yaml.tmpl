@@ -1,0 +1,15 @@
+{{ if ne $.TargetVersionName "ga" -}}
+resource: 'google_tags_tag_binding_collection'
+generation_type: 'handwritten'
+api_service_name: 'cloudresourcemanager.googleapis.com'
+api_version: 'v3'
+api_resource_type_kind: 'TagBindingCollection'
+fields:
+  - field: 'location'
+  - field: 'full_resource_name'
+  - api_field: 'name'
+  - field: 'active_tags'
+    provider_only: true
+  - field: 'tags'
+    provider_only: true
+{{ end -}}

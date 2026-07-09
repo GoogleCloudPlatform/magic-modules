@@ -42,9 +42,9 @@ custom_code:
   encoder: templates/terraform/encoders/biglake_iceberg_table_create.go.tmpl
   update_encoder: templates/terraform/encoders/biglake_iceberg_table.go.tmpl
   constants: templates/terraform/constants/biglake_iceberg_table.go.tmpl
-  post_read: templates/terraform/post_read/biglake_iceberg_table.go.tmpl
   pre_create: templates/terraform/pre_create/biglake_iceberg_table.go.tmpl
   pre_read: templates/terraform/pre_read/biglake_iceberg_table.go.tmpl
+  post_read: templates/terraform/post_read/biglake_iceberg_table.go.tmpl
   pre_update: templates/terraform/pre_update/biglake_iceberg_table.go.tmpl
   pre_delete: templates/terraform/pre_delete/biglake_iceberg_table.go.tmpl
 samples:

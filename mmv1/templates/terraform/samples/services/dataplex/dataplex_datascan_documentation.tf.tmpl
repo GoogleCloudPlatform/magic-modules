@@ -74,7 +74,9 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
     }
   }
 
-  data_documentation_spec {}
+  data_documentation_spec {
+    catalog_publishing_enabled = true
+  }
 
   project = "{{index $.TestEnvVars "project_name"}}"
 }

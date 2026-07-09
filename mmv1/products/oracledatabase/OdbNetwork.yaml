@@ -24,6 +24,10 @@ create_url: projects/{{project}}/locations/{{location}}/odbNetworks?odbNetworkId
 id_format: projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 async:
   type: OpAsync
   operation:

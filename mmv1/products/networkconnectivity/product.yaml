@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'NetworkConnectivity'
-display_name: 'Network Connectivity'
-versions:
-  - name: 'ga'
-    base_url: 'https://networkconnectivity.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://networkconnectivity.googleapis.com/v1beta/'
+name: NetworkConnectivity
+display_name: Network Connectivity
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://networkconnectivity.googleapis.com/v1/
+  - name: beta
+    base_url: https://networkconnectivity.googleapis.com/v1beta/
