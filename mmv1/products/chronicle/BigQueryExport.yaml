@@ -31,7 +31,6 @@ exclude_delete: true
 samples:
   - name: chronicle_bigquery_export_basic
     primary_resource_id: example
-    skip_vcr: true
     steps:
       - name: chronicle_bigquery_export_basic
         vars:
@@ -41,7 +40,6 @@ samples:
           project_name: 'PROJECT_NAME'
   - name: chronicle_bigquery_export_full
     primary_resource_id: example
-    skip_vcr: true
     steps:
       - name: chronicle_bigquery_export_full
         vars:
