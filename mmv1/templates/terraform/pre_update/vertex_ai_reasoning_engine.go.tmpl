@@ -15,6 +15,10 @@ if !d.HasChange("context_spec") {
 	delete(obj, "contextSpec")
 }
 
+if !d.HasChange("traffic_config") {
+	delete(obj, "trafficConfig")
+}
+
 if !d.HasChange("spec") {
 	delete(obj, "spec")
 } else {
