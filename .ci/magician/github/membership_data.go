@@ -83,6 +83,10 @@ var (
 					startDate: newDate(2026, 4, 19),
 					endDate:   newDate(2026, 4, 26),
 				},
+				{
+					startDate: newDate(2026, 7, 10),
+					endDate:   newDate(2026, 7, 17),
+				},
 			},
 		},
 		"malhotrasagar2212": {
