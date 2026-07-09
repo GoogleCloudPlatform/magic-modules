@@ -12,58 +12,66 @@
 # limitations under the License.
 
 ---
-name: 'RegionalParameter'
+name: RegionalParameter
 api_resource_type_kind: Parameter
 description: |
   A Regional Parameter is a logical regional parameter.
 references:
   guides:
-  api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters'
+  api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/parameters'
-self_link: 'projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/parameters?parameter_id={{parameter_id}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/parameters
+self_link: projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}
+create_url: projects/{{project}}/locations/{{location}}/parameters?parameter_id={{parameter_id}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}'
+  - projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'regional_parameter_basic'
-    primary_resource_id: 'regional-parameter-basic'
-    vars:
-      parameter_id: 'regional_parameter'
-  - name: 'regional_parameter_with_format'
-    primary_resource_id: 'regional-parameter-with-format'
-    vars:
-      parameter_id: 'regional_parameter'
-  - name: 'regional_parameter_with_labels'
-    primary_resource_id: 'regional-parameter-with-labels'
-    vars:
-      parameter_id: 'regional_parameter'
-  - name: 'regional_parameter_with_kms_key'
-    primary_resource_id: 'regional-parameter-with-kms-key'
-    vars:
-      parameter_id: 'regional_parameter'
-      kms_key: 'kms-key'
-    test_vars_overrides:
-      'kms_key': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+samples:
+  - name: regional_parameter_basic
+    primary_resource_id: regional-parameter-basic
+    steps:
+      - name: regional_parameter_basic
+        resource_id_vars:
+          parameter_id: regional_parameter
+  - name: regional_parameter_with_format
+    primary_resource_id: regional-parameter-with-format
+    steps:
+      - name: regional_parameter_with_format
+        resource_id_vars:
+          parameter_id: regional_parameter
+  - name: regional_parameter_with_labels
+    primary_resource_id: regional-parameter-with-labels
+    steps:
+      - name: regional_parameter_with_labels
+        resource_id_vars:
+          parameter_id: regional_parameter
+  - name: regional_parameter_with_kms_key
+    primary_resource_id: regional-parameter-with-kms-key
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+      - member: serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com
+        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    steps:
+      - name: regional_parameter_with_kms_key
+        resource_id_vars:
+          parameter_id: regional_parameter
+          kms_key: kms-key
+        test_vars_overrides:
+          kms_key: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the regional parameter. eg us-central1
     url_param_only: true
     required: true
     immutable: true
-  - name: 'parameterId'
+  - name: parameterId
     type: String
     description: |
       This must be unique within the project.
@@ -71,29 +79,29 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the regional Parameter. Format:
       `projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}`
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The time at which the regional Parameter was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The time at which the regional Parameter was updated.
     output: true
-  - name: 'policyMember'
+  - name: policyMember
     type: NestedObject
     description: |
       An object containing a unique resource identity tied to the regional parameter.
     output: true
     properties:
-      - name: 'iamPolicyUidPrincipal'
+      - name: iamPolicyUidPrincipal
         type: String
         description: |
           IAM policy binding member referring to a Google Cloud resource by system-assigned unique identifier. If
@@ -101,14 +109,14 @@ properties:
           resource. Format:
           `principal://parametermanager.googleapis.com/projects/{{project}}/uid/locations/{{location}}/parameters/{{uid}}`
         output: true
-      - name: 'iamPolicyNamePrincipal'
+      - name: iamPolicyNamePrincipal
         type: String
         description: |
           IAM policy binding member referring to a Google Cloud resource by user-assigned name. If a resource is
           deleted and recreated with the same name, the binding will be applicable to the new resource. Format:
           `principal://parametermanager.googleapis.com/projects/{{project}}/name/locations/{{location}}/parameters/{{parameter_id}}`
         output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       The labels assigned to this regional Parameter.
@@ -123,17 +131,17 @@ properties:
 
       An object containing a list of "key": value pairs. Example:
       { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-  - name: 'format'
+  - name: format
     type: Enum
     description: |
       The format type of the regional parameter.
-    default_value: 'UNFORMATTED'
+    default_value: UNFORMATTED
     immutable: true
     enum_values:
-      - 'UNFORMATTED'
-      - 'YAML'
-      - 'JSON'
-  - name: 'kmsKey'
+      - UNFORMATTED
+      - YAML
+      - JSON
+  - name: kmsKey
     type: String
     description: |
       The resource name of the Cloud KMS CryptoKey used to encrypt regional parameter version payload. Format

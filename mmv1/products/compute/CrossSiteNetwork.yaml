@@ -35,17 +35,19 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
+samples:
   - name: 'compute_cross_site_network_basic'
     primary_resource_id: 'example-cross-site-network'
-    vars:
-      name: 'test-cross-site-network'
-      description: 'Example cross site network'
-    test_vars_overrides:
-      # for backward compatible
-      description: '"Example cross site network" + randomSuffix'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'compute_cross_site_network_basic'
+        resource_id_vars:
+          name: 'test-cross-site-network'
+          description: 'Example cross site network'
+        test_vars_overrides:
+          # for backward compatible
+          description: '"Example cross site network" + randomSuffix'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 parameters:
 properties:
   - name: 'name'

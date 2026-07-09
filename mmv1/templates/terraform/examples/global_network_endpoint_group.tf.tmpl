@@ -1,5 +1,0 @@
-resource "google_compute_global_network_endpoint_group" "{{$.PrimaryResourceId}}" {
-  name                  = "{{index $.Vars "neg_name"}}"
-  default_port          = "90"
-  network_endpoint_type = "INTERNET_FQDN_PORT"
-}

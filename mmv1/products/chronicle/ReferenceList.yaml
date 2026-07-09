@@ -28,16 +28,16 @@ update_verb: PATCH
 update_mask: true
 exclude_delete: true
 autogen_status: UmVmZXJlbmNlTGlzdA==
-
-examples:
+samples:
   - name: 'chronicle_referencelist_basic'
     primary_resource_id: 'example'
-    vars:
-      reference_list_id: reference_list_id
-      data_access_scope_id: scope-id
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
+    steps:
+      - name: 'chronicle_referencelist_basic'
+        resource_id_vars:
+          reference_list_id: reference_list_id
+          data_access_scope_id: scope-id
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
 parameters:
   - name: location
     type: String
@@ -127,8 +127,7 @@ properties:
       type: String
   - name: syntaxType
     type: String
-    description: |2-
-
+    description: |-
       Possible values:
       REFERENCE_LIST_SYNTAX_TYPE_PLAIN_TEXT_STRING
       REFERENCE_LIST_SYNTAX_TYPE_REGEX

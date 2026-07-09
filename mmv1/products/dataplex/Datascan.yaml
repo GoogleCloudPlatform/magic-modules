@@ -900,4 +900,8 @@ properties:
       - data_profile_spec
       - data_discovery_spec
       - data_documentation_spec
-    properties: []
+    properties:
+      - name: catalogPublishingEnabled
+        type: Boolean
+        description: |
+          If set, the latest DataScan job result will be published to Knowledge Catalog.

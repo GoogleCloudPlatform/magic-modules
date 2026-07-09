@@ -1,0 +1,13 @@
+properties, ok := res["properties"].(map[string]interface{})
+if !ok || properties == nil {
+	return nil, fmt.Errorf("properties not found in response")
+}
+
+exascaleConfig, ok := properties["exascaleConfig"].(map[string]interface{})
+if !ok || exascaleConfig == nil {
+	return nil, nil
+}
+
+res["totalStorageSizeGb"] = exascaleConfig["totalStorageSizeGb"]
+
+return res, nil
