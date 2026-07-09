@@ -3,7 +3,7 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
   description = "A generator with tools."
   tools = [google_dialogflow_tool.test_tool.name]
   summarization_context {
-    version = "4.0"
+    version = "6.0"
     output_language_code = "en"
   }
   trigger_event = "MANUAL_CALL"
@@ -20,7 +20,14 @@ openapi: 3.0.0
 info:
   title: Test Tool
   version: 1.0.0
-paths: {}
+paths:
+  /search:
+    get:
+      summary: Search function
+      operationId: searchAction
+      responses:
+        '200':
+          description: OK
 EOF
   }
 }
