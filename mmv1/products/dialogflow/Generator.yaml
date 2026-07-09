@@ -223,7 +223,7 @@ properties:
         type: String
         default_from_api: true
         description: |
-          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["1.0"].
+          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["5.0", "6.0"].
       - name: outputLanguageCode
         type: String
         description: |
