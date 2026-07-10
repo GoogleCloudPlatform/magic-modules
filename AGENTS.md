@@ -12,8 +12,9 @@ here, upstream — never in the downstream repos.
   provider task.
 - **`.agents/skills/`** — reusable skills the workflows compose (generation, testing, log parsing,
   troubleshooting). Each skill's `SKILL.md` frontmatter states when to use it.
-- **`.agents/knowledge/`** — the curated knowledge base (initial seeding in progress). When present,
-  consult its `index.md` at decision points and open only the entries the task needs.
+- **[.agents/knowledge/index.md](.agents/knowledge/index.md)** — the knowledge index: a short map of
+  where provider knowledge lives. Consult it at the start of any task; open only the sources the task
+  needs.
 - **`.agents/archive/`** — parked tracks (currently TGC). Not maintained; do not use as reference.
 
 ## Ground rules

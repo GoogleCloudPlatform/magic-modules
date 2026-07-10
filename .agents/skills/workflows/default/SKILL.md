@@ -14,6 +14,7 @@ This document outlines the structured 5-step lifecycle for formal implementation
 
 ### 2. Triage
 *   Gather context on the change or bug. Plan the change (New feature or bug fix) within schema or logic. 
+*   Consult `.agents/knowledge/index.md` for the topics the change touches and open the relevant sources.
 *   Execute the `triage` skill (located in `.agents/skills/operations/triage/`) to perform this work.
 *   **Transfers to Step 3:** Approved implementation plan and file paths file.
 
