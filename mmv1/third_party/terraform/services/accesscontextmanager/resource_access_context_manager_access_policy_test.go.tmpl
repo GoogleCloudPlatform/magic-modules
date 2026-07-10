@@ -33,6 +33,7 @@ func TestAccAccessContextManager(t *testing.T) {
 		"access_level_custom":				testAccAccessContextManagerAccessLevel_customTest,
 		"access_levels":				testAccAccessContextManagerAccessLevels_basicTest,
 		"access_level_condition":			testAccAccessContextManagerAccessLevelCondition_basicTest,
+		"service_perimeter_psc_endpoint": testAccAccessContextManagerServicePerimeter_pscEndpointTest,
 		"service_perimeter_egress_policy":		testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest,
 		"service_perimeter_egress_policy_update":	testAccAccessContextManagerServicePerimeterEgressPolicy_updateTest,
 		"service_perimeter_dry_run_egress_policy":		testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basicTest,
