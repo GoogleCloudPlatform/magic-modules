@@ -10,15 +10,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */ -}}
-if d.HasChange("desired_state") {
-    switch d.Get("desired_state").(string) {
-    case "STATE_ACTIVE":
-        // The API uses STATE_RESUMING to transition a paused pipeline back to active.
-        obj["state"] = "STATE_RESUMING"
-    case "STATE_PAUSED":
-        obj["state"] = "STATE_PAUSED"
-    case "STATE_ARCHIVED":
-        obj["state"] = "STATE_ARCHIVED"
-    }
+// The Data Pipelines API does not support changing state via PATCH.
+// On CREATE (d.Id() is empty before SetId is called), we can set the initial
+// state by including it in the request body.
+if d.Id() == "" && d.Get("desired_state").(string) == "STATE_PAUSED" {
+    obj["state"] = "STATE_PAUSED"
 }
 return obj, nil

@@ -313,7 +313,29 @@ func TestAccDataPipelinePipeline_desiredState(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataPipelinePipeline_desiredStatePaused(suffix),
+				ResourceName:            "google_data_pipeline_pipeline.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region", "desired_state"},
+			},
+		},
+	})
+}
+
+func TestAccDataPipelinePipeline_desiredStatePaused(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataPipelinePipelineDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Create a pipeline with desired_state=STATE_PAUSED.
+				// The encoder sets state=STATE_PAUSED in the CREATE body so the
+				// scheduler starts in a paused state.
+				Config: testAccDataPipelinePipeline_desiredStatePausedConfig(suffix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "desired_state", "STATE_PAUSED"),
 					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "state", "STATE_PAUSED"),
@@ -383,7 +405,7 @@ resource "google_data_pipeline_pipeline" "primary" {
 `, suffix, suffix)
 }
 
-func testAccDataPipelinePipeline_desiredStatePaused(suffix string) string {
+func testAccDataPipelinePipeline_desiredStatePausedConfig(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
   account_id   = "tf-test-service-%s"
