@@ -4612,15 +4612,16 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			log.Printf("[INFO] Updated windows_node_config for node pool %s", name)
 		}
 		if d.HasChange(prefix + "node_config.0.node_image_config") {
-			imageConfig := expandNodeImageConfig(d.Get(prefix + "node_config.0.node_image_config"))
-
 			req := &container.UpdateClusterRequest{
 				Update: &container.ClusterUpdate{
 					DesiredNodePoolId: name,
-					DesiredImage: imageConfig.Image,
-					DesiredImageProject: imageConfig.ImageProject,
 				},
 			}
+			if imageConfig := expandNodeImageConfig(d.Get(prefix + "node_config.0.node_image_config")); imageConfig!=nil {
+			  req.Update.DesiredImage = imageConfig.Image
+			  req.Update.DesiredImageProject = imageConfig.ImageProject
+			}
+
 			if d.HasChange(prefix + "node_config.0.image_type") {
 				req.Update.DesiredImageType = d.Get(prefix + "node_config.0.image_type").(string)
 			} else {
