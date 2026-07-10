@@ -11,6 +11,14 @@
     limitations under the License.
 */ -}}
 if d.HasChange("desired_state") {
-    obj["state"] = d.Get("desired_state")
+    switch d.Get("desired_state").(string) {
+    case "STATE_ACTIVE":
+        // The API uses STATE_RESUMING to transition a paused pipeline back to active.
+        obj["state"] = "STATE_RESUMING"
+    case "STATE_PAUSED":
+        obj["state"] = "STATE_PAUSED"
+    case "STATE_ARCHIVED":
+        obj["state"] = "STATE_ARCHIVED"
+    }
 }
 return obj, nil

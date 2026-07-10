@@ -11,9 +11,11 @@
     limitations under the License.
 */ -}}
 desiredState := d.Get("desired_state").(string)
-if desiredState != "" && d.Get("state") != desiredState {
-    log.Printf("[DEBUG] Desired state %s not equal to state = %s, updating pipeline %q", desiredState, d.Get("state"), d.Id())
+// Pipelines are created in STATE_ACTIVE by default. Only trigger an update
+// if a different state is desired (STATE_PAUSED or STATE_ARCHIVED).
+if desiredState != "" && desiredState != "STATE_ACTIVE" {
+    log.Printf("[DEBUG] desired_state %q requires update after creation for pipeline %q", desiredState, d.Id())
     if err = resourceDataPipelinePipelineUpdate(d, meta); err != nil {
-        return fmt.Errorf("Error updating Pipeline %q during creation to reach desired_state: %q", d.Get("name").(string), err)
+        return fmt.Errorf("Error updating Pipeline %q during creation to reach desired_state %q: %s", d.Get("name").(string), desiredState, err)
     }
 }
