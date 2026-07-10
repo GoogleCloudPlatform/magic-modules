@@ -18,7 +18,7 @@ description: |
 references:
   guides:
     'BigQuery Export Overview': 'https://cloud.google.com/chronicle/docs/secops/bigquery-export-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.bigQueryExport'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.bigQueryExport'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/bigQueryExport
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/bigQueryExport
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/bigQueryExport
@@ -62,13 +62,15 @@ parameters:
     url_param_only: true
 properties:
   - name: bigQueryExportPackage
-    type: String
-    description: |-
-      Possible values:
-      BIG_QUERY_EXPORT_PACKAGE_BYOBQ
-      BIG_QUERY_EXPORT_PACKAGE_ADVANCED
+    type: Enum
+    default_from_api: true
+    enum_values:
+      - 'BIG_QUERY_EXPORT_PACKAGE_BYOBQ'
+      - 'BIG_QUERY_EXPORT_PACKAGE_ADVANCED'
+    description: The BigQueryExportPackage entitled for the Chronicle instance.
   - name: entityGraphSettings
     type: NestedObject
+    default_from_api: true
     description: The export settings for a data source.
     properties:
       - name: dataFreshnessTime
@@ -86,18 +88,20 @@ properties:
         required: true
         description: Whether the data source is enabled for export.
       - name: latestExportJobState
-        type: String
+        type: Enum
         output: true
-        description: |-
-          Possible values:
-          LATEST_EXPORT_JOB_STATE_SUCCESS
-          LATEST_EXPORT_JOB_STATE_FAILED
+        enum_values:
+          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
+          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
+          - 'LATEST_EXPORT_JOB_STATE_FAILED'
+        description: The latest export job state.
       - name: retentionDays
         type: Integer
         required: true
         description: The retention period for the data source in days.
   - name: iocMatchesSettings
     type: NestedObject
+    default_from_api: true
     description: The export settings for a data source.
     properties:
       - name: dataFreshnessTime
@@ -115,12 +119,13 @@ properties:
         required: true
         description: Whether the data source is enabled for export.
       - name: latestExportJobState
-        type: String
+        type: Enum
         output: true
-        description: |-
-          Possible values:
-          LATEST_EXPORT_JOB_STATE_SUCCESS
-          LATEST_EXPORT_JOB_STATE_FAILED
+        enum_values:
+          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
+          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
+          - 'LATEST_EXPORT_JOB_STATE_FAILED'
+        description: The latest export job state.
       - name: retentionDays
         type: Integer
         required: true
@@ -138,6 +143,7 @@ properties:
     output: true
   - name: ruleDetectionsSettings
     type: NestedObject
+    default_from_api: true
     description: The export settings for a data source.
     properties:
       - name: dataFreshnessTime
@@ -155,18 +161,20 @@ properties:
         required: true
         description: Whether the data source is enabled for export.
       - name: latestExportJobState
-        type: String
+        type: Enum
         output: true
-        description: |-
-          Possible values:
-          LATEST_EXPORT_JOB_STATE_SUCCESS
-          LATEST_EXPORT_JOB_STATE_FAILED
+        enum_values:
+          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
+          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
+          - 'LATEST_EXPORT_JOB_STATE_FAILED'
+        description: The latest export job state.
       - name: retentionDays
         type: Integer
         required: true
         description: The retention period for the data source in days.
   - name: udmEventsAggregatesSettings
     type: NestedObject
+    default_from_api: true
     description: The export settings for a data source.
     properties:
       - name: dataFreshnessTime
@@ -184,18 +192,20 @@ properties:
         required: true
         description: Whether the data source is enabled for export.
       - name: latestExportJobState
-        type: String
+        type: Enum
         output: true
-        description: |-
-          Possible values:
-          LATEST_EXPORT_JOB_STATE_SUCCESS
-          LATEST_EXPORT_JOB_STATE_FAILED
+        enum_values:
+          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
+          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
+          - 'LATEST_EXPORT_JOB_STATE_FAILED'
+        description: The latest export job state.
       - name: retentionDays
         type: Integer
         required: true
         description: The retention period for the data source in days.
   - name: udmEventsSettings
     type: NestedObject
+    default_from_api: true
     description: The export settings for a data source.
     properties:
       - name: dataFreshnessTime
@@ -213,12 +223,13 @@ properties:
         required: true
         description: Whether the data source is enabled for export.
       - name: latestExportJobState
-        type: String
+        type: Enum
         output: true
-        description: |-
-          Possible values:
-          LATEST_EXPORT_JOB_STATE_SUCCESS
-          LATEST_EXPORT_JOB_STATE_FAILED
+        enum_values:
+          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
+          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
+          - 'LATEST_EXPORT_JOB_STATE_FAILED'
+        description: The latest export job state.
       - name: retentionDays
         type: Integer
         required: true
