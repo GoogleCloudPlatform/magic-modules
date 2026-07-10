@@ -1,0 +1,79 @@
+readUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/global/vmExtensionPolicies/{{"{{"}}name{{"}}"}}")
+if err != nil {
+	return err
+}
+
+// Wait for deletion (up to 10 minutes) to avoid eventual consistency issues during subsequent resource deletions (e.g. RolloutPlan)
+deadline := time.Now().Add(10 * time.Minute)
+for {
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    readUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			break
+		}
+		return err
+	}
+	if time.Now().After(deadline) {
+		return fmt.Errorf("timeout waiting for GlobalVmExtensionPolicy %q to be deleted", d.Id())
+	}
+	log.Printf("[DEBUG] GlobalVmExtensionPolicy %q is still deleting, waiting...", d.Id())
+	time.Sleep(5 * time.Second)
+}
+
+// Clean up any historical rollout records owned by this GlobalVmExtensionPolicy
+policyName := ""
+if n, ok := d.GetOk("name"); ok {
+	policyName = n.(string)
+}
+
+if policyName != "" {
+	listUrl := fmt.Sprintf("https://compute.googleapis.com/compute/beta/projects/%s/global/rollouts?filter=rolloutEntity.orchestratedEntity.orchestrationSource%%20eq%%20%%22.*%s%%22", project, policyName)
+	listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    listUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return fmt.Errorf("Error listing rollouts to clean up references: %s", err)
+	}
+
+	if listRes != nil {
+		if items, ok := listRes["items"].([]interface{}); ok {
+			for _, item := range items {
+				if rollout, ok := item.(map[string]interface{}); ok {
+					if rolloutName, ok := rollout["name"].(string); ok && rolloutName != "" {
+						log.Printf("[DEBUG] Deleting historical rollout %q owned by policy %q to unlock referenced rollout plan", rolloutName, policyName)
+						deleteUrl := fmt.Sprintf("https://compute.googleapis.com/compute/beta/projects/%s/global/rollouts/%s", project, rolloutName)
+
+						res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+							Config:    config,
+							Method:    "DELETE",
+							Project:   billingProject,
+							RawURL:    deleteUrl,
+							UserAgent: userAgent,
+						})
+						if err != nil {
+							log.Printf("[WARNING] Error deleting rollout %q: %s", rolloutName, err)
+							continue
+						}
+
+						err = ComputeOperationWaitTime(
+							config, res, project, fmt.Sprintf("Deleting rollout %q", rolloutName), userAgent,
+							d.Timeout(schema.TimeoutDelete))
+						if err != nil {
+							log.Printf("[WARNING] Error waiting for rollout %q deletion: %s", rolloutName, err)
+						}
+					}
+				}
+			}
+		}
+	}
+}
