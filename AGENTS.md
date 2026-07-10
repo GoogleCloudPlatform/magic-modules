@@ -13,8 +13,8 @@ here, upstream — never in the downstream repos.
 - **`.agents/skills/`** — reusable skills the workflows compose (generation, testing, log parsing,
   troubleshooting). Each skill's `SKILL.md` frontmatter states when to use it.
 - **[.agents/knowledge/index.md](.agents/knowledge/index.md)** — the knowledge index: a short map of
-  where provider knowledge lives. Consult it at the start of any task; open only the sources the task
-  needs.
+  where provider knowledge lives. **CRITICAL:** At the start of any session or conversation, you MUST
+  first open and read this file to check for relevant patterns or instructions before taking any other action.
 - **`.agents/archive/`** — parked tracks (currently TGC). Not maintained; do not use as reference.
 
 ## Ground rules
