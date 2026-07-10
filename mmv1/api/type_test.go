@@ -632,6 +632,7 @@ func TestProviderOnly(t *testing.T) {
 			description: "top-level name field (virtual)",
 			obj: Type{
 				Name:       "name",
+				ApiName:    "name",
 				ClientSide: true,
 			},
 			expected: false,
@@ -640,15 +641,35 @@ func TestProviderOnly(t *testing.T) {
 			description: "top-level name field (url param)",
 			obj: Type{
 				Name:         "name",
+				ApiName:      "name",
 				UrlParamOnly: true,
 			},
 			expected: false,
 		},
 		{
+			description: "top-level field with Name different from ApiName",
+			obj: Type{
+				Name:         "custom_name",
+				ApiName:      "name",
+				UrlParamOnly: true,
+			},
+			expected: false,
+		},
+		{
+			description: "top-level field with ApiName different from name",
+			obj: Type{
+				Name:         "name",
+				ApiName:      "something_else",
+				UrlParamOnly: true,
+			},
+			expected: true,
+		},
+		{
 			description: "top-level name field (special labels)",
 			obj: Type{
-				Name: "name",
-				Type: "KeyValueEffectiveLabels",
+				Name:    "name",
+				ApiName: "name",
+				Type:    "KeyValueEffectiveLabels",
 			},
 			expected: true,
 		},

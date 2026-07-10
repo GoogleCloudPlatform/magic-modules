@@ -1459,7 +1459,7 @@ func (t *Type) ProviderOnly() bool {
 
 	// top-level `name` fields are never provider-only.
 	parent := t.Parent()
-	if parent == nil && t.Name == "name" {
+	if parent == nil && t.ApiName == "name" {
 		return false
 	}
 
