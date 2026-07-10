@@ -25,5 +25,14 @@ resource "google_discovery_engine_data_store" "document_processing_config_layout
         include_ancestor_headings = true
       }
     }
+    parsing_config_overrides {
+      file_type = "pdf"
+      layout_parsing_config {
+        enable_table_annotation       = true
+        enable_image_annotation       = true
+        enable_llm_layout_parsing     = true
+        enable_get_processed_document = true
+      }
+    }
   }
 }
