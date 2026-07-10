@@ -317,12 +317,10 @@ properties:
                 type: Boolean
                 description: |
                   If true, the pdf layout will be refined using an LLM.
-                required: false
               - name: 'enableGetProcessedDocument'
                 type: Boolean
                 description: |
                   If true, the processed document will be made available for the GetProcessedDocument API.
-                required: false
               - name: 'structuredContentTypes'
                 type: Array
                 description: |
@@ -415,12 +413,10 @@ properties:
                   type: Boolean
                   description: |
                     If true, the pdf layout will be refined using an LLM.
-                  required: false
                 - name: 'enableGetProcessedDocument'
                   type: Boolean
                   description: |
                     If true, the processed document will be made available for the GetProcessedDocument API.
-                  required: false
                 - name: 'structuredContentTypes'
                   type: Array
                   description: |
