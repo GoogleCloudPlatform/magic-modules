@@ -558,6 +558,18 @@ func TestProviderOnly(t *testing.T) {
 	}
 	nested.SetDefault(&Resource{})
 
+	nestedName := Type{
+		Name: "foo",
+		Type: "NestedObject",
+		Properties: []*Type{
+			{
+				Name:       "name",
+				ClientSide: true,
+			},
+		},
+	}
+	nestedName.SetDefault(&Resource{})
+
 	labeled := Resource{
 		BaseUrl: "test",
 		Properties: []*Type{
@@ -615,6 +627,35 @@ func TestProviderOnly(t *testing.T) {
 			// Effective labels are added second
 			obj:      *labeled.Properties[2],
 			expected: true,
+		},
+		{
+			description: "top-level name field (virtual)",
+			obj: Type{
+				Name:       "name",
+				ClientSide: true,
+			},
+			expected: false,
+		},
+		{
+			description: "top-level name field (url param)",
+			obj: Type{
+				Name:         "name",
+				UrlParamOnly: true,
+			},
+			expected: false,
+		},
+		{
+			description: "top-level name field (special labels)",
+			obj: Type{
+				Name: "name",
+				Type: "KeyValueEffectiveLabels",
+			},
+			expected: true,
+		},
+		{
+			description: "nested name field (virtual)",
+			obj:         *nestedName.Properties[0],
+			expected:    true,
 		},
 	}
 

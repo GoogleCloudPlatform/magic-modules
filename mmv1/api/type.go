@@ -1457,12 +1457,17 @@ func (t *Type) ProviderOnly() bool {
 		return true
 	}
 
+	// top-level `name` fields are never provider-only.
+	parent := t.Parent()
+	if parent == nil && t.Name == "name" {
+		return false
+	}
+
 	if t.UrlParamOnly || t.ClientSide {
 		return true
 	}
 
 	// The type is provider-only if any of its ancestors are provider-only (it is inherited)
-	parent := t.Parent()
 	return parent != nil && parent.ProviderOnly()
 }
 
