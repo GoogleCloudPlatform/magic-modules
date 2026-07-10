@@ -6,7 +6,12 @@ if err != nil {
 billingProject := ""
 
 obj := make(map[string]interface{})
-
+admissionPolicyProp, err := expandStorageRapidCacheAdmissionPolicy(d.Get("admission_policy"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("admission_policy"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, admissionPolicyProp)) {
+    obj["admissionPolicy"] = admissionPolicyProp
+}
 ttlProp, err := expandStorageRapidCacheTtl(d.Get("ttl"), d, config)
 if err != nil {
     return err

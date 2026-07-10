@@ -10,6 +10,18 @@ if err != nil {
 } else if v, ok := d.GetOkExists("zone"); !tpgresource.IsEmptyValue(reflect.ValueOf(zoneProp)) && (ok || !reflect.DeepEqual(v, zoneProp)) {
     obj["zone"] = zoneProp
 }
+admissionPolicyProp, err := expandStorageRapidCacheAdmissionPolicy(d.Get("admission_policy"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("admission_policy"); !tpgresource.IsEmptyValue(reflect.ValueOf(admissionPolicyProp)) && (ok || !reflect.DeepEqual(v, admissionPolicyProp)) {
+    obj["admissionPolicy"] = admissionPolicyProp
+}
+cacheTypeProp, err := expandStorageRapidCacheCacheType(d.Get("cache_type"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("cache_type"); !tpgresource.IsEmptyValue(reflect.ValueOf(cacheTypeProp)) && (ok || !reflect.DeepEqual(v, cacheTypeProp)) {
+    obj["cacheType"] = cacheTypeProp
+}
 ttlProp, err := expandStorageRapidCacheTtl(d.Get("ttl"), d, config)
 if err != nil {
     return err
