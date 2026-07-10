@@ -949,3 +949,11 @@ fields:
     provider_only: true
   - field: 'ignore_node_count_changes'
     provider_only: true
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'desired_emulated_version'
+    provider_only: true
+  - field: 'emulated_version'
+    provider_only: true
+  - field: 'rollback_safe_upgrade.control_plane_soak_duration'
+    provider_only: true
+{{- end }}
