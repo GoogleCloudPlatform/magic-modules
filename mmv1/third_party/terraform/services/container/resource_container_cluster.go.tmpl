@@ -1231,6 +1231,21 @@ func ResourceContainerCluster() *schema.Resource {
 			},
 
 {{- if ne $.TargetVersionName "ga" }}
+			"rollback_safe_upgrade": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Description: `Configuration for rollback-safe (two-step) upgrades.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"control_plane_soak_duration": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `A user-defined period for the cluster remains in the rollbackable state. E.g., '30d'.`,
+						},
+					},
+				},
+			},
 			"desired_emulated_version": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -4934,6 +4949,20 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 					DesiredMasterVersion: ver,
 				},
 			}
+
+{{- if ne $.TargetVersionName "ga" }}
+			if r, ok := d.GetOk("rollback_safe_upgrade"); ok {
+				rls := r.([]interface{})
+				if len(rls) > 0 && rls[0] != nil {
+					rl := rls[0].(map[string]interface{})
+					if soakDuration, ok := rl["control_plane_soak_duration"].(string); ok && soakDuration != "" {
+						req.Update.DesiredRollbackSafeUpgrade = &container.RollbackSafeUpgrade{
+							ControlPlaneSoakDuration: soakDuration,
+						}
+					}
+				}
+			}
+{{- end }}
 
 			updateF := updateFunc(req, "updating GKE master version")
 			// Call update serially.

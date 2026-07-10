@@ -255,6 +255,8 @@ to the datasource. A region can have a different set of supported versions than 
 region are guaranteed to support the same version.
 
 {{- if ne $.TargetVersionName "ga" }}
+* `rollback_safe_upgrade` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for rollback-safe (two-step) upgrades. Structure is [documented below](#nested_rollback_safe_upgrade).
+
 * `desired_emulated_version` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The desired emulated version for the cluster. Used to complete a rollback-safe upgrade after a soak period. Must be in major.minor format (e.g., "1.31"). To complete the upgrade declaratively, set this field to the target minor version. Removing this field from your configuration will not trigger completion.
 {{- end }}
 
@@ -999,6 +1001,10 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
     * `NETWORK_TIER_PREMIUM`: Premium network tier.
     * `NETWORK_TIER_STANDARD`: Standard network tier.
 
+
+<a name="nested_rollback_safe_upgrade"></a>The `rollback_safe_upgrade` block supports:
+
+* `control_plane_soak_duration` - (Optional) A user-defined period for the cluster remains in the rollbackable state. E.g., '30d'.
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
