@@ -296,6 +296,147 @@ resource "google_data_pipeline_pipeline" "primary" {
 }
 `, suffix, suffix)
 }
+
+func TestAccDataPipelinePipeline_desiredState(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataPipelinePipelineDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataPipelinePipeline_desiredStateActive(suffix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "desired_state", "STATE_ACTIVE"),
+				),
+			},
+			{
+				Config: testAccDataPipelinePipeline_desiredStatePaused(suffix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "desired_state", "STATE_PAUSED"),
+					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "state", "STATE_PAUSED"),
+				),
+			},
+			{
+				ResourceName:            "google_data_pipeline_pipeline.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region", "desired_state"},
+			},
+		},
+	})
+}
+
+func testAccDataPipelinePipeline_desiredStateActive(suffix string) string {
+	return fmt.Sprintf(`
+resource "google_service_account" "service_account" {
+  account_id   = "tf-test-service-%s"
+  display_name = "Service Account"
+}
+
+resource "google_data_pipeline_pipeline" "primary" {
+  name          = "tf-test-pipeline-%s"
+  type          = "PIPELINE_TYPE_BATCH"
+  desired_state = "STATE_ACTIVE"
+
+  workload {
+    dataflow_launch_template_request {
+      project_id = "my-project"
+      gcs_path   = "gs://my-bucket/path"
+      launch_parameters {
+        job_name = "my-job"
+        parameters = {
+          "name" : "wrench"
+        }
+        environment {
+          num_workers           = 5
+          max_workers           = 5
+          zone                  = "us-centra1-a"
+          service_account_email = google_service_account.service_account.email
+          network               = "default"
+          temp_location         = "gs://my-bucket/tmp_dir"
+          machine_type          = "E2"
+          additional_experiments = []
+          additional_user_labels = {
+            "context" : "test"
+          }
+          worker_region           = "us-central1"
+          worker_zone             = "us-central1-a"
+          enable_streaming_engine = "false"
+        }
+        update                 = false
+        transform_name_mapping = { "name" : "wrench" }
+      }
+      location = "us-central1"
+    }
+  }
+  schedule_info {
+    schedule  = "0 * * * *"
+    time_zone = "UTC"
+  }
+  pipeline_sources = {
+    "name" : "wrench"
+  }
+}
+`, suffix, suffix)
+}
+
+func testAccDataPipelinePipeline_desiredStatePaused(suffix string) string {
+	return fmt.Sprintf(`
+resource "google_service_account" "service_account" {
+  account_id   = "tf-test-service-%s"
+  display_name = "Service Account"
+}
+
+resource "google_data_pipeline_pipeline" "primary" {
+  name          = "tf-test-pipeline-%s"
+  type          = "PIPELINE_TYPE_BATCH"
+  desired_state = "STATE_PAUSED"
+
+  workload {
+    dataflow_launch_template_request {
+      project_id = "my-project"
+      gcs_path   = "gs://my-bucket/path"
+      launch_parameters {
+        job_name = "my-job"
+        parameters = {
+          "name" : "wrench"
+        }
+        environment {
+          num_workers           = 5
+          max_workers           = 5
+          zone                  = "us-centra1-a"
+          service_account_email = google_service_account.service_account.email
+          network               = "default"
+          temp_location         = "gs://my-bucket/tmp_dir"
+          machine_type          = "E2"
+          additional_experiments = []
+          additional_user_labels = {
+            "context" : "test"
+          }
+          worker_region           = "us-central1"
+          worker_zone             = "us-central1-a"
+          enable_streaming_engine = "false"
+        }
+        update                 = false
+        transform_name_mapping = { "name" : "wrench" }
+      }
+      location = "us-central1"
+    }
+  }
+  schedule_info {
+    schedule  = "0 * * * *"
+    time_zone = "UTC"
+  }
+  pipeline_sources = {
+    "name" : "wrench"
+  }
+}
+`, suffix, suffix)
+}
+
 func testAccDataPipelinePipeline_basicLaunchTemplate(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
