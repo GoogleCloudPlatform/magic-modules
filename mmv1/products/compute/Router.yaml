@@ -223,6 +223,7 @@ properties:
           between the two peers. If set, this value must be between 20 and 60.
           The default is 20.
         default_value: 20
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
       - name: 'identifierRange'
         type: String
         description: |
