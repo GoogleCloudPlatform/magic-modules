@@ -313,6 +313,14 @@ properties:
                 description: |
                   If true, the LLM based annotation is added to the image during parsing.
                 required: false
+              - name: 'enableLlmLayoutParsing'
+                type: Boolean
+                description: |
+                  If true, the pdf layout will be refined using an LLM.
+              - name: 'enableGetProcessedDocument'
+                type: Boolean
+                description: |
+                  If true, the processed document will be made available for the GetProcessedDocument API.
               - name: 'structuredContentTypes'
                 type: Array
                 description: |
@@ -401,6 +409,14 @@ properties:
                   description: |
                     If true, the LLM based annotation is added to the image during parsing.
                   required: false
+                - name: 'enableLlmLayoutParsing'
+                  type: Boolean
+                  description: |
+                    If true, the pdf layout will be refined using an LLM.
+                - name: 'enableGetProcessedDocument'
+                  type: Boolean
+                  description: |
+                    If true, the processed document will be made available for the GetProcessedDocument API.
                 - name: 'structuredContentTypes'
                   type: Array
                   description: |
