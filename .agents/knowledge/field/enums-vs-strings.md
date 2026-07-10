@@ -28,7 +28,9 @@ last_verified: 2026-07-09
 ```
 
 **Rules for Enum:**
-- Do **not** include `UNSPECIFIED`-style values in `enum_values`.
+- Omit the `FIELD_NAME_UNSPECIFIED` value from `enum_values` — it is the proto convention's first enum
+  value, representing 0/unset, not a real choice. An enum whose meaningful values include a literal
+  `UNSPECIFIED` (e.g. BackendService) keeps it.
 - Enums validate against the list automatically; a custom `validation` **overrides** that default — if you
   add one, it must re-verify the enum values itself.
 
