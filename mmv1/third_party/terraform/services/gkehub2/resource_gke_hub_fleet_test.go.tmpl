@@ -74,6 +74,12 @@ resource "google_gke_hub_fleet" "default" {
 		mode = "DISABLED"
 		vulnerability_mode = "VULNERABILITY_DISABLED"
 	}
+	compliance_posture_config {
+		mode = "DISABLED"
+	}
+  }
+  labels = {
+	env = "test"
   }
   depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
@@ -96,6 +102,15 @@ resource "google_gke_hub_fleet" "default" {
 		mode = "BASIC"
 		vulnerability_mode = "VULNERABILITY_BASIC"
 	}
+	compliance_posture_config {
+		mode = "ENABLED"
+		compliance_standards {
+			standard = "cis-gke"
+		}
+	}
+  }
+  labels = {
+	env = "prod"
   }
   depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
