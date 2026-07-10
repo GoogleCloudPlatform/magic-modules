@@ -1,0 +1,82 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'InstanceTokenAuthUser'
+api_resource_type_kind: 'TokenAuthUser'
+description: |
+  A token based auth user for a Google Cloud Memorystore Instance.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/memorystore/docs/valkey/
+  api: https://cloud.google.com/memorystore/docs/valkey/reference/rest/v1main/projects.locations.instances.tokenAuthUsers
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers
+min_version: beta
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{token_auth_user}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}:addTokenAuthUser
+delete_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{token_auth_user}}
+create_verb: POST
+delete_verb: DELETE
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{token_auth_user}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{token_auth_user}}
+timeouts:
+  insert_minutes: 30
+  delete_minutes: 30
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete]
+include_in_tgc_next: true
+samples:
+  - name: memorystore_instance_token_auth_user_basic
+    primary_resource_id: token-auth-user
+    steps:
+      - name: memorystore_instance_token_auth_user_basic
+        vars:
+          instance_name: instance-token-auth
+          token_auth_user_name: user-token-auth
+          policy_name: policy-token-auth
+          subnet_name: subnet-token-auth
+          network_name: net-token-auth
+parameters:
+  - name: 'instance'
+    type: String
+    description: |
+      Required. The name of the Memorystore instance.
+      Format: projects/{project}/locations/{location}/instances/{instance}
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: 'tokenAuthUser'
+    type: String
+    description: |
+      Required. The identifier of the token auth user.
+    required: true
+    immutable: true
+    ignore_read: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Output only. Identifier. The resource name of the token auth user.
+      Format: projects/{project}/locations/{location}/instances/{instance}/tokenAuthUsers/{token_auth_user}
+    output: true
+  - name: 'state'
+    type: String
+    description: |
+      Output only. The state of the token auth user.
+      Possible values: STATE_UNSPECIFIED, ACTIVE, CREATING, UPDATING, DELETING
+    output: true

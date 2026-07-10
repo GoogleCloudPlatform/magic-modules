@@ -385,6 +385,7 @@ properties:
       - AUTH_MODE_UNSPECIFIED
       - AUTH_MODE_IAM_AUTH
       - AUTH_MODE_DISABLED
+      - AUTH_MODE_TOKEN_AUTH
   - name: transitEncryptionMode
     type: Enum
     description: |
