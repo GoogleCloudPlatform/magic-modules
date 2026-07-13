@@ -23,7 +23,16 @@ if err != nil {
     obj["ttl"] = ttlProp
 }
 
-url, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{bucket}}/anywhereCaches/"}}")
+if v, ok := d.GetOkExists("ingest_on_write"); ok {
+    ingestOnWriteProp, err := expandStorageAnywhereCacheIngestOnWrite(v, d, config)
+    if err != nil {
+        return err
+    }
+    obj["ingestOnWrite"] = ingestOnWriteProp
+}
+
+
+url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"b/{{bucket}}/anywhereCaches/"}}")
 if err != nil {
     return err
 }

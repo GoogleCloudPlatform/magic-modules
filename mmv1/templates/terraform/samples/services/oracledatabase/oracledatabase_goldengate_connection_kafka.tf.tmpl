@@ -1,0 +1,26 @@
+resource "google_oracle_database_goldengate_connection" "{{$.PrimaryResourceId}}" {
+  goldengate_connection_id = "{{index $.ResourceIdVars "goldengate_connection_id"}}"
+  location                 = "europe-west8"
+  project                  = "{{index $.ResourceIdVars "project"}}"
+  gcp_oracle_zone          = "europe-west8-a-r1"
+
+  properties {
+    display_name    = "{{index $.ResourceIdVars "goldengate_connection_id"}} display name"
+    connection_type = "KAFKA"
+    kafka_connection_properties {
+      technology_type              = "APACHE_KAFKA"
+      stream_pool_id               = "ocid1.streampool.oc1..example"
+      cluster_id                   = "ocid1.kafkacluster.oc1..example"
+      bootstrap_servers {
+        host               = "kafka.example.com"
+        port               = 9092
+        private_ip_address = "10.0.0.1"
+      }
+      security_protocol            = "SSL"
+      consumer_properties_file     = "Y29uc3VtZXIucHJvcGVydGllcz1kZW1v"
+      producer_properties_file     = "cHJvZHVjZXIucHJvcGVydGllcz1kZW1v"
+      use_resource_principal       = false
+    }
+  }
+  deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
+}

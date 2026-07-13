@@ -31,6 +31,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Activedirectory",
         "path" to "./google-beta/services/activedirectory"
     ),
+    "agentregistry" to mapOf(
+        "name" to "agentregistry",
+        "displayName" to "Agent Registry",
+        "path" to "./google-beta/services/agentregistry"
+    ),
     "alloydb" to mapOf(
         "name" to "alloydb",
         "displayName" to "Alloydb",
@@ -90,6 +95,11 @@ var ServicesListBeta = mapOf(
         "name" to "biglake",
         "displayName" to "Biglake",
         "path" to "./google-beta/services/biglake"
+    ),
+    "biglakehive" to mapOf(
+        "name" to "biglakehive",
+        "displayName" to "BiglakeHive",
+        "path" to "./google-beta/services/biglakehive"
     ),
     "biglakeiceberg" to mapOf(
         "name" to "biglakeiceberg",
@@ -255,6 +265,11 @@ var ServicesListBeta = mapOf(
         "name" to "compute",
         "displayName" to "Compute",
         "path" to "./google-beta/services/compute"
+    ),
+    "config" to mapOf(
+        "name" to "config",
+        "displayName" to "Config",
+        "path" to "./google-beta/services/config"
     ),
     "contactcenterinsights" to mapOf(
         "name" to "contactcenterinsights",
@@ -565,6 +580,11 @@ var ServicesListBeta = mapOf(
         "name" to "kms",
         "displayName" to "Kms",
         "path" to "./google-beta/services/kms"
+    ),
+    "licensemanager" to mapOf(
+        "name" to "licensemanager",
+        "displayName" to "License Manager",
+        "path" to "./google/services/licensemanager"
     ),
     "logging" to mapOf(
         "name" to "logging",

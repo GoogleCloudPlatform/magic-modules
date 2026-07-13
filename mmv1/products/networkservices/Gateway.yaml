@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'Gateway'
-include_in_tgc_next: true
+name: Gateway
 description: |
   Gateway represents the configuration for a proxy, typically a load balancer.
   It captures the ip:port over which the services are exposed by the proxy,
@@ -21,134 +20,143 @@ description: |
   to dictate how requests should be routed by this Gateway.
 references:
   guides:
-  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1/projects.locations.gateways'
+  api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1/projects.locations.gateways
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/gateways'
-self_link: 'projects/{{project}}/locations/{{location}}/gateways/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/gateways?gatewayId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{location}}/gateways
+self_link: projects/{{project}}/locations/{{location}}/gateways/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/gateways?gatewayId={{name}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/gateways/{{name}}'
+  - projects/{{project}}/locations/{{location}}/gateways/{{name}}
 timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-autogen_async: true
+sweeper:
+  url_substitutions:
+    - region: us-east1
+    - region: us-central1
+    - region: us-south1
+    - region: us-west1
+    - region: us-west2
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
-    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
+autogen_async: true
+include_in_tgc_next: true
 custom_code:
-  constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
-  post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/network_services_gateway.go.tmpl'
-sweeper:
-  url_substitutions:
-    - region: "us-east1"
-    - region: "us-central1"
-    - region: "us-south1"
-    - region: "us-west1"
-    - region: "us-west2"
-examples:
-  - name: 'network_services_gateway_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-gateway'
-  - name: 'network_services_gateway_advanced'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-gateway'
-  - name: 'network_services_gateway_secure_web_proxy'
-    primary_resource_id: 'default'
-    vars:
-      certificate_name: 'my-certificate'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork-name'
-      proxy_only_subnetwork_name: 'my-proxy-only-subnetwork'
-      policy_name: 'my-policy-name'
-      policy_rule_name: 'my-policyrule-name'
-      gateway_name_1: 'my-gateway1'
-      scope_1: 'my-default-scope1'
-    ignore_read_extra:
-      - 'delete_swg_autogen_router_on_destroy'
-  - name: 'network_services_gateway_multiple_swp_same_network'
-    primary_resource_id: 'default'
-    vars:
-      certificate_name: 'my-certificate'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork-name'
-      proxy_only_subnetwork_name: 'my-proxy-only-subnetwork'
-      policy_name: 'my-policy-name'
-      policy_rule_name: 'my-policyrule-name'
-      gateway_name_1: 'my-gateway1'
-      gateway_name_2: 'my-gateway2'
-      scope_1: 'my-default-scope1'
-      scope_2: 'my-default-scope2'
-    ignore_read_extra:
-      - 'delete_swg_autogen_router_on_destroy'
+  update_encoder: templates/terraform/update_encoder/network_services_gateway.go.tmpl
+  constants: templates/terraform/constants/network_services_gateway.go.tmpl
+  post_delete: templates/terraform/post_delete/network_services_gateway.go.tmpl
+samples:
+  - name: network_services_gateway_basic
+    primary_resource_id: default
+    steps:
+      - name: network_services_gateway_basic
+        resource_id_vars:
+          resource_name: my-gateway
+  - name: network_services_gateway_advanced
+    primary_resource_id: default
+    steps:
+      - name: network_services_gateway_advanced
+        resource_id_vars:
+          resource_name: my-gateway
+  - name: network_services_gateway_secure_web_proxy
+    primary_resource_id: default
+    steps:
+      - name: network_services_gateway_secure_web_proxy
+        resource_id_vars:
+          certificate_name: my-certificate
+          network_name: my-network
+          subnetwork_name: my-subnetwork-name
+          proxy_only_subnetwork_name: my-proxy-only-subnetwork
+          policy_name: my-policy-name
+          policy_rule_name: my-policyrule-name
+          gateway_name_1: my-gateway1
+          scope_1: my-default-scope1
+        ignore_read_extra:
+          - delete_swg_autogen_router_on_destroy
+  - name: network_services_gateway_multiple_swp_same_network
+    primary_resource_id: default
+    steps:
+      - name: network_services_gateway_multiple_swp_same_network
+        resource_id_vars:
+          certificate_name: my-certificate
+          network_name: my-network
+          subnetwork_name: my-subnetwork-name
+          proxy_only_subnetwork_name: my-proxy-only-subnetwork
+          policy_name: my-policy-name
+          policy_rule_name: my-policyrule-name
+          gateway_name_1: my-gateway1
+          gateway_name_2: my-gateway2
+          scope_1: my-default-scope1
+          scope_2: my-default-scope2
+        ignore_read_extra:
+          - delete_swg_autogen_router_on_destroy
 virtual_fields:
-  - name: 'delete_swg_autogen_router_on_destroy'
+  - name: delete_swg_autogen_router_on_destroy
     description: |
       When deleting a gateway of type 'SECURE_WEB_GATEWAY', this boolean option will also delete auto generated router by the gateway creation.
       If there is no other gateway of type 'SECURE_WEB_GATEWAY' remaining for that region and network it will be deleted.
     type: Boolean
     default_value: false
 parameters:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Name of the Gateway resource.
     url_param_only: true
     required: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the gateway.
       The default value is `global`.
     url_param_only: true
-    default_value: 'global'
+    default_value: global
 properties:
-  - name: 'selfLink'
+  - name: selfLink
     type: String
     description: |
       Server-defined URL of this resource.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       The timestamp when the resource was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       The timestamp when the resource was updated.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       Set of label tags associated with the Gateway resource.
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - name: 'type'
+  - name: type
     type: Enum
     description: |
       Immutable. The type of the customer managed gateway.
     required: true
     immutable: true
     enum_values:
-      - 'OPEN_MESH'
-      - 'SECURE_WEB_GATEWAY'
-  - name: 'addresses'
+      - OPEN_MESH
+      - SECURE_WEB_GATEWAY
+  - name: addresses
     type: Array
     description: |
       Zero or one IPv4 or IPv6 address on which the Gateway will receive the traffic.
@@ -160,7 +168,7 @@ properties:
     default_from_api: true
     item_type:
       type: String
-  - name: 'allPorts'
+  - name: allPorts
     description: |
       Configures this gateway to ​listen on all ports.
       By enabling the wildcard ports feature on​ ​your Secure Web Proxy Gateway,
@@ -170,7 +178,7 @@ properties:
     immutable: true
     conflicts:
       - ports
-  - name: 'ports'
+  - name: ports
     type: Array
     description: |
       One or more port numbers (1-65535), on which the Gateway will receive traffic.
@@ -180,7 +188,7 @@ properties:
       type: Integer
     conflicts:
       - allPorts
-  - name: 'scope'
+  - name: scope
     type: String
     description: |
       Immutable. Scope determines how configuration across multiple Gateway instances are merged.
@@ -188,24 +196,24 @@ properties:
 
       Max length 64 characters. Scope should start with a letter and can only have letters, numbers, hyphens.
     immutable: true
-  - name: 'serverTlsPolicy'
+  - name: serverTlsPolicy
     type: String
     description: |
       A fully-qualified ServerTLSPolicy URL reference. Specifies how TLS traffic is terminated. If empty, TLS termination is disabled.
-  - name: 'certificateUrls'
+  - name: certificateUrls
     type: Array
     description: |
       A fully-qualified Certificates URL reference. The proxy presents a Certificate (selected based on SNI) when establishing a TLS connection.
       This feature only applies to gateways of type 'SECURE_WEB_GATEWAY'.
     item_type:
       type: String
-  - name: 'gatewaySecurityPolicy'
+  - name: gatewaySecurityPolicy
     type: String
     description: |
       A fully-qualified GatewaySecurityPolicy URL reference. Defines how a server should apply security policy to inbound (VM to Proxy) initiated connections.
       For example: 'projects/*/locations/*/gatewaySecurityPolicies/swg-policy'.
       This policy is specific to gateways of type 'SECURE_WEB_GATEWAY'.
-  - name: 'network'
+  - name: network
     type: String
     description: |
       The relative resource name identifying the VPC network that is using this configuration.
@@ -213,7 +221,7 @@ properties:
 
       Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY'.
     immutable: true
-  - name: 'subnetwork'
+  - name: subnetwork
     type: String
     description: |
       The relative resource name identifying the subnetwork in which this SWG is allocated.
@@ -221,27 +229,27 @@ properties:
 
       Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY'.
     immutable: true
-  - name: 'ipVersion'
+  - name: ipVersion
     type: Enum
     description: |
       The IP Version that will be used by this gateway.
     enum_values:
-      - 'IPV4'
-      - 'IPV6'
-  - name: 'envoyHeaders'
+      - IPV4
+      - IPV6
+  - name: envoyHeaders
     type: Enum
     description: |
       Determines if envoy will insert internal debug headers into upstream requests.
       Other Envoy headers may still be injected.
       By default, envoy will not insert any debug headers.
     enum_values:
-      - 'NONE'
-      - 'DEBUG_HEADERS'
-  - name: 'routingMode'
+      - NONE
+      - DEBUG_HEADERS
+  - name: routingMode
     type: Enum
-    diff_suppress_func: 'tpgresource.SuppressRoutingModeDefault'
+    diff_suppress_func: tpgresource.SuppressRoutingModeDefault
     description: |
       The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
     enum_values:
-      - 'NEXT_HOP_ROUTING_MODE'
-      - 'EXPLICIT_ROUTING_MODE'
+      - NEXT_HOP_ROUTING_MODE
+      - EXPLICIT_ROUTING_MODE

@@ -1,0 +1,12 @@
+location := d.Get("location").(string)
+universeDomain := config.UniverseDomain
+
+if universeDomain != "" && universeDomain != "googleapis.com" {
+  url = strings.Replace(url, "googleapis.com", universeDomain, 1)
+}
+
+if strings.HasPrefix(url, "https://contactcenterinsights") {
+    if location != "" && location != "us-central1" {
+        url = strings.Replace(url, "https://contactcenterinsights", fmt.Sprintf("https://%s-contactcenterinsights", location), 1)
+    }
+}

@@ -15,7 +15,6 @@
 name: 'RolloutSequence'
 description: |
   RolloutSequence defines the desired order of upgrades.
-min_version: beta
 references:
   guides:
     'Rollout Sequencing Overview': 'https://cloud.google.com/kubernetes-engine/docs/concepts/rollout-sequencing-custom-stages/about-rollout-sequencing'
@@ -28,6 +27,8 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/global/rolloutSequences/{{rollout_sequence_id}}'
+custom_code:
+  constants: 'templates/terraform/constants/gke_hub_rollout_sequence.go.tmpl'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -129,4 +130,53 @@ properties:
         - name: 'soakDuration'
           type: String
           description: |
-            Soak time after upgrading all the clusters in the stage, specified in seconds.
+            Soak time after upgrading all the clusters in the stage.
+            Has to be specified in seconds, minutes, hours or days.
+          custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
+          diff_suppress_func: 'rolloutSequenceDurationDiffSuppress'
+  - name: 'autoUpgradeConfig'
+    type: NestedObject
+    description: |
+      Configuration for automatic upgrades.
+      If not specified, the system applies default behavior.
+    properties:
+      - name: 'rolloutCreationScope'
+        type: NestedObject
+        description: |
+          Specifies the scope of automation for the creation of rollouts.
+          Represents the types of rollouts (version upgrades) the sequence should
+          initiate automatically.
+          If this field is not specified, it defaults to all types.
+          If this field is specified, but the nested upgradeTypes field is empty,
+          most automatic rollouts are disabled for this sequence.
+          Exceptions are rollouts enforcing our security policies (e.g. such as
+          end-of-support and outdated control plane patch enforcements).
+          These policy enforcements cannot be disabled.
+        properties:
+          - name: 'upgradeTypes'
+            type: Array
+            is_set: true
+            description: |
+              The list of enabled upgrade types.
+              Current valid values are `CONTROL_PLANE_MINOR`, `CONTROL_PLANE_PATCH`, `NODE_MINOR`, and `NODE_PATCH`.
+            item_type:
+              type: String
+samples:
+  - name: 'gke_hub_rollout_sequence_basic'
+    primary_resource_id: 'rollout_sequence'
+    steps:
+      - name: 'gke_hub_rollout_sequence_create'
+        resource_id_vars:
+          rollout_sequence_id: 'rs-basic'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        ignore_read_extra:
+          - 'labels'
+          - 'rollout_sequence_id'
+        include_step_doc: true
+      - name: 'gke_hub_rollout_sequence_update'
+        resource_id_vars:
+          rollout_sequence_id: 'rs-basic'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+        include_step_doc: true

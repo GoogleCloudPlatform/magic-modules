@@ -9,11 +9,14 @@ import (
 	{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	{{- end}}
+	"github.com/hashicorp/terraform-plugin-framework/list"
+
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
-	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
+	cloudresourcemanagerv3 "google.golang.org/api/cloudresourcemanager/v3"
 )
 
 var IamFolderSchema = map[string]*schema.Schema{
@@ -48,6 +51,19 @@ func FolderIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
 	return nil
 }
 
+// FolderIamParentResourceIdentityParser returns the parent folder's id
+func FolderIamParentResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, _ *transport_tpg.Config) (string, error) {
+	v, ok := identity.GetOk("folder")
+	if !ok {
+		return "", fmt.Errorf("import identity is missing attribute %q", "folder")
+	}
+	s, ok := v.(string)
+	if !ok || s == "" {
+		return "", fmt.Errorf("import identity attribute %q must be a non-empty string", "folder")
+	}
+	return CanonicalFolderId(s), nil
+}
+
 func (u *FolderIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
 	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
@@ -68,7 +84,7 @@ func (u *FolderIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Pol
 		return err
 	}
 
-	_, err = u.Config.NewResourceManagerV3Client(userAgent).Folders.SetIamPolicy(u.folderId, &resourceManagerV3.SetIamPolicyRequest{
+	_, err = resourcemanagerv3.NewClient(u.Config, userAgent).Folders.SetIamPolicy(u.folderId, &cloudresourcemanagerv3.SetIamPolicyRequest{
 		Policy:     v2Policy,
 		UpdateMask: "bindings,etag,auditConfigs",
 	}).Do()
@@ -101,8 +117,8 @@ func CanonicalFolderId(folder string) string {
 }
 
 // v1 and v2 policy are identical
-func v1PolicyToV2(in *cloudresourcemanager.Policy) (*resourceManagerV3.Policy, error) {
-	out := &resourceManagerV3.Policy{}
+func v1PolicyToV2(in *cloudresourcemanager.Policy) (*cloudresourcemanagerv3.Policy, error) {
+	out := &cloudresourcemanagerv3.Policy{}
 	err := tpgresource.Convert(in, out)
 	if err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a v1 policy to a v2 policy: {{"{{"}}err{{"}}"}}", err)
@@ -110,7 +126,7 @@ func v1PolicyToV2(in *cloudresourcemanager.Policy) (*resourceManagerV3.Policy, e
 	return out, nil
 }
 
-func v2PolicyToV1(in *resourceManagerV3.Policy) (*cloudresourcemanager.Policy, error) {
+func v2PolicyToV1(in *cloudresourcemanagerv3.Policy) (*cloudresourcemanager.Policy, error) {
 	out := &cloudresourcemanager.Policy{}
 	err := tpgresource.Convert(in, out)
 	if err != nil {
@@ -121,9 +137,9 @@ func v2PolicyToV1(in *resourceManagerV3.Policy) (*cloudresourcemanager.Policy, e
 
 // Retrieve the existing IAM Policy for a folder
 func GetFolderIamPolicyByFolderName(folderName, userAgent string, config *transport_tpg.Config) (*cloudresourcemanager.Policy, error) {
-	p, err := config.NewResourceManagerV3Client(userAgent).Folders.GetIamPolicy(folderName,
-		&resourceManagerV3.GetIamPolicyRequest{
-			Options: &resourceManagerV3.GetPolicyOptions{
+	p, err := resourcemanagerv3.NewClient(config, userAgent).Folders.GetIamPolicy(folderName,
+		&cloudresourcemanagerv3.GetIamPolicyRequest{
+			Options: &cloudresourcemanagerv3.GetPolicyOptions{
 				RequestedPolicyVersion: tpgiamresource.IamPolicyVersion,
 			},
 		}).Do()
@@ -138,6 +154,33 @@ func GetFolderIamPolicyByFolderName(folderName, userAgent string, config *transp
 
 	return v1Policy, nil
 }
+
+
+func FolderIamMemberResource() *schema.Resource {
+	return tpgiamresource.ResourceIamMember(
+		IamFolderSchema,
+		NewFolderIamUpdater,
+		FolderIdParseFunc,
+		tpgiamresource.IamWithBatching,
+		tpgiamresource.IamWithParentResourceIdentity(FolderIamParentResourceIdentityParser),
+		)
+	}
+
+// NewFolderIamMemberListResource returns the list implementation for google_folder_iam_member
+func NewFolderIamMemberListResource() list.ListResource {
+	return tpgiamresource.NewIamMemberListResource(
+		"google_folder_iam_member",
+		FolderIamMemberResource(),
+		NewFolderIamUpdater,
+		tpgiamresource.IamMemberListCallConfig{
+			ParentResourceField: "folder",
+			EnableRoleFilter:   true,
+  			EnableMemberFilter: true,
+		},
+	)
+}
+
+
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 
 func init() {
@@ -157,7 +200,12 @@ func init() {
 		Name:        "google_folder_iam_member",
 		ProductName: "resourcemanager",
 		Type:        registry.SchemaTypeIAMResource,
-		Schema:      tpgiamresource.ResourceIamMember(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc),
+		Schema:      FolderIamMemberResource(),
+	}.Register()
+	registry.FrameworkListResource{
+		Name:        "google_folder_iam_member",
+		ProductName: "resourcemanager",
+		Func: 		 NewFolderIamMemberListResource,
 	}.Register()
 	registry.Schema{
 		Name:        "google_folder_iam_policy",

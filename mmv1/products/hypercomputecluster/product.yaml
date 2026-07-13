@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,12 +13,12 @@
 
 ---
 name: Hypercomputecluster
-packagepath: ""
 display_name: Cluster Director
+packagepath: ""
 scopes:
-    - https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
-    - base_url: https://hypercomputecluster.googleapis.com/v1/
-      name: ga
-    - base_url: https://hypercomputecluster.googleapis.com/v1beta/
-      name: beta
+  - base_url: https://hypercomputecluster.googleapis.com/v1/
+    name: ga
+  - base_url: https://hypercomputecluster.googleapis.com/v1beta/
+    name: beta

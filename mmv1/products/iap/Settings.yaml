@@ -38,17 +38,21 @@ custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
-examples:
+samples:
   - name: 'iap_settings_basic'
     primary_resource_id: 'iap_settings'
-    vars:
-      backend_service_name: 'iap-settings-tf'
-      health_check_name: 'iap-bs-health-check'
+    steps:
+      - name: 'iap_settings_basic'
+        resource_id_vars:
+          backend_service_name: 'iap-settings-tf'
+          health_check_name: 'iap-bs-health-check'
   - name: 'iap_settings_oauth_storage'
     primary_resource_id: 'iap_settings_oauth'
-    vars:
-      backend_service_name: 'iap-settings-oauth'
-      health_check_name: 'iap-bs-health-check-oauth'
+    steps:
+      - name: 'iap_settings_oauth_storage'
+        resource_id_vars:
+          backend_service_name: 'iap-settings-oauth'
+          health_check_name: 'iap-bs-health-check-oauth'
 parameters:
 properties:
   - name: 'name'
@@ -66,7 +70,6 @@ properties:
       * projects/{project_id}/iap_web/appengine-{app_id}
       * projects/{project_id}/iap_web/appengine-{app_id}/services/{service_id}
       * projects/{project_id}/iap_web/appengine-{app_id}/services/{service_id}/version/{version_id}
-
     required: true
     immutable: true
     ignore_read: true

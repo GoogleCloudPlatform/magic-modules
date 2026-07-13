@@ -10,10 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/kms"
 )
 
 func TestAccDataSourceGoogleKmsKeyHandles_basic(t *testing.T) {
-	kmsAutokey := acctest.BootstrapKMSAutokeyKeyHandle(t)
+	kmsAutokey := BootstrapKMSAutokeyKeyHandle(t)
 	keyParts := strings.Split(kmsAutokey.KeyHandle.Name, "/")
 	project := keyParts[1]
 	location := keyParts[3]

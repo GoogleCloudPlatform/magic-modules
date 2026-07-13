@@ -27,20 +27,22 @@ func NewContainerNodePoolCai2hclConverter(provider *schema.Provider) models.Cai2
 	}
 }
 
-// Convert converts asset resource data.
-func (c *ContainerNodePoolCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
-	if asset.Resource == nil || asset.Resource.Data == nil {
-		return nil, fmt.Errorf("asset resource data is nil")
+// Convert converts assets resource data.
+func (c *ContainerNodePoolCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
 	}
 
-	block, err := c.convertResourceData(asset)
+	var blocks []*models.TerraformResourceBlock
+	block, err := c.convertResourceData(assets[0], options)
 	if err != nil {
 		return nil, err
 	}
-	return []*models.TerraformResourceBlock{block}, nil
+	blocks = append(blocks, block)
+	return blocks, nil
 }
 
-func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.Asset, options *models.ResourceConverterOptions) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -73,8 +75,14 @@ func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.A
 	if err != nil {
 		return nil, err
 	}
+	var hclBlockName string
+	if options != nil && options.ResourceName != "" {
+		hclBlockName = options.ResourceName
+	} else {
+		hclBlockName = asset.Resource.Data["name"].(string)
+	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, asset.Resource.Data["name"].(string)},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }
@@ -119,16 +127,29 @@ func flattenNodePoolUpgradeSettings(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+	if len(us) == 0 {
+		return nil
+	}
 	upgradeSettings := make(map[string]interface{})
 
-	upgradeSettings["blue_green_settings"] = flattenNodePoolBlueGreenSettings(us["blueGreenSettings"])
-	upgradeSettings["max_surge"] = us["maxSurge"]
-	upgradeSettings["max_unavailable"] = us["maxUnavailable"]
+	if v := flattenNodePoolBlueGreenSettings(us["blueGreenSettings"]); v != nil {
+		upgradeSettings["blue_green_settings"] = v
+	}
+	if v := us["maxSurge"]; v != nil {
+		upgradeSettings["max_surge"] = v
+	}
+	if v := us["maxUnavailable"]; v != nil {
+		upgradeSettings["max_unavailable"] = v
+	}
 
 	// "SHORT_LIVED" strategy is not supported by the Terraform provider yet.
 	// Suppress Default Value "SURGE"
 	if strategy, ok := us["strategy"].(string); ok && strategy != "SHORT_LIVED" && strategy != "SURGE" {
 		upgradeSettings["strategy"] = strategy
+	}
+
+	if len(upgradeSettings) == 0 {
+		return nil
 	}
 
 	return []map[string]interface{}{upgradeSettings}
@@ -265,6 +286,7 @@ func flattenNodeNetworkConfig(c interface{}, d *schema.ResourceData, prefix stri
 			"network_performance_config":      flattenNodeNetworkPerformanceConfig(config["networkPerformanceConfig"]),
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(config["additionalNodeNetworkConfigs"]),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(config["additionalPodNetworkConfigs"]),
+			"accelerator_network_profile":     config["acceleratorNetworkProfile"],
 		}
 
 		// enable_private_nodes = false and the field not in HCL behaves the same, as this field is in ForceSendFields and the false value is included in the API request when it is not specified in config.

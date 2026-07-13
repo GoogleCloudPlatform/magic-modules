@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'StorageTransfer'
-display_name: 'Storage Transfer Service'
-versions:
-  - name: 'ga'
-    base_url: 'https://storagetransfer.googleapis.com/v1/'
+name: StorageTransfer
+display_name: Storage Transfer Service
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://storagetransfer.googleapis.com/v1/

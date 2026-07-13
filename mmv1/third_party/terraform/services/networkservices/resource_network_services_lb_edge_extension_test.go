@@ -11,6 +11,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/networkservices"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -144,6 +146,7 @@ resource "google_network_services_lb_edge_extension" "default" {
       fail_open = false
       supported_events = ["REQUEST_HEADERS"]
       forward_headers  = ["custom-header"]
+      forward_attributes = ["request.host", "request.path"]
     }
   }
 
@@ -273,6 +276,7 @@ resource "google_network_services_lb_edge_extension" "default" {
       fail_open = false
       supported_events = ["REQUEST_HEADERS"]
       forward_headers  = ["custom-header"]
+      forward_attributes = ["request.host", "request.path", "request.scheme"]
     }
   }
 
@@ -289,6 +293,7 @@ resource "google_network_services_lb_edge_extension" "default" {
       fail_open = true
       supported_events = ["REQUEST_HEADERS"]
       forward_headers  = ["testing-header"]
+      forward_attributes = ["request.host"]
     }
   }
 
@@ -363,7 +368,7 @@ func testAccCheckNetworkServicesLbEdgeExtensionDestroyProducer(t *testing.T) fun
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetworkServicesBasePath}}projects/{{project}}/locations/{{location}}/lbEdgeExtensions/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(networkservices.Product, config)+"projects/{{project}}/locations/{{location}}/lbEdgeExtensions/{{name}}")
 			if err != nil {
 				return err
 			}

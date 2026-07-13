@@ -40,271 +40,321 @@ include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccComputeUrlMap_cachePolicyMultiLevelUpdate'
     skip: 'Index mismatch in path_matcher due to test framework limitation'
-examples:
+custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/compute_url_map.go.tmpl'
+samples:
   - name: 'url_map_bucket_and_service'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      login_backend_service_name: 'login'
-      http_health_check_name: 'health-check'
-      backend_bucket_name: 'static-asset-backend-bucket'
-      storage_bucket_name: 'static-asset-bucket'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      login_backend_service_name: '"login" + randomSuffix'
+    steps:
+      - name: 'url_map_bucket_and_service'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          login_backend_service_name: 'login'
+          http_health_check_name: 'health-check'
+          backend_bucket_name: 'static-asset-backend-bucket'
+          storage_bucket_name: 'static-asset-bucket'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          login_backend_service_name: '"login" + randomSuffix'
   - name: 'url_map_traffic_director_route'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      home_backend_service_name: '"home" + randomSuffix'
+    steps:
+      - name: 'url_map_traffic_director_route'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          home_backend_service_name: 'home'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_traffic_director_route_partial'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      home_backend_service_name: '"home" + randomSuffix'
+    steps:
+      - name: 'url_map_traffic_director_route_partial'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          home_backend_service_name: 'home'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_traffic_director_path'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      home_backend_service_name: '"home" + randomSuffix'
+    steps:
+      - name: 'url_map_traffic_director_path'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          home_backend_service_name: 'home'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_traffic_director_path_partial'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      home_backend_service_name: '"home" + randomSuffix'
+    steps:
+      - name: 'url_map_traffic_director_path_partial'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          home_backend_service_name: 'home'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_header_based_routing'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      default_backend_service_name: 'default'
-      service_a_backend_service_name: 'service-a'
-      service_b_backend_service_name: 'service-b'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      default_backend_service_name: '"default" + randomSuffix'
+    steps:
+      - name: 'url_map_header_based_routing'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          default_backend_service_name: 'default'
+          service_a_backend_service_name: 'service-a'
+          service_b_backend_service_name: 'service-b'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          default_backend_service_name: '"default" + randomSuffix'
   - name: 'url_map_parameter_based_routing'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      default_backend_service_name: 'default'
-      service_a_backend_service_name: 'service-a'
-      service_b_backend_service_name: 'service-b'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      default_backend_service_name: '"default" + randomSuffix'
+    steps:
+      - name: 'url_map_parameter_based_routing'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          default_backend_service_name: 'default'
+          service_a_backend_service_name: 'service-a'
+          service_b_backend_service_name: 'service-b'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          default_backend_service_name: '"default" + randomSuffix'
   - name: 'url_map_default_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      home_backend_service_name: '"home" + randomSuffix'
-      # for backward compatible
-      mirror_backend_service_name: '"mirror" + randomSuffix'
+    steps:
+      - name: 'url_map_default_mirror_percent'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          home_backend_service_name: 'home'
+          mirror_backend_service_name: 'mirror'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          home_backend_service_name: '"home" + randomSuffix'
+          # for backward compatible
+          mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_path_matcher_default_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      home_backend_service_name: '"home" + randomSuffix'
-      # for backward compatible
-      mirror_backend_service_name: '"mirror" + randomSuffix'
+    steps:
+      - name: 'url_map_path_matcher_default_mirror_percent'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          home_backend_service_name: 'home'
+          mirror_backend_service_name: 'mirror'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          home_backend_service_name: '"home" + randomSuffix'
+          # for backward compatible
+          mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_cache_policy_basic'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'home'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      backend_service_name: '"home" + randomSuffix'
+    steps:
+      - name: 'url_map_cache_policy_basic'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'home'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_cache_policy_multi_level'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'home'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      backend_service_name: '"home" + randomSuffix'
+    steps:
+      - name: 'url_map_cache_policy_multi_level'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'home'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_path_rule_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      home_backend_service_name: '"home" + randomSuffix'
-      # for backward compatible
-      mirror_backend_service_name: '"mirror" + randomSuffix'
+    steps:
+      - name: 'url_map_path_rule_mirror_percent'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          home_backend_service_name: 'home'
+          mirror_backend_service_name: 'mirror'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          home_backend_service_name: '"home" + randomSuffix'
+          # for backward compatible
+          mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_route_rule_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      home_backend_service_name: '"home" + randomSuffix'
-      # for backward compatible
-      mirror_backend_service_name: '"mirror" + randomSuffix'
+    steps:
+      - name: 'url_map_route_rule_mirror_percent'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          home_backend_service_name: 'home'
+          mirror_backend_service_name: 'mirror'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          home_backend_service_name: '"home" + randomSuffix'
+          # for backward compatible
+          mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_test_headers'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'backend'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      backend_service_name: '"backend" + randomSuffix'
+    steps:
+      - name: 'url_map_test_headers'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'backend'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          backend_service_name: '"backend" + randomSuffix'
   - name: 'url_map_test_expected_output_url'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'backend'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      backend_service_name: '"backend" + randomSuffix'
+    steps:
+      - name: 'url_map_test_expected_output_url'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'backend'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          backend_service_name: '"backend" + randomSuffix'
   - name: 'url_map_test_redirect_response_code'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'backend'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      backend_service_name: '"backend" + randomSuffix'
+    steps:
+      - name: 'url_map_test_redirect_response_code'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'backend'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          backend_service_name: '"backend" + randomSuffix'
   - name: 'external_http_lb_mig_backend'
     primary_resource_id: 'default'
-    vars:
-      lb_backend_template: 'lb-backend-template'
-      lb_backend_example: 'lb-backend-example'
-      fw_allow_health_check: 'fw-allow-health-check'
-      lb_ipv4_1: 'lb-ipv4-1'
-      http_basic_check: 'http-basic-check'
-      web_backend_service: 'web-backend-service'
-      web_map_http: 'web-map-http'
-      http_lb_proxy: 'http-lb-proxy'
-      http_content_rule: 'http-content-rule'
-    ignore_read_extra:
-      - 'metadata'
-      - 'metadata_startup_script'
- # Very similar to external_http_lb_mig_backend_custom_header
+    # Very similar to external_http_lb_mig_backend_custom_header
     exclude_test: true
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'external_http_lb_mig_backend'
+        resource_id_vars:
+          lb_backend_template: 'lb-backend-template'
+          lb_backend_example: 'lb-backend-example'
+          fw_allow_health_check: 'fw-allow-health-check'
+          lb_ipv4_1: 'lb-ipv4-1'
+          http_basic_check: 'http-basic-check'
+          web_backend_service: 'web-backend-service'
+          web_map_http: 'web-map-http'
+          http_lb_proxy: 'http-lb-proxy'
+          http_content_rule: 'http-content-rule'
+        ignore_read_extra:
+          - 'metadata'
+          - 'metadata_startup_script'
   - name: 'url_map_path_template_match'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      cart_backend_service_name: 'cart-service'
-      user_backend_service_name: 'user-service'
-      http_health_check_name: 'health-check'
-      backend_bucket_name: 'static-asset-backend-bucket'
-      storage_bucket_name: 'static-asset-bucket'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
+    steps:
+      - name: 'url_map_path_template_match'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          cart_backend_service_name: 'cart-service'
+          user_backend_service_name: 'user-service'
+          http_health_check_name: 'health-check'
+          backend_bucket_name: 'static-asset-backend-bucket'
+          storage_bucket_name: 'static-asset-bucket'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
   - name: 'url_map_custom_error_response_policy'
     primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'login'
-      http_health_check_name: 'health-check'
-      storage_bucket_name: 'static-asset-bucket'
-      error_backend_bucket_name: 'error-backend-bucket'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-      # for backward compatible
-      backend_service_name: '"login" + randomSuffix'
+    steps:
+      - name: 'url_map_custom_error_response_policy'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'login'
+          http_health_check_name: 'health-check'
+          storage_bucket_name: 'static-asset-bucket'
+          error_backend_bucket_name: 'error-backend-bucket'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
+          # for backward compatible
+          backend_service_name: '"login" + randomSuffix'
   - name: 'url_map_http_filter_configs'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      default_backend_service_name: 'default-backend'
-      service_a_backend_service_name: 'service-a-backend'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
+    steps:
+      - name: 'url_map_http_filter_configs'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          default_backend_service_name: 'default-backend'
+          service_a_backend_service_name: 'service-a-backend'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
   - name: 'url_map_http_filter_metadata'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      default_backend_service_name: 'default-backend'
-      service_a_backend_service_name: 'service-a-backend'
-      service_b_backend_service_name: 'service-b-backend'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
+    steps:
+      - name: 'url_map_http_filter_metadata'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          default_backend_service_name: 'default-backend'
+          service_a_backend_service_name: 'service-a-backend'
+          service_b_backend_service_name: 'service-b-backend'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          url_map_name: '"urlmap" + randomSuffix'
 parameters:
 properties:
   - name: 'creationTimestamp'

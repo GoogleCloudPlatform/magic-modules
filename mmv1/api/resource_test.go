@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"os"
@@ -9,12 +9,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 )
 
 func TestResourceMinVersionObj(t *testing.T) {
 	t.Parallel()
-	p := Product{
+	p := api.Product{
 		Name: "test",
 		Versions: []*product.Version{
 			&product.Version{
@@ -34,12 +38,12 @@ func TestResourceMinVersionObj(t *testing.T) {
 
 	cases := []struct {
 		description string
-		obj         Resource
+		obj         api.Resource
 		expected    string
 	}{
 		{
 			description: "resource minVersion is empty",
-			obj: Resource{
+			obj: api.Resource{
 				Name:            "test",
 				MinVersion:      "",
 				ProductMetadata: &p,
@@ -48,7 +52,7 @@ func TestResourceMinVersionObj(t *testing.T) {
 		},
 		{
 			description: "resource minVersion is not empty",
-			obj: Resource{
+			obj: api.Resource{
 				Name:            "test",
 				MinVersion:      "beta",
 				ProductMetadata: &p,
@@ -74,7 +78,7 @@ func TestResourceMinVersionObj(t *testing.T) {
 
 func TestResourceNotInVersion(t *testing.T) {
 	t.Parallel()
-	p := Product{
+	p := api.Product{
 		Name: "test",
 		Versions: []*product.Version{
 			&product.Version{
@@ -94,13 +98,13 @@ func TestResourceNotInVersion(t *testing.T) {
 
 	cases := []struct {
 		description string
-		obj         Resource
+		obj         api.Resource
 		input       *product.Version
 		expected    bool
 	}{
 		{
 			description: "ga is in version if MinVersion is empty",
-			obj: Resource{
+			obj: api.Resource{
 				Name:            "test",
 				MinVersion:      "",
 				ProductMetadata: &p,
@@ -112,7 +116,7 @@ func TestResourceNotInVersion(t *testing.T) {
 		},
 		{
 			description: "ga is not in version if MinVersion is beta",
-			obj: Resource{
+			obj: api.Resource{
 				Name:            "test",
 				MinVersion:      "beta",
 				ProductMetadata: &p,
@@ -142,40 +146,40 @@ func TestResourceServiceVersion(t *testing.T) {
 
 	cases := []struct {
 		description string
-		obj         Resource
+		obj         api.Resource
 		expected    string
 	}{
 		{
 			description: "BaseUrl does not start with a version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl: "test",
 			},
 			expected: "",
 		},
 		{
 			description: "BaseUrl starts with / and does not include a version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl: "/test",
 			},
 			expected: "",
 		},
 		{
 			description: "BaseUrl starts with a version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl: "v3/test",
 			},
 			expected: "v3",
 		},
 		{
 			description: "BaseUrl starts with a / followed by version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl: "/v3/test",
 			},
 			expected: "v3",
 		},
 		{
 			description: "CaiBaseUrl does not start with a version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl:    "apis/serving.knative.dev/v1/namespaces/{{project}}/services",
 				CaiBaseUrl: "projects/{{project}}/locations/{{location}}/services",
 			},
@@ -183,7 +187,7 @@ func TestResourceServiceVersion(t *testing.T) {
 		},
 		{
 			description: "CaiBaseUrl starts with a version",
-			obj: Resource{
+			obj: api.Resource{
 				BaseUrl:    "apis/serving.knative.dev/v1/namespaces/{{project}}/services",
 				CaiBaseUrl: "v1/projects/{{project}}/locations/{{location}}/services",
 			},
@@ -199,6 +203,72 @@ func TestResourceServiceVersion(t *testing.T) {
 
 			if got, want := tc.obj.ServiceVersion(), tc.expected; got != want {
 				t.Errorf("expected %q to be %q", got, want)
+			}
+		})
+	}
+}
+
+func TestProviderDefaultFieldsAreSynthesizedAndDeduplicated(t *testing.T) {
+	t.Parallel()
+
+	version := &product.Version{Name: "ga", BaseUrl: "https://example.googleapis.com/v1/"}
+
+	cases := []struct {
+		description  string
+		obj          api.Resource
+		listScope    bool
+		expectedName map[string]int
+	}{
+		{
+			description: "identity synthesizes project without duplication",
+			obj: api.Resource{
+				BaseUrl: "projects/{{project}}/foos",
+				Parameters: []*api.Type{
+					{Name: "project", Type: "String"},
+				},
+			},
+			expectedName: map[string]int{"project": 1},
+		},
+		{
+			description: "list scope synthesizes missing defaults and deduplicates",
+			obj: api.Resource{
+				BaseUrl: "projects/{{project}}/zones/{{zone}}/foos",
+				Parameters: []*api.Type{
+					{Name: "project", Type: "String"},
+					{Name: "zone", Type: "String", IgnoreRead: true, Exclude: true},
+				},
+				ProductMetadata: &api.Product{
+					Versions: []*product.Version{version},
+					Version:  version,
+				},
+			},
+			listScope:    true,
+			expectedName: map[string]int{"project": 1, "zone": 1},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+
+			var got []*api.Type
+			if tc.listScope {
+				got = tc.obj.ListScopeProperties()
+			} else {
+				got = tc.obj.IdentityProperties()
+			}
+
+			counts := map[string]int{}
+			for _, p := range got {
+				counts[p.Name]++
+			}
+
+			for name, want := range tc.expectedName {
+				if gotCount := counts[name]; gotCount != want {
+					t.Fatalf("expected %s exactly %d time(s), got %d", name, want, gotCount)
+				}
 			}
 		})
 	}
@@ -239,34 +309,34 @@ func TestMagicianLocation(t *testing.T) {
 	}
 
 	// Check if package is under mmv1
-	magicianPath := filepath.Join(dir, RELATIVE_MAGICIAN_LOCATION)
+	magicianPath := filepath.Join(dir, api.RELATIVE_MAGICIAN_LOCATION)
 	relPath, err := filepath.Rel(magicianPath, pwd)
 	if err != nil {
 		t.Fatalf("Failed to get relative path: %v", err)
 	}
 	if strings.HasPrefix(relPath, "..") {
-		t.Errorf("Current package is not under %s. Path from magician dir to current dir: %s", RELATIVE_MAGICIAN_LOCATION, relPath)
+		t.Errorf("Current package is not under %s. Path from magician dir to current dir: %s", api.RELATIVE_MAGICIAN_LOCATION, relPath)
 	}
 }
 
 func TestHasPostCreateComputedFields(t *testing.T) {
 	cases := []struct {
 		name, description string
-		resource          Resource
+		resource          api.Resource
 		want              bool
 	}{
 		{
 			name: "no properties",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
 			},
 			want: false,
 		},
 		{
 			name: "no computed properties",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name: "resource",
 					},
@@ -276,9 +346,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "output-only property",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:   "field",
 						Output: true,
@@ -289,9 +359,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "output-only property in id_format",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:   "resource",
 						Output: true,
@@ -302,9 +372,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "output-only property in id_format with ignore_read",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:       "resource",
 						Output:     true,
@@ -316,9 +386,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "default_from_api property",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:           "field",
 						DefaultFromApi: true,
@@ -329,9 +399,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "default_from_api property in id_format",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:           "resource",
 						DefaultFromApi: true,
@@ -342,9 +412,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "default_from_api property in id_format with ignore_read",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:           "resource",
 						DefaultFromApi: true,
@@ -356,9 +426,9 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "converts prop.name to snake case",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource_id}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:   "resourceId",
 						Output: true,
@@ -369,10 +439,10 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 		},
 		{
 			name: "includes fields in self link that aren't in id format",
-			resource: Resource{
+			resource: api.Resource{
 				IdFormat: "projects/{{project}}/resource/{{resource_id}}",
 				SelfLink: "{{name}}",
-				Properties: []*Type{
+				Properties: []*api.Type{
 					{
 						Name:   "name",
 						Output: true,
@@ -398,10 +468,10 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 func TestResourceAddExtraFields(t *testing.T) {
 	t.Parallel()
 
-	createTestResource := func(name, pn string) *Resource {
-		r := &Resource{
+	createTestResource := func(name, pn string) *api.Resource {
+		r := &api.Resource{
 			Name: name,
-			ProductMetadata: &Product{
+			ProductMetadata: &api.Product{
 				Name: "testproduct",
 			},
 		}
@@ -409,8 +479,8 @@ func TestResourceAddExtraFields(t *testing.T) {
 		return r
 	}
 
-	createTestType := func(name, typeStr string, options ...func(*Type)) *Type {
-		t := &Type{
+	createTestType := func(name, typeStr string, options ...func(*api.Type)) *api.Type {
+		t := &api.Type{
 			Name: name,
 			Type: typeStr,
 		}
@@ -418,24 +488,24 @@ func TestResourceAddExtraFields(t *testing.T) {
 			option(t)
 		}
 		if t.ResourceMetadata == nil {
-			t.ResourceMetadata = &Resource{
+			t.ResourceMetadata = &api.Resource{
 				Immutable: false,
 			}
 		}
 		return t
 	}
 
-	withWriteOnly := func(writeOnly bool) func(*Type) {
-		return func(t *Type) { t.WriteOnly = writeOnly }
+	withWriteOnly := func(writeOnly bool) func(*api.Type) {
+		return func(t *api.Type) { t.WriteOnly = writeOnly }
 	}
-	withRequired := func(required bool) func(*Type) {
-		return func(t *Type) { t.Required = required }
+	withRequired := func(required bool) func(*api.Type) {
+		return func(t *api.Type) { t.Required = required }
 	}
-	withDescription := func(desc string) func(*Type) {
-		return func(t *Type) { t.Description = desc }
+	withDescription := func(desc string) func(*api.Type) {
+		return func(t *api.Type) { t.Description = desc }
 	}
-	withProperties := func(props []*Type) func(*Type) {
-		return func(t *Type) { t.Properties = props }
+	withProperties := func(props []*api.Type) func(*api.Type) {
+		return func(t *api.Type) { t.Properties = props }
 	}
 
 	t.Run("WriteOnly property adds companion fields", func(t *testing.T) {
@@ -448,7 +518,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 			withDescription("A password field"),
 		)
 
-		props := []*Type{writeOnlyProp}
+		props := []*api.Type{writeOnlyProp}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 3 {
@@ -496,7 +566,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 			withDescription("A password field"),
 		)
 
-		props := []*Type{writeOnlyProp}
+		props := []*api.Type{writeOnlyProp}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 1 {
@@ -512,13 +582,13 @@ func TestResourceAddExtraFields(t *testing.T) {
 		t.Parallel()
 
 		resource := createTestResource("testresource", "terraform")
-		labelsType := &Type{
+		labelsType := &api.Type{
 			Name:        "labels",
 			Type:        "KeyValueLabels",
 			Description: "Resource labels",
 		}
 
-		props := []*Type{labelsType}
+		props := []*api.Type{labelsType}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 3 {
@@ -567,12 +637,12 @@ func TestResourceAddExtraFields(t *testing.T) {
 		resource := createTestResource("testresource", "terraform")
 		resource.ExcludeAttributionLabel = true
 
-		labelsType := &Type{
+		labelsType := &api.Type{
 			Name: "labels",
 			Type: "KeyValueLabels",
 		}
 
-		props := []*Type{labelsType}
+		props := []*api.Type{labelsType}
 		resource.AddExtraFields(props, nil)
 
 		expectedDiff := "tpgresource.SetLabelsDiffWithoutAttributionLabel"
@@ -585,14 +655,14 @@ func TestResourceAddExtraFields(t *testing.T) {
 		t.Parallel()
 
 		resource := createTestResource("testresource", "terraform")
-		parent := &Type{Name: "metadata"}
+		parent := &api.Type{Name: "metadata"}
 
-		labelsType := &Type{
+		labelsType := &api.Type{
 			Name: "labels",
 			Type: "KeyValueLabels",
 		}
 
-		props := []*Type{labelsType}
+		props := []*api.Type{labelsType}
 		resource.AddExtraFields(props, parent)
 
 		expectedDiff := "tpgresource.SetMetadataLabelsDiff"
@@ -605,13 +675,13 @@ func TestResourceAddExtraFields(t *testing.T) {
 		t.Parallel()
 
 		resource := createTestResource("testresource", "terraform")
-		annotationsType := &Type{
+		annotationsType := &api.Type{
 			Name:        "annotations",
 			Type:        "KeyValueAnnotations",
 			Description: "Resource annotations",
 		}
 
-		props := []*Type{annotationsType}
+		props := []*api.Type{annotationsType}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 2 {
@@ -648,9 +718,9 @@ func TestResourceAddExtraFields(t *testing.T) {
 		resource := createTestResource("testresource", "terraform")
 
 		nestedWriteOnly := createTestType("nestedPassword", "String", withWriteOnly(true))
-		nestedObject := createTestType("config", "NestedObject", withProperties([]*Type{nestedWriteOnly}))
+		nestedObject := createTestType("config", "NestedObject", withProperties([]*api.Type{nestedWriteOnly}))
 
-		props := []*Type{nestedObject}
+		props := []*api.Type{nestedObject}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 1 {
@@ -670,9 +740,9 @@ func TestResourceAddExtraFields(t *testing.T) {
 		t.Parallel()
 
 		resource := createTestResource("testresource", "terraform")
-		emptyNestedObject := createTestType("config", "NestedObject", withProperties([]*Type{}))
+		emptyNestedObject := createTestType("config", "NestedObject", withProperties([]*api.Type{}))
 
-		props := []*Type{emptyNestedObject}
+		props := []*api.Type{emptyNestedObject}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 1 {
@@ -689,7 +759,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		resource := createTestResource("testresource", "terraform")
 		woProperty := createTestType("passwordWo", "String", withWriteOnly(true))
 
-		props := []*Type{woProperty}
+		props := []*api.Type{woProperty}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 1 {
@@ -707,7 +777,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		resource := createTestResource("testresource", "terraform")
 		regularProp := createTestType("name", "String", withRequired(true))
 
-		props := []*Type{regularProp}
+		props := []*api.Type{regularProp}
 		result := resource.AddExtraFields(props, nil)
 
 		if len(result) != 1 {
@@ -729,9 +799,9 @@ func TestResourceAddExtraFields(t *testing.T) {
 
 		regularProp := createTestType("name", "String")
 		writeOnlyProp := createTestType("password", "String", withWriteOnly(true))
-		labelsType := &Type{Name: "labels", Type: "KeyValueLabels"}
+		labelsType := &api.Type{Name: "labels", Type: "KeyValueLabels"}
 
-		props := []*Type{regularProp, writeOnlyProp, labelsType}
+		props := []*api.Type{regularProp, writeOnlyProp, labelsType}
 		result := resource.AddExtraFields(props, nil)
 
 		// Should have: name + password + passwordWo + passwordWoVersion + labels + terraformLabels + effectiveLabels = 7
@@ -751,4 +821,297 @@ func TestResourceAddExtraFields(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestResource_TestDependencies(t *testing.T) {
+	cases := []struct {
+		name     string
+		resource api.Resource
+		want     map[string]string
+	}{
+		{
+			name: "empty",
+			resource: api.Resource{
+				ProductMetadata: &api.Product{Name: "Apigee"},
+				Samples: []*resource.Sample{
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{},
+								TestHCLText:     "",
+							},
+						},
+					},
+				},
+				Runtime: api.Runtime{
+					ResourcePrefixPkgMap: map[string]string{},
+				},
+			},
+			want: map[string]string{},
+		},
+		{
+			name: "no conflict",
+			resource: api.Resource{
+				ProductMetadata: &api.Product{Name: "Apigee"},
+				Samples: []*resource.Sample{
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{
+									"network": "compute.BootstrapSubnet",
+								},
+								TestHCLText: "",
+							},
+						},
+					},
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{
+									"network": "compute.BootstrapSubnet",
+								},
+								TestHCLText: "",
+							},
+						},
+					},
+				},
+				Runtime: api.Runtime{
+					ResourcePrefixPkgMap: map[string]string{},
+				},
+			},
+			want: map[string]string{
+				"services/compute": "",
+			},
+		},
+		{
+			name: "underscore vs empty string conflict",
+			resource: api.Resource{
+				ProductMetadata: &api.Product{Name: "Apigee"},
+				Samples: []*resource.Sample{
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{
+									"network": "compute.BootstrapSubnet",
+								},
+								TestHCLText: "",
+							},
+						},
+					},
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{},
+								TestHCLText:     `resource "google_compute_instance"`,
+							},
+						},
+					},
+				},
+				Runtime: api.Runtime{
+					ResourcePrefixPkgMap: map[string]string{
+						"google_compute_": "services/compute",
+					},
+				},
+			},
+			want: map[string]string{
+				"services/compute": "",
+			},
+		},
+		{
+			name: "remove current product",
+			resource: api.Resource{
+				ProductMetadata: &api.Product{Name: "Compute"},
+				Samples: []*resource.Sample{
+					{
+						Steps: []*resource.Step{
+							{
+								TestContextVars: map[string]string{
+									"network": "compute.BootstrapSubnet",
+								},
+								TestHCLText: "",
+							},
+						},
+					},
+				},
+				Runtime: api.Runtime{
+					ResourcePrefixPkgMap: map[string]string{},
+				},
+			},
+			want: map[string]string{},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := tc.resource.TestDependencies()
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Errorf("TestDependencies() mismatch (-want +got:\n%s", diff)
+			}
+		})
+	}
+}
+
+// TestIdentityPropertiesFlattenObject ensures that identifiers nested under a
+// property marked with flatten_object (e.g. datasetReference.datasetId ->
+// dataset_id) are collapsed and included in the identity schema. Without this,
+// importing by resource identity panics because the identifier is missing from
+// the generated identity schema.
+func TestIdentityPropertiesFlattenObject(t *testing.T) {
+	t.Parallel()
+
+	res := &api.Resource{
+		Name:            "Dataset",
+		BaseUrl:         "projects/{{project}}/datasets",
+		ImportFormat:    []string{"projects/{{project}}/datasets/{{dataset_id}}"},
+		ProductMetadata: &api.Product{Name: "BigQuery"},
+	}
+	res.Properties = []*api.Type{
+		{
+			Name:             "datasetReference",
+			Type:             "NestedObject",
+			FlattenObject:    true,
+			ResourceMetadata: res,
+			Properties: []*api.Type{
+				{
+					Name:     "datasetId",
+					Type:     "String",
+					Required: true,
+				},
+			},
+		},
+	}
+
+	got := make([]string, 0)
+	for _, p := range res.IdentityProperties() {
+		got = append(got, p.Name)
+	}
+
+	if !slices.Contains(got, "datasetId") {
+		t.Errorf("expected IdentityProperties to include flattened identifier \"datasetId\", got %v", got)
+	}
+}
+
+func TestSamplePrimaryResourceId(t *testing.T) {
+	t.Parallel()
+
+	p := &api.Product{
+		Name: "test",
+		Versions: []*product.Version{
+			{
+				Name:    "ga",
+				BaseUrl: "ga_url",
+			},
+			{
+				Name:    "beta",
+				BaseUrl: "beta_url",
+			},
+		},
+	}
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    string
+	}{
+		{
+			description: "empty samples returns empty string",
+			resource: api.Resource{
+				Samples:           []*resource.Sample{},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "",
+		},
+		{
+			description: "samples with higher min_version returns empty string",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "beta-res",
+						MinVersion:        "beta",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "",
+		},
+		{
+			description: "valid sample returns primary resource id",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "ga-res",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "ga-res",
+		},
+		{
+			description: "only the first sample should be used",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "first-res",
+						MinVersion:        "ga",
+					},
+					{
+						PrimaryResourceId: "second-res",
+						MinVersion:        "ga",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "first-res",
+		},
+		{
+			description: "excludetest should be honored using first non-excluded sample",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "excluded-res",
+						ExcludeTest:       true,
+					},
+					{
+						PrimaryResourceId: "included-res",
+						ExcludeTest:       false,
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "included-res",
+		},
+		{
+			description: "fallback to first matching excluded sample when all are excluded",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "excluded-first",
+						ExcludeTest:       true,
+					},
+					{
+						PrimaryResourceId: "excluded-second",
+						ExcludeTest:       true,
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "excluded-first",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.SamplePrimaryResourceId(); got != tc.expected {
+				t.Errorf("SamplePrimaryResourceId() = %q, want %q", got, tc.expected)
+			}
+		})
+	}
 }

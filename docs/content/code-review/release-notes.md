@@ -1,6 +1,6 @@
 ---
 title: "Write release notes"
-weight: 20
+weight: 30
 aliases:
   - /contribute/release-notes
 ---
@@ -78,6 +78,23 @@ Replace `DATASOURCE_NAME` according to the pull request content. For example:
 ~~~markdown
 ```release-note:new-datasource
 `google_compute_new_datasource`
+```
+~~~
+{{< /tab >}}
+{{< tab "New list resource" >}}
+Write your release note in the following format:
+
+~~~markdown
+```release-note:new-list-resource
+`LIST_RESOURCE_NAME`
+```
+~~~
+
+Replace `LIST_RESOURCE_NAME` according to the pull request content. For example:
+
+~~~markdown
+```release-note:new-list-resource
+`google_compute_new_list_resource`
 ```
 ~~~
 {{< /tab >}}

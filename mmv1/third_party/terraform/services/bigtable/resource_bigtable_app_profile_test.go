@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigtable"
 )
 
 func TestAccBigtableAppProfile_update(t *testing.T) {
@@ -616,6 +617,24 @@ func TestAccBigtableAppProfile_updateRowAffinity(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigtableAppProfile_updateMC2(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_app_profile.ap",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+			{
+				Config: testAccBigtableAppProfile_updateRowAffinity(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_app_profile.ap",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+			{
+				Config: testAccBigtableAppProfile_updateMC1(instanceName),
 			},
 			{
 				ResourceName:            "google_bigtable_app_profile.ap",

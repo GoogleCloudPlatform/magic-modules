@@ -38,16 +38,26 @@ timeouts:
 custom_code:
   post_create: 'templates/terraform/post_create/org_security_policy_association.go.tmpl'
   post_delete: 'templates/terraform/post_create/org_security_policy_association.go.tmpl'
-    # TODO: Remove once b/154369201 is closed.
+  # TODO: Remove once b/154369201 is closed.
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 read_error_transform: 'transformSecurityPolicyAssociationReadError'
-examples:
+samples:
   - name: 'organization_security_policy_association_basic'
     primary_resource_id: 'policy'
-    vars:
-      short_name: "my-short-name"
-    test_env_vars:
-      org_id: 'ORG_TARGET'
+    steps:
+      - name: 'organization_security_policy_association_basic'
+        resource_id_vars:
+          short_name: "my-short-name"
+        test_env_vars:
+          org_id: 'ORG_TARGET'
+  - name: 'organization_security_policy_association_excluded'
+    primary_resource_id: 'policy'
+    steps:
+      - name: 'organization_security_policy_association_excluded'
+        resource_id_vars:
+          short_name: "my-short-name-excluded"
+        test_env_vars:
+          org_id: 'ORG_TARGET'
 parameters:
   - name: 'policyId'
     type: String

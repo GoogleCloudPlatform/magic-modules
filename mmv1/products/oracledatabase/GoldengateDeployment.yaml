@@ -1,0 +1,577 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: GoldengateDeployment
+description: This resource helps to create a GoldengateDeployment which enables running Oracle GoldenGate in Google Cloud.
+base_url: projects/{{project}}/locations/{{location}}/goldengateDeployments
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/goldengateDeployments/{{goldengate_deployment_id}}
+create_url: projects/{{project}}/locations/{{location}}/goldengateDeployments?goldengateDeploymentId={{goldengate_deployment_id}}
+id_format: projects/{{project}}/locations/{{location}}/goldengateDeployments/{{goldengate_deployment_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/goldengateDeployments/{{goldengate_deployment_id}}
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+async:
+  type: OpAsync
+  operation:
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: true
+deletion_policy_default: PREVENT
+autogen_status: R29sZGVuZ2F0ZURlcGxveW1lbnQ=
+autogen_async: true
+samples:
+  - name: oracledatabase_goldengate_deployment_basic
+    primary_resource_id: deployment
+    steps:
+      - name: oracledatabase_goldengate_deployment_basic
+        resource_id_vars:
+          project: my-project
+          goldengate_deployment_id: my-deployment
+          odb_subnet: projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet
+          deletion_policy: PREVENT
+        ignore_read_extra:
+          - deletion_policy
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_policy: '"DELETE"'
+          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-basic-%s", acctest.RandString(t, 10))
+          odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+  - name: oracledatabase_goldengate_deployment_full
+    primary_resource_id: deployment
+    steps:
+      - name: oracledatabase_goldengate_deployment_full
+        resource_id_vars:
+          project: my-project
+          goldengate_deployment_id: my-deployment
+          odb_subnet: projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet
+          odb_network: projects/my-project/locations/us-east4/odbNetworks/my-network
+          deletion_policy: PREVENT
+        ignore_read_extra:
+          - deletion_policy
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_policy: '"DELETE"'
+          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-full-%s", acctest.RandString(t, 10))
+          odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: goldengateDeploymentId
+    type: String
+    required: true
+    description: |-
+      The ID of the GoldengateDeployment to create. This value is
+      restricted to (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of
+      63 characters in length. The value must start with a letter and end with a
+      letter or a number.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: The date and time that the GoldengateDeployment was created.
+    output: true
+  - name: displayName
+    type: String
+    required: true
+    description: The display name for the GoldengateDeployment.
+  - name: entitlementId
+    type: String
+    description: |-
+      The ID of the subscription entitlement associated with the
+      GoldengateDeployment
+    output: true
+  - name: gcpOracleZone
+    type: String
+    default_from_api: true
+    description: |-
+      The GCP Oracle zone where Oracle GoldengateDeployment is hosted.
+      Example: us-east4-b-r2.
+      If not specified, the system will pick a zone based on availability.
+  - name: labels
+    type: KeyValueLabels
+    description: The labels or tags associated with the GoldengateDeployment.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the GoldengateDeployment resource in the following format:
+      projects/{project}/locations/{region}/goldengateDeployments/{goldengate_deployment}
+    output: true
+  - name: ociUrl
+    type: String
+    description: HTTPS link to OCI resources exposed to Customer via UI Interface.
+    output: true
+  - name: odbNetwork
+    type: String
+    default_from_api: true
+    description: The name of the OdbNetwork associated with the GoldengateDeployment.
+  - name: odbSubnet
+    type: String
+    required: true
+    description: |-
+      The name of the OdbSubnet associated with the GoldengateDeployment for IP
+      allocation.
+  - name: properties
+    type: NestedObject
+    required: true
+    description: Properties of GoldengateDeployment.
+    properties:
+      - name: backupSchedule
+        type: NestedObject
+        description: The backup schedule of the GoldengateDeployment.
+        properties:
+          - name: backupScheduledTime
+            type: String
+            description: The timestamp of when the backup was scheduled.
+            output: true
+          - name: bucket
+            type: String
+            description: The bucket name.
+            output: true
+          - name: compartmentId
+            type: String
+            description: The compartment id.
+            output: true
+          - name: frequencyBackupScheduled
+            type: String
+            description: |-
+              The frequency backup scheduled.
+              Possible values:
+              DAILY
+              WEEKLY
+              MONTHLY
+            output: true
+          - name: metadataOnly
+            type: Boolean
+            description: If metadata only.
+            output: true
+          - name: namespace
+            type: String
+            description: The namespace name.
+            output: true
+      - name: category
+        type: String
+        description: |-
+          The category of the GoldengateDeployment.
+          Possible values:
+          DATA_REPLICATION
+          DATA_TRANSFORMS
+        output: true
+      - name: cpuCoreCount
+        type: Integer
+        default_value: 1
+        description: The Minimum number of OCPUs to be made available for this Deployment.
+      - name: deploymentBackupId
+        type: String
+        description: The deployment backup id of the GoldengateDeployment.
+        output: true
+        ignore_read: true
+      - name: deploymentDiagnosticData
+        type: NestedObject
+        description: The deployment diagnostic data.
+        properties:
+          - name: bucket
+            type: String
+            description: The bucket name.
+            output: true
+          - name: diagnosticEndTime
+            type: String
+            description: The time diagnostic end.
+            output: true
+          - name: diagnosticStartTime
+            type: String
+            description: The time diagnostic start.
+            output: true
+          - name: diagnosticState
+            type: String
+            description: |-
+              The diagnostic state.
+              Possible values:
+              IN_PROGRESS
+              SUCCEEDED
+              FAILED
+            output: true
+          - name: namespace
+            type: String
+            description: The namespace name.
+            output: true
+          - name: object
+            type: String
+            description: The object name.
+            output: true
+      - name: deploymentRole
+        type: String
+        description: |-
+          The deployment role of the GoldengateDeployment.
+          Possible values:
+          PRIMARY
+          STANDBY
+        output: true
+      - name: deploymentType
+        type: String
+        required: true
+        description: |-
+          A valid Goldengate Deployment type. For a list of supported types, use
+          the `ListGoldengateDeploymentTypes` operation.
+      - name: deploymentUrl
+        type: String
+        description: The deployment url of the GoldengateDeployment.
+        output: true
+      - name: description
+        type: String
+        description: The description of the GoldengateDeployment.
+        default_from_api: true
+      - name: environmentType
+        type: String
+        description: The environment type of the GoldengateDeployment.
+        default_from_api: true
+      - name: fqdn
+        type: String
+        description: The Fully Qualified Domain Name of the GoldengateDeployment.
+        output: true
+      - name: healthy
+        type: Boolean
+        description: Whether the GoldengateDeployment is healthy.
+        output: true
+      - name: ingressIps
+        type: Array
+        description: The ingress ips of the GoldengateDeployment.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: ingressIpAddress
+              type: String
+              description: The ingress IP.
+              output: true
+      - name: isAutoScalingEnabled
+        type: Boolean
+        description: Indicates if auto scaling is enabled for the Deployment's CPU core count.
+        default_from_api: true
+      - name: isLatestVersion
+        type: Boolean
+        description: Whether the GoldengateDeployment is of the latest version.
+        output: true
+      - name: isPublic
+        type: Boolean
+        description: Whether the GoldengateDeployment is public.
+        output: true
+      - name: isStorageUtilizationLimitExceeded
+        type: Boolean
+        description: Whether storage utilization limit is exceeded of the GoldengateDeployment.
+        output: true
+      - name: lastBackupScheduleTime
+        type: String
+        description: The time last backup scheduled of the GoldengateDeployment.
+        output: true
+      - name: licenseModel
+        type: String
+        description: |-
+          The Oracle license model that applies to a Deployment.
+          Possible values:
+          LICENSE_INCLUDED
+          BRING_YOUR_OWN_LICENSE
+        default_from_api: true
+      - name: lifecycleDetails
+        type: String
+        description: The lifecycle details of the GoldengateDeployment.
+        output: true
+      - name: lifecycleState
+        type: String
+        description: |-
+          State of the GoldengateDeployment.
+          Possible values:
+          CREATING
+          UPDATING
+          ACTIVE
+          INACTIVE
+          DELETING
+          DELETED
+          FAILED
+          NEEDS_ATTENTION
+          IN_PROGRESS
+          CANCELLING
+          CANCELLED
+          SUCCEEDED
+          WAITING
+        output: true
+      - name: lifecycleSubState
+        type: String
+        description: |-
+          The lifecycle sub-state of the GoldengateDeployment.
+          Possible values:
+          RECOVERING
+          STARTING
+          STOPPING
+          MOVING
+          UPGRADING
+          RESTORING
+          BACKING_UP
+          ROLLING_BACK
+        output: true
+      - name: loadBalancerId
+        type: String
+        description: The load balancer id of the GoldengateDeployment.
+        output: true
+      - name: loadBalancerSubnetId
+        type: String
+        description: The load balancer subnet id of the GoldengateDeployment.
+        output: true
+      - name: locks
+        type: Array
+        description: The locks of the GoldengateDeployment.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: compartmentId
+              type: String
+              description: The compartment id.
+              output: true
+            - name: createTime
+              type: String
+              description: The time created.
+              output: true
+            - name: message
+              type: String
+              description: The message.
+              output: true
+            - name: relatedResourceId
+              type: String
+              description: The related resource id.
+              output: true
+            - name: type
+              type: String
+              description: |-
+                The type of lock.
+                Possible values:
+                FULL
+                DELETE
+              output: true
+      - name: maintenanceConfig
+        type: NestedObject
+        description: The maintenance configuration of the GoldengateDeployment.
+        default_from_api: true
+        properties:
+          - name: bundleReleaseUpgradePeriodDays
+            type: Integer
+            default_from_api: true
+            description: |-
+              Defines auto upgrade period for bundle releases. Manually configured period
+              cannot be longer than service defined period for bundle releases. This
+              period must be shorter or equal to major release upgrade period. Not
+              passing this field during create will equate to using the service default.
+          - name: interimReleaseUpgradePeriodDays
+            type: Integer
+            default_from_api: true
+            description: |-
+              Defines auto upgrade period for interim releases. This period must be
+              shorter or equal to bundle release upgrade period.
+          - name: isInterimReleaseAutoUpgradeEnabled
+            type: Boolean
+            default_from_api: true
+            description: |-
+              By default auto upgrade for interim releases are not enabled. If
+              auto-upgrade is enabled for interim release,  you have to specify
+              interim_release_upgrade_period_days too.
+          - name: majorReleaseUpgradePeriodDays
+            type: Integer
+            default_from_api: true
+            description: |-
+              Defines auto upgrade period for major releases. Manually configured period
+              cannot be longer than service defined period for major releases. Not
+              passing this field during create will equate to using the service default.
+          - name: securityPatchUpgradePeriodDays
+            type: Integer
+            default_from_api: true
+            description: |-
+              Defines auto upgrade period for releases with security fix. Manually
+              configured period cannot be longer than service defined period for security
+              releases. Not passing this field during create will equate to using the
+              service default.
+      - name: maintenanceWindow
+        type: NestedObject
+        description: The maintenance window of the GoldengateDeployment.
+        properties:
+          - name: day
+            type: String
+            required: true
+            description: |-
+              Possible values:
+              MONDAY
+              TUESDAY
+              WEDNESDAY
+              THURSDAY
+              FRIDAY
+              SATURDAY
+              SUNDAY
+          - name: startHour
+            type: Integer
+            required: true
+            description: Start hour for maintenance period. Hour is in UTC.
+      - name: nextBackupScheduleTime
+        type: String
+        description: The time next backup scheduled of the GoldengateDeployment.
+        output: true
+      - name: nextMaintenanceActionType
+        type: String
+        description: |-
+          The next maintenance action type of the GoldengateDeployment.
+          Possible values:
+          UPGRADE
+        output: true
+      - name: nextMaintenanceDescription
+        type: String
+        description: The next maintenance description of the GoldengateDeployment.
+        output: true
+      - name: nextMaintenanceTime
+        type: String
+        description: The time of next maintenance of the GoldengateDeployment.
+        output: true
+      - name: nsgIds
+        type: Array
+        description: The nsg ids of the GoldengateDeployment.
+        output: true
+        item_type:
+          type: String
+      - name: ocid
+        type: String
+        description: OCID of the GoldengateDeployment.
+        output: true
+      - name: oggData
+        type: NestedObject
+        required: true
+        description: The Ogg data of the GoldengateDeployment.
+        ignore_read: true
+        properties:
+          - name: adminPassword
+            type: String
+            description: The Goldengate deployment console password in plain text.
+          - name: adminPasswordSecretVersion
+            type: String
+            description: Input only. The Goldengate deployment console password secret version.
+          - name: adminUsername
+            type: String
+            required: true
+            description: The Goldengate deployment console username.
+          - name: certificate
+            type: String
+            description: The certificate of the GoldengateDeployment.
+            output: true
+          - name: credentialStore
+            type: String
+            description: |-
+              The credential store of the GoldengateDeployment.
+              Possible values:
+              GOLDENGATE
+              IAM
+            output: true
+          - name: deployment
+            type: String
+            required: true
+            description: |-
+              The name given to the Goldengate service deployment. The name must be 1 to
+              32 characters long, must contain only alphanumeric characters and must
+              start with a letter.
+          - name: groupRolesMapping
+            type: NestedObject
+            description: The group to roles mapping of the GoldengateDeployment.
+            properties:
+              - name: administratorGroupId
+                type: String
+                description: The administrator group id.
+                output: true
+              - name: operatorGroupId
+                type: String
+                description: The operator group id.
+                output: true
+              - name: securityGroupId
+                type: String
+                description: The security group id.
+                output: true
+              - name: userGroupId
+                type: String
+                description: The user group id.
+                output: true
+          - name: identityDomainId
+            type: String
+            description: The identity domain id of the GoldengateDeployment.
+            output: true
+          - name: oggVersion
+            type: String
+            description: Version of OGG
+            default_from_api: true
+          - name: passwordSecretId
+            type: String
+            description: The password secret id of the GoldengateDeployment.
+            output: true
+      - name: oggVersionSupportEndTime
+        type: String
+        description: The time ogg version supported until of the GoldengateDeployment.
+        output: true
+      - name: placements
+        type: Array
+        description: The placements of the GoldengateDeployment.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: availabilityDomain
+              type: String
+              description: The availability domain.
+              output: true
+            - name: faultDomain
+              type: String
+              description: The fault domain.
+              output: true
+      - name: privateIpAddress
+        type: String
+        description: The private ip address of the GoldengateDeployment.
+        output: true
+      - name: publicIpAddress
+        type: String
+        description: The public ip address of the GoldengateDeployment.
+        output: true
+      - name: roleChangeTime
+        type: String
+        description: The time when the role of the GoldengateDeployment was changed.
+        output: true
+      - name: storageUtilizationBytes
+        type: String
+        description: The storage utilization in bytes of the GoldengateDeployment.
+        output: true
+      - name: updateTime
+        type: String
+        description: The time the GoldengateDeployment was updated.
+        output: true
+      - name: upgradeRequiredTime
+        type: String
+        description: The time upgrade required of the GoldengateDeployment.
+        output: true
