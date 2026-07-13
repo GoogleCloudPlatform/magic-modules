@@ -83,6 +83,10 @@ var (
 					startDate: newDate(2026, 4, 19),
 					endDate:   newDate(2026, 4, 26),
 				},
+				{
+					startDate: newDate(2026, 7, 10),
+					endDate:   newDate(2026, 7, 17),
+				},
 			},
 		},
 		"malhotrasagar2212": {
@@ -130,13 +134,25 @@ var (
 					startDate: newDate(2026, 5, 7),
 					endDate:   newDate(2026, 5, 11),
 				},
+				{
+					startDate: newDate(2026, 7, 5),
+					endDate:   newDate(2026, 8, 17),
+				},
 			},
 		},
 		"ScottSuarez": {
 			vacations: []Vacation{
 				{
 					startDate: newDate(2026, 4, 4),
-					endDate:   newDate(2026, 7, 13),
+					endDate:   newDate(2026, 7, 5),
+				},
+			},
+		},
+		"shuyama1": {
+			vacations: []Vacation{
+				{
+					startDate: newDate(2026, 07, 28),
+					endDate:   newDate(2026, 12, 31),
 				},
 			},
 		},
@@ -168,7 +184,6 @@ var (
 		"tavasyag":   {},
 		"hao-nan-li": {},
 		"NickElliot": {},
-		"shuyama1":   {},
 		"trodge":     {},
 		"zli82016":   {},
 		"vr-ibm":     {},

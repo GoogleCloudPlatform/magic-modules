@@ -62,7 +62,7 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/semantic_governance_policy_engine.go.tmpl'
   post_read: 'templates/terraform/post_read/vertex_ai_semantic_governance_policy_engine.go.tmpl'
-examples:
+samples:
   - name: 'vertex_ai_semantic_governance_policy_engine_basic'
     primary_resource_id: 'sgpe'
     # The generator's standard CheckDestroy expects GET to return an error
@@ -73,6 +73,8 @@ examples:
     # test (resource_vertex_ai_semantic_governance_policy_engine_test.go),
     # which CI still runs because it is a new TestAcc function in the diff.
     exclude_test: true
+    steps:
+      - name: 'vertex_ai_semantic_governance_policy_engine_basic'
 parameters:
   - name: 'region'
     type: String

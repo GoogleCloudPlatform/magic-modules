@@ -45,6 +45,7 @@ custom_code:
 samples:
   - name: app_engine_firewall_rule_basic
     primary_resource_id: rule
+    external_providers: [time]
     steps:
       - name: app_engine_firewall_rule_basic
         resource_id_vars:
