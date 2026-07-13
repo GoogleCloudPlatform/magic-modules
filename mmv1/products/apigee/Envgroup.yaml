@@ -43,22 +43,26 @@ async:
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_environment_group.go.tmpl'
 exclude_sweeper: true
-examples:
+samples:
   - name: 'apigee_environment_group_basic'
-    vars:
-      envgroup_name: 'my-envgroup'
     exclude_test: true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
+    steps:
+      - name: 'apigee_environment_group_basic'
+        resource_id_vars:
+          envgroup_name: 'my-envgroup'
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
   - name: 'apigee_environment_group_basic_test'
     primary_resource_id: 'apigee_environment_group'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    exclude_basic_doc: true
+    # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+    steps:
+      - name: 'apigee_environment_group_basic_test'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
 parameters:
   - name: 'orgId'
     type: String

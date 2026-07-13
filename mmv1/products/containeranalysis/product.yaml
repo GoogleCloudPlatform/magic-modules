@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'ContainerAnalysis'
-display_name: 'Container Registry'
-versions:
-  - name: 'ga'
-    base_url: 'https://containeranalysis.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://containeranalysis.googleapis.com/v1beta1/'
+name: ContainerAnalysis
+display_name: Container Registry
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://containeranalysis.googleapis.com/v1/
+  - name: beta
+    base_url: https://containeranalysis.googleapis.com/v1beta1/

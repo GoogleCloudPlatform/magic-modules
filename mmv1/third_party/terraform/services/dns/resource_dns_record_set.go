@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/dns/v1"
@@ -95,10 +96,38 @@ func ResourceDnsRecordSet() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceDnsRecordSetImportState,
 		},
-
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 		),
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"managed_zone": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"type": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
+		ResourceBehavior: schema.ResourceBehavior{
+			MutableIdentity: true,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"managed_zone": {
@@ -243,6 +272,9 @@ func ResourceDnsRecordSet() *schema.Resource {
 				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -375,7 +407,7 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 	// delete them, before adding in the changes requested.  Normally this would
 	// result in an AlreadyExistsError.
 	log.Printf("[DEBUG] DNS record list request for %q", zone)
-	res, err := config.NewDnsClient(userAgent).ResourceRecordSets.List(project, zone).Do()
+	res, err := NewClient(config, userAgent).ResourceRecordSets.List(project, zone).Do()
 	if err != nil {
 		return fmt.Errorf("Error retrieving record sets for %q: %s", zone, err)
 	}
@@ -400,7 +432,7 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	log.Printf("[DEBUG] DNS Record create request: %#v", chg)
-	chg, err = config.NewDnsClient(userAgent).Changes.Create(project, zone, chg).Do()
+	chg, err = NewClient(config, userAgent).Changes.Create(project, zone, chg).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating DNS RecordSet: %s", err)
 	}
@@ -408,7 +440,7 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s/rrsets/%s/%s", project, zone, name, rType))
 
 	w := &DnsChangeWaiter{
-		Service:     config.NewDnsClient(userAgent),
+		Service:     NewClient(config, userAgent),
 		Change:      chg,
 		Project:     project,
 		ManagedZone: zone,
@@ -443,7 +475,7 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			var reqErr error
-			resp, reqErr = config.NewDnsClient(userAgent).ResourceRecordSets.List(
+			resp, reqErr = NewClient(config, userAgent).ResourceRecordSets.List(
 				project, zone).Name(name).Type(dnsType).Do()
 			return reqErr
 		},
@@ -477,10 +509,29 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
 
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":      project,
+		"managed_zone": zone,
+		"name":         rrset.Name,
+		"type":         rrset.Type,
+	}); err != nil {
+		return fmt.Errorf("Error setting resource identity: %s", err)
+	}
+
 	return nil
 }
 
 func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -507,7 +558,7 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 	// This does not apply to SOA, as they can only be set on the root
 	// zone.
 	if d.Get("type").(string) == "NS" || d.Get("type").(string) == "SOA" {
-		mz, err := config.NewDnsClient(userAgent).ManagedZones.Get(project, zone).Do()
+		mz, err := NewClient(config, userAgent).ManagedZones.Get(project, zone).Do()
 		if err != nil {
 			return fmt.Errorf("Error retrieving managed zone %q from %q: %s", zone, project, err)
 		}
@@ -546,13 +597,13 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	log.Printf("[DEBUG] DNS Record delete request: %#v", chg)
-	chg, err = config.NewDnsClient(userAgent).Changes.Create(project, zone, chg).Do()
+	chg, err = NewClient(config, userAgent).Changes.Create(project, zone, chg).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, "google_dns_record_set")
 	}
 
 	w := &DnsChangeWaiter{
-		Service:     config.NewDnsClient(userAgent),
+		Service:     NewClient(config, userAgent),
 		Change:      chg,
 		Project:     project,
 		ManagedZone: zone,
@@ -567,6 +618,11 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceDnsRecordSet) {
+		return ResourceDnsRecordSet().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -627,13 +683,13 @@ func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error 
 		chg.Deletions[0].Rrdatas[i] = oldRR.(string)
 	}
 	log.Printf("[DEBUG] DNS Record change request: %#v old: %#v new: %#v", chg, chg.Deletions[0], chg.Additions[0])
-	chg, err = config.NewDnsClient(userAgent).Changes.Create(project, zone, chg).Do()
+	chg, err = NewClient(config, userAgent).Changes.Create(project, zone, chg).Do()
 	if err != nil {
 		return fmt.Errorf("Error changing DNS RecordSet: %s", err)
 	}
 
 	w := &DnsChangeWaiter{
-		Service:     config.NewDnsClient(userAgent),
+		Service:     NewClient(config, userAgent),
 		Change:      chg,
 		Project:     project,
 		ManagedZone: zone,
@@ -835,7 +891,7 @@ func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancerNetworkUrl(v inte
 	} else if strings.HasPrefix(v.(string), "https://") {
 		return v, nil
 	}
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}"+v.(string))
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(compute.Product, config)+v.(string))
 	if err != nil {
 		return "", err
 	}

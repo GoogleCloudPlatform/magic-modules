@@ -48,53 +48,59 @@ collection_url_key: 'items'
 custom_code:
   update_encoder: 'templates/terraform/update_encoder/future_reservation.go.tmpl'
 min_version: beta
-examples:
+samples:
   - name: 'future_reservation_basic'
     primary_resource_id: 'gce_future_reservation'
-    vars:
-      future_reservation_name: 'gce-future-reservation'
-      start_time: '2025-11-01T00:00:00Z'
-      end_time: '2025-11-02T00:00:00Z'
-    test_vars_overrides:
-      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
-      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+    steps:
+      - name: 'future_reservation_basic'
+        resource_id_vars:
+          future_reservation_name: 'gce-future-reservation'
+          start_time: '2025-11-01T00:00:00Z'
+          end_time: '2025-11-02T00:00:00Z'
+        test_vars_overrides:
+          start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
+          end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
   - name: 'future_reservation_aggregate_reservation'
     primary_resource_id: 'gce_future_reservation'
-    vars:
-      future_reservation_name: 'gce-future-reservation-aggregate-reservation'
-      start_time: '2025-11-01T00:00:00Z'
-      end_time: '2025-11-02T00:00:00Z'
-    test_vars_overrides:
-      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
-      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
     # Skip in VCR until the test issue is resolved
     # https://github.com/hashicorp/terraform-provider-google/issues/25087
     skip_vcr: true
+    steps:
+      - name: 'future_reservation_aggregate_reservation'
+        resource_id_vars:
+          future_reservation_name: 'gce-future-reservation-aggregate-reservation'
+          start_time: '2025-11-01T00:00:00Z'
+          end_time: '2025-11-02T00:00:00Z'
+        test_vars_overrides:
+          start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
+          end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
   - name: 'shared_future_reservation'
     primary_resource_id: 'gce_future_reservation'
-    vars:
-      future_reservation_name: 'gce-shared-future-reservation'
-      start_time: '2025-08-01T00:00:00Z'
-      end_time: '2025-08-02T00:00:00Z'
-    test_vars_overrides:
-      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
-      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_TARGET'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
     # Skip in VCR until the test issue is resolved
     # https://github.com/hashicorp/terraform-provider-google/issues/25063
     skip_vcr: true
+    steps:
+      - name: 'shared_future_reservation'
+        resource_id_vars:
+          future_reservation_name: 'gce-shared-future-reservation'
+          start_time: '2025-08-01T00:00:00Z'
+          end_time: '2025-08-02T00:00:00Z'
+        test_vars_overrides:
+          start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
+          end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+          org_id: 'ORG_TARGET'
+          billing_account: 'BILLING_ACCT'
 parameters:
   - name: 'name'
     type: String
@@ -620,3 +626,19 @@ properties:
           - 'BATCH'
           - 'SERVING'
           - 'UNSPECIFIED'
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+      Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the future reservation. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        immutable: true
+        ignore_read: true

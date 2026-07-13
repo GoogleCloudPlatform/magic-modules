@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	iamcredentials_tpg "github.com/hashicorp/terraform-provider-google/google/services/iamcredentials"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -23,7 +24,7 @@ func DataSourceGoogleServiceAccountAccessToken() *schema.Resource {
 			"target_service_account": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: verify.ValidateRegexp("(" + strings.Join(verify.PossibleServiceAccountNames, "|") + ")"),
+				ValidateFunc: verify.ValidateRegexp("^(" + strings.Join(verify.PossibleServiceAccountNames, "|") + ")$"),
 			},
 			"access_token": {
 				Type:      schema.TypeString,
@@ -46,7 +47,7 @@ func DataSourceGoogleServiceAccountAccessToken() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: verify.ValidateRegexp(verify.ServiceAccountLinkRegex),
+					ValidateFunc: verify.ValidateRegexp("^" + verify.ServiceAccountLinkRegex + "$"),
 				},
 			},
 			"lifetime": {
@@ -68,7 +69,7 @@ func dataSourceGoogleServiceAccountAccessTokenRead(d *schema.ResourceData, meta 
 
 	log.Printf("[INFO] Acquire Service Account AccessToken for %s", d.Get("target_service_account").(string))
 
-	service := config.NewIamCredentialsClient(userAgent)
+	service := iamcredentials_tpg.NewClient(config, userAgent)
 
 	name := fmt.Sprintf("projects/-/serviceAccounts/%s", d.Get("target_service_account").(string))
 	tokenRequest := &iamcredentials.GenerateAccessTokenRequest{

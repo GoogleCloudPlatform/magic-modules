@@ -13,47 +13,49 @@
 
 ---
 name: Enrollment
-include_in_tgc_next: true
 description: |
   The Eventarc Enrollment resource
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/eventarc/advanced/docs/receive-events/create-enrollment'
+    Official Documentation: https://cloud.google.com/eventarc/advanced/docs/receive-events/create-enrollment
   api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.enrollments
 base_url: projects/{{project}}/locations/{{location}}/enrollments
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/enrollments/{{enrollment_id}}
 create_url: projects/{{project}}/locations/{{location}}/enrollments?enrollmentId={{enrollment_id}}
+update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/enrollments/{{enrollment_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/enrollments/{{enrollment_id}}
-autogen_async: true
 async:
-  actions: ['create', 'update', 'delete']
+  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 20
       update_minutes: 20
       delete_minutes: 20
     base_url: '{{op_id}}'
-  type: OpAsync
+  actions: [create, update, delete]
   result:
     resource_inside_response: true
-examples:
+autogen_async: true
+include_in_tgc_next: true
+tgc_tests:
+  - name: TestAccEventarcMessageBus/enrollment
+  - name: TestAccEventarcMessageBus/updateEnrollment
+samples:
   - name: eventarc_enrollment_with_pipeline_destination
     primary_resource_id: primary
-    vars:
-      enrollment_id: some-enrollment
-      pipeline_id: some-pipeline
-      message_bus_id: some-message-bus
-      network_attachment_name: some-network-attachment
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
     exclude_test: true
-tgc_tests:
-  - name: 'TestAccEventarcMessageBus/enrollment'
-  - name: 'TestAccEventarcMessageBus/updateEnrollment'
+    steps:
+      - name: eventarc_enrollment_with_pipeline_destination
+        resource_id_vars:
+          enrollment_id: some-enrollment
+          pipeline_id: some-pipeline
+          message_bus_id: some-message-bus
+          network_attachment_name: some-network-attachment
+        test_env_vars:
+          project_id: PROJECT_NAME
 parameters:
   - name: location
     type: String

@@ -1,0 +1,93 @@
+package storagecontrol
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceGoogleStorageControlProjectIntelligenceFinding() *schema.Resource {
+	s := map[string]*schema.Schema{
+		"finding_id": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: `The ID of the intelligence finding.`,
+		},
+		"location": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "global",
+			Description: `The location of the intelligence finding. Currently default value is global and users cannot use for input for now.`,
+		},
+		"project": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    true,
+			Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
+		},
+	}
+	for k, v := range storageControlIntelligenceFindingSchema() {
+		s[k] = v
+	}
+	return &schema.Resource{
+		Read:   dataSourceGoogleStorageControlProjectIntelligenceFindingRead,
+		Schema: s,
+	}
+}
+
+func dataSourceGoogleStorageControlProjectIntelligenceFindingRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for intelligence finding: %s", err)
+	}
+	location := d.Get("location").(string)
+	findingId := d.Get("finding_id").(string)
+
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"projects/%s/locations/%s/intelligenceFindings/%s", project, location, findingId))
+	if err != nil {
+		return fmt.Errorf("Error formatting url for intelligence finding: %s", err)
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, "StorageControlProjectIntelligenceFinding", fmt.Sprintf("StorageControlProjectIntelligenceFinding %s", findingId))
+	}
+
+	flatFinding := flattenStorageControlIntelligenceFinding(res)
+	if flatFinding == nil {
+		return fmt.Errorf("Error flattening intelligence finding response")
+	}
+	for k, v := range flatFinding {
+		if err := d.Set(k, v); err != nil {
+			return fmt.Errorf("Error setting %s: %s", k, err)
+		}
+	}
+
+	d.SetId(fmt.Sprintf("projects/%s/locations/%s/intelligenceFindings/%s", project, location, findingId))
+
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_storage_control_project_intelligence_finding",
+		ProductName: "storagecontrol",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleStorageControlProjectIntelligenceFinding(),
+	}.Register()
+}

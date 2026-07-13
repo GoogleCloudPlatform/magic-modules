@@ -72,6 +72,10 @@ type Product struct {
 
 	ClientName string `yaml:"client_name,omitempty"`
 
+	// RepByDefault is if this product should default to REP endpoints if
+	// available. Changing this requires REP to be supported in *ALL* regions
+	RepByDefault bool `yaml:"rep_by_default,omitempty"`
+
 	// The version of the product which is currently being generated.
 	Version *product.Version `yaml:"-"`
 
@@ -81,9 +85,8 @@ type Product struct {
 	// ImportPath contains the prefix used for importing packages in generated files.
 	ImportPath string `yaml:"-"`
 
-	// RepByDefault is if this product should default to REP endpoints if
-	// available. Changing this requires REP to be supported in *ALL* regions
-	RepByDefault bool `yaml:"rep_by_default,omitempty"`
+	// Runtime contains information about the currently-running generation process.
+	Runtime Runtime `yaml:"-"`
 }
 
 func (p *Product) UnmarshalYAML(value *yaml.Node) error {
@@ -327,6 +330,13 @@ func Merge(self, otherObj reflect.Value, version string) {
 
 		if selfObj.Field(i).Kind() == reflect.Slice {
 			DeepMerge(selfObj.Field(i), otherObj.Field(i), version)
+		} else if selfObj.Field(i).Kind() == reflect.Pointer {
+			// merge the objects that are being pointed to, if both exist (namely, ItemTypes)
+			if reflect.Indirect(selfObj.Field(i)).IsValid() && reflect.Indirect(otherObj.Field(i)).IsValid() {
+				Merge(selfObj.Field(i), reflect.Indirect(otherObj.Field(i)), version)
+			} else {
+				selfObj.Field(i).Set(otherObj.Field(i))
+			}
 		} else {
 			selfObj.Field(i).Set(otherObj.Field(i))
 		}

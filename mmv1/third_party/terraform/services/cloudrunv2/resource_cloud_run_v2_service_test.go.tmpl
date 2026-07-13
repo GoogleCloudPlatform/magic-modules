@@ -9,6 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
   "github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/vpcaccess"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networkservices"
   "github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/cloudrunv2"
 )
@@ -515,7 +520,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 func testAccCheckCloudRunV2ServiceDestroyByNameProducer(t *testing.T, serviceName string) func() {
 	return func() {
 		config := acctest.GoogleProviderConfig(t)
-		service := config.NewCloudRunV2Client(config.UserAgent).Projects.Locations.Services
+		service := cloudrunv2.NewClient(config, config.UserAgent).Projects.Locations.Services
 		qualifiedServiceName := fmt.Sprintf("projects/%s/locations/%s/services/%s", config.Project, config.Region, serviceName)
 		op, err := service.Delete(qualifiedServiceName).Do()
 		if err != nil {

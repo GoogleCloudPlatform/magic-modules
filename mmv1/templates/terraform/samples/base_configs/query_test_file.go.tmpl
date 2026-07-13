@@ -1,0 +1,163 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+{{$.CodeHeader TemplatePath}}
+
+package {{ lower $.ProductMetadata.Name }}_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+
+	"{{ $.ImportPath }}/acctest"
+	"{{ $.ImportPath }}/envvar"
+)
+
+var (
+	_ = envvar.TestEnvVar
+)
+
+{{ $sample := $.FirstTestConfig.Sample }}
+{{ $step := $.FirstTestConfig.Step }}
+func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
+	t.Parallel()
+
+	{{- if $sample.SkipVcr }}
+	acctest.SkipIfVcr(t)
+	{{- end }}
+
+	{{- if $sample.BootstrapIam }}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	{{- range $iam := $sample.BootstrapIam }}
+		{
+			Member: "{{$iam.Member}}",
+			Role:   "{{$iam.Role}}",
+		},
+	{{- end}}
+	})
+	{{- end }}
+
+	randomSuffix := acctest.RandString(t, 10)
+	context := map[string]interface{}{
+	{{- template "EnvVarContext" dict "TestEnvVars" $step.TestEnvVars "HasNewLine" false}}
+	{{- range $varKey, $varVal := $step.TestContextVars }}
+		"{{$varKey}}": {{$varVal}},
+	{{- end }}
+	{{- range $scope := $.ListScopeProperties }}
+		{{- $n := underscore $scope.Name }}
+		{{- if not (index $step.TestContextVars $n) }}
+		{{- if or (eq $n "region") (eq $n "location") }}
+		"{{$n}}": envvar.GetTestRegionFromEnv(),
+		{{- else if eq $n "zone" }}
+		"zone": envvar.GetTestZoneFromEnv(),
+		{{- else if eq $n "project" }}
+		{{- if not (index $step.TestEnvVars "project") }}
+		"project": envvar.GetTestProjectFromEnv(),
+		{{- end }}
+		{{- end }}
+		{{- end }}
+	{{- end }}
+		"random_suffix": randomSuffix,
+	}
+
+	var listDisplayName acctest.ListDisplayName
+	var listScope acctest.ListScopeCapture
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+{{- if $.VersionedProvider $sample.MinVersion }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+{{- else }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+	{{- if $sample.ExternalProviders }}
+		ExternalProviders: map[string]resource.ExternalProvider{
+		{{- range $provider := $sample.ExternalProviders }}
+			"{{$provider}}": {},
+		{{- end }}
+		},
+	{{- end }}
+{{- end }}
+{{- if not $.ExcludeDelete }}
+		CheckDestroy: testAccCheck{{ $.ResourceName }}DestroyProducer(t),
+{{- end }}
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}(context),
+				Check: resource.ComposeTestCheckFunc(
+					listDisplayName.Capture(
+						"{{ $sample.ResourceType $.TerraformName }}.{{ $sample.PrimaryResourceId }}",
+						[]string{
+						{{- range $key := $.ListResultDisplayNameKeyStrings }}
+							"{{ $key }}",
+						{{- end }}
+						},
+					),
+					listScope.Capture(map[string]string{
+					{{- range $scope := $.ListScopeProperties }}
+						{{- if $scope.Required }}
+							{{- $n := underscore $scope.Name }}
+						"{{ $n }}": "{{ $sample.ResourceType $.TerraformName }}.{{ $sample.PrimaryResourceId }}",
+						{{- end }}
+					{{- end }}
+					}),
+				),
+			},
+			{
+				Query:  true,
+				Config: testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context),
+				ConfigVariables: listScope.AsConfigVariables(),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLengthAtLeast("{{ $sample.ResourceType $.TerraformName }}.list_query", 1),
+					querycheck.ExpectResourceDisplayName(
+						"{{ $sample.ResourceType $.TerraformName }}.list_query",
+						queryfilter.ByDisplayName(listDisplayName.CheckValue()),
+						listDisplayName.CheckValue(),
+					),
+				},
+			},
+		},
+	})
+}
+
+func testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+{{- range $scope := $.ListScopeProperties }}
+	{{- if $scope.Required }}
+		{{- $n := underscore $scope.Name }}
+variable "{{ $n }}" { type = string }
+	{{- end }}
+{{- end }}
+list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
+    provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
+	limit = 10000
+    config {
+{{- range $scope := $.ListScopeProperties }}
+        {{- if $scope.Required }}
+            {{- $n := underscore $scope.Name }}
+        {{ $n }} = var.{{ $n }}
+        {{- end }}
+{{- end }}
+    }
+}
+`, context)
+}

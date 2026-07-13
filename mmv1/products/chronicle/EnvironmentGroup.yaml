@@ -1,0 +1,87 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EnvironmentGroup
+description: >
+  Environment groups let you organize multiple environments into logical categories, making it easier to manage large organizations or multiple customers as a Managed Security Service Provider (MSSP).
+
+min_version: 'beta'
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.environmentGroups'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environmentGroups
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environmentGroups/{{environment_group_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environmentGroups
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environmentGroups/{{environment_group_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/environmentGroups/{{environment_group_id}}
+autogen_status: RW52aXJvbm1lbnRHcm91cA==
+samples:
+  - name: chronicle_environmentgroup_update
+    primary_resource_id: sample
+    min_version: beta
+    steps:
+      - name: "chronicle_environmentgroup_basic"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+      - name: "chronicle_environmentgroup_full"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: environmentGroupId
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Id of the environment group record.
+properties:
+  - name: description
+    type: String
+    required: true
+    description: |-
+      The EnvironmentGroup description.
+      This value is optional. This value should be up to
+      250 characters, and valid characters are /a-z-/.
+  - name: displayName
+    type: String
+    required: true
+    description: The group name.
+  - name: environmentsIds
+    type: Array
+    required: true
+    description: The environment IDs for the group.
+    item_type:
+      type: String
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the environment group.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/environmentGroups/{environment_group}
+    output: true

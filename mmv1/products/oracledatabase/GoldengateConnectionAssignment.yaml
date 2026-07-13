@@ -1,0 +1,143 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: GoldengateConnectionAssignment
+description: This resource helps to assign a GoldengateConnection to a GoldengateDeployment used for actual data replication and transformations.
+base_url: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments/{{goldengate_connection_assignment_id}}
+create_url: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments?goldengateConnectionAssignmentId={{goldengate_connection_assignment_id}}
+id_format: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments/{{goldengate_connection_assignment_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments/{{goldengate_connection_assignment_id}}
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+async:
+  operation:
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: R29sZGVuZ2F0ZUNvbm5lY3Rpb25Bc3NpZ25tZW50
+autogen_async: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/oracledatabase_goldengate_connection_assignment.go.tmpl
+samples:
+  - name: oracledatabase_goldengate_connection_assignment_full
+    primary_resource_id: assignment
+    steps:
+      - name: oracledatabase_goldengate_connection_assignment_full
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_assignment_id: my-assignment
+          goldengate_deployment_id: my-deployment
+          goldengate_connection_id: my-connection
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oci-terraform-testing-prod"'
+          deletion_protection: false
+          goldengate_connection_assignment_id: fmt.Sprintf("tf-gcca-%s", acctest.RandString(t, 10))
+          goldengate_deployment_id: '"tf-test-permanent-deployment"'
+          goldengate_connection_id: '"tf-test-permanent-connection"'
+virtual_fields:
+  - name: deletion_protection
+    type: Boolean
+    default_value: true
+    description: Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: goldengateConnectionAssignmentId
+    type: String
+    required: true
+    description: The ID of the GoldengateConnectionAssignment to create.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: The time when the connection assignment was created.
+    output: true
+  - name: displayName
+    type: String
+    description: The display name for the GoldengateConnectionAssignment.
+  - name: entitlementId
+    type: String
+    description: The OCID of the entitlement linked to this resource.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: The labels or tags associated with the GoldengateConnectionAssignment.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the GoldengateConnectionAssignment resource in the following
+      format:
+      projects/{project}/locations/{region}/goldengateConnectionAssignments/{goldengate_connection_assignment}
+    output: true
+  - name: properties
+    type: NestedObject
+    required: true
+    description: The properties of a GoldengateConnectionAssignment.
+    properties:
+      - name: alias
+        type: String
+        description: Credential store alias.
+        output: true
+      - name: goldengateConnection
+        type: String
+        required: true
+        description: |-
+          The GoldengateConnection resource to be assigned.
+          Format:
+          projects/{project}/locations/{location}/goldengateConnections/{goldengate_connection}
+      - name: goldengateDeployment
+        type: String
+        required: true
+        description: |-
+          The GoldenGateDeployment to assign the connection to.
+          Format:
+          projects/{project}/locations/{location}/goldengateDeployments/{goldengate_deployment}
+      - name: ocid
+        type: String
+        description: |-
+          The
+          [OCID](https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+          of the connection assignment being referenced.
+        output: true
+      - name: state
+        type: String
+        description: |-
+          The lifecycle state of the connection assignment.
+          Possible values:
+          CREATING
+          ACTIVE
+          FAILED
+          UPDATING
+          DELETING
+        output: true

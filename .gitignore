@@ -16,6 +16,7 @@
 *#
 *.swp
 *.bak
+/scratch/
 
 # Python
 *.pyc
@@ -54,8 +55,9 @@ mmv1/build/*
 tpgtools/temp.serial
 tpgtools/serialization.go
 
-# ignore magician binary
+# ignore built binaries
 .ci/magician/magician
+/bin
 
 # ignore leftover testlogs and cassettes
 .ci/magician/testlogs
@@ -68,3 +70,4 @@ MODULE.bazel.lock
 go.work
 go.work.sum
 terraform-provider-google/
+debug_output/

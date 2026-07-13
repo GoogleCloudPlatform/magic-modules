@@ -12,105 +12,106 @@
 # limitations under the License.
 
 ---
-name: 'Tensorboard'
-description: |-
-  Tensorboard is a physical database that stores users' training metrics. A default Tensorboard is provided in each region of a GCP project. If needed users can also create extra Tensorboards in their projects.
+name: Tensorboard
+description: Tensorboard is a physical database that stores users' training metrics. A default Tensorboard is provided in each region of a GCP project. If needed users can also create extra Tensorboards in their projects.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.tensorboards'
+    Official Documentation: https://cloud.google.com/vertex-ai/docs
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.tensorboards
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/tensorboards'
+base_url: projects/{{project}}/locations/{{region}}/tensorboards
 self_link: '{{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/vertex_ai_tensorboard_import.go.tmpl'
-examples:
-  - name: 'vertex_ai_tensorboard'
-    primary_resource_id: 'tensorboard'
-    vars:
-      display_name: 'terraform'
-    test_vars_overrides:
-      # for backward compatible
-      display_name: '"terraform" + randomSuffix'
-    ignore_read_extra:
-      - 'project'
-  - name: 'vertex_ai_tensorboard_full'
-    primary_resource_id: 'tensorboard'
-    vars:
-      display_name: 'terraform'
-      kms_key_name: 'kms-name'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      # for backward compatible
-      display_name: '"terraform" + randomSuffix'
-    ignore_read_extra:
-      - 'project'
+  custom_import: templates/terraform/custom_import/vertex_ai_tensorboard_import.go.tmpl
+samples:
+  - name: vertex_ai_tensorboard
+    primary_resource_id: tensorboard
+    steps:
+      - name: vertex_ai_tensorboard
+        resource_id_vars:
+          display_name: terraform
+        test_vars_overrides:
+          # for backward compatible
+          display_name: '"terraform" + randomSuffix'
+        ignore_read_extra:
+          - project
+  - name: vertex_ai_tensorboard_full
+    primary_resource_id: tensorboard
+    steps:
+      - name: vertex_ai_tensorboard_full
+        resource_id_vars:
+          display_name: terraform
+          kms_key_name: kms-name
+        test_vars_overrides:
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+          # for backward compatible
+          display_name: '"terraform" + randomSuffix'
+        ignore_read_extra:
+          - project
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     description: The region of the tensorboard. eg us-central1
     url_param_only: true
     immutable: true
     default_from_api: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: Name of the Tensorboard.
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: User provided name of this Tensorboard.
     required: true
-  - name: 'description'
+  - name: description
     type: String
     description: Description of this Tensorboard.
-  - name: 'encryptionSpec'
+  - name: encryptionSpec
     type: NestedObject
     description: |
       Customer-managed encryption key spec for a Tensorboard. If set, this Tensorboard and all sub-resources of this Tensorboard will be secured by this key.
     immutable: true
     properties:
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
         description: |
           The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
           Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
         required: true
         immutable: true
-  - name: 'blobStoragePathPrefix'
+  - name: blobStoragePathPrefix
     type: String
-    description:
-      Consumer project Cloud Storage path prefix used to store blob data, which
-      can either be a bucket or directory. Does not end with a '/'.
+    description: Consumer project Cloud Storage path prefix used to store blob data, which can either be a bucket or directory. Does not end with a '/'.
     output: true
-  - name: 'runCount'
+  - name: runCount
     type: String
     description: The number of Runs stored in this Tensorboard.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The timestamp of when the Tensorboard was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The timestamp of when the Tensorboard was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: |
       The labels with user-defined metadata to organize your Tensorboards.

@@ -9,23 +9,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
-	"google.golang.org/api/googleapi"
-{{- end }}
+  "github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
@@ -54,14 +49,11 @@ func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 func TestAccComputeInstanceFromMachineImage_maxRunDuration(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	var expectedMaxRunDuration = compute.Duration{}
-	// Define in testAccComputeInstanceFromMachineImage_maxRunDuration
-	expectedMaxRunDuration.Nanos = 123
-	expectedMaxRunDuration.Seconds = 60
+	var expectedMaxRunDuration = map[string]interface{}{"nanos": float64(123), "seconds": "60"}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -87,7 +79,7 @@ func TestAccComputeInstanceFromMachineImage_maxRunDuration(t *testing.T) {
 func TestAccComputeInstanceFromMachineImage_preemptionNoticeDuration(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
@@ -116,7 +108,7 @@ func TestAccComputeInstanceFromMachineImage_terminationTime(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
@@ -146,13 +138,11 @@ func TestAccComputeInstanceFromMachineImage_terminationTime(t *testing.T) {
 func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
-	expectedLocalSsdRecoveryTimeout.Nanos = 0
-	expectedLocalSsdRecoveryTimeout.Seconds = 3600
+	var expectedLocalSsdRecoveryTimeout = map[string]interface{}{"nanos": float64(0), "seconds": "3600"}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -173,13 +163,11 @@ func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T
 func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
-	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
-	expectedLocalSsdRecoveryTimeout.Nanos = 0
-	expectedLocalSsdRecoveryTimeout.Seconds = 7200
+	var expectedLocalSsdRecoveryTimeout = map[string]interface{}{"nanos": float64(0), "seconds": "7200"}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -201,14 +189,20 @@ func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(
 func TestAccComputeInstanceFromMachineImageWithOverride_partnerMetadata(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
 	var namespace = "test.compute.googleapis.com"
-	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
-	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
-		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
+	expectedPartnerMetadata := make(map[string]map[string]interface{})
+	expectedPartnerMetadata[namespace] = map[string]interface{}{
+		"entries": map[string]interface{}{
+			"key1": "value1",
+			"key2": float64(2),
+			"key3": map[string]interface{}{
+				"key31": "value31",
+			},
+		},
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -231,7 +225,7 @@ func TestAccComputeInstanceFromMachineImageWithOverride_partnerMetadata(t *testi
 func TestAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
@@ -256,7 +250,7 @@ func TestAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(t *
 func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_instance_from_machine_image.foobar"
@@ -287,7 +281,7 @@ func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
 func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -348,7 +342,7 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 func TestAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var resourceName = "google_compute_instance_from_machine_image.foobar"
 	var machineImageName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -379,7 +373,7 @@ func TestAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(
 func TestAccComputeInstanceFromMachineImage_VSSWindows(t *testing.T) {
   t.Parallel()
 
-  var instance compute.Instance
+  var instance map[string]interface{}
 
   context_1 := map[string]interface{}{
     "instance1_name":       fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
@@ -423,6 +417,40 @@ func TestAccComputeInstanceFromMachineImage_VSSWindows(t *testing.T) {
 }
 {{- end }}
 
+func TestAccComputeInstanceFromMachineImage_workloadIdentity(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
+	randomSuffix := acctest.RandString(t, 10)
+	resourceName := "google_compute_instance_from_machine_image.foobar"
+
+	context := map[string]interface{}{
+		"instance_name":                instanceName,
+		"generated_instance_name":      generatedInstanceName,
+		"random_suffix":                randomSuffix,
+		"identity_id":                  "tf-test-id-1-" + randomSuffix,
+		"identity_certificate_enabled": true,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_workloadIdentity(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, "workload_identity_config.0.identity", fmt.Sprintf("ns/tf-test-ns-%s/sa/tf-test-id-1-%s", randomSuffix, randomSuffix)),
+					resource.TestCheckResourceAttr(resourceName, "workload_identity_config.0.identity_certificate_enabled", "true"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -432,8 +460,15 @@ func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) fu
 				continue
 			}
 
-			_, err := compute_tpg.NewClient(config, config.UserAgent).Instances.Get(
-				config.Project, rs.Primary.Attributes["zone"], rs.Primary.ID).Do()
+		instanceURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s",
+				transport_tpg.BaseUrl(tpgcompute.Product, config), config.Project, rs.Primary.Attributes["zone"], tpgresource.GetResourceNameFromSelfLink(rs.Primary.ID))
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   config.Project,
+				RawURL:    instanceURL,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("Instance still exists")
 			}
@@ -1382,7 +1417,7 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 func TestAccComputeInstanceFromMachineImage_IgmpQuery_v2(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
+	var instance map[string]interface{}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	suffix := acctest.RandString(t, 10)
 	envRegion := envvar.GetTestRegionFromEnv()
@@ -1485,6 +1520,68 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 		subnetwork = google_compute_subnetwork.inst-test-subnetwork.id
 		igmp_query = "%{igmp_query}"
 	}
+}
+`, context)
+}
+
+func testAccComputeInstanceFromMachineImage_workloadIdentity(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_iam_workload_identity_pool" "pool" {
+  workload_identity_pool_id = "tf-test-pool-%{random_suffix}"
+  mode                      = "TRUST_DOMAIN"
+}
+
+resource "google_iam_workload_identity_pool_namespace" "ns" {
+  workload_identity_pool_id        = google_iam_workload_identity_pool.pool.workload_identity_pool_id
+  workload_identity_pool_namespace_id = "tf-test-ns-%{random_suffix}"
+}
+
+resource "google_iam_workload_identity_pool_managed_identity" "id" {
+  workload_identity_pool_id            = google_iam_workload_identity_pool_namespace.ns.workload_identity_pool_id
+  workload_identity_pool_namespace_id = google_iam_workload_identity_pool_namespace.ns.workload_identity_pool_namespace_id
+  workload_identity_pool_managed_identity_id = "%{identity_id}"
+}
+
+resource "google_compute_instance" "vm" {
+  name         = "%{instance_name}-source"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  workload_identity_config {
+    identity = "ns/tf-test-ns-%{random_suffix}/sa/%{identity_id}"
+    identity_certificate_enabled = %{identity_certificate_enabled}
+  }
+}
+
+resource "google_compute_machine_image" "foobar" {
+  name            = "image-%{random_suffix}"
+  source_instance = google_compute_instance.vm.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  name                 = "%{generated_instance_name}"
+  zone                 = "us-central1-a"
+  source_machine_image = google_compute_machine_image.foobar.self_link
+
+  workload_identity_config {
+    identity = "ns/tf-test-ns-%{random_suffix}/sa/%{identity_id}"
+    identity_certificate_enabled = %{identity_certificate_enabled}
+  }
 }
 `, context)
 }

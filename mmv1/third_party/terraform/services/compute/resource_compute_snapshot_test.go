@@ -6,6 +6,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccComputeSnapshot_encryption(t *testing.T) {
@@ -39,7 +43,7 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 
 	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	kmsKeyName := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-compute-snapshot-key1").CryptoKey.Name
+	kmsKeyName := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-compute-snapshot-key1").CryptoKey.Name
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -200,6 +204,71 @@ resource "google_compute_disk" "persistent" {
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-a"
+}
+`, context)
+}
+
+func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	pid := envvar.GetTestProjectFromEnv()
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    pid,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSnapshot_resourceManagerTags(context),
+			},
+		},
+	})
+}
+
+func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "tag_key" {
+  parent     = "projects/%{project_id}"
+  short_name = "tf-test-key-%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent     = "tagKeys/${google_tags_tag_key.tag_key.name}"
+  short_name = "tf-test-value-%{random_suffix}"
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "tf-test-disk-%{random_suffix}"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_instant_snapshot" "foobar" {
+  name        = "tf-test-instant-snapshot-%{random_suffix}"
+  zone        = "us-central1-a"
+  source_disk = google_compute_disk.foobar.id
+}
+
+resource "google_compute_snapshot" "foobar" {
+  name                    = "tf-test-snapshot-%{random_suffix}"
+  zone                    = "us-central1-a"
+  source_instant_snapshot = google_compute_instant_snapshot.foobar.id
+  params {
+    resource_manager_tags = {
+      "${google_tags_tag_key.tag_key.id}" = "${google_tags_tag_value.tag_value.id}"
+    }
+  }
 }
 `, context)
 }

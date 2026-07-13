@@ -32,6 +32,7 @@ has_self_link: true
 exclude_delete: true
 # Cannot be updated (as of implementation date)
 immutable: true
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -45,21 +46,28 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
+samples:
   - name: 'compute_region_commitment_basic'
     primary_resource_id: 'foobar'
-    vars:
-      region_commitment_name: 'my-region-commitment'
     # Creating a resource means signing a contract
     # Spanning years that cannot be deleted
     exclude_test: true
+    steps:
+      - name: 'compute_region_commitment_basic'
+        resource_id_vars:
+          region_commitment_name: 'my-region-commitment'
   - name: 'compute_region_commitment_full'
     primary_resource_id: 'foobar'
-    vars:
-      region_commitment_name: 'my-full-commitment'
     # Creating a resource means signing a contract
     # Spanning years that cannot be deleted
     exclude_test: true
+    steps:
+      - name: 'compute_region_commitment_full'
+        resource_id_vars:
+          region_commitment_name: 'my-full-commitment'
+          tag_key: 'tagkey'
+          tag_value: 'tagvalue'
+          org_id: 'ORG_ID'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -202,4 +210,20 @@ properties:
     type: String
     description: |
       Specifies the already existing reservations to attach to the Commitment.
-    default_from_api: true
+    # Ignore read as a temporary fix because the API only returns these in the `reservations` list
+    ignore_read: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+      Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the commitment. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true

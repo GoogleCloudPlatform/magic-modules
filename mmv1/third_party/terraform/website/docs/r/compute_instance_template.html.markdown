@@ -430,6 +430,10 @@ The following arguments are supported:
 
 * `key_revocation_action_type` - (optional) Action to be taken when a customer's encryption key is revoked. Supports `STOP` and `NONE`, with `NONE` being the default.
 
+* `workload_identity_config` - (Optional) Workload Identity Config. More details about
+    this configuration option are [detailed below](#nested_workload_identity_config).
+
+
 <a name="nested_disk"></a>The `disk` block supports:
 
 * `auto_delete` - (Optional) Whether or not the disk should be auto-deleted.
@@ -600,7 +604,11 @@ The following arguments are supported:
     array of alias IP ranges for this network interface. Can only be specified for network
     interfaces on subnet-mode networks. Structure [documented below](#nested_alias_ip_range).
 
-* `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, MRDMA, IRDMA.
+* `alias_ipv6_range` - (Optional) [Beta] An
+    array of alias IPv6 ranges for this network interface. Can only be specified for network
+    interfaces on subnet-mode networks. Structure [documented below](#nested_alias_ip_range).
+
+* `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, MRDMA, IRDMA, IDPF.
 
 * `igmp_query` - (Optional) Indicates whether igmp query is enabled on the network interface or not. If enabled, also indicates the version of IGMP supported.
 
@@ -791,9 +799,9 @@ The `specific_reservation` block supports:
 
 <a name="nested_confidential_instance_config"></a>The `confidential_instance_config` block supports:
 
-* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled with AMD SEV. If enabled, [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled with AMD SEV. If enabled, [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"` or `"AMD Genoa"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
 
-* `confidential_instance_type` (Optional) Defines the confidential computing technology the instance uses. SEV is an AMD feature. TDX is an Intel feature. One of the following values is required: `SEV`, `SEV_SNP`, `TDX`. [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`confidential_instance_type`](#confidential_instance_type) is set to `SEV` and [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM.
+* `confidential_instance_type` (Optional) Defines the confidential computing technology the instance uses. SEV is an AMD feature. TDX is an Intel feature. One of the following values is required: `SEV`, `SEV_SNP`, `TDX`. [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`confidential_instance_type`](#confidential_instance_type) is set to `SEV` and [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"` or `"AMD Genoa"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM.
 
 <a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 
@@ -812,6 +820,12 @@ The `specific_reservation` block supports:
 * `performance_monitoring_unit` - (Optional) [The PMU](https://cloud.google.com/compute/docs/pmu-overview) is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are `STANDARD`, `ENHANCED`, and `ARCHITECTURAL`.
 
 * `enable_uefi_networking` - (Optional) Whether to enable UEFI networking for instance creation.
+
+<a name="nested_workload_identity_config"></a>The `workload_identity_config` block supports:
+
+* `identity` - (Required) Identity SPIFFE id.
+
+* `identity_certificate_enabled` - (Required) Specifies whether identity certificates are enabled.
 
 ## Attributes Reference
 

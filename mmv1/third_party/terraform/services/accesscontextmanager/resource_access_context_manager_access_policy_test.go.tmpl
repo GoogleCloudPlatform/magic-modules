@@ -2,12 +2,15 @@ package accesscontextmanager_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/accesscontextmanager"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -30,10 +33,15 @@ func TestAccAccessContextManager(t *testing.T) {
 		"access_level_custom":				testAccAccessContextManagerAccessLevel_customTest,
 		"access_levels":				testAccAccessContextManagerAccessLevels_basicTest,
 		"access_level_condition":			testAccAccessContextManagerAccessLevelCondition_basicTest,
+		"service_perimeter_psc_endpoint": testAccAccessContextManagerServicePerimeter_pscEndpointTest,
 		"service_perimeter_egress_policy":		testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest,
+		"service_perimeter_egress_policy_update":	testAccAccessContextManagerServicePerimeterEgressPolicy_updateTest,
 		"service_perimeter_dry_run_egress_policy":		testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basicTest,
+		"service_perimeter_egress_policy_psc_endpoint":	testAccAccessContextManagerServicePerimeterEgressPolicy_pscEndpointTest,
 		"service_perimeter_ingress_policy":		testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest,
+		"service_perimeter_ingress_policy_update":	testAccAccessContextManagerServicePerimeterIngressPolicy_updateTest,
 		"service_perimeter_dry_run_ingress_policy":		testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basicTest,
+		"service_perimeter_ingress_policy_psc_endpoint":	testAccAccessContextManagerServicePerimeterIngressPolicy_pscEndpointTest,
 		"service_perimeters":				testAccAccessContextManagerServicePerimeters_basicTest,
 		"gcp_user_access_binding":			testAccAccessContextManagerGcpUserAccessBinding_basicTest,
 		"authorized_orgs_desc":				testAccAccessContextManagerAuthorizedOrgsDesc_basicTest,
@@ -90,7 +98,7 @@ func testAccCheckAccessContextManagerAccessPolicyDestroyProducer(t *testing.T) f
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}AccessContextManagerBasePath{{"}}"}}accessPolicies/{{"{{"}}name{{"}}"}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(accesscontextmanager.Product, config)+"accessPolicies/{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}
@@ -120,6 +128,9 @@ resource "google_access_context_manager_access_policy" "test-access" {
 }
 
 func testAccAccessContextManagerAccessPolicy_scopedTest(t *testing.T) {
+	if os.Getenv("GOOGLE_ACM_SCOPED_POLICIES_ENABLED") == "" {
+		t.Skip("GOOGLE_ACM_SCOPED_POLICIES_ENABLED is not set; skipping test that requires a scoped AccessPolicy")
+	}
 	org := envvar.GetTestOrgFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{

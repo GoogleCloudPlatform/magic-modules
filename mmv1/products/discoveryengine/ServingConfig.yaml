@@ -12,27 +12,27 @@
 # limitations under the License.
 
 ---
-name: 'ServingConfig'
+name: ServingConfig
 description: |
   Represents a serving config which is a singleton resource under engine. A default
   serving config is automatically provisioned and deleted with its parent engine.
 references:
-  api: 'https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1/projects.locations.collections.engines.servingConfigs'
-base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs'
-self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs/{{serving_config_id}}'
+  api: https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1/projects.locations.collections.engines.servingConfigs
+base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs
+self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs/{{serving_config_id}}
 # Update API is also used as create API.
-create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs/{{serving_config_id}}?updateMask=filterControlIds,boostControlIds,synonymsControlIds,redirectControlIds,promoteControlIds'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
+create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs/{{serving_config_id}}?updateMask=filterControlIds,boostControlIds,synonymsControlIds,redirectControlIds,promoteControlIds
 update_mask: true
-exclude_delete: true
+create_verb: PATCH
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs/{{serving_config_id}}'
+  - projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs/{{serving_config_id}}
 timeouts:
   insert_minutes: 5
   update_minutes: 5
+exclude_delete: true
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The geographic location where the data store should reside. The value can
@@ -40,57 +40,57 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'collectionId'
+  - name: collectionId
     type: String
-    description: 'The collection ID. Currently only accepts "default_collection".'
+    description: The collection ID. Currently only accepts "default_collection".
     url_param_only: true
     immutable: true
-    default_value: 'default_collection'
-  - name: 'engineId'
+    default_value: default_collection
+  - name: engineId
     type: String
-    description: 'The ID of the engine associated with the serving config.'
+    description: The ID of the engine associated with the serving config.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'servingConfigId'
+  - name: servingConfigId
     type: String
     description: |
       'The unique ID of the serving config. Currently only accepts "default_search".'
     url_param_only: true
     immutable: true
-    default_value: 'default_search'
+    default_value: default_search
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The unique full resource name of the serving config. Values are of the format
       `projects/{project}/locations/{location}/collections/{collection_id}/engines/{engine_id}/servingConfigs/{serving_config_id}`.
     output: true
-  - name: 'filterControlIds'
+  - name: filterControlIds
     type: Array
     description: |
       The resource IDs of the filter controls to be applied.
     item_type:
       type: String
-  - name: 'boostControlIds'
+  - name: boostControlIds
     type: Array
     description: |
       The resource IDs of the boost controls to be applied.
     item_type:
       type: String
-  - name: 'synonymsControlIds'
+  - name: synonymsControlIds
     type: Array
     description: |
       The resource IDs of the synonyms controls to be applied.
     item_type:
       type: String
-  - name: 'redirectControlIds'
+  - name: redirectControlIds
     type: Array
     description: |
       The resource IDs of the redirect controls to be applied.
     item_type:
       type: String
-  - name: 'promoteControlIds'
+  - name: promoteControlIds
     type: Array
     description: |
       The resource IDs of the promote controls to be applied.

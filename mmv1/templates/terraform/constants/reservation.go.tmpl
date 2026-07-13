@@ -1,3 +1,63 @@
-import "net/url"
+import (
+	"net/url"
 
-var _ = url.Parse
+	rmClient "{{ $.ImportPath }}/services/resourcemanager/client"
+)
+
+var (
+	_ = url.Parse
+	_ = rmClient.NewClient
+)
+
+{{- if ne $.TargetVersionName "ga" }}
+func computeReservationShareSettingsSuppress(d *schema.ResourceData, suppressMap bool) bool {
+	conf := d.GetRawConfig()
+	if conf.IsNull() || !conf.GetAttr("share_settings").IsKnown() || conf.GetAttr("share_settings").IsNull() {
+		return false
+	}
+
+	shareSettingsSlice := conf.GetAttr("share_settings").AsValueSlice()
+	if len(shareSettingsSlice) == 0 || shareSettingsSlice[0].IsNull() {
+		return false
+	}
+
+	shareSettings := shareSettingsSlice[0]
+
+	hasProjectMap := false
+	if shareSettings.Type().HasAttribute("project_map") {
+		projMapAttr := shareSettings.GetAttr("project_map")
+		if !projMapAttr.IsNull() && projMapAttr.IsKnown() {
+			if projMapAttr.LengthInt() > 0 {
+				hasProjectMap = true
+			}
+		}
+	}
+
+	hasProjects := false
+	if shareSettings.Type().HasAttribute("projects") {
+		projectsAttr := shareSettings.GetAttr("projects")
+		if !projectsAttr.IsNull() && projectsAttr.IsKnown() {
+			if projectsAttr.LengthInt() > 0 {
+				hasProjects = true
+			}
+		}
+	}
+
+	if suppressMap {
+		return !hasProjectMap && hasProjects
+	}
+	return hasProjectMap && !hasProjects
+}
+
+func computeReservationProjectMapDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return computeReservationShareSettingsSuppress(d, true)
+}
+
+func computeReservationProjectsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return computeReservationShareSettingsSuppress(d, false)
+}
+{{- else }}
+func computeReservationProjectMapDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return false
+}
+{{- end }}

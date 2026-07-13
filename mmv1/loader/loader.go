@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	apiresource "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
@@ -101,6 +102,48 @@ func (l *Loader) LoadProducts() {
 	}
 
 	l.Products = l.batchLoadProducts(allProductFiles)
+
+	// Set up ResourcePrefixPkgMap now that all products are loaded.
+	runtime := api.Runtime{
+		// Hardcode a few unusually-named handwritten resources. These are among the oldest resources
+		// in the provider; we shouldn't be adding more to this list.
+		ResourcePrefixPkgMap: map[string]string{
+			"google_project":         "services/resourcemanager",
+			"google_folder":          "services/resourcemanager",
+			"google_organization":    "services/resourcemanager",
+			"google_service_account": "services/resourcemanager",
+		},
+	}
+	prefixCount := map[string]int{}
+	for _, p := range l.Products {
+		prefix := fmt.Sprintf("google_%s_", p.TerraformName())
+		runtime.ResourcePrefixPkgMap[prefix] = "services/" + strings.ToLower(p.ApiName)
+		prefixCount[prefix] += 1
+		if prefixCount[prefix] > 1 {
+			delete(runtime.ResourcePrefixPkgMap, prefix)
+		}
+		// Always add resources with legacy_name
+		for _, r := range p.Objects {
+			if r.LegacyName != "" && !strings.HasPrefix(r.LegacyName, prefix) {
+				runtime.ResourcePrefixPkgMap[r.LegacyName] = "services/" + strings.ToLower(p.ApiName)
+			}
+		}
+	}
+	// For products that share a prefix, add the individual resources instead.
+	for _, p := range l.Products {
+		prefix := fmt.Sprintf("google_%s_", p.TerraformName())
+		if prefixCount[prefix] > 1 {
+			for _, r := range p.Objects {
+				runtime.ResourcePrefixPkgMap[r.TerraformName()] = "services/" + strings.ToLower(p.ApiName)
+			}
+		}
+	}
+	for _, p := range l.Products {
+		p.Runtime = runtime
+		for _, r := range p.Objects {
+			r.Runtime = runtime
+		}
+	}
 }
 
 func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Product {
@@ -215,6 +258,27 @@ func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
 	return p, nil
 }
 
+type varsReplacingFS struct {
+	google.ReadDirReadFileFS
+}
+
+func (v varsReplacingFS) ReadFile(name string) ([]byte, error) {
+	content, err := v.ReadDirReadFileFS.ReadFile(name)
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.Contains(name, "examples/") {
+		modified := strings.ReplaceAll(string(content), "$.Vars", "$.ResourceIdVars")
+		return []byte(modified), nil
+	}
+	return content, nil
+}
+
+func NewVarsReplacingFS(inner google.ReadDirReadFileFS) google.ReadDirReadFileFS {
+	return varsReplacingFS{inner}
+}
+
 // loadResources loads all resources for a product
 func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 	var resources []*api.Resource = make([]*api.Resource, 0)
@@ -317,6 +381,56 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 
 	// Set resource defaults and validate
 	resource.TargetVersionName = l.version
+
+	if resource.IamPolicy != nil && resource.IamPolicy.SampleConfigBody == "" {
+		resource.IamPolicy.SampleConfigBody = resource.IamPolicy.ExampleConfigBody
+		resource.IamPolicy.ExampleConfigBody = ""
+	}
+
+	// Convert Examples to Samples in memory after overrides are applied
+	if len(resource.Examples) > 0 {
+		var convertedSamples []*apiresource.Sample
+		for _, e := range resource.Examples {
+			// Create an in-memory custom wrapper over the fs for legacy template files
+			if e.ConfigPath == "" {
+				e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", e.Name)
+			}
+
+			steps := []*apiresource.Step{
+				{
+					Name:              e.Name,
+					ConfigPath:        e.ConfigPath,
+					ResourceIdVars:    e.Vars,
+					TestEnvVars:       e.TestEnvVars,
+					TestVarsOverrides: e.TestVarsOverrides,
+					OicsVarsOverrides: e.OicsVarsOverrides,
+					MinVersion:        e.MinVersion,
+					IgnoreReadExtra:   e.IgnoreReadExtra,
+					ExcludeImportTest: e.ExcludeImportTest,
+				},
+			}
+			sample := &apiresource.Sample{
+				Name:                e.Name,
+				SkipVcr:             e.SkipVcr,
+				SkipTest:            e.SkipTest,
+				SkipFunc:            e.SkipFunc,
+				ExcludeTest:         e.ExcludeTest,
+				ExcludeBasicDoc:     e.ExcludeDocs,
+				ExternalProviders:   e.ExternalProviders,
+				BootstrapIam:        e.BootstrapIam,
+				MinVersion:          e.MinVersion,
+				PrimaryResourceId:   e.PrimaryResourceId,
+				PrimaryResourceType: e.PrimaryResourceType,
+				RegionOverride:      e.RegionOverride,
+				TGCSkipTest:         e.TGCSkipTest,
+				Steps:               steps,
+			}
+			convertedSamples = append(convertedSamples, sample)
+		}
+		resource.Samples = append(convertedSamples, resource.Samples...)
+		resource.Examples = nil
+	}
+
 	// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
 	resource.SetDefault(product)
 	resource.TestSampleSetUp(l.sysfs)

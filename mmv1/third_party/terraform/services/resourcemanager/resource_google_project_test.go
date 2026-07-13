@@ -12,10 +12,13 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/cloudbilling"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 var (
@@ -26,7 +29,7 @@ var (
 func TestAccProject_createWithoutOrg(t *testing.T) {
 	t.Parallel()
 
-	creds := transport_tpg.MultiEnvSearch(envvar.CredsEnvVars)
+	creds := envvar.MultiEnvSearch(envvar.CredsEnvVars)
 	if strings.Contains(creds, "iam.gserviceaccount.com") {
 		t.Skip("Service accounts cannot create projects without a parent. Requires user credentials.")
 	}
@@ -42,6 +45,44 @@ func TestAccProject_createWithoutOrg(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 				),
+			},
+		},
+	})
+}
+
+// Test that a Project resource can be imported using an identity block (Terraform 1.12+).
+func TestAccProject_importBlockWithResourceIdentity(t *testing.T) {
+	t.Parallel()
+	t.Skip("terraform_labels cannot be ignored during a resource identity import test")
+
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProject(pid, org),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
+				),
+			},
+			{
+				// The import step config must use deletion_policy = "PREVENT" because
+				// DeletionPolicyReadDefault sets that value during import (it is a
+				// client-side field not stored in the GCP API). Using a mismatching
+				// value would cause a non-empty plan and fail the no-op import check.
+				ResourceName:    "google_project.acceptance",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				Config:          testAccProject_noAllowDestroy(pid, org),
+			},
+			{
+				// Reset deletion_policy to "DELETE" so the project can be cleaned up.
+				Config: testAccProject(pid, org),
 			},
 		},
 	})
@@ -245,12 +286,12 @@ func TestAccProject_tags(t *testing.T) {
 	t.Parallel()
 
 	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "crm-projects-tagkey", nil)
+	tagKey := tags.BootstrapSharedTestOrganizationTagKey(t, "crm-projects-tagkey", nil)
 	context := map[string]interface{}{
 		"pid":           pid,
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "crm-projects-tagvalue", tagKey),
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "crm-projects-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 	acctest.VcrTest(t, resource.TestCase{
@@ -320,7 +361,7 @@ func testAccCheckGoogleProjectHasBillingAccount(t *testing.T, r, pid, billingId 
 		// Actual value in API should match state and expected
 		// Read the billing account
 		config := acctest.GoogleProviderConfig(t)
-		ba, err := config.NewBillingClient(config.UserAgent).Projects.GetBillingInfo(resourcemanager.PrefixedProject(pid)).Do()
+		ba, err := cloudbilling.NewClient(config, config.UserAgent).Projects.GetBillingInfo(resourcemanager.PrefixedProject(pid)).Do()
 		if err != nil {
 			return fmt.Errorf("Error reading billing account for project %q: %v", resourcemanager.PrefixedProject(pid), err)
 		}
@@ -346,7 +387,7 @@ func testAccCheckGoogleProjectHasLabels(t *testing.T, r, pid string, expected ma
 		// Actual value in API should match state and expected
 		config := acctest.GoogleProviderConfig(t)
 
-		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
+		found, err := rmClient.NewClient(config, config.UserAgent).Projects.Get(pid).Do()
 		if err != nil {
 			return err
 		}
@@ -388,7 +429,7 @@ func testAccCheckGoogleProjectHasNoLabels(t *testing.T, r, pid string) resource.
 		// Actual value in API should match state and expected
 		config := acctest.GoogleProviderConfig(t)
 
-		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
+		found, err := rmClient.NewClient(config, config.UserAgent).Projects.Get(pid).Do()
 		if err != nil {
 			return err
 		}

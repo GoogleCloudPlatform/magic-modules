@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -219,7 +220,7 @@ func testAccComposerUserWorkloadsSecretDestroyed(t *testing.T) func(s *terraform
 				Secret:      idTokens[7],
 			}
 
-			_, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.UserWorkloadsSecrets.Get(secretName.ResourceName()).Do()
+			_, err := composer.NewClient(config, config.UserAgent).Projects.Locations.Environments.UserWorkloadsSecrets.Get(secretName.ResourceName()).Do()
 			if err == nil {
 				return fmt.Errorf("secret %s still exists", secretName.ResourceName())
 			}

@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,13 +15,16 @@
 name: Cluster
 description: A collection of virtual machines and connected resources forming a high-performance computing cluster capable of running large-scale, tightly coupled workloads. A cluster combines a set a compute resources that perform computations, storage resources that contain inputs and store outputs, an orchestrator that is responsible for assigning jobs to compute resources, and network resources that connect everything together.
 base_url: projects/{{project}}/locations/{{location}}/clusters
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
 create_url: projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
-autogen_async: true
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
 async:
   operation:
     timeouts:
@@ -35,9 +38,21 @@ async:
     - delete
   result:
     resource_inside_response: true
+autogen_status: Q2x1c3Rlcg==
+autogen_async: true
 custom_code:
   constants: templates/terraform/custom_code/hypercomputecluster_cluster_storage_resources_hash.go.tmpl
-autogen_status: Q2x1c3Rlcg==
+samples:
+  - name: hypercomputecluster_cluster_basic
+    primary_resource_id: cluster
+    steps:
+      - name: hypercomputecluster_cluster_basic
+        resource_id_vars:
+          cluster_id: mycluster1
+          network_id: cluster-net1
+        test_vars_overrides:
+          cluster_id: fmt.Sprintf("tf%s", acctest.RandString(t, 8))
+          network_id: fmt.Sprintf("cluster-net1-%s", acctest.RandString(t,10))
 parameters:
   - name: location
     type: String
@@ -179,6 +194,7 @@ properties:
     output: true
   - name: networkResources
     type: Map
+    required: true
     description: |-
       Network resources available to the cluster. Must contain at most one value.
       Keys specify the ID of the network resource by which it can be referenced
@@ -306,7 +322,7 @@ properties:
               - name: count
                 type: String
                 required: true
-                diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("0")'
+                diff_suppress_func: tpgresource.EmptyOrDefaultStringSuppress("0")
                 description: Number of login node instances to create.
               - name: enableOsLogin
                 type: Boolean
@@ -442,7 +458,7 @@ properties:
                     alphanumeric, and at most 63 characters).
                 - name: maxDynamicNodeCount
                   type: String
-                  diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("0")'
+                  diff_suppress_func: tpgresource.EmptyOrDefaultStringSuppress("0")
                   description: |-
                     Controls how many additional nodes a cluster can bring online to handle
                     workloads. Set this value to enable dynamic node creation and limit the
@@ -451,7 +467,7 @@ properties:
                     on static nodes.
                 - name: staticNodeCount
                   type: String
-                  diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("0")'
+                  diff_suppress_func: tpgresource.EmptyOrDefaultStringSuppress("0")
                   description: |-
                     Number of nodes to be statically created for this nodeset. The cluster will
                     attempt to ensure that at least this many nodes exist at all times.
@@ -597,6 +613,13 @@ properties:
                       type: Boolean
                       required: true
                       description: Enables Auto-class feature.
+                    - name: terminalStorageClass
+                      type: String
+                      description: |-
+                        Terminal storage class of the autoclass bucket
+                        Possible values:
+                        NEARLINE
+                        ARCHIVE
                 - name: bucket
                   type: String
                   required: true
@@ -605,14 +628,14 @@ properties:
                   type: NestedObject
                   default_from_api: true
                   description: Message describing Google Cloud Storage hierarchical namespace configuration
-                  diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+                  diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
                   properties:
                     - name: enabled
                       type: Boolean
                       default_from_api: true
                       required: true
                       description: Enables hierarchical namespace setup for the bucket.
-                      diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+                      diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
                 - name: storageClass
                   type: String
                   description: |-
@@ -624,11 +647,11 @@ properties:
                     COLDLINE
                     ARCHIVE
                   enum_values:
-                    - 'STORAGE_CLASS_UNSPECIFIED'
-                    - 'STANDARD'
-                    - 'NEARLINE'
-                    - 'COLDLINE'
-                    - 'ARCHIVE'
+                    - STORAGE_CLASS_UNSPECIFIED
+                    - STANDARD
+                    - NEARLINE
+                    - COLDLINE
+                    - ARCHIVE
             - name: newFilestore
               type: NestedObject
               description: |-
@@ -673,9 +696,9 @@ properties:
                     NFSV3
                     NFSV41
                   enum_values:
-                    - 'PROTOCOL_UNSPECIFIED'
-                    - 'NFSV3'
-                    - 'NFSV41'
+                    - PROTOCOL_UNSPECIFIED
+                    - NFSV3
+                    - NFSV41
                 - name: tier
                   type: Enum
                   required: true
@@ -685,9 +708,9 @@ properties:
                     ZONAL
                     REGIONAL
                   enum_values:
-                    - 'TIER_UNSPECIFIED'
-                    - 'ZONAL'
-                    - 'REGIONAL'
+                    - TIER_UNSPECIFIED
+                    - ZONAL
+                    - REGIONAL
             - name: newLustre
               type: NestedObject
               description: |-
@@ -717,6 +740,14 @@ properties:
                   description: |-
                     Name of the Managed Lustre instance to create, in the format
                     `projects/{project}/locations/{location}/instances/{instance}`
+                - name: perUnitStorageThroughput
+                  type: String
+                  description: |-
+                    Throughput of the instance in MB/s/TiB. Valid values are 125, 250,
+                    500, 1000. See [Performance tiers and maximum storage
+                    capacities](https://cloud.google.com/managed-lustre/docs/create-instance#performance-tiers)
+                    for more information.
+                  immutable: true
         - name: filestore
           type: NestedObject
           description: A reference to a [Filestore](https://cloud.google.com/filestore) instance.
@@ -746,12 +777,3 @@ properties:
     type: String
     description: Time that the cluster was most recently updated.
     output: true
-examples:
-  - name: hypercomputecluster_cluster_basic
-    primary_resource_id: 'cluster'
-    vars:
-      cluster_id: 'mycluster1'
-      network_id: 'cluster-net1'
-    test_vars_overrides:
-      cluster_id: 'fmt.Sprintf("tf%s", acctest.RandString(t, 8))'
-      network_id: 'fmt.Sprintf("cluster-net1-%s", acctest.RandString(t,10))'

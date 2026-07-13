@@ -74,7 +74,7 @@ func dataSourceNetworkSecurityAddressGroups(d *schema.ResourceData, meta interfa
 	var project string
 
 	if parent, ok := d.GetOk("parent"); ok {
-		url = fmt.Sprintf("%s%s/locations/%s/addressGroups", config.NetworkSecurityBasePath, parent.(string), location)
+		url = fmt.Sprintf("%s%s/locations/%s/addressGroups", transport_tpg.BaseUrl(Product, config), parent.(string), location)
 	} else {
 		// Project-level, defaults to provider project if not set
 		project, err = tpgresource.GetProject(d, config)
@@ -82,7 +82,7 @@ func dataSourceNetworkSecurityAddressGroups(d *schema.ResourceData, meta interfa
 			return err
 		}
 
-		url, err = tpgresource.ReplaceVars(d, config, "{{NetworkSecurityBasePath}}projects/{{project}}/locations/{{location}}/addressGroups")
+		url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/addressGroups")
 		if err != nil {
 			return err
 		}

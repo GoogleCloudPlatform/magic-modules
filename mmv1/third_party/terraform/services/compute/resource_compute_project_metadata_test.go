@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 // Add two key value pairs
@@ -153,8 +154,8 @@ resource "google_project_service" "compute" {
   depends_on = [time_sleep.wait_60_seconds]
 }
 
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_240_seconds" {
+  create_duration = "240s"
   depends_on = [google_project_service.compute]
 }
 
@@ -164,7 +165,7 @@ resource "google_compute_project_metadata" "fizzbuzz" {
     banana = "orange"
     sofa   = "darwinism"
   }
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_240_seconds]
 }
 `, projectID, projectID, org, billing)
 }
@@ -190,8 +191,8 @@ resource "google_project_service" "compute" {
   depends_on = [time_sleep.wait_60_seconds]
 }
 
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_240_seconds" {
+  create_duration = "240s"
   depends_on = [google_project_service.compute]
 }
 
@@ -201,7 +202,7 @@ resource "google_compute_project_metadata" "fizzbuzz" {
     kiwi    = "papaya"
     finches = "darwinism"
   }
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_240_seconds]
 }
 `, projectID, projectID, org, billing)
 }
@@ -227,8 +228,8 @@ resource "google_project_service" "compute" {
   depends_on = [time_sleep.wait_60_seconds]
 }
 
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_240_seconds" {
+  create_duration = "240s"
   depends_on = [google_project_service.compute]
 }
 
@@ -239,7 +240,7 @@ resource "google_compute_project_metadata" "fizzbuzz" {
     genghis_khan = "french bread"
     happy        = "smiling"
   }
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_240_seconds]
 }
 `, projectID, projectID, org, billing)
 }
@@ -265,8 +266,8 @@ resource "google_project_service" "compute" {
   depends_on = [time_sleep.wait_60_seconds]
 }
 
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
+resource "time_sleep" "wait_240_seconds" {
+  create_duration = "240s"
   depends_on = [google_project_service.compute]
 }
 
@@ -277,7 +278,7 @@ resource "google_compute_project_metadata" "fizzbuzz" {
     paris = "french bread"
     happy = "laughing"
   }
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_240_seconds]
 }
 `, projectID, projectID, org, billing)
 }

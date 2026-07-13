@@ -47,47 +47,61 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/compute_network.go.tmpl'
   decoder: 'templates/terraform/decoders/compute_network.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_network_delete_default_route.tmpl'
-examples:
+samples:
   - name: 'network_basic'
     primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
+    steps:
+      - name: 'network_basic'
+        resource_id_vars:
+          network_name: 'vpc-network'
   - name: 'network_custom_mtu'
     primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_custom_mtu'
+        resource_id_vars:
+          network_name: 'vpc-network'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'network_custom_firewall_enforcement_order'
     primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_custom_firewall_enforcement_order'
+        resource_id_vars:
+          network_name: 'vpc-network'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'network_bgp_best_path_selection_mode'
     primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_bgp_best_path_selection_mode'
+        resource_id_vars:
+          network_name: 'vpc-network'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'network_bgp_best_path_selection_mode_standard'
     primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_bgp_best_path_selection_mode_standard'
+        resource_id_vars:
+          network_name: 'vpc-network'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'network_bgp_best_path_selection_mode_standard_custom_fields'
     primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_bgp_best_path_selection_mode_standard_custom_fields'
+        resource_id_vars:
+          network_name: 'vpc-network'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'network_bgp_standard_mode_delete_med'
     primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_bgp_standard_mode_delete_med'
+        resource_id_vars:
+          network_name: 'vpc-network'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 virtual_fields:
   - name: 'delete_default_routes_on_create'
     description: |
@@ -177,7 +191,7 @@ properties:
       - name: 'bgpBestPathSelectionMode'
         type: Enum
         description: |
-         The BGP best selection algorithm to be employed. MODE can be LEGACY or STANDARD.
+          The BGP best selection algorithm to be employed. MODE can be LEGACY or STANDARD.
         default_from_api: true
         update_url: 'projects/{{project}}/global/networks/{{name}}'
         update_verb: 'PATCH'
@@ -188,8 +202,8 @@ properties:
       - name: 'bgpAlwaysCompareMed'
         type: Boolean
         description: |
-         Enables/disables the comparison of MED across routes with different Neighbor ASNs.
-         This value can only be set if the --bgp-best-path-selection-mode is STANDARD
+          Enables/disables the comparison of MED across routes with different Neighbor ASNs.
+          This value can only be set if the --bgp-best-path-selection-mode is STANDARD
         required: false
         default_from_api: true
         update_url: 'projects/{{project}}/global/networks/{{name}}'
@@ -198,7 +212,7 @@ properties:
       - name: 'bgpInterRegionCost'
         type: Enum
         description: |
-         Choice of the behavior of inter-regional cost and MED in the BPS algorithm.
+          Choice of the behavior of inter-regional cost and MED in the BPS algorithm.
         required: false
         default_from_api: true
         update_url: 'projects/{{project}}/global/networks/{{name}}'
@@ -272,7 +286,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs
