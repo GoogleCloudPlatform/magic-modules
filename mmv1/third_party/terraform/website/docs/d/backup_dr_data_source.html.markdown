@@ -48,9 +48,3 @@ The `gcp_backup_config` block contains:
 * `backup_plan_description` - The description of the backup plan.
 * `backup_plan_association` - The name of the backup plan association.
 * `backup_plan_rules` - The rules of the backup plan.
-nkuravi@nkuravi.c.googlers.com
-gcert: 19h 38m
-
-Agent State Debug
-
-Incognito
