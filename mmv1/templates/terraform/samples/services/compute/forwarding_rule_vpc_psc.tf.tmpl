@@ -61,7 +61,7 @@ resource "google_compute_service_attachment" "producer_service_attachment" {
 
   enable_proxy_protocol = true
   connection_preference = "ACCEPT_AUTOMATIC"
-  nat_subnets           = [google_compute_subnetwork.psc_producer_subnet.name]
+  nat_subnets           = [google_compute_subnetwork.psc_producer_subnet.id]
   target_service        = google_compute_forwarding_rule.producer_target_service.id
 }
 

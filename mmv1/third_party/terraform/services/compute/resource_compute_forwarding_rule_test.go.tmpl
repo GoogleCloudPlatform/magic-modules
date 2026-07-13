@@ -776,7 +776,7 @@ resource "google_compute_service_attachment" "producer_service_attachment" {
 
   enable_proxy_protocol = true
   connection_preference = "ACCEPT_AUTOMATIC"
-  nat_subnets           = [google_compute_subnetwork.psc_producer_subnet.name]
+  nat_subnets           = [google_compute_subnetwork.psc_producer_subnet.id]
   target_service        = google_compute_forwarding_rule.producer_target_service.id
 }
 
@@ -877,7 +877,7 @@ resource "google_compute_service_attachment" "producer_service_attachment" {
 
   enable_proxy_protocol = true
   connection_preference = "ACCEPT_AUTOMATIC"
-  nat_subnets           = [google_compute_subnetwork.psc_producer_subnet.name]
+  nat_subnets           = [google_compute_subnetwork.psc_producer_subnet.id]
   target_service        = google_compute_forwarding_rule.producer_target_service.id
 }
 
@@ -991,7 +991,7 @@ resource "google_compute_service_attachment" "producer_service_attachment_one" {
 
   enable_proxy_protocol = true
   connection_preference = "ACCEPT_AUTOMATIC"
-  nat_subnets           = [google_compute_subnetwork.psc_producer_nat_subnet_one.name]
+  nat_subnets           = [google_compute_subnetwork.psc_producer_nat_subnet_one.id]
   target_service        = google_compute_forwarding_rule.producer_target_service_one.id
 }
 
@@ -1002,7 +1002,7 @@ resource "google_compute_service_attachment" "producer_service_attachment_two" {
 
   enable_proxy_protocol = true
   connection_preference = "ACCEPT_AUTOMATIC"
-  nat_subnets           = [google_compute_subnetwork.psc_producer_nat_subnet_two.name]
+  nat_subnets           = [google_compute_subnetwork.psc_producer_nat_subnet_two.id]
   target_service        = google_compute_forwarding_rule.producer_target_service_two.id
 }
 
