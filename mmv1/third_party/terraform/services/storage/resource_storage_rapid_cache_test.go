@@ -79,7 +79,7 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_rapid_cache" "cache" {
   bucket           = google_storage_bucket.bucket.name
   zone             = "us-central1-f"
-  admission_policy = "no_read_admission"
+  admission_policy = "no-read-admission"
   cache_type       = "rapid-cache"
   ttl              = "3620s"
   ingest_on_write  = true
