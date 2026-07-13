@@ -171,6 +171,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Customerengagementsuite",
         "path" to "./google-beta/services/ces"
     ),
+    "chromepolicy" to mapOf(
+        "name" to "chromepolicy",
+        "displayName" to "Chromepolicy",
+        "path" to "./google-beta/services/chromepolicy"
+    ),
     "chronicle" to mapOf(
         "name" to "chronicle",
         "displayName" to "Chronicle",
