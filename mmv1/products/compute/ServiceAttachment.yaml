@@ -263,6 +263,10 @@ properties:
       destination servers.
     required: true
     send_empty_value: true
+  - name: 'natIpsPerEndpoint'
+    type: Integer
+    description: |
+      The number of NAT IPs allocated per connected endpoint.
   - name: 'domainNames'
     type: Array
     description: |
