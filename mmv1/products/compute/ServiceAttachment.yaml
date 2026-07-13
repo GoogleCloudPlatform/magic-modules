@@ -262,6 +262,7 @@ properties:
       address data in TCP connections that traverse proxies on their way to
       destination servers.
     required: true
+    send_empty_value: true
   - name: 'domainNames'
     type: Array
     description: |
