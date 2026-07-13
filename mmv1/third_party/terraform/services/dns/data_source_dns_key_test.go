@@ -10,7 +10,9 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/dns"
 )
 
-func TestAccDataSourceDNSKeys_basic(t *testing.T) {
+// This test covers all cases for the DNSKeys resource so that they can
+// reuse the same DNS managed zone without running into dns_name conflicts.
+func TestAccDataSourceDNSKeys(t *testing.T) {
 	t.Parallel()
 
 	dnsZoneName := fmt.Sprintf("tf-test-dnskey-test-%s", acctest.RandString(t, 10))
