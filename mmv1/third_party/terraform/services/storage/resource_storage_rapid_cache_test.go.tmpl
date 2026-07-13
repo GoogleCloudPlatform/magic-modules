@@ -1,4 +1,5 @@
 package storage_test
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -18,7 +19,7 @@ func TestAccStorageRapidCache_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -53,12 +54,14 @@ func TestAccStorageRapidCache_update(t *testing.T) {
 func testAccStorageRapidCache_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "tf-test-bucket-name%{random_suffix}"
+  provider = google-beta
+  name     = "tf-test-bucket-name%{random_suffix}"
   location = "US"
   force_destroy = "true"
 }
 
 resource "google_storage_rapid_cache" "cache" {
+  provider        = google-beta
   bucket          = google_storage_bucket.bucket.name
   zone            = "us-central1-f"
   cache_type      = "rapid-cache"
@@ -71,12 +74,14 @@ resource "google_storage_rapid_cache" "cache" {
 func testAccStorageRapidCache_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "tf-test-bucket-name%{random_suffix}"
+  provider = google-beta
+  name     = "tf-test-bucket-name%{random_suffix}"
   location = "US"
   force_destroy = "true"
 }
 
 resource "google_storage_rapid_cache" "cache" {
+  provider         = google-beta
   bucket           = google_storage_bucket.bucket.name
   zone             = "us-central1-f"
   admission_policy = "no-read-admission"
@@ -96,7 +101,7 @@ func TestAccStorageRapidCache_cacheType(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -131,13 +136,15 @@ func TestAccStorageRapidCache_cacheType(t *testing.T) {
 func testAccStorageRapidCache_cacheTypeUltra(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "tf-test-bucket-name%{random_suffix}"
-  location = "US"
-  force_destroy = "true"
+  provider                    = google-beta
+  name                        = "tf-test-bucket-name%{random_suffix}"
+  location                    = "US"
+  force_destroy               = "true"
   uniform_bucket_level_access = true
 }
 
 resource "google_storage_rapid_cache" "cache" {
+  provider        = google-beta
   bucket          = google_storage_bucket.bucket.name
   zone            = "us-central1-a"
   cache_type      = "rapid-cache-ultra"
@@ -146,3 +153,4 @@ resource "google_storage_rapid_cache" "cache" {
 }
 `, context)
 }
+{{- end }}

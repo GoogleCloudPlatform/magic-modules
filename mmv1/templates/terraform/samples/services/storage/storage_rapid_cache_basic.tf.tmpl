@@ -1,4 +1,5 @@
 resource "google_storage_bucket" "bucket" {
+  provider                    = google-beta
   name                        = "{{index $.ResourceIdVars "bucket_name"}}"
   location                    = "US"
 }
@@ -9,8 +10,9 @@ resource "time_sleep" "destroy_wait_5000_seconds" {
 }
 
 resource "google_storage_rapid_cache" "cache" {
-  bucket = google_storage_bucket.bucket.name
-  zone = "us-central1-f"
-  ttl = "3601s"
+  provider   = google-beta
+  bucket     = google_storage_bucket.bucket.name
+  zone       = "us-central1-f"
+  ttl        = "3601s"
   depends_on = [time_sleep.destroy_wait_5000_seconds]
 }

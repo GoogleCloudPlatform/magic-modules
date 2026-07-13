@@ -19,6 +19,7 @@ description: |
   caches are co-located with the customers compute engines to provide
   cost efficiency.
 base_url: b/{{bucket}}/anywhereCaches
+min_version: beta
 self_link: b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}
 create_url: b/{{bucket}}/anywhereCaches/
 delete_url: b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}/disable
@@ -47,10 +48,12 @@ custom_code:
   custom_update: templates/terraform/custom_update/storage_rapid_cache.go.tmpl
 samples:
   - name: storage_rapid_cache_basic
+    min_version: beta
     primary_resource_id: cache
     external_providers: [time]
     steps:
       - name: storage_rapid_cache_basic
+        min_version: beta
         resource_id_vars:
           bucket_name: bucket-name
         ignore_read_extra:
