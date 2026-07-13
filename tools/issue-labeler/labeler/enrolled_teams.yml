@@ -13,6 +13,9 @@ service/agentidentity:
 service/agentregistry:
   resources:
   - google_agent_registry_.*
+service/aiplatform-aad:
+  resources:
+  - google_vertex_ai_agent_anomaly_detection_.*
 service/aiplatform-agent-engine:
   resources:
   - google_vertex_ai_reasoning_engine.*
