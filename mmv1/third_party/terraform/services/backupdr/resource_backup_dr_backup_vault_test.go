@@ -39,6 +39,14 @@ func TestAccBackupDRBackupVault_fullUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccBackupDRBackupVault_fullUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(
+							"google_backup_dr_backup_vault.backup-vault-test",
+							plancheck.ResourceActionUpdate,
+						),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_backup_dr_backup_vault.backup-vault-test",
