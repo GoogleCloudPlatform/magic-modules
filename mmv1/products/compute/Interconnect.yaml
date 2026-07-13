@@ -76,17 +76,17 @@ properties:
     type: ResourceRef
     required: true
     description: |
-      URL of the InterconnectLocation object that represents where this connection is to be provisioned.
+      URL of the InterconnectLocation object that represents where this connection is requested to be provisioned.
       Specifies the location inside Google's Networks.
     resource: InterconnectLocations
     imports: selfLink
   - name: effectiveLocation
+    type: ResourceRef
+    resource: InterconnectLocations
     description: |
-      [Output Only] URL of the InterconnectLocation object that represents where
-      this connection is to be provisioned. By default it will be the same as the
-      location field.
+      URL of the InterconnectLocation object that represents where this connection is to be provisioned.
+      Specifies the location inside Google's Networks.
     output: true
-    type: String
   - name: linkType
     type: Enum
     required: true
