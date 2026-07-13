@@ -173,6 +173,16 @@ samples:
           mesh_name: 'network-services-mesh'
         ignore_read_extra:
           - 'deletion_protection'
+  - name: 'cloudrunv2_service_sandbox'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'cloudrunv2_service_sandbox'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_invokeriam'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -517,6 +527,11 @@ properties:
               description: |-
                 URL of the Container image in Google Container Registry or Google Artifact Registry. More info: https://kubernetes.io/docs/concepts/containers/images
               required: true
+            - name: 'sandboxLauncher'
+              type: Boolean
+              min_version: 'beta'
+              description: |-
+                Indicates that this container can act as a sandbox supervisor and launch sandboxes. Requires the second generation execution environment (`EXECUTION_ENVIRONMENT_GEN2`).
             - name: 'command'
               type: Array
               description: |-
