@@ -123,10 +123,10 @@ samples:
         test_vars_overrides:
           # for backward compatible
           desc: '"example remote docker repository" + randomSuffix'
-  - name: artifact_registry_repository_remote_no_cache
+  - name: artifact_registry_repository_connector
     primary_resource_id: my-repo
     steps:
-      - name: artifact_registry_repository_remote_no_cache
+      - name: artifact_registry_repository_connector
         resource_id_vars:
           repository_id: my-repository
           desc: example remote docker repository with no cache (connector mode)
