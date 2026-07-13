@@ -1,0 +1,26 @@
+resource "google_model_armor_template" "template-template-metadata" {
+  location    = "{{index $.ResourceIdVars "location"}}"
+  template_id = "{{index $.ResourceIdVars "templateId"}}"
+
+  filter_config {
+    rai_settings {
+      rai_filters {
+        filter_type      = "{{index $.ResourceIdVars "filter_config_rai_settings_rai_filters_0_filter_type"}}"
+        confidence_level = "{{index $.ResourceIdVars "filter_config_rai_settings_rai_filters_0_confidence_level"}}"
+      }
+    }
+  }
+  template_metadata {
+    custom_llm_response_safety_error_message = "{{index $.ResourceIdVars "template_metadata_custom_llm_response_safety_error_message"}}"
+    log_sanitize_operations                  = {{index $.ResourceIdVars "template_metadata_log_sanitize_operations"}}
+    log_template_operations                  = {{index $.ResourceIdVars "template_metadata_log_template_operations"}}
+    multi_language_detection {
+      enable_multi_language_detection        = {{index $.ResourceIdVars "template_metadata_multi_language_detection_enable_multi_language_detection"}}
+    }
+    ignore_partial_invocation_failures       = {{index $.ResourceIdVars "template_metadata_ignore_partial_invocation_failures"}}
+    custom_prompt_safety_error_code          = {{index $.ResourceIdVars "template_metadata_custom_prompt_safety_error_code"}}
+    custom_prompt_safety_error_message       = "{{index $.ResourceIdVars "template_metadata_custom_prompt_safety_error_message"}}"
+    custom_llm_response_safety_error_code    = {{index $.ResourceIdVars "template_metadata_custom_llm_response_safety_error_code"}}
+    enforcement_type                         = "{{index $.ResourceIdVars "template_metadata_enforcement_type"}}"
+  }
+}

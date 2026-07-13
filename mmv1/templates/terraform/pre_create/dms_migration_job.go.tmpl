@@ -1,0 +1,3 @@
+if desiredState, ok := d.Get("desired_state").(string); ok && desiredState == "RUNNING" {
+	return fmt.Errorf("Migration Job cannot be created in RUNNING state. Please set desired_state to 'NOT_STARTED' for creation, and update to 'RUNNING' afterwards.")
+}

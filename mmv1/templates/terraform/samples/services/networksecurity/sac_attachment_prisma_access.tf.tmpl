@@ -1,0 +1,10 @@
+resource "google_network_security_sac_attachment" "{{$.PrimaryResourceId}}" {
+    provider = google-beta
+    name = "{{index $.ResourceIdVars "resource_name"}}"
+    location = "us-central1"
+    labels = {
+        label-one = "value-one"
+    }
+    ncc_gateway = "{{index $.ResourceIdVars "ncc_gateway"}}"
+    sac_realm = "{{index $.ResourceIdVars "sac_realm"}}"
+}

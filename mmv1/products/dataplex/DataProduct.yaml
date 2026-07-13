@@ -122,6 +122,14 @@ properties:
   - name: description
     type: String
     description: Description of the data product.
+  - name: icon
+    type: String
+    description: |
+      Base64 encoded image representing the data product. Max Size: 3.0MiB
+      Expected image dimensions are 512x512 pixels, however the API only
+      performs validation on size of the encoded data.
+      Note: For byte fields, the content of the fields are base64-encoded (which
+      increases the size of the data by 33-36%) when using JSON on the wire.
   - name: ownerEmails
     type: Array
     item_type:

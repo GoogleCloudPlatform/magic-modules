@@ -1,0 +1,21 @@
+resource "google_oracle_database_cloud_exadata_infrastructure" "infra" {
+  cloud_exadata_infrastructure_id = "{{index $.ResourceIdVars "cloud_exadata_infrastructure_id"}}"
+  display_name                    = "{{index $.ResourceIdVars "cloud_exadata_infrastructure_id"}} displayname"
+  location                        = "us-east4"
+  project                         = "{{index $.ResourceIdVars "project"}}"
+  
+  properties {
+    shape         = "Exadata.X9M"
+    compute_count = "2"
+    storage_count = "3"
+  }
+
+  deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
+}
+
+resource "google_oracle_database_cloud_exadata_infrastructure_exascale_config" "{{$.PrimaryResourceId}}" {
+  cloud_exadata_infrastructure = google_oracle_database_cloud_exadata_infrastructure.infra.cloud_exadata_infrastructure_id
+  location                     = "us-east4"
+  project                      = "{{index $.ResourceIdVars "project"}}"
+  total_storage_size_gb        = 10240
+}

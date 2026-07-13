@@ -38,6 +38,15 @@ func Rfc3339TimeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return false
 }
 
+func validateDuration(v interface{}, k string) (ws []string, errors []error) {
+	s := v.(string)
+	_, err := time.ParseDuration(s)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q is not a valid duration: %s", k, err))
+	}
+	return
+}
+
 var (
 	instanceGroupManagerURL = regexp.MustCompile(fmt.Sprintf("projects/(%s)/zones/([a-z0-9-]*)/instanceGroupManagers/([^/]*)", verify.ProjectRegex))
 
@@ -102,8 +111,9 @@ var (
 		"addons_config.0.lustre_csi_driver_config",
 		"addons_config.0.slice_controller_config",
 		"addons_config.0.pod_snapshot_config",
-	{{- if ne $.TargetVersionName "ga" }}
+		"addons_config.0.slurm_operator_config",
 		"addons_config.0.agent_sandbox_config",
+	{{- if ne $.TargetVersionName "ga" }}
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
 	{{- end }}
@@ -139,15 +149,15 @@ var (
 			return true
 		}
 		// Suppress the addition of a fleet block (count changes 0 -> 1) if the "project" field being added is null or empty.
-                if k == "fleet.#" && oldValue == "0" && newValue == "1" { 
-                        // When transitioning from 0->1 blocks, d.Get/d.GetOk effectively reads the 'new' config value.
-                        projectVal, projectIsSet := d.GetOk("fleet.0.project")
-                        if !projectIsSet || projectVal.(string) == "" {
-                                log.Printf("[DEBUG] Suppressing diff for 'fleet.#' (0 -> 1) because fleet.0.project is null or empty in config.\n")
-                                return true
-                        }
-                }
-                return false
+		if k == "fleet.#" && oldValue == "0" && newValue == "1" {
+			// When transitioning from 0->1 blocks, d.Get/d.GetOk effectively reads the 'new' config value.
+			projectVal, projectIsSet := d.GetOk("fleet.0.project")
+			if !projectIsSet || projectVal.(string) == "" {
+				log.Printf("[DEBUG] Suppressing diff for 'fleet.#' (0 -> 1) because fleet.0.project is null or empty in config.\n")
+				return true
+			}
+		}
+		return false
 	})
 
 	suppressDiffForConfidentialNodes = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
@@ -243,6 +253,7 @@ func ResourceContainerCluster() *schema.Resource {
 			containerClusterSurgeSettingsCustomizeDiff,
 			containerClusterEnableK8sBetaApisCustomizeDiff,
 			containerClusterNodeVersionCustomizeDiff,
+			containerClusterSkipNodePoolRefreshCustomizeDiff,
 			tpgresource.SetDiffForLabelsWithCustomizedName("resource_labels"),
 			clusterAcceleratorNetworkProfileCustomizeDiff,
 		),
@@ -684,7 +695,22 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-						{{- if ne $.TargetVersionName "ga" }}
+						"slurm_operator_config": {
+							Type:          schema.TypeList,
+							Optional:      true,
+							Computed:      true,
+							AtLeastOneOf:  addonsConfigKeys,
+							MaxItems:      1,
+							Description:   `The status of the Slurm Operator addon, which creates slurm related CRDs and KCP pods to manage them. Defaults to disabled for Standard clusters; set enabled = true to enable. It can not be enabled for Autopilot clusters.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
 						"agent_sandbox_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -702,7 +728,6 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-						{{- end }}
 					},
 				},
 			},
@@ -1218,6 +1243,7 @@ func ResourceContainerCluster() *schema.Resource {
 							ExactlyOneOf: []string{
 								"maintenance_policy.0.daily_maintenance_window",
 								"maintenance_policy.0.recurring_window",
+								"maintenance_policy.0.recurring_maintenance_window",
 							},
 							MaxItems:    1,
 							Description: `Time window specified for daily maintenance operations. Specify start_time in RFC3339 format "HH:MM”, where HH : [00-23] and MM : [00-59] GMT.`,
@@ -1243,6 +1269,7 @@ func ResourceContainerCluster() *schema.Resource {
 							ExactlyOneOf: []string{
 								"maintenance_policy.0.daily_maintenance_window",
 								"maintenance_policy.0.recurring_window",
+								"maintenance_policy.0.recurring_maintenance_window",
 							},
 							Description: `Time window for recurring maintenance operations.`,
 							Elem: &schema.Resource{
@@ -1256,6 +1283,74 @@ func ResourceContainerCluster() *schema.Resource {
 										Type:         schema.TypeString,
 										Required:     true,
 										ValidateFunc: verify.ValidateRFC3339Date,
+									},
+									"recurrence": {
+										Type:             schema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: rfc5545RecurrenceDiffSuppress,
+									},
+								},
+							},
+						},
+						"recurring_maintenance_window": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							ExactlyOneOf: []string{
+								"maintenance_policy.0.daily_maintenance_window",
+								"maintenance_policy.0.recurring_window",
+								"maintenance_policy.0.recurring_maintenance_window",
+							},
+							Description: `Time window for recurring maintenance operations.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"delay_until": {
+										Type:     schema.TypeList,
+										Optional: true,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"year": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"month": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"day": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+											},
+										},
+									},
+									"window_duration": {
+										Required:         true,
+										Type:             schema.TypeString,
+										DiffSuppressFunc: tpgresource.DurationDiffSuppress,
+										ValidateFunc:     validateDuration,
+									},
+									"window_start_time": {
+										Required: true,
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"hours": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"minutes": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"seconds": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+											},
+										},
 									},
 									"recurrence": {
 										Type:             schema.TypeString,
@@ -2102,6 +2197,12 @@ func ResourceContainerCluster() *schema.Resource {
 				ConflictsWith: []string{"enable_autopilot"},
 			},
 
+			"skip_node_pool_refresh": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `If true, the provider will not refresh the inline node_pool state from the API during cluster reads. Set this to true only when all node pools are managed via separate google_container_node_pool resources; it substantially improves plan/apply performance on clusters with a high node pool count. Must not be set to true when inline node_pool blocks are defined on this resource.`,
+			},
+
 			"control_plane_endpoints_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -2483,6 +2584,12 @@ func ResourceContainerCluster() *schema.Resource {
 				Description:      `The desired datapath provider for this cluster. By default, uses the IPTables-based kube-proxy implementation.`,
 				ValidateFunc:     validation.StringInSlice([]string{"DATAPATH_PROVIDER_UNSPECIFIED", "LEGACY_DATAPATH", "ADVANCED_DATAPATH"}, false),
 				DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("DATAPATH_PROVIDER_UNSPECIFIED"),
+			},
+			"dataplane_optimization_mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `The desired dataplane optimization mode.`,
 			},
 			"enable_cilium_clusterwide_network_policy": {
 				Type:        schema.TypeBool,
@@ -2905,6 +3012,11 @@ func ResourceContainerCluster() *schema.Resource {
 	//UDP schema start
             "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 	//UDP schema end
+			"ignore_node_count_changes": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `When true, the provider ignores external changes (drift) to the node count by skipping GCE API queries to the Instance Group Managers. This is a performance optimization for large clusters that saves API quota. Setting this to true will result in missing managed_instance_group_urls in the state for all node pools in the cluster.`,
+			},
 		},
 	}
 }
@@ -3087,6 +3199,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			EnableIntraNodeVisibility:            d.Get("enable_intranode_visibility").(bool),
 			DefaultSnatStatus:                    expandDefaultSnatStatus(d.Get("default_snat_status")),
 			DatapathProvider:                     d.Get("datapath_provider").(string),
+			DataplaneV2Config:                    expandDataplaneV2Config(d.Get("dataplane_optimization_mode")),
 			EnableCiliumClusterwideNetworkPolicy: d.Get("enable_cilium_clusterwide_network_policy").(bool),
 			PrivateIpv6GoogleAccess:              d.Get("private_ipv6_google_access").(string),
 			InTransitEncryptionConfig:            d.Get("in_transit_encryption_config").(string),
@@ -3703,6 +3816,11 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("datapath_provider", cluster.NetworkConfig.DatapathProvider); err != nil {
 		return fmt.Errorf("Error setting datapath_provider: %s", err)
 	}
+	if cluster.NetworkConfig.DataplaneV2Config != nil {
+		if err := d.Set("dataplane_optimization_mode", cluster.NetworkConfig.DataplaneV2Config.ScalabilityMode); err != nil {
+			return fmt.Errorf("Error setting dataplane_optimization_mode: %s", err)
+		}
+	}
 	if err := d.Set("enable_cilium_clusterwide_network_policy", cluster.NetworkConfig.EnableCiliumClusterwideNetworkPolicy); err != nil {
 		return fmt.Errorf("Error setting enable_cilium_clusterwide_network_policy: %s", err)
 	}
@@ -3902,20 +4020,20 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
     return err
   }
 
-        
+
     if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
         return err
     }
-    
+
 	return nil
 }
 
 func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) error {
-    
+
     if tpgresource.DeletionPolicyPreUpdate(d, ResourceContainerCluster) {
         return ResourceContainerCluster().Read(d, meta)
     }
-    
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -5722,13 +5840,13 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) error {
-    
+
     if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
         return err
     }else if ok{
         return nil
     }
-    	
+
     	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with cluster deletion.")
 	}
@@ -6000,8 +6118,15 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			ForceSendFields: []string{"Enabled"},
 		}
 	}
+	
+	if v, ok := config["slurm_operator_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.SlurmOperatorConfig = &container.SlurmOperatorConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := config["agent_sandbox_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.AgentSandboxConfig = &container.AgentSandboxConfig{
@@ -6009,7 +6134,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			ForceSendFields: []string{"Enabled"},
 		}
 	}
-{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
@@ -6138,7 +6262,7 @@ func expandAutoIpamConfig(configured interface{}) *container.AutoIpamConfig {
 	if !ok || len(l) == 0 || l[0] == nil {
 		return nil
 	}
-	
+
 	return &container.AutoIpamConfig{
 		Enabled: l[0].(map[string]interface{})["enabled"].(bool),
 	}
@@ -6258,6 +6382,35 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 			DisruptionBudget: budget,
 			ResourceVersion: resourceVersion,
 		}
+	}
+	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
+		rmw := recurringMaintenanceWindow.([]interface{})[0].(map[string]interface{})
+		duration, _ := time.ParseDuration(rmw["window_duration"].(string))
+
+		policy := &container.MaintenancePolicy{
+			Window: &container.MaintenanceWindow{
+				MaintenanceExclusions: exclusions,
+				RecurringMaintenanceWindow: &container.RecurringMaintenanceWindow{
+					WindowStartTime: &container.TimeOfDay{
+						Hours:   int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["hours"].(int)),
+						Minutes: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["minutes"].(int)),
+						Seconds: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["seconds"].(int)),
+					},
+					WindowDuration: fmt.Sprintf("%ds", int(duration.Seconds())),
+					Recurrence:     rmw["recurrence"].(string),
+				},
+			},
+			ResourceVersion: resourceVersion,
+		}
+
+		if _, ok := rmw["delay_until"]; ok && len(rmw["delay_until"].([]interface{})) == 1 {
+			policy.Window.RecurringMaintenanceWindow.DelayUntil = &container.Date{
+				Year:  int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["year"].(int)),
+				Month: int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["month"].(int)),
+				Day:   int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["day"].(int)),
+			}
+		}
+		return policy
 	}
 	return nil
 }
@@ -7041,6 +7194,19 @@ func expandDefaultSnatStatus(configured interface{}) *container.DefaultSnatStatu
 
 }
 
+func expandDataplaneV2Config(v interface{}) *container.DataplaneV2Config {
+	if v == nil {
+		return nil
+	}
+	s := v.(string)
+	if s == "" {
+		return nil
+	}
+	return &container.DataplaneV2Config{
+		ScalabilityMode: s,
+	}
+}
+
 func expandWorkloadIdentityConfig(configured interface{}) *container.WorkloadIdentityConfig {
 	l := configured.([]interface{})
 	v := &container.WorkloadIdentityConfig{}
@@ -7744,7 +7910,14 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		}
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+	if c.SlurmOperatorConfig != nil {
+		result["slurm_operator_config"] = []map[string]interface{}{
+			{
+				"enabled": c.SlurmOperatorConfig.Enabled,
+			},
+		}
+	}
+
 	if c.AgentSandboxConfig != nil {
 		result["agent_sandbox_config"] = []map[string]interface{}{
 			{
@@ -7752,7 +7925,6 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 			},
 		}
 	}
-{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if c.IstioConfig != nil {
@@ -7777,6 +7949,15 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 }
 
 func flattenClusterNodePools(d *schema.ResourceData, config *transport_tpg.Config, c []*container.NodePool) ([]map[string]interface{}, error) {
+	// Performance escape hatch: when the user opts in via skip_node_pool_refresh,
+	// do not materialize the (potentially huge) inline node_pool list into state.
+	// A CustomizeDiff guard prevents this combining with inline node_pool blocks.
+	// Users who flip this on accept that cluster.node_pool will read as empty.
+	if v, ok := d.GetOk("skip_node_pool_refresh"); ok && v.(bool) {
+		log.Printf("[DEBUG] Skipping flattenClusterNodePools because skip_node_pool_refresh=true.")
+		return nil, nil
+	}
+
 	nodePools := make([]map[string]interface{}, 0, len(c))
 
 	for i, np := range c {
@@ -8085,7 +8266,7 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 					if window.EndTime != "" {
 						exclusion["end_time"] = window.EndTime
 					}
-				} 
+				}
 			} else {
 				if window.EndTime != "" {
 					exclusion["end_time"] = window.EndTime
@@ -8142,6 +8323,37 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 				"disruption_budget": budget,
 			},
 		}
+	}
+	if mp.Window.RecurringMaintenanceWindow != nil {
+		window := []map[string]interface{}{
+			{
+				"recurring_maintenance_window": []map[string]interface{}{
+					{
+						"window_start_time": []map[string]interface{}{
+							{
+								"hours":   mp.Window.RecurringMaintenanceWindow.WindowStartTime.Hours,
+								"minutes": mp.Window.RecurringMaintenanceWindow.WindowStartTime.Minutes,
+								"seconds": mp.Window.RecurringMaintenanceWindow.WindowStartTime.Seconds,
+							},
+						},
+						"window_duration": mp.Window.RecurringMaintenanceWindow.WindowDuration,
+						"recurrence":      mp.Window.RecurringMaintenanceWindow.Recurrence,
+					},
+				},
+				"maintenance_exclusion": exclusions,
+			},
+		}
+
+		if mp.Window.RecurringMaintenanceWindow.DelayUntil != nil {
+			window[0]["recurring_maintenance_window"].([]map[string]interface{})[0]["delay_until"] = []map[string]interface{}{
+				{
+					"year":  mp.Window.RecurringMaintenanceWindow.DelayUntil.Year,
+					"month": mp.Window.RecurringMaintenanceWindow.DelayUntil.Month,
+					"day":   mp.Window.RecurringMaintenanceWindow.DelayUntil.Day,
+				},
+			}
+		}
+		return window
 	}
 	return nil
 }
@@ -9061,6 +9273,28 @@ func containerClusterNodeVersionCustomizeDiff(_ context.Context,diff *schema.Res
 	return containerClusterNodeVersionCustomizeDiffFunc(diff)
 }
 
+// containerClusterSkipNodePoolRefreshCustomizeDiff errors at plan time if the
+// user enables skip_node_pool_refresh while also declaring inline node_pool
+// blocks. Without this guard, the inline blocks would diff against the empty
+// state produced by the skip path and trigger ForceNew cluster replacement.
+func containerClusterSkipNodePoolRefreshCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	if !diff.Get("skip_node_pool_refresh").(bool) {
+		return nil
+	}
+	rawConfig := diff.GetRawConfig()
+	if rawConfig.IsNull() {
+		return nil
+	}
+	nodePool := rawConfig.GetAttr("node_pool")
+	if nodePool.IsNull() || !nodePool.IsKnown() {
+		return nil
+	}
+	if nodePool.LengthInt() > 0 {
+		return fmt.Errorf("skip_node_pool_refresh cannot be true when inline node_pool blocks are defined; use google_container_node_pool resources instead, or unset skip_node_pool_refresh")
+	}
+	return nil
+}
+
 func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	oldValueName, _ := diff.GetChange("name")
 	if oldValueName != "" {
@@ -9136,7 +9370,7 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 
 		// A. DETECT USER CONFIG (Raw Config Check for this specific pool)
 		userHasAdditionalConfigs := false
-		
+
 		// Re-find the specific raw block for logic checking
 		if !rawNodePools.IsNull() {
 			it := rawNodePools.ElementIterator()
@@ -9165,9 +9399,9 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 		shouldClear := false
 		basePath := fmt.Sprintf("node_pool.%d", i)
 		networkConfigPath := basePath + ".network_config.0"
-		
+
 		oldProfile, newProfile := diff.GetChange(networkConfigPath + ".accelerator_network_profile")
-		
+
 		newProfileStr := ""
 		if newProfile != nil { newProfileStr = newProfile.(string) }
 		oldProfileStr := ""
@@ -9197,9 +9431,9 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 		// C. APPLY FIX TO THE MAP
 		if shouldClear {
 			log.Printf("[DEBUG] Cluster ANP CustomizeDiff: Clearing additional configs for INLINE pool %s", currentName)
-			
+
 			var newConfigMap map[string]interface{}
-			
+
 			if ncList, ok := newNpMap["network_config"].([]interface{}); ok && len(ncList) > 0 {
 				if existingMap, ok := ncList[0].(map[string]interface{}); ok {
 					newConfigMap = make(map[string]interface{})
@@ -9208,13 +9442,13 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 					}
 				}
 			}
-			
+
 			if newConfigMap == nil {
 				newConfigMap = make(map[string]interface{})
 			}
 
 			newConfigMap["additional_node_network_configs"] = []interface{}{}
-			
+
 			if !anpIsActive {
 				newConfigMap["accelerator_network_profile"] = ""
 			}
@@ -9234,7 +9468,6 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 	return nil
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandAgentSandboxConfig(v interface{}) *container.AgentSandboxConfig {
     l := v.([]interface{})
     if len(l) == 0 || l[0] == nil {
@@ -9256,7 +9489,6 @@ func flattenAgentSandboxConfig(v *container.AgentSandboxConfig) []interface{} {
         },
     }
 }
-{{- end }}
 
 func init() {
 	registry.Schema{

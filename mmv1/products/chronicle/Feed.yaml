@@ -14,11 +14,10 @@
 ---
 name: Feed
 description: The FeedsService is responsible for configuring and managing the ingestion of third-party security data and logs into Google Security Operations through various feed creation, updates, and lifecycle management, and schema validation.
-min_version: 'beta'
 references:
   guides:
     'Feed management overview': 'https://docs.cloud.google.com/chronicle/docs/administration/feed-management-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.feeds'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.feeds'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds
@@ -27,36 +26,40 @@ update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
 delete_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
-
-examples:
+samples:
   - name: 'chronicle_feed_basic'
     primary_resource_id: 'example_feed'
-    vars:
-      resource_name: test-feeds
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-      project_name: 'PROJECT_NAME'
+    steps:
+      - name: 'chronicle_feed_basic'
+        resource_id_vars:
+          resource_name: test-feeds
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+          project_name: 'PROJECT_NAME'
   - name: 'chronicle_feed_gcs'
     primary_resource_id: 'example_feed'
-    vars:
-      resource_name: test-feeds
-      description: test-feeds-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-      project_name: 'PROJECT_NAME'
-      project_number: 'PROJECT_NUMBER'
-    ignore_read_extra:
-      - 'feed_service_account'
+    steps:
+      - name: 'chronicle_feed_gcs'
+        resource_id_vars:
+          resource_name: test-feeds
+          description: test-feeds-description
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+          project_name: 'PROJECT_NAME'
+          project_number: 'PROJECT_NUMBER'
+        ignore_read_extra:
+          - 'feed_service_account'
   - name: 'chronicle_feed_https_push'
     primary_resource_id: 'example_feed'
-    vars:
-      resource_name: test-feeds
-      description: test-feeds-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-      project_name: 'PROJECT_NAME'
-    exclude_import_test: true
-
+    steps:
+      - name: 'chronicle_feed_https_push'
+        resource_id_vars:
+          resource_name: test-feeds
+          description: test-feeds-description
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+          project_name: 'PROJECT_NAME'
+        exclude_import_test: true
 custom_code:
   update_encoder: 'templates/terraform/encoders/chronicle_feed_update.go.tmpl'
   post_update: 'templates/terraform/post_update/chronicle_feed_state.go.tmpl'
@@ -1039,7 +1042,6 @@ properties:
                   -----BEGIN RSA PRIVATE KEY-----
                   Proc-Type: 4,ENCRYPTED
                   DEK-Info: DES-EDE3-CBC,F23074E02CF47304
-
 
                   -----END RSA PRIVATE KEY-----
               - name: sslCertificate

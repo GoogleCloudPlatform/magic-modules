@@ -4,6 +4,7 @@ package compute
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -1150,6 +1151,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("STANDARD"),
 							ValidateFunc: validation.StringInSlice([]string{"STANDARD", "ENHANCED", "ARCHITECTURAL"}, false),
 							Description: `The PMU is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are "STANDARD", "ENHANCED", and "ARCHITECTURAL".`,
 						},
@@ -1301,6 +1303,30 @@ be from 0 to 999,999,999 inclusive.`,
 				ValidateFunc: validation.StringInSlice([]string{"NONE", "STOP", ""}, false),
 				Description:  `Action to be taken when a customer's encryption key is revoked. Supports "STOP" and "NONE", with "NONE" being the default.`,
 			},
+
+			"workload_identity_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `Workload identity config.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"identity": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							Description:  `Identity SPIFFE id.`,
+						},
+						"identity_certificate_enabled": {
+							Type:         schema.TypeBool,
+							Optional:     true,
+							ForceNew:     true,
+							Description:  `Specifies whether identity certificates are enabled.`,
+						},
+					},
+				},
+			},
 			//UDP schema start
             "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 //UDP schema end
@@ -1341,7 +1367,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	if err != nil {
 		return err
 	}
-	PartnerMetadata, err := convertPartnerMetadataToCompute(partnerMetadataMap)
+	PartnerMetadata, err := convertPartnerMetadataToComputeTyped(partnerMetadataMap)
 	if err != nil {
 		return err
 	}
@@ -1366,23 +1392,14 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	}
 	resourcePolicies := expandInstanceTemplateResourcePolicies(d, "resource_policies")
 
-	// Convert network interfaces (still typed) via JSON roundtrip
-	networksJSON, err := json.Marshal(networks)
-	if err != nil {
-		return fmt.Errorf("Error marshaling network interfaces: %s", err)
-	}
-	var networksIface interface{}
-	if err := json.Unmarshal(networksJSON, &networksIface); err != nil {
-		return fmt.Errorf("Error unmarshaling network interfaces: %s", err)
-	}
-
+	// network interfaces are already expanded to the map-based representation.
 	// Service accounts are already expanded to the map-based representation.
 	serviceAccountsIface := expandServiceAccounts(d.Get("service_account").([]interface{}))
 
 	instanceProperties := map[string]interface{}{
 		"machineType":       d.Get("machine_type").(string),
 		"disks":             disks,
-		"networkInterfaces": networksIface,
+		"networkInterfaces": networks,
 		"scheduling":        scheduling,
 	}
 	if d.Get("can_ip_forward").(bool) {
@@ -1407,20 +1424,12 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		instanceProperties["keyRevocationActionType"] = v
 	}
 	if metadata != nil {
-		metadataMap, err := tpgresource.ConvertToMap(metadata)
-		if err != nil {
-			return fmt.Errorf("Error converting metadata: %s", err)
-		}
-		instanceProperties["metadata"] = metadataMap
+		instanceProperties["metadata"] = metadata
 	}
 	if networkPerformanceConfig != nil {
 		instanceProperties["networkPerformanceConfig"] = networkPerformanceConfig
 	}
-	if tags := resourceInstanceTags(d); tags != nil {
-		tagsMap, err := tpgresource.ConvertToMap(tags)
-		if err != nil {
-			return fmt.Errorf("Error converting tags: %s", err)
-		}
+	if tagsMap := resourceInstanceTags(d); tagsMap != nil {
 		instanceProperties["tags"] = tagsMap
 	}
 	if cic := expandConfidentialInstanceConfig(d); cic != nil {
@@ -1430,11 +1439,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		instanceProperties["shieldedInstanceConfig"] = sic
 	}
 	if amf := expandAdvancedMachineFeatures(d); amf != nil {
-		amfMap, err := tpgresource.ConvertToMap(amf)
-		if err != nil {
-			return fmt.Errorf("Error converting advancedMachineFeatures: %s", err)
-		}
-		instanceProperties["advancedMachineFeatures"] = amfMap
+		instanceProperties["advancedMachineFeatures"] = amf
 	}
 	if reservationAffinity != nil {
 		instanceProperties["reservationAffinity"] = reservationAffinity
@@ -1464,6 +1469,9 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	}
 	if _, ok := d.GetOk("resource_manager_tags"); ok {
 		instanceProperties["resourceManagerTags"] = tpgresource.ExpandStringMap(d, "resource_manager_tags")
+	}
+	if workloadIdentityConfig := expandWorkloadIdentityConfig(d); workloadIdentityConfig != nil {
+		instanceProperties["workloadIdentityConfig"] = workloadIdentityConfig
 	}
 
 	var itName string
@@ -1570,7 +1578,10 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	default:
 		numericId = fmt.Sprintf("%v", v)
 	}
-	selfLink, _ := res["selfLink"].(string)
+	selfLink, ok := res["selfLink"].(string)
+	if !ok && res["selfLink"] != nil {
+		log.Printf("[WARN] resourceComputeRegionInstanceTemplateRead: unexpected type for selfLink: %T", res["selfLink"])
+	}
 	delete(res, "id")
 
 	resBytes, err := json.Marshal(res)
@@ -1696,7 +1707,11 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		return err
 	}
 	if instanceTemplate.Properties.NetworkInterfaces != nil {
-		networkInterfaces, region, _, _, err := flattenNetworkInterfaces(d, config, instanceTemplate.Properties.NetworkInterfaces)
+		networkInterfacesRaw, err := networkInterfacesToInterface(instanceTemplate.Properties.NetworkInterfaces)
+		if err != nil {
+			return err
+		}
+		networkInterfaces, region, _, _, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
 		if err != nil {
 			return err
 		}
@@ -1743,7 +1758,7 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		}
 	}
 	if instanceTemplate.Properties.GuestAccelerators != nil {
-		if err = d.Set("guest_accelerator", flattenGuestAccelerators(instanceTemplate.Properties.GuestAccelerators)); err != nil {
+		if err = d.Set("guest_accelerator", flattenGuestAccelerators(guestAcceleratorsToInterface(instanceTemplate.Properties.GuestAccelerators))); err != nil {
 			return fmt.Errorf("Error setting guest_accelerator: %s", err)
 		}
 	}
@@ -1768,13 +1783,17 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		}
 	}
 	if instanceTemplate.Properties.AdvancedMachineFeatures != nil {
-		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(instanceTemplate.Properties.AdvancedMachineFeatures)); err != nil {
+		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeaturesTyped(instanceTemplate.Properties.AdvancedMachineFeatures)); err != nil {
 			return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 		}
 	}
 {{- if ne $.TargetVersionName "ga" }}
 	if instanceTemplate.Properties.DisplayDevice != nil {
-		if err = d.Set("enable_display", flattenEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
+		ddMap, convErr := tpgresource.ConvertToMap(instanceTemplate.Properties.DisplayDevice)
+		if convErr != nil {
+			return fmt.Errorf("Error converting displayDevice: %s", convErr)
+		}
+		if err = d.Set("enable_display", flattenEnableDisplay(ddMap)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}
@@ -1800,6 +1819,12 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
     if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
         return err
     }
+
+	if instanceTemplate.Properties.WorkloadIdentityConfig != nil {
+		if err = d.Set("workload_identity_config", flattenWorkloadIdentityConfig(instanceTemplate.Properties.WorkloadIdentityConfig)); err != nil {
+			return fmt.Errorf("Error setting workload_identity_config: %s", err)
+		}
+	}
     
 	return nil
 }

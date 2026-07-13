@@ -35,15 +35,14 @@ var waitForCommitCmd = &cobra.Command{
 			return fmt.Errorf("error creating Runner: %w", err)
 		}
 
-		return execWaitForCommit(syncBranchPrefix, baseBranch, sha, rnr)
+		waitFunc := func() {
+			time.Sleep(5 * time.Second)
+		}
+		return execWaitForCommit(syncBranchPrefix, baseBranch, sha, rnr, waitFunc)
 	},
 }
 
-var waitFunc = func() {
-	time.Sleep(5 * time.Second)
-}
-
-func execWaitForCommit(syncBranchPrefix, baseBranch, sha string, runner source.Runner) error {
+func execWaitForCommit(syncBranchPrefix, baseBranch, sha string, runner source.Runner, waitFunc func()) error {
 	syncBranch := getSyncBranch(syncBranchPrefix, baseBranch)
 	fmt.Println("SYNC_BRANCH: ", syncBranch)
 

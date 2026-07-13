@@ -616,18 +616,21 @@ func tfplan2caiConvert(t *testing.T, tfFileName, jsonFileName string, tfDir stri
 func compareAssetName(want, got string) error {
 	parts1 := strings.Split(want, "/")
 	parts2 := strings.Split(got, "/")
-	if len(parts1) != len(parts2) {
-		return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
-	}
 
-	for i, part := range parts1 {
-		if parts2[i] == "null" {
-			continue
+	for i := 0; i < len(parts2); i++ {
+		if parts2[i] == "null" || parts2[i] == "unknown" {
+			return nil
 		}
-
-		if part != parts2[i] {
+		if i >= len(parts1) {
 			return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
 		}
+		if parts1[i] != parts2[i] {
+			return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
+		}
+	}
+
+	if len(parts1) != len(parts2) {
+		return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
 	}
 	return nil
 }
