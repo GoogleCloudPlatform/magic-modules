@@ -30,20 +30,6 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.#", "1"),
 				),
 			},
-		},
-	})
-}
-
-func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
-	t.Parallel()
-
-	dnsZoneName := fmt.Sprintf("tf-test-dnskey-test-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducer(t),
-		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
 				Check: resource.ComposeTestCheckFunc(
