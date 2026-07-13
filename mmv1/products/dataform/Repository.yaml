@@ -109,6 +109,8 @@ samples:
           connection_name: my-connection
           repository_link_name: my-repository
           dataform_repository_name: dataform_repository
+        test_env_vars:
+          project_id: PROJECT_NAME
 virtual_fields:
   - name: deletion_policy
     type: Enum
