@@ -86,14 +86,6 @@ properties:
         - name: name
           type: String
           description: Name of location.
-  - name: name
-    type: String
-    description: |-
-      Identifier. The resource name (full URI of the resource) following the standard naming
-      scheme:
-
-      "projects/{project}/locations/{location}/saas/{saas}"
-    output: true
   - name: uid
     type: String
     description: |-
