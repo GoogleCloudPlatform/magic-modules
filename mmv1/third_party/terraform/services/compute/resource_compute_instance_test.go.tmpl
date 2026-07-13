@@ -13299,7 +13299,7 @@ resource "google_compute_network_attachment" "test_network_attachment" {
   description = "network attachment description"
   connection_preference = "ACCEPT_MANUAL"
   producer_accept_lists = [
-    "%{service_class_id}"
+    "serviceclasses/%{service_class_id}"
   ]
 
   subnetworks = [
@@ -13328,7 +13328,8 @@ resource "google_compute_instance" "foobar" {
   }
   
   network_interface {
-    network = "default"
+    network = google_compute_network.test-network.id
+    subnetwork = google_compute_subnetwork.test-subnetwork.self_link
   }
   
   network_interface {
