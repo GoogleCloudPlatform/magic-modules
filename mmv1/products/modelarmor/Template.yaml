@@ -98,6 +98,22 @@ samples:
           template_metadata_custom_llm_response_safety_error_code: 401
           template_metadata_enforcement_type: '"INSPECT_ONLY"'
           template_metadata_filter_version_selector_alias: '"FILTER_VERSION_ALIAS_LATEST"'
+  - name: modelarmor_template_filter_version_selector
+    primary_resource_id: template-filter-version-selector
+    steps:
+      - name: modelarmor_template_filter_version_selector
+        resource_id_vars:
+          templateId: modelarmor5
+          location: us-central1
+          filter_config_rai_settings_rai_filters_0_filter_type: HATE_SPEECH
+          filter_config_rai_settings_rai_filters_0_confidence_level: HIGH
+          template_metadata_filter_version_selector_version: v1
+        test_vars_overrides:
+          templateId: '"modelarmor5"'
+          location: '"us-central1"'
+          filter_config_rai_settings_rai_filters_0_filter_type: '"HATE_SPEECH"'
+          filter_config_rai_settings_rai_filters_0_confidence_level: '"HIGH"'
+          template_metadata_filter_version_selector_version: '"v1"'
   - name: modelarmor_template_label
     primary_resource_id: template-label-advanced-config
     steps:
@@ -324,6 +340,8 @@ properties:
         properties:
           - name: alias
             type: String
+            conflicts:
+              - template_metadata.0.filter_version_selector.0.version
             description: |-
               A predefined filter version alias. The template automatically follows the
               version this alias points to.
@@ -332,6 +350,8 @@ properties:
               FILTER_VERSION_ALIAS_LATEST
           - name: version
             type: String
+            conflicts:
+              - template_metadata.0.filter_version_selector.0.alias
             description: |-
               Pins the template to a specific, immutable filter version. Expected
               format is a case-sensitive string such as 'v1' or 'v2'.
