@@ -2815,15 +2815,13 @@ resource "google_dataproc_cluster" "spot_with_instance_flexibility_policy" {
     preemptible_worker_config {
       num_instances = "3"
       preemptibility = "SPOT"
-      disk_config {
-        boot_disk_size_gb = 35
-      }
 	  instance_flexibility_policy {
         instance_selection_list {
           machine_types = ["n2d-standard-2"]
           rank          = 3
           disk_config {
             boot_disk_size_gb = 40
+						boot_disk_type = "pd-standard"
           }
         }
       }
