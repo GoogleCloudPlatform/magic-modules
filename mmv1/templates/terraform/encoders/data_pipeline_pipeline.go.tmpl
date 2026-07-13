@@ -11,9 +11,6 @@
     limitations under the License.
 */ -}}
 // The Data Pipelines API does not support changing state via PATCH.
-// On CREATE (d.Id() is empty before SetId is called), we can set the initial
-// state by including it in the request body.
-if d.Id() == "" && d.Get("desired_state").(string) == "STATE_PAUSED" {
-    obj["state"] = "STATE_PAUSED"
-}
+// State management is handled by post_create for the initial pause request
+// and by pre_update for archiving.
 return obj, nil

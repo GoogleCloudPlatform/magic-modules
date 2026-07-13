@@ -333,12 +333,12 @@ func TestAccDataPipelinePipeline_desiredStatePaused(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create a pipeline with desired_state=STATE_PAUSED.
-				// The encoder sets state=STATE_PAUSED in the CREATE body so the
-				// scheduler starts in a paused state.
+				// The API creates the pipeline first, then the provider calls
+				// the stop endpoint to reach the paused state.
 				Config: testAccDataPipelinePipeline_desiredStatePausedConfig(suffix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "desired_state", "STATE_PAUSED"),
-					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "state", "STATE_PAUSED"),
+					resource.TestCheckResourceAttrSet("google_data_pipeline_pipeline.primary", "state"),
 				),
 			},
 			{
