@@ -28,6 +28,7 @@ references:
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
 base_url: 'projects/{{project}}/regions/{{region}}/healthSources'
+generate_list_resource: true
 # URL for the resource's standard Get method. https://google.aip.dev/131
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.

@@ -12,14 +12,14 @@
 # limitations under the License.
 
 ---
-name: 'Document'
+name: Document
 description: |
   In Cloud Firestore, the unit of storage is the document. A document is a lightweight record
   that contains fields, which map to values. Each document is identified by a name.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/firestore/docs/manage-data/add-data'
-  api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.documents'
+    Official Documentation: https://cloud.google.com/firestore/docs/manage-data/add-data
+  api: https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.documents
 docs:
   warning: |
     This resource creates a Firestore Document on a project that already has
@@ -30,53 +30,57 @@ docs:
     `google_app_engine_application` resource with `database_type` set to
     `"CLOUD_FIRESTORE"`. Your Firestore location will be the same as
     the App Engine location specified.
-base_url: 'projects/{{project}}/databases/{{database}}/documents/{{collection}}'
+base_url: projects/{{project}}/databases/{{database}}/documents/{{collection}}
 self_link: '{{name}}'
-create_url: 'projects/{{project}}/databases/{{database}}/documents/{{collection}}?documentId={{document_id}}'
-update_verb: 'PATCH'
+create_url: projects/{{project}}/databases/{{database}}/documents/{{collection}}?documentId={{document_id}}
+update_verb: PATCH
 import_format:
   - '{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  decoder: 'templates/terraform/decoders/firestore_document.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/firestore_document.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'firestore_document_basic'
-    primary_resource_id: 'mydoc'
-    vars:
-      document_id: 'my-doc-id'
-      project_id: 'project-id'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    external_providers: ["random", "time"]
-  - name: 'firestore_document_nested_document'
-    primary_resource_id: 'mydoc'
-    vars:
-      document_id: 'my-doc-id'
-      project_id: 'project-id'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    external_providers: ["random", "time"]
+custom_code:
+  decoder: templates/terraform/decoders/firestore_document.go.tmpl
+  custom_import: templates/terraform/custom_import/firestore_document.go.tmpl
+samples:
+  - name: firestore_document_basic
+    primary_resource_id: mydoc
+    external_providers: [random, time]
+    steps:
+      - name: firestore_document_basic
+        resource_id_vars:
+          document_id: my-doc-id
+          project_id: project-id
+        test_env_vars:
+          org_id: ORG_ID
+  - name: firestore_document_nested_document
+    primary_resource_id: mydoc
+    external_providers: [random, time]
+    steps:
+      - name: firestore_document_nested_document
+        resource_id_vars:
+          document_id: my-doc-id
+          project_id: project-id
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
-  - name: 'database'
+  - name: database
     type: String
     description: |
       The Firestore database id. Defaults to `"(default)"`.
     url_param_only: true
     immutable: true
-    default_value: "(default)"
-  - name: 'collection'
+    default_value: (default)
+  - name: collection
     type: String
     description: |
       The collection ID, relative to database. For example: chatrooms or chatrooms/my-document/private-messages.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'documentId'
+  - name: documentId
     type: String
     description: |
       The client-assigned document ID to use for this document during creation.
@@ -84,33 +88,33 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       A server defined name for this document. Format:
       `projects/{{project_id}}/databases/{{database_id}}/documents/{{path}}/{{document_id}}`
     output: true
-  - name: 'path'
+  - name: path
     type: String
     description: |
       A relative path to the collection this document exists within
     output: true
     # This is a string instead of a NestedObject because fields can be deeply nested
-  - name: 'fields'
+  - name: fields
     type: String
     description: |
       The document's [fields](https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.documents) formated as a json string.
     required: true
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
     validation:
-      function: 'validation.StringIsJSON'
-  - name: 'createTime'
+      function: validation.StringIsJSON
+  - name: createTime
     type: Time
-    description: 'Creation timestamp in RFC3339 format.'
+    description: Creation timestamp in RFC3339 format.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
-    description: 'Last update timestamp in RFC3339 format.'
+    description: Last update timestamp in RFC3339 format.
     output: true

@@ -136,6 +136,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 			EnableIntraNodeVisibility:            d.Get("enable_intranode_visibility").(bool),
 			DefaultSnatStatus:                    expandDefaultSnatStatus(d.Get("default_snat_status")),
 			DatapathProvider:                     d.Get("datapath_provider").(string),
+			DataplaneV2Config:                    expandDataplaneV2Config(d.Get("dataplane_optimization_mode")),
 			EnableCiliumClusterwideNetworkPolicy: d.Get("enable_cilium_clusterwide_network_policy").(bool),
 			PrivateIpv6GoogleAccess:              d.Get("private_ipv6_google_access").(string),
 			InTransitEncryptionConfig:            d.Get("in_transit_encryption_config").(string),
@@ -1708,5 +1709,18 @@ func expandNodeCreationConfig(v interface{}) *container.NodeCreationConfig {
 	config := l[0].(map[string]interface{})
 	return &container.NodeCreationConfig{
 		NodeCreationMode: config["node_creation_mode"].(string),
+	}
+}
+
+func expandDataplaneV2Config(v interface{}) *container.DataplaneV2Config {
+	if v == nil {
+		return nil
+	}
+	s := v.(string)
+	if s == "" {
+		return nil
+	}
+	return &container.DataplaneV2Config{
+		ScalabilityMode: s,
 	}
 }

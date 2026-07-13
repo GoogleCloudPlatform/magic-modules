@@ -15,30 +15,33 @@
 name: UnitKind
 description: A UnitKind serves as a template or type definition for a group of Units. Units that belong to the same UnitKind are managed together, follow the same release model, and are typically updated together through rollouts.
 base_url: projects/{{project}}/locations/{{location}}/unitKinds
-update_mask: true
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
 create_url: projects/{{project}}/locations/{{location}}/unitKinds?unitKindId={{unit_kind_id}}
+update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
-min_version: beta
-examples:
-  - name: saas_runtime_unit_kind_basic
-    primary_resource_id: "example"
-    min_version: 'beta'
-    vars:
-      saas_name: example-saas
-      cluster_unitkind_name: cluster-unitkind
-      app_unitkind_name: app-unitkind
-      release_name: example-release
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
-autogen_async: false
 autogen_status: VW5pdEtpbmQ=
+autogen_async: false
+samples:
+  - name: saas_runtime_unit_kind_basic
+    primary_resource_id: example
+    min_version: beta
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    steps:
+      - name: saas_runtime_unit_kind_basic
+        min_version: beta
+        resource_id_vars:
+          saas_name: example-saas
+          cluster_unitkind_name: cluster-unitkind
+          app_unitkind_name: app-unitkind
+          release_name: example-release
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
