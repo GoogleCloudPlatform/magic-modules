@@ -27,9 +27,7 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/environmentGroups/{{environment_group_id}}
-
 autogen_status: RW52aXJvbm1lbnRHcm91cA==
-
 samples:
   - name: chronicle_environmentgroup_update
     primary_resource_id: sample
@@ -40,7 +38,6 @@ samples:
       - name: "chronicle_environmentgroup_full"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
-
 parameters:
   - name: location
     type: String

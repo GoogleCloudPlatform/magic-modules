@@ -2,7 +2,9 @@ package container
 
 import (
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
@@ -642,11 +644,17 @@ func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transp
 	if err != nil {
 		return nil
 	}
-	clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
-	if config.UserProjectOverride {
-		clusterGetCall.Header().Add("X-Goog-User-Project", project)
+	var cluster *container.Cluster
+	client := NewClient(config, userAgent)
+	if client != nil {
+		clusterGetCall := client.Projects.Locations.Clusters.Get(name)
+		if config.UserProjectOverride {
+			clusterGetCall.Header().Add("X-Goog-User-Project", project)
+		}
+		cluster, _ = clusterGetCall.Do()
+	} else {
+		log.Printf("[WARN] GKE client is nil, skipping cluster GET call")
 	}
-	cluster, _ := clusterGetCall.Do()
 	resourceVersion := ""
 	exclusions := make(map[string]container.TimeWindow)
 	if cluster != nil && cluster.MaintenancePolicy != nil {
@@ -728,6 +736,35 @@ func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transp
 			},
 			ResourceVersion: resourceVersion,
 		}
+	}
+	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
+		rmw := recurringMaintenanceWindow.([]interface{})[0].(map[string]interface{})
+		duration, _ := time.ParseDuration(rmw["window_duration"].(string))
+
+		policy := &container.MaintenancePolicy{
+			Window: &container.MaintenanceWindow{
+				MaintenanceExclusions: exclusions,
+				RecurringMaintenanceWindow: &container.RecurringMaintenanceWindow{
+					WindowStartTime: &container.TimeOfDay{
+						Hours:   int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["hours"].(int)),
+						Minutes: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["minutes"].(int)),
+						Seconds: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["seconds"].(int)),
+					},
+					WindowDuration: fmt.Sprintf("%ds", int(duration.Seconds())),
+					Recurrence:     rmw["recurrence"].(string),
+				},
+			},
+			ResourceVersion: resourceVersion,
+		}
+
+		if _, ok := rmw["delay_until"]; ok && len(rmw["delay_until"].([]interface{})) == 1 {
+			policy.Window.RecurringMaintenanceWindow.DelayUntil = &container.Date{
+				Year:  int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["year"].(int)),
+				Month: int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["month"].(int)),
+				Day:   int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["day"].(int)),
+			}
+		}
+		return policy
 	}
 	return nil
 }

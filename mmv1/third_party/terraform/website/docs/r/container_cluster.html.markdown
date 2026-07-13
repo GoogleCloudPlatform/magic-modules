@@ -766,10 +766,11 @@ This block also contains several computed attributes, documented below.
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
 * `daily_maintenance_window` - (Optional) structure documented below.
 * `recurring_window` - (Optional) structure documented below
+* `recurring_maintenance_window` - (Optional) structure documented below
 * `maintenance_exclusion` - (Optional) structure documented below
 * `disruption_budget` - (Optional) structure documented below
 
-In beta, one or the other of `recurring_window` and `daily_maintenance_window` is required if a `maintenance_policy` block is supplied.
+In beta, one of `recurring_window`, `recurring_maintenance_window` and `daily_maintenance_window` is required if a `maintenance_policy` block is supplied.
 
 * `daily_maintenance_window` - Time window specified for daily maintenance operations.
     Specify `start_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) format "HH:MM”,
@@ -808,6 +809,60 @@ maintenance_policy {
     start_time = "2019-01-01T09:00:00Z"
     end_time = "2019-01-01T17:00:00Z"
     recurrence = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
+  }
+}
+```
+
+* `recurring_maintenance_window` - Defines a recurring window for maintenance operations.
+  *   `delay_until`: (Optional) Specifies the initial date when the recurring window can start.
+      *   `day`: The day of the month (integer value between 1 and 31).
+      *   `month`: The month of the year (integer value between 1 and 12).
+      *   `year`: The year (integer value).
+
+  *   `window_start_time`: The time of day when each maintenance window instance begins.
+      *   `hours`: The hour of the day (integer value between 0 and 23).
+      *   `minutes`: The minute of the hour (integer value between 0 and 59).
+      *   `seconds`: The second of the minute (integer value between 0 and 59).
+
+  *   `window_duration`: The length of each maintenance window instance. Specified as a sequence of decimal numbers, each with an optional fraction and a unit suffix, such as `"300s"`, `"1.5m"`, and `"2h45m"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". The value must be a positive duration.
+
+  *   `recurrence`: Defines when the window recurs, using the [RFC5545](https://tools.ietf.org/html/rfc5545#section-3.8.5.3) RRULE format.
+
+Examples:
+```
+maintenance_policy {
+  recurring_maintenance_window {
+    delay_until {
+      day   = 1
+      month = 8
+      year  = 2019
+    }
+    window_start_time {
+      hours   = 2
+      minutes = 0
+      seconds = 0
+    }
+    window_duration = "4h"
+    recurrence      = "FREQ=DAILY"
+  }
+}
+```
+
+```
+maintenance_policy {
+  recurring_maintenance_window {
+    delay_until {
+      day   = 1
+      month = 1
+      year  = 2019
+    }
+    window_start_time {
+      hours   = 9
+      minutes = 0
+      seconds = 0
+    }
+    window_duration = "8h"
+    recurrence      = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
   }
 }
 ```
@@ -1220,9 +1275,9 @@ sole_tenant_config {
 
 <a name="nested_node_image_config"></a>The `node_image_config` block supports:
 
-* `image` (Optional) - The name of the image to use for this node.
+* `image` (Optional) - The Operating System image for the node pool. This is a private feature, please contact your Google account team for allowlisting this feature.
 
-* `image_project` (Optional) - The project containing the image to use for this node.
+* `image_project` (Optional) - The GCP project storing the Operating System image for the node pool. This is a private feature, please contact your Google account team for allowlisting this feature.
 
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 
@@ -1734,6 +1789,8 @@ linux_node_config {
 
 * `accurate_time_config` - (Optional) Accurate time configuration for the node. Structure is [documented below](#nested_accurate_time_config).
 
+* `custom_node_init` - (Optional) Custom node init settings. Structure is [documented below](#nested_custom_node_init).
+
 <a name="nested_swap_config"></a>The `swap_config` block supports:
 
 * `enabled` - (Optional) Enables or disables swap for the node pool.
@@ -1799,6 +1856,18 @@ linux_node_config {
     * `POLICY_UNSPECIFIED`: Default if unset. GKE selects the image based on node type. For CPU and TPU nodes, the image will not allow loading external kernel modules. For GPU nodes, the image will allow loading any module, whether it is signed or not.
     * `ENFORCE_SIGNED_MODULES`: Enforced signature verification: Node pools will use a Container-Optimized OS image configured to allow loading of *Google-signed* external kernel modules. Loadpin is enabled but configured to exclude modules, and kernel module signature checking is enforced.
     * `DO_NOT_ENFORCE_SIGNED_MODULES`: Mirrors existing DEFAULT behavior: For CPU and TPU nodes, the image will not allow loading external kernel modules. For GPU nodes, the image will allow loading any module, whether it is signed or not.
+
+<a name="nested_custom_node_init"></a>The `custom_node_init` block supports:
+
+* `init_script` - (Optional) The init script configuration. Structure is [documented below](#nested_init_script).
+
+<a name="nested_init_script"></a>The `init_script` block supports:
+
+* `gcs_uri` - (Optional) The Google Cloud Storage URI for storing the init script. Format: `gs://BUCKET_NAME/OBJECT_NAME`. The service account on the nodepool must have read access to the object. Conflicts with `gcp_secret_manager_secret_uri`. If `gcs_uri` is used, `gcs_generation` is required.
+
+* `gcs_generation` - (Optional) The generation of the init script in Google Cloud Storage. If `gcs_uri` is used, `gcs_generation` is required.
+
+* `gcp_secret_manager_secret_uri` - (Optional) The Google Cloud Secret Manager secret version URI for storing the init script. Format: `projects/PROJECT_ID/secrets/SECRET_NAME/versions/VERSION`. The service account on the nodepool must have access to the secret version. Conflicts with `gcs_uri`.
 
 <a name="nested_containerd_config"></a>The `containerd_config` block supports:
 

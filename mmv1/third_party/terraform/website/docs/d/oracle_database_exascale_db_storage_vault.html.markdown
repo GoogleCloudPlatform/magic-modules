@@ -1,0 +1,37 @@
+---
+subcategory: "Oracle Database"
+description: |-
+  Get information about an ExascaleDbStorageVault.
+---
+
+# google_oracle_database_exascale_db_storage_vault
+
+Get information about an ExascaleDbStorageVault.
+
+For more information see the
+[API](https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.exascaleDbStorageVaults).
+
+## Example Usage
+
+```hcl
+data "google_oracle_database_exascale_db_storage_vault" "my-vault"{
+  location                     = "us-east4"
+  exascale_db_storage_vault_id = "vault-id"
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `exascale_db_storage_vault_id` - (Required) The ID of the ExascaleDbStorageVault.
+
+* `location` - (Required) The location of the resource.
+
+- - -
+* `project` - (Optional) The project to which the resource belongs. If it
+    is not provided, the provider project is used.
+
+## Attributes Reference
+
+See [google_oracle_database_exascale_db_storage_vault](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/oracle_database_exascale_db_storage_vault#argument-reference) resource for details of the available attributes.

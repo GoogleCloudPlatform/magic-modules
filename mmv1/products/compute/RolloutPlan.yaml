@@ -24,6 +24,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/rolloutPlans'
 base_url: 'projects/{{project}}/global/rolloutPlans'
 has_self_link: true
+generate_list_resource: true
 immutable: true
 create_url: 'projects/{{project}}/global/rolloutPlans'
 create_verb: 'POST'

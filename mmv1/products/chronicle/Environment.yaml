@@ -16,11 +16,10 @@ name: Environment
 description: >
   An environment is logical container for different networks or customers that are managed by the SOC or MSSP. This is useful for SOCs who provide services to several different networks, customers or business units within the organization. The Platform comes with a predefined environment named Default Environment.
 
-min_version: 'beta'
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.environments'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.environments'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments/{{environment_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environments
@@ -35,7 +34,6 @@ autogen_status: RW52aXJvbm1lbnQ=
 samples:
   - name: chronicle_environment_update
     primary_resource_id: sample
-    min_version: beta
     steps:
       - name: "chronicle_environment_basic"
         test_env_vars:

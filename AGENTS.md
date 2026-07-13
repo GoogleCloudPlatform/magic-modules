@@ -1,13 +1,24 @@
-## Workflows
+# Agent Instructions
 
-This repository supports development for both the standard Terraform Google Provider and the TGC (Terraform Google Conversion) tool. Please follow the entrypoint for your specific task:
+Magic Modules (MMv1) defines the Google Cloud Terraform providers: resource schemas in `mmv1/products/`,
+handwritten code and tests under `mmv1/third_party/terraform/`, generated into the downstream
+`terraform-provider-google` and `terraform-provider-google-beta` repositories. Changes are always made
+here, upstream — never in the downstream repos.
 
-## 1. Standard Terraform Provider (Magic Modules)
-For adding resources/fields, fixing issues, or syncing standard provider code:
-- Refer to the [Provider Workflows Menu](.agents/WORKFLOWS.md).
+## Entry points
 
-## 2. TGC (Terraform Google Conversion)
-For adding resources/fields, fixing conversion failures, or running TGC integration tests:
-- Refer to the [TGC Workflows Menu](.agents/TGC_WORKFLOWS.md).
+- **[.agents/WORKFLOWS.md](.agents/WORKFLOWS.md)** — the workflows for provider tasks (adding
+  resources/fields, fixing issues, syncing) and the rules that govern them. Read it before starting a
+  provider task.
+- **`.agents/skills/`** — reusable skills the workflows compose (generation, testing, log parsing,
+  troubleshooting). Each skill's `SKILL.md` frontmatter states when to use it.
+- **`.agents/knowledge/`** — the curated knowledge base (initial seeding in progress). When present,
+  consult its `index.md` at decision points and open only the entries the task needs.
+- **`.agents/archive/`** — parked tracks (currently TGC). Not maintained; do not use as reference.
 
-This framework is strictly **opt-in**. Unless the user explicitly asks to use **Workflow Mode** or references these instructions, ignore these files and proceed normally. For Workflow Mode, you MUST first read [.agents/WORKFLOWS.md](.agents/WORKFLOWS.md) to understand the rules and menu before proceeding.
+## Ground rules
+
+- **Never weaken a test or check to make it pass.** No disabling or skipping tests, and no test-dodging
+  behavior flags (`ignore_read`, `default_from_api`, `ImportStateVerifyIgnore`) without an adjacent
+  comment justifying the API behavior that requires them.
+- **Verify before opening a PR**: generate, build, and run the tests relevant to what you changed.

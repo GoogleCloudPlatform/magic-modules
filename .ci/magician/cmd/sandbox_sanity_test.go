@@ -42,16 +42,16 @@ func TestSandboxInitialization(t *testing.T) {
 
 func TestSandboxInterceptor_AllowedCommand(t *testing.T) {
 	sb := newSandbox(t)
-	sb.RequireWhitelist()
+	sb.RequireAllowlist()
 	_, err := sb.Runner.Run("touch", []string{"test_file.txt"}, nil)
 	if err != nil {
-		t.Fatalf("Expected whitelisted command to succeed, got: %v", err)
+		t.Fatalf("Expected allowlisted command to succeed, got: %v", err)
 	}
 }
 
 func TestSandboxInterceptor_MockOverridesAllowed(t *testing.T) {
 	sb := newSandbox(t)
-	sb.RequireWhitelist()
+	sb.RequireAllowlist()
 	sb.Runner.WriteFile("echo", "#!/bin/bash\necho 'intercepted echo'")
 	os.Chmod(filepath.Join(sb.Dir, "echo"), 0755)
 
@@ -60,13 +60,13 @@ func TestSandboxInterceptor_MockOverridesAllowed(t *testing.T) {
 		t.Fatalf("Expected mocked command to succeed, got: %v", err)
 	}
 	if !strings.Contains(output, "intercepted echo") {
-		t.Errorf("Expected sandbox mock to override whitelist, got: %s", output)
+		t.Errorf("Expected sandbox mock to override allowlist, got: %s", output)
 	}
 }
 
 func TestSandboxInterceptor_UnhandledCommandPanics(t *testing.T) {
 	sb := newSandbox(t)
-	sb.RequireWhitelist()
+	sb.RequireAllowlist()
 	_, err := sb.Runner.Run("curl", []string{"http://example.com"}, nil)
 	if err == nil {
 		t.Fatalf("Expected unhandled command to return error, but it succeeded")
