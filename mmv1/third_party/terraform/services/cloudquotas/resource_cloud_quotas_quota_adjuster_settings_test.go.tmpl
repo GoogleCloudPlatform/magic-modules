@@ -1,7 +1,5 @@
 package cloudquotas_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"testing"
 
@@ -27,7 +25,7 @@ func TestAccCloudQuotasQuotaAdjusterSettings_cloudQuotasQuotaAdjusterSettingsUpd
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudQuotasQuotaAdjusterSettings_basic(context),
@@ -54,11 +52,9 @@ func TestAccCloudQuotasQuotaAdjusterSettings_cloudQuotasQuotaAdjusterSettingsUpd
 func testAccCloudQuotasQuotaAdjusterSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	data "google_project" "project" {
-		provider      = google-beta
 	}
 
 	resource "google_cloud_quotas_quota_adjuster_settings" "adjuster_settings" {
-		provider      = google-beta
 		parent        = "projects/${data.google_project.project.number}"
 		enablement    = "%{enablement}"
 	}
@@ -68,15 +64,12 @@ func testAccCloudQuotasQuotaAdjusterSettings_basic(context map[string]interface{
 func testAccCloudQuotasQuotaAdjusterSettings_updateEnabelement(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	data "google_project" "project" {
-		provider      = google-beta
 	}
 
 	resource "google_cloud_quotas_quota_adjuster_settings" "adjuster_settings" {
-		provider      = google-beta
 		parent        = "projects/${data.google_project.project.number}"
 		enablement    = "%{updated_enablement}"
 	}
 `, context)
 }
 
-{{- end }}
