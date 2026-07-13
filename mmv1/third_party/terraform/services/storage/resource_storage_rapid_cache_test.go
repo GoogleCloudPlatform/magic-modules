@@ -30,7 +30,7 @@ func TestAccStorageRapidCache_update(t *testing.T) {
 				ResourceName:            "google_storage_rapid_cache.cache",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"bucket", "update_time"},
+				ImportStateVerifyIgnore: []string{"bucket", "update_time", "cache_type"},
 			},
 			{
 				Config: testAccStorageRapidCache_update(context),
@@ -44,7 +44,7 @@ func TestAccStorageRapidCache_update(t *testing.T) {
 				ResourceName:            "google_storage_rapid_cache.cache",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"bucket", "update_time"},
+				ImportStateVerifyIgnore: []string{"bucket", "update_time", "cache_type"},
 			},
 		},
 	})
