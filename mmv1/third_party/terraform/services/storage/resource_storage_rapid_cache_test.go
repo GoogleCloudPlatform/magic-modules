@@ -1,5 +1,7 @@
+//go:build !ga
+// +build !ga
+
 package storage_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -153,4 +155,3 @@ resource "google_storage_rapid_cache" "cache" {
 }
 `, context)
 }
-{{- end }}
