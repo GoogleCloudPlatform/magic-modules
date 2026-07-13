@@ -281,6 +281,7 @@ properties:
     type: Integer
     description: |
       The number of NAT IPs allocated per connected endpoint.
+    default_from_api: true
   - name: 'domainNames'
     type: Array
     description: |
