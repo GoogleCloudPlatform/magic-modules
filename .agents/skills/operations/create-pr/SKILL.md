@@ -58,10 +58,14 @@ git commit -m "<product>: <concise description of change>"
 
 ### 3. Push to Fork
 
-Identify your personal fork remote (remote not pointing to `GoogleCloudPlatform`) and push the branch:
+Identify your personal fork remote. If multiple non-upstream remotes exist or the target remote is ambiguous, stop and ask the user which remote to push to:
 
 ```bash
-# Discover personal fork remote (defaults to 'origin' if unmatched)
+# Check available remotes
+git remote -v
+
+# Automatically select personal fork remote (remote not pointing to GoogleCloudPlatform).
+# If multiple non-upstream remotes exist, ask the user to confirm the remote name.
 FORK_REMOTE=$(git remote -v | grep -v -i "GoogleCloudPlatform/magic-modules" | head -n 1 | awk '{print $1}')
 FORK_REMOTE="${FORK_REMOTE:-origin}"
 
