@@ -15,7 +15,7 @@ This skill provides step-by-step instructions for preparing, formatting, and ope
 * Your git working directory is clean except for the files intended for the PR.
 * Downstream provider changes are NOT staged or committed to `magic-modules`.
 * `gh` CLI is installed and authenticated (`gh auth status`).
-* Remote repositories are configured (e.g., `upstream` pointing to `GoogleCloudPlatform/magic-modules` and a personal fork remote such as `mau` or `origin`).
+* Remote repositories are configured (e.g., `upstream` pointing to `GoogleCloudPlatform/magic-modules` and a personal fork remote such as `origin`).
 
 ---
 
@@ -54,10 +54,10 @@ git commit -m "<product>: <concise description of change>"
 
 ### 3. Push to Fork
 
-Push the branch to your personal GitHub fork (replace `mau` with your fork's remote name):
+Push the branch to your personal GitHub fork (`origin` or your configured fork remote):
 
 ```bash
-FORK_REMOTE="mau" # Or "origin" - verify via `git remote -v`
+FORK_REMOTE="origin" # Verify fork remote via `git remote -v`
 git push -u "$FORK_REMOTE" "$BRANCH"
 ```
 
