@@ -69,11 +69,9 @@ samples:
           skewed_info: |
             skewed_info {
               skewed_col_names = ["col1"]
-              
               skewed_col_values {
                 values = ["val1"]
               }
-              
               skewed_key_values_locations {
                 values   = ["val1"]
                 location = "gs://example-bucket/skewed_location_1"
@@ -127,14 +125,12 @@ samples:
           skewed_info: |
             skewed_info {
               skewed_col_names = ["col1", "col2"]
-              
               skewed_col_values {
                 values = ["val1"]
               }
               skewed_col_values {
                 values = ["val2"]
               }
-              
               skewed_key_values_locations {
                 values   = ["val1"]
                 location = "gs://example-bucket/skewed_location_1"
