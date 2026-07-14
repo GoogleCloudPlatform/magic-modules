@@ -798,8 +798,12 @@ func flattenVerticalPodAutoscaling(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+	enabled := c["enabled"]
+	if enabled == nil {
+		enabled = false
+	}
 	transformed := map[string]interface{}{
-		"enabled": c["enabled"],
+		"enabled": enabled,
 	}
 
 	return []map[string]interface{}{transformed}
