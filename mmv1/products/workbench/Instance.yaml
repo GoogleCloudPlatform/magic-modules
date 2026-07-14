@@ -416,6 +416,7 @@ properties:
               diff_suppress_func: 'WorkbenchInstanceKmsDiffSuppress'
             - name: 'resourcePolicies'
               type: Array
+              default_from_api: true
               description: |
                 Optional. Resource policies applied to this disk.
               item_type:
