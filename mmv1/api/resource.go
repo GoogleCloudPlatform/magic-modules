@@ -1337,7 +1337,7 @@ func (r Resource) PackageName() string {
 // general defined timeouts, or default Timeouts
 func (r Resource) GetTimeouts() *Timeouts {
 	timeoutsFiltered := r.Timeouts
-	if timeoutsFiltered == nil {
+	if timeoutsFiltered == nil || timeoutsFiltered.IsZero() {
 		if async := r.GetAsync(); async != nil && async.Operation != nil {
 			timeoutsFiltered = async.Operation.Timeouts
 		}
@@ -1840,6 +1840,9 @@ func (r Resource) SamplePrimaryResourceId() string {
 		samples = google.Reject(r.Samples, func(s *resource.Sample) bool {
 			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
 		})
+	}
+	if len(samples) == 0 {
+		return ""
 	}
 	return samples[0].PrimaryResourceId
 }

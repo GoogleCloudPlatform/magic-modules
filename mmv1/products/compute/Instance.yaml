@@ -1008,3 +1008,13 @@ properties:
         type: String
         description: 'kms key service account'
         is_missing_in_cai: true
+  - name: 'workloadIdentityConfig'
+    type: NestedObject
+    description: 'Workload identity config.'
+    properties:
+      - name: 'identity'
+        type: String
+        description: 'Identity SPIFFE id.'
+      - name: 'identityCertificateEnabled'
+        type: Boolean
+        description: 'Specifies whether identity certificates are enabled.'

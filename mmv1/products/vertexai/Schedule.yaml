@@ -27,7 +27,7 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: U2NoZWR1bGU=
+autogen_status: U2NoZWR1bGVBdXRvZ2VuVjJBZ2VudA==
 autogen_async: false
 samples:
   - name: vertex_ai_schedule

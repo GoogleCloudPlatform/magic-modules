@@ -107,7 +107,7 @@ properties:
   - name: runFrequency
     type: String
     diff_suppress_func: 'chronicleRuleDeploymentNilRunFrequencyDiffSuppressFunc'
-    description: |2-
+    description: |-
       The run frequency of the rule deployment.
       Possible values:
       LIVE
@@ -115,7 +115,7 @@ properties:
       DAILY
   - name: executionState
     type: String
-    description: |2-
+    description: |-
       The execution state of the rule deployment.
       Possible values:
       DEFAULT
