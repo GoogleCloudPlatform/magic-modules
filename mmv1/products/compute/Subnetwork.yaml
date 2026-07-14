@@ -558,6 +558,12 @@ properties:
     type: String
     description: |
       The range of external IPv6 addresses that are owned by this subnetwork.
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    fingerprint_name: fingerprint
+    diff_suppress_func: IpDiffSuppress
+    validation:
+      function: verify.ValidateIpCidrRange
     default_from_api: true
   - name: ipCollection
     type: String
