@@ -1,0 +1,9 @@
+resource "google_certificate_manager_certificate" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.ResourceIdVars "cert_name"}}"
+  description = "Global cert"
+  scope       = "ALL_REGIONS"
+  self_managed {
+    certificate_pem = file("test-fixtures/cert.pem")
+    private_key_pem = file("test-fixtures/private-key.pem")
+  }
+}
