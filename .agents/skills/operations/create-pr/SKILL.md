@@ -79,7 +79,7 @@ CONTENT
 
 Common types include `new-resource`, `new-datasource`, `new-list-resource`, `enhancement`, `bug`, `deprecation`, `breaking-change`, `note`, and `none`.
 
-#### Sample PR Body (`.git/pr_body.md`)
+#### Sample PR Body String
 ```markdown
 Summary of what changed and why in a few concise sentences.
 
@@ -94,17 +94,26 @@ compute: added `foo` field to `google_compute_instance` resource
 
 ### 5. Create Pull Request with `gh` CLI
 
-Write the PR description to `.git/pr_body.md` (inside workspace to avoid prompt permissions) and execute:
+Construct the PR body string directly and execute `gh pr create` with `--body`:
 
 ```bash
 PR_TITLE="<product>: <short description>" # e.g. compute: add foo field to google_compute_instance
+
+PR_BODY=$(cat <<'EOF'
+<summary of what changed and why>
+
+```release-note:<type>
+<release note content>
+```
+EOF
+)
 
 gh pr create \
   --repo GoogleCloudPlatform/magic-modules \
   --base main \
   --head "$(gh api user -q .login):$BRANCH" \
   --title "$PR_TITLE" \
-  --body-file .git/pr_body.md
+  --body "$PR_BODY"
 ```
 
 ---
