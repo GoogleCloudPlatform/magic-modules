@@ -24,6 +24,7 @@ references:
 base_url: projects/{{project}}/global/targetTcpProxies
 immutable: true
 has_self_link: true
+generate_list_resource: true
 collection_url_key: items
 kind: compute#targetTcpProxy
 id_format: projects/{{project}}/global/targetTcpProxies/{{name}}

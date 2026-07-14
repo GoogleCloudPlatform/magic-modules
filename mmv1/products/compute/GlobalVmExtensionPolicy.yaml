@@ -1,0 +1,235 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'GlobalVmExtensionPolicy'
+description: 'A Global VM Extension Policy.'
+min_version: 'beta'
+base_url: 'projects/{{project}}/global/vmExtensionPolicies'
+self_link: 'projects/{{project}}/global/vmExtensionPolicies/{{name}}'
+update_verb: 'PATCH'
+delete_url: 'projects/{{project}}/global/vmExtensionPolicies/{{name}}/delete'
+delete_verb: 'POST'
+custom_code:
+  pre_update: 'templates/terraform/pre_update/vm_extension_policy_name.go.tmpl'
+  test_check_destroy: 'templates/terraform/test_check_destroy/global_vm_extension_policy.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/vm_extension_policy_rollout.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/global_vm_extension_policy.go.tmpl'
+
+samples:
+  - name: 'compute_global_vm_extension_policy_basic'
+    primary_resource_id: 'ops_agent_policy'
+    steps:
+      - name: 'compute_global_vm_extension_policy_basic'
+        vars:
+          policy_name: 'global-ops-agent-policy'
+        ignore_read_extra:
+          - 'rollout_operation'
+      - name: 'compute_global_vm_extension_policy_update'
+        vars:
+          policy_name: 'global-ops-agent-policy'
+        ignore_read_extra:
+          - 'rollout_operation'
+  - name: 'compute_global_vm_extension_policy_rollout'
+    primary_resource_id: 'ops_agent_policy'
+    steps:
+      - name: 'compute_global_vm_extension_policy_basic'
+        vars:
+          policy_name: 'global-ops-agent-policy'
+        ignore_read_extra:
+          - 'rollout_operation'
+      - name: 'compute_global_vm_extension_policy_update_rollout'
+        vars:
+          policy_name: 'global-ops-agent-policy'
+        ignore_read_extra:
+          - 'rollout_operation'
+  - name: 'compute_global_vm_extension_policy_custom_rollout'
+    primary_resource_id: 'ops_agent_policy'
+    steps:
+      - name: 'compute_global_vm_extension_policy_custom_rollout'
+        vars:
+          policy_name: 'global-ops-agent-policy'
+        ignore_read_extra:
+          - 'rollout_operation'
+
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+
+properties:
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    description: |-
+      Name of the resource. Provided by the client when the resource is created. The name must be 1-63 characters long and match the regular expression '^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$' to comply with RFC1035.
+    validation:
+      regex: '^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$'
+  - name: 'description'
+    type: String
+    description: 'An optional description of this resource.'
+  - name: 'extensionPolicies'
+    type: Map
+    required: true
+    description: |-
+      Map from extension (eg: "cloudops") to its policy configuration.
+    value_type:
+      type: NestedObject
+      properties:
+        - name: 'pinnedVersion'
+          type: String
+          description: 'The version pinning for the extension.'
+        - name: 'stringConfig'
+          type: String
+          description: 'String configuration payload.'
+    key_name: 'extension_name'
+  - name: 'instanceSelectors'
+    type: Array
+    description: 'Selector to target VMs for a policy.'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'labelSelector'
+          type: NestedObject
+          description: 'LabelSelector matches VM labels.'
+          properties:
+            - name: 'inclusionLabels'
+              type: KeyValuePairs
+              description: 'Labels as key value pairs.'
+  - name: 'priority'
+    type: Integer
+    default_from_api: true
+    description: 'Used to resolve conflicts when multiple policies are active. Defaults to 0.'
+  - name: 'rolloutOperation'
+    type: NestedObject
+    required: true
+    description: 'Represents the rollout operation.'
+    properties:
+      - name: 'rolloutInput'
+        type: NestedObject
+        required: true
+        description: 'Rollout input settings.'
+        properties:
+          - name: 'conflictBehavior'
+            type: String
+            description: 'Specifies the behavior of the rollout if a conflict is detected.'
+          - name: 'name'
+            type: String
+            description: 'The name of the rollout plan.'
+            exactly_one_of:
+              - 'rollout_operation.0.rollout_input.0.name'
+              - 'rollout_operation.0.rollout_input.0.predefined_rollout_plan'
+          - name: 'predefinedRolloutPlan'
+            type: String
+            description: 'Specifies the predefined rollout plan for the policy.'
+            exactly_one_of:
+              - 'rollout_operation.0.rollout_input.0.name'
+              - 'rollout_operation.0.rollout_input.0.predefined_rollout_plan'
+          - name: 'retryUuid'
+            type: String
+            description: 'The UUID that identifies a policy rollout retry attempt. It should only be set when retrying an existing rollout. Updating this field along with other policy fields (description, extension_policies, instance_selectors, priority) in the same plan will return an error.'
+      - name: 'rolloutStatus'
+        type: NestedObject
+        description: 'Rollout status.'
+        output: true
+        properties:
+          - name: 'currentRollouts'
+            type: Array
+            description: 'The current rollouts for the latest version of the resource.'
+            output: true
+            item_type:
+              type: NestedObject
+              output: true
+              properties:
+                - name: 'locationRolloutStatus'
+                  type: Map
+                  description: 'The rollout status for each location.'
+                  output: true
+                  value_type:
+                    type: NestedObject
+                    output: true
+                    properties:
+                      - name: 'state'
+                        type: String
+                        description: 'The state of the location rollout.'
+                        output: true
+                  key_name: 'location_name'
+                - name: 'rollout'
+                  type: String
+                  description: 'The name of the rollout.'
+                  output: true
+                - name: 'rolloutPlan'
+                  type: String
+                  description: 'The name of the rollout plan.'
+                  output: true
+                - name: 'state'
+                  type: String
+                  description: 'The overall state of the rollout.'
+                  output: true
+          - name: 'previousRollout'
+            type: NestedObject
+            description: 'Rollout status of the previous rollout.'
+            output: true
+            properties:
+              - name: 'locationRolloutStatus'
+                type: Map
+                description: 'The rollout status for each location.'
+                output: true
+                value_type:
+                  type: NestedObject
+                  output: true
+                  properties:
+                    - name: 'state'
+                      type: String
+                      description: 'The state of the location rollout.'
+                      output: true
+                key_name: 'location_name'
+              - name: 'rollout'
+                type: String
+                description: 'The name of the rollout.'
+                output: true
+              - name: 'rolloutPlan'
+                type: String
+                description: 'The name of the rollout plan.'
+                output: true
+              - name: 'state'
+                type: String
+                description: 'The overall state of the rollout.'
+                output: true
+  - name: 'scopedResourceStatus'
+    type: String
+    description: 'The scoped resource status.'
+    output: true
+  - name: 'creationTimestamp'
+    type: String
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - name: 'id'
+    type: String
+    description: 'The unique identifier for the resource.'
+    output: true
+  - name: 'kind'
+    type: String
+    description: 'Type of the resource.'
+    output: true
+  - name: 'selfLink'
+    type: String
+    description: 'Server-defined fully-qualified URL for this resource.'
+    output: true
+  - name: 'updateTimestamp'
+    type: String
+    description: 'Update timestamp in RFC3339 text format.'
+    output: true

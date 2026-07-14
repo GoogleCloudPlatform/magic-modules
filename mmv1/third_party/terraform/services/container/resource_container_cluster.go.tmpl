@@ -38,6 +38,15 @@ func Rfc3339TimeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return false
 }
 
+func validateDuration(v interface{}, k string) (ws []string, errors []error) {
+	s := v.(string)
+	_, err := time.ParseDuration(s)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q is not a valid duration: %s", k, err))
+	}
+	return
+}
+
 var (
 	instanceGroupManagerURL = regexp.MustCompile(fmt.Sprintf("projects/(%s)/zones/([a-z0-9-]*)/instanceGroupManagers/([^/]*)", verify.ProjectRegex))
 
@@ -140,15 +149,15 @@ var (
 			return true
 		}
 		// Suppress the addition of a fleet block (count changes 0 -> 1) if the "project" field being added is null or empty.
-                if k == "fleet.#" && oldValue == "0" && newValue == "1" { 
-                        // When transitioning from 0->1 blocks, d.Get/d.GetOk effectively reads the 'new' config value.
-                        projectVal, projectIsSet := d.GetOk("fleet.0.project")
-                        if !projectIsSet || projectVal.(string) == "" {
-                                log.Printf("[DEBUG] Suppressing diff for 'fleet.#' (0 -> 1) because fleet.0.project is null or empty in config.\n")
-                                return true
-                        }
-                }
-                return false
+		if k == "fleet.#" && oldValue == "0" && newValue == "1" {
+			// When transitioning from 0->1 blocks, d.Get/d.GetOk effectively reads the 'new' config value.
+			projectVal, projectIsSet := d.GetOk("fleet.0.project")
+			if !projectIsSet || projectVal.(string) == "" {
+				log.Printf("[DEBUG] Suppressing diff for 'fleet.#' (0 -> 1) because fleet.0.project is null or empty in config.\n")
+				return true
+			}
+		}
+		return false
 	})
 
 	suppressDiffForConfidentialNodes = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
@@ -1234,6 +1243,7 @@ func ResourceContainerCluster() *schema.Resource {
 							ExactlyOneOf: []string{
 								"maintenance_policy.0.daily_maintenance_window",
 								"maintenance_policy.0.recurring_window",
+								"maintenance_policy.0.recurring_maintenance_window",
 							},
 							MaxItems:    1,
 							Description: `Time window specified for daily maintenance operations. Specify start_time in RFC3339 format "HH:MM”, where HH : [00-23] and MM : [00-59] GMT.`,
@@ -1259,6 +1269,7 @@ func ResourceContainerCluster() *schema.Resource {
 							ExactlyOneOf: []string{
 								"maintenance_policy.0.daily_maintenance_window",
 								"maintenance_policy.0.recurring_window",
+								"maintenance_policy.0.recurring_maintenance_window",
 							},
 							Description: `Time window for recurring maintenance operations.`,
 							Elem: &schema.Resource{
@@ -1272,6 +1283,74 @@ func ResourceContainerCluster() *schema.Resource {
 										Type:         schema.TypeString,
 										Required:     true,
 										ValidateFunc: verify.ValidateRFC3339Date,
+									},
+									"recurrence": {
+										Type:             schema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: rfc5545RecurrenceDiffSuppress,
+									},
+								},
+							},
+						},
+						"recurring_maintenance_window": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							ExactlyOneOf: []string{
+								"maintenance_policy.0.daily_maintenance_window",
+								"maintenance_policy.0.recurring_window",
+								"maintenance_policy.0.recurring_maintenance_window",
+							},
+							Description: `Time window for recurring maintenance operations.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"delay_until": {
+										Type:     schema.TypeList,
+										Optional: true,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"year": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"month": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"day": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+											},
+										},
+									},
+									"window_duration": {
+										Required:         true,
+										Type:             schema.TypeString,
+										DiffSuppressFunc: tpgresource.DurationDiffSuppress,
+										ValidateFunc:     validateDuration,
+									},
+									"window_start_time": {
+										Required: true,
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"hours": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"minutes": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"seconds": {
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+											},
+										},
 									},
 									"recurrence": {
 										Type:             schema.TypeString,
@@ -3941,20 +4020,20 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
     return err
   }
 
-        
+
     if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
         return err
     }
-    
+
 	return nil
 }
 
 func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) error {
-    
+
     if tpgresource.DeletionPolicyPreUpdate(d, ResourceContainerCluster) {
         return ResourceContainerCluster().Read(d, meta)
     }
-    
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -5761,13 +5840,13 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) error {
-    
+
     if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
         return err
     }else if ok{
         return nil
     }
-    	
+
     	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Cannot destroy cluster because deletion_protection is set to true. Set it to false to proceed with cluster deletion.")
 	}
@@ -6183,7 +6262,7 @@ func expandAutoIpamConfig(configured interface{}) *container.AutoIpamConfig {
 	if !ok || len(l) == 0 || l[0] == nil {
 		return nil
 	}
-	
+
 	return &container.AutoIpamConfig{
 		Enabled: l[0].(map[string]interface{})["enabled"].(bool),
 	}
@@ -6303,6 +6382,35 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 			DisruptionBudget: budget,
 			ResourceVersion: resourceVersion,
 		}
+	}
+	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
+		rmw := recurringMaintenanceWindow.([]interface{})[0].(map[string]interface{})
+		duration, _ := time.ParseDuration(rmw["window_duration"].(string))
+
+		policy := &container.MaintenancePolicy{
+			Window: &container.MaintenanceWindow{
+				MaintenanceExclusions: exclusions,
+				RecurringMaintenanceWindow: &container.RecurringMaintenanceWindow{
+					WindowStartTime: &container.TimeOfDay{
+						Hours:   int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["hours"].(int)),
+						Minutes: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["minutes"].(int)),
+						Seconds: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["seconds"].(int)),
+					},
+					WindowDuration: fmt.Sprintf("%ds", int(duration.Seconds())),
+					Recurrence:     rmw["recurrence"].(string),
+				},
+			},
+			ResourceVersion: resourceVersion,
+		}
+
+		if _, ok := rmw["delay_until"]; ok && len(rmw["delay_until"].([]interface{})) == 1 {
+			policy.Window.RecurringMaintenanceWindow.DelayUntil = &container.Date{
+				Year:  int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["year"].(int)),
+				Month: int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["month"].(int)),
+				Day:   int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["day"].(int)),
+			}
+		}
+		return policy
 	}
 	return nil
 }
@@ -8158,7 +8266,7 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 					if window.EndTime != "" {
 						exclusion["end_time"] = window.EndTime
 					}
-				} 
+				}
 			} else {
 				if window.EndTime != "" {
 					exclusion["end_time"] = window.EndTime
@@ -8215,6 +8323,37 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 				"disruption_budget": budget,
 			},
 		}
+	}
+	if mp.Window.RecurringMaintenanceWindow != nil {
+		window := []map[string]interface{}{
+			{
+				"recurring_maintenance_window": []map[string]interface{}{
+					{
+						"window_start_time": []map[string]interface{}{
+							{
+								"hours":   mp.Window.RecurringMaintenanceWindow.WindowStartTime.Hours,
+								"minutes": mp.Window.RecurringMaintenanceWindow.WindowStartTime.Minutes,
+								"seconds": mp.Window.RecurringMaintenanceWindow.WindowStartTime.Seconds,
+							},
+						},
+						"window_duration": mp.Window.RecurringMaintenanceWindow.WindowDuration,
+						"recurrence":      mp.Window.RecurringMaintenanceWindow.Recurrence,
+					},
+				},
+				"maintenance_exclusion": exclusions,
+			},
+		}
+
+		if mp.Window.RecurringMaintenanceWindow.DelayUntil != nil {
+			window[0]["recurring_maintenance_window"].([]map[string]interface{})[0]["delay_until"] = []map[string]interface{}{
+				{
+					"year":  mp.Window.RecurringMaintenanceWindow.DelayUntil.Year,
+					"month": mp.Window.RecurringMaintenanceWindow.DelayUntil.Month,
+					"day":   mp.Window.RecurringMaintenanceWindow.DelayUntil.Day,
+				},
+			}
+		}
+		return window
 	}
 	return nil
 }
@@ -9231,7 +9370,7 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 
 		// A. DETECT USER CONFIG (Raw Config Check for this specific pool)
 		userHasAdditionalConfigs := false
-		
+
 		// Re-find the specific raw block for logic checking
 		if !rawNodePools.IsNull() {
 			it := rawNodePools.ElementIterator()
@@ -9260,9 +9399,9 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 		shouldClear := false
 		basePath := fmt.Sprintf("node_pool.%d", i)
 		networkConfigPath := basePath + ".network_config.0"
-		
+
 		oldProfile, newProfile := diff.GetChange(networkConfigPath + ".accelerator_network_profile")
-		
+
 		newProfileStr := ""
 		if newProfile != nil { newProfileStr = newProfile.(string) }
 		oldProfileStr := ""
@@ -9292,9 +9431,9 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 		// C. APPLY FIX TO THE MAP
 		if shouldClear {
 			log.Printf("[DEBUG] Cluster ANP CustomizeDiff: Clearing additional configs for INLINE pool %s", currentName)
-			
+
 			var newConfigMap map[string]interface{}
-			
+
 			if ncList, ok := newNpMap["network_config"].([]interface{}); ok && len(ncList) > 0 {
 				if existingMap, ok := ncList[0].(map[string]interface{}); ok {
 					newConfigMap = make(map[string]interface{})
@@ -9303,13 +9442,13 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
 					}
 				}
 			}
-			
+
 			if newConfigMap == nil {
 				newConfigMap = make(map[string]interface{})
 			}
 
 			newConfigMap["additional_node_network_configs"] = []interface{}{}
-			
+
 			if !anpIsActive {
 				newConfigMap["accelerator_network_profile"] = ""
 			}
