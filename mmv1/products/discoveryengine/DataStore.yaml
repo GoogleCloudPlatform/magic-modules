@@ -60,6 +60,7 @@ samples:
           data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_kms_key_name'
     primary_resource_id: 'kms_key_name'
+    exclude_test: true
     steps:
       - name: 'discoveryengine_datastore_kms_key_name'
         resource_id_vars:
