@@ -40,19 +40,19 @@ type GoogleContainerNodePoolListModel struct {
 }
 
 func NewGoogleContainerNodePoolListResource() list.ListResource {
-	listR := &GoogleContainerNodePoolListResource{}
-	listR.TypeName = "google_container_node_pool"
-	listR.SDKv2Resource = ResourceContainerNodePool()
-	listR.ListConfigFields = []tpgresource.ListConfigField{
+	resource := &GoogleContainerNodePoolListResource{}
+	resource.TypeName = "google_container_node_pool"
+	resource.SDKv2Resource = ResourceContainerNodePool()
+	resource.ListConfigFields = []tpgresource.ListConfigField{
 		{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true},
 		{Name: "location", Kind: tpgresource.ListConfigKindString, Optional: false},
 		{Name: "cluster", Kind: tpgresource.ListConfigKindString, Optional: false},
 	}
-	return listR
+	return resource
 }
 
-func (listR *GoogleContainerNodePoolListResource) List(ctx context.Context, listReq list.ListRequest, stream *list.ListResultsStream) {
-	errContainerNodePoolListStreamClosed := errors.New("stream closed")
+func (resource *GoogleContainerNodePoolListResource) List(ctx context.Context, listReq list.ListRequest, stream *list.ListResultsStream) {
+	errStreamClosed := errors.New("stream closed")
 
 	var data GoogleContainerNodePoolListModel
 	diags := listReq.Config.Get(ctx, &data)
@@ -60,7 +60,7 @@ func (listR *GoogleContainerNodePoolListResource) List(ctx context.Context, list
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
 	}
-	if listR.Client == nil {
+	if resource.Client == nil {
 		diags = append(diags, diag.NewErrorDiagnostic(
 			"Provider not configured",
 			"The Google provider client is not available; ensure the provider is configured (e.g. credentials and default project).",
@@ -69,24 +69,24 @@ func (listR *GoogleContainerNodePoolListResource) List(ctx context.Context, list
 		return
 	}
 
-	project := listR.GetProject(data.Project)
-	location := listR.GetLocation(data.Location)
+	project := resource.GetProject(data.Project)
+	location := resource.GetLocation(data.Location)
 	cluster := data.Cluster.ValueString()
 
 	stream.Results = func(push func(list.ListResult) bool) {
-		err := ListContainerNodePools(listR.Client, project, location, cluster, func(rd *schema.ResourceData) error {
+		err := ListContainerNodePools(resource.Client, project, location, cluster, func(rd *schema.ResourceData) error {
 			result := listReq.NewListResult(ctx)
 
-			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd, "name"); err != nil {
+			if err := resource.SetResult(ctx, listReq.IncludeResource, &result, rd, "name"); err != nil {
 				return err
 			}
 
 			if !push(result) {
-				return errContainerNodePoolListStreamClosed
+				return errStreamClosed
 			}
 			return nil
 		})
-		if err == nil || errors.Is(err, errContainerNodePoolListStreamClosed) {
+		if err == nil || errors.Is(err, errStreamClosed) {
 			return
 		}
 		diags.AddError("API Error", err.Error())

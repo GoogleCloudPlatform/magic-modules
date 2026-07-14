@@ -21,7 +21,7 @@ func TestAccContainerNodePoolListResource_queryIdentity(t *testing.T) {
 
 	project := envvar.GetTestProjectFromEnv()
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	nodePool := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
 
@@ -33,11 +33,11 @@ func TestAccContainerNodePoolListResource_queryIdentity(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePoolListResourceBasic(project, cluster, nodePool, networkName, subnetworkName),
+				Config: testAccContainerNodePoolListResourceBasic(project, cluster, nodePoolName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.test", "name", cluster),
 					resource.TestCheckResourceAttr("google_container_cluster.test", "location", "us-central1-a"),
-					resource.TestCheckResourceAttr("google_container_node_pool.test", "name", nodePool),
+					resource.TestCheckResourceAttr("google_container_node_pool.test", "name", nodePoolName),
 				),
 			},
 			{
@@ -49,7 +49,7 @@ func TestAccContainerNodePoolListResource_queryIdentity(t *testing.T) {
 						"project":  knownvalue.StringExact(project),
 						"location": knownvalue.StringExact("us-central1-a"),
 						"cluster":  knownvalue.StringExact(cluster),
-						"name":     knownvalue.StringExact(nodePool),
+						"name":     knownvalue.StringExact(nodePoolName),
 					}),
 				},
 			},
