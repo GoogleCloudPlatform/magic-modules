@@ -574,15 +574,11 @@ properties:
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: 'port'
-                            description: |-
-                              Required. The header field name
-                            type: Integer
-                            deprecation_message: '`port` field is deprecated and will be removed in a future major release. It was never supported by the API.'
                           - name: 'name'
                             description: |-
                               Required. The header field name
                             type: String
+                            required: true
                           - name: 'value'
                             description: |-
                               Optional. The header field value
@@ -654,15 +650,11 @@ properties:
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: 'port'
-                            description: |-
-                              Required. The header field name
-                            type: Integer
-                            deprecation_message: '`port` field is deprecated and will be removed in a future major release. It was never supported by the API.'
                           - name: 'name'
                             description: |-
                               Required. The header field name
                             type: String
+                            required: true
                           - name: 'value'
                             description: |-
                               Optional. The header field value
