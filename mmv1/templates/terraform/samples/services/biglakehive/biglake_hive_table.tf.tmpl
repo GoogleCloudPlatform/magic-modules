@@ -32,15 +32,21 @@ resource "google_biglake_hive_table" "{{$.PrimaryResourceId}}" {
 
   description = "{{index $.Vars "description"}}"
   storage_descriptor {
-    input_format  = "org.apache.hadoop.mapred.TextInputFormat"
-    output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
-    columns {
-      name = "id"
-      type = "INT"
-    }
+    {{index $.Vars "columns"}}
+    input_format         = "org.apache.hadoop.mapred.TextInputFormat"
+    output_format        = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+    compressed           = {{index $.Vars "compressed"}}
+    num_buckets          = {{index $.Vars "num_buckets"}}
+    bucket_cols          = {{index $.Vars "bucket_cols"}}
+    {{index $.Vars "sort_cols"}}
+    {{index $.Vars "skewed_info"}}
     serde_info {
-      name              = "LazySimpleSerDe"
-      serialization_lib = "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe"
+      name               = "LazySimpleSerDe"
+      serialization_lib  = "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe"
     }
+    parameters           = {{index $.Vars "parameters"}}
+    stored_as_sub_dirs   = {{index $.Vars "stored_as_sub_dirs"}}
   }
+  {{index $.Vars "partition_keys"}}
+  parameters = {{index $.Vars "parameters"}}
 }
