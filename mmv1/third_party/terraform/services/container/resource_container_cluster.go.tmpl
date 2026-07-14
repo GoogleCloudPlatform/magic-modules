@@ -1229,8 +1229,6 @@ func ResourceContainerCluster() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"logging.googleapis.com", "logging.googleapis.com/kubernetes", "none"}, false),
 				Description:  `The logging service that the cluster should write logs to. Available options include logging.googleapis.com(Legacy Stackdriver), logging.googleapis.com/kubernetes(Stackdriver Kubernetes Engine Logging), and none. Defaults to logging.googleapis.com/kubernetes.`,
 			},
-
-{{- if ne $.TargetVersionName "ga" }}
 			"rollback_safe_upgrade": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -1241,7 +1239,7 @@ func ResourceContainerCluster() *schema.Resource {
 						"control_plane_soak_duration": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: `A user-defined period for the cluster remains in the rollbackable state. E.g., '30d'.`,
+							Description: `A user-defined period for the cluster remains in the rollbackable state. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "2592000s" for 30 days.`,
 						},
 					},
 				},
@@ -1258,7 +1256,6 @@ func ResourceContainerCluster() *schema.Resource {
 				Computed:    true,
 				Description: `The current emulated Kubernetes version running on the GKE cluster control plane.`,
 			},
-{{- end }}
 
 			"maintenance_policy": {
 				Type:        schema.TypeList,
@@ -3751,11 +3748,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("master_version", cluster.CurrentMasterVersion); err != nil {
 		return fmt.Errorf("Error setting master_version: %s", err)
 	}
-{{- if ne $.TargetVersionName "ga" }}
 	if err := d.Set("emulated_version", cluster.CurrentEmulatedVersion); err != nil {
 		return fmt.Errorf("Error setting emulated_version: %s", err)
 	}
-{{- end }}
 	if err := d.Set("node_version", cluster.CurrentNodeVersion); err != nil {
 		return fmt.Errorf("Error setting node_version: %s", err)
 	}
@@ -4727,7 +4722,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s legacy ABAC has been updated to %v", d.Id(), enabled)
 	}
 
-{{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("desired_emulated_version") {
 		emulatedVersion := d.Get("desired_emulated_version").(string)
 		if emulatedVersion != "" {
@@ -4745,7 +4739,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			log.Printf("[INFO] GKE cluster %s: master emulated version has been updated to %s", d.Id(), emulatedVersion)
 		}
 	}
-{{- end }}
 
 	if d.HasChange("monitoring_service") || d.HasChange("logging_service") {
 		logging := d.Get("logging_service").(string)
@@ -4950,7 +4943,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				},
 			}
 
-{{- if ne $.TargetVersionName "ga" }}
 			if r, ok := d.GetOk("rollback_safe_upgrade"); ok {
 				rls := r.([]interface{})
 				if len(rls) > 0 && rls[0] != nil {
@@ -4962,7 +4954,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 					}
 				}
 			}
-{{- end }}
 
 			updateF := updateFunc(req, "updating GKE master version")
 			// Call update serially.

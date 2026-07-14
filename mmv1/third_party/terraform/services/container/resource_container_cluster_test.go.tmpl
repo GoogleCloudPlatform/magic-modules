@@ -19491,7 +19491,7 @@ resource "google_container_cluster" "primary" {
   subnetwork = "%s"
 
   rollback_safe_upgrade {
-    control_plane_soak_duration = "30d"
+    control_plane_soak_duration = "259200s"
   }
 
   node_config {
@@ -19516,7 +19516,7 @@ resource "google_container_cluster" "primary" {
   subnetwork = "%s"
 
   rollback_safe_upgrade {
-    control_plane_soak_duration = "30d"
+    control_plane_soak_duration = "259200s"
   }
 
   desired_emulated_version = regex("^[0-9]+\\.[0-9]+", data.google_container_engine_versions.central1.release_channel_latest_version["RAPID"])
@@ -19616,7 +19616,7 @@ resource "google_container_cluster" "primary" {
   }
 
   rollback_safe_upgrade {
-    control_plane_soak_duration = "30d"
+    control_plane_soak_duration = "259200s"
   }
 }
 `, clusterName, networkName, subnetworkName)
@@ -19642,7 +19642,7 @@ resource "google_container_cluster" "primary" {
   }
 
   rollback_safe_upgrade {
-    control_plane_soak_duration = "30d"
+    control_plane_soak_duration = "259200s"
   }
 
   desired_emulated_version = regex("^[0-9]+\\.[0-9]+", data.google_container_engine_versions.central1.release_channel_latest_version["RAPID"])
