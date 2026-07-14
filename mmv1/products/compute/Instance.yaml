@@ -629,7 +629,6 @@ properties:
             The name of the parent network interface.
           output: true
         - name: 'serviceClassId'
-          min_version: 'beta'
           type: String
           description: |
             Producer Service's Service class Id for the region of this network interface.
