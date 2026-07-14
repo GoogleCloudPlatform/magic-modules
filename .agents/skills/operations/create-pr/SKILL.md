@@ -68,7 +68,7 @@ git push -u "$FORK_REMOTE" "$BRANCH"
 Every PR must contain at least one release note block in the PR body.
 
 Refer to the official guide for detailed release note rules, categories, and examples:
-* [docs/content/code-review/release-notes.md](file:///Users/shuyama/Desktop/GitHub/magic-modules/docs/content/code-review/release-notes.md)
+* [docs/content/code-review/release-notes.md](../../../docs/content/code-review/release-notes.md)
 
 #### Release Note Block Format
 ```markdown
