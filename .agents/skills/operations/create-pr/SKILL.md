@@ -79,7 +79,7 @@ CONTENT
 
 Common types include `new-resource`, `new-datasource`, `new-list-resource`, `enhancement`, `bug`, `deprecation`, `breaking-change`, `note`, and `none`.
 
-#### Sample PR Body (`/tmp/pr_body.md`)
+#### Sample PR Body (`.git/pr_body.md`)
 ```markdown
 Summary of what changed and why in a few concise sentences.
 
@@ -94,7 +94,7 @@ compute: added `foo` field to `google_compute_instance` resource
 
 ### 5. Create Pull Request with `gh` CLI
 
-Write the PR description to `/tmp/pr_body.md` and execute:
+Write the PR description to `.git/pr_body.md` (inside workspace to avoid prompt permissions) and execute:
 
 ```bash
 PR_TITLE="<product>: <short description>" # e.g. compute: add foo field to google_compute_instance
@@ -104,7 +104,7 @@ gh pr create \
   --base main \
   --head "$(gh api user -q .login):$BRANCH" \
   --title "$PR_TITLE" \
-  --body-file /tmp/pr_body.md
+  --body-file .git/pr_body.md
 ```
 
 ---
