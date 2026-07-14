@@ -74,7 +74,7 @@ func (listR *GoogleSqlUserListResource) List(ctx context.Context, listReq list.L
 		err := ListSqlUsers(listR.Client, project, instance, func(rd *schema.ResourceData) error {
 			result := listReq.NewListResult(ctx)
 
-			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd, "name", "instance", "project", "host"); err != nil {
+			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd, "name"); err != nil {
 				return err
 			}
 
@@ -98,40 +98,7 @@ func flattenSqlUserListItem(res map[string]interface{}, d *schema.ResourceData, 
 	if err := tpgresource.Convert(res, &user); err != nil {
 		return fmt.Errorf("error converting SQL user list response: %w", err)
 	}
-
-	if err := d.Set("host", user.Host); err != nil {
-		return fmt.Errorf("error setting host: %w", err)
-	}
-	if err := d.Set("instance", user.Instance); err != nil {
-		return fmt.Errorf("error setting instance: %w", err)
-	}
-	if err := d.Set("name", user.Name); err != nil {
-		return fmt.Errorf("error setting name: %w", err)
-	}
-	if err := d.Set("type", user.Type); err != nil {
-		return fmt.Errorf("error setting type: %w", err)
-	}
-	if err := d.Set("iam_email", user.IamEmail); err != nil {
-		return fmt.Errorf("error setting iam_email: %w", err)
-	}
-	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("error setting project: %w", err)
-	}
-	if err := d.Set("sql_server_user_details", flattenSqlServerUserDetails(user.SqlserverUserDetails)); err != nil {
-		return fmt.Errorf("error setting sql server user details: %w", err)
-	}
-	if user.PasswordPolicy != nil {
-		passwordPolicy := flattenPasswordPolicy(user.PasswordPolicy)
-		if len(passwordPolicy.([]map[string]interface{})[0]) != 0 {
-			if err := d.Set("password_policy", passwordPolicy); err != nil {
-				return fmt.Errorf("error setting password_policy: %w", err)
-			}
-		}
-	}
-
-	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
-
-	return nil
+	return flattenSqlUser(&user, d, project)
 }
 
 func ListSqlUsers(config *transport_tpg.Config, project, instance string, callback func(rd *schema.ResourceData) error) error {
