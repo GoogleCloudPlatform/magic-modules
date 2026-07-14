@@ -159,6 +159,15 @@ samples:
           cloud_run_job_name: cloudrun-job
         ignore_read_extra:
           - deletion_protection
+  - name: cloudrunv2_job_tags
+    primary_resource_id: default
+    exclude_test: true
+    steps:
+      - name: cloudrunv2_job_tags
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
 virtual_fields:
   - name: deletion_protection
     description: |
@@ -797,6 +806,14 @@ properties:
         type: String
         description: A reason for the execution condition.
         output: true
+  - name: tags
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
+    immutable: true
+    ignore_read: true
   - name: conditions
     type: Array
     description: The Conditions of all other associated sub-resources. They contain additional diagnostics information in case the Job does not reach its desired state. See comments in reconciling for additional information on `reconciliation` process in Cloud Run.
