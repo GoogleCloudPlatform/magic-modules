@@ -52,6 +52,7 @@ async:
 autogen_async: false
 custom_code:
   encoder: templates/terraform/encoders/discovery_engine_search_engine_hardcode_solution_type.go.tmpl
+  constants: templates/terraform/constants/discoveryengine_search_engine.go.tmpl
 samples:
   - name: discoveryengine_searchengine_basic
     primary_resource_id: basic
@@ -202,6 +203,7 @@ properties:
   - name: features
     type: KeyValuePairs
     default_from_api: true
+    diff_suppress_func: discoveryEngineSearchEngineFeaturesDiffSuppress
     description: |
       A map of the feature config for the engine to opt in or opt out of features.
   - name: kmsKeyName

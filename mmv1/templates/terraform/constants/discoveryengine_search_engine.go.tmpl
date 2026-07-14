@@ -1,0 +1,9 @@
+func discoveryEngineSearchEngineFeaturesDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if strings.HasSuffix(k, ".%") {
+		return true
+	}
+	if new == "" && old != "" {
+		return true
+	}
+	return false
+}
