@@ -60,14 +60,13 @@ samples:
           data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_kms_key_name'
     primary_resource_id: 'kms_key_name'
-    exclude_test: true
     steps:
       - name: 'discoveryengine_datastore_kms_key_name'
         resource_id_vars:
           data_store_id: 'data-store-id'
           kms_key_name: 'kms-key'
         test_vars_overrides:
-          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
     steps:
