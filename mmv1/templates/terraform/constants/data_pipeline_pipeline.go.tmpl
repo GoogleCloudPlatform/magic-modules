@@ -15,8 +15,8 @@ func resourceDataPipelinePipelineCustomDiffFunc(diff tpgresource.TerraformResour
         _, new := diff.GetChange("desired_state")
         newState := new.(string)
 
-        if newState != "STATE_ACTIVE" && newState != "STATE_PAUSED" && newState != "STATE_ARCHIVED" {
-            return fmt.Errorf("`desired_state` can only be set to `STATE_ACTIVE`, `STATE_PAUSED`, or `STATE_ARCHIVED`")
+        if newState != "STATE_ACTIVE" && newState != "STATE_ARCHIVED" {
+            return fmt.Errorf("`desired_state` can only be set to `STATE_ACTIVE` or `STATE_ARCHIVED`")
         }
     }
     return nil

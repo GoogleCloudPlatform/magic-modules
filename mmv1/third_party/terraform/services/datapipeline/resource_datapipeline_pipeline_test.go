@@ -300,6 +300,7 @@ resource "google_data_pipeline_pipeline" "primary" {
 func TestAccDataPipelinePipeline_desiredState(t *testing.T) {
 	t.Parallel()
 
+	var generatedId string
 	suffix := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -309,36 +310,16 @@ func TestAccDataPipelinePipeline_desiredState(t *testing.T) {
 			{
 				Config: testAccDataPipelinePipeline_desiredStateActive(suffix),
 				Check: resource.ComposeTestCheckFunc(
+					setTestCheckDataPipelinePipelineId("google_data_pipeline_pipeline.primary", &generatedId),
 					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "desired_state", "STATE_ACTIVE"),
 				),
 			},
 			{
-				ResourceName:            "google_data_pipeline_pipeline.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region", "desired_state"},
-			},
-		},
-	})
-}
-
-func TestAccDataPipelinePipeline_desiredStatePaused(t *testing.T) {
-	t.Parallel()
-
-	suffix := acctest.RandString(t, 10)
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataPipelinePipelineDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				// Create a pipeline with desired_state=STATE_PAUSED.
-				// The API creates the pipeline first, then the provider calls
-				// the stop endpoint to reach the paused state.
-				Config: testAccDataPipelinePipeline_desiredStatePausedConfig(suffix),
+				Config: testAccDataPipelinePipeline_desiredStateArchived(suffix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "desired_state", "STATE_PAUSED"),
-					resource.TestCheckResourceAttrSet("google_data_pipeline_pipeline.primary", "state"),
+					testCheckDataPipelinePipelineIdAfterUpdate("google_data_pipeline_pipeline.primary", &generatedId),
+					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "desired_state", "STATE_ARCHIVED"),
+					resource.TestCheckResourceAttr("google_data_pipeline_pipeline.primary", "state", "STATE_ARCHIVED"),
 				),
 			},
 			{
@@ -405,7 +386,7 @@ resource "google_data_pipeline_pipeline" "primary" {
 `, suffix, suffix)
 }
 
-func testAccDataPipelinePipeline_desiredStatePausedConfig(suffix string) string {
+func testAccDataPipelinePipeline_desiredStateArchived(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
   account_id   = "tf-test-service-%s"
@@ -415,7 +396,7 @@ resource "google_service_account" "service_account" {
 resource "google_data_pipeline_pipeline" "primary" {
   name          = "tf-test-pipeline-%s"
   type          = "PIPELINE_TYPE_BATCH"
-  desired_state = "STATE_PAUSED"
+  desired_state = "STATE_ARCHIVED"
 
   workload {
     dataflow_launch_template_request {
@@ -447,10 +428,6 @@ resource "google_data_pipeline_pipeline" "primary" {
       }
       location = "us-central1"
     }
-  }
-  schedule_info {
-    schedule  = "0 * * * *"
-    time_zone = "UTC"
   }
   pipeline_sources = {
     "name" : "wrench"

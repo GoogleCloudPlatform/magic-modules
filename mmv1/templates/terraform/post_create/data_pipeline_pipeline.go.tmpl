@@ -11,7 +11,7 @@
     limitations under the License.
 */ -}}
 desiredState := d.Get("desired_state").(string)
-if desiredState == "STATE_PAUSED" {
+if desiredState == "STATE_ARCHIVED" {
     stopUrl := fmt.Sprintf("https://datapipelines.googleapis.com/v1/%s:stop", res["name"].(string))
     _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config:    config,
@@ -23,6 +23,6 @@ if desiredState == "STATE_PAUSED" {
         Timeout:   d.Timeout(schema.TimeoutCreate),
     })
     if err != nil {
-        return fmt.Errorf("Error pausing Pipeline after creation %q: %s", res["name"].(string), err)
+        return fmt.Errorf("Error archiving Pipeline after creation %q: %s", res["name"].(string), err)
     }
 }

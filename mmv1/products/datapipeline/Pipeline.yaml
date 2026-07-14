@@ -50,9 +50,9 @@ samples:
 virtual_fields:
   - name: desired_state
     description: |
-      The desired state of the pipeline. Set this field to `STATE_PAUSED` to pause the pipeline,
-      `STATE_ACTIVE` to resume or start the pipeline, or `STATE_ARCHIVED` to archive the pipeline.
-      Possible values: STATE_ACTIVE, STATE_PAUSED, STATE_ARCHIVED.
+      The desired state of the pipeline. Set this field to `STATE_ACTIVE` to start the pipeline
+      or `STATE_ARCHIVED` to archive the pipeline.
+      Possible values: STATE_ACTIVE, STATE_ARCHIVED.
     type: String
     conflicts:
       - state
