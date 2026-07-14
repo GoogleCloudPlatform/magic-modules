@@ -12,36 +12,43 @@
 # limitations under the License.
 
 ---
-name: 'Boundary'
-description: 'Application management boundary.'
+name: Boundary
+description: Application management boundary.
 references:
   guides:
-    'AppHub': 'https://docs.cloud.google.com/app-hub/docs/'
-  api: 'https://docs.cloud.google.com/app-hub/docs/reference/rest/v1/Boundary'
-
+    AppHub: https://docs.cloud.google.com/app-hub/docs/
+  api: https://docs.cloud.google.com/app-hub/docs/reference/rest/v1/Boundary
 docs:
-self_link: 'projects/{{project}}/locations/{{location}}/boundary'
+self_link: projects/{{project}}/locations/{{location}}/boundary
 # Singleton resource, point create_url to update_url.
-create_url: 'projects/{{project}}/locations/{{location}}/boundary'
-create_verb: 'PATCH'
-update_url: 'projects/{{project}}/locations/{{location}}/boundary'
-update_verb: 'PATCH'
-exclude_delete: true
-id_format: 'projects/{{project}}/locations/{{location}}/boundary'
+create_url: projects/{{project}}/locations/{{location}}/boundary
+update_url: projects/{{project}}/locations/{{location}}/boundary
+create_verb: PATCH
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/boundary
 import_format:
-  - "projects/{{project}}/locations/{{location}}/boundary"
-autogen_async: true
+  - projects/{{project}}/locations/{{location}}/boundary
 async:
-  actions: ['create', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, update]
   result:
     resource_inside_response: true
+exclude_delete: true
+autogen_async: true
+samples:
+  - name: apphub_boundary_basic
+    primary_resource_id: example
+    exclude_test: true
+    steps:
+      - name: apphub_boundary_basic
+        test_env_vars:
+          crm_node_project_number: PROJECT_NUMBER
 parameters:
-  - name: 'location'
+  - name: location
     type: String
-    description: 'The location for the Boundary resource. Must be global.'
+    description: The location for the Boundary resource. Must be global.
     url_param_only: true
     immutable: true
     required: true
@@ -60,7 +67,7 @@ properties:
       Format: `projects/{project-number}`
   - name: createTime
     type: Time
-    description: 'Create time.'
+    description: Create time.
     output: true
   - name: updateTime
     type: Time
@@ -68,16 +75,9 @@ properties:
     output: true
   - name: type
     type: Enum
-    description: 'Boundary type.'
+    description: Boundary type.
     output: true
     enum_values:
       - AUTOMATIC
       - MANUAL
       - MANAGED_AUTOMATIC
-
-examples:
-  - name: 'apphub_boundary_basic'
-    primary_resource_id: 'example'
-    test_env_vars:
-      crm_node_project_number: 'PROJECT_NUMBER'
-    exclude_test: true

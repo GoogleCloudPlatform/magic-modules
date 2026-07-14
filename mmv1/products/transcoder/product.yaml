@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Transcoder'
-display_name: 'Transcoder'
-versions:
-  - name: 'ga'
-    base_url: 'https://transcoder.googleapis.com/v1/'
+name: Transcoder
+display_name: Transcoder
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://transcoder.googleapis.com/v1/

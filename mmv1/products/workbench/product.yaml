@@ -12,18 +12,18 @@
 # limitations under the License.
 
 ---
-name: 'Workbench'
-display_name: 'Vertex AI Workbench'
-versions:
-  - name: 'beta'
-    base_url: 'https://notebooks.googleapis.com/v2/'
-  - name: 'ga'
-    base_url: 'https://notebooks.googleapis.com/v2/'
-scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+name: Workbench
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+display_name: Vertex AI Workbench
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: beta
+    base_url: https://notebooks.googleapis.com/v2/
+  - name: ga
+    base_url: https://notebooks.googleapis.com/v2/

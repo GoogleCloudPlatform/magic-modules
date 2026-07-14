@@ -16,6 +16,7 @@
 *#
 *.swp
 *.bak
+/scratch/
 
 # Python
 *.pyc

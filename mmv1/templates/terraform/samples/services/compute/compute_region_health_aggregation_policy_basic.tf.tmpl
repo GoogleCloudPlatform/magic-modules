@@ -1,0 +1,8 @@
+data "google_project" "project" {
+}
+
+resource "google_compute_region_health_aggregation_policy" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.ResourceIdVars "name"}}"
+  description = "{{index $.ResourceIdVars "description"}}"
+  region      = "us-central1"
+}

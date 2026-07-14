@@ -26,9 +26,13 @@ func NewContainerClusterCai2hclConverter(provider *schema.Provider) models.Cai2h
 	}
 }
 
-func (c *ContainerClusterCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ContainerClusterCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
+	}
+
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(asset)
+	block, err := c.convertResourceData(assets[0], options)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +40,7 @@ func (c *ContainerClusterCai2hclConverter) Convert(asset caiasset.Asset) ([]*mod
 	return blocks, nil
 }
 
-func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.Asset, options *models.ResourceConverterOptions) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -129,6 +133,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	hclData["security_posture_config"] = flattenSecurityPostureConfig(asset.Resource.Data["securityPostureConfig"])
 	hclData["enterprise_config"] = flattenEnterpriseConfig(asset.Resource.Data["enterpriseConfig"])
 	hclData["anonymous_authentication_config"] = flattenAnonymousAuthenticationConfig(asset.Resource.Data["anonymousAuthenticationConfig"])
+	hclData["node_creation_config"] = flattenNodeCreationConfig(asset.Resource.Data["nodeCreationConfig"])
 	hclData["notification_config"] = flattenNotificationConfig(asset.Resource.Data["notificationConfig"])
 	hclData["binary_authorization"] = flattenBinaryAuthorization(asset.Resource.Data["binaryAuthorization"])
 	if !enableAutopilot {
@@ -168,6 +173,9 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 		}
 		hclData["private_ipv6_google_access"] = nc["privateIpv6GoogleAccess"]
 		hclData["datapath_provider"] = nc["datapathProvider"]
+		if dvc, ok := nc["dataplaneV2Config"].(map[string]interface{}); ok {
+			hclData["dataplane_optimization_mode"] = dvc["scalabilityMode"]
+		}
 		if v := nc["enableMultiNetworking"]; v != nil && v != false {
 			hclData["enable_multi_networking"] = v
 		}
@@ -228,8 +236,14 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	}
 	// name is likely string, safe cast or fallback
 	name, _ := asset.Resource.Data["name"].(string)
+	var hclBlockName string
+	if options != nil && options.ResourceName != "" {
+		hclBlockName = options.ResourceName
+	} else {
+		hclBlockName = name
+	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, name},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }
@@ -629,6 +643,19 @@ func flattenClusterAddonsConfig(v interface{}, enableAutopilot bool) []map[strin
 		}
 
 		result["pod_snapshot_config"] = []map[string]interface{}{
+			{
+				"enabled": enabled,
+			},
+		}
+	}
+
+	if val, ok := c["slurmOperatorConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
+		result["slurm_operator_config"] = []map[string]interface{}{
 			{
 				"enabled": enabled,
 			},
@@ -1095,6 +1122,36 @@ func flattenMaintenancePolicy(v interface{}) []map[string]interface{} {
 
 			transformed["recurring_window"] = []map[string]interface{}{windowMap}
 		}
+
+		if recurringMaintenanceWindow, ok := window["recurringMaintenanceWindow"].(map[string]interface{}); ok && recurringMaintenanceWindow != nil {
+			windowMap := map[string]interface{}{}
+			windowMap["window_start_time"] = []map[string]interface{}{}
+			startTime, _ := recurringMaintenanceWindow["windowStartTime"].(map[string]interface{})
+			windowMap["window_start_time"] = []map[string]interface{}{
+				{
+					"hours":   startTime["hours"],
+					"minutes": startTime["minutes"],
+					"seconds": startTime["seconds"],
+				},
+			}
+
+			delay, _ := recurringMaintenanceWindow["delayUntil"].(map[string]interface{})
+			if delay != nil {
+				windowMap["delayUntil"] = []map[string]interface{}{
+					{
+						"year":  delay["year"],
+						"month": delay["month"],
+						"day":   delay["day"],
+					},
+				}
+			}
+
+			windowMap["window_duration"] = recurringMaintenanceWindow["windowDuration"]
+			windowMap["recurrence"] = recurringMaintenanceWindow["recurrence"]
+
+			transformed["recurring_maintenance_window"] = []map[string]interface{}{windowMap}
+		}
+
 	}
 
 	if disruptionBudget, ok := mp["disruptionBudget"].(map[string]interface{}); ok && disruptionBudget != nil {
@@ -1113,8 +1170,9 @@ func flattenMaintenancePolicy(v interface{}) []map[string]interface{} {
 	}
 
 	_, hasDaily := transformed["daily_maintenance_window"]
-	_, hasRecurring := transformed["recurring_window"]
-	if !hasDaily && !hasRecurring {
+	_, hasRecurringWindow := transformed["recurring_window"]
+	_, hasRecurringMaintenance := transformed["recurring_maintenance_window"]
+	if !hasDaily && !hasRecurringWindow && !hasRecurringMaintenance {
 		return nil
 	}
 
@@ -1922,5 +1980,19 @@ func flattenRBACBindingConfig(v interface{}) []map[string]interface{} {
 		"enable_insecure_binding_system_unauthenticated": c["enableInsecureBindingSystemUnauthenticated"],
 	}
 
+	return []map[string]interface{}{transformed}
+}
+
+func flattenNodeCreationConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	ncc, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"node_creation_mode": ncc["nodeCreationMode"],
+	}
 	return []map[string]interface{}{transformed}
 }

@@ -1,6 +1,7 @@
 package container
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
+	"github.com/hashicorp/go-cty/cty"
 	"google.golang.org/api/container/v1"
 )
 
@@ -191,6 +193,25 @@ func schemaContainerdConfig() *schema.Schema {
 					}},
 			},
 		}},
+	}
+}
+
+func schemaTaintConfig() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: `Taint configuration for this node.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"architecture_taint_behavior": {
+					Type:         schema.TypeString,
+					Required:     true,
+					Description:  `Architecture taint behavior. Controls, how we apply taints based on the node architecture.`,
+					ValidateFunc: validation.StringInSlice([]string{"ARCHITECTURE_TAINT_BEHAVIOR_UNSPECIFIED", "NONE", "ARM"}, false),
+				},
+			},
+		},
 	}
 }
 
@@ -647,6 +668,8 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
+				"taint_config": schemaTaintConfig(),
+
 				"effective_taints": {
 					Type:        schema.TypeList,
 					Computed:    true,
@@ -852,6 +875,18 @@ func schemaNodeConfig() *schema.Schema {
 								Type:        schema.TypeInt,
 								Optional:    true,
 								Description: `Defines the maximum allowed grace period (in seconds) to use when terminating pods in response to a soft eviction threshold being met.`,
+							},
+							"shutdown_grace_period_seconds": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Computed:    true,
+								Description: `Controls the total duration of time (in seconds) the node delays shutdown.`,
+							},
+							"shutdown_grace_period_critical_pods_seconds": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Computed:    true,
+								Description: `Controls the portion of total grace period (in seconds) that is specifically reserved for terminating critical pods.`,
 							},
 							"eviction_soft": {
 								Type:        schema.TypeList,
@@ -1121,6 +1156,42 @@ func schemaNodeConfig() *schema.Schema {
 											Type:        schema.TypeBool,
 											Optional:    true,
 											Description: `Whether to enable accurate time synchronization with PTP-KVM.`,
+										},
+									},
+								},
+							},
+							"custom_node_init": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `The custom node init settings.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"init_script": {
+											Type:        schema.TypeList,
+											Optional:    true,
+											MaxItems:    1,
+											Description: `The init script configuration.`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"gcs_uri": {
+														Type:        schema.TypeString,
+														Optional:    true,
+														Description: `The GCS URI of the init script.`,
+													},
+													"gcs_generation": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Computed:    true,
+														Description: `The GCS generation of the init script.`,
+													},
+													"gcp_secret_manager_secret_uri": {
+														Type:        schema.TypeString,
+														Optional:    true,
+														Description: `The Secret Manager secret URI of the init script.`,
+													},
+												},
+											},
 										},
 									},
 								},
@@ -1720,6 +1791,31 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 
 	if v, ok := nodeConfig["kubelet_config"]; ok {
 		nc.KubeletConfig = expandKubeletConfig(v)
+
+		rawConfigNPRoot := d.GetRawConfig()
+		if !rawConfigNPRoot.IsNull() && rawConfigNPRoot.Type().IsObjectType() {
+			if prefix != "" {
+				parts := strings.Split(prefix, ".")
+				npIndex, err := strconv.Atoi(parts[1])
+				if err != nil {
+					panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
+				}
+				rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
+			}
+
+			if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
+				if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
+					vSGP := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_seconds")
+					if vSGP != cty.NullVal(cty.Number) && !vSGP.IsNull() {
+						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+					}
+					vSGPC := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_critical_pods_seconds")
+					if vSGPC != cty.NullVal(cty.Number) && !vSGPC.IsNull() {
+						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
+					}
+				}
+			}
+		}
 	}
 
 	if v, ok := nodeConfig["linux_node_config"]; ok {
@@ -1745,6 +1841,10 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 
 	if v, ok := nodeConfig["sole_tenant_config"]; ok && len(v.([]interface{})) > 0 {
 		nc.SoleTenantConfig = expandSoleTenantConfig(v)
+	}
+
+	if v, ok := nodeConfig["taint_config"]; ok {
+		nc.TaintConfig = expandTaintConfig(v)
 	}
 
 	if v, ok := nodeConfig["enable_confidential_storage"]; ok {
@@ -1902,6 +2002,14 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	}
 	if evictionMaxPodGracePeriodSeconds, ok := cfg["eviction_max_pod_grace_period_seconds"]; ok {
 		kConfig.EvictionMaxPodGracePeriodSeconds = int64(evictionMaxPodGracePeriodSeconds.(int))
+	}
+	if shutdownGracePeriodSeconds, ok := cfg["shutdown_grace_period_seconds"]; ok {
+		kConfig.ShutdownGracePeriodSeconds = int64(shutdownGracePeriodSeconds.(int))
+		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+	}
+	if shutdownGracePeriodCriticalPodsSeconds, ok := cfg["shutdown_grace_period_critical_pods_seconds"]; ok {
+		kConfig.ShutdownGracePeriodCriticalPodsSeconds = int64(shutdownGracePeriodCriticalPodsSeconds.(int))
+		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
 	}
 	if v, ok := cfg["eviction_soft"]; ok && len(v.([]interface{})) > 0 {
 		es := v.([]interface{})[0].(map[string]interface{})
@@ -2090,6 +2198,10 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 
 	if v, ok := cfg["swap_config"]; ok {
 		linuxNodeConfig.SwapConfig = expandSwapConfig(v)
+	}
+
+	if v, ok := cfg["custom_node_init"]; ok {
+		linuxNodeConfig.CustomNodeInit = expandCustomNodeInit(v)
 	}
 
 	return linuxNodeConfig
@@ -2290,6 +2402,27 @@ func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
 	cc.WritableCgroups = expandWritableCgroups(cfg["writable_cgroups"])
 	cc.RegistryHosts = expandRegistryHosts(cfg["registry_hosts"])
 	return cc
+}
+
+func expandTaintConfig(v interface{}) *container.TaintConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.TaintConfig{}
+	}
+
+	cfg := ls[0].(map[string]interface{})
+
+	tc := &container.TaintConfig{}
+	if val, ok := cfg["architecture_taint_behavior"]; ok {
+		tc.ArchitectureTaintBehavior = val.(string)
+	}
+	return tc
 }
 
 func expandPrivateRegistryAccessConfig(v interface{}) *container.PrivateRegistryAccessConfig {
@@ -2607,6 +2740,7 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"resource_manager_tags":       flattenResourceManagerTags(c["resourceManagerTags"]),
 		"enable_confidential_storage": c["enableConfidentialStorage"],
 		"local_ssd_encryption_mode":   c["localSsdEncryptionMode"],
+		"taint_config":                flattenTaintConfig(c["taintConfig"]),
 	}
 
 	// Suppress Default Value
@@ -3058,27 +3192,29 @@ func flattenKubeletConfig(v interface{}) []map[string]interface{} {
 		return nil
 	}
 	transformed := map[string]interface{}{
-		"cpu_cfs_quota":                          c["cpuCfsQuota"],
-		"cpu_cfs_quota_period":                   c["cpuCfsQuotaPeriod"],
-		"cpu_manager_policy":                     c["cpuManagerPolicy"],
-		"memory_manager":                         flattenMemoryManager(c["memoryManager"]),
-		"topology_manager":                       flattenTopologyManager(c["topologyManager"]),
-		"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(v),
-		"pod_pids_limit":                         c["podPidsLimit"],
-		"container_log_max_size":                 c["containerLogMaxSize"],
-		"container_log_max_files":                c["containerLogMaxFiles"],
-		"image_gc_low_threshold_percent":         c["imageGcLowThresholdPercent"],
-		"image_gc_high_threshold_percent":        c["imageGcHighThresholdPercent"],
-		"image_minimum_gc_age":                   c["imageMinimumGcAge"],
-		"image_maximum_gc_age":                   c["imageMaximumGcAge"],
-		"allowed_unsafe_sysctls":                 c["allowedUnsafeSysctls"],
-		"single_process_oom_kill":                c["singleProcessOomKill"],
-		"max_parallel_image_pulls":               c["maxParallelImagePulls"],
-		"eviction_max_pod_grace_period_seconds":  c["evictionMaxPodGracePeriodSeconds"],
-		"eviction_soft":                          flattenEvictionSignals(c["evictionSoft"]),
-		"eviction_soft_grace_period":             flattenEvictionGracePeriod(c["evictionSoftGracePeriod"]),
-		"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c["evictionMinimumReclaim"]),
-		"crash_loop_back_off":                    flattenCrashLoopBackOffConfig(c["crashLoopBackOff"]),
+		"cpu_cfs_quota":                               c["cpuCfsQuota"],
+		"cpu_cfs_quota_period":                        c["cpuCfsQuotaPeriod"],
+		"cpu_manager_policy":                          c["cpuManagerPolicy"],
+		"memory_manager":                              flattenMemoryManager(c["memoryManager"]),
+		"topology_manager":                            flattenTopologyManager(c["topologyManager"]),
+		"insecure_kubelet_readonly_port_enabled":      flattenInsecureKubeletReadonlyPortEnabled(v),
+		"pod_pids_limit":                              c["podPidsLimit"],
+		"container_log_max_size":                      c["containerLogMaxSize"],
+		"container_log_max_files":                     c["containerLogMaxFiles"],
+		"image_gc_low_threshold_percent":              c["imageGcLowThresholdPercent"],
+		"image_gc_high_threshold_percent":             c["imageGcHighThresholdPercent"],
+		"image_minimum_gc_age":                        c["imageMinimumGcAge"],
+		"image_maximum_gc_age":                        c["imageMaximumGcAge"],
+		"allowed_unsafe_sysctls":                      c["allowedUnsafeSysctls"],
+		"single_process_oom_kill":                     c["singleProcessOomKill"],
+		"max_parallel_image_pulls":                    c["maxParallelImagePulls"],
+		"eviction_max_pod_grace_period_seconds":       c["evictionMaxPodGracePeriodSeconds"],
+		"shutdown_grace_period_seconds":               c["shutdownGracePeriodSeconds"],
+		"shutdown_grace_period_critical_pods_seconds": c["shutdownGracePeriodCriticalPodsSeconds"],
+		"eviction_soft":                               flattenEvictionSignals(c["evictionSoft"]),
+		"eviction_soft_grace_period":                  flattenEvictionGracePeriod(c["evictionSoftGracePeriod"]),
+		"eviction_minimum_reclaim":                    flattenEvictionMinimumReclaim(c["evictionMinimumReclaim"]),
+		"crash_loop_back_off":                         flattenCrashLoopBackOffConfig(c["crashLoopBackOff"]),
 	}
 
 	return []map[string]interface{}{transformed}
@@ -3251,6 +3387,7 @@ func flattenLinuxNodeConfig(v interface{}) []map[string]interface{} {
 		"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c["nodeKernelModuleLoading"]),
 		"swap_config":                  flattenSwapConfig(c["swapConfig"]),
 		"accurate_time_config":         flattenAccurateTimeConfig(c["accurateTimeConfig"]),
+		"custom_node_init":             flattenCustomNodeInit(c["customNodeInit"]),
 	}
 
 	return []map[string]interface{}{transformed}
@@ -3368,6 +3505,21 @@ func flattenNodeKernelModuleLoading(v interface{}) []map[string]interface{} {
 	r := make(map[string]interface{})
 	if val, ok := c["policy"]; ok {
 		r["policy"] = val
+	}
+	return []map[string]interface{}{r}
+}
+
+func flattenTaintConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := map[string]interface{}{}
+	if c["architectureTaintBehavior"] != nil {
+		r["architecture_taint_behavior"] = c["architectureTaintBehavior"]
 	}
 	return []map[string]interface{}{r}
 }
@@ -3685,4 +3837,94 @@ func flattenGpuDirectConfig(v interface{}) string {
 		return ""
 	}
 	return strategy
+}
+
+func expandCustomNodeInit(v interface{}) *container.CustomNodeInit {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.CustomNodeInit{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	customNodeInit := &container.CustomNodeInit{}
+	if v, ok := cfg["init_script"]; ok {
+		customNodeInit.InitScript = expandInitScript(v)
+	}
+	return customNodeInit
+}
+
+func expandInitScript(v interface{}) *container.InitScript {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.InitScript{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	initScript := &container.InitScript{}
+	if v, ok := cfg["gcs_uri"]; ok {
+		initScript.GcsUri = v.(string)
+	}
+	if v, ok := cfg["gcs_generation"]; ok {
+		initScript.GcsGeneration = int64(v.(int))
+	}
+	if v, ok := cfg["gcp_secret_manager_secret_uri"]; ok {
+		initScript.GcpSecretManagerSecretUri = v.(string)
+	}
+	return initScript
+}
+
+func flattenCustomNodeInit(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{}
+	if is, ok := c["initScript"].(map[string]interface{}); ok {
+		transformed["init_script"] = flattenInitScript(is)
+	}
+	return []map[string]interface{}{transformed}
+}
+
+func flattenInitScript(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{}
+	if val, ok := c["gcsUri"]; ok {
+		transformed["gcs_uri"] = val
+	}
+	if val, ok := c["gcsGeneration"]; ok {
+		var gen interface{} = val
+		if strGen, ok := val.(string); ok {
+			if intGen, err := strconv.Atoi(strGen); err == nil {
+				gen = intGen
+			}
+		} else if floatGen, ok := val.(float64); ok {
+			gen = int(floatGen)
+		}
+		transformed["gcs_generation"] = gen
+	}
+	if val, ok := c["gcpSecretManagerSecretUri"]; ok {
+		transformed["gcp_secret_manager_secret_uri"] = val
+	}
+	return []map[string]interface{}{transformed}
 }

@@ -121,7 +121,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating params: %s", err)
 	}
 
-	metadata, err := resourceInstanceMetadata(d)
+	metadata, err := resourceInstanceMetadataTyped(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
@@ -168,6 +168,15 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
+	tagsMap := resourceInstanceTags(d)
+	var tags *compute.Tags
+	if tagsMap != nil {
+		tags = &compute.Tags{
+			Items:       tagsMap["items"].([]string),
+			Fingerprint: tagsMap["fingerprint"].(string),
+		}
+	}
+
 	// Create the instance information
 	instance := &compute.Instance{
 		CanIpForward:             d.Get("can_ip_forward").(bool),
@@ -179,7 +188,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Zone:                     d.Get("zone").(string),
 		NetworkInterfaces:        networkInterfaces,
 		NetworkPerformanceConfig: networkPerformanceConfig,
-		Tags:                     resourceInstanceTags(d),
+		Tags:                     tags,
 		Params:                   params,
 		Labels:                   tpgresource.ExpandLabels(d),
 		ServiceAccounts:          expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
@@ -188,8 +197,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Scheduling:               scheduling,
 		DeletionProtection:       d.Get("deletion_protection").(bool),
 		Hostname:                 d.Get("hostname").(string),
-		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
-		DisplayDevice:            expandDisplayDeviceTgcNext(d),
+		AdvancedMachineFeatures:  expandAdvancedMachineFeaturesTgcNext(d),
 		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:      reservationAffinity,
 		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
@@ -210,6 +218,13 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
+	if dd := expandDisplayDevice(d); dd != nil {
+		enabled, _ := dd["enableDisplay"].(bool)
+		instance.DisplayDevice = &compute.DisplayDevice{
+			EnableDisplay:   enabled,
+			ForceSendFields: []string{"EnableDisplay"},
+		}
+	}
 	return instance, nil
 }
 
@@ -458,16 +473,29 @@ func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *tra
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
 
+		accessConfigs, err := expandAccessConfigsTyped(data["access_config"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		aliasIpRanges, err := expandAliasIpRangesTyped(data["alias_ip_range"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		ipv6AccessConfigs, err := expandIpv6AccessConfigsTyped(data["ipv6_access_config"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:                data["network_ip"].(string),
 			Network:                  network,
 			Subnetwork:               subnetwork,
-			AccessConfigs:            expandAccessConfigs(data["access_config"].([]interface{})),
-			AliasIpRanges:            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
+			AccessConfigs:            accessConfigs,
+			AliasIpRanges:            aliasIpRanges,
 			NicType:                  data["nic_type"].(string),
 			StackType:                data["stack_type"].(string),
 			QueueCount:               int64(data["queue_count"].(int)),
-			Ipv6AccessConfigs:        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
+			Ipv6AccessConfigs:        ipv6AccessConfigs,
 			Ipv6Address:              data["ipv6_address"].(string),
 			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
 			NetworkAttachment:        data["network_attachment"].(string),
@@ -629,12 +657,10 @@ func expandComputeLocalSsdRecoveryTimeoutTgc(v interface{}) (*compute.Duration, 
 	return duration, nil
 }
 
-func expandDisplayDeviceTgcNext(d tpgresource.TerraformResourceData) *compute.DisplayDevice {
-	if _, ok := d.GetOkExists("enable_display"); !ok {
-		return nil
+func expandAdvancedMachineFeaturesTgcNext(d tpgresource.TerraformResourceData) *compute.AdvancedMachineFeatures {
+	features := expandAdvancedMachineFeaturesTyped(d)
+	if features != nil && features.PerformanceMonitoringUnit == "" {
+		features.PerformanceMonitoringUnit = "STANDARD"
 	}
-	return &compute.DisplayDevice{
-		EnableDisplay:   d.Get("enable_display").(bool),
-		ForceSendFields: []string{"EnableDisplay"},
-	}
+	return features
 }

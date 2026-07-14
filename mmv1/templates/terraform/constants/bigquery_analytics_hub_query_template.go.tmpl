@@ -1,0 +1,13 @@
+func resourceBigqueryAnalyticsHubQueryTemplateCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+	if diff.HasChange("submit") {
+		old, new := diff.GetChange("submit")
+		if !new.(bool) && old.(bool) { 
+			return fmt.Errorf("Cannot change `submit` from true to false as unsubmitting is not supported.")
+		}
+	}
+	return nil
+}
+
+func resourceBigqueryAnalyticsHubQueryTemplateCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	return resourceBigqueryAnalyticsHubQueryTemplateCustomDiffFunc(diff)
+}

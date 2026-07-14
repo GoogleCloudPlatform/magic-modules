@@ -12,86 +12,88 @@
 # limitations under the License.
 
 ---
-name: 'Index'
-description: |-
-  A representation of a collection of database items organized in a way that allows for approximate nearest neighbor (a.k.a ANN) algorithms search.
+name: Index
+description: A representation of a collection of database items organized in a way that allows for approximate nearest neighbor (a.k.a ANN) algorithms search.
 references:
   guides:
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexes/'
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexes/
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/indexes'
-self_link: 'projects/{{project}}/locations/{{region}}/indexes/{{name}}'
-create_url: 'projects/{{project}}/locations/{{region}}/indexes'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{region}}/indexes
+self_link: projects/{{project}}/locations/{{region}}/indexes/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/indexes
 update_mask: true
+update_verb: PATCH
 timeouts:
   insert_minutes: 180
   update_minutes: 180
   delete_minutes: 180
+sweeper:
+  identifier_field: displayName
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
 custom_code:
-  custom_update: 'templates/terraform/custom_update/vertex_ai_index.go.tmpl'
-sweeper:
-  identifier_field: 'displayName'
-examples:
-  - name: 'vertex_ai_index'
+  custom_update: templates/terraform/custom_update/vertex_ai_index.go.tmpl
+samples:
+  - name: vertex_ai_index
     min_version: beta
-    primary_resource_id: 'index'
-    vars:
-      display_name: 'test-index'
-      bucket_name: 'vertex-ai-index-test'
-      kms_key_name: 'kms-name'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'metadata.0.contents_delta_uri'
-      - 'metadata.0.is_complete_overwrite'
-  - name: 'vertex_ai_index_streaming'
-    primary_resource_id: 'index'
-    vars:
-      display_name: 'test-index'
-      bucket_name: 'vertex-ai-index-test'
-      kms_key_name: 'kms-name'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'kms_key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'metadata.0.contents_delta_uri'
-      - 'metadata.0.is_complete_overwrite'
+    primary_resource_id: index
+    steps:
+      - name: vertex_ai_index
+        min_version: beta
+        resource_id_vars:
+          display_name: test-index
+          bucket_name: vertex-ai-index-test
+          kms_key_name: kms-name
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+        ignore_read_extra:
+          - metadata.0.contents_delta_uri
+          - metadata.0.is_complete_overwrite
+  - name: vertex_ai_index_streaming
+    primary_resource_id: index
+    steps:
+      - name: vertex_ai_index_streaming
+        resource_id_vars:
+          display_name: test-index
+          bucket_name: vertex-ai-index-test
+          kms_key_name: kms-name
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+        ignore_read_extra:
+          - metadata.0.contents_delta_uri
+          - metadata.0.is_complete_overwrite
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     description: The region of the index. eg us-central1
     url_param_only: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: The resource name of the Index.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'displayName'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
     type: String
-    description:
-      The display name of the Index. The name can be up to 128 characters long
-      and can consist of any UTF-8 characters.
+    description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
     required: true
-  - name: 'description'
+  - name: description
     type: String
     description: The description of the Index.
   # Please take a look at the following links for the original definition:
   # https://cloud.google.com/vertex-ai/docs/matching-engine/create-manage-index#create_index-drest
   # https://cloud.google.com/vertex-ai/docs/matching-engine/configuring-indexes
-  - name: 'metadata'
+  - name: metadata
     type: NestedObject
     description: |-
       Additional information about the Index.
@@ -99,7 +101,7 @@ properties:
       Attempts to create an Index without this field will result in an API error.
     required: true
     properties:
-      - name: 'contentsDeltaUri'
+      - name: contentsDeltaUri
         type: String
         description: |-
           Allows inserting, updating  or deleting the contents of the Matching Engine Index.
@@ -108,32 +110,32 @@ properties:
           Index field can be also updated as part of the same call.
           The expected structure and format of the files this URI points to is
           described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
-        custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.tmpl'
-      - name: 'isCompleteOverwrite'
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.tmpl
+      - name: isCompleteOverwrite
         type: Boolean
         description: |-
           If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
           then existing content of the Index will be replaced by the data from the contentsDeltaUri.
-        custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.tmpl
         default_value: false
-      - name: 'config'
+      - name: config
         type: NestedObject
         description: The configuration of the Matching Engine Index.
         required: true
         immutable: true
         properties:
-          - name: 'dimensions'
+          - name: dimensions
             type: Integer
             description: The number of dimensions of the input vectors.
             required: true
-          - name: 'approximateNeighborsCount'
+          - name: approximateNeighborsCount
             type: Integer
             description: |-
               The default number of neighbors to find via approximate search before exact reordering is
               performed. Exact reordering is a procedure where results returned by an
               approximate search algorithm are reordered via a more expensive distance computation.
               Required if tree-AH algorithm is used.
-          - name: 'shardSize'
+          - name: shardSize
             type: String
             description: |-
               Index data is split into equal parts to be processed. These are called "shards".
@@ -143,7 +145,7 @@ properties:
               * SHARD_SIZE_LARGE: Large (50GB)
             immutable: true
             default_from_api: true
-          - name: 'distanceMeasureType'
+          - name: distanceMeasureType
             type: String
             description: |-
               The distance measure used in nearest neighbor search. The value must be one of the followings:
@@ -151,43 +153,39 @@ properties:
               * L1_DISTANCE: Manhattan (L_1) Distance
               * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
               * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
-            default_value: "DOT_PRODUCT_DISTANCE"
-          - name: 'featureNormType'
+            default_value: DOT_PRODUCT_DISTANCE
+          - name: featureNormType
             type: String
             description: |-
               Type of normalization to be carried out on each vector. The value must be one of the followings:
               * UNIT_L2_NORM: Unit L2 normalization type
               * NONE: No normalization type is specified.
             ignore_read: true
-            default_value: "NONE"
-          - name: 'algorithmConfig'
+            default_value: NONE
+          - name: algorithmConfig
             type: NestedObject
-            description:
-              The configuration with regard to the algorithms used for efficient
-              search. This field may be required based on your configuration.
+            description: The configuration with regard to the algorithms used for efficient search. This field may be required based on your configuration.
             properties:
-              - name: 'treeAhConfig'
+              - name: treeAhConfig
                 type: NestedObject
                 description: |-
                   Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
                   Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
                 exactly_one_of:
-                  - 'treeAhConfig'
-                  - 'bruteForceConfig'
+                  - treeAhConfig
+                  - bruteForceConfig
                 properties:
-                  - name: 'leafNodeEmbeddingCount'
+                  - name: leafNodeEmbeddingCount
                     type: Integer
-                    description:
-                      Number of embeddings on each leaf node. The default value
-                      is 1000 if not set.
+                    description: Number of embeddings on each leaf node. The default value is 1000 if not set.
                     default_value: 1000
-                  - name: 'leafNodesToSearchPercent'
+                  - name: leafNodesToSearchPercent
                     type: Integer
                     description: |-
                       The default percentage of leaf nodes that any query may be searched. Must be in
                       range 1-100, inclusive. The default value is 10 (means 10%) if not set.
                     default_value: 10
-              - name: 'bruteForceConfig'
+              - name: bruteForceConfig
                 type: NestedObject
                 description: |-
                   Configuration options for using brute force search, which simply implements the
@@ -195,86 +193,72 @@ properties:
                 send_empty_value: true
                 allow_empty_object: true
                 exactly_one_of:
-                  - 'treeAhConfig'
-                  - 'bruteForceConfig'
-                properties:
-                  []
-  - name: 'metadataSchemaUri'
+                  - treeAhConfig
+                  - bruteForceConfig
+                properties: []
+  - name: metadataSchemaUri
     type: String
-    description: |-
-      Points to a YAML file stored on Google Cloud Storage describing additional information about the Index, that is specific to it. Unset if the Index does not have any additional information.
+    description: Points to a YAML file stored on Google Cloud Storage describing additional information about the Index, that is specific to it. Unset if the Index does not have any additional information.
     output: true
-  - name: 'deployedIndexes'
+  - name: deployedIndexes
     type: Array
-    description:
-      The pointers to DeployedIndexes created from this Index. An Index can be
-      only deleted if all its DeployedIndexes had been undeployed first.
+    description: The pointers to DeployedIndexes created from this Index. An Index can be only deleted if all its DeployedIndexes had been undeployed first.
     output: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'indexEndpoint'
+        - name: indexEndpoint
           type: String
           description: A resource name of the IndexEndpoint.
           output: true
-        - name: 'deployedIndexId'
+        - name: deployedIndexId
           type: String
           description: The ID of the DeployedIndex in the above IndexEndpoint.
           output: true
-  - name: 'etag'
+  - name: etag
     type: String
     description: Used to perform consistent read-modify-write updates.
     ignore_read: true
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: The labels with user-defined metadata to organize your Indexes.
-  - name: 'createTime'
+  - name: createTime
     type: String
-    description:
-      The timestamp of when the Index was created in RFC3339 UTC "Zulu" format,
-      with nanosecond resolution and up to nine fractional digits.
+    description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
-    description:
-      The timestamp of when the Index was last updated in RFC3339 UTC "Zulu"
-      format, with nanosecond resolution and up to nine fractional digits.
+    description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
-  - name: 'indexStats'
+  - name: indexStats
     type: NestedObject
     description: Stats of the index resource.
     output: true
     properties:
-      - name: 'vectorsCount'
+      - name: vectorsCount
         type: String
         description: The number of vectors in the Index.
         output: true
-      - name: 'shardsCount'
+      - name: shardsCount
         type: Integer
         description: The number of shards in the Index.
         output: true
-  - name: 'indexUpdateMethod'
+  - name: indexUpdateMethod
     type: String
     description: |-
       The update method to use with this Index. The value must be the followings. If not set, BATCH_UPDATE will be used by default.
       * BATCH_UPDATE: user can call indexes.patch with files on Cloud Storage of datapoints to update.
       * STREAM_UPDATE: user can call indexes.upsertDatapoints/DeleteDatapoints to update the Index and the updates will be applied in corresponding DeployedIndexes in nearly real-time.
     immutable: true
-    default_value: "BATCH_UPDATE"
-  - name: 'encryptionSpec'
+    default_value: BATCH_UPDATE
+  - name: encryptionSpec
     type: NestedObject
-    description:
-      Customer-managed encryption key spec for an Index. If set, this Index and all sub-resources of this Index will be secured by this key.
+    description: Customer-managed encryption key spec for an Index. If set, this Index and all sub-resources of this Index will be secured by this key.
     immutable: true
     properties:
-      - name: 'kmsKeyName'
+      - name: kmsKeyName
         type: String
-        description:
-          'Required. The Cloud KMS resource identifier of the customer managed
-          encryption key used to protect a resource. Has the form:
-          `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
-          The key needs to be in the same region as where the compute resource
-          is created.'
+        description: 'Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. Has the form: `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`. The key needs to be in the same region as where the compute resource is created.'
         required: true
         immutable: true

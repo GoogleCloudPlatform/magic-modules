@@ -1,0 +1,30 @@
+# use existing network with connectivity to the thirdparty datastore
+data "google_compute_network" "default" {
+  name      = "default"
+}
+
+# Create a thirdparty datastore.
+# Note: To mount this datastore on a vSphere cluster, configure the `datastore_mount_config`
+# block within the `google_vmwareengine_cluster` resource. For example:
+#
+#  datastore_mount_config {
+#    datastore        = google_vmwareengine_datastore.example_thirdparty.id
+#    datastore_network {
+#      subnet           = google_vmwareengine_subnet.example_subnet.id
+#      connection_count = 4
+#      mtu              = 1500
+#    }
+#  }
+resource "google_vmwareengine_datastore" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.ResourceIdVars "resource_name"}}"
+  location    = "{{index $.TestEnvVars "region"}}-a"
+  description = "example thirdparty datastore."
+
+  nfs_datastore {
+    third_party_file_service {
+      file_share  = "/share1"
+      network     = data.google_compute_network.default.id
+      servers     = ["10.0.0.4"]
+    }
+  }
+}

@@ -209,7 +209,7 @@ delete_verb: 'POST'
 
 ### `exclude_delete`
 If true, deleting the resource will only remove it from the Terraform state and will not call an API. If false, deleting the resource will run the standard deletion behavior and/or any [custom code]({{< ref "/develop/custom-code" >}}) related to deletion.
-This should be used if the resource can never be deleted in the API, and there is no other reasonable action to take on deletion. See [Deletion behaviors]({{< ref "/best-practices/deletion-behaviors" >}}) for more information.
+This should be used if the resource can never be deleted in the API, and there is no other reasonable action to take on deletion. See [Deletion policy]({{< ref "/best-practices/deletion-policy" >}}) for more information.
 
 ```yaml
 exclude_delete: true

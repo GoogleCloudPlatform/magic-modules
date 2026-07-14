@@ -1,0 +1,27 @@
+resource "google_compute_global_vm_extension_policy" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  name        = "global-ops-agent-vme-policy-%{random_suffix}"
+  description = "A basic global VM extension policy"
+  priority    = 10
+
+  extension_policies {
+    extension_name = "ops-agent"
+    pinned_version = "2.66.0"
+  }
+
+  instance_selectors {
+    label_selector {
+      inclusion_labels = {
+        env = "test"
+      }
+    }
+  }
+
+  rollout_operation {
+    rollout_input {
+      conflict_behavior       = "overwrite"
+      predefined_rollout_plan = "SLOW_ROLLOUT"
+      retry_uuid              = "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+    }
+  }
+}

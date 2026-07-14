@@ -46,7 +46,9 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
+    {{- if and $.IdentityUpgraders (not $.IsTgcCompiler) }}
+    "github.com/hashicorp/terraform-plugin-go/tftypes"
+    {{- end }}
     "{{ $.ImportPath }}/registry"
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
@@ -117,11 +119,11 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end}}
 
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout({{ $.Timeouts.InsertMinutes -}} * time.Minute),
+            Create: schema.DefaultTimeout({{ $.GetTimeouts.InsertMinutes -}} * time.Minute),
 {{- if or (or $.Updatable $.RootLabels) $.VirtualFields }}
-            Update: schema.DefaultTimeout({{ $.Timeouts.UpdateMinutes -}} * time.Minute),
+            Update: schema.DefaultTimeout({{ $.GetTimeouts.UpdateMinutes -}} * time.Minute),
 {{- end}}
-            Delete: schema.DefaultTimeout({{ $.Timeouts.DeleteMinutes -}} * time.Minute),
+            Delete: schema.DefaultTimeout({{ $.GetTimeouts.DeleteMinutes -}} * time.Minute),
         },
 {{ if $.SchemaVersion }}
         SchemaVersion: {{ $.SchemaVersion -}},
@@ -1514,7 +1516,7 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 {{- end }}
 
 {{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
-    {{ $.CustomTemplate $.IdentityUpgraderFile false -}}
+    {{ customTemplate $ $.IdentityUpgraderFile false -}}
 {{- end }}
 
 {{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
@@ -1602,8 +1604,10 @@ if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName
 {{- end}}
 {{- end}}
 {{if $.HasSelfLink -}}
-    if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
-        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    if selfLink, ok := res["selfLink"].(string); ok && selfLink != "" {
+        if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(selfLink)); err != nil {
+            return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+        }
     }
 {{- end }}
     return nil

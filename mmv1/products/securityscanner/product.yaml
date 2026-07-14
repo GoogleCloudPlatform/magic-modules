@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'SecurityScanner'
-display_name: 'Cloud Security Scanner'
-versions:
-  - name: 'beta'
-    base_url: 'https://websecurityscanner.googleapis.com/v1beta/'
+name: SecurityScanner
+display_name: Cloud Security Scanner
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: beta
+    base_url: https://websecurityscanner.googleapis.com/v1beta/

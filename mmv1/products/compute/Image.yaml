@@ -58,22 +58,28 @@ iam_policy:
   iam_conditions_request_type: 'QUERY_PARAM'
 include_in_tgc_next: true
 custom_code:
-examples:
+samples:
   - name: 'image_basic'
     primary_resource_id: 'example'
-    vars:
-      disk_name: 'example-disk'
-      image_name: 'example-image'
+    steps:
+      - name: 'image_basic'
+        resource_id_vars:
+          disk_name: 'example-disk'
+          image_name: 'example-image'
   - name: 'image_guest_os'
     primary_resource_id: 'example'
-    vars:
-      disk_name: 'example-disk'
-      image_name: 'example-image'
+    steps:
+      - name: 'image_guest_os'
+        resource_id_vars:
+          disk_name: 'example-disk'
+          image_name: 'example-image'
   - name: 'image_basic_storage_location'
     primary_resource_id: 'example'
-    vars:
-      disk_name: 'example-disk'
-      image_name: 'example-sl-image'
+    steps:
+      - name: 'image_basic_storage_location'
+        resource_id_vars:
+          disk_name: 'example-disk'
+          image_name: 'example-sl-image'
 parameters:
 properties:
   - name: 'archiveSizeBytes'

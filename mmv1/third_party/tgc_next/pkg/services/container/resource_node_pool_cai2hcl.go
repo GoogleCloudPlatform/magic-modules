@@ -27,20 +27,22 @@ func NewContainerNodePoolCai2hclConverter(provider *schema.Provider) models.Cai2
 	}
 }
 
-// Convert converts asset resource data.
-func (c *ContainerNodePoolCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
-	if asset.Resource == nil || asset.Resource.Data == nil {
-		return nil, fmt.Errorf("asset resource data is nil")
+// Convert converts assets resource data.
+func (c *ContainerNodePoolCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
 	}
 
-	block, err := c.convertResourceData(asset)
+	var blocks []*models.TerraformResourceBlock
+	block, err := c.convertResourceData(assets[0], options)
 	if err != nil {
 		return nil, err
 	}
-	return []*models.TerraformResourceBlock{block}, nil
+	blocks = append(blocks, block)
+	return blocks, nil
 }
 
-func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.Asset, options *models.ResourceConverterOptions) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -73,8 +75,14 @@ func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.A
 	if err != nil {
 		return nil, err
 	}
+	var hclBlockName string
+	if options != nil && options.ResourceName != "" {
+		hclBlockName = options.ResourceName
+	} else {
+		hclBlockName = asset.Resource.Data["name"].(string)
+	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, asset.Resource.Data["name"].(string)},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }

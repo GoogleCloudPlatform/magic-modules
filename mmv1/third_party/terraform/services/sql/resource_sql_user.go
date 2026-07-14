@@ -26,6 +26,22 @@ func diffSuppressIamUserName(_, old, new string, d *schema.ResourceData) bool {
 		return true
 	}
 
+	// MySQL casts all hostnames to lowercase. For MySQL Cloud IAM Groups
+	// make sure comparison checks lowercase everything after the "@" symbol.
+	// Only MySQL has "%" populated for empty hostnames so we can use
+	// that to identify MySQL Cloud IAM Groups.
+	if strings.Contains(userType, "CLOUD_IAM_GROUP") && d.Get("host") == "%" {
+		splitName := strings.SplitN(new, "@", 2)
+		if len(splitName) == 2 {
+			groupUsername := splitName[0]
+			groupHostname := splitName[1]
+			groupName := groupUsername + "@" + strings.ToLower(groupHostname)
+			if old == groupName {
+				return true
+			}
+		}
+	}
+
 	return false
 }
 
@@ -350,6 +366,42 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	return resourceSqlUserRead(d, meta)
 }
 
+func flattenSqlUser(user *sqladmin.User, d *schema.ResourceData, project string) error {
+	if err := d.Set("host", user.Host); err != nil {
+		return fmt.Errorf("Error setting host: %s", err)
+	}
+	if err := d.Set("instance", user.Instance); err != nil {
+		return fmt.Errorf("Error setting instance: %s", err)
+	}
+	if err := d.Set("name", user.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("type", user.Type); err != nil {
+		return fmt.Errorf("Error setting type: %s", err)
+	}
+	if err := d.Set("iam_email", user.IamEmail); err != nil {
+		return fmt.Errorf("Error setting iam_email: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("sql_server_user_details", flattenSqlServerUserDetails(user.SqlserverUserDetails)); err != nil {
+		return fmt.Errorf("Error setting sql server user details: %s", err)
+	}
+	if user.PasswordPolicy != nil {
+		passwordPolicy := flattenPasswordPolicy(user.PasswordPolicy)
+		if len(passwordPolicy.([]map[string]interface{})[0]) != 0 {
+			if err := d.Set("password_policy", passwordPolicy); err != nil {
+				return fmt.Errorf("Error setting password_policy: %s", err)
+			}
+		}
+	}
+
+	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
+
+	return nil
+}
+
 func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -392,6 +444,13 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		var username string
 		if !(strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") || currentUser.Type == "CLOUD_IAM_GROUP") {
 			username = strings.Split(name, "@")[0]
+		} else if strings.Contains(databaseInstance.DatabaseVersion, "MYSQL") && currentUser.Type == "CLOUD_IAM_GROUP" {
+			splitName := strings.SplitN(name, "@", 2)
+			if len(splitName) == 2 {
+				groupUsername := splitName[0]
+				groupHostname := splitName[1]
+				username = groupUsername + "@" + strings.ToLower(groupHostname)
+			}
 		} else {
 			username = name
 		}
@@ -412,37 +471,9 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 
-	if err := d.Set("host", user.Host); err != nil {
-		return fmt.Errorf("Error setting host: %s", err)
+	if err := flattenSqlUser(user, d, project); err != nil {
+		return err
 	}
-	if err := d.Set("instance", user.Instance); err != nil {
-		return fmt.Errorf("Error setting instance: %s", err)
-	}
-	if err := d.Set("name", user.Name); err != nil {
-		return fmt.Errorf("Error setting name: %s", err)
-	}
-	if err := d.Set("type", user.Type); err != nil {
-		return fmt.Errorf("Error setting type: %s", err)
-	}
-	if err := d.Set("iam_email", user.IamEmail); err != nil {
-		return fmt.Errorf("Error setting iam_email: %s", err)
-	}
-	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
-	}
-	if err := d.Set("sql_server_user_details", flattenSqlServerUserDetails(user.SqlserverUserDetails)); err != nil {
-		return fmt.Errorf("Error setting sql server user details: %s", err)
-	}
-	if user.PasswordPolicy != nil {
-		passwordPolicy := flattenPasswordPolicy(user.PasswordPolicy)
-		if len(passwordPolicy.([]map[string]interface{})[0]) != 0 {
-			if err := d.Set("password_policy", passwordPolicy); err != nil {
-				return fmt.Errorf("Error setting password_policy: %s", err)
-			}
-		}
-	}
-
-	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err

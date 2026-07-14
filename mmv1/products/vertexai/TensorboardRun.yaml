@@ -1,0 +1,126 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: TensorboardRun
+description: A TensorboardRun is a single execution of a training job.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/vertex-ai/docs
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.tensorboards.experiments.runs
+base_url: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{experiment}}/runs
+self_link: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{experiment}}/runs/{{tensorboard_run_id}}
+create_url: projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{experiment}}/runs?tensorboardRunId={{tensorboard_run_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/tensorboards/{{tensorboard}}/experiments/{{experiment}}/runs/{{tensorboard_run_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: VGVuc29yYm9hcmRSdW5BdXRvZ2VuVjJBZ2VudA==
+samples:
+  - name: vertex_ai_tensorboard_run
+    primary_resource_id: tensorboard_run
+    steps:
+      - name: vertex_ai_tensorboard_run_basic
+        resource_id_vars:
+          tensorboardRunId: run
+          tensorboardExperimentId: experiment
+          tensorboard: tensorboard
+      - name: vertex_ai_tensorboard_run_update
+        resource_id_vars:
+          tensorboardRunId: run
+          tensorboardExperimentId: experiment
+          tensorboard: tensorboard
+parameters:
+  - name: location
+    type: String
+    description: The location of the Tensorboard Run. eg us-central1
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: tensorboard
+    type: String
+    required: true
+    description: The Tensorboard instance.
+    immutable: true
+    url_param_only: true
+  - name: experiment
+    type: String
+    required: true
+    description: The Tensorboard Experiment ID.
+    immutable: true
+    url_param_only: true
+  - name: tensorboardRunId
+    type: String
+    required: true
+    description: |-
+      The ID to use for the Tensorboard run, which becomes the final
+      component of the Tensorboard run's resource name.
+
+      This value should be 1-128 characters, and valid characters
+      are `/a-z-/`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: Timestamp when this TensorboardRun was created.
+    output: true
+  - name: description
+    type: String
+    description: Description of this TensorboardRun.
+  - name: displayName
+    type: String
+    required: true
+    description: |-
+      User provided name of this TensorboardRun.
+      This value must be unique among all TensorboardRuns
+      belonging to the same parent TensorboardExperiment.
+  - name: labels
+    type: KeyValueLabels
+    description: |-
+      The labels with user-defined metadata to organize your TensorboardRuns.
+
+      This field will be used to filter and visualize Runs in the Tensorboard UI.
+      For example, a Vertex AI training job can set a label
+      aiplatform.googleapis.com/training_job_id=xxxxx to all the runs created
+      within that job. An end user can set a label experiment_id=xxxxx for all
+      the runs produced in a Jupyter notebook. These runs can be grouped by a
+      label value and visualized together in the Tensorboard UI.
+
+      Label keys and values can be no longer than 64 characters
+      (Unicode codepoints), can only contain lowercase letters, numeric
+      characters, underscores and dashes. International characters are allowed.
+      No more than 64 user labels can be associated with one TensorboardRun
+      (System labels are excluded).
+
+      See https://goo.gl/xmQnxf for more information and examples of labels.
+      System reserved label keys are prefixed with "aiplatform.googleapis.com/"
+      and are immutable.
+  - name: name
+    type: String
+    description: |-
+      Name of the TensorboardRun.
+      Format:
+      `projects/{project}/locations/{location}/tensorboards/{tensorboard}/experiments/{experiment}/runs/{run}`
+    output: true
+  - name: updateTime
+    type: String
+    description: Timestamp when this TensorboardRun was last updated.
+    output: true
