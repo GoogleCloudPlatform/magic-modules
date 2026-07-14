@@ -12,6 +12,7 @@
 # limitations under the License.
 
 ---
+---
 name: AclPolicy
 description: Description
 base_url: projects/{{project}}/locations/{{location}}/aclPolicies
@@ -22,6 +23,7 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/aclPolicies/{{acl_policy_id}}
 async:
+  actions: ['create', 'delete', 'update']
   operation:
     base_url: '{{op_id}}'
   actions:
@@ -29,8 +31,6 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: QWNsUG9saWN5
-autogen_async: true
 parameters:
   - name: location
     type: String
@@ -42,8 +42,9 @@ parameters:
     type: String
     required: true
     description: |-
-      The logical name of the ACL Policy in the customer project
+      The logical name of the ACL policy in the customer project
       with the following restrictions:
+
       * Must contain only lowercase letters, numbers, and hyphens.
       * Must start with a letter.
       * Must be between 1-63 characters.
@@ -91,5 +92,5 @@ properties:
     output: true
   - name: version
     type: String
-    description: The version of the ACL policy. Used in drift resolution.
+    description: 'Deprecated: Used in drift resolution.'
     output: true

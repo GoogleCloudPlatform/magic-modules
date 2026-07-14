@@ -22,6 +22,7 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/aclPolicies/{{acl_policy_id}}
 async:
+  actions: ['create', 'delete', 'update']
   operation:
     base_url: '{{op_id}}'
   actions:
@@ -29,8 +30,6 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: QWNsUG9saWN5
-autogen_async: true
 parameters:
   - name: location
     type: String
@@ -42,8 +41,9 @@ parameters:
     type: String
     required: true
     description: |-
-      The logical name of the ACL Policy in the customer project
+      The logical name of the ACL policy in the customer project
       with the following restrictions:
+
       * Must contain only lowercase letters, numbers, and hyphens.
       * Must start with a letter.
       * Must be between 1-63 characters.
@@ -72,14 +72,14 @@ properties:
           required: true
           description: |-
             The rule to be applied to the username. Ex: "on >password123 ~* +@all"
-            The format of the rule is defined by Redis OSS:
-            https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/
+            The format of the rule is defined by Valkey OSS:
+            https://valkey.io/topics/acl/
         - name: username
           type: String
           required: true
           description: |-
             Specifies the IAM user or service account to be added to the ACL policy.
-            This username will be directly set on the Redis OSS.
+            This username will be directly set on the Valkey OSS.
   - name: state
     type: String
     description: |-
@@ -91,5 +91,5 @@ properties:
     output: true
   - name: version
     type: String
-    description: The version of the ACL policy. Used in drift resolution.
+    description: 'Deprecated: Used in drift resolution.'
     output: true

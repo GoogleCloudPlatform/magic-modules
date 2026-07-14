@@ -287,11 +287,12 @@ properties:
   - name: aclPolicy
     type: String
     description: |
-      Optional. The name of the ACL policy to attach to the instance.
+      The name of the ACL policy to attach to the instance.
+      Format: projects/{project}/locations/{location}/aclPolicies/{acl_policy}
   - name: isAclPolicyInSync
     type: Boolean
     description: |
-      Optional. Whether the ACL policy is in sync with the cluster.
+      Whether the ACL policy is in sync with the cluster.
     output: true
   - name: transitEncryptionMode
     type: String
