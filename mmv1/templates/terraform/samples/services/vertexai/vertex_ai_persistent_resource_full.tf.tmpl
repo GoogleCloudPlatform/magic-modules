@@ -1,0 +1,120 @@
+resource "google_vertex_ai_persistent_resource" "{{.PrimaryResourceId}}" {
+  name         = "{{index $.ResourceIdVars "persistent_resource_id"}}"
+  location     = "us-central1"
+  display_name = "test-persistent-resource-full"
+
+  labels = {
+    env = "test"
+  }
+
+  # Network peering for Vertex AI
+  network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.vertex_network.name}"
+
+  # Reserved IP ranges under the VPC for the persistent resource
+  reserved_ip_ranges = [google_compute_global_address.vertex_range.name]
+
+  # Customer-managed encryption key
+  encryption_spec {
+    kms_key_name = "{{index $.ResourceIdVars "kms_key_name"}}"
+  }
+
+  # PSC-I configuration
+  psc_interface_config {
+    network_attachment = google_compute_network_attachment.psc_attachment.id
+
+    dns_peering_configs {
+      domain         = "example.com."
+      target_project = data.google_project.project.project_id
+      target_network = google_compute_network.vertex_network.name
+    }
+  }
+
+  resource_pools {
+    machine_spec {
+      machine_type = "n1-standard-4"
+    }
+
+    replica_count = "1"
+
+    disk_spec {
+      boot_disk_size_gb = 200
+      boot_disk_type    = "pd-ssd"
+    }
+  }
+
+  resource_runtime_spec {
+    service_account_spec {
+      enable_custom_service_account = true
+    }
+  }
+
+  depends_on = [
+    google_service_networking_connection.vertex_vpc_connection,
+    google_kms_crypto_key_iam_member.crypto_key,
+    # Give the google_vertex_ai_persistent_resource a change to fully delete
+    # before deleting other resources.
+    time_sleep.wait_for_deletion,
+  ]
+}
+
+# VPC network for Vertex AI peering
+resource "google_compute_network" "vertex_network" {
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+# Service networking connection for Vertex AI
+resource "google_service_networking_connection" "vertex_vpc_connection" {
+  network                 = google_compute_network.vertex_network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.vertex_range.name]
+}
+
+# Reserved IP range for Vertex AI peering
+resource "google_compute_global_address" "vertex_range" {
+  name          = "{{index $.ResourceIdVars "address_name"}}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 24
+  network       = google_compute_network.vertex_network.id
+}
+
+resource "time_sleep" "wait_for_deletion" {
+  depends_on = [
+    google_compute_network_attachment.psc_attachment,
+    google_service_networking_connection.vertex_vpc_connection
+  ]
+  destroy_duration = "300s"
+}
+
+# Network attachment for PSC-I
+resource "google_compute_network_attachment" "psc_attachment" {
+  name                  = "{{index $.ResourceIdVars "network_attachment_name"}}"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_MANUAL"
+
+  subnetworks = [
+    google_compute_subnetwork.psc_subnetwork.id
+  ]
+  
+  lifecycle {
+    ignore_changes = [producer_accept_lists]
+  }
+}
+
+# Subnetwork for the network attachment
+resource "google_compute_subnetwork" "psc_subnetwork" {
+  name          = "{{index $.ResourceIdVars "subnetwork_name"}}"
+  region        = "us-central1"
+  ip_cidr_range = "10.0.0.0/16"
+  network       = google_compute_network.vertex_network.id
+}
+
+# Grant Vertex AI service agent access to the KMS key
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = "{{index $.ResourceIdVars "kms_key_name"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
+data "google_project" "project" {}

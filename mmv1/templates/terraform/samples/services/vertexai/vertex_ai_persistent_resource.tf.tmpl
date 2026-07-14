@@ -1,13 +1,13 @@
 resource "google_vertex_ai_persistent_resource" "{{.PrimaryResourceId}}" {
-  persistent_resource_id = "{{index $.ResourceIdVars "persistent_resource_id"}}"
-  location               = "us-central1"
-  display_name           = "{{index $.Vars "display_name"}}"
+  name         = "{{index $.ResourceIdVars "persistent_resource_id"}}"
+  location     = "us-central1"
+  display_name = "Example persistent resource"
 
   resource_pools {
     machine_spec {
       machine_type = "n1-standard-4"
     }
 
-    replica_count = "1"
+    replica_count = "{{index $.Vars "replica_count"}}"
   }
 }

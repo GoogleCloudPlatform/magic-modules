@@ -22,23 +22,19 @@ references:
   api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.persistentResources
 docs:
 base_url: projects/{{project}}/locations/{{location}}/persistentResources
-self_link: projects/{{project}}/locations/{{location}}/persistentResources/{{persistent_resource_id}}
-create_url: projects/{{project}}/locations/{{location}}/persistentResources?persistentResourceId={{persistent_resource_id}}
-update_mask: true
-update_verb: PATCH
+self_link: projects/{{project}}/locations/{{location}}/persistentResources/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/persistentResources?persistentResourceId={{name}}
 import_format:
-  - projects/{{project}}/locations/{{location}}/persistentResources/{{persistent_resource_id}}
+  - projects/{{project}}/locations/{{location}}/persistentResources/{{name}}
 async:
   operation:
     base_url: '{{op_id}}'
   actions:
     - create
-    - update
     - delete
   result:
     resource_inside_response: true
 autogen_status: UGVyc2lzdGVudFJlc291cmNlQXV0b2dlblYyQWdlbnQ=
-autogen_async: true
 samples:
   - name: vertex_ai_persistent_resource
     primary_resource_id: persistent_resource
@@ -47,19 +43,36 @@ samples:
         resource_id_vars:
           persistent_resource_id: example-persistent-resource
         vars:
-          display_name: test-persistent-resource
-      - name: vertex_ai_persistent_resource
+          replica_count: "1"
+  - name: vertex_ai_persistent_resource_full
+    primary_resource_id: persistent_resource
+    external_providers: [time]
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/compute.networkAdmin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/dns.peer"
+    steps:
+      - name: vertex_ai_persistent_resource_full
         resource_id_vars:
           persistent_resource_id: example-persistent-resource
-        vars:
-          display_name: test-persistent-resource-updated
+          network_name: vertex-network
+          address_name: vertex-ip-range
+          network_attachment_name: psc-attachment
+          subnetwork_name: psc-subnetwork
+          kms_key_name: example-key
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-pr-key1").CryptoKey.Name'
 parameters:
   - name: location
     type: String
     description: The location of the PersistentResource. eg us-central1
     url_param_only: true
     immutable: true
-  - name: persistentResourceId
+properties:
+  - name: name
     type: String
     description: |-
       The ID to use for the PersistentResource, which become the final component
@@ -67,13 +80,7 @@ parameters:
 
       The maximum length is 63 characters, and valid characters
       are `/^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$/`.
-    immutable: true
-    url_param_only: true
     required: true
-properties:
-  - name: name
-    type: String
-    description: Resource name of a PersistentResource.
     immutable: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: displayName
@@ -96,6 +103,7 @@ properties:
             User can specify it if necessary. Otherwise, it's generated
             automatically.
           immutable: true
+          default_from_api: true
         - name: machineSpec
           type: NestedObject
           required: true
@@ -140,6 +148,7 @@ properties:
             - name: acceleratorCount
               type: Integer
               description: The number of accelerators to attach to the machine.
+              immutable: true
             - name: gpuPartitionSize
               type: String
               description: |-
@@ -170,6 +179,7 @@ properties:
                 A ReservationAffinity can be used to configure a Vertex AI resource (e.g., a
                 DeployedModel) to draw its Compute Engine resources from a Shared
                 Reservation, or exclusively from on-demand capacity.
+              immutable: true
               properties:
                 - name: reservationAffinityType
                   type: String
@@ -180,12 +190,14 @@ properties:
                     NO_RESERVATION
                     ANY_RESERVATION
                     SPECIFIC_RESERVATION
+                  immutable: true
                 - name: key
                   type: String
                   description: |-
                     Corresponds to the label key of a reservation resource. To target a
                     SPECIFIC_RESERVATION by name, use `compute.googleapis.com/reservation-name`
                     as the key and specify the name of your reservation as its value.
+                  immutable: true
                 - name: values
                   type: Array
                   description: |-
@@ -193,6 +205,7 @@ properties:
                     full resource name of the reservation or reservation block.
                   item_type:
                     type: String
+                  immutable: true
         - name: replicaCount
           type: String
           description: The total number of machines to use for this resource pool.
@@ -205,10 +218,14 @@ properties:
         - name: diskSpec
           type: NestedObject
           description: Represents the spec of disk options.
+          default_from_api: true
+          immutable: true
           properties:
             - name: bootDiskSizeGb
               type: Integer
               description: Size in GB of the boot disk (default is 100GB).
+              default_from_api: true
+              immutable: true
             - name: bootDiskType
               type: String
               description: |-
@@ -216,12 +233,16 @@ properties:
                 "pd-ssd", for A3U machines, the default value is "hyperdisk-balanced".
                 Valid values: "pd-ssd" (Persistent Disk Solid State Drive),
                 "pd-standard" (Persistent Disk Hard Disk Drive) or "hyperdisk-balanced".
+              default_from_api: true
+              immutable: true
         - name: autoscalingSpec
           type: NestedObject
           description: The min/max number of replicas allowed if enabling autoscaling
+          immutable: true
           properties:
             - name: minReplicaCount
               type: String
+              immutable: true
               description: |-
                 min replicas in the node pool,
                 must be ≤ replica_count and < max_replica_count or will throw error.
@@ -233,11 +254,13 @@ properties:
                 CreatePersistentResourceRequestValidator.java.
             - name: maxReplicaCount
               type: String
+              immutable: true
               description: |-
                 max replicas in the node pool,
                 must be ≥ replica_count and > min_replica_count or will throw error
   - name: labels
     type: KeyValueLabels
+    immutable: true
     description: |-
       The labels with user-defined metadata to organize PersistentResource.
 
@@ -248,6 +271,7 @@ properties:
       See https://goo.gl/xmQnxf for more information and examples of labels.
   - name: network
     type: String
+    immutable: true
     description: |-
       The full name of the Compute Engine
       [network](/compute/docs/networks-and-firewalls#networks) to peered with
@@ -266,10 +290,12 @@ properties:
       network.
   - name: pscInterfaceConfig
     type: NestedObject
+    immutable: true
     description: Configuration for PSC-I.
     properties:
       - name: networkAttachment
         type: String
+        immutable: true
         description: |-
           The name of the Compute Engine
           [network
@@ -288,15 +314,18 @@ properties:
           on the target project.
         item_type:
           type: NestedObject
+          immutable: true
           properties:
             - name: domain
               type: String
+              immutable: true
               required: true
               description: |-
                 The DNS name suffix of the zone being peered to, e.g.,
                 "my-internal-domain.corp.". Must end with a dot.
             - name: targetNetwork
               type: String
+              immutable: true
               required: true
               description: |-
                 The VPC network name
@@ -304,6 +333,7 @@ properties:
                 visible.
             - name: targetProject
               type: String
+              immutable: true
               required: true
               description: |-
                 The project ID hosting the Cloud DNS managed zone that
@@ -311,6 +341,7 @@ properties:
                 dns.peer role on this project.
   - name: encryptionSpec
     type: NestedObject
+    immutable: true
     description: |-
       Represents a customer-managed encryption key specification that can be
       applied to a Vertex AI resource.
@@ -326,90 +357,27 @@ properties:
           `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
   - name: resourceRuntimeSpec
     type: NestedObject
+    immutable: true
     description: |-
-      Configuration for the runtime on a PersistentResource instance, including
-      but not limited to:
-
-      * Service accounts used to run the workloads.
-      * Whether to make it a dedicated Ray Cluster.
+      Configuration for the runtime on a PersistentResource instance.
     properties:
       - name: serviceAccountSpec
         type: NestedObject
         description: Configuration for the use of custom service account to run the workloads.
+        immutable: true
         properties:
           - name: enableCustomServiceAccount
             type: Boolean
             required: true
+            immutable: true
             description: |-
               If true, custom user-managed service account is enforced to run any
               workloads (for example, Vertex Jobs) on the resource.
               Otherwise, uses the [Vertex AI Custom Code Service
               Agent](https://cloud.google.com/vertex-ai/docs/general/access-control#service-agents).
-          - name: serviceAccount
-            type: String
-            description: |-
-              Required when all below conditions are met
-               * `enable_custom_service_account` is true;
-               * any runtime is specified via `ResourceRuntimeSpec` on creation time,
-                 for example, Ray
-
-              The users must have `iam.serviceAccounts.actAs` permission on this service
-              account and then the specified runtime containers will run as it.
-
-              Do not set this field if you want to submit jobs using custom service
-              account to this PersistentResource after creation, but only specify the
-              `service_account` inside the job.
-      - name: raySpec
-        type: NestedObject
-        description: |-
-          Configuration information for the Ray cluster.
-          For experimental launch, Ray cluster creation and Persistent
-          cluster creation are 1:1 mapping: We will provision all the nodes within the
-          Persistent cluster as Ray nodes.
-        properties:
-          - name: imageUri
-            type: String
-            description: |-
-              Default image for user to choose a preferred ML framework
-              (for example, TensorFlow or Pytorch) by choosing from [Vertex prebuilt
-              images](https://cloud.google.com/vertex-ai/docs/training/pre-built-containers).
-              Either this or the resource_pool_images is required. Use this field if
-              you need all the resource pools to have the same Ray image. Otherwise, use
-              the `resource_pool_images` field.
-          - name: headNodeResourcePoolId
-            type: String
-            description: |-
-              This will be used to indicate which resource pool will serve as
-              the Ray head node(the first node within that pool). Will use the machine
-              from the first workerpool as the head node by default if this field isn't
-              set.
-          - name: rayMetricSpec
-            type: NestedObject
-            description: Configuration for the Ray metrics.
-            properties:
-              - name: disabled
-                type: Boolean
-                description: Flag to disable the Ray metrics collection.
-          - name: rayLogsSpec
-            type: NestedObject
-            description: Configuration for the Ray OSS Logs.
-            properties:
-              - name: disabled
-                type: Boolean
-                description: Flag to disable the export of Ray OSS logs to Cloud Logging.
-          - name: resourcePoolImages
-            type: KeyValuePairs
-            description: |-
-              Required if image_uri isn't set. A map of resource_pool_id to prebuild Ray
-              image if user need to use different images for different head/worker pools.
-              This map needs to cover all the resource pool ids. Example:
-              {
-              "ray_head_node_pool": "head image"
-              "ray_worker_node_pool1": "worker image"
-              "ray_worker_node_pool2": "another worker image"
-              }
   - name: reservedIpRanges
     type: Array
+    immutable: true
     description: |-
       A list of names for the reserved IP ranges under the VPC network
       that can be used for this persistent resource.
