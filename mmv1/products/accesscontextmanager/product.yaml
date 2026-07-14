@@ -24,4 +24,4 @@ scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
   - name: ga
-    base_url: https://accesscontextmanager.googleapis.com/v1alpha/
+    base_url: https://accesscontextmanager.googleapis.com/v1/
