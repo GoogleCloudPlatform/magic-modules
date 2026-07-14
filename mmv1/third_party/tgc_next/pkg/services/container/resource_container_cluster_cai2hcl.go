@@ -662,6 +662,19 @@ func flattenClusterAddonsConfig(v interface{}, enableAutopilot bool) []map[strin
 		}
 	}
 
+	if val, ok := c["nodeReadinessConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
+		result["node_readiness_config"] = []map[string]interface{}{
+			{
+				"enabled": enabled,
+			},
+		}
+	}
+
 	return []map[string]interface{}{result}
 }
 

@@ -574,6 +574,8 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
     Defaults to disabled for Standard clusters; set `enabled = true` to enable.
     It can not be enabled for Autopilot clusters.
 
+* `node_readiness_config` - (Optional) The status of the Node Readiness Controller addon.
+
 This example `addons_config` disables two addons:
 
 ```hcl
