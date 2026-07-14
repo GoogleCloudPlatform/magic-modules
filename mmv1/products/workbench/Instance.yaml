@@ -545,9 +545,9 @@ properties:
               to target a shared reservation in the same zone but in a different project.
       - name: 'minCpuPlatform'
         type: String
+        default_from_api: true
         description: |
           Optional. The minimum CPU platform to use for this instance.
-        immutable: true
   - name: 'proxyUri'
     type: String
     description: |
