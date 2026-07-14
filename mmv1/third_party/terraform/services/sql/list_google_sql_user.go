@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
@@ -75,7 +74,7 @@ func (listR *GoogleSqlUserListResource) List(ctx context.Context, listReq list.L
 		err := ListSqlUsers(listR.Client, project, instance, func(rd *schema.ResourceData) error {
 			result := listReq.NewListResult(ctx)
 
-			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd, "name"); err != nil {
+			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd, "name", "instance", "project", "host"); err != nil {
 				return err
 			}
 
@@ -94,7 +93,12 @@ func (listR *GoogleSqlUserListResource) List(ctx context.Context, listReq list.L
 	}
 }
 
-func flattenSqlUserListItem(user *sqladmin.User, d *schema.ResourceData, project string) error {
+func flattenSqlUserListItem(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config, project string) error {
+	var user sqladmin.User
+	if err := tpgresource.Convert(res, &user); err != nil {
+		return fmt.Errorf("error converting SQL user list response: %w", err)
+	}
+
 	if err := d.Set("host", user.Host); err != nil {
 		return fmt.Errorf("error setting host: %w", err)
 	}
@@ -107,64 +111,30 @@ func flattenSqlUserListItem(user *sqladmin.User, d *schema.ResourceData, project
 	if err := d.Set("type", user.Type); err != nil {
 		return fmt.Errorf("error setting type: %w", err)
 	}
+	if err := d.Set("iam_email", user.IamEmail); err != nil {
+		return fmt.Errorf("error setting iam_email: %w", err)
+	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("error setting project: %w", err)
 	}
-
-	iamEmail, databaseRoles := sqlUserOptionalFields(user)
-
-	if _, ok := ResourceSqlUser().Schema["iam_email"]; ok {
-		if err := d.Set("iam_email", iamEmail); err != nil {
-			return fmt.Errorf("error setting iam_email: %w", err)
-		}
-	}
 	if err := d.Set("sql_server_user_details", flattenSqlServerUserDetails(user.SqlserverUserDetails)); err != nil {
-		return fmt.Errorf("error setting sql_server_user_details: %w", err)
+		return fmt.Errorf("error setting sql server user details: %w", err)
 	}
-	passwordPolicy := []map[string]interface{}{}
 	if user.PasswordPolicy != nil {
-		flattenedPasswordPolicy := flattenPasswordPolicy(user.PasswordPolicy).([]map[string]interface{})
-		if len(flattenedPasswordPolicy[0]) != 0 {
-			passwordPolicy = flattenedPasswordPolicy
-		}
-	}
-	if err := d.Set("password_policy", passwordPolicy); err != nil {
-		return fmt.Errorf("error setting password_policy: %w", err)
-	}
-	if _, ok := ResourceSqlUser().Schema["database_roles"]; ok {
-		if databaseRoles == nil {
-			databaseRoles = []string{}
-		}
-		if err := d.Set("database_roles", databaseRoles); err != nil {
-			return fmt.Errorf("error setting database_roles: %w", err)
+		passwordPolicy := flattenPasswordPolicy(user.PasswordPolicy)
+		if len(passwordPolicy.([]map[string]interface{})[0]) != 0 {
+			if err := d.Set("password_policy", passwordPolicy); err != nil {
+				return fmt.Errorf("error setting password_policy: %w", err)
+			}
 		}
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
-	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
-		"project":  project,
-		"instance": user.Instance,
-		"name":     user.Name,
-		"host":     user.Host,
-	})
+
+	return nil
 }
 
-func sqlUserOptionalFields(user *sqladmin.User) (string, []string) {
-	// Prefer typed fields to avoid brittle JSON round-tripping and keep
-	// behavior aligned with sqladmin.User schema evolution.
-	databaseRoles := append([]string(nil), user.DatabaseRoles...)
-	return user.IamEmail, databaseRoles
-}
-
-func resourceDataForListedSqlUser(user *sqladmin.User, project string) (*schema.ResourceData, error) {
-	d := ResourceSqlUser().Data(&terraform.InstanceState{})
-	if err := flattenSqlUserListItem(user, d, project); err != nil {
-		return nil, err
-	}
-	return d, nil
-}
-
-func ListSqlUsers(config *transport_tpg.Config, project, instance string, callback func(*schema.ResourceData) error) error {
+func ListSqlUsers(config *transport_tpg.Config, project, instance string, callback func(rd *schema.ResourceData) error) error {
 	if config == nil {
 		return fmt.Errorf("provider client is not configured")
 	}
@@ -181,36 +151,32 @@ func ListSqlUsers(config *transport_tpg.Config, project, instance string, callba
 		}
 	}
 
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/instances/{{instance}}/users")
+	if err != nil {
+		return err
+	}
+
+	billingProject := project
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	var users *sqladmin.UsersListResponse
-	err = transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() error {
-			var rerr error
-			users, rerr = NewClient(config, userAgent).Users.List(project, instance).Do()
-			return rerr
+	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
+		Config:         config,
+		TempData:       d,
+		Resource:       ResourceSqlUser(),
+		ListURL:        url,
+		BillingProject: billingProject,
+		UserAgent:      userAgent,
+		ItemName:       "items",
+		Flattener: func(item map[string]interface{}, itemD *schema.ResourceData, c *transport_tpg.Config) error {
+			return flattenSqlUserListItem(item, itemD, c, project)
 		},
-		Timeout: 5 * time.Minute,
+		Callback: callback,
 	})
-	if err != nil {
-		return fmt.Errorf("error listing SQL users for instance %q in project %q: %w", instance, project, err)
-	}
-
-	for _, user := range users.Items {
-		if user == nil {
-			continue
-		}
-		itemData, err := resourceDataForListedSqlUser(user, project)
-		if err != nil {
-			return err
-		}
-		if err := callback(itemData); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
