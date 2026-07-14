@@ -35,12 +35,16 @@ Before creating a branch or opening a PR, verify all of the following rules:
 
 ### 1. Sync and Create Feature Branch
 
-Fetch the latest `upstream/main` and create a clean topic branch:
+Identify the upstream remote (pointing to `GoogleCloudPlatform/magic-modules`), fetch `main`, and create a clean topic branch:
 
 ```bash
-git fetch upstream main
+# Discover the remote for GoogleCloudPlatform/magic-modules (defaults to 'upstream' if unmatched)
+UPSTREAM_REMOTE=$(git remote -v | grep -i "GoogleCloudPlatform/magic-modules" | head -n 1 | awk '{print $1}')
+UPSTREAM_REMOTE="${UPSTREAM_REMOTE:-upstream}"
+
+git fetch "$UPSTREAM_REMOTE" main
 BRANCH="<short-descriptive-branch-name>" # e.g. add-compute-foo-field
-git checkout -b "$BRANCH" upstream/main
+git checkout -b "$BRANCH" "$UPSTREAM_REMOTE/main"
 ```
 
 ### 2. Stage and Commit Changes
@@ -54,10 +58,13 @@ git commit -m "<product>: <concise description of change>"
 
 ### 3. Push to Fork
 
-Push the branch to your personal GitHub fork (`origin` or your configured fork remote):
+Identify your personal fork remote (remote not pointing to `GoogleCloudPlatform`) and push the branch:
 
 ```bash
-FORK_REMOTE="origin" # Verify fork remote via `git remote -v`
+# Discover personal fork remote (defaults to 'origin' if unmatched)
+FORK_REMOTE=$(git remote -v | grep -v -i "GoogleCloudPlatform/magic-modules" | head -n 1 | awk '{print $1}')
+FORK_REMOTE="${FORK_REMOTE:-origin}"
+
 git push -u "$FORK_REMOTE" "$BRANCH"
 ```
 
