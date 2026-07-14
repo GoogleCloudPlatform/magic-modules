@@ -14,14 +14,13 @@
 ---
 name: 'RouterNamedSet'
 api_resource_type_kind: Router
-min_version: beta
 description: |
   A Named Set is a collection of IP addresses or ranges (for PREFIX type) or
   BGP communities (for COMMUNITY type) that can be used in route policies.
 references:
   guides:
     'Google Cloud Router': 'https://cloud.google.com/router/docs/'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/routers'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
 docs:
 id_format: '{{project}}/{{region}}/{{router}}/namedSets/{{name}}'
 base_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
