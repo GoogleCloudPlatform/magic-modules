@@ -355,6 +355,8 @@ SQL Server version to use. Supported values include `MYSQL_5_6`,
 [Database Version Policies](https://cloud.google.com/sql/docs/db-versions)
 includes an up-to-date reference of supported versions.
 
+* `switch_transaction_logs_to_cloud_storage_enabled` - (Optional) When set to `true`, Cloud SQL instances can switch storing point-in-time recovery transaction logs from a data disk to Cloud Storage, freeing up data disk space and enabling longer retention windows. This is an input-only field that is not persisted in the API.
+
 * `name` - (Optional, Computed) The name of the instance. If the name is left
     blank, Terraform will randomly generate one when the instance is first
     created. This is done because after a name is used, it cannot be reused for
@@ -398,6 +400,11 @@ includes an up-to-date reference of supported versions.
     When the field is set to false, deleting the instance is allowed.
 
   ~> **NOTE:** This flag only protects instances from deletion within Terraform. To protect your instances from accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform), use the API flag `settings.deletion_protection_enabled`.
+
+* `enforce_new_sql_network_architecture` - (Optional) Whether to enforce the new SQL network architecture. 
+    By default, new Cloud SQL instances created in projects created after August 2021 use the new network architecture. 
+    This follows the gcloud pattern where the flag is an irreversible opt-in.
+    See [official documentation](https://docs.cloud.google.com/sql/docs/mysql/upgrade-cloud-sql-instance-new-network-architecture#new-arch) for more details.
 
 * `final_backup_description` - (Optional) The description of final backup. Only set this field when `final_backup_config.enabled` is true.
 
@@ -619,6 +626,8 @@ The optional `settings.ip_configuration.psc_config` sublist supports:
 * `psc_auto_dns_enabled` - (Optional) Whether PSC auto DNS is enabled for this instance.
 
 * `psc_write_endpoint_dns_enabled` - (Optional) Whether PSC write endpoint DNS is enabled for this instance. This is only supported for Enterprise Plus edition instances.
+
+* `settings.ip_configuration.psc_config.psc_auto_connection_policy_enabled` - (Optional) Whether a service connection policy is created for the auto connections configured for the instance.
 
 * `allowed_consumer_projects` - (Optional) List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).
 
@@ -894,9 +903,17 @@ performing filtering in a Terraform config.
 
 * `settings.ip_configuration.psc_config.psc_auto_connections.consumer_network_status` - (Output) The connection policy status of the consumer network.
 
+* `settings.ip_configuration.psc_config.psc_auto_connections.instance_auto_dns_status` - (Output) The status of the automated DNS provisioning for the instance.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.write_endpoint_auto_dns_status` - (Output) The status of the automated DNS provisioning for the write endpoint.
+
 * `settings.ip_configuration.psc_config.psc_auto_connections.ip_address` - (Output) The IP address of the consumer endpoint.
 
 * `settings.ip_configuration.psc_config.psc_auto_connections.status` - (Output) The connection status of the consumer endpoint.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.service_connection_policy` - (Output) The service connection policy created for the auto connection.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.service_connection_policy_creation_result` - (Output) The result of the service connection policy creation.
 
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.

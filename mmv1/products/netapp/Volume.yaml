@@ -49,6 +49,16 @@ deletion_policy_custom_docs: true
 deletion_policy_default: DEFAULT
 autogen_async: true
 include_in_tgc_next: true
+sweeper:
+  url_substitutions:
+    - location: us-central1
+    - location: us-west2
+    - location: us-east4
+    - location: us-west4
+    - location: northamerica-northeast1
+    - location: us-south1-a
+    - location: us-central1-a
+  query_string: "?force=true"
 custom_code:
   constants: templates/terraform/constants/netapp_volume.go.tmpl
   pre_update: templates/terraform/pre_update/netapp_volume_update.go.tmpl

@@ -76,7 +76,7 @@ Default value: {{ .ItemType.DefaultValue -}}
   {{ end -}}
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
-      {{- range $prop := .ResourceMetadata.OrderProperties $.UserProperties }}
+      {{- range $prop := .ResourceMetadata.OrderProperties .UserProperties }}
       {{template "SchemaFields" $prop}}
       {{- end }}
     },
@@ -103,6 +103,9 @@ Default value: {{ .ItemType.DefaultValue -}}
   {{ else if eq .ItemType.Type "String" -}}
       Elem: &schema.Schema{
         Type: schema.Type{{ .ItemTypeClass -}},
+        {{- if .ItemType.DiffSuppressFunc }}
+        DiffSuppressFunc: {{ .ItemType.DiffSuppressFunc }},
+        {{- end }}
         {{ template "ItemValidation" . -}}
       },
   {{ else if eq .ItemType.Type "Enum" -}}

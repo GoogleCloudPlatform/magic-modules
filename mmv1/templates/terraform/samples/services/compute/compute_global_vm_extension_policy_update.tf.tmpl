@@ -1,0 +1,26 @@
+resource "google_compute_global_vm_extension_policy" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  name        = "global-ops-agent-vme-policy-%{random_suffix}"
+  description = "A basic global VM extension policy"
+  priority    = 20
+
+  extension_policies {
+    extension_name = "ops-agent"
+    pinned_version = "2.66.0"
+    string_config  = "logging:\n  receivers:\n    syslog:\n      type: files\n      include_paths:\n      - /var/log/messages\n"
+  }
+
+  instance_selectors {
+    label_selector {
+      inclusion_labels = {
+        env = "test"
+      }
+    }
+  }
+
+  rollout_operation {
+    rollout_input {
+      predefined_rollout_plan = "FAST_ROLLOUT"
+    }
+  }
+}
