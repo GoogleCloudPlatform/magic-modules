@@ -1766,7 +1766,12 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		ResourcePolicies:           resourcePolicies,
 		ReservationAffinity:        reservationAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
-		WorkloadIdentityConfig:     expandWorkloadIdentityConfig(d),
+	}
+	if wic := expandWorkloadIdentityConfig(d); wic != nil {
+		instanceProperties.WorkloadIdentityConfig = &compute.WorkloadIdentityConfig{
+			Identity:                   wic["identity"].(string),
+			IdentityCertificateEnabled: wic["identityCertificateEnabled"].(bool),
+		}
 	}
 	if cic := expandConfidentialInstanceConfig(d); cic != nil {
 		instanceProperties.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{
@@ -2414,7 +2419,11 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	}
 
 	if instanceTemplate.Properties.WorkloadIdentityConfig != nil {
-		if err = d.Set("workload_identity_config", flattenWorkloadIdentityConfig(instanceTemplate.Properties.WorkloadIdentityConfig)); err != nil {
+		wicMap, convErr := tpgresource.ConvertToMap(instanceTemplate.Properties.WorkloadIdentityConfig)
+		if convErr != nil {
+			return fmt.Errorf("Error converting workload_identity_config: %s", convErr)
+		}
+		if err = d.Set("workload_identity_config", flattenWorkloadIdentityConfig(wicMap)); err != nil {
 			return fmt.Errorf("Error setting workload_identity_config: %s", err)
 		}
 	}

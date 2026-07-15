@@ -1831,7 +1831,11 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
     }
 
 	if instanceTemplate.Properties.WorkloadIdentityConfig != nil {
-		if err = d.Set("workload_identity_config", flattenWorkloadIdentityConfig(instanceTemplate.Properties.WorkloadIdentityConfig)); err != nil {
+		wicMap, convErr := tpgresource.ConvertToMap(instanceTemplate.Properties.WorkloadIdentityConfig)
+		if convErr != nil {
+			return fmt.Errorf("Error converting workload_identity_config: %s", convErr)
+		}
+		if err = d.Set("workload_identity_config", flattenWorkloadIdentityConfig(wicMap)); err != nil {
 			return fmt.Errorf("Error setting workload_identity_config: %s", err)
 		}
 	}

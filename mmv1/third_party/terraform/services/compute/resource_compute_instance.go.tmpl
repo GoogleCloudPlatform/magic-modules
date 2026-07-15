@@ -1965,7 +1965,12 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		{{- if ne $.TargetVersionName `ga` }}
 		EraseWindowsVssSignature:   d.Get("erase_windows_vss_signature").(bool),
 		{{- end }}
-		WorkloadIdentityConfig:     expandWorkloadIdentityConfig(d),
+	}
+	if wic := expandWorkloadIdentityConfig(d); wic != nil {
+		instance.WorkloadIdentityConfig = &compute.WorkloadIdentityConfig{
+			Identity:                   wic["identity"].(string),
+			IdentityCertificateEnabled: wic["identityCertificateEnabled"].(bool),
+		}
 	}
 	if cic := expandConfidentialInstanceConfig(d); cic != nil {
 		instance.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{
