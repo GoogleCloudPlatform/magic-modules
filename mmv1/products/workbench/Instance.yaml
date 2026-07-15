@@ -417,6 +417,7 @@ properties:
             - name: 'resourcePolicies'
               type: Array
               default_from_api: true
+              diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
               description: |
                 Optional. Resource policies applied to this disk.
               item_type:
