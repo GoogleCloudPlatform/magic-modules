@@ -30,8 +30,12 @@ resource "google_vertex_ai_persistent_resource" "{{.PrimaryResourceId}}" {
   }
 
   resource_pools {
+    id = "{{index $.ResourceIdVars "resource_pool_id"}}"
+
     machine_spec {
-      machine_type = "n1-standard-4"
+      machine_type       = "a3-highgpu-8g"
+      accelerator_count  = 8
+      accelerator_type   = "NVIDIA_H100_80GB"
     }
 
     replica_count = "1"
@@ -96,7 +100,7 @@ resource "google_compute_network_attachment" "psc_attachment" {
   subnetworks = [
     google_compute_subnetwork.psc_subnetwork.id
   ]
-  
+
   lifecycle {
     ignore_changes = [producer_accept_lists]
   }

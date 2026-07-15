@@ -9,5 +9,9 @@ resource "google_vertex_ai_persistent_resource" "{{.PrimaryResourceId}}" {
     }
 
     replica_count = 1
-  }
+
+    autoscaling_spec {
+      min_replica_count = 1
+      max_replica_count = 2
+    }
 }

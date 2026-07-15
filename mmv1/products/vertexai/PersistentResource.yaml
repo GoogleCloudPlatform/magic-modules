@@ -42,8 +42,12 @@ samples:
       - name: vertex_ai_persistent_resource
         resource_id_vars:
           persistent_resource_id: example-persistent-resource
-        vars:
-          replica_count: "1"
+  - name: vertex_ai_persistent_resource_autoscaling
+    primary_resource_id: persistent_resource
+    steps:
+      - name: vertex_ai_persistent_resource
+        resource_id_vars:
+          persistent_resource_id: example-persistent-resource
   - name: vertex_ai_persistent_resource_full
     primary_resource_id: persistent_resource
     external_providers: [time]
@@ -63,6 +67,7 @@ samples:
           network_attachment_name: psc-attachment
           subnetwork_name: psc-subnetwork
           kms_key_name: example-key
+          resource_pool_id: vpr-resource-pool
         test_vars_overrides:
           kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-pr-key1").CryptoKey.Name'
 parameters:
@@ -415,15 +420,18 @@ properties:
     properties:
       - name: code
         type: Integer
+        output: true
         description: The status code, which should be an enum value of google.rpc.Code.
       - name: message
         type: String
+        output: true
         description: |-
           A developer-facing error message, which should be in English. Any
           user-facing error message should be localized and sent in the
           google.rpc.Status.details field, or localized by the client.
       - name: details
         type: Array
+        output: true
         description: |-
           A list of messages that carry the error details.  There is a common set of
           message types for APIs to use.
