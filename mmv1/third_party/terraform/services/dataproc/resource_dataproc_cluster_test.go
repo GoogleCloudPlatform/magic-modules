@@ -742,6 +742,9 @@ func TestAccDataprocCluster_workerInstanceFlexibilityPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
 					resource.TestCheckResourceAttrWith("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_results.0.machine_type", validateMachineTypeExpected(expectedWorkerMachines)),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_size_gb", "35"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_type", "pd-ssd"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_type", "pd-standard"),
 				),
 			},
 		},
@@ -2727,17 +2730,23 @@ resource "google_dataproc_cluster" "worker_instance_flexibility_policy" {
 
     worker_config {
       num_instances = "2"
-      disk_config {
-        boot_disk_size_gb = 35
-      }
       instance_flexibility_policy {
 				instance_selection_list {
 					machine_types = ["n2d-standard-2"]
 					rank          = 1
+					disk_config {
+						boot_disk_size_gb = 35
+						boot_disk_type = "pd-ssd"
+						num_local_ssds = 1
+					}
 				}
 				instance_selection_list {
 					machine_types = ["e2-standard-2"]
 					rank          = 3
+					disk_config {
+						boot_disk_size_gb = 35
+						boot_disk_type = "pd-standard"
+					}
 				}
 			}
     }
@@ -3736,7 +3745,12 @@ func TestAccDataprocCluster_instanceFlexibilityDiskConfig(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.instance_flexibility_disk_config", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_type", "pd-standard"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.machine_types.0", "n4-standard-4"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_size_gb", "40"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_size_gb", "100"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_provisioned_throughput", "140"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.disk_size_gb", "3000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.disk_type", "HYPERDISK_THROUGHPUT"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.machine_types.0", "n4-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_provisioned_iops", "3000"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_provisioned_throughput", "140"),
@@ -3773,13 +3787,17 @@ resource "google_dataproc_cluster" "instance_flexibility_disk_config" {
 					}
 				}
 				instance_selection_list {
-					machine_types = ["n4-standard-4"]
+					machine_types = ["n4-standard-2"]
 					rank          = 2
 					disk_config {
 						boot_disk_size_gb = 100
 						boot_disk_type = "hyperdisk-balanced"
 						boot_disk_provisioned_iops = 3000
 						boot_disk_provisioned_throughput = 140
+						attached_disk_config {
+							disk_size_gb = 3000
+							disk_type = "HYPERDISK_THROUGHPUT"
+						}
 					}
 				}
 			}
