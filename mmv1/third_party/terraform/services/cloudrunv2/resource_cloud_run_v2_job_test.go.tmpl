@@ -937,7 +937,6 @@ resource "google_cloud_run_v2_job" "default" {
 }
 
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunV2Job_cloudrunv2JobWithStartExecutionTokenUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -1053,7 +1052,6 @@ func testAccCloudRunV2Job_cloudrunv2JobWithRunExecutionToken(context map[string]
   }
 `, context)
 }
-{{- end }}
 
 
 func TestAccCloudRunV2Job_cloudrunv2JobWithGpuUpdate(t *testing.T) {
