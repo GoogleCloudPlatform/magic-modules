@@ -724,15 +724,3 @@ func Is409SyncMutateCannotBeQueuedError(err error) (bool, string) {
 	}
 	return false, ""
 }
-
-// Retry on NOT_FOUND during MonitoredAgent Enable — the agent may not be
-// discovered yet by the background sync job that ingests agents from ADK
-// traces into BigQuery.
-func IsMonitoredAgentNotFoundRetryableError(err error) (bool, string) {
-	if gerr, ok := err.(*googleapi.Error); ok {
-		if gerr.Code == 404 && strings.Contains(gerr.Body, "monitoredAgents/") {
-			return true, "MonitoredAgent not found, retrying (agent may not be discovered yet)"
-		}
-	}
-	return false, ""
-}

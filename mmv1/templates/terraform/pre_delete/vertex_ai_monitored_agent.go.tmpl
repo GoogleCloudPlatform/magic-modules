@@ -1,4 +1,0 @@
-if disable := d.Get("disable_on_destroy"); !disable.(bool) {
-	log.Printf("[WARN] MonitoredAgent %q disable_on_destroy is false, skipping DisableMonitoredAgent call", d.Id())
-	return nil
-}

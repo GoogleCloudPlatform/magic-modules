@@ -1,8 +1,0 @@
-// MonitoredAgent Get returns disabled agents with state=DISABLED (200 OK),
-// not NOT_FOUND. Treat DISABLED as "doesn't exist" in Terraform state so
-// that plan knows to re-enable.
-if state, ok := res["state"].(string); ok && state == "DISABLED" {
-	log.Printf("[DEBUG] MonitoredAgent %q has state DISABLED, removing from Terraform state", d.Id())
-	return nil, nil
-}
-return res, nil
