@@ -111,6 +111,7 @@ samples:
           network_name: 'wbi-test-default'
           reservation_name: 'wbi-reservation'
           key_name: 'my-crypto-key'
+          resource_policy_name: 'wbi-policy'
         test_env_vars:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
@@ -413,6 +414,14 @@ properties:
                 Learn more about using your own encryption keys.'
               immutable: true
               diff_suppress_func: 'WorkbenchInstanceKmsDiffSuppress'
+            - name: 'resourcePolicies'
+              type: Array
+              default_from_api: true
+              diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+              description: |
+                Optional. Resource policies applied to this disk.
+              item_type:
+                type: String
         max_size: 1
       - name: 'networkInterfaces'
         type: Array
