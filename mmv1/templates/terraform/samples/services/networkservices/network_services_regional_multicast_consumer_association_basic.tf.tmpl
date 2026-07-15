@@ -1,0 +1,27 @@
+resource "google_compute_network" "default" {
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_services_multicast_domain" "default" {
+  multicast_domain_id = "{{index $.ResourceIdVars "domain_name"}}"
+  location            = "global"
+  admin_network       = google_compute_network.default.id
+}
+
+resource "google_network_services_regional_multicast_domain_activation" "default" {
+  regional_multicast_domain_activation_id = "{{index $.ResourceIdVars "domain_activation_name"}}"
+  location                                = "us-central1"
+  multicast_domain                        = google_network_services_multicast_domain.default.id
+  pim_spec {
+    pim_mode                  = "PIM_MODE_SPARSE"
+    multicast_source_location = "MULTICAST_SOURCE_GCP"
+  }
+}
+
+resource "google_network_services_regional_multicast_consumer_association" {{$.PrimaryResourceId}} {
+  regional_multicast_consumer_association_id = "{{index $.ResourceIdVars "consumer_association_name"}}"
+  location                                   = "us-central1"
+  network                                    = google_compute_network.default.id
+  regional_multicast_domain_activation       = google_network_services_regional_multicast_domain_activation.default.id
+}

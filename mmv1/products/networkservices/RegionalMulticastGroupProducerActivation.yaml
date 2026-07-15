@@ -1,0 +1,159 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: RegionalMulticastGroupProducerActivation
+description: Create a regional multicast group producer activation in the specified location of the current project.
+min_version: nightly
+base_url: projects/{{project}}/locations/{{location}}/regionalMulticastGroupProducerActivations
+self_link: projects/{{project}}/locations/{{location}}/regionalMulticastGroupProducerActivations/{{regional_multicast_group_producer_activation_id}}
+create_url: projects/{{project}}/locations/{{location}}/regionalMulticastGroupProducerActivations?regionalMulticastGroupProducerActivationId={{regional_multicast_group_producer_activation_id}}
+update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/regionalMulticastGroupProducerActivations/{{regional_multicast_group_producer_activation_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/regionalMulticastGroupProducerActivations/{{regional_multicast_group_producer_activation_id}}
+sweeper:
+  url_substitutions:
+    - location: us-central1
+async:
+  type: OpAsync
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: UmVnaW9uYWxNdWx0aWNhc3RHcm91cFByb2R1Y2VyQWN0aXZhdGlvbg==
+autogen_async: true
+samples:
+  - name: network_services_regional_multicast_group_producer_activation_basic
+    primary_resource_id: rmgpa_test
+    steps:
+      - name: network_services_regional_multicast_group_producer_activation_basic
+        resource_id_vars:
+          network_name: test-network-rmgpa
+          domain_name: test-domain-rmgpa
+          domain_activation_name: test-domain-activation-rmgpa
+          group_range_name: test-group-range-rmgpa
+          group_range_activation_name: test-group-range-activation-rmgpa
+          producer_association_name: test-producer-association-rmgpa
+          group_producer_activation_name: test-group-producer-activation-rmgpa
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: regionalMulticastGroupProducerActivationId
+    type: String
+    required: true
+    description: |-
+      A unique name for the regional multicast group producer activation.
+      The name is restricted to lower-case letters, numbers, and hyphen, with
+      the first character a lower-case letter, and the last a letter or a
+      number. The name must not exceed 63 characters.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the regional multicast group producer
+      activation was created.
+    output: true
+  - name: description
+    type: String
+    description: |-
+      An optional text description of the regional multicast group producer
+      activation.
+  - name: interconnectAttachments
+    type: Array
+    required: true
+    description: |-
+      The resource name of the interconnect attachments that are in the same
+      region as this regional multicast group producer activation and
+      are used with the on-premises multicast source.
+      These attachments must have multicast functionality enabled.
+      Use the following format: `projects/*/regions/*/interconnectAttachments/*`.
+    item_type:
+      type: String
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key-value pairs
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the regional multicast group producer activation.
+      Use the following format:
+      `projects/*/locations/*/regionalMulticastGroupProducerActivations/*`.
+    output: true
+  - name: regionalMulticastGroupRangeActivation
+    type: String
+    required: true
+    description: |-
+      The resource name of the regional multicast group range activation created
+      by the admin in the same region as this regional multicast group producer
+      activation.
+      Use the following format:
+      `projects/*/locations/*/regionalMulticastGroupRangeActivations/*`.
+    immutable: true
+  - name: regionalMulticastProducerAssociation
+    type: String
+    required: true
+    description: |-
+      The resource name of the regional multicast producer association that is in
+      the same region as this regional multicast group producer activation.
+      Use the following format:
+      `projects/*/locations/*/regionalMulticastProducerAssociations/*`.
+    immutable: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
+          OBSOLETE
+  - name: uniqueId
+    type: String
+    description: |-
+      [Output only] The Google-generated UUID for the resource. This value is
+      unique across all regional multicast group producer activation resources.
+      If a regional multicast group producer activation is deleted and another
+      with the same name is created, the new regional multicast group producer
+      activation is assigned a different unique_id.
+    output: true
+  - name: updateTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the regional multicast group producer
+      activation was most recently updated.
+    output: true

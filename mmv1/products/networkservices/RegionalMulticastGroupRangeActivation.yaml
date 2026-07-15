@@ -1,0 +1,188 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: RegionalMulticastGroupRangeActivation
+description: Create a regional multicast group range activation in the specified location of the current project.
+min_version: nightly
+base_url: projects/{{project}}/locations/{{location}}/regionalMulticastGroupRangeActivations
+self_link: projects/{{project}}/locations/{{location}}/regionalMulticastGroupRangeActivations/{{regional_multicast_group_range_activation_id}}
+create_url: projects/{{project}}/locations/{{location}}/regionalMulticastGroupRangeActivations?regionalMulticastGroupRangeActivationId={{regional_multicast_group_range_activation_id}}
+update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/regionalMulticastGroupRangeActivations/{{regional_multicast_group_range_activation_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/regionalMulticastGroupRangeActivations/{{regional_multicast_group_range_activation_id}}
+sweeper:
+  url_substitutions:
+    - location: us-central1
+async:
+  type: OpAsync
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: UmVnaW9uYWxNdWx0aWNhc3RHcm91cFJhbmdlQWN0aXZhdGlvbg==
+autogen_async: true
+samples:
+  - name: network_services_regional_multicast_group_range_activation_basic
+    primary_resource_id: rmgra_test
+    steps:
+      - name: network_services_regional_multicast_group_range_activation_basic
+        resource_id_vars:
+          network_name: test-network-rmgra
+          domain_name: test-domain-rmgra
+          domain_activation_name: test-domain-activation-rmgra
+          group_range_name: test-group-range-rmgra
+          group_range_activation_name: test-group-range-activation-rmgra
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: regionalMulticastGroupRangeActivationId
+    type: String
+    required: true
+    description: |-
+      A unique name for the regional multicast group range activation.
+      The name is restricted to lower-case letters, numbers, and hyphen, with
+      the first character a lower-case letter, and the last a letter or a
+      number. The name must not exceed 63 characters.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the regional multicast group range
+      activation was created.
+    output: true
+  - name: description
+    type: String
+    description: |-
+      An optional text description of the regional multicast group range
+      activation.
+  - name: ipCidrRange
+    type: String
+    description: '[Output only] The multicast group IP address range.'
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key-value pairs.
+  - name: logConfig
+    type: NestedObject
+    description: The logging configuration.
+    properties:
+      - name: enabled
+        type: Boolean
+        description: Whether to enable logging or not.
+  - name: multicastGroupRange
+    type: String
+    required: true
+    description: |-
+      The resource name of the global multicast group range for the
+      group.
+      Use the following format:
+      `projects/*/locations/global/multicastGroupRanges/*`
+    immutable: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the regional multicast group range activation.
+      Use the following format:
+      `projects/*/locations/*/regionalMulticastGroupRangeActivations/*`.
+    output: true
+  - name: pimSpec
+    type: NestedObject
+    description: Specification for the PIM (Protocol Independent Multicast) protocol.
+    properties:
+      - name: multicastSourceLocation
+        type: String
+        required: true
+        description: |-
+          Indicates the location of the multicast source.
+          Possible values:
+          MULTICAST_SOURCE_GCP
+          MULTICAST_SOURCE_NON_GCP
+      - name: pimMode
+        type: String
+        description: |-
+          Specifies the PIM mode. If not specified, the service will default to
+          SPARSE. Only SPARSE is supported.
+          Possible values:
+          PIM_MODE_SPARSE
+      - name: rpIpAddress
+        type: String
+        description: The IP address of the PIM-SM Rendezvous Point (RP).
+  - name: regionalMulticastDomainActivation
+    type: String
+    required: true
+    description: |-
+      The resource name of a regional multicast domain activation that is in the
+      same region as this regional multicast group range activation.
+      Use the following format:
+      `projects/*/locations/*/regionalMulticastDomainActivations/*`
+    immutable: true
+  - name: regionalMulticastGroupConsumerActivations
+    type: Array
+    description: |-
+      [Output only] The resource names of associated regional multicast
+      group consumer activations in the following format:
+      `projects/*/locations/*/regionalMulticastGroupConsumerActivations/*`.
+    output: true
+    item_type:
+      type: String
+      output: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
+          OBSOLETE
+  - name: uniqueId
+    type: String
+    description: |-
+      [Output only] The Google-generated UUID for the resource. This value is
+      unique across all regional multicast group range activation resources. If a
+      regional multicast group range activation is deleted and another with the
+      same name is created, the new regional multicast group range activation is
+      assigned a different unique_id.
+    output: true
+  - name: updateTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the regional multicast group range
+      activation was most recently updated.
+    output: true

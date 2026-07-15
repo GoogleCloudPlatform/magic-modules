@@ -1,0 +1,143 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: RegionalMulticastProducerAssociation
+description: Create a regional multicast producer association in the specified location of the current project.
+min_version: nightly
+base_url: projects/{{project}}/locations/{{location}}/regionalMulticastProducerAssociations
+self_link: projects/{{project}}/locations/{{location}}/regionalMulticastProducerAssociations/{{regional_multicast_producer_association_id}}
+create_url: projects/{{project}}/locations/{{location}}/regionalMulticastProducerAssociations?regionalMulticastProducerAssociationId={{regional_multicast_producer_association_id}}
+update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/regionalMulticastProducerAssociations/{{regional_multicast_producer_association_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/regionalMulticastProducerAssociations/{{regional_multicast_producer_association_id}}
+sweeper:
+  url_substitutions:
+    - location: us-central1
+async:
+  type: OpAsync
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: UmVnaW9uYWxNdWx0aWNhc3RQcm9kdWNlckFzc29jaWF0aW9u
+autogen_async: true
+samples:
+  - name: network_services_regional_multicast_producer_association_basic
+    primary_resource_id: rmpa_test
+    steps:
+      - name: network_services_regional_multicast_producer_association_basic
+        resource_id_vars:
+          network_name: test-network-rmpa
+          domain_name: test-domain-rmpa
+          domain_activation_name: test-domain-activation-rmpa
+          producer_association_name: test-producer-association-rmpa
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: regionalMulticastProducerAssociationId
+    type: String
+    required: true
+    description: |-
+      A unique name for the regional multicast producer association.
+      The name is restricted to lower-case letters, numbers, and hyphen, with
+      the first character a lower-case letter, and the last a letter or a
+      number. The name must not exceed 63 characters.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the regional multicast producer
+      association was created.
+    output: true
+  - name: description
+    type: String
+    description: |-
+      An optional text description of the regional multicast producer
+      association.
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key-value pairs
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the regional multicast producer association.
+      Use the following format:
+      `projects/*/locations/*/regionalMulticastProducerAssociations/*`.
+    output: true
+  - name: network
+    type: String
+    required: true
+    description: |-
+      The resource name of the multicast producer VPC network.
+      Use the following format:
+      `projects/{project}/locations/global/networks/{network}`.
+    immutable: true
+  - name: regionalMulticastDomainActivation
+    type: String
+    required: true
+    description: |-
+      The resource name of the regional multicast domain activation that is in
+      the same region as this regional multicast producer association.
+      Use the following format:
+      `projects/*/locations/*/regionalMulticastDomainActivations/*`.
+    immutable: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
+          OBSOLETE
+  - name: uniqueId
+    type: String
+    description: |-
+      [Output only] The Google-generated UUID for the resource. This value is
+      unique across all regional multicast producer association resources. If a
+      regional multicast producer association is deleted and another with the
+      same name is created, the new regional multicast producer association is
+      assigned a different unique_id.
+    output: true
+  - name: updateTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the regional multicast producer
+      association was most recently updated.
+    output: true
