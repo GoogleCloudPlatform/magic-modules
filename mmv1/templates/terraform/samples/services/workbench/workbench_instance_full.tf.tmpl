@@ -14,12 +14,10 @@ resource "google_compute_address" "static" {
   name = "{{index $.ResourceIdVars "network_name"}}"
 }
 
-resource "google_service_account_iam_binding" "act_as_permission" {
+resource "google_service_account_iam_member" "act_as_permission" {
   service_account_id = "projects/{{index $.TestEnvVars "project_id"}}/serviceAccounts/{{index $.TestEnvVars "service_account"}}"
   role               = "roles/iam.serviceAccountUser"
-  members = [
-    "user:example@example.com",
-  ]
+  member             = "user:example@example.com"
 }
 
 resource "google_compute_reservation" "gpu_reservation" {
@@ -40,6 +38,19 @@ resource "google_compute_reservation" "gpu_reservation" {
   }
 
   specific_reservation_required = true
+}
+
+resource "google_compute_resource_policy" "my_policy" {
+  name   = "{{index $.ResourceIdVars "resource_policy_name"}}"
+  region = "us-central1"
+  snapshot_schedule_policy {
+    schedule {
+      daily_schedule {
+        days_in_cycle = 1
+        start_time    = "04:00"
+      }
+    }
+  }
 }
 
 resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
@@ -77,6 +88,7 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
       disk_type = "PD_SSD"
       disk_encryption = "CMEK"
       kms_key = "{{index $.ResourceIdVars "key_name"}}"
+      resource_policies = [google_compute_resource_policy.my_policy.id]
     }
 
     network_interfaces {
@@ -122,7 +134,8 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
     google_compute_network.my_network,
     google_compute_subnetwork.my_subnetwork,
     google_compute_address.static,
-    google_service_account_iam_binding.act_as_permission,
-    google_compute_reservation.gpu_reservation
+    google_service_account_iam_member.act_as_permission,
+    google_compute_reservation.gpu_reservation,
+    google_compute_resource_policy.my_policy
   ]
 }
