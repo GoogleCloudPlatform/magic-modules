@@ -14,6 +14,10 @@
 ---
 name: RegionalMulticastGroupRangeActivation
 description: Create a regional multicast group range activation in the specified location of the current project.
+references:
+  guides:
+    Create Regional Multicast Group Range Activation: https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#activate_the_group_range
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.regionalMulticastGroupRangeActivations
 min_version: nightly
 base_url: projects/{{project}}/locations/{{location}}/regionalMulticastGroupRangeActivations
 self_link: projects/{{project}}/locations/{{location}}/regionalMulticastGroupRangeActivations/{{regional_multicast_group_range_activation_id}}
@@ -132,6 +136,7 @@ properties:
           SPARSE. Only SPARSE is supported.
           Possible values:
           PIM_MODE_SPARSE
+        default_from_api: true
       - name: rpIpAddress
         type: String
         description: The IP address of the PIM-SM Rendezvous Point (RP).
@@ -157,6 +162,7 @@ properties:
   - name: state
     type: NestedObject
     description: The multicast resource's state.
+    output: true
     properties:
       - name: state
         type: String
@@ -171,6 +177,7 @@ properties:
           UPDATE_FAILED
           INACTIVE
           OBSOLETE
+        output: true
   - name: uniqueId
     type: String
     description: |-

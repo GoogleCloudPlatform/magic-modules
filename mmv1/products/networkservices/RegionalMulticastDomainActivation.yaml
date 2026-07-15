@@ -14,6 +14,10 @@
 ---
 name: RegionalMulticastDomainActivation
 description: Create a regional multicast domain activation in the specified location of the current project.
+references:
+  guides:
+    Create Regional Multicast Domain Activation: https://docs.cloud.google.com/vpc/docs/multicast/create-domains#activate-domain
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.regionalMulticastDomainActivations
 min_version: nightly
 base_url: projects/{{project}}/locations/{{location}}/regionalMulticastDomainActivations
 self_link: projects/{{project}}/locations/{{location}}/regionalMulticastDomainActivations/{{regional_multicast_domain_activation_id}}
@@ -119,6 +123,7 @@ properties:
           SPARSE. Only SPARSE is supported.
           Possible values:
           PIM_MODE_SPARSE
+        default_from_api: true
       - name: rpIpAddress
         type: String
         description: The IP address of the PIM-SM Rendezvous Point (RP).
@@ -135,6 +140,7 @@ properties:
   - name: state
     type: NestedObject
     description: The multicast resource's state.
+    output: true
     properties:
       - name: state
         type: String
@@ -149,6 +155,7 @@ properties:
           UPDATE_FAILED
           INACTIVE
           OBSOLETE
+        output: true
   - name: uniqueId
     type: String
     description: |-

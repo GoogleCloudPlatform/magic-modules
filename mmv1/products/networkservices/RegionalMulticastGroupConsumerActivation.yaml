@@ -14,6 +14,10 @@
 ---
 name: RegionalMulticastGroupConsumerActivation
 description: Create a regional multicast group consumer activation in the specified location of the current project.
+references:
+  guides:
+    Create Regional Multicast Group Consumer Activation: https://docs.cloud.google.com/vpc/docs/multicast/enable-consumer-network#activate-consumer
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.regionalMulticastGroupConsumerActivations
 min_version: nightly
 base_url: projects/{{project}}/locations/{{location}}/regionalMulticastGroupConsumerActivations
 self_link: projects/{{project}}/locations/{{location}}/regionalMulticastGroupConsumerActivations/{{regional_multicast_group_consumer_activation_id}}
@@ -135,6 +139,7 @@ properties:
   - name: state
     type: NestedObject
     description: The multicast resource's state.
+    output: true
     properties:
       - name: state
         type: String
@@ -149,6 +154,7 @@ properties:
           UPDATE_FAILED
           INACTIVE
           OBSOLETE
+        output: true
   - name: uniqueId
     type: String
     description: |-

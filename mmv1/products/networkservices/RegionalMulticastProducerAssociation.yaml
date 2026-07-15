@@ -14,6 +14,10 @@
 ---
 name: RegionalMulticastProducerAssociation
 description: Create a regional multicast producer association in the specified location of the current project.
+references:
+  guides:
+    Create Regional Multicast Producer Association: https://docs.cloud.google.com/vpc/docs/multicast/enable-producer-network#create-producer
+  api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.regionalMulticastProducerAssociations
 min_version: nightly
 base_url: projects/{{project}}/locations/{{location}}/regionalMulticastProducerAssociations
 self_link: projects/{{project}}/locations/{{location}}/regionalMulticastProducerAssociations/{{regional_multicast_producer_association_id}}
@@ -112,6 +116,7 @@ properties:
   - name: state
     type: NestedObject
     description: The multicast resource's state.
+    output: true
     properties:
       - name: state
         type: String
@@ -126,6 +131,7 @@ properties:
           UPDATE_FAILED
           INACTIVE
           OBSOLETE
+        output: true
   - name: uniqueId
     type: String
     description: |-
