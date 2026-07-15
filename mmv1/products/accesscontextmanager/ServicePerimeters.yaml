@@ -238,9 +238,11 @@ properties:
                               properties:
                                 - name: key
                                   type: String
+                                  required: true
                                   description: 'HTTP header key.'
                                 - name: value
                                   type: String
+                                  required: true
                                   description: 'HTTP header value.'
                 - name: servicePatternsEnforcementScopes
                   type: Array
@@ -249,7 +251,6 @@ properties:
                   item_type:
                     type: Enum
                     enum_values:
-                      - 'SERVICE_PATTERNS_ENFORCEMENT_SCOPE_UNSPECIFIED'
                       - 'GOOGLE_APIS_VIA_PRIVATE_PATH'
             - name: ingressPolicies
               type: Array
@@ -634,9 +635,11 @@ properties:
                               properties:
                                 - name: key
                                   type: String
+                                  required: true
                                   description: 'HTTP header key.'
                                 - name: value
                                   type: String
+                                  required: true
                                   description: 'HTTP header value.'
                 - name: servicePatternsEnforcementScopes
                   type: Array
@@ -645,7 +648,6 @@ properties:
                   item_type:
                     type: Enum
                     enum_values:
-                      - 'SERVICE_PATTERNS_ENFORCEMENT_SCOPE_UNSPECIFIED'
                       - 'GOOGLE_APIS_VIA_PRIVATE_PATH'
             - name: ingressPolicies
               type: Array
