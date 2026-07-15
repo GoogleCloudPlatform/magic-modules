@@ -242,6 +242,7 @@ properties:
       - host.gceInstance.boostConfigs
       - host.gceInstance.disableSsh
       - host.gceInstance.vmTags
+      - host.gceInstance.instanceMetadata
     properties:
       - name: gceInstance
         type: NestedObject
@@ -404,6 +405,10 @@ properties:
               https://docs.cloud.google.com/resource-manager/docs/tags/tags-overview
               Keys must be in the format `tagKeys/{tag_key_id}`, and
               values are in the format `tagValues/456`.
+          - name: instanceMetadata
+            type: KeyValuePairs
+            description: |
+              Client-specified metadata key-value pairs, to be passed to the start-up script in the VM.
   - name: persistentDirectories
     type: Array
     description: |
