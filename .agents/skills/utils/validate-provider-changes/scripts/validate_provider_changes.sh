@@ -44,6 +44,11 @@ DIFF_PROCESSOR_DIR="${REPO_ROOT}/tools/diff-processor"
 
 mkdir -p "$SCRATCH_DIR"
 
+# Always copy test-reader and issue-labeler into SCRATCH_DIR so go.mod replace directives resolve
+rm -rf "${SCRATCH_DIR}/test-reader" "${SCRATCH_DIR}/issue-labeler"
+cp -r "${REPO_ROOT}/tools/test-reader" "$SCRATCH_DIR/"
+cp -r "${REPO_ROOT}/tools/issue-labeler" "$SCRATCH_DIR/"
+
 # 4. Set up cleanup trap to ensure we never leave git worktrees behind
 cleanup() {
   echo -e "${BLUE}Cleaning up temporary files and worktrees...${NC}"
