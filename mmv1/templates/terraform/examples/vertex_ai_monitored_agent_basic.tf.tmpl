@@ -1,0 +1,26 @@
+resource "google_logging_project_bucket_config" "{{index $.Vars "log_bucket_id"}}" {
+  project        = data.google_project.project.project_id
+  location       = "us-central1"
+  retention_days = 30
+  bucket_id      = "{{index $.Vars "log_bucket_id"}}"
+}
+
+resource "google_vertex_ai_agent_anomaly_detection_scope" "{{index $.Vars "scope_id"}}" {
+  region                           = "us-central1"
+  agent_anomaly_detection_scope_id = "{{index $.Vars "scope_id"}}"
+  log_buckets = [
+    google_logging_project_bucket_config.{{index $.Vars "log_bucket_id"}}.id,
+  ]
+  observability_buckets = [
+    "projects/${data.google_project.project.project_id}/locations/us-central1/observationBuckets/{{index $.Vars "observability_bucket_id"}}",
+  ]
+}
+
+resource "google_vertex_ai_monitored_agent" "{{$.PrimaryResourceId}}" {
+  region             = "us-central1"
+  monitored_agent_id = "example-agent-id"
+
+  depends_on = [google_vertex_ai_agent_anomaly_detection_scope.{{index $.Vars "scope_id"}}]
+}
+
+data "google_project" "project" {}
