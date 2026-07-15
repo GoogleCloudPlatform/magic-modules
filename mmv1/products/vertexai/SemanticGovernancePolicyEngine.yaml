@@ -32,7 +32,6 @@ references:
   guides:
     'Semantic governance overview': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/semantic-governance-overview'
 docs:
-min_version: 'beta'
 id_format: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
 base_url: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
 self_link: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicyEngine'
