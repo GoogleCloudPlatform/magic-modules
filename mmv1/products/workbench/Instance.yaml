@@ -115,6 +115,7 @@ samples:
         test_env_vars:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
+          identity_user: 'IDENTITY_USER'
         test_vars_overrides:
           'key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         ignore_read_extra:
