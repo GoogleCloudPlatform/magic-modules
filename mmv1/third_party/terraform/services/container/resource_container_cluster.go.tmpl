@@ -4946,11 +4946,10 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			if r, ok := d.GetOk("rollback_safe_upgrade"); ok {
 				rls := r.([]interface{})
 				if len(rls) > 0 && rls[0] != nil {
+					req.Update.DesiredRollbackSafeUpgrade = &container.RollbackSafeUpgrade{}
 					rl := rls[0].(map[string]interface{})
 					if soakDuration, ok := rl["control_plane_soak_duration"].(string); ok && soakDuration != "" {
-						req.Update.DesiredRollbackSafeUpgrade = &container.RollbackSafeUpgrade{
-							ControlPlaneSoakDuration: soakDuration,
-						}
+						req.Update.DesiredRollbackSafeUpgrade.ControlPlaneSoakDuration = soakDuration
 					}
 				}
 			}

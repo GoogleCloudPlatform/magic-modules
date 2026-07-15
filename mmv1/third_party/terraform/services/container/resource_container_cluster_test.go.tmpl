@@ -19460,11 +19460,37 @@ func testAccContainerCluster_desiredEmulatedVersionBase(clusterName, networkName
 data "google_container_engine_versions" "central1" {
   location = "us-central1"
 }
+
+locals {
+  valid_minors = distinct([
+    for v in data.google_container_engine_versions.central1.valid_master_versions :
+    regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
+  ])
+  sorted_minors = reverse(sort(local.valid_minors))
+  target_minor  = local.sorted_minors[0]
+  base_minor    = local.sorted_minors[1]
+}
+
+data "google_container_engine_versions" "base" {
+  location       = "us-central1"
+  version_prefix = "1.${local.base_minor}."
+}
+
+data "google_container_engine_versions" "target" {
+  location       = "us-central1"
+  version_prefix = "1.${local.target_minor}."
+}
+
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1"
   initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.central1.release_channel_default_version["STABLE"]
+
+  release_channel {
+    channel = "RAPID"
+  }
+
+  min_master_version = data.google_container_engine_versions.base.latest_master_version
   deletion_protection = false
   network    = "%s"
   subnetwork = "%s"
@@ -19481,11 +19507,37 @@ func testAccContainerCluster_desiredEmulatedVersionSoak(clusterName, networkName
 data "google_container_engine_versions" "central1" {
   location = "us-central1"
 }
+
+locals {
+  valid_minors = distinct([
+    for v in data.google_container_engine_versions.central1.valid_master_versions :
+    regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
+  ])
+  sorted_minors = reverse(sort(local.valid_minors))
+  target_minor  = local.sorted_minors[0]
+  base_minor    = local.sorted_minors[1]
+}
+
+data "google_container_engine_versions" "base" {
+  location       = "us-central1"
+  version_prefix = "1.${local.base_minor}."
+}
+
+data "google_container_engine_versions" "target" {
+  location       = "us-central1"
+  version_prefix = "1.${local.target_minor}."
+}
+
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1"
   initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.central1.release_channel_latest_version["RAPID"]
+
+  release_channel {
+    channel = "RAPID"
+  }
+
+  min_master_version = data.google_container_engine_versions.target.latest_master_version
   deletion_protection = false
   network    = "%s"
   subnetwork = "%s"
@@ -19506,11 +19558,37 @@ func testAccContainerCluster_desiredEmulatedVersionComplete(clusterName, network
 data "google_container_engine_versions" "central1" {
   location = "us-central1"
 }
+
+locals {
+  valid_minors = distinct([
+    for v in data.google_container_engine_versions.central1.valid_master_versions :
+    regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
+  ])
+  sorted_minors = reverse(sort(local.valid_minors))
+  target_minor  = local.sorted_minors[0]
+  base_minor    = local.sorted_minors[1]
+}
+
+data "google_container_engine_versions" "base" {
+  location       = "us-central1"
+  version_prefix = "1.${local.base_minor}."
+}
+
+data "google_container_engine_versions" "target" {
+  location       = "us-central1"
+  version_prefix = "1.${local.target_minor}."
+}
+
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1"
   initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.central1.release_channel_latest_version["RAPID"]
+
+  release_channel {
+    channel = "RAPID"
+  }
+
+  min_master_version = data.google_container_engine_versions.target.latest_master_version
   deletion_protection = false
   network    = "%s"
   subnetwork = "%s"
@@ -19519,7 +19597,7 @@ resource "google_container_cluster" "primary" {
     control_plane_soak_duration = "259200s"
   }
 
-  desired_emulated_version = regex("^[0-9]+\\.[0-9]+", data.google_container_engine_versions.central1.release_channel_latest_version["RAPID"])
+  desired_emulated_version = regex("^[0-9]+\\.[0-9]+", data.google_container_engine_versions.target.latest_master_version)
 
   node_config {
     machine_type = "e2-standard-2"
@@ -19579,11 +19657,32 @@ func testAccContainerCluster_desiredEmulatedVersionAutopilotBase(clusterName, ne
 data "google_container_engine_versions" "central1" {
   location = "us-central1"
 }
+
+locals {
+  valid_minors = distinct([
+    for v in data.google_container_engine_versions.central1.valid_master_versions :
+    regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
+  ])
+  sorted_minors = reverse(sort(local.valid_minors))
+  target_minor  = local.sorted_minors[0]
+  base_minor    = local.sorted_minors[1]
+}
+
+data "google_container_engine_versions" "base" {
+  location       = "us-central1"
+  version_prefix = "1.${local.base_minor}."
+}
+
+data "google_container_engine_versions" "target" {
+  location       = "us-central1"
+  version_prefix = "1.${local.target_minor}."
+}
+
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1"
   enable_autopilot   = true
-  min_master_version = data.google_container_engine_versions.central1.release_channel_default_version["REGULAR"]
+  min_master_version = data.google_container_engine_versions.base.latest_master_version
   deletion_protection = false
   network    = "%s"
   subnetwork = "%s"
@@ -19601,11 +19700,32 @@ func testAccContainerCluster_desiredEmulatedVersionAutopilotSoak(clusterName, ne
 data "google_container_engine_versions" "central1" {
   location = "us-central1"
 }
+
+locals {
+  valid_minors = distinct([
+    for v in data.google_container_engine_versions.central1.valid_master_versions :
+    regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
+  ])
+  sorted_minors = reverse(sort(local.valid_minors))
+  target_minor  = local.sorted_minors[0]
+  base_minor    = local.sorted_minors[1]
+}
+
+data "google_container_engine_versions" "base" {
+  location       = "us-central1"
+  version_prefix = "1.${local.base_minor}."
+}
+
+data "google_container_engine_versions" "target" {
+  location       = "us-central1"
+  version_prefix = "1.${local.target_minor}."
+}
+
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1"
   enable_autopilot   = true
-  min_master_version = data.google_container_engine_versions.central1.release_channel_latest_version["RAPID"]
+  min_master_version = data.google_container_engine_versions.target.latest_master_version
   deletion_protection = false
   network    = "%s"
   subnetwork = "%s"
@@ -19627,11 +19747,32 @@ func testAccContainerCluster_desiredEmulatedVersionAutopilotComplete(clusterName
 data "google_container_engine_versions" "central1" {
   location = "us-central1"
 }
+
+locals {
+  valid_minors = distinct([
+    for v in data.google_container_engine_versions.central1.valid_master_versions :
+    regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
+  ])
+  sorted_minors = reverse(sort(local.valid_minors))
+  target_minor  = local.sorted_minors[0]
+  base_minor    = local.sorted_minors[1]
+}
+
+data "google_container_engine_versions" "base" {
+  location       = "us-central1"
+  version_prefix = "1.${local.base_minor}."
+}
+
+data "google_container_engine_versions" "target" {
+  location       = "us-central1"
+  version_prefix = "1.${local.target_minor}."
+}
+
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1"
   enable_autopilot   = true
-  min_master_version = data.google_container_engine_versions.central1.release_channel_latest_version["RAPID"]
+  min_master_version = data.google_container_engine_versions.target.latest_master_version
   deletion_protection = false
   network    = "%s"
   subnetwork = "%s"
@@ -19645,7 +19786,7 @@ resource "google_container_cluster" "primary" {
     control_plane_soak_duration = "259200s"
   }
 
-  desired_emulated_version = regex("^[0-9]+\\.[0-9]+", data.google_container_engine_versions.central1.release_channel_latest_version["RAPID"])
+  desired_emulated_version = regex("^[0-9]+\\.[0-9]+", data.google_container_engine_versions.target.latest_master_version)
 }
 `, clusterName, networkName, subnetworkName)
 }
