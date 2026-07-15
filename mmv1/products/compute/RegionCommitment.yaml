@@ -211,8 +211,8 @@ properties:
     type: String
     description: |
       Specifies the already existing reservations to attach to the Commitment. This field will suppress
-      diffs that change the value from empty to non-empty, in order to allow non-destructive upgrades
-      from provider versions prior to 7.37.0.
+      diffs that change the value from empty to non-empty. To force changing this field from empty to non-empty,
+      change another field at the same time.
     # Ignore read as a temporary fix because the API only returns these in the `reservations` list.
     ignore_read: true
     # Diff suppress function prevents forced recreations for existing resources when upgrading from
