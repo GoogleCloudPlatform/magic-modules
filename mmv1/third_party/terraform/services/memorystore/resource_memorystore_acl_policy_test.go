@@ -1,14 +1,12 @@
 package memorystore_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
-
 
 func TestAccMemorystoreAclPolicy_basic(t *testing.T) {
 	t.Parallel()
@@ -66,4 +64,64 @@ resource "google_memorystore_acl_policy" "test" {
   }
 }
 `, context)
+}
+
+func TestAccMemorystoreAclPolicy_withInstance(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"location":      "us-central1",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMemorystoreAclPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMemorystoreAclPolicy_withInstance(context),
+			},
+			{
+				ResourceName:            "google_memorystore_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id", "location"},
+			},
+			{
+				ResourceName:      "google_memorystore_acl_policy.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccMemorystoreAclPolicy_withInstance(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_memorystore_acl_policy" "test" {
+  acl_policy_id = "tf-test-policy-%{random_suffix}"
+  location      = "%{location}"
+  rules {
+    rule     = "on allkeys +get"
+    username = "default"
+  }
+}
+
+resource "google_memorystore_instance" "test" {
+  instance_id                  = "tf-test-instance-%{random_suffix}"
+  shard_count                  = 1
+  location                     = "%{location}"
+  deletion_protection_enabled  = false
+  node_type                    = "SHARED_CORE_NANO"
+
+  acl_policy                  = google_memorystore_acl_policy.test.id
+}
+`, context)
+}
+
+func testAccCheckMemorystoreAclPolicyDestroyProducer(t *testing.T) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		return nil
+	}
 }

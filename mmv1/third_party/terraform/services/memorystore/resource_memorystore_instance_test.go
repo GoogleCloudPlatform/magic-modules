@@ -1974,7 +1974,6 @@ resource "google_memorystore_instance" "instance_cas" {
 }
 `, context)
 }
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccMemorystoreInstance_withAclPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -1993,6 +1992,7 @@ func TestAccMemorystoreInstance_withAclPolicy(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
+				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"instance_id", "location"},
 			},
@@ -2022,4 +2022,3 @@ resource "google_memorystore_acl_policy" "acl_policy" {
 }
 `, context)
 }
-{{- end }}

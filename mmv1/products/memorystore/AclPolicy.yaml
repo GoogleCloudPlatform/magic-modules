@@ -13,7 +13,8 @@
 
 ---
 name: AclPolicy
-description: Description
+description: |
+  A Google Cloud Memorystore ACL policy.
 base_url: projects/{{project}}/locations/{{location}}/aclPolicies
 self_link: projects/{{project}}/locations/{{location}}/aclPolicies/{{acl_policy_id}}
 create_url: projects/{{project}}/locations/{{location}}/aclPolicies?aclPolicyId={{acl_policy_id}}
@@ -21,15 +22,6 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/aclPolicies/{{acl_policy_id}}
-async:
-  actions: ['create', 'delete', 'update']
-  operation:
-    base_url: '{{op_id}}'
-  actions:
-    - update
-    - delete
-  result:
-    resource_inside_response: true
 parameters:
   - name: location
     type: String
@@ -88,8 +80,4 @@ properties:
       ACTIVE
       UPDATING
       DELETING
-    output: true
-  - name: version
-    type: String
-    description: 'Deprecated: Used in drift resolution.'
     output: true

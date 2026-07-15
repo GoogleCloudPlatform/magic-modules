@@ -1675,8 +1675,6 @@ resource "google_redis_cluster" "cluster_cas" {
 `, context)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
-
 func TestAccRedisCluster_withAclPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -1723,5 +1721,3 @@ resource "google_redis_acl_policy" "acl_policy" {
 }
 `, context)
 }
-
-{{- end }}

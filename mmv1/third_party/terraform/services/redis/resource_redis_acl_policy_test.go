@@ -1,7 +1,6 @@
 package redis_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -65,4 +64,62 @@ resource "google_redis_acl_policy" "test" {
   }
 }
 `, context)
+}
+
+func TestAccRedisAclPolicy_withCluster(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisAclPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisAclPolicy_withCluster(context),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				ResourceName:      "google_redis_acl_policy.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccRedisAclPolicy_withCluster(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_acl_policy" "test" {
+  acl_policy_id = "tf-test-policy-%{random_suffix}"
+  location      = "us-central1"
+  rules {
+    rule     = "on allkeys +get"
+    username = "default"
+  }
+}
+
+resource "google_redis_cluster" "test" {
+  name                        = "tf-test-redis-%{random_suffix}"
+  shard_count                 = 1
+  region                      = "us-central1"
+  deletion_protection_enabled = false
+
+  acl_policy                  = google_redis_acl_policy.test.id
+}
+`, context)
+}
+
+func testAccCheckRedisAclPolicyDestroyProducer(t *testing.T) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		return nil
+	}
 }
