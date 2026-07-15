@@ -248,6 +248,7 @@ resource "google_colab_schedule" "schedule" {
   location = "%{location}"
   allow_queueing = true
   max_concurrent_run_count = 2
+  max_concurrent_active_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
   start_time = "%{start_time}"
@@ -344,6 +345,7 @@ resource "google_colab_schedule" "schedule" {
   location = "%{location}"
   allow_queueing = true
   max_concurrent_run_count = 2
+  max_concurrent_active_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
   start_time = "%{start_time}"
@@ -442,6 +444,7 @@ resource "google_colab_schedule" "schedule" {
   location = "%{location}"
   allow_queueing = true
   max_concurrent_run_count = 2
+  max_concurrent_active_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
   start_time = "%{start_time}"
@@ -540,6 +543,7 @@ resource "google_colab_schedule" "schedule" {
   location = "%{location}"
   allow_queueing = false
   max_concurrent_run_count = 1
+  max_concurrent_active_run_count = 1
   cron = "TZ=America/Los_Angeles 0 * * * *"
   max_run_count = 3
   start_time = "%{updated_start_time}"
