@@ -191,7 +191,7 @@ properties:
     item_type:
       type: String
     conflicts:
-    - targetSecureTags
+      - targetSecureTags
   - name: 'targetSecureTags'
     type: Array
     send_empty_value: true
@@ -200,7 +200,7 @@ properties:
       If targetSecureTag are specified, then the traffic classification rule applies only to instances in the VPC network that have one of those EFFECTIVE secure tags, if all the targetSecureTag are in INEFFECTIVE state, then this rule will be ignored.
       targetSecureTag may not be set at the same time as targetServiceAccounts. If neither targetServiceAccounts nor targetSecureTag are specified, the firewall rule applies to all instances on the specified network. Maximum number of target label tags allowed is 256.
     conflicts:
-    - targetServiceAccounts
+      - targetServiceAccounts
     item_type:
       type: NestedObject
       properties:
