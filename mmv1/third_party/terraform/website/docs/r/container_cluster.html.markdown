@@ -575,6 +575,7 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
     It can not be enabled for Autopilot clusters.
 
 * `node_readiness_config` - (Optional) The status of the Node Readiness Controller addon.
+  Structure is [documented below](#nested_node_readiness_config).
 
 This example `addons_config` disables two addons:
 
@@ -589,6 +590,10 @@ addons_config {
   }
 }
 ```
+<a name="nested_node_readiness_config"></a>The `node_readiness_config` block supports:
+
+* `enabled` - (Required) Enable the Node Readiness Controller addon for your cluster.
+
 <a name="nested_binary_authorization"></a>The `binary_authorization` block supports:
 
 * `enabled` - (DEPRECATED) Enable Binary Authorization for this cluster. Deprecated in favor of `evaluation_mode`.
