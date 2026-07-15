@@ -831,7 +831,7 @@ func ResourceDataprocCluster() *schema.Resource {
 													Type:         schema.TypeString,
 													Optional:     true,
 													AtLeastOneOf: confidentialInstanceConfigKeys,
-													ValidateFunc: validation.StringInSlice([]string{"CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED", "SEV", "SEV_SNP", "TDX"}, false),
+													ValidateFunc: validation.StringInSlice([]string{"SEV", "SEV_SNP", "TDX"}, false),
 													ForceNew:     true,
 													Description:  `Defines the type of Confidential Compute technology to use.`,
 												},
