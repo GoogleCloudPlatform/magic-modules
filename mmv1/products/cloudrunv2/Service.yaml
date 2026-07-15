@@ -439,6 +439,22 @@ properties:
             description: |-
               Maximum number of serving instances that this resource should have. Must not be less than minimum instance count. If absent, Cloud Run will calculate
               a default value based on the project's available container instances quota in the region and specified instance size.
+          - name: 'cpuUtilization'
+            type: Double
+            min_version: 'beta'
+            description: |-
+              Determines a threshold for CPU utilization before scaling begins. Accepted values are between `0.1` and `0.95` (inclusive) or `0.0` to disable
+              CPU utilization as threshold for scaling. CPU and concurrency scaling cannot both be disabled.
+              For more information, visit https://cloud.google.com/run/docs/configuring/scaling-controls.
+            default_from_api: true
+          - name: 'concurrencyUtilization'
+            type: Double
+            min_version: 'beta'
+            description: |-
+              Determines a threshold for concurrency utilization before scaling begins. Accepted values are between `0.1` and `0.95` (inclusive) or `0.0` to disable
+              concurrency utilization as threshold for scaling. CPU and concurrency scaling cannot both be disabled.
+              For more information, visit https://cloud.google.com/run/docs/configuring/scaling-controls.
+            default_from_api: true
       - name: 'vpcAccess'
         type: NestedObject
         description: |-
