@@ -45,7 +45,7 @@ func TestAccComputeInterconnect_computeInterconnectMacsecTest(t *testing.T) {
 			},
 			{
 				Config:      testAccComputeInterconnect_computeInterconnectChangeLocation(context),
-				ExpectError: regexp.MustCompile("location"),
+				ExpectError: regexp.MustCompile("The location field must match the effectiveLocation field on patch"),
 			},
 		},
 	})
