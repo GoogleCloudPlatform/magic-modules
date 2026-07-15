@@ -77,7 +77,16 @@ func FlattenDiskHTTP(disk map[string]interface{}, configDisk map[string]any, def
 		if v, ok := initParams["provisionedIops"]; ok { diskMap["provisioned_iops"] = ParseIntHTTP(v) }
 		if v, ok := initParams["provisionedThroughput"]; ok { diskMap["provisioned_throughput"] = ParseIntHTTP(v) }
 		if v, ok := initParams["diskName"]; ok { diskMap["disk_name"] = v } else { diskMap["disk_name"] = "" }
-		if v, ok := initParams["labels"]; ok { diskMap["labels"] = v }
+		var diskLabels map[string]string
+		if lRaw, ok := initParams["labels"].(map[string]interface{}); ok {
+			diskLabels = make(map[string]string)
+			for k, v := range lRaw {
+				if str, ok := v.(string); ok {
+					diskLabels[k] = str
+				}
+			}
+		}
+		diskMap["labels"] = diskLabels
 
 		var diskSizeGb int
 		if v, ok := disk["diskSizeGb"]; ok { diskSizeGb = ParseIntHTTP(v) }
@@ -93,8 +102,26 @@ func FlattenDiskHTTP(disk map[string]interface{}, configDisk map[string]any, def
 			diskMap["disk_size_gb"] = initDiskSizeGb
 		}
 
-		if v, ok := initParams["resourcePolicies"]; ok { diskMap["resource_policies"] = v }
-		if v, ok := initParams["resourceManagerTags"]; ok { diskMap["resource_manager_tags"] = v }
+		var rPolicies []string
+		if rpRaw, ok := initParams["resourcePolicies"].([]interface{}); ok {
+			for _, v := range rpRaw {
+				if str, ok := v.(string); ok {
+					rPolicies = append(rPolicies, str)
+				}
+			}
+		}
+		diskMap["resource_policies"] = rPolicies
+
+		var rmTags map[string]string
+		if rmtRaw, ok := initParams["resourceManagerTags"].(map[string]interface{}); ok {
+			rmTags = make(map[string]string)
+			for k, v := range rmtRaw {
+				if str, ok := v.(string); ok {
+					rmTags[k] = str
+				}
+			}
+		}
+		diskMap["resource_manager_tags"] = rmTags
 		if sp, ok := initParams["storagePool"].(string); ok && sp != "" {
 			diskMap["storage_pool"] = tpgresource.GetResourceNameFromSelfLink(sp)
 		}
@@ -144,15 +171,21 @@ func FlattenDiskHTTP(disk map[string]interface{}, configDisk map[string]any, def
 
 func FlattenSchedulingHTTP(resp map[string]interface{}) []map[string]interface{} {
 	schedulingMap := map[string]interface{}{}
-	if v, ok := resp["onHostMaintenance"]; ok { schedulingMap["on_host_maintenance"] = v }
-	if v, ok := resp["preemptible"]; ok { schedulingMap["preemptible"] = v }
-	if v, ok := resp["minNodeCpus"]; ok { schedulingMap["min_node_cpus"] = ParseIntHTTP(v) }
-	if v, ok := resp["provisioningModel"]; ok { schedulingMap["provisioning_model"] = v }
-	if v, ok := resp["instanceTerminationAction"]; ok { schedulingMap["instance_termination_action"] = v }
-	if v, ok := resp["availabilityDomain"]; ok { schedulingMap["availability_domain"] = ParseIntHTTP(v) }
-	if v, ok := resp["terminationTime"]; ok { schedulingMap["termination_time"] = v }
+	v_ohm, _ := resp["onHostMaintenance"].(string)
+	schedulingMap["on_host_maintenance"] = v_ohm
+	v_p, _ := resp["preemptible"].(bool)
+	schedulingMap["preemptible"] = v_p
+	schedulingMap["min_node_cpus"] = ParseIntHTTP(resp["minNodeCpus"])
+	v_pm, _ := resp["provisioningModel"].(string)
+	schedulingMap["provisioning_model"] = v_pm
+	v_ita, _ := resp["instanceTerminationAction"].(string)
+	schedulingMap["instance_termination_action"] = v_ita
+	schedulingMap["availability_domain"] = ParseIntHTTP(resp["availabilityDomain"])
+	v_tt, _ := resp["terminationTime"].(string)
+	schedulingMap["termination_time"] = v_tt
 	if v, ok := resp["automaticRestart"]; ok { schedulingMap["automatic_restart"] = v }
-	if v, ok := resp["skipGuestOsShutdown"]; ok { schedulingMap["skip_guest_os_shutdown"] = v }
+	v_sgos, _ := resp["skipGuestOsShutdown"].(bool)
+	schedulingMap["skip_guest_os_shutdown"] = v_sgos
 {{- if ne $.TargetVersionName "ga" }}
 	if v, ok := resp["maintenanceInterval"]; ok { schedulingMap["maintenance_interval"] = v }
 	if v, ok := resp["hostErrorTimeoutSeconds"]; ok { schedulingMap["host_error_timeout_seconds"] = ParseIntHTTP(v) }

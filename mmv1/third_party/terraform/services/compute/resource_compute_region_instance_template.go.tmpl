@@ -1675,15 +1675,15 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		for k, v := range labelsRaw {
 			labels[k] = v.(string)
 		}
-		if err := tpgresource.SetLabels(labels, d, "labels"); err != nil {
-			return fmt.Errorf("Error setting labels: %s", err)
-		}
-		if err := tpgresource.SetLabels(labels, d, "terraform_labels"); err != nil {
-			return fmt.Errorf("Error setting terraform_labels: %s", err)
-		}
-		if err := d.Set("effective_labels", labels); err != nil {
-			return fmt.Errorf("Error setting effective_labels: %s", err)
-		}
+	}
+	if err := tpgresource.SetLabels(labels, d, "labels"); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if err := d.Set("effective_labels", labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 
 	if err = d.Set("self_link", selfLink); err != nil {
@@ -1708,20 +1708,17 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error setting disk: %s", err)
 		}
 	}
-	if desc, ok := res["description"].(string); ok {
-		if err = d.Set("description", desc); err != nil {
-			return fmt.Errorf("Error setting description: %s", err)
-		}
+	desc, _ := res["description"].(string)
+	if err = d.Set("description", desc); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
 	}
-	if mt, ok := properties["machineType"].(string); ok {
-		if err = d.Set("machine_type", mt); err != nil {
-			return fmt.Errorf("Error setting machine_type: %s", err)
-		}
+	mt, _ := properties["machineType"].(string)
+	if err = d.Set("machine_type", mt); err != nil {
+		return fmt.Errorf("Error setting machine_type: %s", err)
 	}
-	if mcp, ok := properties["minCpuPlatform"].(string); ok {
-		if err = d.Set("min_cpu_platform", mcp); err != nil {
-			return fmt.Errorf("Error setting min_cpu_platform: %s", err)
-		}
+	mcp, _ := properties["minCpuPlatform"].(string)
+	if err = d.Set("min_cpu_platform", mcp); err != nil {
+		return fmt.Errorf("Error setting min_cpu_platform: %s", err)
 	}
 
 	if cif, ok := properties["canIpForward"].(bool); ok {
@@ -1734,24 +1731,23 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		}
 	}
 
-	if idesc, ok := properties["description"].(string); ok {
-		if err = d.Set("instance_description", idesc); err != nil {
-			return fmt.Errorf("Error setting instance_description: %s", err)
-		}
+	idesc, _ := properties["description"].(string)
+	if err = d.Set("instance_description", idesc); err != nil {
+		return fmt.Errorf("Error setting instance_description: %s", err)
 	}
-	if krat, ok := properties["keyRevocationActionType"].(string); ok {
-		if err = d.Set("key_revocation_action_type", krat); err != nil {
-			return fmt.Errorf("Error setting key_revocation_action_type: %s", err)
-		}
+	krat, _ := properties["keyRevocationActionType"].(string)
+	if err = d.Set("key_revocation_action_type", krat); err != nil {
+		return fmt.Errorf("Error setting key_revocation_action_type: %s", err)
 	}
 	if err = d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
+	var npcMap map[string]interface{}
 	if properties["networkPerformanceConfig"] != nil {
-		npcMap := properties["networkPerformanceConfig"].(map[string]interface{})
-		if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(npcMap)); err != nil {
-			return err
-		}
+		npcMap = properties["networkPerformanceConfig"].(map[string]interface{})
+	}
+	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(npcMap)); err != nil {
+		return err
 	}
 	if properties["networkInterfaces"] != nil {
 		networkInterfacesRaw := properties["networkInterfaces"].([]interface{})
