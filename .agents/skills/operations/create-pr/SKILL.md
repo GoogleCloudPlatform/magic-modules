@@ -90,7 +90,7 @@ CONTENT
 
 Common types include `new-resource`, `new-datasource`, `new-list-resource`, `enhancement`, `bug`, `deprecation`, `breaking-change`, `note`, and `none`.
 
-#### Sample PR Body String
+#### Sample PR Body Content
 ```markdown
 Summary of what changed and why in a few concise sentences.
 
@@ -103,34 +103,44 @@ compute: added `foo` field to `google_compute_instance` resource
 
 ---
 
-### 5. Create Pull Request with `gh` CLI
+### 5. Create Pull Request with `gh` CLI Using `--body-file`
 
-Construct the PR body string directly and execute `gh pr create` with `--body`:
+> [!CAUTION]
+> **DO NOT pass inline double-quoted `--body "..."` strings containing backticks.**
+> Enclosing triple backticks (` ```release-note:type ``` `) in double quotes causes `zsh`/`bash` to execute `` `release-note:type` `` as a live shell command substitution. The command fails, silently stripping the release note block from the published PR body!
+
+Always write the body to a temporary file via a single-quoted HEREDOC (`cat <<'EOF'`) and invoke `gh pr create` with `--body-file`:
 
 ```bash
 PR_TITLE="<product>: <short description>" # e.g. compute: add foo field to google_compute_instance
 
-PR_BODY=$(cat <<'EOF'
+cat <<'EOF' > /tmp/pr_body.txt
 <summary of what changed and why>
 
 ```release-note:<type>
 <release note content>
 ```
 EOF
-)
 
 gh pr create \
   --repo GoogleCloudPlatform/magic-modules \
   --base main \
   --head "$(gh api user -q .login):$BRANCH" \
   --title "$PR_TITLE" \
-  --body "$PR_BODY"
+  --body-file /tmp/pr_body.txt
 ```
 
 ---
 
-## Verification & Handoff
+## Verification & Auto-Repair Handoff
 
 1. Verify that `gh pr create` completed successfully and returned a valid Pull Request URL.
-2. Share the PR URL with the user and complete the execution.
-
+2. **Verify PR Body Integrity:** Run `gh pr view` to verify the published body rendered the release note block:
+   ```bash
+   gh pr view --repo GoogleCloudPlatform/magic-modules
+   ```
+3. **Auto-Repair Missing Release Note:** If the output body does NOT contain `release-note:`, repair it immediately:
+   ```bash
+   gh pr edit --repo GoogleCloudPlatform/magic-modules --body-file /tmp/pr_body.txt
+   ```
+4. Share the confirmed PR URL with the user and complete the execution.
