@@ -2487,7 +2487,6 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
     if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
         return err
     }
-
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"project":    project,
 		"dataset_id": res.TableReference.DatasetId,
