@@ -131,7 +131,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	hclData["node_config"] = flattenNodeConfig(asset.Resource.Data["nodeConfig"], nil)
 	hclData["description"] = asset.Resource.Data["description"]
 	hclData["security_posture_config"] = flattenSecurityPostureConfig(asset.Resource.Data["securityPostureConfig"])
-	hclData["enterprise_config"] = flattenEnterpriseConfig(asset.Resource.Data["enterpriseConfig"])
+	// enterprise_config is deprecated and will be removed in a future major release; do not convert
 	hclData["anonymous_authentication_config"] = flattenAnonymousAuthenticationConfig(asset.Resource.Data["anonymousAuthenticationConfig"])
 	hclData["node_creation_config"] = flattenNodeCreationConfig(asset.Resource.Data["nodeCreationConfig"])
 	hclData["notification_config"] = flattenNotificationConfig(asset.Resource.Data["notificationConfig"])
@@ -259,26 +259,6 @@ func flattenSecurityPostureConfig(v interface{}) []map[string]interface{} {
 	transformed := map[string]interface{}{
 		"mode":               spc["mode"],
 		"vulnerability_mode": spc["vulnerabilityMode"],
-	}
-
-	return []map[string]interface{}{transformed}
-}
-
-func flattenEnterpriseConfig(v interface{}) []map[string]interface{} {
-	if v == nil {
-		return nil
-	}
-	ec, ok := v.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	transformed := make(map[string]interface{})
-	if ec["desiredTier"] != nil {
-		transformed["desired_tier"] = ec["desiredTier"]
-	}
-
-	if len(transformed) == 0 {
-		return nil
 	}
 
 	return []map[string]interface{}{transformed}
@@ -798,8 +778,12 @@ func flattenVerticalPodAutoscaling(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+	enabled := c["enabled"]
+	if enabled == nil {
+		enabled = false
+	}
 	transformed := map[string]interface{}{
-		"enabled": c["enabled"],
+		"enabled": enabled,
 	}
 
 	return []map[string]interface{}{transformed}
