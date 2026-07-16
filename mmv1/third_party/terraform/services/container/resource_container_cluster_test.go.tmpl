@@ -19466,9 +19466,8 @@ locals {
     for v in data.google_container_engine_versions.central1.valid_master_versions :
     regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
   ])
-  sorted_minors = reverse(sort(local.valid_minors))
-  target_minor  = local.sorted_minors[0]
-  base_minor    = local.sorted_minors[1]
+  target_minor  = local.valid_minors[0]
+  base_minor    = local.valid_minors[1]
 }
 
 data "google_container_engine_versions" "base" {
@@ -19513,9 +19512,8 @@ locals {
     for v in data.google_container_engine_versions.central1.valid_master_versions :
     regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
   ])
-  sorted_minors = reverse(sort(local.valid_minors))
-  target_minor  = local.sorted_minors[0]
-  base_minor    = local.sorted_minors[1]
+  target_minor  = local.valid_minors[0]
+  base_minor    = local.valid_minors[1]
 }
 
 data "google_container_engine_versions" "base" {
@@ -19564,9 +19562,8 @@ locals {
     for v in data.google_container_engine_versions.central1.valid_master_versions :
     regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
   ])
-  sorted_minors = reverse(sort(local.valid_minors))
-  target_minor  = local.sorted_minors[0]
-  base_minor    = local.sorted_minors[1]
+  target_minor  = local.valid_minors[0]
+  base_minor    = local.valid_minors[1]
 }
 
 data "google_container_engine_versions" "base" {
@@ -19665,9 +19662,8 @@ locals {
     for v in data.google_container_engine_versions.central1.valid_master_versions :
     regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
   ])
-  sorted_minors = reverse(sort(local.valid_minors))
-  target_minor  = local.sorted_minors[0]
-  base_minor    = local.sorted_minors[1]
+  target_minor  = local.valid_minors[0]
+  base_minor    = local.valid_minors[1]
 }
 
 data "google_container_engine_versions" "base" {
@@ -19708,9 +19704,8 @@ locals {
     for v in data.google_container_engine_versions.central1.valid_master_versions :
     regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
   ])
-  sorted_minors = reverse(sort(local.valid_minors))
-  target_minor  = local.sorted_minors[0]
-  base_minor    = local.sorted_minors[1]
+  target_minor  = local.valid_minors[0]
+  base_minor    = local.valid_minors[1]
 }
 
 data "google_container_engine_versions" "base" {
@@ -19755,9 +19750,8 @@ locals {
     for v in data.google_container_engine_versions.central1.valid_master_versions :
     regex("^[0-9]+\\.([0-9]+)\\.", v)[0]
   ])
-  sorted_minors = reverse(sort(local.valid_minors))
-  target_minor  = local.sorted_minors[0]
-  base_minor    = local.sorted_minors[1]
+  target_minor  = local.valid_minors[0]
+  base_minor    = local.valid_minors[1]
 }
 
 data "google_container_engine_versions" "base" {
