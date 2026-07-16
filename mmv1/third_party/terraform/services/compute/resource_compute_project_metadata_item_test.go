@@ -1,13 +1,13 @@
 package compute_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -163,8 +163,10 @@ func testAccCheckProjectMetadataItemDestroyProducer(t *testing.T) func(s *terraf
 
 		var commonInstanceMetadataMap map[string]interface{}
 		if project.CommonInstanceMetadata != nil {
-			metaBytes, _ := json.Marshal(project.CommonInstanceMetadata)
-			_ = json.Unmarshal(metaBytes, &commonInstanceMetadataMap)
+			commonInstanceMetadataMap, err = tpgresource.ConvertToMap(project.CommonInstanceMetadata)
+			if err != nil {
+				return err
+			}
 		}
 		metadata := tpgcompute.FlattenMetadata(commonInstanceMetadataMap)
 

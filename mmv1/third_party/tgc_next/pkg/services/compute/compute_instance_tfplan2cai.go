@@ -208,11 +208,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 	if metadataMap != nil {
-		metadataBytes, err := json.Marshal(metadataMap)
-		if err != nil {
-			return nil, fmt.Errorf("Error encoding metadata: %s", err)
-		}
-		if err := json.Unmarshal(metadataBytes, &instance.Metadata); err != nil {
+		if err := convertViaJSONTgcNext(metadataMap, &instance.Metadata); err != nil {
 			return nil, fmt.Errorf("Error converting metadata: %s", err)
 		}
 	}
