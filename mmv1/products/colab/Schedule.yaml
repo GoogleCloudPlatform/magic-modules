@@ -344,6 +344,7 @@ properties:
       - name: 'parent'
         type: String
         description: 'The resource name of the Location to create the NotebookExecutionJob. Format: `projects/{project}/locations/{location}`'
+        default_from_api: true
   - name: 'createPipelineJobRequest'
     type: NestedObject
     description: Request message for PipelineService.CreatePipelineJob.
@@ -351,6 +352,7 @@ properties:
       - name: 'parent'
         type: String
         description: 'The resource name of the Location to create the PipelineJob in. Format: `projects/{project}/locations/{location}`'
+        default_from_api: true
       - name: 'pipelineJob'
         type: NestedObject
         required: true
