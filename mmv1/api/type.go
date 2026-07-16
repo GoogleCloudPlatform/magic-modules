@@ -1486,11 +1486,6 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 		camelPname := google.Camelize(pname, "lower")
 		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
 
-		// if we couldn't find it, see if it was renamed at the top level
-		if prop == nil {
-			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
-		}
-
 		if prop == nil {
 			return ""
 		}
