@@ -18,7 +18,7 @@ references:
   guides:
     Create Regional Multicast Group Range Activation: https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#activate_the_group_range
   api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.regionalMulticastGroupRangeActivations
-min_version: beta
+min_version: alpha
 base_url: projects/{{project}}/locations/{{location}}/regionalMulticastGroupRangeActivations
 self_link: projects/{{project}}/locations/{{location}}/regionalMulticastGroupRangeActivations/{{regional_multicast_group_range_activation_id}}
 create_url: projects/{{project}}/locations/{{location}}/regionalMulticastGroupRangeActivations?regionalMulticastGroupRangeActivationId={{regional_multicast_group_range_activation_id}}

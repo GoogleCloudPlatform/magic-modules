@@ -18,7 +18,7 @@ references:
   guides:
     Create Regional Multicast Producer Association: https://docs.cloud.google.com/vpc/docs/multicast/enable-producer-network#create-producer
   api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.regionalMulticastProducerAssociations
-min_version: beta
+min_version: alpha
 base_url: projects/{{project}}/locations/{{location}}/regionalMulticastProducerAssociations
 self_link: projects/{{project}}/locations/{{location}}/regionalMulticastProducerAssociations/{{regional_multicast_producer_association_id}}
 create_url: projects/{{project}}/locations/{{location}}/regionalMulticastProducerAssociations?regionalMulticastProducerAssociationId={{regional_multicast_producer_association_id}}
