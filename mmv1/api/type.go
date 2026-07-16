@@ -1523,8 +1523,6 @@ func findPropByNameInFlattenedList(props []*Type, name string) *Type {
 		if p.Name == name {
 			return p
 		}
-	}
-	for _, p := range props {
 		if p.FlattenObject {
 			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
 				return found
