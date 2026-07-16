@@ -21,11 +21,23 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 ) error {
 	resourceData := Resource{{ $.ResourceName }}().Data(&terraform.InstanceState{})
 {{- range $scope := $.ListScopeProperties }}
+{{- if $scope.DefaultValue }}
+	{
+		v := {{ $scope.CamelizeProperty }}
+		if v == "" {
+			v = "{{ $scope.DefaultValue }}"
+		}
+		if err := resourceData.Set("{{ underscore $scope.Name }}", v); err != nil {
+			return fmt.Errorf("error setting {{ underscore $scope.Name }} on temporary resource data: %w", err)
+		}
+	}
+{{- else }}
 	if {{ $scope.CamelizeProperty }} != "" {
 		if err := resourceData.Set("{{ underscore $scope.Name }}", {{ $scope.CamelizeProperty }}); err != nil {
 			return fmt.Errorf("error setting {{ underscore $scope.Name }} on temporary resource data: %w", err)
 		}
 	}
+{{- end }}
 {{- end }}
 
 	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.BaseUrl}}")
