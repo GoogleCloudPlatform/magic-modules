@@ -7,6 +7,11 @@ resource "google_storage_bucket" "bucket" {
   force_destroy               = true
 }
 
+resource "google_compute_network" "my_network" {
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
 resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   display_name                    = "{{index $.Vars "display_name"}}"
   location                        = "us-central1"
@@ -19,13 +24,33 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   end_time                        = "{{index $.Vars "end_time"}}"
 
   create_pipeline_job_request {
-    parent = "projects/${data.google_project.project.project_id}/locations/us-central1"
+    pipeline_job_id = "test-pipeline-job-id"
+    parent          = "projects/${data.google_project.project.project_id}/locations/us-central1"
     pipeline_job {
       display_name          = "test-pipeline-job"
       preflight_validations = {{index $.Vars "preflight_validations"}}
+      network               = google_compute_network.my_network.id
+      service_account       = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+      template_uri          = "https://us-kfp.pkg.dev/proj/repo/template/v1"
+      reserved_ip_ranges    = ["vertex-ai-ip-range"]
+
       labels = {
         "key" = "{{index $.Vars "pipeline_job_label_value"}}"
       }
+
+      encryption_spec {
+        kms_key_name = "{{index $.ResourceIdVars "key_name"}}"
+      }
+
+      psc_interface_config {
+        network_attachment = "projects/${data.google_project.project.project_id}/regions/us-central1/networkAttachments/my-attachment"
+        dns_peering_configs {
+          domain         = "my-internal-domain.corp."
+          target_network = google_compute_network.my_network.id
+          target_project = data.google_project.project.project_id
+        }
+      }
+
       pipeline_spec = jsonencode({
         pipelineInfo = {
           name = "hello-world"
@@ -42,6 +67,12 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
       runtime_config {
         gcs_output_directory = "gs://${google_storage_bucket.bucket.name}/pipeline_root"
         failure_policy       = "{{index $.Vars "failure_policy"}}"
+        parameter_values     = {
+          param1 = "val1"
+        }
+        input_artifacts      = {
+          artifact1 = "val1"
+        }
       }
     }
   }
