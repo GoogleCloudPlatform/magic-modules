@@ -1479,9 +1479,10 @@ func (t *Type) ProviderOnly() bool {
 // convert to snake in this method
 func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	nestedProps := t.ResourceMetadata.UserProperites()
+	segments := strings.Split(schemaPath, ".0.")
 
 	var pathTkns []string
-	for _, pname := range strings.Split(schemaPath, ".0.") {
+	for idx, pname := range segments {
 		camelPname := google.Camelize(pname, "lower")
 		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
 
@@ -1497,10 +1498,10 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 		if !prop.FlattenObject {
 			pathTkns = append(pathTkns, google.Underscore(pname))
 			// ExactlyOneOf/ConflictsWith/etc. paths are only valid through TypeList
-			// blocks with MaxItems:1. If this prop is a multi-item list or set,
-			// the path is invalid for those schema attributes. Return early to
-			// avoid panics from calling NestedProperties on uninitialized ItemTypes.
-			if prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
+			// blocks with MaxItems:1. Terminal array fields like budget_filter.0.projects
+			// are valid references, but non-terminal array segments like containers.0.grpc
+			// are not. Return early only for non-terminal multi-item arrays.
+			if idx < len(segments)-1 && prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
 				return ""
 			}
 		}
