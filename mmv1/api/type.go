@@ -1483,27 +1483,28 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	var pathTkns []string
 	for _, pname := range strings.Split(schemaPath, ".0.") {
 		camelPname := google.Camelize(pname, "lower")
-		index := slices.IndexFunc(nestedProps, func(p *Type) bool {
-			return p.Name == camelPname
-		})
+		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
 
 		// if we couldn't find it, see if it was renamed at the top level
-		if index == -1 {
-			index = slices.IndexFunc(nestedProps, func(p *Type) bool {
-				return p.Name == schemaPath
-			})
+		if prop == nil {
+			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
 		}
 
-		if index == -1 {
+		if prop == nil {
 			return ""
 		}
 
-		prop := nestedProps[index]
-
-		nestedProps = prop.NestedProperties()
 		if !prop.FlattenObject {
 			pathTkns = append(pathTkns, google.Underscore(pname))
+			// ExactlyOneOf/ConflictsWith/etc. paths are only valid through TypeList
+			// blocks with MaxItems:1. If this prop is a multi-item list or set,
+			// the path is invalid for those schema attributes. Return early to
+			// avoid panics from calling NestedProperties on uninitialized ItemTypes.
+			if prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
+				return ""
+			}
 		}
+		nestedProps = prop.NestedProperties()
 	}
 
 	if len(pathTkns) == 0 || pathTkns[len(pathTkns)-1] == "" {
@@ -1511,6 +1512,25 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	}
 
 	return strings.Join(pathTkns[:], ".0.")
+}
+
+// findPropByNameInFlattenedList searches for a property by name in a list of properties,
+// also searching recursively inside any FlattenObject nested objects (since those appear
+// as top-level fields in the schema).
+func findPropByNameInFlattenedList(props []*Type, name string) *Type {
+	for _, p := range props {
+		if p.Name == name {
+			return p
+		}
+	}
+	for _, p := range props {
+		if p.FlattenObject {
+			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
+				return found
+			}
+		}
+	}
+	return nil
 }
 
 func (t Type) GetPropertySchemaPathList(propertyList []string) []string {

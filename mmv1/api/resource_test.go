@@ -991,6 +991,137 @@ func TestIdentityPropertiesFlattenObject(t *testing.T) {
 	}
 }
 
+// TestGetPropertySchemaPath verifies that GetPropertySchemaPath correctly
+// resolves property paths, handles flatten_object fields, and returns "" for
+// paths that go through multi-item lists (which are invalid for ExactlyOneOf).
+func TestGetPropertySchemaPath(t *testing.T) {
+	t.Parallel()
+
+	makeRes := func(props []*api.Type) *api.Resource {
+		p := &api.Product{Name: "TestProduct"}
+		r := &api.Resource{
+			Name:            "TestResource",
+			ProductMetadata: p,
+		}
+		r.Properties = props
+		for _, prop := range r.Properties {
+			prop.ResourceMetadata = r
+		}
+		return r
+	}
+
+	t.Run("simple path resolves correctly", func(t *testing.T) {
+		t.Parallel()
+		res := makeRes([]*api.Type{
+			{Name: "outer", Type: "NestedObject", Properties: []*api.Type{
+				{Name: "inner", Type: "String"},
+			}},
+		})
+		res.Properties[0].ResourceMetadata = res
+
+		got := res.Properties[0].GetPropertySchemaPath("outer.0.inner")
+		if got != "outer.0.inner" {
+			t.Errorf("got %q, want %q", got, "outer.0.inner")
+		}
+	})
+
+	t.Run("path through FlattenObject is resolved", func(t *testing.T) {
+		t.Parallel()
+		res := makeRes([]*api.Type{
+			{Name: "payload", Type: "NestedObject", FlattenObject: true, Properties: []*api.Type{
+				{Name: "secretData", Type: "String"},
+			}},
+		})
+		res.Properties[0].ResourceMetadata = res
+
+		// "payload" is flatten_object so "payload.0.secretData" should resolve to "secret_data"
+		got := res.Properties[0].GetPropertySchemaPath("payload.0.secretData")
+		if got != "secret_data" {
+			t.Errorf("got %q, want %q", got, "secret_data")
+		}
+	})
+
+	t.Run("path through multi-item Array returns empty string", func(t *testing.T) {
+		t.Parallel()
+		// containers is an Array of NestedObjects without MaxSize:1 — invalid for ExactlyOneOf.
+		// The path should return "" when traversing through it.
+		p := &api.Product{Name: "TestProduct"}
+		res := &api.Resource{Name: "TestResource", ProductMetadata: p}
+		containersProp := &api.Type{
+			Name:             "containers",
+			Type:             "Array",
+			ResourceMetadata: res,
+			ItemType: &api.Type{
+				Name: "containers",
+				Type: "NestedObject",
+				Properties: []*api.Type{
+					{Name: "livenessProbe", Type: "NestedObject", Properties: []*api.Type{
+						{Name: "grpc", Type: "NestedObject", Properties: []*api.Type{}},
+					}},
+				},
+			},
+		}
+		res.Properties = []*api.Type{containersProp}
+
+		got := containersProp.GetPropertySchemaPath("containers.0.livenessProbe.0.grpc")
+		if got != "" {
+			t.Errorf("expected empty string for path through multi-item list, got %q", got)
+		}
+	})
+
+	t.Run("path through Array with MaxSize:1 is not blocked", func(t *testing.T) {
+		t.Parallel()
+		maxOne := 1
+		// For Array with MaxSize:1, the guard should NOT trigger.
+		// We verify this by checking the path for a known multi-item Array returns ""
+		// while a MaxSize:1 Array does not return "" at that segment.
+		// (Full path resolution for Array MaxSize:1 requires fully initialized types;
+		// this test confirms the guard condition on MaxSize.)
+		p := &api.Product{Name: "TestProduct"}
+		res := &api.Resource{Name: "TestResource", ProductMetadata: p}
+		arrayPropWithMax := &api.Type{
+			Name:             "spec",
+			Type:             "Array",
+			MaxSize:          &maxOne,
+			ResourceMetadata: res,
+			ItemType: &api.Type{
+				Name: "spec",
+				Type: "NestedObject",
+				Properties: []*api.Type{
+					{Name: "serviceAccount", Type: "String"},
+				},
+			},
+		}
+		arrayPropWithMax.ItemType.ResourceMetadata = res
+		arrayPropWithoutMax := &api.Type{
+			Name:             "containers",
+			Type:             "Array",
+			ResourceMetadata: res,
+			ItemType: &api.Type{
+				Name: "containers",
+				Type: "NestedObject",
+				Properties: []*api.Type{
+					{Name: "image", Type: "String"},
+				},
+			},
+		}
+		res.Properties = []*api.Type{arrayPropWithMax, arrayPropWithoutMax}
+
+		// MaxSize:1 — guard should not fire; path should not return "" at "spec" level
+		// (we only check the guard doesn't prematurely return "")
+		gotWithMax := res.Properties[0].GetPropertySchemaPath("spec.0.serviceAccount")
+		if gotWithMax == "" {
+			t.Errorf("expected non-empty path for Array with MaxSize:1, got empty string")
+		}
+
+		// No MaxSize — guard should fire, return ""
+		gotWithoutMax := res.Properties[1].GetPropertySchemaPath("containers.0.image")
+		if gotWithoutMax != "" {
+			t.Errorf("expected empty string for path through multi-item list, got %q", gotWithoutMax)
+		}
+	})
+}
+
 func TestSamplePrimaryResourceId(t *testing.T) {
 	t.Parallel()
 
