@@ -697,4 +697,3 @@ resource "google_colab_schedule" "all_fields_schedule" {
 }
 `, context)
 }
-
