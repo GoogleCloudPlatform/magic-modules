@@ -17,6 +17,8 @@ display_name: Network Services
 scopes:
   - https://www.googleapis.com/auth/cloud-identity
 versions:
+  - name: alpha
+    base_url: https://networkservices.googleapis.com/v1alpha1/
   - name: beta
     base_url: https://networkservices.googleapis.com/v1/
   - name: ga
