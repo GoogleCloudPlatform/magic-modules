@@ -1,0 +1,80 @@
+data "google_project" "project" {}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_compute_network" "my_network" {
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "my_subnetwork" {
+  name          = "{{index $.ResourceIdVars "network_name"}}"
+  network       = google_compute_network.my_network.id
+  region        = "us-central1"
+  ip_cidr_range = "10.0.1.0/24"
+}
+
+resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
+  display_name             = "{{index $.Vars "display_name"}}"
+  location                 = "us-central1"
+  max_concurrent_run_count = {{index $.Vars "max_concurrent_run_count"}}
+  cron                     = "{{index $.Vars "cron"}}"
+  start_time               = "2030-01-01T00:00:00Z"
+
+  create_notebook_execution_job_request {
+    notebook_execution_job_id = "job-id"
+    parent                    = "projects/${data.google_project.project.project_id}/locations/us-central1"
+    notebook_execution_job {
+      display_name   = "test-notebook-execution-job"
+      gcs_output_uri  = "gs://${google_storage_bucket.bucket.name}"
+      execution_user = "user@example.com"
+      kernel_name    = "python3"
+
+      direct_notebook_source {
+        content = "ewogICJjZWxscyI6IFtdLAogICJtZXRhZGF0YSI6IHt9LAogICJuYmZvcm1hdCI6IDQsCiAgIm5iZm9ybWF0X21pbm9yIjogMAp9Cg=="
+      }
+
+      custom_environment_spec {
+        machine_spec {
+          machine_type             = "n1-standard-4"
+          accelerator_type         = "NVIDIA_TESLA_T4"
+          accelerator_count        = 1
+          gpu_partition_size       = "1g.10gb"
+          tpu_topology             = "2x2"
+          reservation_affinity {
+            reservation_affinity_type = "NO_RESERVATION"
+            key                       = "reservation-key"
+            values                    = ["reservation-val"]
+            use_reservation_pool      = false
+          }
+        }
+        persistent_disk_spec {
+          disk_size_gb = "100"
+          disk_type    = "pd-standard"
+        }
+        network_spec {
+          enable_internet_access = true
+          network                = google_compute_network.my_network.id
+          subnetwork             = google_compute_subnetwork.my_subnetwork.id
+        }
+      }
+
+      encryption_spec {
+        kms_key_name = "{{index $.ResourceIdVars "key_name"}}"
+      }
+
+      labels = {
+        test = "value"
+      }
+
+      parameters = {
+        param1 = "val1"
+      }
+    }
+  }
+}

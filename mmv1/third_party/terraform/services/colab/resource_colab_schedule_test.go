@@ -248,6 +248,7 @@ resource "google_colab_schedule" "schedule" {
   location = "%{location}"
   allow_queueing = true
   max_concurrent_run_count = 2
+  max_concurrent_active_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
   start_time = "%{start_time}"
@@ -344,6 +345,7 @@ resource "google_colab_schedule" "schedule" {
   location = "%{location}"
   allow_queueing = true
   max_concurrent_run_count = 2
+  max_concurrent_active_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
   start_time = "%{start_time}"
@@ -442,6 +444,7 @@ resource "google_colab_schedule" "schedule" {
   location = "%{location}"
   allow_queueing = true
   max_concurrent_run_count = 2
+  max_concurrent_active_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
   start_time = "%{start_time}"
@@ -540,6 +543,7 @@ resource "google_colab_schedule" "schedule" {
   location = "%{location}"
   allow_queueing = false
   max_concurrent_run_count = 1
+  max_concurrent_active_run_count = 1
   cron = "TZ=America/Los_Angeles 0 * * * *"
   max_run_count = 3
   start_time = "%{updated_start_time}"
@@ -566,135 +570,3 @@ resource "google_colab_schedule" "schedule" {
 }
 `, context)
 }
-
-func TestAccColabSchedule_allFields(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"location":        envvar.GetTestRegionFromEnv(),
-		"project_id":      envvar.GetTestProjectFromEnv(),
-		"service_account": envvar.GetTestServiceAccountFromEnv(t),
-		"random_suffix":   acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccColabSchedule_allFields(context),
-			},
-		},
-	})
-}
-
-func testAccColabSchedule_allFields(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_compute_network" "my_network" {
-  name                    = "tf-test-network%{random_suffix}"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "my_subnetwork" {
-  name          = "tf-test-subnetwork%{random_suffix}"
-  network       = google_compute_network.my_network.id
-  region        = "us-central1"
-  ip_cidr_range = "10.0.1.0/24"
-}
-
-resource "google_colab_schedule" "all_fields_schedule" {
-  display_name             = "tf-test-schedule%{random_suffix}"
-  location                 = "%{location}"
-  max_concurrent_run_count = 2
-  cron                     = "TZ=America/Los_Angeles * * * * *"
-
-  create_notebook_execution_job_request {
-    notebook_execution_job_id = "job-id"
-    parent                    = "projects/%{project_id}/locations/%{location}"
-    notebook_execution_job {
-      display_name   = "Notebook execution"
-      gcs_output_uri = "gs://my-bucket"
-      execution_user = "user@example.com"
-      kernel_name    = "python3"
-
-      direct_notebook_source {
-        content = "ewogICJjZWxscyI6IFtdLAogICJtZXRhZGF0YSI6IHt9LAogICJuYmZvcm1hdCI6IDQsCiAgIm5iZm9ybWF0X21pbm9yIjogMAp9Cg=="
-      }
-
-      custom_environment_spec {
-        machine_spec {
-          machine_type       = "n1-standard-4"
-          accelerator_type   = "NVIDIA_TESLA_T4"
-          accelerator_count  = 1
-          gpu_partition_size = "1g.10gb"
-          tpu_topology       = "2x2"
-          reservation_affinity {
-            key                       = "reservation-key"
-            reservation_affinity_type = "NO_RESERVATION"
-            use_reservation_pool      = false
-            values                    = ["reservation-val"]
-          }
-        }
-        network_spec {
-          enable_internet_access = true
-          network                = google_compute_network.my_network.id
-          subnetwork             = google_compute_subnetwork.my_subnetwork.id
-        }
-        persistent_disk_spec {
-          disk_size_gb = "100"
-          disk_type    = "pd-standard"
-        }
-      }
-
-      encryption_spec {
-        kms_key_name = "projects/%{project_id}/locations/%{location}/keyRings/my-keyring/cryptoKeys/my-key"
-      }
-
-      labels = {
-        test = "value"
-      }
-
-      parameters = {
-        param1 = "val1"
-      }
-    }
-  }
-
-  create_pipeline_job_request {
-    pipeline_job_id = "pipeline-job-id"
-    parent          = "projects/%{project_id}/locations/%{location}"
-    pipeline_job {
-      display_name       = "test-pipeline-job"
-      network            = google_compute_network.my_network.id
-      service_account    = "%{service_account}"
-      template_uri       = "https://us-kfp.pkg.dev/proj/repo/template/v1"
-      reserved_ip_ranges = ["vertex-ai-ip-range"]
-
-      encryption_spec {
-        kms_key_name = "projects/%{project_id}/locations/%{location}/keyRings/my-keyring/cryptoKeys/my-key"
-      }
-
-      psc_interface_config {
-        network_attachment = "projects/%{project_id}/regions/us-central1/networkAttachments/my-attachment"
-        dns_peering_configs {
-          domain         = "my-internal-domain.corp."
-          target_network = google_compute_network.my_network.id
-          target_project = "%{project_id}"
-        }
-      }
-
-      runtime_config {
-        gcs_output_directory = "gs://my-bucket/pipeline_root"
-        input_artifacts = {
-          artifact1 = "val1"
-        }
-        parameter_values = {
-          param1 = "val1"
-        }
-      }
-    }
-  }
-}
-`, context)
-}
-

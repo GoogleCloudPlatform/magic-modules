@@ -90,12 +90,37 @@ samples:
           end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
           # for backward compatible
           secret: '"secret" + randomSuffix'
+  - name: colab_schedule_notebook_full
+    primary_resource_id: schedule
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    steps:
+      - name: colab_schedule_notebook_full
+        resource_id_vars:
+          bucket: 'my_bucket'
+          network_name: 'colab-test-default'
+          key_name: 'my-key'
+        vars:
+          display_name: 'full-notebook-schedule'
+          max_concurrent_run_count: 2
+          cron: '*/5 * * * *'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+          location: 'REGION'
+        test_vars_overrides:
+          key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
   - name: colab_schedule_pipeline
     primary_resource_id: schedule
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     steps:
       - name: colab_schedule_pipeline
         resource_id_vars:
           pipeline_job_id: pipeline-job
+          network_name: 'colab-test-default'
+          key_name: 'my-key'
         vars:
           display_name: test-schedule
           max_concurrent_run_count: 2
@@ -107,9 +132,13 @@ samples:
           preflight_validations: true
           pipeline_job_label_value: value-one
           failure_policy: PIPELINE_FAILURE_POLICY_FAIL_FAST
+        test_vars_overrides:
+          key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       - name: colab_schedule_pipeline
         resource_id_vars:
           pipeline_job_id: pipeline-job
+          network_name: 'colab-test-default'
+          key_name: 'my-key'
         vars:
           display_name: test-schedule-updated
           max_concurrent_run_count: 3
@@ -121,23 +150,8 @@ samples:
           preflight_validations: false
           pipeline_job_label_value: value-updated
           failure_policy: PIPELINE_FAILURE_POLICY_FAIL_SLOW
-  - name: colab_schedule_notebook
-    primary_resource_id: schedule
-    steps:
-      - name: colab_schedule_notebook
-        resource_id_vars:
-          pipeline_job_id: notebook-job
-        vars:
-          display_name: test-schedule-notebook
-          max_concurrent_run_count: 2
-          cron: '*/5 * * * *'
-      - name: colab_schedule_notebook
-        resource_id_vars:
-          pipeline_job_id: notebook-job
-        vars:
-          display_name: test-schedule-notebook-updated
-          max_concurrent_run_count: 3
-          cron: '*/10 * * * *'
+        test_vars_overrides:
+          key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 virtual_fields:
   - name: 'desired_state'
     description: |
