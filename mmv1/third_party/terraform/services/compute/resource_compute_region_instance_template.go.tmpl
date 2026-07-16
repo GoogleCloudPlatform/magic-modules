@@ -2,9 +2,6 @@
 package compute
 
 import (
-{{- if ne $.TargetVersionName `ga` }}
-	"encoding/json"
-{{- end }}
 	"fmt"
 	"strings"
 	"time"
@@ -1577,21 +1574,6 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		properties = make(map[string]interface{})
 	}
 
-	// Set the metadata fingerprint if there is one.
-	if instanceTemplate.Properties.Metadata != nil {
-		if err = d.Set("metadata_fingerprint", instanceTemplate.Properties.Metadata.Fingerprint); err != nil {
-			return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
-		}
-
-		metadata := instanceTemplate.Properties.Metadata
-		var metadataMap map[string]interface{}
-		if metadata != nil {
-			var convErr error
-			if metadataMap, convErr = tpgresource.ConvertToMap(metadata); convErr != nil {
-				return fmt.Errorf("Error converting metadata: %s", convErr)
-			}
-		}
-		_md := flattenMetadataBeta(metadataMap)
 	if properties["metadata"] != nil {
 		mdRaw, _ := properties["metadata"].(map[string]interface{})
 		if fingerprint, ok := mdRaw["fingerprint"].(string); ok {
@@ -1915,6 +1897,3 @@ func init() {
 		Schema: ResourceComputeRegionInstanceTemplate(),
 	}.Register()
 }
-
-
-

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -56,8 +57,6 @@ var (
 	}
 )
 
-var DEFAULT_SCRATCH_DISK_SIZE_GB = 375
-var VALID_SCRATCH_DISK_SIZES_GB = []int{375, 3000, 3500, 7000, 14000}
 
 func ResourceComputeInstanceTemplate() *schema.Resource {
 	return &schema.Resource{
@@ -1871,6 +1870,80 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 func resourceComputeInstanceTemplateUpdate(d *schema.ResourceData, meta interface{}) error {
 	// Only the field "labels" and "terraform_labels" is mutable
 	return resourceComputeInstanceTemplateRead(d, meta)
+}
+
+func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultProject string) (map[string]interface{}, error) {
+	diskMap := make(map[string]interface{})
+
+
+	// These values are not returned by the API, so we copy them from the config.
+	diskMap["source_image_encryption_key"] = configDisk["source_image_encryption_key"]
+	diskMap["source_snapshot"] = configDisk["source_snapshot"]
+	diskMap["source_snapshot_encryption_key"] = configDisk["source_snapshot_encryption_key"]
+
+	if disk.InitializeParams != nil {
+		if disk.InitializeParams.SourceImage != "" {
+			path, err := resolveImageRefToRelativeURI(defaultProject, disk.InitializeParams.SourceImage)
+			if err != nil {
+				return nil, errwrap.Wrapf("Error expanding source image input to relative URI: {{"{{"}}err{{"}}"}}", err)
+			}
+			diskMap["source_image"] = path
+		} else {
+			diskMap["source_image"] = ""
+		}
+		diskMap["disk_type"] = disk.InitializeParams.DiskType
+		diskMap["provisioned_iops"] = disk.InitializeParams.ProvisionedIops
+		diskMap["provisioned_throughput"] = disk.InitializeParams.ProvisionedThroughput
+		diskMap["disk_name"] = disk.InitializeParams.DiskName
+		diskMap["labels"] = disk.InitializeParams.Labels
+		// The API does not return a disk size value for scratch disks. They are largely only one size,
+		// so we can assume that size here. Prefer disk.DiskSizeGb over the deprecated
+		// disk.InitializeParams.DiskSizeGb.
+		if disk.DiskSizeGb == 0 && disk.InitializeParams.DiskSizeGb == 0 && disk.Type == "SCRATCH" {
+			diskMap["disk_size_gb"] = DEFAULT_SCRATCH_DISK_SIZE_GB
+		} else if disk.DiskSizeGb != 0 {
+			diskMap["disk_size_gb"] = disk.DiskSizeGb
+		} else {
+			diskMap["disk_size_gb"] = disk.InitializeParams.DiskSizeGb
+		}
+		diskMap["resource_policies"] = disk.InitializeParams.ResourcePolicies
+		diskMap["resource_manager_tags"] = disk.InitializeParams.ResourceManagerTags
+		if disk.InitializeParams.StoragePool != "" {
+    		diskMap["storage_pool"] = tpgresource.GetResourceNameFromSelfLink(disk.InitializeParams.StoragePool)
+		}
+	}
+
+	if disk.DiskEncryptionKey != nil {
+		encryption := make([]map[string]interface{}, 1)
+		encryption[0] = make(map[string]interface{})
+		encryption[0]["kms_key_self_link"] = disk.DiskEncryptionKey.KmsKeyName
+		if diskEncryptionKey, ok := configDisk["disk_encryption_key"].([]interface{}); ok && len(diskEncryptionKey) > 0 {
+			if encryptionKeyMap, ok := diskEncryptionKey[0].(map[string]interface{}); ok {
+				if kmsSa, ok := encryptionKeyMap["kms_key_service_account"].(string); ok && kmsSa != "" {
+					encryption[0]["kms_key_service_account"] = kmsSa
+				}
+			}
+		}
+		diskMap["disk_encryption_key"] = encryption
+	}
+
+	guestOsFeaturesSlice := make([]interface{}, 0, len(disk.GuestOsFeatures))
+	for _, f := range disk.GuestOsFeatures {
+		if f != nil && f.Type != "" {
+			guestOsFeaturesSlice = append(guestOsFeaturesSlice, map[string]interface{}{"type": f.Type})
+		}
+	}
+	diskMap["auto_delete"] = disk.AutoDelete
+	diskMap["boot"] = disk.Boot
+	diskMap["device_name"] = disk.DeviceName
+	diskMap["interface"] = disk.Interface
+	diskMap["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
+	diskMap["mode"] = disk.Mode
+	diskMap["type"] = disk.Type
+	diskMap["guest_os_features"] = flattenComputeInstanceGuestOsFeatures(guestOsFeaturesSlice)
+	diskMap["architecture"] = configDisk["architecture"]
+
+	return diskMap, nil
 }
 
 func flattenDisks(disks []*compute.AttachedDisk, d *schema.ResourceData, defaultProject string) ([]map[string]interface{}, error) {
