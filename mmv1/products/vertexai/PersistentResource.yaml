@@ -45,7 +45,7 @@ samples:
   - name: vertex_ai_persistent_resource_autoscaling
     primary_resource_id: persistent_resource
     steps:
-      - name: vertex_ai_persistent_resource
+      - name: vertex_ai_persistent_resource_autoscaling
         resource_id_vars:
           persistent_resource_id: example-persistent-resource
   - name: vertex_ai_persistent_resource_full
