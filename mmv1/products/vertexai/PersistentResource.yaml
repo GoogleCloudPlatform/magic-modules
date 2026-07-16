@@ -429,15 +429,6 @@ properties:
           A developer-facing error message, which should be in English. Any
           user-facing error message should be localized and sent in the
           google.rpc.Status.details field, or localized by the client.
-      - name: details
-        type: Array
-        output: true
-        description: |-
-          A list of messages that carry the error details.  There is a common set of
-          message types for APIs to use.
-        item_type:
-          type: NestedObject
-          properties: []
   - name: createTime
     type: String
     description: Time when the PersistentResource was created.
