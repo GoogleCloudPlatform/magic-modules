@@ -18,7 +18,7 @@ references:
   guides:
     Create Regional Multicast Domain Activation: https://docs.cloud.google.com/vpc/docs/multicast/create-domains#activate-domain
   api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.regionalMulticastDomainActivations
-min_version: nightly
+min_version: alpha
 base_url: projects/{{project}}/locations/{{location}}/regionalMulticastDomainActivations
 self_link: projects/{{project}}/locations/{{location}}/regionalMulticastDomainActivations/{{regional_multicast_domain_activation_id}}
 create_url: projects/{{project}}/locations/{{location}}/regionalMulticastDomainActivations?regionalMulticastDomainActivationId={{regional_multicast_domain_activation_id}}

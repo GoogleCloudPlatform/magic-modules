@@ -18,7 +18,7 @@ references:
   guides:
     Create Regional Multicast Consumer Association: https://docs.cloud.google.com/vpc/docs/multicast/enable-consumer-network#add-consumer
   api: https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.regionalMulticastConsumerAssociations
-min_version: nightly
+min_version: alpha
 base_url: projects/{{project}}/locations/{{location}}/regionalMulticastConsumerAssociations
 self_link: projects/{{project}}/locations/{{location}}/regionalMulticastConsumerAssociations/{{regional_multicast_consumer_association_id}}
 create_url: projects/{{project}}/locations/{{location}}/regionalMulticastConsumerAssociations?regionalMulticastConsumerAssociationId={{regional_multicast_consumer_association_id}}
