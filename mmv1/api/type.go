@@ -1510,9 +1510,6 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	return strings.Join(pathTkns[:], ".0.")
 }
 
-// findPropByNameInFlattenedList searches for a property by name in a list of properties,
-// also searching recursively inside any FlattenObject nested objects (since those appear
-// as top-level fields in the schema).
 func findPropByNameInFlattenedList(props []*Type, name string) *Type {
 	for _, p := range props {
 		if p.Name == name {
