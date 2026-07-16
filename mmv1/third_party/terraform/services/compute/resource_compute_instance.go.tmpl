@@ -1001,7 +1001,7 @@ func ResourceComputeInstance() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: `Whether deletion protection is enabled on this instance.`,
+				Description: `Whether deletion protection is enabled on this instance. When enabled, the instance cannot be deleted until deletion protection is disabled.`,
 			},
 
 			"enable_display": {
