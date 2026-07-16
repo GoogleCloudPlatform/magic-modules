@@ -1504,11 +1504,12 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 		nestedProps = prop.NestedProperties()
 		if !prop.FlattenObject {
 			pathTkns = append(pathTkns, google.Underscore(pname))
-			// ExactlyOneOf/ConflictsWith/etc. paths are only valid through TypeList
-			// blocks with MaxItems:1. Terminal array fields like budget_filter.0.projects
-			// are valid references, but non-terminal array segments like containers.0.grpc
-			// are not. Return early only for non-terminal multi-item arrays.
-			if idx < len(segments)-1 && prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
+			// Constraint paths can only pass through single-item lists (MaxItems:1).
+			// If this array segment is non-terminal (not the last segment) and can
+			// hold multiple items, drop the path as unsupported.
+			isNonTerminalSegment := idx < len(segments)-1
+			isUnsupportedArraySegment := prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1)
+			if isNonTerminalSegment && isUnsupportedArraySegment {
 				return ""
 			}
 		}
