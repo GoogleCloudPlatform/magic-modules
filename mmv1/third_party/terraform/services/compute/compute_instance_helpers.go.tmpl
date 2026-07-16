@@ -185,6 +185,10 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 	if v, ok := original["min_node_cpus"]; ok && v.(int) != 0 {
 		result["minNodeCpus"] = int64(v.(int))
 	}
+
+	if v, ok := original["location_hint"]; ok {
+		scheduling.LocationHint = v.(string)
+	}
 	if v, ok := original["provisioning_model"]; ok {
 		result["provisioningModel"] = v.(string)
 	}
@@ -453,6 +457,10 @@ func flattenScheduling(resp map[string]interface{}) []map[string]interface{} {
 		}
 	}
 	schedulingMap["node_affinities"] = nodeAffinities
+
+	if resp.LocationHint != "" {
+		schedulingMap["location_hint"] = resp.LocationHint
+	}
 
 	return []map[string]interface{}{schedulingMap}
 }
