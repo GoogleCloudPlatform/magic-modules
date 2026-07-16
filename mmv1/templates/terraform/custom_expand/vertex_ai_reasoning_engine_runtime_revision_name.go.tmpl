@@ -1,0 +1,56 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	s, ok := v.(string)
+	if !ok || s == "" {
+		return v, nil
+	}
+
+	// Keyword resolution for LATEST or PREVIOUS from state
+	if s == "LATEST" || s == "PREVIOUS" {
+		var tcData interface{}
+		if rd, ok := d.(interface{ GetChange(string) (interface{}, interface{}) }); ok {
+			tcData, _ = rd.GetChange("traffic_config")
+		} else if tc, ok := d.GetOk("traffic_config"); ok {
+			tcData = tc
+		}
+		if tcList, ok := tcData.([]interface{}); ok && len(tcList) > 0 && tcList[0] != nil {
+			tcMap := tcList[0].(map[string]interface{})
+			if tsm, ok := tcMap["traffic_split_manual"]; ok {
+				if tsmList, ok := tsm.([]interface{}); ok && len(tsmList) > 0 && tsmList[0] != nil {
+					tsmMap := tsmList[0].(map[string]interface{})
+					if targets, ok := tsmMap["targets"]; ok {
+						if targetsList, ok := targets.([]interface{}); ok {
+							var revs []string
+							for _, target := range targetsList {
+								if tMap, ok := target.(map[string]interface{}); ok {
+									if rev, ok := tMap["runtime_revision_name"].(string); ok && rev != "" && rev != "LATEST" && rev != "PREVIOUS" {
+										revs = append(revs, rev)
+									}
+								}
+							}
+							if s == "LATEST" && len(revs) > 0 {
+								s = revs[len(revs)-1]
+							} else if s == "PREVIOUS" && len(revs) > 1 {
+								s = revs[len(revs)-2]
+							} else if s == "PREVIOUS" && len(revs) == 1 {
+								s = revs[0]
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Expand short revision names into full resource URIs
+	if !strings.HasPrefix(s, "projects/") && !strings.Contains(s, "/runtimeRevisions/") {
+		resName, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/reasoningEngines/{{"{{"}}name{{"}}"}}")
+		if err == nil && resName != "" {
+			return fmt.Sprintf("%s/runtimeRevisions/%s", resName, s), nil
+		}
+	}
+
+	return s, nil
+}

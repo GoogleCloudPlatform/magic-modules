@@ -1,0 +1,22 @@
+func vertexAiReasoningEngineRuntimeRevisionNameDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if old == new {
+		return true
+	}
+	if old == "" || new == "" {
+		return false
+	}
+
+	// Short name suffix matching (e.g., "rev-1" or "1" against full URI "projects/.../runtimeRevisions/rev-1")
+	if strings.HasSuffix(old, "/"+new) {
+		return true
+	}
+
+	// Keyword matching for LATEST or PREVIOUS
+	if new == "LATEST" || new == "PREVIOUS" {
+		if len(old) > 0 {
+			return true
+		}
+	}
+
+	return false
+}
