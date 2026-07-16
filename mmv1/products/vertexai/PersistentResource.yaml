@@ -48,7 +48,14 @@ samples:
       - name: vertex_ai_persistent_resource_autoscaling
         resource_id_vars:
           persistent_resource_id: example-persistent-resource
-  - name: vertex_ai_persistent_resource_full
+  - name: vertex_ai_persistent_resource_machine_spec
+    exclude_test: true # Requires GPU quota
+    primary_resource_id: persistent_resource
+    steps:
+      - name: vertex_ai_persistent_resource_machine_spec
+        resource_id_vars:
+          persistent_resource_id: example-persistent-resource
+  - name: vertex_ai_persistent_resource_network
     primary_resource_id: persistent_resource
     external_providers: [time]
     bootstrap_iam:
@@ -59,7 +66,7 @@ samples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
         role: "roles/dns.peer"
     steps:
-      - name: vertex_ai_persistent_resource_full
+      - name: vertex_ai_persistent_resource_network
         resource_id_vars:
           persistent_resource_id: example-persistent-resource
           network_name: vertex-network

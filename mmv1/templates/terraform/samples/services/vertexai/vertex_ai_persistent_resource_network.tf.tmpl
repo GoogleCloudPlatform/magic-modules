@@ -32,13 +32,11 @@ resource "google_vertex_ai_persistent_resource" "{{.PrimaryResourceId}}" {
   resource_pools {
     id = "{{index $.ResourceIdVars "resource_pool_id"}}"
 
-    machine_spec {
-      machine_type       = "a3-highgpu-8g"
-      accelerator_count  = 8
-      accelerator_type   = "NVIDIA_H100_80GB"
-    }
-
     replica_count = "1"
+    
+    machine_spec {
+      machine_type = "n1-standard-4"
+    }
 
     disk_spec {
       boot_disk_size_gb = 200
