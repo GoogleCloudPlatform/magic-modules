@@ -56,57 +56,53 @@ samples:
           network_name: test-network-rmgpa
           domain_name: test-domain-rmgpa
           domain_activation_name: test-domain-activation-rmgpa
-          producer_association_name: test-producer-association-rmgpa
-          internal_range_name: test-internal-range-rmgpa
           group_range_name: test-group-range-rmgpa
-          group_range_activation_name: test-rmgra-rmgpa
-          group_producer_activation_name: test-rmgpa-rmgpa
+          group_range_activation_name: test-group-range-activation-rmgpa
+          producer_association_name: test-producer-association-rmgpa
+          group_producer_activation_name: test-group-producer-activation-rmgpa
 parameters:
   - name: location
     type: String
+    required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
   - name: regionalMulticastGroupProducerActivationId
     type: String
+    required: true
     description: |-
       A unique name for the regional multicast group producer activation.
-      The name is restricted to letters, numbers, and hyphen, with the first
-      character a letter, and the last a letter or a number. The name must not
-      exceed 48 characters.
+      The name is restricted to lower-case letters, numbers, and hyphen, with
+      the first character a lower-case letter, and the last a letter or a
+      number. The name must not exceed 63 characters.
     immutable: true
     url_param_only: true
-    required: true
 properties:
   - name: createTime
     type: String
-    description: The timestamp when the regional multicast group producer activation was created.
+    description: |-
+      [Output only] The timestamp when the regional multicast group producer
+      activation was created.
     output: true
   - name: description
     type: String
-    description: An optional text description of the regional multicast group producer activation.
+    description: |-
+      An optional text description of the regional multicast group producer
+      activation.
+  - name: interconnectAttachments
+    type: Array
+    required: true
+    description: |-
+      The resource name of the interconnect attachments that are in the same
+      region as this regional multicast group producer activation and
+      are used with the on-premises multicast source.
+      These attachments must have multicast functionality enabled.
+      Use the following format: `projects/*/regions/*/interconnectAttachments/*`.
+    item_type:
+      type: String
   - name: labels
     type: KeyValueLabels
     description: Labels as key-value pairs
-  - name: regionalMulticastGroupRangeActivation
-    type: String
-    description: |-
-      The resource name of the regional multicast group range activationcreated by the
-      admin in the same region as this regional multicast group producer activation. Use the
-      following format:
-      // `projects/*/locations/*/regionalMulticastGroupRangeActivations/*`.
-    immutable: true
-    required: true
-  - name: regionalMulticastProducerAssociation
-    type: String
-    description: |-
-      The resource name of the regional multicast producer association that is in the
-      same region as this regional multicast group producer activation.
-      Use the following format:
-      `projects/*/locations/*/regionalMulticastProducerAssociations/*`.
-    immutable: true
-    required: true
   - name: name
     type: String
     description: |-
@@ -114,6 +110,25 @@ properties:
       Use the following format:
       `projects/*/locations/*/regionalMulticastGroupProducerActivations/*`.
     output: true
+  - name: regionalMulticastGroupRangeActivation
+    type: String
+    required: true
+    description: |-
+      The resource name of the regional multicast group range activation created
+      by the admin in the same region as this regional multicast group producer
+      activation.
+      Use the following format:
+      `projects/*/locations/*/regionalMulticastGroupRangeActivations/*`.
+    immutable: true
+  - name: regionalMulticastProducerAssociation
+    type: String
+    required: true
+    description: |-
+      The resource name of the regional multicast producer association that is in
+      the same region as this regional multicast group producer activation.
+      Use the following format:
+      `projects/*/locations/*/regionalMulticastProducerAssociations/*`.
+    immutable: true
   - name: state
     type: NestedObject
     description: The multicast resource's state.
@@ -131,18 +146,20 @@ properties:
           UPDATING
           UPDATE_FAILED
           INACTIVE
+          OBSOLETE
         output: true
   - name: uniqueId
     type: String
     description: |-
-      The Google-generated UUID for the resource. This value is
-      unique across all regional multicast group producer activation resources. If a group
-      producer activation is deleted and another with the same name is created,
-      the new group producer activation is assigned a different unique_id.
+      [Output only] The Google-generated UUID for the resource. This value is
+      unique across all regional multicast group producer activation resources.
+      If a regional multicast group producer activation is deleted and another
+      with the same name is created, the new regional multicast group producer
+      activation is assigned a different unique_id.
     output: true
   - name: updateTime
     type: String
     description: |-
-      The timestamp when the regional multicast group producer activation
-      was most recently updated.
+      [Output only] The timestamp when the regional multicast group producer
+      activation was most recently updated.
     output: true
