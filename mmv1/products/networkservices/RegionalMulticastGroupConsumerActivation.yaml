@@ -56,50 +56,38 @@ samples:
           network_name: test-network-rmgca
           domain_name: test-domain-rmgca
           domain_activation_name: test-domain-activation-rmgca
-          group_range_name: test-group-range-rmgca
-          group_range_activation_name: test-group-range-activation-rmgca
           consumer_association_name: test-consumer-association-rmgca
-          group_consumer_activation_name: test-group-consumer-activation-rmgca
+          internal_range_name: test-internal-range-rmgca
+          group_range_name: test-group-range-rmgca
+          group_range_activation_name: test-rmgra-rmgca
+          group_consumer_activation_name: test-rmgca-rmgca
 parameters:
   - name: location
     type: String
-    required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
+    required: true
   - name: regionalMulticastGroupConsumerActivationId
     type: String
-    required: true
     description: |-
       A unique name for the regional multicast group consumer activation.
-      The name is restricted to lower-case letters, numbers, and hyphen, with
-      the first character a lower-case letter, and the last a letter or a
-      number. The name must not exceed 63 characters.
+      The name is restricted to letters, numbers, and hyphen, with the first
+      character a letter, and the last a letter or a number. The name must not
+      exceed 48 characters.
     immutable: true
     url_param_only: true
+    required: true
 properties:
   - name: createTime
     type: String
     description: |-
-      [Output only] The timestamp when the regional multicast group consumer
-      activation was created.
+      The timestamp when the regional multicast group consumer activation
+      was created.
     output: true
   - name: description
     type: String
-    description: |-
-      An optional text description of the regional multicast group consumer
-      activation.
-  - name: interconnectAttachments
-    type: Array
-    required: true
-    description: |-
-      The resource name of the interconnect attachments that are in the same
-      region as this regional multicast group consumer activation and are used by
-      on-premises consumers to receive multicast traffic.
-      These attachments must have multicast functionality enabled.
-      Use the following format: `projects/*/regions/*/interconnectAttachments/*`.
-    item_type:
-      type: String
+    description: An optional text description of the regional multicast group consumer activation.
   - name: labels
     type: KeyValueLabels
     description: Labels as key-value pairs
@@ -110,6 +98,24 @@ properties:
       - name: enabled
         type: Boolean
         description: Whether to enable logging or not.
+  - name: regionalMulticastConsumerAssociation
+    type: String
+    description: |-
+      The resource name of the regional multicast consumer association that is in the
+      same region as this regional multicast group consumer activation.
+      Use the following format:
+      `projects/*/locations/*/regionalMulticastConsumerAssociations/*`.
+    immutable: true
+    required: true
+  - name: regionalMulticastGroupRangeActivation
+    type: String
+    description: |-
+      The resource name of the regional multicast group range activation created by the
+      admin in the same region as this regional multicast group consumer activation. Use the
+      following format:
+      // `projects/*/locations/*/regionalMulticastGroupRangeActivations/*`.
+    immutable: true
+    required: true
   - name: name
     type: String
     description: |-
@@ -117,25 +123,6 @@ properties:
       Use the following format:
       `projects/*/locations/*/regionalMulticastGroupConsumerActivations/*`.
     output: true
-  - name: regionalMulticastConsumerAssociation
-    type: String
-    required: true
-    description: |-
-      The resource name of the regional multicast consumer association that is in
-      the same region as this regional multicast group consumer activation.
-      Use the following format:
-      `projects/*/locations/*/regionalMulticastConsumerAssociations/*`.
-    immutable: true
-  - name: regionalMulticastGroupRangeActivation
-    type: String
-    required: true
-    description: |-
-      The resource name of the regional multicast group range activation created
-      by the admin in the same region as this regional multicast group consumer
-      activation.
-      Use the following format:
-      `projects/*/locations/*/regionalMulticastGroupRangeActivations/*`.
-    immutable: true
   - name: state
     type: NestedObject
     description: The multicast resource's state.
@@ -153,20 +140,18 @@ properties:
           UPDATING
           UPDATE_FAILED
           INACTIVE
-          OBSOLETE
         output: true
   - name: uniqueId
     type: String
     description: |-
-      [Output only] The Google-generated UUID for the resource. This value is
-      unique across all regional multicast group consumer activation resources.
-      If a regional multicast group consumer activation is deleted and another
-      with the same name is created, the new regional multicast group consumer
-      activation is assigned a different unique_id.
+      The Google-generated UUID for the resource. This value is
+      unique across all regional multicast group consumer activation resources. If a group
+      consumer activation is deleted and another with the same name is created,
+      the new group consumer activation is assigned a different unique_id.
     output: true
   - name: updateTime
     type: String
     description: |-
-      [Output only] The timestamp when the regional multicast group consumer
-      activation was most recently updated.
+      The timestamp when the regional multicast group consumer activation
+      was most recently updated.
     output: true

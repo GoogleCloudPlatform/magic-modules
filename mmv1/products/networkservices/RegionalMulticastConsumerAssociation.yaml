@@ -60,35 +60,42 @@ samples:
 parameters:
   - name: location
     type: String
-    required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
+    required: true
   - name: regionalMulticastConsumerAssociationId
     type: String
-    required: true
     description: |-
       A unique name for the regional multicast consumer association.
-      The name is restricted to lower-case letters, numbers, and hyphen, with
-      the first character a lower-case letter, and the last a letter or a
-      number. The name must not exceed 63 characters.
+      The name is restricted to letters, numbers, and hyphen, with the first
+      character a letter, and the last a letter or a number. The name must not
+      exceed 48 characters.
     immutable: true
     url_param_only: true
+    required: true
 properties:
   - name: createTime
     type: String
     description: |-
-      [Output only] The timestamp when the regional multicast consumer
-      association was created.
+      [Output only] The timestamp when the regional multicast consumer association was
+      created.
     output: true
   - name: description
     type: String
-    description: |-
-      An optional text description of the regional multicast consumer
-      association.
+    description: An optional text description of the regional multicast consumer association.
   - name: labels
     type: KeyValueLabels
     description: Labels as key-value pairs
+  - name: regionalMulticastDomainActivation
+    type: String
+    description: |-
+      The resource name of the regional multicast domain activation that is in the
+      same region as this regional multicast consumer association.
+      Use the following format:
+      // `projects/*/locations/*/regionalMulticastDomainActivations/*`.
+    immutable: true
+    required: true
   - name: name
     type: String
     description: |-
@@ -98,21 +105,21 @@ properties:
     output: true
   - name: network
     type: String
-    required: true
     description: |-
       The resource name of the multicast consumer VPC network.
       Use following format:
       `projects/{project}/locations/global/networks/{network}`.
     immutable: true
-  - name: regionalMulticastDomainActivation
-    type: String
     required: true
+  - name: placementPolicy
+    type: String
     description: |-
-      The resource name of the regional multicast domain activation that is in
-      the same region as this regional multicast consumer association.
-      Use the following format:
-      `projects/*/locations/*/regionalMulticastDomainActivations/*`.
-    immutable: true
+      [Output only] A Compute Engine (placement
+      policy)[https://cloud.google.com/compute/docs/instances/placement-policies-overview]
+      that can be used to place virtual machine (VM) instances as multicast
+      consumers close to the multicast infrastructure created for this domain,
+      on a best effort basis.
+    output: true
   - name: state
     type: NestedObject
     description: The multicast resource's state.
@@ -130,19 +137,18 @@ properties:
           UPDATING
           UPDATE_FAILED
           INACTIVE
-          OBSOLETE
         output: true
   - name: uniqueId
     type: String
     description: |-
       [Output only] The Google-generated UUID for the resource. This value is
-      unique across all regional multicast consumer association resources. If a
-      consumer association is deleted and another with the same name is created,
-      the new consumer association is assigned a different unique_id.
+      unique across all regional multicast consumer association resources. If a consumer
+      association is deleted and another with the same name is created, the new
+      consumer association is assigned a different unique_id.
     output: true
   - name: updateTime
     type: String
     description: |-
-      [Output only] The timestamp when the regional multicast consumer
-      association was most recently updated.
+      [Output only] The timestamp when the Regional Multicast Consumer Association was
+      most recently updated.
     output: true
