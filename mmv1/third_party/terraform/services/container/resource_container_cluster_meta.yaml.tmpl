@@ -143,6 +143,8 @@ fields:
   - field: 'deletion_protection'
     provider_only: true
   - api_field: 'description'
+  - field: 'desired_emulated_version'
+    provider_only: true
   - field: 'dns_config.additive_vpc_scope_dns_domain'
     api_field: 'networkConfig.dnsConfig.additiveVpcScopeDnsDomain'
   - field: 'dns_config.cluster_dns'
@@ -153,6 +155,8 @@ fields:
     api_field: 'networkConfig.dnsConfig.clusterDnsScope'
   - field: 'effective_labels'
     provider_only: true
+  - field: 'emulated_version'
+    api_field: 'currentEmulatedVersion'
   - field: 'enable_autopilot'
     api_field: 'autopilot.enabled'
   - field: 'enable_cilium_clusterwide_network_policy'
@@ -904,6 +908,8 @@ fields:
   - api_field: 'resourceUsageExportConfig.enableNetworkEgressMetering'
   - field: 'resource_usage_export_config.enable_resource_consumption_metering'
     api_field: 'resourceUsageExportConfig.consumptionMeteringConfig.enabled'
+  - field: 'rollback_safe_upgrade.control_plane_soak_duration'
+    provider_only: true
   - api_field: 'secretManagerConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.rotationInterval'
@@ -948,10 +954,4 @@ fields:
   - field: 'skip_node_pool_refresh'
     provider_only: true
   - field: 'ignore_node_count_changes'
-    provider_only: true
-  - field: 'desired_emulated_version'
-    provider_only: true
-  - field: 'emulated_version'
-    api_field: 'currentEmulatedVersion'
-  - field: 'rollback_safe_upgrade.control_plane_soak_duration'
     provider_only: true

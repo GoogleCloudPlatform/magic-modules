@@ -1239,7 +1239,7 @@ func ResourceContainerCluster() *schema.Resource {
 						"control_plane_soak_duration": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: `A user-defined period for the cluster remains in the rollbackable state. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "2592000s" for 30 days.`,
+							Description: `A user-defined period that the cluster remains in the rollbackable state. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "604800s" for 7 days. Minimum is 6 hours, maximum is 7 days. If omitted, the two-step upgrade is skipped and a standard one-step upgrade is performed.`,
 						},
 					},
 				},
@@ -1248,7 +1248,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[0-9]+\.[0-9]+$`), "desired_emulated_version must be in major.minor format"),
-				Description:  "The desired emulated version for the cluster. Set this to complete a rollback-safe upgrade.",
+				Description:  "The desired emulated version for the cluster. Used to complete a rollback-safe upgrade after a soak period. Must be in major.minor format (e.g., \"1.31\"). To complete the upgrade declaratively, set this field to the target minor version. Removing this field from your configuration will not trigger completion.",
 			},
 
 			"emulated_version": {
