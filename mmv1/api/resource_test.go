@@ -1120,6 +1120,21 @@ func TestGetPropertySchemaPath(t *testing.T) {
 			t.Errorf("expected empty string for path through multi-item list, got %q", gotWithoutMax)
 		}
 	})
+
+	t.Run("terminal multi-item Array path is preserved", func(t *testing.T) {
+		t.Parallel()
+		res := makeRes([]*api.Type{
+			{Name: "budgetFilter", Type: "NestedObject", Properties: []*api.Type{
+				{Name: "projects", Type: "Array", ItemType: &api.Type{Type: "String"}},
+			}},
+		})
+		res.Properties[0].ResourceMetadata = res
+
+		got := res.Properties[0].GetPropertySchemaPath("budget_filter.0.projects")
+		if got != "budget_filter.0.projects" {
+			t.Errorf("got %q, want %q", got, "budget_filter.0.projects")
+		}
+	})
 }
 
 func TestSamplePrimaryResourceId(t *testing.T) {
