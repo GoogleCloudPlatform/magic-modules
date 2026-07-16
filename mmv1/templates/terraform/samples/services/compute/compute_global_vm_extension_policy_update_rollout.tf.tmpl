@@ -1,5 +1,4 @@
 resource "google_compute_global_vm_extension_policy" "{{$.PrimaryResourceId}}" {
-  provider    = google-beta
   name        = "global-ops-agent-vme-policy-%{random_suffix}"
   description = "A basic global VM extension policy"
   priority    = 10
