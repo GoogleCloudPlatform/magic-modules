@@ -89,6 +89,7 @@ samples:
           project: PROJECT_NAME
   - name: privateca_certificate_with_requested_not_before_time
     primary_resource_id: default
+    skip_vcr: true
     external_providers:
       - time
     steps:
