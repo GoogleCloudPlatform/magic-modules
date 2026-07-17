@@ -1,6 +1,3 @@
-// Copyright (c) IBM Corp. 2014, 2026
-// SPDX-License-Identifier: MPL-2.0
-
 package compute
 
 import (
@@ -70,11 +67,8 @@ func (listR *GoogleComputeInstanceListResource) List(ctx context.Context, listRe
 		return
 	}
 
-	project := listR.GetProject(data.Project)
-	zone := listR.GetZone(data.Zone)
-
 	stream.Results = func(push func(list.ListResult) bool) {
-		err := ListComputeInstances(listR.Client, project, zone, func(rd *schema.ResourceData) error {
+		err := ListComputeInstances(listR.Client, listR.GetProject(data.Project), listR.GetZone(data.Zone), func(rd *schema.ResourceData) error {
 			result := listReq.NewListResult(ctx)
 			if err := listR.SetResult(ctx, listReq.IncludeResource, &result, rd, "name"); err != nil {
 				return err
@@ -149,7 +143,6 @@ func ListComputeInstances(config *transport_tpg.Config, project, zone string, ca
 		ListURL:        url,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
-		ItemName: "items",
 		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 			return flattenComputeInstanceListItem(res, d, config, project)
 		},
