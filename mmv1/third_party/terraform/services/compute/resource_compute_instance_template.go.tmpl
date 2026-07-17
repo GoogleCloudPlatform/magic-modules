@@ -2343,37 +2343,28 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 		}
 	}
 
-	// Strip fields that shouldn't be sent if they are empty/null to match old behavior
-	if val, ok := expanded["hostErrorTimeoutSeconds"]; ok && val == nil {
-		delete(expanded, "hostErrorTimeoutSeconds")
-	}
-	if val, ok := expanded["nodeAffinities"].([]interface{}); ok && len(val) == 1 && val[0] == nil {
-		delete(expanded, "nodeAffinities")
-	}
-
 	schedulingTyped := &compute.Scheduling{}
 	if err := tpgresource.Convert(expanded, schedulingTyped); err != nil {
 		return nil, fmt.Errorf("Error converting scheduling: %s", err)
 	}
-
-	if val, ok := expanded["preemptible"].(bool); ok && val {
-		schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, "Preemptible")
-	}
-	if val, ok := expanded["onHostMaintenance"].(string); ok && val != "" {
-		schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, "OnHostMaintenance")
-	}
-	if val, ok := expanded["provisioningModel"].(string); ok && val != "" {
-		schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, "ProvisioningModel")
-	}
-	if val, ok := expanded["instanceTerminationAction"].(string); ok && val != "" {
-		schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, "InstanceTerminationAction")
-	}
-	if val, ok := expanded["skipGuestOsShutdown"].(bool); ok && val {
-		schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, "SkipGuestOsShutdown")
+	for _, pair := range [][2]string{
+		{"preemptible", "Preemptible"},
+		{"onHostMaintenance", "OnHostMaintenance"},
+		{"provisioningModel", "ProvisioningModel"},
+		{"instanceTerminationAction", "InstanceTerminationAction"},
+		{"skipGuestOsShutdown", "SkipGuestOsShutdown"},
+	} {
+		if _, ok := expanded[pair[0]]; ok {
+			schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, pair[1])
+		}
 	}
 {{- if ne $.TargetVersionName "ga" }}
-	if v, ok := expanded["hostErrorTimeoutSeconds"]; ok && v != nil {
-		schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, "HostErrorTimeoutSeconds")
+	if v, ok := expanded["hostErrorTimeoutSeconds"]; ok {
+		if v == nil {
+			schedulingTyped.NullFields = append(schedulingTyped.NullFields, "HostErrorTimeoutSeconds")
+		} else {
+			schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, "HostErrorTimeoutSeconds")
+		}
 	}
 {{- end }}
 	return schedulingTyped, nil

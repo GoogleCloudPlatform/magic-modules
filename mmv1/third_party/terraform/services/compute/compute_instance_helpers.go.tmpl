@@ -199,9 +199,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if transformedMaxRunDuration != nil {
-			result["maxRunDuration"] = transformedMaxRunDuration
-		}
+		result["maxRunDuration"] = transformedMaxRunDuration
 	}
 
 	if v, ok := original["on_instance_stop_action"]; ok {
@@ -209,9 +207,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if transformedOnInstanceStopAction != nil {
-			result["onInstanceStopAction"] = transformedOnInstanceStopAction
-		}
+		result["onInstanceStopAction"] = transformedOnInstanceStopAction
 	}
 {{- if ne $.TargetVersionName "ga" }}
 	if v, ok := original["host_error_timeout_seconds"]; ok {
@@ -233,9 +229,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if transformedGracefulShutdown != nil {
-			result["gracefulShutdown"] = transformedGracefulShutdown
-		}
+		result["gracefulShutdown"] = transformedGracefulShutdown
 	}
 
 	if v, ok := original["skip_guest_os_shutdown"]; ok {
@@ -247,9 +241,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if transformedPreemptionNoticeDuration != nil {
-			result["preemptionNoticeDuration"] = transformedPreemptionNoticeDuration
-		}
+		result["preemptionNoticeDuration"] = transformedPreemptionNoticeDuration
 	}
 {{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
@@ -257,9 +249,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if transformedLocalSsdRecoveryTimeout != nil {
-			result["localSsdRecoveryTimeout"] = transformedLocalSsdRecoveryTimeout
-		}
+		result["localSsdRecoveryTimeout"] = transformedLocalSsdRecoveryTimeout
 	}
 	if v, ok := original["termination_time"]; ok && v.(string) != "" {
 		result["terminationTime"] = v.(string)
