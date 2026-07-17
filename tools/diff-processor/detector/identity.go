@@ -13,36 +13,55 @@ import (
 type MissingIdentityInfo struct {
 	// MissingCRUD lists which CRUD functions are missing SetResourceIdentityAttributes.
 	MissingCRUD []string `json:"missingCRUD,omitempty"`
-	// MissingImportTest is true if no step uses ImportStateKind: ImportBlockWithResourceIdentity.
+	// MissingImportTest is true if no TestAcc*_importBlockWithResourceIdentity test exists.
 	MissingImportTest bool `json:"missingImportTest"`
 }
 
-// DetectMissingIdentityCoverage scans the provided resource files.
-// servicesDir must be the direct parent of the resource_*.go files.
+// DetectMissingIdentityCoverage scans resource files in servicesDir.
+// It only checks resources whose names appear in changedResources.
 func DetectMissingIdentityCoverage(servicesDir string, changedResources []string) (map[string]*MissingIdentityInfo, error) {
 	results := make(map[string]*MissingIdentityInfo)
-	for _, resourceName := range changedResources {
-		path := filepath.Join(servicesDir, "resource_"+resourceName+".go")
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			continue
+
+	changedSet := make(map[string]bool, len(changedResources))
+	for _, r := range changedResources {
+		changedSet[r] = true
+	}
+
+	err := filepath.Walk(servicesDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+		if !strings.Contains(filepath.Base(path), "resource_") {
+			return nil
+		}
+
+		baseName := filepath.Base(path)
+		resourceName := strings.TrimPrefix(baseName, "resource_")
+		resourceName = strings.TrimSuffix(resourceName, ".go")
+
+		if !changedSet[resourceName] {
+			return nil
 		}
 
 		hasIdentity, err := fileContainsIdentityBlock(path)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if !hasIdentity {
-			continue
+			return nil
 		}
 
 		missingCRUD, err := checkCRUDCoverage(path)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		missingImportTest, err := checkImportTest(path)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		if len(missingCRUD) > 0 || missingImportTest {
@@ -51,8 +70,10 @@ func DetectMissingIdentityCoverage(servicesDir string, changedResources []string
 				MissingImportTest: missingImportTest,
 			}
 		}
-	}
-	return results, nil
+		return nil
+	})
+
+	return results, err
 }
 
 func fileContainsIdentityBlock(path string) (bool, error) {
@@ -119,6 +140,9 @@ func checkCRUDCoverage(path string) ([]string, error) {
 			}
 		}
 	}
+	if currentFunc != nil {
+		functions = append(functions, currentFunc)
+	}
 
 	if err := scanner.Err(); err != nil {
 		return nil, err
@@ -148,22 +172,30 @@ func checkImportTest(resourcePath string) (bool, error) {
 	dir := filepath.Dir(resourcePath)
 	baseName := filepath.Base(resourcePath)
 	resourcePrefix := strings.TrimSuffix(baseName, ".go")
+
+	testPattern := regexp.MustCompile(`func\s+(TestAcc\w*_importBlockWithResourceIdentity)`)
+
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return true, fmt.Errorf("error reading directory %s: %w", dir, err)
 	}
+
 	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), "_test.go") || !strings.HasPrefix(entry.Name(), resourcePrefix) {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), "_test.go") {
 			continue
 		}
+		if !strings.HasPrefix(entry.Name(), resourcePrefix) {
+			continue
+		}
+
 		content, err := os.ReadFile(filepath.Join(dir, entry.Name()))
 		if err != nil {
 			return true, err
 		}
-		// Updated to check for the actual ImportStateKind configuration
-		if strings.Contains(string(content), "ImportStateKind: resource.ImportBlockWithResourceIdentity,") {
+		if testPattern.Match(content) {
 			return false, nil
 		}
 	}
+
 	return true, nil
 }
