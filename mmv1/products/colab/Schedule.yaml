@@ -103,6 +103,7 @@ samples:
           key_name: 'my-key'
         vars:
           display_name: 'full-notebook-schedule'
+          max_concurrent_run_count: 2
           cron: '*/5 * * * *'
         test_env_vars:
           project_id: 'PROJECT_NAME'
