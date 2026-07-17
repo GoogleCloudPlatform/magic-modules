@@ -1,4 +1,3 @@
-{{- if ne $.TargetVersionName "ga" -}}
 package vertexai
 
 import (
@@ -80,5 +79,3 @@ func TestUnitSGPE_PostReadDispatch_inStateBranches_no_op(t *testing.T) {
 		})
 	}
 }
-
-{{- end }}
