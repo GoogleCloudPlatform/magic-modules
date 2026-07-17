@@ -1,0 +1,13 @@
+resource "google_network_services_telemetry_policy" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.ResourceIdVars "resource_name"}}"
+  location = "global"
+  labels   = {
+    foo = "bar"
+  }
+
+  telemetry_target {
+    resources = [
+      "//staging-run.sandbox.googleapis.com/projects/{{index $.Vars "project"}}/locations/us-central1/services/my-service"
+    ]
+  }
+}
