@@ -658,6 +658,7 @@ service/networkservices-traffic-director:
   - google_network_services_service_binding
   - google_network_services_tcp_route
   - google_network_services_tls_route
+  - google_network_services_telemetry_policy
 service/notebooks:
   resources:
   - google_notebooks_.*
