@@ -120,6 +120,39 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
+	metadataMap, err := resourceInstanceMetadata(d)
+	if err != nil {
+		return fmt.Errorf("Error creating metadata: %s", err)
+	}
+	if len(metadataMap) > 0 {
+		metadataBytes, err := json.Marshal(metadataMap)
+		if err != nil {
+			return fmt.Errorf("Error marshaling metadata: %s", err)
+		}
+		if err := json.Unmarshal(metadataBytes, &instance.Metadata); err != nil {
+			return fmt.Errorf("Error setting metadata: %s", err)
+		}
+	}
+{{- if ne $.TargetVersionName "ga" }}
+	partnerMetadataMap, err := resourceInstancePartnerMetadata(d)
+	if err != nil {
+		return fmt.Errorf("Error creating partner metadata: %s", err)
+	}
+	if len(partnerMetadataMap) > 0 {
+		partnerMetadataConverted, err := convertPartnerMetadataToCompute(partnerMetadataMap)
+		if err != nil {
+			return fmt.Errorf("Error converting partner metadata: %s", err)
+		}
+		partnerMetadataBytes, err := json.Marshal(partnerMetadataConverted)
+		if err != nil {
+			return fmt.Errorf("Error marshaling partner metadata: %s", err)
+		}
+		if err := json.Unmarshal(partnerMetadataBytes, &instance.PartnerMetadata); err != nil {
+			return fmt.Errorf("Error setting partner metadata: %s", err)
+		}
+	}
+{{- end }}
+
 	sourceInstanceTemplate:= ConvertToUniqueIdWhenPresent(d.Get("source_instance_template").(string))
 	tpl, err := tpgresource.ParseInstanceTemplateFieldValue(sourceInstanceTemplate, d, config)
 	if err != nil {
@@ -181,11 +214,63 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		}
 	}
 
-	// when we make the original call to expandComputeInstance expandScheduling is called, which sets default values.
-	// However, we want the values to be read from the template instead.
+	// expandComputeInstance no longer sets Scheduling; handle it here so the user's
+	// scheduling overrides are applied. When no scheduling block is set, inherit from
+	// the instance template. When set, convert the map-based result from expandScheduling
+	// into the typed struct required by the API client.
 	if _, hasSchedule := d.GetOk("scheduling"); !hasSchedule {
 		instance.Scheduling = it.Properties.Scheduling
+	} else {
+		schedulingMap, err := expandScheduling(d.Get("scheduling"))
+		if err != nil {
+			return fmt.Errorf("Error expanding scheduling: %s", err)
+		}
+		for _, key := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "preemptionNoticeDuration"} {
+			if dur, ok := schedulingMap[key].(map[string]interface{}); ok {
+				if sec, ok := dur["seconds"]; ok {
+					dur["seconds"] = fmt.Sprintf("%d", getInt(sec))
+				}
+			}
+		}
+		if gs, ok := schedulingMap["gracefulShutdown"].(map[string]interface{}); ok {
+			if md, ok := gs["maxDuration"].(map[string]interface{}); ok {
+				if sec, ok := md["seconds"]; ok {
+					md["seconds"] = fmt.Sprintf("%d", getInt(sec))
+				}
+			}
+		}
+		schedulingBytes, err := json.Marshal(schedulingMap)
+		if err != nil {
+			return fmt.Errorf("Error marshaling scheduling: %s", err)
+		}
+		schedulingTyped := &compute.Scheduling{}
+		if err := json.Unmarshal(schedulingBytes, schedulingTyped); err != nil {
+			return fmt.Errorf("Error setting scheduling: %s", err)
+		}
+		instance.Scheduling = schedulingTyped
 	}
+
+	{{- if ne $.TargetVersionName "ga" }}
+	if pm := d.Get("partner_metadata").(map[string]interface{}); len(pm) > 0 {
+		pmRaw, err := resourceInstancePartnerMetadata(d)
+		if err != nil {
+			return fmt.Errorf("Error expanding partner_metadata: %s", err)
+		}
+		partnerMetadataConverted, err := convertPartnerMetadataToCompute(pmRaw)
+		if err != nil {
+			return fmt.Errorf("Error converting partner_metadata: %s", err)
+		}
+		if len(partnerMetadataConverted) > 0 {
+			partnerMetadataBytes, err := json.Marshal(partnerMetadataConverted)
+			if err != nil {
+				return fmt.Errorf("Error marshaling partner_metadata: %s", err)
+			}
+			if err := json.Unmarshal(partnerMetadataBytes, &instance.PartnerMetadata); err != nil {
+				return fmt.Errorf("Error setting partner_metadata: %s", err)
+			}
+		}
+	}
+	{{- end }}
 
 	// Force send all top-level fields that have been set in case they're overridden to zero values.
 	// Initialize ForceSendFields to empty so we don't get things that the instance resource

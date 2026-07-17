@@ -93,6 +93,8 @@ samples:
           sec_policy_name: 'policyruletest'
           backend_name: 'backendpolicy'
           network_name: 'test-network'
+          subnetwork_name: 'test-subnet'
+          health_check_name: 'test-health-check'
         test_vars_overrides:
           # for backward compatible
           sec_policy_name: '"policyruletest" + randomSuffix'

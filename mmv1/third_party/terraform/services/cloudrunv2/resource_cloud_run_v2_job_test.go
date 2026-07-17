@@ -6,11 +6,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/vpcaccess"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudrunv2"
-    "github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/vpcaccess"
 )
 
 func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
@@ -218,7 +219,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithDirectVPCUpdate(t *testing.T) {
 	jobName := fmt.Sprintf("tf-test-cloudrun-job%s", acctest.RandString(t, 10))
 	context := map[string]interface{}{
 		"job_name": jobName,
-		"project": envvar.GetTestProjectFromEnv(),
+		"project":  envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -476,6 +477,56 @@ func testAccCloudRunV2Job_cloudrunv2JobWithNfsVolume(context map[string]interfac
 `, context)
 }
 
+func TestAccCloudRunV2Job_cloudrunv2JobWithTags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "cloud-run-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagkey := tagKeyResult["shared_tag_key"]
+	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "cloud-run-tagvalue", sharedTagkey, org)
+
+	context := map[string]interface{}{}
+	context["random_suffix"] = acctest.RandString(t, 10)
+	context["tag_key_id"] = tagKeyResult["name"]
+	context["tag_value_id"] = tagValueResult["name"]
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2JobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2Job_cloudrunv2JobWithTags(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_job.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection", "tags"},
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2Job_cloudrunv2JobWithTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_job" "default" {
+  name     = "tf-test-cloudrun-tags-job%{random_suffix}"
+  location = "us-central1"
+  deletion_protection = false
+  tags = {
+    "%{tag_key_id}" = "%{tag_value_id}"
+  }
+  template {
+    template {
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/job"
+      }
+    }
+  }
+}
+`, context)
+}
 
 func TestAccCloudRunV2Job_cloudrunv2JobTCPProbesUpdate(t *testing.T) {
 	t.Parallel()
@@ -561,7 +612,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobGRPCProbesUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckCloudRunV2JobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccCloudRunV2Job_cloudRunJobUpdateWithEmptyGRPCStartupProbe(context),
+				Config: testAccCloudRunV2Job_cloudRunJobUpdateWithEmptyGRPCStartupProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_job.default",
@@ -570,7 +621,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobGRPCProbesUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "deletion_protection"},
 			},
 			{
-				Config:      testAccCloudRunV2Job_cloudRunJobUpdateWithGRPCStartupProbe(context),
+				Config: testAccCloudRunV2Job_cloudRunJobUpdateWithGRPCStartupProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_job.default",
@@ -812,8 +863,6 @@ resource "google_cloud_run_v2_job" "default" {
 `, context)
 }
 
-
-
 func testAccCloudRunV2Job_cloudRunJobWithDependsOn(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_run_v2_job" "default" {
@@ -884,19 +933,17 @@ resource "google_cloud_run_v2_job" "default" {
 `, context)
 }
 
-
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunV2Job_cloudrunv2JobWithStartExecutionTokenUpdate(t *testing.T) {
 	t.Parallel()
 
 	jobName := fmt.Sprintf("tf-test-cloudrun-job%s", acctest.RandString(t, 10))
 	context1 := map[string]interface{}{
 		"job_name": jobName,
-    "token": "token1",
+		"token":    "token1",
 	}
-  context2 := map[string]interface{}{
+	context2 := map[string]interface{}{
 		"job_name": jobName,
-    "token": "token2",
+		"token":    "token2",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -950,11 +997,11 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithRunExecutionTokenUpdate(t *testing.T)
 	jobName := fmt.Sprintf("tf-test-cloudrun-job%s", acctest.RandString(t, 10))
 	context1 := map[string]interface{}{
 		"job_name": jobName,
-    "token": "token1",
+		"token":    "token1",
 	}
-  context2 := map[string]interface{}{
+	context2 := map[string]interface{}{
 		"job_name": jobName,
-    "token": "token2",
+		"token":    "token2",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -962,7 +1009,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithRunExecutionTokenUpdate(t *testing.T)
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2JobDestroyProducer(t),
 		Steps: []resource.TestStep{
-      {
+			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobWithRunExecutionToken(context1),
 			},
 			{
@@ -1001,8 +1048,6 @@ func testAccCloudRunV2Job_cloudrunv2JobWithRunExecutionToken(context map[string]
   }
 `, context)
 }
-{{- end }}
-
 
 func TestAccCloudRunV2Job_cloudrunv2JobWithGpuUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)

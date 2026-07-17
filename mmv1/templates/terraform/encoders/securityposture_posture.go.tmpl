@@ -1,0 +1,29 @@
+if policySets, ok := obj["policySets"].([]interface{}); ok {
+	for _, ps := range policySets {
+		if psMap, ok := ps.(map[string]interface{}); ok {
+			if policies, ok := psMap["policies"].([]interface{}); ok {
+				for _, p := range policies {
+					if pMap, ok := p.(map[string]interface{}); ok {
+						if constraint, ok := pMap["constraint"].(map[string]interface{}); ok {
+							if opc, ok := constraint["orgPolicyConstraint"].(map[string]interface{}); ok {
+								if rules, ok := opc["policyRules"].([]interface{}); ok {
+									for _, r := range rules {
+										if rule, ok := r.(map[string]interface{}); ok {
+											_, isList := rule["values"]
+											_, hasAllow := rule["allowAll"]
+											_, hasDeny := rule["denyAll"]
+											if isList || hasAllow || hasDeny {
+												delete(rule, "enforce") // enforce is only valid for boolean constraints
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+return obj, nil

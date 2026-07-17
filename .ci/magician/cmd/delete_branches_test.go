@@ -5,14 +5,14 @@ import (
 )
 
 func TestFetchPRNumber(t *testing.T) {
-	mr := NewMockRunner()
+	sb := newSandbox(t)
+	sb.RequireAllowlist()
 	gh := &mockGithub{
 		calledMethods: make(map[string][][]any),
 		commitMessage: "Add `additional_group_keys` attribute to `google_cloud_identity_group` resource (#9217) (#6504)\n\n* Add `additional_group_keys` attribute to `google_cloud_identity_group` resource\n\n* Update acceptance test to check for attribute\n\n* Fix test check\n\n* Add `output: true` to nested properties in output field\n[upstream:49d3741f9d4d810a0a4768363bb8498afa21c688]\n\nSigned-off-by: Modular Magician <magic-modules@google.com>",
 	}
 
-	// Call function with mocks
-	prNumber, err := fetchPRNumber("8c6e61bb62d52c950008340deafc1e2a2041898a", "main", mr, gh)
+	prNumber, err := fetchPRNumber("8c6e61bb62d52c950008340deafc1e2a2041898a", "main", sb.Runner, gh)
 	if err != nil {
 		t.Errorf("error fetching PR number: %s", err)
 	}
