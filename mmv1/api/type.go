@@ -1479,34 +1479,31 @@ func (t *Type) ProviderOnly() bool {
 // convert to snake in this method
 func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	nestedProps := t.ResourceMetadata.UserProperites()
-	segments := strings.Split(schemaPath, ".0.")
 
 	var pathTkns []string
-	for idx, pname := range segments {
+	for _, pname := range strings.Split(schemaPath, ".0.") {
 		camelPname := google.Camelize(pname, "lower")
-		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
+		index := slices.IndexFunc(nestedProps, func(p *Type) bool {
+			return p.Name == camelPname
+		})
 
-		// Fallback for paths that don't resolve via camelized segment lookup.
-		if prop == nil {
-			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
+		// if we couldn't find it, see if it was renamed at the top level
+		if index == -1 {
+			index = slices.IndexFunc(nestedProps, func(p *Type) bool {
+				return p.Name == schemaPath
+			})
 		}
 
-		if prop == nil {
+		if index == -1 {
 			return ""
 		}
 
+		prop := nestedProps[index]
+
+		nestedProps = prop.NestedProperties()
 		if !prop.FlattenObject {
 			pathTkns = append(pathTkns, google.Underscore(pname))
-			// Constraint paths can only pass through single-item lists (MaxItems:1).
-			// If this array segment is non-terminal (not the last segment) and can
-			// hold multiple items, drop the path as unsupported.
-			isNonTerminalSegment := idx < len(segments)-1
-			isUnsupportedArraySegment := prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1)
-			if isNonTerminalSegment && isUnsupportedArraySegment {
-				return ""
-			}
 		}
-		nestedProps = prop.NestedProperties()
 	}
 
 	if len(pathTkns) == 0 || pathTkns[len(pathTkns)-1] == "" {
@@ -1514,20 +1511,6 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	}
 
 	return strings.Join(pathTkns[:], ".0.")
-}
-
-func findPropByNameInFlattenedList(props []*Type, name string) *Type {
-	for _, p := range props {
-		if p.Name == name {
-			return p
-		}
-		if p.FlattenObject {
-			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
-				return found
-			}
-		}
-	}
-	return nil
 }
 
 func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
