@@ -120,6 +120,7 @@ parameters:
       The zone where the future reservation is located.
     immutable: true
     default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
