@@ -1,0 +1,24 @@
+resource "google_logging_project_bucket_config" "{{index $.Vars "log_bucket_id"}}" {
+  provider       = google-beta
+  project        = data.google_project.project.project_id
+  location       = "us-central1"
+  retention_days = 30
+  bucket_id      = "{{index $.Vars "log_bucket_id"}}"
+}
+
+resource "google_vertex_ai_agent_anomaly_detection_scope" "{{$.PrimaryResourceId}}" {
+  provider                         = google-beta
+  region                           = "us-central1"
+  agent_anomaly_detection_scope_id = "{{index $.Vars "scope_id"}}"
+  display_name                     = "Basic AAD scope"
+  log_buckets = [
+    google_logging_project_bucket_config.{{index $.Vars "log_bucket_id"}}.id,
+  ]
+  observability_buckets = [
+    "projects/${data.google_project.project.project_id}/locations/us/buckets/_Trace/datasets/Spans",
+  ]
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
