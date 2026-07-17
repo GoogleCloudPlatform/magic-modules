@@ -1,0 +1,20 @@
+data "google_project" "project" {
+}
+
+resource "google_vertex_ai_semantic_governance_policy_engine" "{{$.PrimaryResourceId}}" {
+  region = "us-central1"
+
+  gateway_config {
+    name          = "primary"
+    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
+    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    dns_zone_name = "example-com"
+  }
+
+  gateway_config {
+    name          = "secondary"
+    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
+    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    dns_zone_name = "example-com"
+  }
+}

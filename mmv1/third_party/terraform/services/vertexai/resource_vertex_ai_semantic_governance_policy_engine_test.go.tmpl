@@ -14,9 +14,32 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// Handwritten lifecycle test (Create + Import; deprovision via CheckDestroy).
-// The generated example is exclude_test — see the singleton-aware
+// Handwritten lifecycle test (Create + Import + gateway_config
+// create/update/rename/remove; deprovision via CheckDestroy). The
+// generated samples are exclude_test — see the singleton-aware
 // CheckDestroy below for why.
+//
+// SGPE is an AIP-156 project-regional singleton, so all steps below
+// operate on the same underlying engine. Do NOT add a second parallel
+// test that provisions SGPE in the same (project, us-central1) — the
+// two runs would race on the singleton.
+//
+// gateway_config lifecycle coverage (HLD.md §3):
+//
+//	Step 3 addGateway     : create — provision "primary"; assert state ACTIVE + psc_endpoint set.
+//	Step 5 updateGateway  : update — mutate primary's dns_zone_name; asserts primary is still ACTIVE
+//	                        after the in-place update, plus siblings-untouched (secondary unchanged).
+//	Step 7 renameGateway  : rename — drop "primary", add "main"; siblings stay ACTIVE; main gets a
+//	                        fresh psc_endpoint via the backend teardown-and-recreate chain.
+//	Step 9 removeAllGateways: remove — drop everything; post-apply Get MUST return no gateway_config keys
+//	                        (state-only removal would miss the failure mode HLD §5 warns about).
+//
+// The rename step's "sibling stays ACTIVE with unchanged psc_endpoint"
+// invariant (HLD §3, §4) is asserted at the state-level as ACTIVE-with-
+// psc_endpoint-set on both. A stronger "same psc_endpoint before and
+// after" cross-step assertion would need a stashing pattern; skipped as
+// good-to-have (not blocking) since VCR replay against a real backend
+// already exercises the value round-trip.
 func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 	t.Parallel()
 
@@ -27,6 +50,7 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckVertexAISemanticGovernancePolicyEngineDestroyProducer(t),
 		Steps: []resource.TestStep{
+			// Step 1: Create basic (engine only, no gateway_config).
 			{
 				Config: testAccVertexAISemanticGovernancePolicyEngine_basic(context),
 				Check: resource.ComposeTestCheckFunc(
@@ -47,10 +71,112 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 					// rule, which the basic fixture has none of.
 				),
 			},
+			// Step 2: ImportStateVerify (engine only, no gateway_config).
 			{
 				ResourceName:      "google_vertex_ai_semantic_governance_policy_engine.sgpe",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			// Step 3 (addGateway): provision "primary". Exercises the
+			// gateway_config expand path + backend per-gateway create chain
+			// (reserve IP → create PSC endpoint → create DNS A-record).
+			{
+				Config: testAccVertexAISemanticGovernancePolicyEngine_addGateway(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.*",
+						map[string]string{"name": "primary", "state": "ACTIVE"}),
+				),
+			},
+			// Step 4: ImportStateVerify (round-trip with gateway_config).
+			// The critical SGPE-specific assertion: confirms the native Map
+			// declaration's flatten path produces a stable round-trip through
+			// Import (no drift in the proto map -> TypeSet conversion).
+			{
+				ResourceName:      "google_vertex_ai_semantic_governance_policy_engine.sgpe",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Step 5 (updateGateway): mutate primary's dns_zone_name + add
+			// "secondary" as a sibling. Exercises the Update code path and
+			// the multi-gateway map shape at the same time.
+			{
+				Config: testAccVertexAISemanticGovernancePolicyEngine_updateGatewayAndAddSecondary(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.#", "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.*",
+						map[string]string{"name": "primary", "state": "ACTIVE"}),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.*",
+						map[string]string{"name": "secondary", "state": "ACTIVE"}),
+				),
+			},
+			// Step 6: ImportStateVerify (round-trip with 2 gateways).
+			{
+				ResourceName:      "google_vertex_ai_semantic_governance_policy_engine.sgpe",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Step 7 (renameGateway): rename "primary" -> "main"; keep
+			// "secondary". Exercises HLD §2.3 Option B pass-through: the
+			// backend tombstones "primary" (runs teardown chain), provisions
+			// "main" fresh (runs create chain), and leaves "secondary"
+			// ACTIVE. The provider issues one PATCH; the sibling-invariance
+			// is a backend property.
+			{
+				Config: testAccVertexAISemanticGovernancePolicyEngine_renamePrimaryToMain(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.#", "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.*",
+						map[string]string{"name": "main", "state": "ACTIVE"}),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.*",
+						map[string]string{"name": "secondary", "state": "ACTIVE"}),
+					// Explicitly assert "primary" is gone (drop-add rename
+					// semantics: the old key must not resurface).
+					testAccCheckSGPEGatewayConfigNamesExact(t,
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						[]string{"main", "secondary"}),
+				),
+			},
+			// Step 8: ImportStateVerify (round-trip after rename).
+			{
+				ResourceName:      "google_vertex_ai_semantic_governance_policy_engine.sgpe",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Step 9 (removeAllGateways): drop all gateway_config blocks.
+			// A Terraform-local state assertion (gateway_config.# == 0)
+			// alone is NOT sufficient: a hypothetical backend regression
+			// that silently acked a remove without running the teardown
+			// chain would still leave orphan PSC/IP/DNS resources
+			// server-side (this is exactly the A10 failure class the
+			// tombstone-chain fix, cl/945777282, closes). Assert against
+			// a live Get too.
+			{
+				Config: testAccVertexAISemanticGovernancePolicyEngine_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.#", "0"),
+					testAccCheckSGPEGatewayConfigNamesExact(t,
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						[]string{}),
+				),
 			},
 		},
 	})
@@ -62,6 +188,182 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
   region = "us-central1"
 }
 `, context)
+}
+
+// gateway_config fixtures reuse the project's "default" VPC and inline
+// a private google_dns_managed_zone so the test is self-contained
+// (runnable in any project with a default VPC + subnet, including
+// HashiCorp CI projects, once the SGPE backend gate clears). The zone
+// uses an RFC 2606 reserved domain (example.com.) so there's no risk
+// of colliding with a real DNS zone. depends_on wires the SGPE update
+// before the zone destroy on the remove-all step (Step 9).
+//
+// See SCOPE.md §7.1 for the record-time environment prerequisite
+// (cl/945777282 live in us-central1 prod).
+
+const testAccSGPESharedDNSZone = `
+resource "google_dns_managed_zone" "sgpe_zone" {
+  name        = "tf-sgpe-lifecycle-zone"
+  dns_name    = "sgpe-lifecycle.example.com."
+  description = "Private DNS zone for SGPE lifecycle acceptance test."
+  visibility  = "private"
+
+  private_visibility_config {
+    networks {
+      network_url = "projects/${data.google_project.project.project_id}/global/networks/default"
+    }
+  }
+}
+`
+
+func testAccVertexAISemanticGovernancePolicyEngine_addGateway(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+`+testAccSGPESharedDNSZone+`
+resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
+  region = "us-central1"
+
+  gateway_config {
+    name          = "primary"
+    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
+    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  depends_on = [google_dns_managed_zone.sgpe_zone]
+}
+`, context)
+}
+
+func testAccVertexAISemanticGovernancePolicyEngine_updateGatewayAndAddSecondary(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+`+testAccSGPESharedDNSZone+`
+resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
+  region = "us-central1"
+
+  gateway_config {
+    name          = "primary"
+    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
+    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  gateway_config {
+    name          = "secondary"
+    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
+    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  depends_on = [google_dns_managed_zone.sgpe_zone]
+}
+`, context)
+}
+
+func testAccVertexAISemanticGovernancePolicyEngine_renamePrimaryToMain(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+`+testAccSGPESharedDNSZone+`
+resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
+  region = "us-central1"
+
+  gateway_config {
+    name          = "main"
+    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
+    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  gateway_config {
+    name          = "secondary"
+    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
+    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  depends_on = [google_dns_managed_zone.sgpe_zone]
+}
+`, context)
+}
+
+// testAccCheckSGPEGatewayConfigNamesExact issues a live Get against the
+// SGPE resource and asserts the set of gateway_config `name` values in
+// the response exactly matches `want` (order-insensitive). This is the
+// backend-truth companion to Terraform-local state assertions — it
+// catches the class of failure where the backend silently acks a
+// remove/rename without running the teardown chain (the A10 failure
+// mode that cl/945777282 closed; see HLD §5 "when this design stops
+// working").
+func testAccCheckSGPEGatewayConfigNamesExact(t *testing.T, resourceName string, want []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource %q not in state", resourceName)
+		}
+		if strings.HasPrefix(resourceName, "data.") {
+			return fmt.Errorf("resource %q is a data source; this check only supports managed resources", resourceName)
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(registry.GetProduct("vertexai"), config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/semanticGovernancePolicyEngine")
+		if err != nil {
+			return err
+		}
+
+		billingProject := ""
+		if config.BillingProject != "" {
+			billingProject = config.BillingProject
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("live Get against %s failed: %s", url, err)
+		}
+
+		// The API returns gatewayConfigs as a map<string, GatewayConfig>.
+		// A missing / nil map (backend never populated any) reads as an
+		// empty set on the wire; the "want == empty" case is legal.
+		got := map[string]struct{}{}
+		if raw, ok := res["gatewayConfigs"]; ok && raw != nil {
+			m, ok := raw.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("gatewayConfigs at %s is %T, expected map[string]interface{}", url, raw)
+			}
+			for k := range m {
+				got[k] = struct{}{}
+			}
+		}
+
+		if len(got) != len(want) {
+			return fmt.Errorf("gatewayConfigs at %s: got %d keys %v, want %d keys %v",
+				url, len(got), keysOf(got), len(want), want)
+		}
+		for _, name := range want {
+			if _, ok := got[name]; !ok {
+				return fmt.Errorf("gatewayConfigs at %s: missing expected key %q (got %v, want %v)",
+					url, name, keysOf(got), want)
+			}
+		}
+		return nil
+	}
+}
+
+func keysOf(m map[string]struct{}) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	return out
 }
 
 // testAccCheckVertexAISemanticGovernancePolicyEngineDestroyProducer

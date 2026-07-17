@@ -35,3 +35,205 @@ func sgpePostReadDispatch(d sgpeResourceID, res map[string]interface{}) error {
 	}
 	return nil
 }
+
+// ---------------------------------------------------------------------------
+// CustomizeDiff helpers
+// ---------------------------------------------------------------------------
+//
+// Two plan-time checks wire in via the YAML's `custom_diff:` list:
+//
+//   Check 1 (sgpeFailedStateWarningCheck) — soft warning. Logs [WARN] when
+//   prior state is FAILED and a mutable field is changing, so the operator
+//   sees that the impending apply will re-provision. Never blocks the plan.
+//
+//   Check 2 (sgpeGatewayConfigChecksFunc) — hard error on duplicate
+//   gateway_config.name. Proto3 maps silently overwrite duplicate keys on
+//   the server side, so the duplication must be caught before the RPC
+//   fires. Nothing else here — HLD §2.3 (Option B) dropped the preserve
+//   branch's rename detector; rename is now a normal map delta that the
+//   backend DEPROVISIONING-tombstone teardown chain (cl/945777282)
+//   handles pass-through.
+//
+// Both functions accept the tpgresource.TerraformResourceDiff interface
+// so unit tests can drive them via tpgresource.ResourceDiffMock (peer
+// precedent: resource_bigtable_gc_policy_internal_test.go).
+
+// sgpeMutableFieldNames lists the schema field names that, when changed,
+// constitute a "non-empty diff" for the purposes of Check 1.
+//
+// MAINTAINER NOTE: when a future slice adds a new mutable field to the
+// SGPE schema, append the new field name here. Output-only fields
+// (state, name, create_time, update_time, psc_service_attachment,
+// ip_address, psc_forwarding_rule, and per-gateway outputs) MUST NOT
+// appear here — they change as the result of an apply, not as the cause
+// of one, and including them would make Check 1 fire on every
+// refresh-after-apply against a FAILED engine.
+//
+// Why an explicit list instead of diff.GetChangedKeysPrefix(""): the
+// tpgresource.TerraformResourceDiff interface used by unit tests does
+// NOT expose GetChangedKeysPrefix (only the concrete *schema.ResourceDiff
+// does), and we want unit tests to exercise the same code path as
+// production. An explicit list keeps the two paths identical at the cost
+// of one line of maintenance per mutable schema field added.
+var sgpeMutableFieldNames = []string{
+	"gateway_config",
+}
+
+// sgpeHasNonEmptyDiff returns true if any field in sgpeMutableFieldNames
+// has changed in the planned diff. Used by Check 1 to suppress the
+// FAILED-state warning when the user runs `terraform plan` against an
+// unchanged HCL.
+//
+// Implementation note: uses GetChange + reflect.DeepEqual rather than
+// diff.HasChange because tpgresource.ResourceDiffMock's HasChange does
+// naive `old != new` interface comparison, which panics on slice/map
+// values (Go rejects `==` on slices with a runtime error). DeepEqual is
+// safe for both scalar and composite fields; production *schema.ResourceDiff
+// performs deep comparison inside HasChange as well, so the semantics
+// match.
+func sgpeHasNonEmptyDiff(diff tpgresource.TerraformResourceDiff) bool {
+	for _, field := range sgpeMutableFieldNames {
+		before, after := diff.GetChange(field)
+		if !reflect.DeepEqual(before, after) {
+			return true
+		}
+	}
+	return false
+}
+
+// sgpeFailedStateWarningCheck implements Check 1. It is the testable
+// internal entry point; the public YAML-facing wrapper is sgpeCustomizeDiff
+// below.
+//
+// Behavior:
+//   - Reads the prior-state `state` value via diff.GetChange("state") (the
+//     "old" return). Because state is Computed and not user-settable in
+//     HCL, the prior value equals the most recent Read result.
+//   - Fires only when prior-state state == "FAILED" AND at least one
+//     mutable field has changed in the planned diff.
+//   - Emits a [WARN] log line via log.Printf and returns nil. Does NOT
+//     block the plan and does NOT change what the provider sends on the
+//     wire.
+//   - Returns nil in all other cases (including PROVISIONING /
+//     DEPROVISIONING — those have a different correct user action and
+//     would be diluted by sharing this warning).
+//
+// Warning visibility: log.Printf("[WARN] ...") is the established
+// magic-modules convention for non-blocking CustomizeDiff warnings (see
+// deployment_manager_deployment.go.tmpl). Plugin SDK v2's CustomizeDiff
+// signature returns error only — there is no Diagnostics channel — so
+// the warning is visible at TF_LOG=WARN or higher, not in plain
+// `terraform plan` output.
+func sgpeFailedStateWarningCheck(diff tpgresource.TerraformResourceDiff) error {
+	priorStateRaw, _ := diff.GetChange("state")
+	priorState, ok := priorStateRaw.(string)
+	if !ok || priorState != "FAILED" {
+		return nil
+	}
+	if !sgpeHasNonEmptyDiff(diff) {
+		return nil
+	}
+	log.Printf("[WARN] This SemanticGovernancePolicyEngine is in FAILED state. " +
+		"Applying any change will trigger a full re-provision — equivalent to a " +
+		"`terraform destroy` followed by `terraform apply`. The values of " +
+		"output-only fields such as `psc_service_attachment`, `ip_address`, and " +
+		"`psc_forwarding_rule` are likely to change.")
+	return nil
+}
+
+// extractGatewayConfigBlocks pulls the planned gateway_config blocks out
+// of the diff in a form usable by both production code and unit tests.
+//
+// Production *schema.ResourceDiff.Get("gateway_config") returns a
+// *schema.Set (whose .List() yields []interface{} of
+// map[string]interface{}). The test mock tpgresource.ResourceDiffMock.Get
+// returns whatever was stuffed into After["gateway_config"] verbatim.
+// This helper accepts either form via type switch and returns the
+// canonical []map[string]interface{} representation so Check 2 agrees
+// across both worlds.
+//
+// Returning a slice (not a map) preserves block order, which the unit
+// tests use for stable case naming.
+func extractGatewayConfigBlocks(raw interface{}) []map[string]interface{} {
+	if raw == nil {
+		return nil
+	}
+	switch v := raw.(type) {
+	case *schema.Set:
+		out := make([]map[string]interface{}, 0, v.Len())
+		for _, item := range v.List() {
+			if m, ok := item.(map[string]interface{}); ok {
+				out = append(out, m)
+			}
+		}
+		return out
+	case []interface{}:
+		out := make([]map[string]interface{}, 0, len(v))
+		for _, item := range v {
+			if m, ok := item.(map[string]interface{}); ok {
+				out = append(out, m)
+			}
+		}
+		return out
+	case []map[string]interface{}:
+		return v
+	default:
+		return nil
+	}
+}
+
+// gatewayConfigNames returns the `name` values from the given blocks in
+// iteration order (so duplicates are spotted at first occurrence).
+func gatewayConfigNames(blocks []map[string]interface{}) []string {
+	out := make([]string, 0, len(blocks))
+	for _, block := range blocks {
+		name, _ := block["name"].(string)
+		out = append(out, name)
+	}
+	return out
+}
+
+// sgpeGatewayConfigChecksFunc implements Check 2 (duplicate
+// gateway_config.name validation). Returns an error on the first
+// duplicate `name` value across planned gateway_config blocks. Hard
+// error — blocks the plan before the RPC is issued.
+//
+// Empty names are intentionally skipped here — the schema's
+// Required:true on the key field surfaces those during the generator's
+// standard validation, so double-flagging would be redundant.
+//
+// NOTE: this func does NOT do rename detection. HLD §2.3 (Option B)
+// dropped the preserve-branch's rename detector once cl/945777282's
+// DEPROVISIONING-tombstone teardown chain landed: rename now plays out
+// as `{drop:old_name, add:new_name}` on the wire and the backend
+// handles it pass-through. See HLD §2.3 for the tradeoff analysis.
+func sgpeGatewayConfigChecksFunc(diff tpgresource.TerraformResourceDiff) error {
+	plannedRaw := diff.Get("gateway_config")
+	planned := extractGatewayConfigBlocks(plannedRaw)
+
+	seen := make(map[string]bool, len(planned))
+	for _, name := range gatewayConfigNames(planned) {
+		if name == "" {
+			continue
+		}
+		if seen[name] {
+			return fmt.Errorf("gateway_config.name %q is duplicated; each block must have a unique name.", name)
+		}
+		seen[name] = true
+	}
+	return nil
+}
+
+// sgpeCustomizeDiff is the public CustomizeDiff entry point referenced
+// from the SemanticGovernancePolicyEngine.yaml `custom_diff:` list. It
+// delegates to sgpeFailedStateWarningCheck (Check 1) then
+// sgpeGatewayConfigChecksFunc (Check 2), returning on the first error.
+func sgpeCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if err := sgpeFailedStateWarningCheck(diff); err != nil {
+		return err
+	}
+	if err := sgpeGatewayConfigChecksFunc(diff); err != nil {
+		return err
+	}
+	return nil
+}
