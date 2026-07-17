@@ -125,7 +125,6 @@ properties:
     immutable: true
     resource: Network
     imports: selfLink
-    custom_flatten: templates/terraform/custom_flatten/transport_network_flatten.tmpl
   - name: advertisedRoutes
     type: Array
     description: |
