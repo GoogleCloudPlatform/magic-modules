@@ -27,7 +27,6 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   start_time               = "2030-01-01T00:00:00Z"
 
   create_notebook_execution_job_request {
-    notebook_execution_job_id = "job-id"
     parent                    = "projects/${data.google_project.project.project_id}/locations/us-central1"
     notebook_execution_job {
       display_name   = "test-notebook-execution-job"

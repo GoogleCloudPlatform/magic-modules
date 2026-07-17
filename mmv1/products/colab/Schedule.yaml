@@ -341,6 +341,7 @@ properties:
       - name: 'notebookExecutionJobId'
         type: String
         description: User specified ID for the NotebookExecutionJob.
+        output: true
       - name: 'parent'
         type: String
         description: 'The resource name of the Location to create the NotebookExecutionJob. Format: `projects/{project}/locations/{location}`'
