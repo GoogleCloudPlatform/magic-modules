@@ -45,12 +45,6 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
           accelerator_count        = 1
           gpu_partition_size       = "1g.10gb"
           tpu_topology             = "2x2"
-          reservation_affinity {
-            reservation_affinity_type = "NO_RESERVATION"
-            key                       = "reservation-key"
-            values                    = ["reservation-val"]
-            use_reservation_pool      = false
-          }
         }
         persistent_disk_spec {
           disk_size_gb = "100"
