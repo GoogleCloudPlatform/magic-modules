@@ -439,10 +439,6 @@ properties:
                 type: String
                 required: true
                 description: A path in a Cloud Storage bucket, which will be treated as the root output directory of the pipeline. It is used by the system to generate the paths of output artifacts. The artifact paths are generated with a sub-path pattern `{job_id}/{task_id}/{output_key}` under the specified output directory. The service account specified in this pipeline must have the `storage.objects.get` and `storage.objects.create` permissions for this bucket.
-              - name: 'inputArtifacts'
-                type: KeyValuePairs
-                default_from_api: true
-                description: The runtime artifacts of the PipelineJob. The key will be the input artifact name and the value would be one of the InputArtifact.
               - name: 'parameterValues'
                 type: KeyValuePairs
                 default_from_api: true
