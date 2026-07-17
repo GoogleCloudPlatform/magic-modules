@@ -953,11 +953,7 @@ func (r *Resource) attachConstraintGroup(groupType string, source []string) *[]s
 	return &newGroup
 }
 
-func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
-	originalFieldLineage := strings.Join(originalField.Lineage(), ".0.")
-	newFieldLineage := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
-	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
-
+func buildWriteOnlyField(name string, originalField *Type) *Type {
 	apiName := originalField.ApiName
 	if apiName == "" {
 		apiName = originalField.Name
@@ -970,49 +966,55 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 		propertyWithWriteOnly(true),
 		propertyWithApiName(apiName),
 		propertyWithIgnoreRead(true),
-		propertyWithRequiredWith([]string{requiredWith}),
-	}
-
-	if originalField.Required || len(originalField.ExactlyOneOf) > 0 {
-		originalField.Required = false
-		if originalField.ExactlyOneOfGroup == nil {
-			base := []string{originalFieldLineage, newFieldLineage}
-			originalField.ExactlyOneOfGroup = &base
-		} else {
-			*originalField.ExactlyOneOfGroup = deduplicateSliceOfStrings(append(*originalField.ExactlyOneOfGroup, originalFieldLineage, newFieldLineage))
-		}
-		options = append(options, propertyWithExactlyOneOfPointer(originalField.ExactlyOneOfGroup))
-	} else {
-		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldLineage}, originalField.Conflicts...))
-		newConflicts = slices.DeleteFunc(newConflicts, func(s string) bool {
-			return s == newFieldLineage
-		})
-		options = append(options, propertyWithConflicts(newConflicts))
-
-		if originalField.ConflictsGroup != nil {
-			*originalField.ConflictsGroup = deduplicateSliceOfStrings(append(*originalField.ConflictsGroup, newFieldLineage))
-		} else {
-			originalField.Conflicts = deduplicateSliceOfStrings(append(originalField.Conflicts, newFieldLineage))
-		}
-	}
-
-	if originalField.AtLeastOneOfGroup != nil {
-		*originalField.AtLeastOneOfGroup = deduplicateSliceOfStrings(append(*originalField.AtLeastOneOfGroup, originalFieldLineage, newFieldLineage))
-		options = append(options, propertyWithAtLeastOneOfPointer(originalField.AtLeastOneOfGroup))
 	}
 
 	return NewProperty(name, originalField.ApiName, options)
 }
 
+func configureWriteOnlyConstraints(originalField, writeOnlyField, versionField *Type) {
+	originalFieldPath := originalField.PropertyPath()
+	writeOnlyFieldPath := writeOnlyField.PropertyPath()
+	versionFieldPath := versionField.PropertyPath()
+
+	writeOnlyField.RequiredWith = []string{versionFieldPath}
+	versionField.RequiredWith = []string{writeOnlyFieldPath}
+
+	if originalField.Required || len(originalField.ExactlyOneOf) > 0 {
+		originalField.Required = false
+		if originalField.ExactlyOneOfGroup == nil {
+			base := []string{originalFieldPath, writeOnlyFieldPath}
+			originalField.ExactlyOneOfGroup = &base
+		} else {
+			*originalField.ExactlyOneOfGroup = deduplicateSliceOfStrings(append(*originalField.ExactlyOneOfGroup, originalFieldPath, writeOnlyFieldPath))
+		}
+		writeOnlyField.ExactlyOneOfGroup = originalField.ExactlyOneOfGroup
+	} else {
+		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldPath}, originalField.Conflicts...))
+		newConflicts = slices.DeleteFunc(newConflicts, func(s string) bool {
+			return s == writeOnlyFieldPath
+		})
+		writeOnlyField.Conflicts = newConflicts
+
+		if originalField.ConflictsGroup != nil {
+			*originalField.ConflictsGroup = deduplicateSliceOfStrings(append(*originalField.ConflictsGroup, writeOnlyFieldPath))
+		} else {
+			originalField.Conflicts = deduplicateSliceOfStrings(append(originalField.Conflicts, writeOnlyFieldPath))
+		}
+	}
+
+	if originalField.AtLeastOneOfGroup != nil {
+		*originalField.AtLeastOneOfGroup = deduplicateSliceOfStrings(append(*originalField.AtLeastOneOfGroup, originalFieldPath, writeOnlyFieldPath))
+		writeOnlyField.AtLeastOneOfGroup = originalField.AtLeastOneOfGroup
+	}
+}
+
 func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
 	description := fmt.Sprintf("Triggers update of `%s` write-only. Increment this value when an update to `%s` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)", google.Underscore(writeOnlyField.Name), google.Underscore(writeOnlyField.Name))
-	requiredWith := strings.ReplaceAll(strings.Join(originalField.Lineage(), ".0."), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
 		propertyWithType("String"),
 		propertyWithImmutable(originalField.IsForceNew()),
 		propertyWithDescription(description),
-		propertyWithRequiredWith([]string{requiredWith}),
 		propertyWithClientSide(true),
 	}
 
@@ -1030,8 +1032,11 @@ func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type)
 	if !strings.Contains(r.ProductMetadata.Compiler, "terraformgoogleconversion") {
 		woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
 		woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
-		writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
+		writeOnlyField := buildWriteOnlyField(woFieldName, propWithWoConfigured)
 		writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
+		writeOnlyField.ParentMetadata = propWithWoConfigured.ParentMetadata
+		writeOnlyVersionField.ParentMetadata = propWithWoConfigured.ParentMetadata
+		configureWriteOnlyConstraints(propWithWoConfigured, writeOnlyField, writeOnlyVersionField)
 		props = append(props, writeOnlyField, writeOnlyVersionField)
 	}
 	return props
