@@ -289,7 +289,7 @@ properties:
                     Tag key is expected to be in the namespaced format, for example
                     "parent-id/pii" where "parent-id" is the ID of the parent
                     organization or project resource for this tag key.
-                    Tag value is expected to be the short name, for example "sensitive"..
+                    Tag value is expected to be the short name, for example "sensitive".
   - name: 'schemaForeignTypeInfo'
     type: NestedObject
     description: |
