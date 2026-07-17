@@ -1245,12 +1245,6 @@ func propertyWithIgnoreRead(ignoreRead bool) func(*Type) {
 	}
 }
 
-func propertyWithAtLeastOneOf(atLeastOneOf []string) func(*Type) {
-	return func(p *Type) {
-		p.AtLeastOneOf = atLeastOneOf
-	}
-}
-
 func propertyWithApiName(apiName string) func(*Type) {
 	return func(p *Type) {
 		p.ApiName = apiName
