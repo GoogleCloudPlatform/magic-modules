@@ -1,8 +1,6 @@
 package container
 
 import (
-	"time"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -459,11 +457,6 @@ var schemaNodePool = map[string]*schema.Schema{
 
 func ResourceContainerNodePool() *schema.Resource {
 	return &schema.Resource{
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(2 * time.Hour),
-			Update: schema.DefaultTimeout(2 * time.Hour),
-			Delete: schema.DefaultTimeout(2 * time.Hour),
-		},
 		Schema: tpgresource.MergeSchemas(
 			schemaNodePool,
 			map[string]*schema.Schema{
