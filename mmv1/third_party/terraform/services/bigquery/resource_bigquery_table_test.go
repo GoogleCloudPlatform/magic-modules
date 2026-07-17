@@ -5951,7 +5951,7 @@ func TestAccBigQueryTable_DataGovernanceTags(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
 			},
 			{
 				Config: testAccBigQueryTable_dataGovernanceTagsClear(project, tagKeyShortName, tagValueShortName, datasetID, tableID),
@@ -5960,7 +5960,7 @@ func TestAccBigQueryTable_DataGovernanceTags(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
 			},
 		},
 	})
