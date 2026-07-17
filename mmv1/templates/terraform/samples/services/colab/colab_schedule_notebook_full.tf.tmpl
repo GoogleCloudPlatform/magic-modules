@@ -22,7 +22,6 @@ resource "google_compute_subnetwork" "my_subnetwork" {
 resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   display_name             = "{{index $.Vars "display_name"}}"
   location                 = "us-central1"
-  max_concurrent_run_count = {{index $.Vars "max_concurrent_run_count"}}
   cron                     = "{{index $.Vars "cron"}}"
   start_time               = "2030-01-01T00:00:00Z"
 

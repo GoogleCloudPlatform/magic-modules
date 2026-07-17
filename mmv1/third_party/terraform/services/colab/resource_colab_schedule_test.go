@@ -247,7 +247,6 @@ resource "google_colab_schedule" "schedule" {
   display_name = "tf-test-schedule%{random_suffix}"
   location = "%{location}"
   allow_queueing = true
-  max_concurrent_run_count = 2
   max_concurrent_active_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
@@ -344,7 +343,6 @@ resource "google_colab_schedule" "schedule" {
   display_name = "tf-test-schedule%{random_suffix}"
   location = "%{location}"
   allow_queueing = true
-  max_concurrent_run_count = 2
   max_concurrent_active_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
@@ -443,7 +441,6 @@ resource "google_colab_schedule" "schedule" {
   display_name = "tf-test-schedule%{random_suffix}"
   location = "%{location}"
   allow_queueing = true
-  max_concurrent_run_count = 2
   max_concurrent_active_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
@@ -542,7 +539,6 @@ resource "google_colab_schedule" "schedule" {
   display_name = "tf-test-schedule-updated%{random_suffix}"
   location = "%{location}"
   allow_queueing = false
-  max_concurrent_run_count = 1
   max_concurrent_active_run_count = 1
   cron = "TZ=America/Los_Angeles 0 * * * *"
   max_run_count = 3
