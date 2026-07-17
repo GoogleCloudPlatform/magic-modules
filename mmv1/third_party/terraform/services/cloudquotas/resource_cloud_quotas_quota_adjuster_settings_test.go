@@ -6,11 +6,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudquotas"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudquotas"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
-
 
 func TestAccCloudQuotasQuotaAdjusterSettings_cloudQuotasQuotaAdjusterSettingsUpdate(t *testing.T) {
 	t.Parallel()
@@ -72,4 +71,3 @@ func testAccCloudQuotasQuotaAdjusterSettings_updateEnabelement(context map[strin
 	}
 `, context)
 }
-
