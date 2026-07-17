@@ -1227,21 +1227,9 @@ func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	}
 }
 
-func propertyWithRequired(required bool) func(*Type) {
-	return func(p *Type) {
-		p.Required = required
-	}
-}
-
 func propertyWithWriteOnly(writeOnly bool) func(*Type) {
 	return func(p *Type) {
 		p.WriteOnly = writeOnly
-	}
-}
-
-func propertyWithIgnoreRead(ignoreRead bool) func(*Type) {
-	return func(p *Type) {
-		p.IgnoreRead = ignoreRead
 	}
 }
 
