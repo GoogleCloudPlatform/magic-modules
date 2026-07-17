@@ -169,3 +169,16 @@ properties:
       unique within a project. Used as {data_policy_id} in part of the resource
       name.
     required: true
+  - name: dataGovernanceTag
+    type: NestedObject
+    description: |-
+      Data Governance tag bound to the Data Policy.
+    properties:
+      - name: key
+        type: String
+        description: |-
+          Tag keys are globally unique. Tag key is expected to be in the namespaced format, for example "123456789012/environment" where 123456789012 is the ID of the parent organization or project resource for this tag key.
+      - name: value
+        type: String
+        description: |-
+          Tag value is expected to be the short name.
