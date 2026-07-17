@@ -1,7 +1,7 @@
 data "google_project" "project" {}
 
 resource "google_storage_bucket" "bucket" {
-  name                        = "{{index $.ResourceIdVars "pipeline_job_id"}}"
+  name                        = "{{index $.ResourceIdVars "storage_bucket"}}"
   location                    = "us-central1"
   uniform_bucket_level_access = true
   force_destroy               = true
@@ -24,7 +24,6 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   end_time                        = "{{index $.Vars "end_time"}}"
 
   create_pipeline_job_request {
-    pipeline_job_id = "test-pipeline-job-id"
     parent          = "projects/${data.google_project.project.project_id}/locations/us-central1"
     pipeline_job {
       display_name          = "test-pipeline-job"

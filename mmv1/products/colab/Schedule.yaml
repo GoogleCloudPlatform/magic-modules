@@ -117,7 +117,7 @@ samples:
     steps:
       - name: colab_schedule_pipeline
         resource_id_vars:
-          pipeline_job_id: pipeline-job
+          storage_bucket: pipeline-job
           network_name: 'colab-test-default'
           key_name: 'my-key'
         vars:
@@ -135,7 +135,7 @@ samples:
           key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       - name: colab_schedule_pipeline
         resource_id_vars:
-          pipeline_job_id: pipeline-job
+          storage_bucket: pipeline-job
           network_name: 'colab-test-default'
           key_name: 'my-key'
         vars:
@@ -477,6 +477,7 @@ properties:
       - name: 'pipelineJobId'
         type: String
         description: The ID to use for the PipelineJob, which will become the final component of the PipelineJob name. If not provided, an ID will be automatically generated. This value should be less than 128 characters, and valid characters are `/a-z-/`.
+        output: true
   - name: 'createTime'
     type: String
     description: Timestamp when this Schedule was created.
