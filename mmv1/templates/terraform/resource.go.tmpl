@@ -317,7 +317,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{- end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.CreateUri}}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, {{if $.BaseUrlOverride -}}"{{$.BaseUrlOverride}}"{{- else -}}transport_tpg.BaseUrl(Product, config){{- end}}+"{{$.CreateUri}}")
     if err != nil {
         return err
     }
@@ -585,7 +585,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
     return func() (map[string]interface{}, error) {
         config := meta.(*transport_tpg.Config)
 
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, {{if $.BaseUrlOverride -}}"{{$.BaseUrlOverride}}"{{- else -}}transport_tpg.BaseUrl(Product, config){{- end}}+"{{$.SelfLinkUri}}")
         if err != nil {
             return nil, err
         }
@@ -689,7 +689,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, {{if $.BaseUrlOverride -}}"{{$.BaseUrlOverride}}"{{- else -}}transport_tpg.BaseUrl(Product, config){{- end}}+"{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
     if err != nil {
         return err
     }
@@ -981,7 +981,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{-             end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.UpdateUri }}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, {{if $.BaseUrlOverride -}}"{{$.BaseUrlOverride}}"{{- else -}}transport_tpg.BaseUrl(Product, config){{- end}}+"{{ $.UpdateUri }}")
     if err != nil {
         return err
     }
@@ -1092,7 +1092,7 @@ if len(updateMask) > 0 {
 if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
 {{		            if $group.FingerprintName }}
-        getUrl, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
+        getUrl, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, {{if $.BaseUrlOverride -}}"{{$.BaseUrlOverride}}"{{- else -}}transport_tpg.BaseUrl(Product, config){{- end}}+"{{$.SelfLinkUri}}")
         if err != nil {
             return err
         }
@@ -1187,7 +1187,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         transport_tpg.MutexStore.Lock(lockName)
         defer transport_tpg.MutexStore.Unlock(lockName)
 {{-                 end}}
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $group.UpdateUrl }}")
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, {{if $.BaseUrlOverride -}}"{{$.BaseUrlOverride}}"{{- else -}}transport_tpg.BaseUrl(Product, config){{- end}}+"{{ $group.UpdateUrl }}")
         if err != nil {
             return err
         }
@@ -1335,7 +1335,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     transport_tpg.MutexStore.Lock(lockName)
     defer transport_tpg.MutexStore.Unlock(lockName)
     {{- end }}
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.DeleteUri}}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, {{if $.BaseUrlOverride -}}"{{$.BaseUrlOverride}}"{{- else -}}transport_tpg.BaseUrl(Product, config){{- end}}+"{{$.DeleteUri}}")
     if err != nil {
         return err
     }

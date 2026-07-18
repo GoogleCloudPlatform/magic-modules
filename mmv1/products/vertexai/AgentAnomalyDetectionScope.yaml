@@ -23,6 +23,9 @@ references:
   guides:
     'Agent Anomaly Detection': 'https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.agentAnomalyDetectionScopes'
+# AAD serves on the REP endpoint (aiplatform.{{region}}.rep.googleapis.com),
+# not the standard Vertex AI endpoint ({{region}}-aiplatform.googleapis.com).
+base_url_override: 'https://aiplatform.{{region}}.rep.googleapis.com/v1beta1/'
 base_url: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes'
 self_link: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes/{{agent_anomaly_detection_scope_id}}'
 id_format: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes/{{agent_anomaly_detection_scope_id}}'
