@@ -1,0 +1,27 @@
+resource "google_logging_project_bucket_config" "{{index $.Vars "log_bucket_id"}}" {
+  project        = data.google_project.project.project_id
+  location       = "us"
+  retention_days = 30
+  bucket_id      = "{{index $.Vars "log_bucket_id"}}"
+}
+
+resource "google_vertex_ai_agent_anomaly_detection_scope" "{{index $.Vars "scope_id"}}" {
+  region                           = "us"
+  agent_anomaly_detection_scope_id = "{{index $.Vars "scope_id"}}"
+  log_buckets = [
+    google_logging_project_bucket_config.{{index $.Vars "log_bucket_id"}}.id,
+  ]
+  observability_buckets = [
+    "projects/${data.google_project.project.project_id}/locations/us/buckets/_Trace/datasets/Spans",
+  ]
+}
+
+resource "google_vertex_ai_monitored_agent" "{{$.PrimaryResourceId}}" {
+  region             = "us"
+  monitored_agent_id = "example-agent-id"
+  disable_on_destroy = true
+
+  depends_on = [google_vertex_ai_agent_anomaly_detection_scope.{{index $.Vars "scope_id"}}]
+}
+
+data "google_project" "project" {}
