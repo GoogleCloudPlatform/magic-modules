@@ -23,12 +23,12 @@ references:
   guides:
     'Agent Anomaly Detection': 'https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.agentAnomalyDetectionScopes'
-base_url: 'https://aiplatform.{{region}}.rep.googleapis.com/v1beta1/projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes'
-self_link: 'https://aiplatform.{{region}}.rep.googleapis.com/v1beta1/projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes/{{agent_anomaly_detection_scope_id}}'
+base_url: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes'
+self_link: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes/{{agent_anomaly_detection_scope_id}}'
 id_format: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes/{{agent_anomaly_detection_scope_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes/{{agent_anomaly_detection_scope_id}}'
-create_url: 'https://aiplatform.{{region}}.rep.googleapis.com/v1beta1/projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes?agentAnomalyDetectionScopeId={{agent_anomaly_detection_scope_id}}'
+create_url: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes?agentAnomalyDetectionScopeId={{agent_anomaly_detection_scope_id}}'
 # The scope has no public update method, so all configurable fields are
 # immutable; changing them requires recreating the scope.
 immutable: true
