@@ -26,13 +26,19 @@ import (
 //
 // gateway_config lifecycle coverage (HLD.md §3):
 //
-//	Step 3 addGateway     : create — provision "primary"; assert state ACTIVE + psc_endpoint set.
-//	Step 5 updateGateway  : update — mutate primary's dns_zone_name; asserts primary is still ACTIVE
-//	                        after the in-place update, plus siblings-untouched (secondary unchanged).
-//	Step 7 renameGateway  : rename — drop "primary", add "main"; siblings stay ACTIVE; main gets a
-//	                        fresh psc_endpoint via the backend teardown-and-recreate chain.
-//	Step 9 removeAllGateways: remove — drop everything; post-apply Get MUST return no gateway_config keys
-//	                        (state-only removal would miss the failure mode HLD §5 warns about).
+//	Step 3  addGateway               : create — provision "primary"; assert state ACTIVE + psc_endpoint set.
+//	Step 5  updateGateway            : update — mutate primary's dns_zone_name; asserts primary is still ACTIVE
+//	                                   after the in-place update, plus siblings-untouched (secondary unchanged).
+//	Step 7  renameGateway            : rename — drop "primary", add "main"; siblings stay ACTIVE; main gets a
+//	                                   fresh psc_endpoint via the backend teardown-and-recreate chain.
+//	Step 9a removeAllGatewaysKeepZone: remove — drop every gateway_config while keeping the DNS zone declared
+//	                                   (isolates SGPE Update from DNS zone destroy per FOLLOWUPS.md FU-9).
+//	                                   Post-apply Get MUST return no gateway_config keys (state-only removal
+//	                                   would miss the failure mode HLD §5 warns about).
+//	Step 9b destroyDNSZone           : follow-up destroy of the now-empty DNS zone. Terraform-only step —
+//	                                   no backend RPC beyond DNS. Succeeds because Step 9a's teardown chain
+//	                                   already removed the A-record (framework awaits child teardowns per
+//	                                   TASK_STATE_WAITING_FOR_CHILD; proven empirically by Step 7's rename).
 //
 // The rename step's "sibling stays ACTIVE with unchanged psc_endpoint"
 // invariant (HLD §3, §4) is asserted at the state-level as ACTIVE-with-
@@ -159,7 +165,22 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// Step 9 (removeAllGateways): drop all gateway_config blocks.
+			// Step 9a (removeAllGatewaysKeepZone): drop every
+			// gateway_config while keeping the google_dns_managed_zone
+			// declared in the Terraform config. This isolates the SGPE
+			// Update RPC (empty the gateway map) from the DNS zone
+			// destroy — split from a single "empty engine + no zone"
+			// step per FOLLOWUPS.md FU-9.
+			//
+			// Rationale: with both changes in a single step (the previous
+			// shape), terraform ran the DNS zone delete in parallel with
+			// (or before) the SGPE Update. The delete failed on
+			// containerNotEmpty because the backend teardown hadn't yet
+			// run to remove the A-record; step aborted; and per Spanner
+			// evidence, the SGPE Update RPC never fired at all (see the
+			// FU-9 write-up + run 8 log). Splitting the step gives each
+			// RPC its own step and lets the assertions actually execute.
+			//
 			// A Terraform-local state assertion (gateway_config.# == 0)
 			// alone is NOT sufficient: a hypothetical backend regression
 			// that silently acked a remove without running the teardown
@@ -168,7 +189,7 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 			// tombstone-chain fix, cl/945777282, closes). Assert against
 			// a live Get too.
 			{
-				Config: testAccVertexAISemanticGovernancePolicyEngine_basic(context),
+				Config: testAccVertexAISemanticGovernancePolicyEngine_removeAllGatewaysKeepZone(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
@@ -177,6 +198,21 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						[]string{}),
 				),
+			},
+			// Step 9b (destroyDNSZone): revert to _basic (no DNS zone
+			// declared) so Terraform destroys the zone. The zone is
+			// empty because Step 9a's backend teardown chain already
+			// removed the A-record — the deploy task awaits its
+			// teardown children via TASK_STATE_WAITING_FOR_CHILD before
+			// returning done=true (proven empirically by Step 7's
+			// rename in run 8, which correctly tore down primary's
+			// client-side infra within the 30 s LRO).
+			//
+			// No Check block — this step exists solely to exercise the
+			// clean DNS zone destroy path that failed on run 8 due to
+			// FU-9.
+			{
+				Config: testAccVertexAISemanticGovernancePolicyEngine_basic(context),
 			},
 		},
 	})
@@ -195,8 +231,14 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
 // (runnable in any project with a default VPC + subnet, including
 // HashiCorp CI projects, once the SGPE backend gate clears). The zone
 // uses an RFC 2606 reserved domain (example.com.) so there's no risk
-// of colliding with a real DNS zone. depends_on wires the SGPE update
-// before the zone destroy on the remove-all step (Step 9).
+// of colliding with a real DNS zone.
+//
+// depends_on wires the SGPE resource's create-order dependency on the
+// DNS zone: when gateway_config's dns_zone_name references the zone,
+// Terraform creates the zone first. The reverse edge does NOT hold on
+// mixed update+destroy plans (see FOLLOWUPS.md FU-9) — that is why
+// Step 9 is split across 9a (SGPE Update in isolation) and 9b (DNS
+// zone destroy in isolation) rather than combining both.
 //
 // See SCOPE.md §7.1 for the record-time environment prerequisite
 // (cl/945777282 live in us-central1 prod).
@@ -286,6 +328,25 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
   }
 
   depends_on = [google_dns_managed_zone.sgpe_zone]
+}
+`, context)
+}
+
+// _removeAllGatewaysKeepZone: engine with no gateway_config blocks +
+// DNS zone still declared. Used by Step 9a to isolate the SGPE Update
+// RPC (remove all gateways) from the DNS zone destroy — see
+// FOLLOWUPS.md FU-9 for the reasoning. The DNS zone is declared but
+// not referenced from the SGPE resource here (no gateway_config →
+// nothing to reference dns_zone_name from), so no depends_on edge is
+// needed — the zone just sits in Terraform state unchanged for the
+// duration of this step, then gets destroyed by the follow-up Step 9b.
+func testAccVertexAISemanticGovernancePolicyEngine_removeAllGatewaysKeepZone(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+`+testAccSGPESharedDNSZone+`
+resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
+  region = "us-central1"
 }
 `, context)
 }
