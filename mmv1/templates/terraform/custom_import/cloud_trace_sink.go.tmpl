@@ -1,0 +1,42 @@
+config := meta.(*transport_tpg.Config)
+
+// The import id is the canonical sink resource name, which references the
+// project by its number: "projects/{{"{{"}}project_number{{"}}"}}/traceSinks/{{"{{"}}sink_id{{"}}"}}".
+if err := tpgresource.ParseImportId([]string{
+	"^projects/(?P<project>[^/]+)/traceSinks/(?P<sink_id>[^/]+)$",
+}, d, config); err != nil {
+	return nil, err
+}
+
+// The canonical name references the project by number; it drives the read,
+// update and delete URLs, so keep it as the resource id.
+if err := d.Set("name", fmt.Sprintf("projects/%s/traceSinks/%s", d.Get("project"), d.Get("sink_id"))); err != nil {
+	return nil, fmt.Errorf("Error setting name: %s", err)
+}
+d.SetId(d.Get("name").(string))
+
+// The import id carries the project number, but the project field is normally
+// the project ID. Resolve it back so imported state matches a created resource.
+project := d.Get("project").(string)
+if _, err := strconv.Atoi(project); err == nil {
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return nil, err
+	}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		RawURL:    fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v1/projects/%s", project),
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error resolving project id for project number %q: %w", project, err)
+	}
+	if v, ok := res["projectId"].(string); ok && v != "" {
+		if err := d.Set("project", v); err != nil {
+			return nil, fmt.Errorf("Error setting project: %s", err)
+		}
+	}
+}
+
+return []*schema.ResourceData{d}, nil
