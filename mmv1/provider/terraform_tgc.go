@@ -453,7 +453,6 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"converters/google/resources/services/compute/commitment.go":                            "third_party/tgc/services/compute/commitment.go",
 		"converters/google/resources/services/firebase/firebase_project.go":                     "third_party/tgc/services/firebase/firebase_project.go",
 		"converters/google/resources/services/appengine/appengine_application.go":               "third_party/tgc/services/appengine/appengine_application.go",
-		"converters/google/resources/services/apikeys/apikeys_key.go":                           "third_party/tgc/services/apikeys/apikeys_key.go",
 		"converters/google/resources/services/logging/logging_folder_bucket_config.go":          "third_party/tgc/services/logging/logging_folder_bucket_config.go",
 		"converters/google/resources/services/logging/logging_organization_bucket_config.go":    "third_party/tgc/services/logging/logging_organization_bucket_config.go",
 		"converters/google/resources/services/logging/logging_project_bucket_config.go":         "third_party/tgc/services/logging/logging_project_bucket_config.go",
