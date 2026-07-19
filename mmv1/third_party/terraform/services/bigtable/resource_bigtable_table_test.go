@@ -1371,3 +1371,92 @@ resource "google_bigtable_instance" "instance" {
 }
 `, instanceName, instanceName)
 }
+
+func TestAccBigtableTable_tieredStorageConfig(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Creating a table with 30 days tiered storage config
+			{
+				Config: testAccBigtableTable_tieredStorageConfig(instanceName, tableName, family, "720h"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_table.table", "tiered_storage_config.0.infrequent_access.0.include_if_older_than", "720h0m0s"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+			// Update to 60 days
+			{
+				Config: testAccBigtableTable_tieredStorageConfig(instanceName, tableName, family, "1440h"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_table.table", "tiered_storage_config.0.infrequent_access.0.include_if_older_than", "1440h0m0s"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+			// Removing the tiered storage config
+			{
+				Config: testAccBigtableTable_family(instanceName, tableName, family),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_bigtable_table.table", "tiered_storage_config.#"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+		},
+	})
+}
+
+func testAccBigtableTable_tieredStorageConfig(instanceName, tableName, family, includeIfOlderThan string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+
+  column_family {
+    family = "%s"
+  }
+  
+  tiered_storage_config {
+    infrequent_access {
+      include_if_older_than = "%s"
+    }
+  }
+
+  ignore_warnings = true
+}
+`, instanceName, instanceName, tableName, family, includeIfOlderThan)
+}
