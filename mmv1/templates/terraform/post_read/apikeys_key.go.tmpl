@@ -1,0 +1,19 @@
+// The key_string is not returned by the Key GET method; it must be fetched from the
+// dedicated getKeyString sub-endpoint. Populate it on every read so it is available
+// after both create and import. This mirrors the behavior of the previous
+// (DCL-generated) resource, which also fetched the key string on read.
+keyStringUrl := url + "/keyString"
+
+keyStringRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    keyStringUrl,
+	UserAgent: userAgent,
+})
+if err != nil {
+	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ApikeysKey %q", d.Id()))
+}
+if err := d.Set("key_string", keyStringRes["keyString"]); err != nil {
+	return fmt.Errorf("Error setting key_string: %s", err)
+}

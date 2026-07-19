@@ -1,0 +1,8 @@
+// A deleted API key is soft-deleted: a GET keeps returning it with a deleteTime set until it
+// is permanently purged (up to 30 days later). Treat a key that has a deleteTime as gone so
+// Terraform (and the acceptance-test destroy check) see it as deleted rather than dangling.
+if v, ok := res["deleteTime"]; ok && v != nil && v != "" {
+	return nil, nil
+}
+
+return res, nil
