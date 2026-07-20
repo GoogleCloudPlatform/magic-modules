@@ -244,6 +244,7 @@ properties:
             exactly_one_of:
               - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
               - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.direct_notebook_source
             properties:
               - name: 'dataformRepositoryResourceName'
                 type: String
@@ -259,6 +260,7 @@ properties:
             exactly_one_of:
               - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
               - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.direct_notebook_source
             properties:
               - name: 'uri'
                 type: String
@@ -273,7 +275,9 @@ properties:
           - name: 'notebookRuntimeTemplateResourceName'
             type: String
             description: 'The NotebookRuntimeTemplate to source compute configuration from.'
-            required: true
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.notebook_runtime_template_resource_name
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.custom_environment_spec
           - name: 'gcsOutputUri'
             required: true
             type: String
@@ -297,6 +301,9 @@ properties:
           - name: 'customEnvironmentSpec'
             type: NestedObject
             description: Compute configuration to use for an execution job.
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.notebook_runtime_template_resource_name
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.custom_environment_spec
             properties:
               - name: 'machineSpec'
                 type: NestedObject
@@ -365,6 +372,10 @@ properties:
           - name: 'directNotebookSource'
             type: NestedObject
             description: 'The content of the input notebook in ipynb format.'
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.direct_notebook_source
             properties:
               - name: 'content'
                 type: String
