@@ -37,10 +37,10 @@ var _ list.ListResourceWithConfigure = &IamMemberListResource{}
 // All are optional: when ommited, the value is resolved downstream from the provider
 // config(GetProject/GetRegion/GetZone/GetLocation) or environment variables.
 var supportedScopeFields = []tpgresource.ListConfigField{
-	{name: "project", kind: tpgresource.ListConfigKindString, optional: true},
-	{name: "region", kind: tpgresource.ListConfigKindString, optional: true},
-	{name: "zone", kind: tpgresource.ListConfigKindString, optional: true},
-	{name: "location", kind: tpgresource.ListConfigKindString, optional: true},
+	{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true},
+	{Name: "region", Kind: tpgresource.ListConfigKindString, Optional: true},
+	{Name: "zone", Kind: tpgresource.ListConfigKindString, Optional: true},
+	{Name: "location", Kind: tpgresource.ListConfigKindString, Optional: true},
 }
 
 // IamMemberListCallConfig holds resource-specific pieces for transport.ListCall.
