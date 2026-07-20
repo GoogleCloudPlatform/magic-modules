@@ -64,6 +64,7 @@ samples:
           - desired_state
   - name: 'colab_schedule_full'
     primary_resource_id: 'schedule'
+    min_version: beta
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
