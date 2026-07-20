@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/recaptchaenterprise"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/recaptchaenterprise"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -189,7 +189,7 @@ func TestAccComputeSecurityPolicy_update(t *testing.T) {
 			},
 
 			{
-				Config: testAccComputeSecurityPolicy_updateSamePriority(spName),
+				Config:      testAccComputeSecurityPolicy_updateSamePriority(spName),
 				ExpectError: regexp.MustCompile("Two rules have the same priority, please update one of the priorities to be different."),
 			},
 
@@ -315,7 +315,6 @@ func TestAccComputeSecurityPolicy_withAdvancedOptionsConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-
 		},
 	})
 }
@@ -441,6 +440,7 @@ func TestAccComputeSecurityPolicy_withAdaptiveProtectionAutoDeployConfig(t *test
 		},
 	})
 }
+
 {{- end }}
 
 func TestAccComputeSecurityPolicy_withRateLimitOptions(t *testing.T) {
@@ -546,7 +546,6 @@ func TestAccComputeSecurityPolicy_withRateLimitOption_withMultipleEnforceOnKeyCo
 		},
 	})
 }
-
 
 func TestAccComputeSecurityPolicy_EnforceOnKeyUpdates(t *testing.T) {
 	t.Parallel()
@@ -687,7 +686,6 @@ func TestAccComputeSecurityPolicy_ruleActionUpdate(t *testing.T) {
 	})
 }
 
-
 func TestAccComputeSecurityPolicy_withHeadAction(t *testing.T) {
 	t.Parallel()
 
@@ -771,7 +769,7 @@ func TestAccComputeSecurityPolicy_withExprOptions(t *testing.T) {
 func TestAccComputeSecurityPolicy_modifyExprOptions(t *testing.T) {
 	t.Parallel()
 
-  spName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	spName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1780,6 +1778,7 @@ resource "google_compute_security_policy" "policy" {
 }
 `, spName)
 }
+
 {{- end }}
 
 func testAccComputeSecurityPolicy_withRateLimitOptions(spName string) string {
@@ -2455,4 +2454,113 @@ resource "google_compute_security_policy" "policy" {
   }
 }
 `, spName)
+}
+
+func TestAccComputeSecurityPolicy_inlineRuleUpdate(t *testing.T) {
+	t.Parallel()
+
+	spName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSecurityPolicy_inlineRuleUpdate_step1(spName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckTypeSetElemNestedAttrs("google_compute_security_policy.policy", "rule.*", map[string]string{
+						"priority":    "1000",
+						"action":      "allow",
+						"description": "initial description",
+					}),
+				),
+			},
+			{
+				ResourceName:      "google_compute_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSecurityPolicy_inlineRuleUpdate_step2(spName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_security_policy.policy", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckTypeSetElemNestedAttrs("google_compute_security_policy.policy", "rule.*", map[string]string{
+						"priority":    "1000",
+						"action":      "allow",
+						"description": "updated description",
+					}),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeSecurityPolicy_inlineRuleUpdate_step1(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_security_policy" "policy" {
+  name        = "%s"
+  description = "test policy"
+
+  rule {
+    action      = "allow"
+    priority    = "1000"
+    description = "initial description"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["9.9.9.0/24"]
+      }
+    }
+  }
+}
+`, spName)
+}
+
+func testAccComputeSecurityPolicy_inlineRuleUpdate_step2(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_security_policy" "policy" {
+  name        = "%s"
+  description = "test policy"
+
+  rule {
+    action      = "allow"
+    priority    = "1000"
+    description = "updated description"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["9.9.9.0/24"]
+      }
+    }
+  }
+}
+`, spName)
+}
+
+func TestComputeSecurityPolicyRuleHash_inlineRuleModification(t *testing.T) {
+	ruleSchema := tpgcompute.ResourceComputeSecurityPolicy().Schema["rule"]
+	ruleSetFunc := ruleSchema.Set
+
+	rule1 := map[string]interface{}{
+		"priority":    1000,
+		"action":      "allow",
+		"description": "initial description",
+	}
+	rule2 := map[string]interface{}{
+		"priority":    1000,
+		"action":      "allow",
+		"description": "updated description",
+	}
+
+	hash1 := ruleSetFunc(rule1)
+	hash2 := ruleSetFunc(rule2)
+
+	if hash1 == hash2 {
+		t.Fatalf("expected different set hashes when modifying rule description, but both produced hash %d (reproduces hashicorp/terraform-provider-google#28390)", hash1)
+	}
 }
