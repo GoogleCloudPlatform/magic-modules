@@ -389,9 +389,6 @@ properties:
             type: String
             output: true
             description: 'The resource name of this NotebookExecutionJob. Format: `projects/{project_id}/locations/{location}/notebookExecutionJobs/{job_id}`'
-          - name: 'parameters'
-            type: KeyValuePairs
-            description: 'The user-defined parameters to use during notebook execution.'
           - name: 'scheduleResourceName'
             type: String
             output: true
