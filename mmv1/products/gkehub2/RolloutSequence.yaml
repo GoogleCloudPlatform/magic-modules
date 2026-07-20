@@ -199,6 +199,7 @@ virtual_fields:
       Any rollout of the same type already running on the first stage of the sequence will be cancelled to allow for the creation of the new rollout.
       Should be a valid [semantic version](https://semver.org/).
       Version aliases are supported, as described in the [cluster version docs](https://docs.cloud.google.com/kubernetes-engine/versioning#specifying_cluster_version).
+      Note that the `latest` and `-` aliases are not supported for this field.
       Supported formats: `1.X`, `1.X.Y`, `1.X.Y-gke.N`.
   - name: 'min_node_version'
     type: String
@@ -208,6 +209,7 @@ virtual_fields:
       Any rollout of the same type already running on the first stage of the sequence will be cancelled to allow for the creation of the new rollout.
       Should be a valid [semantic version](https://semver.org/).
       Version aliases are supported, as described in the [cluster version docs](https://docs.cloud.google.com/kubernetes-engine/versioning#specifying_cluster_version).
+      Note that the `latest` and `-` aliases are not supported for this field.
       Supported formats: `1.X`, `1.X.Y`, `1.X.Y-gke.N`.
 
 samples:
