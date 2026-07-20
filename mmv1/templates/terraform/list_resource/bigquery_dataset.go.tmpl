@@ -1,0 +1,20 @@
+if datasetReference, ok := res["datasetReference"].(map[string]interface{}); ok {
+	if datasetID, ok := datasetReference["datasetId"]; ok && datasetID != nil {
+		if err := d.Set("dataset_id", datasetID); err != nil {
+			return fmt.Errorf("error setting dataset_id: %w", err)
+		}
+	}
+	if projectID, ok := datasetReference["projectId"]; ok && projectID != nil {
+		if err := d.Set("project", projectID); err != nil {
+			return fmt.Errorf("error setting project: %w", err)
+		}
+	}
+}
+if location, ok := res["location"]; ok && location != nil {
+	if err := d.Set("location", location); err != nil {
+		return fmt.Errorf("error setting location: %w", err)
+	}
+}
+if err = ResourceBigQueryDatasetFlatten(d, config, res, config, project, userAgent, billingProject, url, headers); err != nil {
+	return err
+}

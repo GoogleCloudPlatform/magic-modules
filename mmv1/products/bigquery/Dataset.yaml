@@ -44,6 +44,9 @@ custom_code:
 custom_diff:
   - 'customCollationDiff'
 generate_list_resource: true
+list_api_field_name: 'datasets'
+list_resource:
+  custom_flattener: 'templates/terraform/list_resource/bigquery_dataset.go.tmpl'
 exclude_sweeper: true
 samples:
   - name: 'bigquery_dataset_basic'
