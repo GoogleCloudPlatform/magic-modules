@@ -99,7 +99,6 @@ samples:
         vars:
           lookup_timeout_action: "DENY"
           max_analysis_duration: "20s"
-          inline_timeout_action: "DENY"
         test_env_vars:
           project: "PROJECT_NAME"
           org_id: "ORG_ID"
@@ -222,6 +221,7 @@ properties:
           - 'DENY'
         description: 'Action to take on WildFire real time signature lookup timeout. Default value is ALLOW.'
       - name: 'wildfireInlineCloudAnalysisSettings'
+        immutable: true
         type: 'NestedObject'
         description: 'Settings for WildFire inline cloud analysis.'
         properties:
