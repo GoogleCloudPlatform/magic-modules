@@ -1,11 +1,10 @@
 # Knowledge backlog
 
-Candidate agent-only entries, grouped by contributor-docs coverage. Each lands as its own reviewed PR.
+Tracks known work for growing the agent knowledge base. This document is not intended for agents themselves.
 
 ## Not in the docs
 
 - **casing-and-pluralization** — how API names map to Terraform names; when `api_name` is required.
-- **pr-mined-lessons** — recurring review catches and per-service quirks surfaced from merged PRs.
 - **raw-config-access** — when to use `d.GetRawConfig()` / `GetRawPlan()` / `GetRawState()` instead of
   `Get`/`GetOk`, which conflate "unset in config" with "set to the zero value" (false/0/""); the raw cty
   values distinguish null from zero for detecting whether a user actually set a field.
@@ -27,3 +26,7 @@ Candidate agent-only entries, grouped by contributor-docs coverage. Each lands a
 
 - **failure-troubleshooting-catalog** — `.agents/skills/operations/troubleshooting_reference.md`; migrates
   here if it outgrows the skill.
+
+## Other future work
+
+- **PR mining** — mine historical PRs to discover new entries. These could be recurring review catches and per-service quirks that were only ever captured in the PR reviews themselves.

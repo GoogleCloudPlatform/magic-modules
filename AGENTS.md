@@ -18,7 +18,7 @@ here, upstream — never in the downstream repos.
 
 ## Ground rules
 
-- **Never weaken a test or check to make it pass.** No disabling or skipping tests, and no test-dodging
-  behavior flags (`ignore_read`, `default_from_api`, `ImportStateVerifyIgnore`) without an adjacent
+- **Never weaken baseline test coverage to make a test pass.** No disabling or skipping tests, and no test-dodging
+  behavior flags (`ignore_read`, `ImportStateVerifyIgnore`) without an adjacent
   comment justifying the API behavior that requires them.
 - **Verify before opening a PR**: generate, build, and run the tests relevant to what you changed.
