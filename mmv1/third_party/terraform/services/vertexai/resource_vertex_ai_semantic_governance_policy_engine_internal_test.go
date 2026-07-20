@@ -83,18 +83,8 @@ func TestUnitSGPE_PostReadDispatch_inStateBranches_no_op(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// CustomizeDiff Check 1 (sgpeFailedStateWarningCheck)
-// ---------------------------------------------------------------------------
-//
-// Check 1 is a soft warning: prior-state FAILED + any change to a mutable
-// field logs [WARN] and returns nil. It never blocks the plan. Production
-// asserts log content via TF_LOG=WARN; unit tests only assert return-nil
-// semantics (log capture is fragile — see the preserve-branch precedent).
-
-// sgpeFailedStateWarningCheck returns nil (does not block) when prior
-// state is FAILED and a mutable field changed. Post-scrub the sole
-// mutable field on Check 1's radar is gateway_config.
+// FAILED prior state + gateway_config change: returns nil (warning is
+// non-blocking).
 func TestUnitSGPE_FailedStateWarningCheck_FAILED_with_diff_succeeds(t *testing.T) {
 	t.Parallel()
 	d := &tpgresource.ResourceDiffMock{
@@ -111,13 +101,13 @@ func TestUnitSGPE_FailedStateWarningCheck_FAILED_with_diff_succeeds(t *testing.T
 			},
 		},
 	}
-	if err := sgpeFailedStateWarningCheck(d); err != nil {
+	if err := sgpeFailedStateWarningCheckFunc(d); err != nil {
 		t.Fatalf("expected nil error (warnings are non-blocking); got %v", err)
 	}
 }
 
-// sgpeFailedStateWarningCheck no-ops on: non-FAILED prior state (any
-// mutable diff), and FAILED prior state with no mutable diff.
+// sgpeFailedStateWarningCheckFunc no-ops on: non-FAILED prior state (any
+// gateway_config diff), and FAILED prior state with no gateway_config diff.
 func TestUnitSGPE_FailedStateWarningCheck_negativeCases_no_op(t *testing.T) {
 	t.Parallel()
 	cases := map[string]*tpgresource.ResourceDiffMock{
@@ -154,31 +144,15 @@ func TestUnitSGPE_FailedStateWarningCheck_negativeCases_no_op(t *testing.T) {
 	}
 	for name, d := range cases {
 		t.Run(name, func(t *testing.T) {
-			if err := sgpeFailedStateWarningCheck(d); err != nil {
+			if err := sgpeFailedStateWarningCheckFunc(d); err != nil {
 				t.Fatalf("expected nil error; got %v", err)
 			}
 		})
 	}
 }
 
-// ---------------------------------------------------------------------------
-// CustomizeDiff Check 2 (sgpeGatewayConfigChecksFunc)
-// ---------------------------------------------------------------------------
-//
-// Check 2 is a plan-time hard error on duplicate gateway_config.name.
-// Proto3 maps silently overwrite duplicate keys server-side, so the
-// duplication must be caught before the RPC is issued.
-//
-// This feature intentionally drops the preserve-branch's rename detector
-// (HLD §2.3 Option B): with the DEPROVISIONING-tombstone backend fix
-// (cl/945777282) live, rename is a normal map delta the backend teardown
-// chain handles. See HLD §2.3 for the tradeoff analysis. As a
-// consequence, there is NO ForceNew-on-rename test here, and rename is
-// asserted as a *legitimate* pass-through case below.
-
-// sgpeGatewayConfigChecksFunc errors on the first duplicate name it
-// encounters. Message text is asserted verbatim (substring) because
-// downstream tooling and user-facing docs quote it.
+// Duplicate gateway_config.name returns an error. Message is asserted
+// verbatim since downstream tooling quotes it.
 func TestUnitSGPE_GatewayConfigChecks_duplicateName_returns_error(t *testing.T) {
 	t.Parallel()
 	d := &tpgresource.ResourceDiffMock{
@@ -194,7 +168,7 @@ func TestUnitSGPE_GatewayConfigChecks_duplicateName_returns_error(t *testing.T) 
 			},
 		},
 	}
-	err := sgpeGatewayConfigChecksFunc(d)
+	err := sgpeGatewayConfigDuplicateNameCheckFunc(d)
 	if err == nil {
 		t.Fatal("expected duplicate-name error; got nil")
 	}
@@ -204,15 +178,9 @@ func TestUnitSGPE_GatewayConfigChecks_duplicateName_returns_error(t *testing.T) 
 	}
 }
 
-// sgpeGatewayConfigChecksFunc passes through cleanly for every
-// legitimate map delta: in-place value updates, pure adds, pure
-// removes, empty-to-empty, and RENAMES (drop-old-key + add-new-key).
-//
-// Rename is included here (not in a separate ForceNew-fires test)
-// because HLD §2.3 Option B routes rename through the backend
-// DEPROVISIONING-tombstone chain, not through provider-side ForceNew.
-// The provider's job on rename is to pass the map delta through — the
-// same as any other update.
+// Legitimate map deltas (in-place update, add, remove, rename,
+// empty-to-empty) all pass Check 2. Rename is a drop-then-add delta
+// with no provider-side ForceNew.
 func TestUnitSGPE_GatewayConfigChecks_legitimateUpdates_returnNil(t *testing.T) {
 	t.Parallel()
 	cases := map[string]*tpgresource.ResourceDiffMock{
@@ -256,7 +224,7 @@ func TestUnitSGPE_GatewayConfigChecks_legitimateUpdates_returnNil(t *testing.T) 
 				},
 			},
 		},
-		"rename (drop primary, add main; HLD §2.3 Option B pass-through)": {
+		"rename (drop primary, add main)": {
 			Before: map[string]interface{}{
 				"gateway_config": []map[string]interface{}{
 					{"name": "primary", "network": "n1"},
@@ -275,7 +243,7 @@ func TestUnitSGPE_GatewayConfigChecks_legitimateUpdates_returnNil(t *testing.T) 
 	}
 	for name, d := range cases {
 		t.Run(name, func(t *testing.T) {
-			if err := sgpeGatewayConfigChecksFunc(d); err != nil {
+			if err := sgpeGatewayConfigDuplicateNameCheckFunc(d); err != nil {
 				t.Fatalf("expected nil error; got %v", err)
 			}
 		})

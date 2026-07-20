@@ -59,7 +59,8 @@ async:
   result:
     resource_inside_response: true
 custom_diff:
-  - 'sgpeCustomizeDiff'
+  - 'sgpeFailedStateWarningCheck'
+  - 'sgpeGatewayConfigDuplicateNameCheck'
 custom_code:
   constants: 'templates/terraform/constants/semantic_governance_policy_engine.go.tmpl'
   post_read: 'templates/terraform/post_read/vertex_ai_semantic_governance_policy_engine.go.tmpl'
@@ -76,16 +77,12 @@ samples:
     exclude_test: true
     steps:
       - name: 'vertex_ai_semantic_governance_policy_engine_basic'
-  # gateway_config examples are exclude_test for the same singleton /
-  # AIP-156 reason as _basic above; the handwritten lifecycle test in
-  # resource_vertex_ai_semantic_governance_policy_engine_test.go covers
-  # gateway_config create / update / rename / remove flows end-to-end.
   - name: 'vertex_ai_semantic_governance_policy_engine_full'
     primary_resource_id: 'sgpe'
-    exclude_test: true
+    exclude_test: true # same singleton reason as _basic; covered by handwritten lifecycle test
   - name: 'vertex_ai_semantic_governance_policy_engine_multi_gateway'
     primary_resource_id: 'sgpe'
-    exclude_test: true
+    exclude_test: true # same singleton reason as _basic; covered by handwritten lifecycle test
 parameters:
   - name: 'region'
     type: String
@@ -142,20 +139,11 @@ properties:
     api_name: 'gatewayConfigs'
     type: Map
     description: |
-      Per-gateway Private Service Connect networking, keyed by a
-      user-defined `name` per block. Adding a block provisions a new
-      gateway; changing its inputs updates it; dropping a block removes
-      it (the backend runs the DEPROVISIONING-tombstone teardown chain);
-      renaming a block is a normal map delta (drop old key + add new
-      key), also handled by the backend teardown chain -- siblings are
-      untouched.
-
-      Bounded by a backend cap of 5 gateways per engine. Duplicate
-      `name` values across blocks are rejected at plan time.
-
-      Enum values on `state` are surfaced verbatim from the API; users
-      referencing them with `for_each` or conditional logic take on
-      API-forward-compat risk.
+      Private Service Connect networking for one or more gateways on
+      this engine, keyed by user-defined `name`. Each block provisions
+      a gateway; changing inputs updates in place; removing a block
+      deprovisions the gateway. Up to 5 gateways per engine. Duplicate
+      names are rejected at plan time.
     key_name: 'name'
     value_type:
       type: NestedObject
