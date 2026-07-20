@@ -2507,6 +2507,18 @@ resource "google_compute_security_policy" "policy" {
   description = "test policy"
 
   rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule"
+  }
+
+  rule {
     action      = "allow"
     priority    = "1000"
     description = "initial description"
@@ -2526,6 +2538,18 @@ func testAccComputeSecurityPolicy_inlineRuleUpdate_step2(spName string) string {
 resource "google_compute_security_policy" "policy" {
   name        = "%s"
   description = "test policy"
+
+  rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule"
+  }
 
   rule {
     action      = "allow"
