@@ -6,6 +6,7 @@ resource "google_project" "project" {
   deletion_policy = "DELETE"
 }
 
+// Enable APIs in a deterministic order to avoid inconsistent VCR recordings
 resource "google_project_service" "gkehub" {
   project            = google_project.project.project_id
   service            = "gkehub.googleapis.com"
@@ -14,17 +15,19 @@ resource "google_project_service" "gkehub" {
 resource "google_project_service" "container" {
   project            = google_project.project.project_id
   service            = "container.googleapis.com"
+  depends_on = [google_project_service.gkehub]
 }
 
 resource "google_project_service" "compute" {
   project            = google_project.project.project_id
   service            = "compute.googleapis.com"
+  depends_on = [google_project_service.container]
 }
 
 // wait for API enablement
 resource "time_sleep" "wait_120_seconds" {
   create_duration = "120s"
-  depends_on = [google_project_service.gkehub, google_project_service.container, google_project_service.compute]
+  depends_on = [google_project_service.compute]
 }
 
 resource "google_gke_hub_fleet" "default" {
@@ -38,8 +41,6 @@ data "google_container_engine_versions" "versions" {
   project = google_project.project.project_id
   depends_on = [time_sleep.wait_120_seconds]
 }
-
-resource "time_static" "exclusion_start" {}
 
 resource "google_container_cluster" "primary" {
   project            = google_project.project.project_id
