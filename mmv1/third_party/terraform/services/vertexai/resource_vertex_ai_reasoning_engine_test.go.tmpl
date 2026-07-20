@@ -714,6 +714,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 `, context)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccVertexAIReasoningEngine_apiParity(t *testing.T) {
 	t.Parallel()
 
@@ -794,6 +795,7 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
 }
 `, context)
 }
+{{- end }}
 
 func TestAccVertexAIReasoningEngine_apiParityExternal(t *testing.T) {
 	t.Skip("Skipping agent_gateway and runtime_revision_name due to external infrastructure dependencies")
