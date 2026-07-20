@@ -36,7 +36,7 @@ resource "google_network_security_firewall_endpoint" "{{$.PrimaryResourceId}}" {
 
     wildfire_inline_cloud_analysis_settings {
       max_analysis_duration = "{{index $.Vars "max_analysis_duration"}}"
-      timeout_action        = "{{index $.Vars "inline_timeout_action"}}"
+      timeout_action        = "{{index $.ResourceIdVars "inline_timeout_action"}}"
     }
   }
 }
