@@ -84,10 +84,10 @@ samples:
           network_name: "fw-network"
           subnet_name: "fw-subnet"
           endpoint_name: "fw-endpoint"
+          inline_timeout_action: "ALLOW"
         vars:
           lookup_timeout_action: "ALLOW"
           max_analysis_duration: "10s"
-          inline_timeout_action: "ALLOW"
         test_env_vars:
           project: "PROJECT_NAME"
           org_id: "ORG_ID"
