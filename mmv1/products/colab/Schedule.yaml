@@ -210,6 +210,7 @@ properties:
     required: true
   - name: 'maxConcurrentRunCount'
     type: String # Integer
+    required: true
     description: Maximum number of runs that can be started concurrently for this Schedule. This is the limit for starting the scheduled requests and not the execution of the notebook execution jobs created by the requests.
   - name: 'allowQueueing'
     type: Boolean
@@ -224,6 +225,9 @@ properties:
     immutable: true
     type: NestedObject
     description: Request for google_colab_notebook_execution.
+    exactly_one_of:
+      - create_notebook_execution_job_request
+      - create_pipeline_job_request
     properties:
       - name: 'notebookExecutionJob'
         type: NestedObject
@@ -233,6 +237,7 @@ properties:
           - name: 'displayName'
             type: String
             description: Required. The display name of the Notebook Execution.
+            required: true
           - name: 'dataformRepositorySource'
             type: NestedObject
             description: 'The Dataform Repository containing the input notebook.'
@@ -242,6 +247,7 @@ properties:
             properties:
               - name: 'dataformRepositoryResourceName'
                 type: String
+                required: true
                 description: 'The resource name of the Dataform Repository. Format: `projects/{project_id}/locations/{location}/repositories/{repository_id}`'
                 diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
               - name: 'commitSha'
@@ -256,6 +262,7 @@ properties:
             properties:
               - name: 'uri'
                 type: String
+                required: true
                 description: 'The Cloud Storage uri pointing to the ipynb file. Format: gs://bucket/notebook_file.ipynb'
               - name: 'generation'
                 type: String
@@ -266,7 +273,9 @@ properties:
           - name: 'notebookRuntimeTemplateResourceName'
             type: String
             description: 'The NotebookRuntimeTemplate to source compute configuration from.'
+            required: true
           - name: 'gcsOutputUri'
+            required: true
             type: String
             description: 'The Cloud Storage location to upload the result to. Format:`gs://bucket-name`'
           - name: 'executionUser'
@@ -412,6 +421,9 @@ properties:
   - name: 'createPipelineJobRequest'
     type: NestedObject
     description: Request message for PipelineService.CreatePipelineJob.
+    exactly_one_of:
+      - create_notebook_execution_job_request
+      - create_pipeline_job_request
     properties:
       - name: 'parent'
         type: String
