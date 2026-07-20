@@ -46,6 +46,7 @@ resource "google_container_cluster" "primary" {
   location           = "us-central1-a"
   initial_node_count = 1
   min_master_version = data.google_container_engine_versions.versions.release_channel_default_version["REGULAR"]
+  node_version = data.google_container_engine_versions.versions.release_channel_default_version["REGULAR"]
   deletion_protection = false
 
   release_channel {
@@ -54,20 +55,6 @@ resource "google_container_cluster" "primary" {
 
   resource_labels = {
     rs_test_cluster = "tf-test-%{random_suffix}"
-  }
-
-  maintenance_policy {
-    daily_maintenance_window {
-		  start_time = "03:00"
-	  }
-    maintenance_exclusion {
-      exclusion_name = "no-upgrades"
-      start_time     = timeadd(time_static.exclusion_start.rfc3339, "-24h")
-      end_time       = timeadd(time_static.exclusion_start.rfc3339, "24h")
-      exclusion_options {
-        scope = "NO_UPGRADES"
-      }
-    }
   }
 
   fleet {
