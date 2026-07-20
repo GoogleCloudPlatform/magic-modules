@@ -184,13 +184,41 @@ parameters:
     url_param_only: true
     description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
 properties:
+  - name: 'name'
+    type: String
+    description: 'The resource name of the Schedule'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    output: true
+  - name: 'displayName'
+    type: String
+    description: Required. The display name of the Schedule.
+    required: true
+  - name: 'startTime'
+    type: String
+    description: The timestamp after which the first run can be scheduled. Defaults to the schedule creation time. Must be in the RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt) format.
+    default_from_api: true
+  - name: 'endTime'
+    type: String
+    description: Timestamp after which no new runs can be scheduled. If specified, the schedule will be completed when either end_time is reached or when scheduled_run_count >= max_run_count. Must be in the RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt) format.
+  - name: 'maxRunCount'
+    type: String # Integer
+    description: Maximum run count of the schedule. If specified, The schedule will be completed when either startedRunCount >= maxRunCount or when endTime is reached. If not specified, new runs will keep getting scheduled until this Schedule is paused or deleted. Already scheduled runs will be allowed to complete. Unset if not specified.
+  - name: 'cron'
+    type: String
+    description: |
+      Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
+    required: true
+  - name: 'maxConcurrentRunCount'
+    type: String # Integer
+    description: Maximum number of runs that can be started concurrently for this Schedule. This is the limit for starting the scheduled requests and not the execution of the notebook execution jobs created by the requests.
   - name: 'allowQueueing'
     type: Boolean
     send_empty_value: true
     description: Whether new scheduled runs can be queued when max_concurrent_runs limit is reached. If set to true, new runs will be queued instead of skipped. Default to false.
-  - name: 'catchUp'
-    type: Boolean
-    description: Whether to backfill missed runs when the schedule is resumed from PAUSED state. If set to true, all missed runs will be scheduled. New runs will be scheduled after the backfill is complete. Default to false.
+  - name: 'state'
+    type: String
+    description: |
+      Output only. The state of the schedule.
     output: true
   - name: 'createNotebookExecutionJobRequest'
     immutable: true
@@ -202,6 +230,57 @@ properties:
         required: true
         description: The NotebookExecutionJob to create.
         properties:
+          - name: 'displayName'
+            type: String
+            description: Required. The display name of the Notebook Execution.
+          - name: 'dataformRepositorySource'
+            type: NestedObject
+            description: 'The Dataform Repository containing the input notebook.'
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
+            properties:
+              - name: 'dataformRepositoryResourceName'
+                type: String
+                description: 'The resource name of the Dataform Repository. Format: `projects/{project_id}/locations/{location}/repositories/{repository_id}`'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+              - name: 'commitSha'
+                type: String
+                description: 'The commit SHA to read repository with. If unset, the file will be read at HEAD.'
+          - name: 'gcsNotebookSource'
+            type: NestedObject
+            description: 'The Cloud Storage uri for the input notebook.'
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
+            properties:
+              - name: 'uri'
+                type: String
+                description: 'The Cloud Storage uri pointing to the ipynb file. Format: gs://bucket/notebook_file.ipynb'
+              - name: 'generation'
+                type: String
+                description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
+          - name: 'executionTimeout'
+            type: String
+            description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs). A duration in seconds with up to nine fractional digits, ending with "s". Example: "3.5s".'
+          - name: 'notebookRuntimeTemplateResourceName'
+            type: String
+            description: 'The NotebookRuntimeTemplate to source compute configuration from.'
+          - name: 'gcsOutputUri'
+            type: String
+            description: 'The Cloud Storage location to upload the result to. Format:`gs://bucket-name`'
+          - name: 'executionUser'
+            type: String
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.execution_user
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.service_account
+            description: 'The user email to run the execution as.'
+          - name: 'serviceAccount'
+            type: String
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.execution_user
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.service_account
+            description: 'The service account to run the execution as.'
           - name: 'createTime'
             type: String
             description: Timestamp when this NotebookExecutionJob was created.
@@ -274,17 +353,6 @@ properties:
                   - name: 'diskType'
                     type: String
                     description: 'Type of the disk (default is "pd-standard"). Valid values: "pd-ssd" (Persistent Disk Solid State Drive) "pd-standard" (Persistent Disk Hard Disk Drive) "pd-balanced" (Balanced Persistent Disk) "pd-extreme" (Extreme Persistent Disk)'
-          - name: 'dataformRepositorySource'
-            type: NestedObject
-            description: 'The Dataform Repository containing the input notebook.'
-            properties:
-              - name: 'commitSha'
-                type: String
-                description: 'The commit SHA to read repository with. If unset, the file will be read at HEAD.'
-              - name: 'dataformRepositoryResourceName'
-                type: String
-                description: 'The resource name of the Dataform Repository. Format: `projects/{project_id}/locations/{location}/repositories/{repository_id}`'
-                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - name: 'directNotebookSource'
             type: NestedObject
             description: 'The content of the input notebook in ipynb format.'
@@ -292,9 +360,6 @@ properties:
               - name: 'content'
                 type: String
                 description: 'The base64-encoded contents of the input notebook file.'
-          - name: 'displayName'
-            type: String
-            description: Required. The display name of the Notebook Execution.
           - name: 'encryptionSpec'
             type: NestedObject
             description: Represents a customer-managed encryption key specification that can be applied to a Vertex AI resource.
@@ -303,25 +368,6 @@ properties:
                 type: String
                 required: true
                 description: Resource name of the Cloud KMS key used to protect the resource. The Cloud KMS key must be in the same region as the resource. It must have the format `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
-          - name: 'executionTimeout'
-            type: String
-            description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs). A duration in seconds with up to nine fractional digits, ending with "s". Example: "3.5s".'
-          - name: 'executionUser'
-            type: String
-            description: 'The user email to run the execution as.'
-          - name: 'gcsNotebookSource'
-            type: NestedObject
-            description: 'The Cloud Storage uri for the input notebook.'
-            properties:
-              - name: 'generation'
-                type: String
-                description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
-              - name: 'uri'
-                type: String
-                description: 'The Cloud Storage uri pointing to the ipynb file. Format: gs://bucket/notebook_file.ipynb'
-          - name: 'gcsOutputUri'
-            type: String
-            description: 'The Cloud Storage location to upload the result to. Format:`gs://bucket-name`'
           - name: 'jobState'
             type: String
             output: true
@@ -336,9 +382,6 @@ properties:
             type: String
             output: true
             description: 'The resource name of this NotebookExecutionJob. Format: `projects/{project_id}/locations/{location}/notebookExecutionJobs/{job_id}`'
-          - name: 'notebookRuntimeTemplateResourceName'
-            type: String
-            description: 'The NotebookRuntimeTemplate to source compute configuration from.'
           - name: 'parameters'
             type: KeyValuePairs
             description: 'The user-defined parameters to use during notebook execution.'
@@ -346,9 +389,6 @@ properties:
             type: String
             output: true
             description: 'The Schedule resource name if this job is triggered by one. Format: `projects/{project_id}/locations/{location}/schedules/{schedule_id}`'
-          - name: 'serviceAccount'
-            type: String
-            description: 'The service account to run the execution as.'
           - name: 'updateTime'
             type: String
             output: true
@@ -365,6 +405,10 @@ properties:
         type: String
         description: 'The resource name of the Location to create the NotebookExecutionJob. Format: `projects/{project}/locations/{location}`'
         default_from_api: true
+  - name: 'catchUp'
+    type: Boolean
+    description: Whether to backfill missed runs when the schedule is resumed from PAUSED state. If set to true, all missed runs will be scheduled. New runs will be scheduled after the backfill is complete. Default to false.
+    output: true
   - name: 'createPipelineJobRequest'
     type: NestedObject
     description: Request message for PipelineService.CreatePipelineJob.
@@ -503,18 +547,6 @@ properties:
     type: String
     description: Timestamp when this Schedule was created.
     output: true
-  - name: 'cron'
-    type: String
-    description: |
-      Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
-    required: true
-  - name: 'displayName'
-    type: String
-    description: Required. The display name of the Schedule.
-    required: true
-  - name: 'endTime'
-    type: String
-    description: Timestamp after which no new runs can be scheduled. If specified, the schedule will be completed when either end_time is reached or when scheduled_run_count >= max_run_count. Must be in the RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt) format.
   - name: 'lastPauseTime'
     type: String
     description: Timestamp when this Schedule was last paused. Unset if never paused.
@@ -539,33 +571,13 @@ properties:
   - name: 'maxConcurrentActiveRunCount'
     type: String
     description: Specifies the maximum number of active runs that can be executed concurrently for this Schedule. This limits the number of runs that can be in a non-terminal state at the same time. Currently, this field is only supported for requests of type CreatePipelineJobRequest.
-  - name: 'maxConcurrentRunCount'
-    type: String # Integer
-    description: Maximum number of runs that can be started concurrently for this Schedule. This is the limit for starting the scheduled requests and not the execution of the notebook execution jobs created by the requests.
-  - name: 'maxRunCount'
-    type: String # Integer
-    description: Maximum run count of the schedule. If specified, The schedule will be completed when either startedRunCount >= maxRunCount or when endTime is reached. If not specified, new runs will keep getting scheduled until this Schedule is paused or deleted. Already scheduled runs will be allowed to complete. Unset if not specified.
-  - name: 'name'
-    type: String
-    description: 'The resource name of the Schedule'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    output: true
   - name: 'nextRunTime'
     type: String
     description: Timestamp when this Schedule should schedule the next run. Having a next_run_time in the past means the runs are being started behind schedule.
     output: true
-  - name: 'startTime'
-    type: String
-    description: The timestamp after which the first run can be scheduled. Defaults to the schedule creation time. Must be in the RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt) format.
-    default_from_api: true
   - name: 'startedRunCount'
     type: String
     description: The number of runs started by this schedule.
-    output: true
-  - name: 'state'
-    type: String
-    description: |
-      Output only. The state of the schedule.
     output: true
   - name: 'updateTime'
     type: String
