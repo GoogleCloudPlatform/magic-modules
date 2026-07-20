@@ -21,3 +21,7 @@ versions:
     base_url: https://networkservices.googleapis.com/v1/
   - name: ga
     base_url: https://networkservices.googleapis.com/v1/
+  - name: nightly
+    base_url: https://networkservices.googleapis.com/v1alpha1/
+  - name: private
+    base_url: https://networkservices.googleapis.com/v1alpha1/
