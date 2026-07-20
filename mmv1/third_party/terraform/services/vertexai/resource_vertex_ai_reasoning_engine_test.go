@@ -737,16 +737,6 @@ func testAccVertexAIReasoningEngine_apiParity(context map[string]interface{}) st
 	return acctest.Nprintf(`
 data "google_project" "project" {}
 
-resource "google_cloudbuild_worker_pool" "pool" {
-  name     = "pool-%{random_suffix}"
-  location = "us-central1"
-  worker_config {
-    disk_size_gb   = 100
-    machine_type   = "e2-standard-4"
-    no_external_ip = false
-  }
-}
-
 resource "google_vertex_ai_reasoning_engine" "primary" {
   display_name = "tf-test-reasoning-engine-%{random_suffix}"
   description  = "Reasoning engine testing API parity fields"
@@ -764,9 +754,6 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
       name        = "test-agent"
       description = "a test agent card"
     })
-    build_spec {
-      worker_pool = google_cloudbuild_worker_pool.pool.id
-    }
     deployment_spec {
       agent_server_mode                  = "EXPERIMENTAL"
       dedicated_ingress_endpoint_enabled = false
@@ -792,7 +779,7 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
 }
 
 func TestAccVertexAIReasoningEngine_apiParityExternal(t *testing.T) {
-	t.Skip("Skipping agent_gateway and runtime_revision_name due to external infrastructure dependencies")
+	t.Skip("Skipping worker_pool, agent_gateway and runtime_revision_name due to external infrastructure dependencies")
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -815,6 +802,16 @@ func testAccVertexAIReasoningEngine_apiParityExternal(context map[string]interfa
 	return acctest.Nprintf(`
 data "google_project" "project" {}
 
+resource "google_cloudbuild_worker_pool" "pool" {
+  name     = "pool-%{random_suffix}"
+  location = "us-central1"
+  worker_config {
+    disk_size_gb   = 100
+    machine_type   = "e2-standard-4"
+    no_external_ip = false
+  }
+}
+
 resource "google_vertex_ai_reasoning_engine" "primary" {
   display_name = "tf-test-reasoning-engine-%{random_suffix}"
   description  = "Reasoning engine testing external API parity fields"
@@ -822,6 +819,9 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
 
   spec {
     identity_type = "AGENT_IDENTITY"
+    build_spec {
+      worker_pool = google_cloudbuild_worker_pool.pool.id
+    }
     deployment_spec {
       agent_gateway_config {
         agent_to_anywhere_config {
