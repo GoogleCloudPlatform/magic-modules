@@ -36,40 +36,6 @@ func sgpePostReadDispatch(d sgpeResourceID, res map[string]interface{}) error {
 	return nil
 }
 
-// CustomizeDiff helpers wired via the YAML custom_diff list. Both
-// accept tpgresource.TerraformResourceDiff so unit tests can drive
-// them via tpgresource.ResourceDiffMock.
-
-// sgpeFailedStateWarningCheck is the CustomizeDiff entry point for
-// Check 1. Delegates to the testable inner func.
-func sgpeFailedStateWarningCheck(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-	return sgpeFailedStateWarningCheckFunc(diff)
-}
-
-// sgpeFailedStateWarningCheckFunc logs [WARN] and returns nil when the
-// prior state is FAILED and gateway_config is changing. Never blocks
-// the plan. The Plugin SDK v2 CustomizeDiff signature has no
-// Diagnostics channel, so the warning surfaces only at TF_LOG=WARN.
-func sgpeFailedStateWarningCheckFunc(diff tpgresource.TerraformResourceDiff) error {
-	priorStateRaw, _ := diff.GetChange("state")
-	priorState, ok := priorStateRaw.(string)
-	if !ok || priorState != "FAILED" {
-		return nil
-	}
-	// Explicit per-field GetChange + reflect.DeepEqual (not diff.HasChange)
-	// because ResourceDiffMock's HasChange panics on slice/map values.
-	before, after := diff.GetChange("gateway_config")
-	if reflect.DeepEqual(before, after) {
-		return nil
-	}
-	log.Printf("[WARN] This SemanticGovernancePolicyEngine is in FAILED state. " +
-		"Applying any change will trigger a full re-provision — equivalent to a " +
-		"`terraform destroy` followed by `terraform apply`. The values of " +
-		"output-only fields such as `psc_service_attachment`, `ip_address`, and " +
-		"`psc_forwarding_rule` are likely to change.")
-	return nil
-}
-
 // extractGatewayConfigBlocks normalizes the diff's gateway_config value
 // across production *schema.ResourceDiff (returns *schema.Set) and
 // tpgresource.ResourceDiffMock (returns the raw slice) into a canonical

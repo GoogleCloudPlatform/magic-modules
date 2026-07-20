@@ -59,7 +59,6 @@ async:
   result:
     resource_inside_response: true
 custom_diff:
-  - 'sgpeFailedStateWarningCheck'
   - 'sgpeGatewayConfigDuplicateNameCheck'
 custom_code:
   constants: 'templates/terraform/constants/semantic_governance_policy_engine.go.tmpl'
