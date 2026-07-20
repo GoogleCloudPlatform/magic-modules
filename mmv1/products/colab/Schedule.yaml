@@ -48,6 +48,10 @@ samples:
           project_id: 'PROJECT_NAME'
           location: 'REGION'
           service_account: 'SERVICE_ACCT'
+        ignore_read_extra:
+          - last_scheduled_run_response
+          - next_run_time
+          - started_run_count
   - name: 'colab_schedule_paused'
     primary_resource_id: 'schedule'
     steps:
@@ -62,6 +66,9 @@ samples:
           service_account: 'SERVICE_ACCT'
         ignore_read_extra:
           - desired_state
+          - last_scheduled_run_response
+          - next_run_time
+          - started_run_count
   - name: 'colab_schedule_full'
     primary_resource_id: 'schedule'
     min_version: beta
@@ -91,6 +98,10 @@ samples:
           end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
           # for backward compatible
           secret: '"secret" + randomSuffix'
+        ignore_read_extra:
+          - last_scheduled_run_response
+          - next_run_time
+          - started_run_count
   - name: colab_schedule_notebook_full
     primary_resource_id: schedule
     bootstrap_iam:
@@ -112,6 +123,10 @@ samples:
           service_account: 'SERVICE_ACCT'
         test_vars_overrides:
           key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        ignore_read_extra:
+          - last_scheduled_run_response
+          - next_run_time
+          - started_run_count
   - name: colab_schedule_pipeline
     primary_resource_id: schedule
     bootstrap_iam:
@@ -136,6 +151,10 @@ samples:
           failure_policy: PIPELINE_FAILURE_POLICY_FAIL_FAST
         test_vars_overrides:
           key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        ignore_read_extra:
+          - last_scheduled_run_response
+          - next_run_time
+          - started_run_count
       - name: colab_schedule_pipeline
         resource_id_vars:
           storage_bucket: pipeline-job
@@ -154,6 +173,10 @@ samples:
           failure_policy: PIPELINE_FAILURE_POLICY_FAIL_SLOW
         test_vars_overrides:
           key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        ignore_read_extra:
+          - last_scheduled_run_response
+          - next_run_time
+          - started_run_count
 virtual_fields:
   - name: 'desired_state'
     description: |
