@@ -96,6 +96,7 @@ samples:
           network_name: "fw-network"
           subnet_name: "fw-subnet"
           endpoint_name: "fw-endpoint"
+          inline_timeout_action: "ALLOW"
         vars:
           lookup_timeout_action: "DENY"
           max_analysis_duration: "20s"
