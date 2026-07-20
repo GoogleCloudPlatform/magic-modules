@@ -242,6 +242,7 @@ properties:
           - name: parameters
             type: KeyValuePairs
             description: The user-defined parameters to use during notebook execution.
+            ignore_read: true
           - name: scheduleResourceName
             type: String
             output: true
