@@ -244,7 +244,6 @@ properties:
             exactly_one_of:
               - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
               - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
-              - create_notebook_execution_job_request.0.notebook_execution_job.0.direct_notebook_source
             properties:
               - name: 'dataformRepositoryResourceName'
                 type: String
@@ -260,7 +259,6 @@ properties:
             exactly_one_of:
               - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
               - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
-              - create_notebook_execution_job_request.0.notebook_execution_job.0.direct_notebook_source
             properties:
               - name: 'uri'
                 type: String
@@ -369,17 +367,6 @@ properties:
                   - name: 'diskType'
                     type: String
                     description: 'Type of the disk (default is "pd-standard"). Valid values: "pd-ssd" (Persistent Disk Solid State Drive) "pd-standard" (Persistent Disk Hard Disk Drive) "pd-balanced" (Balanced Persistent Disk) "pd-extreme" (Extreme Persistent Disk)'
-          - name: 'directNotebookSource'
-            type: NestedObject
-            description: 'The content of the input notebook in ipynb format.'
-            exactly_one_of:
-              - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
-              - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
-              - create_notebook_execution_job_request.0.notebook_execution_job.0.direct_notebook_source
-            properties:
-              - name: 'content'
-                type: String
-                description: 'The base64-encoded contents of the input notebook file.'
           - name: 'encryptionSpec'
             type: NestedObject
             description: Represents a customer-managed encryption key specification that can be applied to a Vertex AI resource.
