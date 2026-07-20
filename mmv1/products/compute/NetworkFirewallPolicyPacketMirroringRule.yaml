@@ -34,6 +34,8 @@ delete_verb: 'POST'
 legacy_long_form_project: true
 import_format:
   - 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/packetMirroringRules/{{priority}}'
+generate_list_resource: true
+collection_url_key: 'packetMirroringRules'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

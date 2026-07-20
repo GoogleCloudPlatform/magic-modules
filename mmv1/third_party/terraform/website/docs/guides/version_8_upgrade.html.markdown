@@ -106,3 +106,9 @@ The `http_get.http_headers.port` field of container startup probe and liveness p
 
 The `http_get.http_headers.name` field of container startup probe and liveness probe are now required in this resource. If `http_get.http_headers` field is used, add the sub field `http_get.http_headers.name` to your configuration after
 upgrading.
+
+## Resource: `google_netapp_storage_pool`
+
+### `scale_tier` has been removed
+
+The `scale_tier` argument has been removed from this resource. It was previously deprecated in favor of `scale_type`. When upgrading to version 8.0.0, remove any usage of `scale_tier` from your `google_netapp_storage_pool` configurations. You should use the `scale_type` argument instead for specifying the scale type.

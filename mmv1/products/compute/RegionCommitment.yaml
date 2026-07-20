@@ -46,6 +46,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+  constants: 'templates/terraform/constants/region_commitment.go.tmpl'
 samples:
   - name: 'compute_region_commitment_basic'
     primary_resource_id: 'foobar'
@@ -209,9 +210,14 @@ properties:
   - name: 'existingReservations'
     type: String
     description: |
-      Specifies the already existing reservations to attach to the Commitment.
-    # Ignore read as a temporary fix because the API only returns these in the `reservations` list
+      Specifies the already existing reservations to attach to the Commitment. This field will suppress
+      diffs that change the value from empty to non-empty. To force changing this field from empty to non-empty,
+      change another field at the same time.
+    # Ignore read as a temporary fix because the API only returns these in the `reservations` list.
     ignore_read: true
+    # Diff suppress function prevents forced recreations for existing resources when upgrading from
+    # provider versions prior to 7.37.0
+    diff_suppress_func: 'computeRegionCommitmentExistingReservationsDiffSuppress'
   - name: 'params'
     type: NestedObject
     ignore_read: true
