@@ -31,7 +31,7 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
     notebook_execution_job {
       display_name   = "test-notebook-execution-job"
       gcs_output_uri  = "gs://${google_storage_bucket.bucket.name}"
-      execution_user = "{{index $.TestEnvVars "service_account"}}"
+      service_account = "{{index $.TestEnvVars "service_account"}}"
       kernel_name    = "python3"
 
       direct_notebook_source {

@@ -104,9 +104,6 @@ samples:
           - started_run_count
   - name: colab_schedule_notebook_full
     primary_resource_id: schedule
-    bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     steps:
       - name: colab_schedule_notebook_full
         resource_id_vars:
@@ -129,9 +126,6 @@ samples:
           - started_run_count
   - name: colab_schedule_pipeline
     primary_resource_id: schedule
-    bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     steps:
       - name: colab_schedule_pipeline
         resource_id_vars:
