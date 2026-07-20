@@ -7,7 +7,7 @@ resource "google_compute_network" "default" {
 
 resource "google_compute_subnetwork" "default" {
   provider      = google-beta
-  name          = "test-subnet"
+  name          = "{{index $.ResourceIdVars "subnetwork_name"}}"
   region        = "us-west2"
   network       = google_compute_network.default.id
   ip_cidr_range = "10.10.0.0/24"
@@ -15,7 +15,7 @@ resource "google_compute_subnetwork" "default" {
 
 resource "google_compute_health_check" "default" {
   provider = google-beta
-  name     = "test-health-check"
+  name     = "{{index $.ResourceIdVars "health_check_name"}}"
 
   http_health_check {
     port = 80

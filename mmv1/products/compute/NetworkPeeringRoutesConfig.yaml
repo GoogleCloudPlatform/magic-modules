@@ -65,6 +65,23 @@ samples:
           peering_secondary_name: 'secondary-peering'
           network_primary_name: 'primary-network'
           network_secondary_name: 'secondary-network'
+  - name: 'network_peering_routes_config_gke_peered_vpc'
+    primary_resource_id: 'peering_gke_routes'
+    skip_vcr: true
+    steps:
+      - name: 'network_peering_routes_config_gke_peered_vpc'
+        resource_id_vars:
+          peering_gke_to_workload_name: 'peering-gke-to-workload'
+          peering_workload_to_gke_name: 'peering-workload-to-gke'
+          gke_network_name: 'gke-network'
+          workload_network_name: 'workload-network'
+          gke_subnetwork_name: 'gke-subnetwork'
+          gke_cluster_name: 'gke-cluster'
+          deletion_protection: 'true'
+        test_vars_overrides:
+          'deletion_protection': 'false'
+        oics_vars_overrides:
+          'deletion_protection': 'false'
 parameters:
   - name: 'network'
     type: ResourceRef

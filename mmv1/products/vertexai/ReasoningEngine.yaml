@@ -161,6 +161,7 @@ samples:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/reasoning_engine_deletion_policy.go.tmpl'
   post_update: 'templates/terraform/post_update/sleep_10s.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/vertex_ai_reasoning_engine.go.tmpl'
 virtual_fields:
   - name: 'deletion_policy'
     description: |
@@ -251,6 +252,252 @@ properties:
         description: |
           Optional. Declarations for object class methods in OpenAPI
           specification format.
+
+          **Note**: When deploying via Terraform, this field must be populated manually.
+          Otherwise, client SDKs (like `agent_engines.get()`) will not be able to discover the methods, and calls to the engine (or A2A integrations) will fail.
+
+          Depending on the template/framework used (`agent_framework`), the required class methods and their parameters differ:
+
+          **Warning**: The configuration snippets below are illustrative, may not be exhaustive, and could stop working over time. For the most up-to-date method lists and schemas, please consult the respective SDK source code:
+          * For Google ADK: See [ADK Python SDK cli_deploy.py](https://github.com/google/adk-python/blob/68a780306e3bdd648a882ef34c0abf8e5148353e/src/google/adk/cli/cli_deploy.py#L109).
+          * For Langchain: See [Vertex AI Python SDK langchain.py](https://github.com/googleapis/python-aiplatform/blob/c8a38a085931b01f4d6071f0ab7a64cb42851829/agentplatform/agent_engines/templates/langchain.py#L642-L717).
+
+          ### 1. Langchain Template
+          * `query` (api_mode = "sync" or empty)
+          * `stream_query` (api_mode = "stream")
+
+          Example for Langchain:
+          ```hcl
+          class_methods = jsonencode([
+            {
+              name        = "query"
+              api_mode    = "sync"
+              description = "Queries the reasoning engine"
+              parameters  = {
+                type       = "object"
+                required   = ["input"]
+                properties = {
+                  input = {
+                    type        = "string"
+                    description = "The input prompt"
+                  }
+                }
+              }
+            },
+            {
+              name        = "stream_query"
+              api_mode    = "stream"
+              description = "Streams queries from the reasoning engine"
+              parameters  = {
+                type       = "object"
+                required   = ["input"]
+                properties = {
+                  input = {
+                    type        = "string"
+                    description = "The input prompt"
+                  }
+                }
+              }
+            }
+          ])
+          ```
+
+          ### 2. Google ADK Template (Standard - No A2A)
+          For standard Google ADK (Agent Development Kit) deployments, you must define the following 11 methods:
+
+          Example for Standard ADK:
+          ```hcl
+          class_methods = jsonencode([
+            {
+              name        = "get_session"
+              api_mode    = ""
+              description = "Retrieve session by ID"
+              parameters  = {
+                type     = "object"
+                required = ["user_id", "session_id"]
+                properties = {
+                  user_id    = { type = "string" }
+                  session_id = { type = "string" }
+                }
+              }
+            },
+            {
+              name        = "async_get_session"
+              api_mode    = "async"
+              description = "Retrieve session asynchronously by ID"
+              parameters  = {
+                type     = "object"
+                required = ["user_id", "session_id"]
+                properties = {
+                  user_id    = { type = "string" }
+                  session_id = { type = "string" }
+                }
+              }
+            },
+            {
+              name        = "list_sessions"
+              api_mode    = ""
+              description = "List all sessions for a user"
+              parameters  = {
+                type     = "object"
+                required = ["user_id"]
+                properties = {
+                  user_id = { type = "string" }
+                }
+              }
+            },
+            {
+              name        = "async_list_sessions"
+              api_mode    = "async"
+              description = "List all sessions for a user asynchronously"
+              parameters  = {
+                type     = "object"
+                required = ["user_id"]
+                properties = {
+                  user_id = { type = "string" }
+                }
+              }
+            },
+            {
+              name        = "create_session"
+              api_mode    = ""
+              description = "Create a new session"
+              parameters  = {
+                type     = "object"
+                required = ["user_id"]
+                properties = {
+                  user_id    = { type = "string" }
+                  session_id = { type = "string" }
+                  state      = { type = "object" }
+                }
+              }
+            },
+            {
+              name        = "async_create_session"
+              api_mode    = "async"
+              description = "Create a new session asynchronously"
+              parameters  = {
+                type     = "object"
+                required = ["user_id"]
+                properties = {
+                  user_id    = { type = "string" }
+                  session_id = { type = "string" }
+                  state      = { type = "object" }
+                }
+              }
+            },
+            {
+              name        = "delete_session"
+              api_mode    = ""
+              description = "Delete session by ID"
+              parameters  = {
+                type     = "object"
+                required = ["user_id", "session_id"]
+                properties = {
+                  user_id    = { type = "string" }
+                  session_id = { type = "string" }
+                }
+              }
+            },
+            {
+              name        = "async_delete_session"
+              api_mode    = "async"
+              description = "Delete session asynchronously by ID"
+              parameters  = {
+                type     = "object"
+                required = ["user_id", "session_id"]
+                properties = {
+                  user_id    = { type = "string" }
+                  session_id = { type = "string" }
+                }
+              }
+            },
+            {
+              name        = "stream_query"
+              api_mode    = "stream"
+              description = "Stream queries from the agent"
+              parameters  = {
+                type     = "object"
+                required = ["message", "user_id"]
+                properties = {
+                  message    = { description = "Message string or object" }
+                  user_id    = { type = "string" }
+                  session_id = { type = "string" }
+                  run_config = { type = "object" }
+                }
+              }
+            },
+            {
+              name        = "async_stream_query"
+              api_mode    = "async_stream"
+              description = "Stream queries asynchronously from the agent"
+              parameters  = {
+                type     = "object"
+                required = ["message", "user_id"]
+                properties = {
+                  message        = { description = "Message string or object" }
+                  user_id        = { type = "string" }
+                  session_id     = { type = "string" }
+                  session_events = { type = "array", items = { type = "object" } }
+                  run_config     = { type = "object" }
+                }
+              }
+            },
+            {
+              name        = "streaming_agent_run_with_events"
+              api_mode    = "async_stream"
+              description = "Stream agent run with events asynchronously"
+              parameters  = {
+                type     = "object"
+                required = ["request_json"]
+                properties = {
+                  request_json = { type = "string" }
+                }
+              }
+            }
+          ])
+          ```
+
+          ### 3. Google ADK Template (A2A-Enabled)
+          If the agent integrates with the Gemini Enterprise Agent Registry (A2A), you must inject the `a2a_agent_card` JSON metadata as a string **specifically inside the `async_create_session` method definition**:
+
+          Example for A2A-Enabled ADK:
+          ```hcl
+          locals {
+            # Construct the A2A endpoint URL
+            a2a_url = "https://us-central1-aiplatform.googleapis.com/v1/projects/my-project/locations/us-central1/reasoningEngines/my-agent/a2a"
+
+            agent_card = {
+              name                 = "my-agent"
+              description          = "A2A Agent"
+              version              = "1.0.0"
+              preferred_transport  = "HTTP_JSON"
+              supported_interfaces = [{ url = local.a2a_url, protocol_binding = "HTTP_JSON" }]
+              capabilities         = { streaming = true }
+            }
+          }
+
+          # In class_methods, append "a2a_agent_card" key ONLY to the "async_create_session" method:
+          class_methods = jsonencode([
+            # ... other 10 standard methods (same as Standard ADK) ...
+            {
+              name        = "async_create_session"
+              api_mode    = "async"
+              description = "Create a new session asynchronously"
+              parameters  = {
+                type     = "object"
+                required = ["user_id"]
+                properties = {
+                  user_id    = { type = "string" }
+                  session_id = { type = "string" }
+                  state      = { type = "object" }
+                }
+              }
+              # Inject the serialized Agent Card here
+              a2a_agent_card = jsonencode(local.agent_card)
+            }
+          ])
+          ```
         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
         custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
         custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
@@ -258,6 +505,7 @@ properties:
           function: 'validation.StringIsJSON'
       - name: 'deploymentSpec'
         type: NestedObject
+        default_from_api: true
         description: |-
           Optional. The specification of a Reasoning Engine deployment.
         properties:
@@ -267,6 +515,7 @@ properties:
               Optional. Environment variables to be set with the Reasoning
               Engine deployment.
             is_set: true
+            custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_reasoning_engine_env.go.tmpl'
             item_type:
               type: NestedObject
               properties:
@@ -405,6 +654,72 @@ properties:
               Optional. Concurrency for each container and agent server.
               Recommended value: 2 * cpu + 1. Defaults to 9.
             default_from_api: true
+          - name: 'agentServerMode'
+            type: Enum
+            min_version: 'beta'
+            description: |-
+              Optional. The agent server mode specifies what features are used when deploy the agent to agent engine.
+              Possible values:
+              * `STABLE`: Stable agent server mode.
+              * `EXPERIMENTAL`: Experimental agent server mode.
+            enum_values:
+              - 'STABLE'
+              - 'EXPERIMENTAL'
+          - name: 'agentGatewayConfig'
+            type: NestedObject
+            min_version: 'beta'
+            description: |-
+              Optional. Agent Gateway configuration for a Reasoning Engine deployment.
+            properties:
+              - name: 'clientToAgentConfig'
+                type: NestedObject
+                description: |-
+                  Optional. Configuration for traffic targeting the Reasoning Engine.
+                properties:
+                  - name: 'agentGateway'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. The resource name of the Agent Gateway to use for inbound traffic.
+              - name: 'agentToAnywhereConfig'
+                type: NestedObject
+                description: |-
+                  Optional. Configuration for traffic originating from the Reasoning Engine.
+                properties:
+                  - name: 'agentGateway'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. The resource name of the Agent Gateway for outbound traffic.
+          - name: 'keepAliveProbe'
+            type: NestedObject
+            min_version: 'beta'
+            description: |-
+              Optional. Specifies the configuration for keep-alive probe.
+            properties:
+              - name: 'httpGet'
+                type: NestedObject
+                description: |-
+                  Specifies the HTTP GET configuration for the probe.
+                properties:
+                  - name: 'path'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. Specifies the path of the HTTP GET request (e.g., `"/is_busy"`).
+                  - name: 'port'
+                    type: Integer
+                    description: |-
+                      Optional. Specifies the port number on the container to which the request is sent.
+              - name: 'maxSeconds'
+                type: Integer
+                description: |-
+                  Optional. Specifies the maximum duration (in seconds) to keep the instance alive via this probe. Can be a maximum of 3600 seconds (1 hour).
+          - name: 'dedicatedIngressEndpointEnabled'
+            type: Boolean
+            min_version: 'beta'
+            description: |-
+              Optional. Whether to enable dedicated ingress endpoint for the deployment. If true, the deployment will be accessible via a dedicated endpoint. This is required to enable GKE V2 runtime.
       - name: 'packageSpec'
         type: NestedObject
         description: |-
@@ -536,6 +851,37 @@ properties:
                     required: true
                     description: |
                       The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git ref.
+          - name: 'agentConfigSource'
+            type: NestedObject
+            min_version: 'beta'
+            description: |-
+              Optional. Specification for the deploying from agent config.
+            properties:
+              - name: 'adkConfig'
+                type: NestedObject
+                description: |-
+                  Required. Configuration for the Agent Development Kit (ADK).
+                properties:
+                  - name: 'jsonConfig'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. The value of the ADK config in JSON format.
+                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                    validation:
+                      function: 'validation.StringIsJSON'
+              - name: 'inlineSource'
+                type: NestedObject
+                description: |-
+                  Optional. Any additional files needed to interpret the config.
+                properties:
+                  - name: 'sourceArchive'
+                    type: String
+                    required: true
+                    description: |-
+                      Required. Input only. The application source code archive, provided as a compressed tarball (.tar.gz) file.
       - name: 'serviceAccount'
         type: String
         description: |-
@@ -561,14 +907,41 @@ properties:
         description: |-
           The identity to use for the Reasoning Engine.
         output: true
+      - name: 'exampleStore'
+        type: String
+        min_version: 'beta'
+        description: |-
+          Optional. The resource name of the linked ExampleStore.
+      - name: 'agentCard'
+        type: String
+        min_version: 'beta'
+        description: |-
+          Optional. The A2A Agent Card for the agent (if available).
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+        validation:
+          function: 'validation.StringIsJSON'
+      - name: 'buildSpec'
+        type: NestedObject
+        min_version: 'beta'
+        description: |-
+          Optional. Configuration for building container image.
+        properties:
+          - name: 'workerPool'
+            type: String
+            description: |-
+              Optional. The resource name of the Cloud Build WorkerPool to use for the build.
   - name: 'contextSpec'
     min_version: 'beta'
     type: NestedObject
+    default_from_api: true
     description: |-
       Optional. Configuration for how Agent Engine sub-resources should manage context.
     properties:
       - name: 'memoryBankConfig'
         type: NestedObject
+        default_from_api: true
         description: |-
           Specification for a Memory Bank, which manages memories for the Agent Engine.
         properties:
@@ -723,3 +1096,64 @@ properties:
                         custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                         validation:
                           function: 'validation.StringIsJSON'
+      - name: 'exampleStoreConfig'
+        type: NestedObject
+        min_version: 'beta'
+        description: |-
+          Optional. Specification for an Example Store, which manages few-shot examples for the Agent Engine.
+        properties:
+          - name: 'similaritySearchConfig'
+            type: NestedObject
+            description: |-
+              Optional. Configuration for how to perform similarity search on examples.
+            properties:
+              - name: 'embeddingModel'
+                type: String
+                required: true
+                description: |-
+                  Required. The Gemini model used to generate embeddings to lookup similar examples.
+  - name: 'trafficConfig'
+    type: NestedObject
+    min_version: 'beta'
+    default_from_api: true
+    description: |-
+      Optional. Traffic distribution configuration for the Reasoning Engine.
+    properties:
+      - name: 'trafficSplitManual'
+        type: NestedObject
+        description: |-
+          Optional. Manual traffic distribution configuration, where the user specifies the
+          Runtime Revision IDs and the percentage of traffic to send to each.
+        properties:
+          - name: 'targets'
+            type: Array
+            description: |-
+              Optional. A list of traffic targets for the Runtimes Revisions. The sum of
+              percentages must equal to 100.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'runtimeRevisionName'
+                  type: String
+                  description: |-
+                    Required. The Runtime Revision name to which to send this portion of traffic.
+                  required: true
+                - name: 'percent'
+                  type: Integer
+                  description: |-
+                    Required. Specifies percent of the traffic to this Runtime Revision.
+                  required: true
+      - name: 'trafficSplitAlwaysLatest'
+        type: NestedObject
+        description: |-
+          Optional. Traffic distribution configuration, where all traffic is sent to the
+          latest Runtime Revision.
+        properties: []
+        send_empty_value: true
+        allow_empty_object: true
+  - name: 'url'
+    type: String
+    min_version: 'beta'
+    description: |-
+      Output only. The URL of the reasoning engine.
+    output: true

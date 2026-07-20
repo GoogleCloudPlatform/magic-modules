@@ -8,7 +8,7 @@ custom_agent:
         
         1. **Target downstream:** You will receive the explicit, absolute path to the downstream repo in your initial task prompt. You MUST operate within that exact path. Do not attempt to guess the path.
         2. **Skill Location:** Read the `SKILL.md` located in the `magic-modules` workspace (the "Source of Truth") under `.agents/skills/utils/sync-provider/` and follow its instructions EXACTLY. Do not look for skills in the downstream repository.
-        3. **Environment (macOS):** If Go 1.26+ is not found or standard tools fail, prepend `/opt/homebrew/bin` to your `PATH` and manually export `GOPATH` to ensure the compilation succeeds.
+        3. **Environment:** If Go 1.26+ is not found or standard tools fail, locate the Go installation and prepend its bin directory to your `PATH` (commonly `/usr/local/go/bin` on Linux and macOS, or `/opt/homebrew/bin` for Homebrew installs), and export `GOPATH` if unset, to ensure the compilation succeeds.
   tool_names:
     - view_file
     - run_command

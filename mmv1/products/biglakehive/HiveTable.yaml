@@ -1,0 +1,387 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'HiveTable'
+description: 'Hive Tables in BigLake Metastore that exist within a Hive Catalog and Database.'
+min_version: 'beta'
+# hive/v1beta is added here instead of into the base url of the product.yaml.
+# This is because the IAM policy does not contain this prefix, so it must be separated.
+base_url: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases/{{database}}/tables'
+self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases/{{database}}/tables/{{name}}'
+create_url: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases/{{database}}/tables?hiveTableId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+
+iam_policy:
+  method_name_separator: ":"
+  fetch_iam_policy_verb: 'GET'
+  allowed_iam_role: 'roles/biglake.editor'
+  parent_resource_attribute: 'name'
+  sample_config_body: 'templates/terraform/iam/example_config_body/biglake_hive_table.tf.tmpl'
+  base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{database}}/tables/{{name}}'
+  import_format:
+    - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{database}}/tables/{{name}}'
+    - '{{name}}'
+samples:
+  - name: 'biglake_hive_table'
+    primary_resource_id: 'my_hive_table'
+    min_version: beta
+    steps:
+      - name: 'biglake_hive_table'
+        resource_id_vars:
+          bucket_name: example-bucket
+        vars:
+          description: "Hive table description"
+          parameters: |
+            {
+              key1 = "value1"
+            }
+          columns: |
+            columns {
+              name    = "col0"
+              type    = "STRING"
+              comment = "column that will be deleted on update"
+            }
+            columns {
+              name    = "col1"
+              type    = "STRING"
+              comment = "first skewed column"
+            }
+          compressed: true
+          num_buckets: "1"
+          bucket_cols: '["bucket_col1"]'
+          sort_cols: |
+            sort_cols {
+              col   = "col1"
+              order = 0
+            }
+          skewed_info: |
+            skewed_info {
+              skewed_col_names = ["col1"]
+              skewed_col_values {
+                values = ["val1"]
+              }
+              skewed_key_values_locations {
+                values   = ["val1"]
+                location = "gs://example-bucket/skewed_location_1"
+              }
+            }
+          col_comment: "col comment"
+          stored_as_sub_dirs: false
+          partition_keys: |
+            partition_keys {
+              name    = "dt"
+              type    = "STRING"
+              comment = "date partition"
+            }
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: 'PROJECT'
+          USER_PROJECT_OVERRIDE: 'true'
+
+      - name: 'biglake_hive_table'
+        resource_id_vars:
+          bucket_name: example-bucket
+        vars:
+          description: "Updated Hive table description"
+          parameters: |
+            {
+              key1 = "value1"
+              key2 = "value2"
+            }
+          columns: |
+            columns {
+              name    = "col1"
+              type    = "STRING"
+              comment = "first skewed column updated comment"
+            }
+            columns {
+              name    = "col2"
+              type    = "STRING"
+              comment = "second skewed column"
+            }
+          compressed: false
+          num_buckets: "2"
+          bucket_cols: '["bucket_col1", "bucket_col2"]'
+          sort_cols: |
+            sort_cols {
+              col   = "col1"
+              order = 1
+            }
+            sort_cols {
+              col   = "col2"
+              order = 0
+            }
+          skewed_info: |
+            skewed_info {
+              skewed_col_names = ["col1", "col2"]
+              skewed_col_values {
+                values = ["val1"]
+              }
+              skewed_col_values {
+                values = ["val2"]
+              }
+              skewed_key_values_locations {
+                values   = ["val1"]
+                location = "gs://example-bucket/skewed_location_1"
+              }
+              skewed_key_values_locations {
+                values   = ["val2"]
+                location = "gs://example-bucket/skewed_location_2"
+              }
+            }
+          col_comment: "updated col comment"
+          stored_as_sub_dirs: true
+          partition_keys: |
+            partition_keys {
+              name    = "dt"
+              type    = "STRING"
+              comment = "updated date partition comment"
+            }
+            partition_keys {
+              name    = "country"
+              type    = "STRING"
+              comment = "country partition"
+            }
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: 'PROJECT'
+          USER_PROJECT_OVERRIDE: 'true'
+
+parameters:
+  - name: 'catalog'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: 'The Hive catalog where the table is located.'
+  - name: 'database'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: 'The Hive database where the table is located.'
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: 'The name of the table.'
+properties:
+  - name: 'description'
+    type: String
+    description: 'Description of the table.'
+  - name: 'storage_descriptor'
+    api_name: 'storageDescriptor'
+    type: NestedObject
+    required: true
+    description: 'Storage descriptor of the table.'
+    properties:
+      - name: 'columns'
+        type: Array
+        required: true
+        description: 'Specifies the columns of the table (the schema).'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'name'
+              type: String
+              required: true
+              description: 'Name of the field.'
+            - name: 'type'
+              type: String
+              required: true
+              description: 'Type of the field.'
+            - name: 'comment'
+              type: String
+              description: 'Comment of the field.'
+      - name: 'location_uri'
+        api_name: 'locationUri'
+        default_from_api: true
+        type: String
+        description: 'The Cloud Storage URI where the table data is located.'
+      - name: 'input_format'
+        api_name: 'inputFormat'
+        type: String
+        description: 'The fully qualified Java class name of the input format.'
+      - name: 'output_format'
+        api_name: 'outputFormat'
+        type: String
+        description: 'The fully qualified Java class name of the output format.'
+      - name: 'compressed'
+        type: Boolean
+        description: 'Whether the table data is compressed.'
+        send_empty_value: true
+      - name: 'num_buckets'
+        api_name: 'numBuckets'
+        type: Integer
+        description: 'The number of buckets in the table.'
+      - name: 'serde_info'
+        api_name: 'serdeInfo'
+        type: NestedObject
+        description: 'Serialization and deserialization information.'
+        properties:
+          - name: 'name'
+            type: String
+            required: true
+            description: 'Name of the SerDe, table name by default.'
+          - name: 'serialization_lib'
+            api_name: 'serializationLib'
+            type: String
+            required: true
+            description: 'The fully qualified Java class name of the serialization library.'
+          - name: 'description'
+            type: String
+            description: 'Description of the SerDe.'
+          - name: 'parameters'
+            type: KeyValuePairs
+            default_from_api: true
+            description: 'Parameters of the SerDe.'
+          - name: 'serializer_class'
+            api_name: 'serializerClass'
+            type: String
+            description: 'The fully qualified Java class name of the serializer.'
+          - name: 'deserializer_class'
+            api_name: 'deserializerClass'
+            type: String
+            description: 'The fully qualified Java class name of the deserializer.'
+          - name: 'serde_type'
+            api_name: 'serdeType'
+            type: Enum
+            description: 'The SerDe type.'
+            enum_values:
+              - 'SERDE_TYPE_UNSPECIFIED'
+              - 'HIVE'
+              - 'SCHEMA_REGISTRY'
+      - name: 'bucket_cols'
+        api_name: 'bucketCols'
+        default_from_api: true
+        type: Array
+        item_type:
+          type: String
+        description: 'Reducer grouping columns, clustering columns, and bucketing columns.'
+      - name: 'sort_cols'
+        api_name: 'sortCols'
+        type: Array
+        description: 'Sort order of the data in each bucket.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'col'
+              type: String
+              required: true
+              description: 'The column name.'
+            - name: 'order'
+              type: Integer
+              required: true
+              description: 'Sort order: 1 for Ascending, 0 for Descending.'
+              send_empty_value: true
+      - name: 'parameters'
+        type: KeyValuePairs
+        default_from_api: true
+        description: 'Key-value pairs for the storage descriptor.'
+      - name: 'skewed_info'
+        api_name: 'skewedInfo'
+        type: NestedObject
+        description: 'Table data skew information.'
+        properties:
+          - name: 'skewed_col_names'
+            api_name: 'skewedColNames'
+            type: Array
+            required: true
+            item_type:
+              type: String
+            description: 'The column names that are skewed.'
+          - name: 'skewed_col_values'
+            api_name: 'skewedColValues'
+            type: Array
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'values'
+                  type: Array
+                  required: true
+                  item_type:
+                    type: String
+            description: 'The skewed column values.'
+          - name: 'skewed_key_values_locations'
+            api_name: 'skewedKeyValuesLocations'
+            type: Array
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'values'
+                  type: Array
+                  required: true
+                  item_type:
+                    type: String
+                - name: 'location'
+                  type: String
+                  required: true
+            description: 'The skewed key values locations.'
+      - name: 'stored_as_sub_dirs'
+        api_name: 'storedAsSubDirs'
+        type: Boolean
+        description: 'Whether the table is stored as sub directories.'
+        send_empty_value: true
+  - name: 'create_time'
+    api_name: 'createTime'
+    type: String
+    output: true
+    description: 'Output only. The creation time of the table.'
+  - name: 'last_access_time'
+    api_name: 'lastAccessTime'
+    type: String
+    output: true
+    description: 'Output only. Last access time of the table.'
+  - name: 'partition_keys'
+    api_name: 'partitionKeys'
+    type: Array
+    description: 'Partition keys of the table.'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          required: true
+          description: 'Name of the field.'
+        - name: 'type'
+          type: String
+          required: true
+          description: 'Type of the field.'
+        - name: 'comment'
+          type: String
+          description: 'Comment of the field.'
+  - name: 'parameters'
+    type: KeyValuePairs
+    description: 'Additional parameters associated with the table.'
+    ignore_read: true
+  - name: 'view_original_text'
+    api_name: 'viewOriginalText'
+    type: String
+    description: 'Original view text for Hive views. Empty for non-view.'
+  - name: 'view_expanded_text'
+    api_name: 'viewExpandedText'
+    type: String
+    description: 'Expanded view text for Hive views. Empty for non-view.'
+  - name: 'table_type'
+    api_name: 'tableType'
+    type: String
+    output: true
+    description: 'Output only. The type of the table.'
+  - name: 'update_time'
+    api_name: 'updateTime'
+    type: String
+    output: true
+    description: Output only. The update time of the table
