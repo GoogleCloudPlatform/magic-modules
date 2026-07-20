@@ -2470,9 +2470,10 @@ func TestAccComputeSecurityPolicy_inlineRuleUpdate(t *testing.T) {
 				Config: testAccComputeSecurityPolicy_inlineRuleUpdate_step1(spName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckTypeSetElemNestedAttrs("google_compute_security_policy.policy", "rule.*", map[string]string{
-						"priority":    "1000",
-						"action":      "allow",
-						"description": "initial description",
+						"priority":                 "1000",
+						"action":                   "allow",
+						"description":              "initial description",
+						"match.0.config.0.src_ip_ranges.#": "1",
 					}),
 				),
 			},
@@ -2490,9 +2491,10 @@ func TestAccComputeSecurityPolicy_inlineRuleUpdate(t *testing.T) {
 				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckTypeSetElemNestedAttrs("google_compute_security_policy.policy", "rule.*", map[string]string{
-						"priority":    "1000",
-						"action":      "allow",
-						"description": "updated description",
+						"priority":                 "1000",
+						"action":                   "allow",
+						"description":              "updated description",
+						"match.0.config.0.src_ip_ranges.#": "2",
 					}),
 				),
 			},
@@ -2558,7 +2560,7 @@ resource "google_compute_security_policy" "policy" {
     match {
       versioned_expr = "SRC_IPS_V1"
       config {
-        src_ip_ranges = ["9.9.9.0/24"]
+        src_ip_ranges = ["9.9.9.0/24", "10.0.0.0/8"]
       }
     }
   }
@@ -2570,21 +2572,165 @@ func TestComputeSecurityPolicyRuleHash_inlineRuleModification(t *testing.T) {
 	ruleSchema := tpgcompute.ResourceComputeSecurityPolicy().Schema["rule"]
 	ruleSetFunc := ruleSchema.Set
 
-	rule1 := map[string]interface{}{
+	baseRule := map[string]interface{}{
 		"priority":    1000,
 		"action":      "allow",
 		"description": "initial description",
+		"preview":     false,
+		"match": []interface{}{
+			map[string]interface{}{
+				"versioned_expr": "SRC_IPS_V1",
+				"config": []interface{}{
+					map[string]interface{}{
+						"src_ip_ranges": []interface{}{"9.9.9.0/24"},
+					},
+				},
+			},
+		},
 	}
-	rule2 := map[string]interface{}{
-		"priority":    1000,
-		"action":      "allow",
-		"description": "updated description",
+	baseHash := ruleSetFunc(baseRule)
+
+	testCases := map[string]struct {
+		modifiedRule map[string]interface{}
+		expectEqual  bool
+	}{
+		"description modification": {
+			modifiedRule: map[string]interface{}{
+				"priority":    1000,
+				"action":      "allow",
+				"description": "updated description",
+				"preview":     false,
+				"match": []interface{}{
+					map[string]interface{}{
+						"versioned_expr": "SRC_IPS_V1",
+						"config": []interface{}{
+							map[string]interface{}{
+								"src_ip_ranges": []interface{}{"9.9.9.0/24"},
+							},
+						},
+					},
+				},
+			},
+			expectEqual: false,
+		},
+		"preview boolean toggle": {
+			modifiedRule: map[string]interface{}{
+				"priority":    1000,
+				"action":      "allow",
+				"description": "initial description",
+				"preview":     true,
+				"match": []interface{}{
+					map[string]interface{}{
+						"versioned_expr": "SRC_IPS_V1",
+						"config": []interface{}{
+							map[string]interface{}{
+								"src_ip_ranges": []interface{}{"9.9.9.0/24"},
+							},
+						},
+					},
+				},
+			},
+			expectEqual: false,
+		},
+		"number of src_ip_ranges increased": {
+			modifiedRule: map[string]interface{}{
+				"priority":    1000,
+				"action":      "allow",
+				"description": "initial description",
+				"preview":     false,
+				"match": []interface{}{
+					map[string]interface{}{
+						"versioned_expr": "SRC_IPS_V1",
+						"config": []interface{}{
+							map[string]interface{}{
+								"src_ip_ranges": []interface{}{"9.9.9.0/24", "10.0.0.0/8"},
+							},
+						},
+					},
+				},
+			},
+			expectEqual: false,
+		},
+		"src_ip_range value changed": {
+			modifiedRule: map[string]interface{}{
+				"priority":    1000,
+				"action":      "allow",
+				"description": "initial description",
+				"preview":     false,
+				"match": []interface{}{
+					map[string]interface{}{
+						"versioned_expr": "SRC_IPS_V1",
+						"config": []interface{}{
+							map[string]interface{}{
+								"src_ip_ranges": []interface{}{"192.168.1.0/24"},
+							},
+						},
+					},
+				},
+			},
+			expectEqual: false,
+		},
+		"src_ip_ranges order difference should produce identical hash": {
+			modifiedRule: map[string]interface{}{
+				"priority":    1000,
+				"action":      "allow",
+				"description": "initial description",
+				"preview":     false,
+				"match": []interface{}{
+					map[string]interface{}{
+						"versioned_expr": "SRC_IPS_V1",
+						"config": []interface{}{
+							map[string]interface{}{
+								"src_ip_ranges": []interface{}{"9.9.9.0/24"},
+							},
+						},
+					},
+				},
+			},
+			expectEqual: true,
+		},
 	}
 
-	hash1 := ruleSetFunc(rule1)
-	hash2 := ruleSetFunc(rule2)
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			modHash := ruleSetFunc(tc.modifiedRule)
+			if tc.expectEqual && modHash != baseHash {
+				t.Fatalf("expected equal hash %d, got %d for case %q", baseHash, modHash, name)
+			}
+			if !tc.expectEqual && modHash == baseHash {
+				t.Fatalf("expected different hashes when %s, but both produced %d", name, baseHash)
+			}
+		})
+	}
 
-	if hash1 == hash2 {
-		t.Fatalf("expected different set hashes when modifying rule description, but both produced hash %d (reproduces hashicorp/terraform-provider-google#28390)", hash1)
+	// Specifically test that order of elements in a multi-element src_ip_ranges does not change hash
+	multiRange1 := map[string]interface{}{
+		"priority": 1000,
+		"action":   "allow",
+		"match": []interface{}{
+			map[string]interface{}{
+				"config": []interface{}{
+					map[string]interface{}{
+						"src_ip_ranges": []interface{}{"9.9.9.0/24", "10.0.0.0/8"},
+					},
+				},
+			},
+		},
+	}
+	multiRange2 := map[string]interface{}{
+		"priority": 1000,
+		"action":   "allow",
+		"match": []interface{}{
+			map[string]interface{}{
+				"config": []interface{}{
+					map[string]interface{}{
+						"src_ip_ranges": []interface{}{"10.0.0.0/8", "9.9.9.0/24"},
+					},
+				},
+			},
+		},
+	}
+	if h1, h2 := ruleSetFunc(multiRange1), ruleSetFunc(multiRange2); h1 != h2 {
+		t.Fatalf("expected identical hash for reordered IP ranges, got %d and %d", h1, h2)
 	}
 }
