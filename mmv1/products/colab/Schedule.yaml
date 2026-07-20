@@ -109,6 +109,7 @@ samples:
         test_env_vars:
           project_id: 'PROJECT_NAME'
           location: 'REGION'
+          service_account: 'SERVICE_ACCT'
         test_vars_overrides:
           key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
   - name: colab_schedule_pipeline
