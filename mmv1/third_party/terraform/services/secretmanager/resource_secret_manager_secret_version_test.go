@@ -80,6 +80,7 @@ func TestAccSecretManagerSecretVersion_byName(t *testing.T) {
 }
 
 func TestAccSecretManagerSecretVersion_neitherSecretDataSet(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
