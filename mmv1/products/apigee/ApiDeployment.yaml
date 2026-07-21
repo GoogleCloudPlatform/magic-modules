@@ -22,7 +22,7 @@ references:
 base_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
 immutable: true
 self_link: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
-create_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
+create_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments?serviceAccount={{service_account}}
 update_mask: false
 update_verb: POST
 import_format:
@@ -80,6 +80,11 @@ parameters:
     description: |
       The revision of the API proxy to be deployed.
 properties:
+  - name: service_account
+    type: String
+    description: |
+      The service account to be used by the API deployment.
+    url_param_only: true
   - name: id
     type: String
     description: |
