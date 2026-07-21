@@ -79,10 +79,10 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 	// Auto-expose target-scope dimensions (project/region/zone/location) when the
 	// member resource declares them and they are not  already the parent field.
 	for _, sf := range supportedScopeFields {
-		if sf.name == listCallConfig.ParentResourceField {
+		if sf.Name == listCallConfig.ParentResourceField {
 			continue // scope dimension is itself the parent (e.g. project-iam-member)
 		}
-		if _, ok := memberResource.Schema[sf.name]; !ok {
+		if _, ok := memberResource.Schema[sf.Name]; !ok {
 			continue // resource isn't scoped by this dimension
 		}
 
