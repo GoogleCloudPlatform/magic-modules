@@ -23,11 +23,11 @@ This document outlines the structured 5-step lifecycle for formal implementation
 *   **Transfers to Step 4:** Compiled provider binary.
 
 ### 4. Test and Debug
-*   Invoke the specialized `qa-test-runner` subagent using the `invoke_subagent` tool to reproduce failures and interpret logs. The subagent evaluates if the test fails/passes and returns a human-readable interpretation of the results.
-*   **Transfers to Step 5:** Human-readable Markdown report explaining whether the test succeeded or failed, and what discrepancy was found.
+*   Invoke the specialized `qa-verification` subagent using the `invoke_subagent` tool to run verification and interpret logs. The subagent evaluates if the checks fail/pass and returns a human-readable interpretation of the results.
+*   **Transfers to Step 5:** Human-readable Markdown report explaining whether the verification succeeded or failed, and what discrepancy was found.
 
 ### 5. Fix
-*   This is a Remediation Planning step (similar to Triage). Take the results from `qa-test-runner` and compare against reference guides or user suggestions. Propose a specific fix code change to the user. 
+*   This is a Remediation Planning step (similar to Triage). Take the results from `qa-verification` and compare against reference guides or user suggestions. Propose a specific fix code change to the user. 
 *   Execute the `fix` skill (located in `.agents/skills/operations/fix/`) to perform this planning.
 
 ---

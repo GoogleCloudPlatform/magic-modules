@@ -1,5 +1,5 @@
 {
-  "name": "qa-test-runner",
+  "name": "qa-verification",
   "configPath": {
     "relativePathToConfig": "config.yaml"
   }

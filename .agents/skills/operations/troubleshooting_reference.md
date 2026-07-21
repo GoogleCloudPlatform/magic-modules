@@ -1,7 +1,7 @@
 # Troubleshooting Reference
 
 Failure classes agents hit during Magic Modules tasks, mapped to fix strategies. Consult this after
-`parse-debug-logs` or a `qa-test-runner` report to classify the failure before invoking the `fix` skill.
+`parse-debug-logs` or a `qa-verification` report to classify the failure before invoking the `fix` skill.
 
 Each entry: **Symptom** (what the logs actually say) → **Cause** → **Fix** → **Do NOT** (the shortcut that
 makes the failure disappear without fixing anything — these shortcuts are checked for and will fail review).
