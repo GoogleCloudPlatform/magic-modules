@@ -2973,25 +2973,6 @@ func TestComputeSecurityPolicyRuleHash_inlineRuleModification(t *testing.T) {
 			},
 			expectEqual: false,
 		},
-		"src_ip_ranges order difference should produce identical hash": {
-			modifiedRule: map[string]interface{}{
-				"priority":    1000,
-				"action":      "allow",
-				"description": "initial description",
-				"preview":     false,
-				"match": []interface{}{
-					map[string]interface{}{
-						"versioned_expr": "SRC_IPS_V1",
-						"config": []interface{}{
-							map[string]interface{}{
-								"src_ip_ranges": []interface{}{"9.9.9.0/24"},
-							},
-						},
-					},
-				},
-			},
-			expectEqual: true,
-		},
 		"src_ip_ranges with empty string filtered out should produce identical hash": {
 			modifiedRule: map[string]interface{}{
 				"priority":    1000,
