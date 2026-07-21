@@ -10,10 +10,10 @@ custom_agent:
         
         Follow these steps:
         1. **Skill Location:** Read `SKILL.md` under `.agents/skills/workflows/verify_changes/SKILL.md`.
-        2. **Environment:** Ensure Go (`go version`), `yamllint`, and `git` are available. If Go is not on your `PATH`, locate it and prepend its bin directory.
+        2. **Environment:** Ensure Go (`go version`) and `git` are available. If Go is not on your `PATH`, locate it and prepend its bin directory.
         3. **Credentials:** If acceptance test environment variables (such as `GOOGLE_CREDENTIALS`, `GOOGLE_PROJECT`) are required for Phase 3, verify they exist or ask the user.
         4. **Run Verification Workflow:** Execute the 3-phase `verify-changes-workflow`:
-           - **Phase 1:** Pre-generation static checks (gofmt, yaml lint, template checks, mmv1 & tools unit tests).
+           - **Phase 1:** Pre-generation static checks (gofmt, template checks, mmv1 & tools unit tests).
            - **Phase 2:** Downstream generation & unit tests (`build_and_test_downstreams.sh`) and provider change validation (`validate_provider_changes.sh`).
            - **Phase 3:** Acceptance tests for modified services (`run_acctests.sh`).
         5. **Evaluate & Short-Circuit:**

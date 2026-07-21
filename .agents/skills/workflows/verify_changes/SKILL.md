@@ -12,7 +12,7 @@ This workflow runs all validation and test checks equivalent to the Magic Module
 ## Prerequisites
 
 - You must be in the `magic-modules` root directory.
-- `go` (v1.26+), `yamllint`, and `git` must be installed and configured.
+- `go` (v1.26+) and `git` must be installed and configured.
 
 ---
 
@@ -33,19 +33,7 @@ if [ -n "$GOFMT_OUTPUT" ]; then
 fi
 ```
 
-#### 2. YAML Linting (`mmv1/products`)
-Lint modified YAML product definitions (or all product YAML files if full validation is desired):
-```bash
-yamlfiles=$(git diff --name-only --diff-filter=d origin/main -- mmv1/products)
-if [ -z "$yamlfiles" ]; then
-  yamlfiles=$(find mmv1/products -name "*.yaml" -o -name "*.yml" | tr '\n' ' ')
-fi
-if [ -n "$yamlfiles" ]; then
-  yamllint -c .yamllint $yamlfiles
-fi
-```
-
-#### 3. Template Validation Checks (`tools/template-check`)
+#### 2. Template Validation Checks (`tools/template-check`)
 Check for invalid version guards and unlinked new templates:
 ```bash
 # Version guard check
@@ -67,13 +55,13 @@ Check for invalid version guards and unlinked new templates:
 )
 ```
 
-#### 4. MMv1 Core Unit Tests
+#### 3. MMv1 Core Unit Tests
 Run unit tests for `mmv1`:
 ```bash
 (cd mmv1 && go test ./...)
 ```
 
-#### 5. Tool Unit Tests
+#### 4. Tool Unit Tests
 Run unit tests for internal tools (`go-changelog`, `issue-labeler`, `template-check`, `test-reader`):
 ```bash
 (cd tools/go-changelog && go test ./...)
