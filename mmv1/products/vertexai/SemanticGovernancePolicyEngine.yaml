@@ -79,9 +79,13 @@ samples:
   - name: 'vertex_ai_semantic_governance_policy_engine_full'
     primary_resource_id: 'sgpe'
     exclude_test: true # same singleton reason as _basic; covered by handwritten lifecycle test
+    steps:
+      - name: 'vertex_ai_semantic_governance_policy_engine_full'
   - name: 'vertex_ai_semantic_governance_policy_engine_multi_gateway'
     primary_resource_id: 'sgpe'
     exclude_test: true # same singleton reason as _basic; covered by handwritten lifecycle test
+    steps:
+      - name: 'vertex_ai_semantic_governance_policy_engine_multi_gateway'
 parameters:
   - name: 'region'
     type: String
