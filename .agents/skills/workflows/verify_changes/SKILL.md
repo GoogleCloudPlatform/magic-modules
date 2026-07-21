@@ -114,15 +114,15 @@ This phase executes acceptance tests for GCP services modified by the changes.
 Identify which services were touched by checking the diff on `google-beta/services/` and `google/services/`.
 
 #### 2. Execute Acceptance Tests
-Invoke the `run-acctests` skill ([run-acctests/SKILL.md](../../utils/run-acctests/SKILL.md)) to generate the provider into a scratch workspace, compile it, and run acceptance tests:
+Invoke the `run-acctests` skill ([run-acctests/SKILL.md](../../utils/run-acctests/SKILL.md)) to run acceptance tests sequentially (first Beta, then GA):
 ```bash
-# Example: Run acceptance test for modified service in Beta
-./.agents/skills/utils/run-acctests/scripts/run_acctests.sh beta <SERVICE_NAME> [TEST_NAME]
+# Execute acceptance tests sequentially (Beta, then GA) for modified service
+./.agents/skills/utils/run-acctests/scripts/run_acctests.sh <SERVICE_NAME> [TEST_NAME]
 ```
 
 > 🛑 **SHORT-CIRCUIT GUARD:** If any acceptance test fails:
 > 1. **STOP IMMEDIATELY**. Do not proceed to subsequent tests or PR creation.
-> 2. Invoke the `parse-debug-logs` skill on `scratch/acctest-<version>/logs/test_output_<version>.log` to analyze the failure.
+> 2. Invoke the `parse-debug-logs` skill on `scratch/acctest-<version>/logs/test_output_<version>.log` (where `<version>` is `beta` or `ga`) to analyze the failure.
 > 3. Present the diagnostic report to the user and propose remediation steps.
 
 ---
