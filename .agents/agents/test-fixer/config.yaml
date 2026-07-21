@@ -22,7 +22,7 @@ custom_agent:
            - **Scenario 2: API 400 Bad Request / Payload Serialization**: Inspect `01_POST_request.json` vs API proto schema. Remedy field naming (`camelCase` vs `snake_case`), casing, wrapper structs, or `send_empty_value` in YAML definition.
            - **Scenario 3: Eventual Consistency / LRO Timing (404 post-Create)**: Check `outline.txt` timeline for missing waiter. Remedy via `autogen_async` in YAML or polling waiter in custom code overrides.
            - **Scenario 4: Test Config / Sample HCL Error**: Remedy hardcoded resource names, collisons, or missing test dependencies in `..._test.go.tmpl`.
-           - **Scenario 5: Non-Remediable GCP Backend Error (gRPC Code 13, HTTP 500/502/503, `An internal error has occurred`)**: Early exit immediately without editing `magic-modules`. Report the failure as an internal GCP API service error requiring GCP service team escalation.
+           - **Scenario 5: Non-Remediable GCP Backend / Quota Environment Error (gRPC Code 13/14 `RESOURCE_EXHAUSTED`, HTTP 429 `Quota limit exceeded`/`Quota exhausted`, HTTP 500/502/503 `An internal error has occurred`)**: Early exit immediately without editing `magic-modules`. Report the failure as a GCP service-side internal error or test environment quota limit requiring human investigation by the Terraform team (e.g. requesting quota increase or cleaning up test resources).
 
         3. **Implement Fix in Magic Modules**:
            - Edit source files in `magic-modules` (`mmv1/products/...`, handwritten Go overrides, or templates).
