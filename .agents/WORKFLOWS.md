@@ -16,5 +16,14 @@ specific one.
 
 *   **Default Workflow** (`.agents/skills/workflows/default/SKILL.md`): For tasks that do not involve creating a new resource (fallback for general tasks).
 *   **New Resource Workflow** (`.agents/skills/workflows/new_resource/SKILL.md`): Specifically for creating a new resource, supporting both autogen and manual generation.
+*   **Test Fix Workflow** (`.agents/skills/workflows/test_fix/SKILL.md`): Specifically for resolving failing acceptance tests from GitHub issues, direct prompts, or debug logs.
 *   **Add List Resource Workflow** (`.agents/skills/workflows/add_list_resource/SKILL.md`): Opts one product's eligible MMv1 resources into list-resource generation by setting `generate_list_resource: true`, validates locally, and opens a PR.
-*   *(Future workflows can be added here)*
+
+
+## Subagents:
+
+*   **`autogen`** (`.agents/agents/autogen/`): Automates creation and verification of new resources from OpenAPI specifications.
+*   **`test-fixer`** (`.agents/agents/test-fixer/`): Automates diagnosis, remediation in Magic Modules, provider generation, and re-testing for failing acceptance tests.
+*   **`qa-test-runner`** (`.agents/agents/qa-test-runner/`): Runs target tests and parses debug logs without modifying files.
+*   **`repo-sync`** (`.agents/agents/repo-sync/`): Aligns git histories between Magic Modules and downstream providers.
+
