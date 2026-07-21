@@ -11,6 +11,16 @@ specific one.
 3.  **Verify before a PR:** generate, build, and run the tests relevant to the change. A task is not done because it compiles.
 4.  **Never weaken baseline test coverage:** no disabling or skipping tests, and no test-dodging behavior flags (`ignore_read`, `ImportStateVerifyIgnore`) without an adjacent comment justifying the API behavior that requires them.
 5.  **PR descriptions are brief:** what changed and why, in a few sentences.
+6.  **GitHub Issue Label Routing:** When triaging a GitHub issue URL, inspect the GitHub labels (`gh issue view --json labels` or issue payload). Match against the **Issue Label Routing Matrix** below. If no matching label is present, inspect the issue title/body content; if still unmatched, fall back to the **Default Workflow**.
+
+## Issue Label Routing Matrix:
+
+| GitHub Label Pattern | Issue Category | Target Workflow Skill |
+| :--- | :--- | :--- |
+| `test-failure`, `test-failure-*` | Acceptance Test Failure | `.agents/skills/workflows/test_fix/SKILL.md` |
+| `new-resource` | New Resource Creation | `.agents/skills/workflows/new_resource/SKILL.md` |
+| `list-resource` | List Resource Addition | `.agents/skills/workflows/add_list_resource/SKILL.md` |
+| *No matching label / un-labeled* | General Modification / Bug Fix | Fallback to `.agents/skills/workflows/default/SKILL.md` (or inspect issue body) |
 
 ## Available Workflows:
 
