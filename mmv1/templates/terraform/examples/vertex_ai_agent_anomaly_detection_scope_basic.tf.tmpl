@@ -59,3 +59,24 @@ resource "google_vertex_ai_agent_anomaly_detection_scope" "{{$.PrimaryResourceId
 data "google_project" "project" {
   provider = google-beta
 }
+
+# Diagnostic: dump org policies to test logs to help triage FAILED_PRECONDITION
+data "google_project_organization_policy" "cmek" {
+  provider   = google-beta
+  project    = data.google_project.project.project_id
+  constraint = "constraints/gcp.restrictNonCmekServices"
+}
+
+data "google_project_organization_policy" "resource_locations" {
+  provider   = google-beta
+  project    = data.google_project.project.project_id
+  constraint = "constraints/gcp.resourceLocations"
+}
+
+output "debug_org_policy_cmek" {
+  value = data.google_project_organization_policy.cmek
+}
+
+output "debug_org_policy_resource_locations" {
+  value = data.google_project_organization_policy.resource_locations
+}
