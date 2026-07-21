@@ -21,8 +21,9 @@ This skill converts raw, unstructured, or varied failure reports into a standard
 ### Step 1: Extract Core Failure Information
 
 #### Path A: GitHub Issue URL
-- Use `read_url_content` (or `gh issue view` if CLI available) to read the issue content.
-- Search the issue body for:
+- Use `read_url_content` (or `gh issue view` if CLI available) to read the issue content and inspect its GitHub labels.
+- Check if labels contain `test-failure`, `test-failure-100`, `test-failure-50`, or any similar `test-failure*` labels to confirm this is an acceptance test failure issue.
+- Search the issue body or metadata for:
   - Impacted acceptance test name (e.g., `TestAcc<Resource>_<Scenario>`).
   - Failure error backtrace or state assertion error (e.g., `Step 1/1 error: Check failed...`).
   - GCS debug log URL links (often ending in `.log` or `.txt` hosted on Google Cloud Storage).
