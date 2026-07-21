@@ -87,6 +87,15 @@ samples:
           ca_pool_id: my-pool
         test_env_vars:
           project: PROJECT_NAME
+  - name: privateca_certificate_no_org
+    primary_resource_id: default
+    steps:
+      - name: privateca_certificate_no_org
+        resource_id_vars:
+          certificate_name: my-certificate
+          ca_pool_id: my-pool
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
