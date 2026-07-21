@@ -17,7 +17,6 @@ This workflow runs all validation and test checks equivalent to the Magic Module
 - Downstream provider repositories must be cloned in `$GOPATH/src/github.com/`:
   - `hashicorp/terraform-provider-google`
   - `hashicorp/terraform-provider-google-beta`
-  - `GoogleCloudPlatform/terraform-google-conversion`
   - `terraform-google-modules/docs-examples`
 
 ---
@@ -97,16 +96,13 @@ Run unit tests for internal tools (`go-changelog`, `issue-labeler`, `template-ch
 This phase generates downstream provider code and runs provider build, unit test, and breaking change / missing test / missing doc validation checks.
 
 #### 1. Code Generation
-Generate all downstream target repositories from Magic Modules:
+Generate downstream target repositories from Magic Modules:
 ```bash
 # Generate GA Provider
 make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
 
 # Generate Beta Provider
 make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
-
-# Generate Terraform Google Conversion (TGC)
-make clean-tgc && make tgc OUTPUT_PATH="$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion"
 
 # Generate Docs Examples (tf-oics)
 make tf-oics OUTPUT_PATH="$GOPATH/src/github.com/terraform-google-modules/docs-examples"
@@ -130,16 +126,7 @@ make lint
 make docscheck
 ```
 
-#### 4. Terraform Google Conversion Build & Unit Tests (`terraform-google-conversion`)
-```bash
-cd "$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion"
-go mod edit -replace=github.com/hashicorp/terraform-provider-google-beta="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
-go mod tidy
-make build
-make test
-```
-
-#### 5. Provider Changes Validation (Diff Processor)
+#### 4. Provider Changes Validation (Diff Processor)
 Execute the `validate-provider-changes` skill ([validate-provider-changes/SKILL.md](../../utils/validate-provider-changes/SKILL.md)) to check for breaking changes, missing acceptance tests, and missing documentation across GA and Beta outputs:
 ```bash
 cd "$MAGIC_MODULES_PATH" # Return to magic-modules root
