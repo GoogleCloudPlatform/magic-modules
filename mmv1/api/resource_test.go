@@ -991,6 +991,40 @@ func TestIdentityPropertiesFlattenObject(t *testing.T) {
 	}
 }
 
+func TestIdentityPropertiesCustomIdentityExistingProperty(t *testing.T) {
+	t.Parallel()
+
+	res := &api.Resource{
+		Name:            "Framework",
+		BaseUrl:         "{{parent}}/locations/{{location}}/frameworks",
+		ImportFormat:    []string{"organizations/{{%organization}}/locations/{{location}}/frameworks/{{framework_id}}"},
+		ProductMetadata: &api.Product{Name: "CloudSecurityCompliance"},
+		CustomCode: resource.CustomCode{
+			CustomIdentity: []string{"parent"},
+		},
+	}
+	res.Properties = []*api.Type{
+		{
+			Name:             "parent",
+			Type:             "String",
+			Required:         false,
+			ResourceMetadata: res,
+		},
+		{
+			Name:             "organization",
+			Type:             "String",
+			Required:         false,
+			ResourceMetadata: res,
+		},
+	}
+
+	for _, p := range res.IdentityProperties() {
+		if p.Name == "parent" && p.Required {
+			t.Errorf("expected CustomIdentity property \"parent\" to preserve Required=false, but got Required=true")
+		}
+	}
+}
+
 func TestSamplePrimaryResourceId(t *testing.T) {
 	t.Parallel()
 

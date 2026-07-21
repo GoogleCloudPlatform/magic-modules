@@ -748,7 +748,12 @@ func (r Resource) IdentityProperties() []*Type {
 
 	if len(r.CustomCode.CustomIdentity) > 0 {
 		for _, fieldName := range r.CustomCode.CustomIdentity {
-			props = append(props, &Type{Name: google.Underscore(fieldName), Type: "string", Required: true})
+			underscored := google.Underscore(fieldName)
+			if idx := slices.IndexFunc(allProps, func(prop *Type) bool { return prop.Name == underscored }); idx != -1 {
+				props = append(props, allProps[idx])
+			} else {
+				props = append(props, &Type{Name: underscored, Type: "string", Required: true})
+			}
 		}
 	}
 
