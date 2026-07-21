@@ -1,0 +1,42 @@
+resource "google_ces_app" "app" {
+  provider     = google-beta
+  app_id       = "{{index $.ResourceIdVars "app_id"}}"
+  display_name = "test-app-display-name"
+  location     = "us"
+
+  language_settings {
+    default_language_code = "en-US"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_evaluation" "evaluation" {
+  provider      = google-beta
+  evaluation_id = "{{index $.ResourceIdVars "evaluation_id"}}"
+  display_name  = "my-evaluation"
+  location      = "us"
+  app           = google_ces_app.app.app_id
+}
+
+resource "google_ces_evaluation" "evaluation2" {
+  provider      = google-beta
+  evaluation_id = "{{index $.ResourceIdVars "evaluation_id"}}-2"
+  display_name  = "my-evaluation-2"
+  location      = "us"
+  app           = google_ces_app.app.app_id
+}
+
+resource "google_ces_evaluation_dataset" "default" {
+  provider              = google-beta
+  evaluation_dataset_id = "{{index $.ResourceIdVars "dataset_id"}}"
+  display_name          = "{{index $.Vars "display_name"}}"
+  app                   = google_ces_app.app.app_id
+  location              = "us"
+
+  evaluations = [
+    google_ces_evaluation.evaluation.id,
+    google_ces_evaluation.evaluation2.id
+  ]
+}
