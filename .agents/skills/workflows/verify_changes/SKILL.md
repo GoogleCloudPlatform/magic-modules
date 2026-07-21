@@ -22,55 +22,12 @@ This workflow runs all validation and test checks equivalent to the Magic Module
 
 These checks run directly against `magic-modules` without generating downstream providers.
 
-#### 1. Go Formatting Check (`gofmt`)
-Verify that all `.go` files in the repository follow standard formatting rules:
+Invoke the `run-pre-gen-checks` skill ([run-pre-gen-checks/SKILL.md](../../utils/run-pre-gen-checks/SKILL.md)) to execute `gofmt`, template validation checks (`tools/template-check`), `mmv1` core unit tests, and internal tool unit tests:
 ```bash
-GOFMT_OUTPUT="$(gofmt -l .)"
-if [ -n "$GOFMT_OUTPUT" ]; then
-  echo "The following files are not formatted properly:" >&2
-  echo "$GOFMT_OUTPUT" >&2
-  exit 1
-fi
+./.agents/skills/utils/run-pre-gen-checks/scripts/run_pre_gen_checks.sh
 ```
 
-#### 2. Template Validation Checks (`tools/template-check`)
-Check for invalid version guards and unlinked new templates:
-```bash
-# Version guard check
-(
-  cd tools/template-check
-  tmpls=$(git diff --name-only --diff-filter=d origin/main ../../*.tmpl | sed 's=^=../../=g')
-  if [ -n "$tmpls" ]; then
-    go run main.go version-guard --file-list "${tmpls//$'\n'/,}"
-  fi
-)
-
-# Unused template check
-(
-  cd tools/template-check
-  newtmplfiles=$(git diff --name-only --diff-filter=A origin/main HEAD -- ../../mmv1 | grep .tmpl | sed 's=^=../../=g')
-  if [ -n "$newtmplfiles" ]; then
-    go run main.go unused-tmpl --file-list "${newtmplfiles//$'\n'/,}"
-  fi
-)
-```
-
-#### 3. MMv1 Core Unit Tests
-Run unit tests for `mmv1`:
-```bash
-(cd mmv1 && go test ./...)
-```
-
-#### 4. Tool Unit Tests
-Run unit tests for internal tools (`go-changelog`, `issue-labeler`, `template-check`, `test-reader`):
-```bash
-(cd tools/go-changelog && go test ./...)
-(cd tools/issue-labeler && go test ./...)
-(cd tools/template-check && go test ./...)
-(cd tools/test-reader && go test ./...)
-```
-
-> 🛑 **SHORT-CIRCUIT GUARD:** If any check in **Phase 1** fails, **STOP IMMEDIATELY**. Report the failure details to the user and do not proceed to Phase 2.
+> 🛑 **SHORT-CIRCUIT GUARD:** If `run_pre_gen_checks.sh` fails, **STOP IMMEDIATELY**. Report the failure details to the user and do not proceed to Phase 2.
 
 ---
 
