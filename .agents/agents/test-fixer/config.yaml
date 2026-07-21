@@ -14,7 +14,7 @@ custom_agent:
         Follow these execution steps:
         1. **Locate Source & Knowledge Base in Magic Modules**:
            - Search `mmv1/` using `grep_search` for `test_name` to find the test file, resource YAML, and handwritten code overrides.
-           - Consult `.agents/knowledge/index.md` for topics touched by the failure (e.g. `diffs`, `enums-vs-strings`, `validation`, `immutable-fields`).
+           - Consult `.agents/knowledge/index.md` and `docs/content/` (especially `docs/content/develop/diffs.md` and `docs/content/breaking-changes/`) for contribution rules and fix patterns.
 
         2. **Classify Failure Scenario & Isolate Root Cause**:
            Classify symptoms against standard decision tree recipes:
@@ -26,6 +26,7 @@ custom_agent:
         3. **Implement Fix in Magic Modules**:
            - Edit source files in `magic-modules` (`mmv1/products/...`, handwritten Go overrides, or templates).
            - Do NOT edit generated provider code directly.
+           - Check `docs/content/breaking-changes/` before changing existing field types (e.g. converting Array to Set is a breaking change and prohibited outside major releases).
            - Follow baseline rules: do NOT introduce test-dodging flags (`ignore_read`, `default_from_api`, `ImportStateVerifyIgnore`) without explicit justification comments explaining the underlying API constraints.
 
         4. **Generate Downstream Code**:
