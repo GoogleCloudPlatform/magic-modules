@@ -1,3 +1,10 @@
+resource "google_project_service" "aiplatform" {
+  provider           = google-beta
+  project            = data.google_project.project.project_id
+  service            = "aiplatform.googleapis.com"
+  disable_on_destroy = false
+}
+
 resource "google_logging_project_bucket_config" "{{index $.Vars "log_bucket_id"}}" {
   provider       = google-beta
   project        = data.google_project.project.project_id
@@ -17,6 +24,8 @@ resource "google_vertex_ai_agent_anomaly_detection_scope" "{{$.PrimaryResourceId
   observability_buckets = [
     "projects/${data.google_project.project.project_id}/locations/us/buckets/_Trace/datasets/Spans",
   ]
+
+  depends_on = [google_project_service.aiplatform]
 }
 
 data "google_project" "project" {
