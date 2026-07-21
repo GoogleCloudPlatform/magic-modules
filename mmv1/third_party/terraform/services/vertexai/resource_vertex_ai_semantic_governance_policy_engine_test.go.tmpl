@@ -22,7 +22,9 @@ import (
 func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{}
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -160,33 +162,49 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
 `, context)
 }
 
-// gateway_config fixtures use the project's "default" VPC and inline
-// a private google_dns_managed_zone (example.com. per RFC 2606) so
-// the test is self-contained. The gateway_config removal step splits
-// the SGPE Update from the DNS zone destroy to avoid a parallel
-// containerNotEmpty failure.
+// gateway_config fixtures inline the customer-side infrastructure the
+// SGPE backend requires: a custom-mode VPC, a subnet, and a private
+// DNS managed zone attached to that VPC (example.com. per RFC 2606).
+// SGPE gateway provisioning fails against the project default VPC —
+// the backend expects a custom VPC with an attached private zone
+// (mirrors google_vertex_ai_index_endpoint's PSC test pattern).
+// The gateway_config removal step splits the SGPE Update from the
+// zone/subnet/network destroy to avoid a parallel containerNotEmpty.
 
-const testAccSGPESharedDNSZone = `
+const testAccSGPESharedNetworking = `
+resource "google_compute_network" "sgpe_network" {
+  name                    = "tf-sgpe-net-%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "sgpe_subnet" {
+  name          = "tf-sgpe-subnet-%{random_suffix}"
+  ip_cidr_range = "192.168.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.sgpe_network.id
+}
+
 resource "google_dns_managed_zone" "sgpe_zone" {
-  name        = "tf-sgpe-lifecycle-zone"
+  name        = "tf-sgpe-zone-%{random_suffix}"
   dns_name    = "sgpe-lifecycle.example.com."
   description = "Private DNS zone for SGPE lifecycle acceptance test."
   visibility  = "private"
 
   private_visibility_config {
     networks {
-      network_url = "projects/${data.google_project.project.project_id}/global/networks/default"
+      network_url = google_compute_network.sgpe_network.id
     }
   }
 }
 `
 
 // testAccSGPEPreamble is the shared preamble for every fixture that
-// references gateway_config: the project data source and the DNS zone.
+// references gateway_config: the project data source and the customer-
+// side networking (custom VPC + subnet + attached private DNS zone).
 const testAccSGPEPreamble = `
 data "google_project" "project" {
 }
-` + testAccSGPESharedDNSZone
+` + testAccSGPESharedNetworking
 
 func testAccVertexAISemanticGovernancePolicyEngine_addGateway(context map[string]interface{}) string {
 	return acctest.Nprintf(testAccSGPEPreamble+`
@@ -195,12 +213,15 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
 
   gateway_config {
     name          = "primary"
-    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
-    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
   }
 
-  depends_on = [google_dns_managed_zone.sgpe_zone]
+  depends_on = [
+    google_compute_subnetwork.sgpe_subnet,
+    google_dns_managed_zone.sgpe_zone,
+  ]
 }
 `, context)
 }
@@ -212,19 +233,22 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
 
   gateway_config {
     name          = "primary"
-    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
-    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
   }
 
   gateway_config {
     name          = "secondary"
-    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
-    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
   }
 
-  depends_on = [google_dns_managed_zone.sgpe_zone]
+  depends_on = [
+    google_compute_subnetwork.sgpe_subnet,
+    google_dns_managed_zone.sgpe_zone,
+  ]
 }
 `, context)
 }
@@ -236,27 +260,29 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
 
   gateway_config {
     name          = "main"
-    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
-    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
   }
 
   gateway_config {
     name          = "secondary"
-    network       = "projects/${data.google_project.project.project_id}/global/networks/default"
-    subnetwork    = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
   }
 
-  depends_on = [google_dns_managed_zone.sgpe_zone]
+  depends_on = [
+    google_compute_subnetwork.sgpe_subnet,
+    google_dns_managed_zone.sgpe_zone,
+  ]
 }
 `, context)
 }
 
-// Engine with no gateway_config blocks + DNS zone still declared.
-// Isolates the SGPE Update (remove all gateways) from the DNS zone
-// destroy; the zone is destroyed in the follow-up step's revert to
-// _basic.
+// Engine with no gateway_config blocks + customer networking still declared.
+// Isolates the SGPE Update (remove all gateways) from the VPC/subnet/zone
+// destroy; those are destroyed in the follow-up step's revert to _basic.
 func testAccVertexAISemanticGovernancePolicyEngine_removeAllGatewaysKeepZone(context map[string]interface{}) string {
 	return acctest.Nprintf(testAccSGPEPreamble+`
 resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
