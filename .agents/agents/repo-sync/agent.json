@@ -1,6 +1,0 @@
-{
-  "name": "repo-sync",
-  "configPath": {
-    "relativePathToConfig": "config.yaml"
-  }
-}

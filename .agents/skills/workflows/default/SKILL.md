@@ -5,32 +5,25 @@ description: "Fallback workflow for general implementation and debugging tasks t
 
 # `default-workflow`
 
-This document outlines the structured 5-step lifecycle for formal implementation and debugging tasks in Magic Modules.
+This document outlines the structured 3-step lifecycle for formal implementation and debugging tasks in Magic Modules.
 
 ## Execution Steps
 
-### 1. Repo Sync
-*   Execute the `repo-sync` skill (located in `.agents/skills/operations/repo-sync/`). This skill handles checking the sync status and prompting for action if needed.
-
-### 2. Triage
+### 1. Triage
 *   Gather context on the change or bug. Plan the change (New feature or bug fix) within schema or logic. 
 *   Consult `.agents/knowledge/index.md` for the topics the change touches and open the relevant sources.
 *   Execute the `triage` skill (located in `.agents/skills/operations/triage/`) to perform this work.
-*   **Transfers to Step 3:** Approved implementation plan and file paths file.
+*   **Transfers to Step 2:** Approved implementation plan and file paths file.
 
-### 3. Generate
-*   Once the first pass at the change is made, execute the code generation using the `generate-provider` skill (located in `.agents/skills/operations/generate-provider/`) to compile machine code in the downstream.
-*   **Transfers to Step 4:** Compiled provider binary.
-
-### 4. Test and Debug
+### 2. Test and Debug
 *   Invoke the specialized `qa-verification` subagent using the `invoke_subagent` tool to run verification and interpret logs. The subagent evaluates if the checks fail/pass and returns a human-readable interpretation of the results.
-*   **Transfers to Step 5:** Human-readable Markdown report explaining whether the verification succeeded or failed, and what discrepancy was found.
+*   **Transfers to Step 3:** Human-readable Markdown report explaining whether the verification succeeded or failed, and what discrepancy was found.
 
-### 5. Fix
+### 3. Fix
 *   This is a Remediation Planning step (similar to Triage). Take the results from `qa-verification` and compare against reference guides or user suggestions. Propose a specific fix code change to the user. 
 *   Execute the `fix` skill (located in `.agents/skills/operations/fix/`) to perform this planning.
 
 ---
 
 ## The Loop
-Repeat steps 2-5 as needed during the session until the primary task is complete. Reset to Step 3 (Generate) after applying an approved fix to compile it!
+Repeat steps 1-3 as needed during the session until the primary task is complete. Reset to Step 2 (Test and Debug) after applying an approved fix!
