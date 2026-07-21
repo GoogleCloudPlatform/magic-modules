@@ -122,7 +122,7 @@ Invoke the `run-acctests` skill ([run-acctests/SKILL.md](../../utils/run-acctest
 
 > 🛑 **SHORT-CIRCUIT GUARD:** If any acceptance test fails:
 > 1. **STOP IMMEDIATELY**. Do not proceed to subsequent tests or PR creation.
-> 2. Invoke the `parse-debug-logs` skill on `scratch/test_output.log` to analyze the failure.
+> 2. Invoke the `parse-debug-logs` skill on `scratch/acctest-<version>/logs/test_output_<version>.log` to analyze the failure.
 > 3. Present the diagnostic report to the user and propose remediation steps.
 
 ---

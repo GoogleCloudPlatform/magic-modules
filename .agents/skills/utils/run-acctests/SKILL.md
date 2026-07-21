@@ -6,7 +6,7 @@ description: "Generate downstream providers (GA, Beta), run acceptance tests for
 # `run-acctests`
 
 > **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your current roadblock or required task.
-> This skill generates the downstream provider from local Magic Modules code into an isolated scratch directory, compiles the binary, runs the specified acceptance test with `TF_LOG=DEBUG`, and streams output to `scratch/test_output.log`.
+> This skill generates the downstream provider from local Magic Modules code into an isolated scratch directory, compiles the binary, runs the specified acceptance test with `TF_LOG=DEBUG`, and streams output to `scratch/acctest-<version>/logs/test_output_<version>.log`.
 
 ## Prerequisites
 
@@ -33,4 +33,4 @@ Run the acceptance test runner script:
 ### 2. Verification & Handoff
 
 * If the test succeeds, return to your primary workflow.
-* If the test fails, do **NOT** attempt a blind fix immediately. You MUST invoke the `parse-debug-logs` skill on `scratch/test_output.log` to analyze the API failure before proposing a fix.
+* If the test fails, do **NOT** attempt a blind fix immediately. You MUST invoke the `parse-debug-logs` skill on `scratch/acctest-<version>/logs/test_output_<version>.log` to analyze the API failure before proposing a fix.

@@ -115,7 +115,9 @@ echo -e "${BLUE}Building downstream provider binary...${NC}"
 
 # 5. Execute Acceptance Test
 echo -e "${BLUE}Running acceptance test in ${SCRATCH_DIR}...${NC}"
-LOG_FILE="${REPO_ROOT}/scratch/test_output.log"
+LOGS_DIR="${SCRATCH_DIR}/logs"
+mkdir -p "$LOGS_DIR"
+LOG_FILE="${LOGS_DIR}/test_output_${VERSION}.log"
 
 set +e
 (
