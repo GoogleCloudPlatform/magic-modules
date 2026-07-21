@@ -6,7 +6,7 @@ description: "Run pre-generation static checks including gofmt formatting, templ
 # `run-pre-gen-checks`
 
 > **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your required task.
-> This skill executes pre-generation static checks directly against `magic-modules` without generating downstream providers.
+> This skill executes pre-generation static checks in parallel directly against `magic-modules` without generating downstream providers.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ description: "Run pre-generation static checks including gofmt formatting, templ
 
 ### 1. Run Pre-Generation & Static Checks Runner
 
-Execute the script to run gofmt, template validation checks, mmv1 unit tests, and internal tool unit tests:
+Execute the script to run gofmt, template validation checks, mmv1 unit tests, and internal tool unit tests in parallel:
 
 ```bash
 ./.agents/skills/utils/run-pre-gen-checks/scripts/run_pre_gen_checks.sh
