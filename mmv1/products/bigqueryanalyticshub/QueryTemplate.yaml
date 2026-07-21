@@ -13,7 +13,7 @@
 
 ---
 name: "QueryTemplate"
-min_version: beta
+min_version: ga
 deletion_policy_default: "DELETE_IF_DRAFTED"
 deletion_policy_custom_docs: true
 description: |
@@ -123,6 +123,11 @@ properties:
       Unicode non-characters and C0 and C1 control codes except tabs,
       new lines, carriage returns, and page breaks.
       Default value is an empty string. Max length: 2000 bytes.
+  - name: "proposer"
+    type: String
+    description: |
+      Email or URL of the primary point of contact of the QueryTemplate. 
+      This field will be deprecated.
   - name: "primaryContact"
     type: String
     description: |
