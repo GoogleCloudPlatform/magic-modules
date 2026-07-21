@@ -1,0 +1,97 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: SupportEventSubscription
+description: A support event subscription for receiving notifications from Cloud Support API.
+base_url: 'organizations/{{organization}}/supportEventSubscriptions'
+self_link: '{{name}}'
+create_url: 'organizations/{{organization}}/supportEventSubscriptions'
+update_mask: true
+update_verb: PATCH
+import_format:
+  - 'organizations/{{organization}}/supportEventSubscriptions/{{name}}'
+  - '{{name}}'
+async:
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+autogen_status: U3VwcG9ydEV2ZW50U3Vic2NyaXB0aW9u
+autogen_async: true
+examples:
+  - name: "cloud_support_event_subscription_basic"
+    primary_resource_id: "subscription"
+    vars:
+      subscription_id: "my-subscription"
+    test_env_vars:
+      org_id: "ORG_ID"
+  - name: "cloud_support_event_subscription_update"
+    primary_resource_id: "subscription"
+    vars:
+      subscription_id: "my-subscription"
+    test_env_vars:
+      org_id: "ORG_ID"
+parameters:
+  - name: organization
+    type: String
+    required: true
+    description: The organization ID for the support event subscription.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: The time at which the subscription was created.
+    output: true
+  - name: deleteTime
+    type: String
+    description: The time at which the subscription was deleted.
+    output: true
+  - name: failureReason
+    type: String
+    description: |-
+      Reason why subscription is failing. State of subscription
+      must be FAILING in order for this to have a value.
+      Possible values:
+      PERMISSION_DENIED
+      TOPIC_NOT_FOUND
+      OTHER
+    output: true
+  - name: name
+    type: String
+    description: Identifier. The resource name of the support event subscription.
+    output: true
+  - name: pubSubTopic
+    type: String
+    required: true
+    description: |-
+      The name of the Pub/Sub topic to publish notifications to.
+      Format: projects/{project}/topics/{topic}
+  - name: purgeTime
+    type: String
+    description: The time at which the subscription will be purged.
+    output: true
+  - name: state
+    type: String
+    description: |-
+      The state of the subscription.
+      Possible values:
+      WORKING
+      FAILING
+      DELETED
+    output: true
+  - name: updateTime
+    type: String
+    description: The time at which the subscription was last updated.
+    output: true
