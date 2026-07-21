@@ -17,4 +17,5 @@ specific one.
 *   **Default Workflow** (`.agents/skills/workflows/default/SKILL.md`): For tasks that do not involve creating a new resource (fallback for general tasks).
 *   **New Resource Workflow** (`.agents/skills/workflows/new_resource/SKILL.md`): Specifically for creating a new resource, supporting both autogen and manual generation.
 *   **Add List Resource Workflow** (`.agents/skills/workflows/add_list_resource/SKILL.md`): Opts one product's eligible MMv1 resources into list-resource generation by setting `generate_list_resource: true`, validates locally, and opens a PR.
+*   **Verification Workflow** (`.agents/skills/workflows/verify_changes/SKILL.md`): Runs all CI pipeline checks locally (gofmt, yaml validation, unit tests, diff processor, acceptance tests, and other checks) with early exit on failure.
 *   *(Future workflows can be added here)*
