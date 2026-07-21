@@ -222,6 +222,7 @@ properties:
     type: Array
     description: The supported enforcement modes of the framework.
     output: true
+    custom_flatten: templates/terraform/custom_flatten/cloudsecuritycompliance_framework_supported_enforcement_modes.go.tmpl
     item_type:
       type: String
   - name: supportedTargetResourceTypes
