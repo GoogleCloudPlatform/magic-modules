@@ -1,0 +1,20 @@
+resource "google_pubsub_topic" "support_topic_1" {
+  name = "test-topic-1-%{random_suffix}"
+}
+
+resource "google_pubsub_topic" "support_topic_2" {
+  name = "test-topic-2-%{random_suffix}"
+}
+
+resource "google_pubsub_topic_iam_member" "support_publisher_2" {
+  topic  = google_pubsub_topic.support_topic_2.id
+  role   = "roles/pubsub.publisher"
+  member = "serviceAccount:cloud-support-apievents@system.gserviceaccount.com"
+}
+
+resource "google_cloud_support_support_event_subscription" "{{$.PrimaryResourceId}}" {
+  organization  = "{{index $.TestEnvVars "org_id"}}"
+  pub_sub_topic = google_pubsub_topic.support_topic_2.id
+
+  depends_on = [google_pubsub_topic_iam_member.support_publisher_2]
+}
