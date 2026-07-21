@@ -33,8 +33,11 @@ This skill converts raw, unstructured, or varied failure reports into a standard
 - Extract any GCS or local log paths provided.
 
 #### Path C: Remote / GCS Debug Log URL
-- Download the raw log using `curl` or `read_url_content`.
-- Save the log locally to `<workspace_root>/debug_output/raw_test.log`.
+- For GCS log links (`https://storage.cloud.google.com/<bucket>/<path>` or `https://storage.googleapis.com/<bucket>/<path>`), convert the URL to `gs://<bucket>/<path>` and fetch the exact log output using `gcloud storage cat`:
+  ```bash
+  gcloud storage cat gs://<bucket>/<path>
+  ```
+- Save the log locally to `<workspace_root>/debug_output/raw_test.log` if parsing is required.
 
 ---
 
