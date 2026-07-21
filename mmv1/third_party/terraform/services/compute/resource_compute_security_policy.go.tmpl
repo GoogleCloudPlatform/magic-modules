@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -755,19 +756,71 @@ func resourceComputeSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParams
 	}
 }
 
-// resourceComputeSecurityPolicyRuleHash hashes security policy rules by priority and action.
-// Using only priority causes hash collisions when two rules share the same priority (which
-// the API rejects, but which users may write transiently), causing schema.Set to silently
-// drop one rule and bypass the duplicate-priority validation in rulesCustomizeDiff.
-// Including action ensures distinct rules always produce distinct hashes while still
-// excluding volatile optional fields (description, preview, match sub-fields) that the
-// API may return as empty strings instead of nil, preventing unnecessary rule recreation.
+// resourceComputeSecurityPolicyRuleHash hashes a security policy rule by every field
+// that defines its behavior. Because `rule` is a schema.Set, this hash IS the element's
+// identity: any field left out of the hash is invisible to change detection. Hashing on
+// priority+action alone made schema.Set treat an edited rule as unchanged whenever the
+// edit kept the same priority and action -- e.g. changing match.expr.expression,
+// rate_limit_options.rate_limit_threshold.count, preconfigured_waf_config,
+// redirect_options or header_action -- so d.HasChange("rule") returned false and the
+// update was silently skipped (hashicorp/terraform-provider-google#27936).
+//
+// We therefore serialize the whole decoded rule canonically instead of enumerating a
+// subset of fields. This is safe against the churn that motivated the historical
+// priority+action-only hash (hashicorp/terraform-provider-google#16882 -- the API echoes
+// some optional values back as empty rather than nil): the hash runs on the
+// schema-decoded set element for both config and refreshed state, so leaf values are
+// always their schema zero value (never nil) and share identical Go types, while the
+// flatten* helpers already normalize the empty blocks the API echoes back down to nil.
+// An unchanged rule therefore hashes identically whether it originates from config or a
+// read, while any genuine edit -- at any depth -- changes the hash.
 func resourceComputeSecurityPolicyRuleHash(v interface{}) int {
-	raw := v.(map[string]interface{})
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%d-", raw["priority"].(int)))
-	buf.WriteString(fmt.Sprintf("%s-", raw["action"].(string)))
+	serializeSecurityPolicyRuleForHash(&buf, v)
 	return tpgresource.Hashcode(buf.String())
+}
+
+// serializeSecurityPolicyRuleForHash writes a deterministic representation of a
+// schema-decoded value into buf. Map keys are emitted in sorted order and schema.Set
+// members are sorted, so two rules that are semantically equal always produce the same
+// bytes regardless of Go map iteration order or set element ordering.
+func serializeSecurityPolicyRuleForHash(buf *bytes.Buffer, v interface{}) {
+	switch val := v.(type) {
+	case *schema.Set:
+		members := make([]string, 0, val.Len())
+		for _, item := range val.List() {
+			var b bytes.Buffer
+			serializeSecurityPolicyRuleForHash(&b, item)
+			members = append(members, b.String())
+		}
+		sort.Strings(members)
+		buf.WriteString("[")
+		buf.WriteString(strings.Join(members, ","))
+		buf.WriteString("]")
+	case []interface{}:
+		buf.WriteString("[")
+		for _, item := range val {
+			serializeSecurityPolicyRuleForHash(buf, item)
+			buf.WriteString(",")
+		}
+		buf.WriteString("]")
+	case map[string]interface{}:
+		keys := make([]string, 0, len(val))
+		for k := range val {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		buf.WriteString("{")
+		for _, k := range keys {
+			buf.WriteString(k)
+			buf.WriteString(":")
+			serializeSecurityPolicyRuleForHash(buf, val[k])
+			buf.WriteString(";")
+		}
+		buf.WriteString("}")
+	default:
+		buf.WriteString(fmt.Sprintf("%v", val))
+	}
 }
 
 func rulesCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
