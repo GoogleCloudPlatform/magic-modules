@@ -1,23 +1,18 @@
 ---
 name: verify-changes-workflow
-description: "Workflow to run all CI pipeline checks (pre-generation static checks, downstream provider generation & unit tests, provider change validations, and acceptance tests for modified services) and short-circuit on failure."
+description: "Workflow to run all CI pipeline checks (pre-generation static checks, downstream provider generation & unit tests, provider change validations, and acceptance tests for modified services) with early exit on failure."
 ---
 
 # `verify-changes-workflow`
 
-This workflow runs all validation and test checks equivalent to the Magic Modules CI pipeline (`.ci` and `.github`). The workflow executes checks in three sequential phases and **short-circuits (stops immediately)** if any step in a phase fails.
+This workflow runs all validation and test checks equivalent to the Magic Modules CI pipeline (`.ci` and `.github`). The workflow executes checks in three sequential phases and **stops immediately** if any step in a phase fails.
 
 ---
 
 ## Prerequisites
 
 - You must be in the `magic-modules` root directory.
-- `go` (v1.26+) and `yamllint` must be installed and configured.
-- The `$GOPATH` environment variable must be set correctly.
-- Downstream provider repositories must be cloned in `$GOPATH/src/github.com/`:
-  - `hashicorp/terraform-provider-google`
-  - `hashicorp/terraform-provider-google-beta`
-  - `terraform-google-modules/docs-examples`
+- `go` (v1.26+), `yamllint`, and `git` must be installed and configured.
 
 ---
 
@@ -93,47 +88,21 @@ Run unit tests for internal tools (`go-changelog`, `issue-labeler`, `template-ch
 
 ### Phase 2: Downstream Provider Generation & Unit Tests
 
-This phase generates downstream provider code and runs provider build, unit test, and breaking change / missing test / missing doc validation checks.
+This phase generates downstream provider code and runs provider build, unit test, and breaking change / missing test / missing doc validation checks in parallel in isolated scratch environments.
 
-#### 1. Code Generation
-Generate downstream target repositories from Magic Modules:
+#### 1. Downstream Generation & Unit Tests
+Invoke the `build-and-test-downstreams` skill ([build-and-test-downstreams/SKILL.md](../../utils/build-and-test-downstreams/SKILL.md)) to generate GA, Beta, and docs-examples downstreams and execute `go build`, `make testnolint`, `make lint`, and `make docscheck` in parallel:
 ```bash
-# Generate GA Provider
-make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
-
-# Generate Beta Provider
-make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
-
-# Generate Docs Examples (tf-oics)
-make tf-oics OUTPUT_PATH="$GOPATH/src/github.com/terraform-google-modules/docs-examples"
+./.agents/skills/utils/build-and-test-downstreams/scripts/build_and_test_downstreams.sh
 ```
 
-#### 2. GA Provider Build & Unit Tests (`terraform-provider-google`)
+#### 2. Provider Changes Validation (Diff Processor)
+Invoke the `validate-provider-changes` skill ([validate-provider-changes/SKILL.md](../../utils/validate-provider-changes/SKILL.md)) to check for breaking changes, missing acceptance tests, and missing documentation across GA and Beta outputs:
 ```bash
-cd "$GOPATH/src/github.com/hashicorp/terraform-provider-google"
-go build
-make testnolint
-make lint
-make docscheck
-```
-
-#### 3. Beta Provider Build & Unit Tests (`terraform-provider-google-beta`)
-```bash
-cd "$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
-go build
-make testnolint
-make lint
-make docscheck
-```
-
-#### 4. Provider Changes Validation (Diff Processor)
-Execute the `validate-provider-changes` skill ([validate-provider-changes/SKILL.md](../../utils/validate-provider-changes/SKILL.md)) to check for breaking changes, missing acceptance tests, and missing documentation across GA and Beta outputs:
-```bash
-cd "$MAGIC_MODULES_PATH" # Return to magic-modules root
 ./.agents/skills/utils/validate-provider-changes/scripts/validate_provider_changes.sh
 ```
 
-> 🛑 **SHORT-CIRCUIT GUARD:** If any generation, compilation, unit test, lint check, docs check, or `validate-provider-changes` check fails, **STOP IMMEDIATELY**. Report the failure details to the user and do not proceed to Phase 3.
+> 🛑 **SHORT-CIRCUIT GUARD:** If `build_and_test_downstreams.sh` or `validate_provider_changes.sh` fails, **STOP IMMEDIATELY**. Report the failure details to the user and do not proceed to Phase 3.
 
 ---
 
@@ -142,18 +111,18 @@ cd "$MAGIC_MODULES_PATH" # Return to magic-modules root
 This phase executes acceptance tests for GCP services modified by the changes.
 
 #### 1. Identify Modified Services
-Identify which services were touched in `mmv1/products/<service>` or in downstream provider service directories (`google-beta/services/<service>`).
+Identify which services were touched by checking the diff on `google-beta/services/` and `google/services/`.
 
 #### 2. Execute Acceptance Tests
-Run the acceptance tests for the modified service using the `run-acctests` skill ([run-acctests/SKILL.md](../../utils/run-acctests/SKILL.md)):
+Invoke the `run-acctests` skill ([run-acctests/SKILL.md](../../utils/run-acctests/SKILL.md)) to generate the provider into a scratch workspace, compile it, and run acceptance tests:
 ```bash
-cd "$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
-TF_LOG=DEBUG make testacc TEST=./google-beta/services/<SERVICE_NAME> TESTARGS='-run=<TEST_NAME>$$' > test_output.log 2>&1
+# Example: Run acceptance test for modified service in Beta
+./.agents/skills/utils/run-acctests/scripts/run_acctests.sh beta <SERVICE_NAME> [TEST_NAME]
 ```
 
 > 🛑 **SHORT-CIRCUIT GUARD:** If any acceptance test fails:
 > 1. **STOP IMMEDIATELY**. Do not proceed to subsequent tests or PR creation.
-> 2. Invoke the `parse-debug-logs` skill on `test_output.log` to analyze the failure.
+> 2. Invoke the `parse-debug-logs` skill on `scratch/test_output.log` to analyze the failure.
 > 3. Present the diagnostic report to the user and propose remediation steps.
 
 ---
