@@ -131,4 +131,5 @@ Invoke the `run-acctests` skill ([run-acctests/SKILL.md](../../utils/run-acctest
 
 - All three phases must complete successfully for verification to pass.
 - Never bypass a failure or ignore failing checks.
+- If any step fails to execute (including due to missing permissions or permission timeouts), the workflow MUST be marked as FAILED and stop immediately. Do NOT report success if any step was skipped or failed.
 - If all phases pass, present a summary of executed checks and confirm that changes are verified and ready for PR creation.
