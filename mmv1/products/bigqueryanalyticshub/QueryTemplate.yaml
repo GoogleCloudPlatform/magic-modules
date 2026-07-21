@@ -126,7 +126,7 @@ properties:
   - name: "proposer"
     type: String
     description: |
-      Email or URL of the primary point of contact of the QueryTemplate. 
+      Email or URL of the primary point of contact of the QueryTemplate.
       This field will be deprecated.
   - name: "primaryContact"
     type: String
