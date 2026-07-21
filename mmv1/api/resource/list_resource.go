@@ -16,5 +16,5 @@ package resource
 // ListResource configures list-resource generation overrides.
 type ListResource struct {
 	ListAPIFieldName string `yaml:"list_api_field_name,omitempty"`
-	CustomFlattener string `yaml:"custom_flattener,omitempty"`
+	CustomFlattener  string `yaml:"custom_flattener,omitempty"`
 }
