@@ -36,6 +36,7 @@ Match failure symptoms against standard decision tree scenarios:
 | **Scenario 2** | HTTP 400 `InvalidArgument`, `Unknown Field`, or field serialization error | API Request Payload schema mismatch | Compare `01_POST_request.json` against API schema; fix field camelCase/snake_case mapping or `send_empty_value` |
 | **Scenario 3** | HTTP 404 immediately post-Create or concurrent operation conflict | LRO / Eventual Consistency timing | Configure `autogen_async` in YAML or add polling waiter logic in handwritten code overrides |
 | **Scenario 4** | Pre-requisite resource failure, name collision, or test setup error | Sample HCL test template bug | Update `..._test.go.tmpl` to use dynamic random string suffixes or fix test dependencies |
+| **Scenario 5** | gRPC Code 13, HTTP 500/502/503, `An internal error has occurred`, or API backend crash | Non-Remediable GCP Backend Error | **Early Exit & Handoff:** Do NOT edit `magic-modules`. Report failure as a GCP service-side internal error requiring API team investigation. |
 
 #### Path A: Automated Subagent (Mandatory Default)
 * **Action:** Invoke the `test-fixer` subagent (`.agents/agents/test-fixer/`) using the `invoke_subagent` tool.
