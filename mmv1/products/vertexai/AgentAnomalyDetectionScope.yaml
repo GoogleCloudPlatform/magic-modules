@@ -52,6 +52,10 @@ examples:
     vars:
       scope_id: 'agent-anomaly-detection-scope'
       log_bucket_id: 'aad-log-bucket'
+    # TODO(jennjiang): skip_vcr because ci-test-project-188019 returns
+    # FAILED_PRECONDITION on CreateScope (works on other projects).
+    # Need to debug CI project setup with reviewer. b/527074080
+    skip_vcr: true
 parameters:
   - name: 'region'
     type: String
