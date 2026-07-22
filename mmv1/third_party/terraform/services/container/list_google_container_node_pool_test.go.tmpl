@@ -1,0 +1,100 @@
+{{- if ne $.TargetVersionName "ga" }}
+package container_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/container"
+)
+
+func TestAccContainerNodePoolListResource_queryIdentity(t *testing.T) {
+	t.Parallel()
+
+	project := envvar.GetTestProjectFromEnv()
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePoolListResourceBasic(project, cluster, nodePoolName, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.test", "name", cluster),
+					resource.TestCheckResourceAttr("google_container_cluster.test", "location", "us-central1-a"),
+					resource.TestCheckResourceAttr("google_container_node_pool.test", "name", nodePoolName),
+				),
+			},
+			{
+				Query:  true,
+				Config: testAccContainerNodePoolListResourceQuery(project, cluster),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLengthAtLeast("google_container_node_pool.all", 1),
+					querycheck.ExpectIdentity("google_container_node_pool.all", map[string]knownvalue.Check{
+						"project":  knownvalue.StringExact(project),
+						"location": knownvalue.StringExact("us-central1-a"),
+						"cluster":  knownvalue.StringExact(cluster),
+						"name":     knownvalue.StringExact(nodePoolName),
+					}),
+				},
+			},
+		},
+	})
+}
+
+func testAccContainerNodePoolListResourceBasic(project, cluster, nodePool, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "test" {
+  name               = %q
+  location           = "us-central1-a"
+  project            = %q
+  initial_node_count = 1
+
+  network    = %q
+  subnetwork = %q
+
+  deletion_protection = false
+}
+
+resource "google_container_node_pool" "test" {
+  name       = %q
+  project    = %q
+  cluster    = google_container_cluster.test.name
+  location   = google_container_cluster.test.location
+  node_count = 1
+}
+`, cluster, project, networkName, subnetworkName, nodePool, project)
+}
+
+func testAccContainerNodePoolListResourceQuery(project, cluster string) string {
+	return fmt.Sprintf(`
+provider "google" {}
+
+list "google_container_node_pool" "all" {
+  provider = google
+  limit    = 1000
+
+  config {
+    project  = %q
+    location = "us-central1-a"
+    cluster  = %q
+  }
+}
+`, project, cluster)
+}
+{{- end }}

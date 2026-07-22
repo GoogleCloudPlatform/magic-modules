@@ -209,6 +209,30 @@ func ResourceContainerNodePool() *schema.Resource {
 
 		UseJSONNumber: true,
 
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"location": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"cluster": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
 		Schema: tpgresource.MergeSchemas(
 			schemaNodePool,
 			map[string]*schema.Schema{
@@ -995,6 +1019,15 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 	
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
 	    return err
+	}
+
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":  nodePoolInfo.project,
+		"location": nodePoolInfo.location,
+		"cluster":  nodePoolInfo.cluster,
+		"name":     name,
+	}); err != nil {
+		return err
 	}
 	
 
