@@ -35,11 +35,21 @@ resource "google_project" "runtime_project" {
     deletion_policy = "DELETE"
 }
 
+# Enable API hub API on runtime project
+resource "google_project_service" "apihub_service_runtime" {
+    project = google_project.runtime_project.project_id
+    service = "apihub.googleapis.com"
+    depends_on = [time_sleep.wait_60_seconds]
+}
+
 resource "google_apihub_runtime_project_attachment" "{{$.PrimaryResourceId}}" {
     project = google_project.host_project.project_id
     location = "asia-south1"
     runtime_project_attachment_id = google_project.runtime_project.project_id
     runtime_project = "projects/${google_project.runtime_project.project_id}"
 
-    depends_on = [google_apihub_host_project_registration.host_project_reg]
+    depends_on = [
+        google_apihub_host_project_registration.host_project_reg,
+        google_project_service.apihub_service_runtime
+    ]
 }
