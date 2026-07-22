@@ -107,22 +107,30 @@ func appearsInStringLiteral(body string, identifier string) bool {
 	var current strings.Builder
 	for _, ch := range body {
 		if escaped {
-			if inString { current.WriteRune(ch) }
+			if inString {
+				current.WriteRune(ch)
+			}
 			escaped = false
 			continue
 		}
 		if ch == '\\' {
 			escaped = true
-			if inString { current.WriteRune(ch) }
+			if inString {
+				current.WriteRune(ch)
+			}
 			continue
 		}
 		if ch == '"' {
-			if inString && strings.Contains(current.String(), identifier) { return true }
+			if inString && strings.Contains(current.String(), identifier) {
+				return true
+			}
 			current.Reset()
 			inString = !inString
 			continue
 		}
-		if inString { current.WriteRune(ch) }
+		if inString {
+			current.WriteRune(ch)
+		}
 	}
 	return false
 }
