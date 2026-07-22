@@ -1,37 +1,13 @@
-resource "google_project_service" "serviceusage" {
-  provider           = google-beta
-  project            = data.google_project.project.project_id
-  service            = "serviceusage.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "aiplatform" {
-  provider           = google-beta
-  project            = data.google_project.project.project_id
-  service            = "aiplatform.googleapis.com"
-  disable_on_destroy = false
-  depends_on         = [google_project_service.serviceusage]
-}
-
-resource "google_project_service" "logging" {
-  provider           = google-beta
-  project            = data.google_project.project.project_id
-  service            = "logging.googleapis.com"
-  disable_on_destroy = false
-  depends_on         = [google_project_service.serviceusage]
-}
-
-resource "google_project_service" "monitoring" {
-  provider           = google-beta
-  project            = data.google_project.project.project_id
-  service            = "monitoring.googleapis.com"
-  disable_on_destroy = false
-  depends_on         = [google_project_service.serviceusage]
+# TODO(jennjiang): Temporarily hardcoded to gp-prod-bugbash-7 for VCR test.
+# Revert to data.google_project.project.project_id once ci-test-project-188019
+# orphaned scope is cleaned up. b/527074080
+locals {
+  project_id = "gp-prod-bugbash-7"
 }
 
 resource "google_logging_project_bucket_config" "{{index $.Vars "log_bucket_id"}}" {
   provider       = google-beta
-  project        = data.google_project.project.project_id
+  project        = local.project_id
   location       = "us"
   retention_days = 30
   bucket_id      = "{{index $.Vars "log_bucket_id"}}"
@@ -39,6 +15,7 @@ resource "google_logging_project_bucket_config" "{{index $.Vars "log_bucket_id"}
 
 resource "google_vertex_ai_agent_anomaly_detection_scope" "{{$.PrimaryResourceId}}" {
   provider                         = google-beta
+  project                          = local.project_id
   region                           = "us"
   agent_anomaly_detection_scope_id = "{{index $.Vars "scope_id"}}"
   display_name                     = "Basic AAD scope"
@@ -46,37 +23,6 @@ resource "google_vertex_ai_agent_anomaly_detection_scope" "{{$.PrimaryResourceId
     google_logging_project_bucket_config.{{index $.Vars "log_bucket_id"}}.id,
   ]
   observability_buckets = [
-    "projects/${data.google_project.project.project_id}/locations/us/buckets/_Trace/datasets/Spans",
+    "projects/${local.project_id}/locations/us/buckets/_Trace/datasets/Spans",
   ]
-
-  depends_on = [
-    google_project_service.aiplatform,
-    google_project_service.logging,
-    google_project_service.monitoring,
-  ]
-}
-
-data "google_project" "project" {
-  provider = google-beta
-}
-
-# Diagnostic: dump org policies to test logs to help triage FAILED_PRECONDITION
-data "google_project_organization_policy" "cmek" {
-  provider   = google-beta
-  project    = data.google_project.project.project_id
-  constraint = "constraints/gcp.restrictNonCmekServices"
-}
-
-data "google_project_organization_policy" "resource_locations" {
-  provider   = google-beta
-  project    = data.google_project.project.project_id
-  constraint = "constraints/gcp.resourceLocations"
-}
-
-output "debug_org_policy_cmek" {
-  value = data.google_project_organization_policy.cmek
-}
-
-output "debug_org_policy_resource_locations" {
-  value = data.google_project_organization_policy.resource_locations
 }

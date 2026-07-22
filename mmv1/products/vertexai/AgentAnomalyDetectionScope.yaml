@@ -52,6 +52,11 @@ examples:
     vars:
       scope_id: 'agent-anomaly-detection-scope'
       log_bucket_id: 'aad-log-bucket'
+    # TODO(jennjiang): Temporary fixed IDs for VCR test against gp-prod-bugbash-7.
+    # Revert once ci-test-project-188019 orphaned scope is cleaned up. b/527074080
+    test_vars_overrides:
+      scope_id: '"tf-vcr-test-scope"'
+      log_bucket_id: '"tf-vcr-test-aad-log-bucket"'
 parameters:
   - name: 'region'
     type: String
