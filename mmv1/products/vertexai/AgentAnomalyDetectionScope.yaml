@@ -52,10 +52,6 @@ examples:
     vars:
       scope_id: 'agent-anomaly-detection-scope'
       log_bucket_id: 'aad-log-bucket'
-    # TODO(jennjiang): Temporary fixed log bucket ID to match orphan cleanup.
-    # Revert to random suffix after orphan is cleaned up. b/527074080
-    test_vars_overrides:
-      log_bucket_id: '"tf-test-aad-log-bucket-orphan-cleanup"'
 parameters:
   - name: 'region'
     type: String
