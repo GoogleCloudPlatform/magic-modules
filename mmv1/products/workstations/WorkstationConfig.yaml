@@ -142,6 +142,14 @@ samples:
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
+  - name: workstation_config_idle_action
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: workstation_config_idle_action
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
 parameters:
   - name: workstationConfigId
     type: String
@@ -202,6 +210,15 @@ properties:
       How long to wait before automatically stopping an instance that hasn't recently received any user traffic. A value of 0 indicates that this instance should never time out from idleness. Defaults to 20 minutes.
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
     default_value: 1200s
+  - name: idleAction
+    type: Enum
+    description: |
+      The action to take when the workstation has been idle for the duration specified in idle_timeout.
+      Defaults to STOP.
+    enum_values:
+      - STOP
+      - SUSPEND
+    min_version: beta
   - name: runningTimeout
     type: String
     description: |
