@@ -142,3 +142,27 @@ jobs:
           cd mmv1
           go test ./...
 
+  func-check:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          path: repo
+          fetch-depth: 0
+      - name: Merge base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          cd repo
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${GITHUB_BASE_REF}
+          git merge --no-ff origin/${GITHUB_BASE_REF}
+      - name: Check for invalid template functions
+        run: |
+          cd repo/tools/template-check
+          tmpls=$(git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF} ../../*.tmpl | grep -v '\.markdown\.tmpl$' | grep -v '\.tf\.tmpl$' | sed 's=^=../../=g')
+          tmpls=${tmpls//$'\n'/,}
+          if [[ -n "$tmpls" ]]; then
+            go run main.go func-check --file-list $tmpls
+          fi
