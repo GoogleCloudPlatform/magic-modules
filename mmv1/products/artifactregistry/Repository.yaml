@@ -416,14 +416,10 @@ properties:
           - RELEASE
           - SNAPSHOT
   - name: mode
-    type: Enum
+    type: String
     description: The mode configures the repository to serve artifacts from different sources.
     immutable: true
     default_value: STANDARD_REPOSITORY
-    enum_values:
-      - STANDARD_REPOSITORY
-      - VIRTUAL_REPOSITORY
-      - REMOTE_REPOSITORY
   - name: virtualRepositoryConfig
     type: NestedObject
     description: Configuration specific for a Virtual Repository.
