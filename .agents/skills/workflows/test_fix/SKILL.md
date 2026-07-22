@@ -28,15 +28,9 @@ Consult `.agents/knowledge/index.md` for the topics the failure touches and open
 
 ### 2. Failure Scenario Classification & Remediation (Choose Path)
 
-Match failure symptoms against standard decision tree scenarios:
+Match failure symptoms against the central decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (Scenarios 1-5+).
 
-| Scenario ID | Symptom / Error Pattern | Root Cause Category | Primary File Location & Remedy |
-| :--- | :--- | :--- | :--- |
-| **Scenario 1** | State drift, `ImportStateVerify` mismatch, or non-empty plan after Apply | State normalization / Default mismatch | Edit `mmv1/products/<product>/<Resource>.yaml` to add `diff_suppress_func`, adjust state reader, or handle API defaults |
-| **Scenario 2** | HTTP 400 `InvalidArgument`, `Unknown Field`, or field serialization error | API Request Payload schema mismatch | Compare `01_POST_request.json` against API schema; fix field camelCase/snake_case mapping or `send_empty_value` |
-| **Scenario 3** | HTTP 404 immediately post-Create or concurrent operation conflict | LRO / Eventual Consistency timing | Configure `autogen_async` in YAML or add polling waiter logic in handwritten code overrides |
-| **Scenario 4** | Pre-requisite resource failure, name collision, or test setup error | Sample HCL test template bug | Update `..._test.go.tmpl` to use dynamic random string suffixes or fix test dependencies |
-| **Scenario 5** | gRPC Code 13/14 (`RESOURCE_EXHAUSTED`), HTTP 429 (`Quota limit exceeded`/`Quota exhausted`), HTTP 500/502/503 (`An internal error has occurred`), or API backend crash | Non-Remediable GCP Backend / Quota Environment Error | **Early Exit & Handoff:** Do NOT edit `magic-modules`. Report failure as a GCP service-side internal error or test environment quota exhaustion requiring human investigation by the Terraform team. |
+Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symptom patterns, root causes, and remediation recipes.
 
 #### Path A: Automated Subagent (Mandatory Default)
 * **Action:** Invoke the `test-fixer` subagent (`.agents/agents/test-fixer/`) using the `invoke_subagent` tool.
