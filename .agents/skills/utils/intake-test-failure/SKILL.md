@@ -23,21 +23,24 @@ This skill converts raw, unstructured, or varied failure reports into a standard
 #### Path A: GitHub Issue URL
 - Use `read_url_content` (or `gh issue view` if CLI available) to read the issue content and inspect its GitHub labels.
 - Check if labels contain `test-failure`, `test-failure-100`, `test-failure-50`, or any similar `test-failure*` labels to confirm this is an acceptance test failure issue.
-- Search the issue body or metadata for:
+- Distinguish between **Error Message Links** and **Debug Log Links** in the issue body:
+  - **Error Message Link** (e.g. `https://storage.cloud.google.com/nightly-test-data/test-errors/.../*.txt`): Contains the exact `go test` output, backtrace, and `stdout` plan diff. **Always fetch the complete content of this file using `gcloud storage cat` to populate `error_message`.**
+  - **Debug Log Link** (e.g. `https://storage.cloud.google.com/teamcity-logs/.../*.txt`): Contains the full `TF_LOG=DEBUG` provider trace. Fetch and process via `tf_debug_parser.py` for `parsed_logs_dir`.
+- Search the issue body or fetched error log file for:
   - Impacted acceptance test name (e.g., `TestAcc<Resource>_<Scenario>`).
-  - Failure error backtrace or state assertion error (e.g., `Step 1/1 error: Check failed...`).
-  - GCS debug log URL links (often ending in `.log` or `.txt` hosted on Google Cloud Storage).
+  - Full error text, backtrace, and `stdout` plan diff.
 
 #### Path B: Direct Prompt / Text Entry
-- Extract `test_name` and `error_message` directly from user input.
+- Extract `test_name` and full `error_message` directly from user input.
 - Extract any GCS or local log paths provided.
 
-#### Path C: Remote / GCS Debug Log URL
-- For GCS log links (`https://storage.cloud.google.com/<bucket>/<path>` or `https://storage.googleapis.com/<bucket>/<path>`), convert the URL to `gs://<bucket>/<path>` and fetch the exact log output using `gcloud storage cat`:
+#### Path C: Remote / GCS Log URLs
+- For Error Log or Debug Log links (`https://storage.cloud.google.com/<bucket>/<path>` or `https://storage.googleapis.com/<bucket>/<path>`), convert the URL to `gs://<bucket>/<path>` and fetch using `gcloud storage cat`:
   ```bash
   gcloud storage cat gs://<bucket>/<path>
   ```
-- Save the log locally to `<workspace_root>/debug_output/raw_test.log` if parsing is required.
+- Store the error message text in full in `error_message`.
+- Save debug logs locally to `<workspace_root>/debug_output/raw_test.log` for parsing.
 
 ---
 
@@ -51,14 +54,15 @@ If a debug log (local or GCS) is present:
 
 ---
 
-### Step 3: Produce Minimal Normalized Failure Payload
+### Step 3: Produce Complete Normalized Failure Payload
 
-Assemble and present the normalized payload in the following clean format:
+Assemble and present the normalized payload in the following format. **CRITICAL: Do NOT truncate multi-line error output, assertion backtraces, or `stdout` plan diffs. Use a multi-line YAML block scalar (`|`) to preserve full error context:**
 
 ```yaml
 normalized_failure_payload:
   test_name: "<ExactTestFunctionName>"
-  error_message: "<Concise error string or failed assertion>"
+  error_message: |
+    <Full error output, go test backtrace, and stdout plan diff>
   parsed_logs_dir: "debug_output/<test_name>/"  # Optional
 ```
 
