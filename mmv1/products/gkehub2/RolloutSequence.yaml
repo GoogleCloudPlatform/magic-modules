@@ -27,8 +27,6 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/global/rolloutSequences/{{rollout_sequence_id}}'
-custom_code:
-  constants: 'templates/terraform/constants/gke_hub_rollout_sequence.go.tmpl'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -41,6 +39,11 @@ async:
     base_url: '{{op_id}}'
     result:
       resource_inside_response: false
+custom_code:
+  constants: 'templates/terraform/constants/gke_hub_rollout_sequence.go.tmpl'
+  post_create: 'templates/terraform/post_create/gke_hub_rollout_sequence.go.tmpl'
+  post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.tmpl'
+  post_update: 'templates/terraform/post_update/gke_hub_rollout_sequence.go.tmpl'
 parameters:
   - name: 'rollout_sequence_id'
     type: String
@@ -152,6 +155,8 @@ properties:
           Exceptions are rollouts enforcing our security policies (e.g. such as
           end-of-support and outdated control plane patch enforcements).
           These policy enforcements cannot be disabled.
+        allow_empty_object: true
+        send_empty_value: true
         properties:
           - name: 'upgradeTypes'
             type: Array
@@ -161,15 +166,65 @@ properties:
               Current valid values are `CONTROL_PLANE_MINOR`, `CONTROL_PLANE_PATCH`, `NODE_MINOR`, and `NODE_PATCH`.
             item_type:
               type: String
+            send_empty_value: true
+
+  - name: 'targetControlPlaneVersion'
+    type: String
+    description: |
+      The current target control plane version.
+    output: true
+  - name: 'targetNodeVersion'
+    type: String
+    description: |
+      The current target node version.
+    output: true
+  - name: 'operationalState'
+    type: NestedObject
+    description: |
+      The operational state of the rollout sequence.
+    output: true
+    properties:
+      - name: 'state'
+        type: String
+        description: |
+          The state of the rollout sequence.
+        output: true
+
+virtual_fields:
+  - name: 'min_control_plane_version'
+    type: String
+    description: |
+      Minimum control plane version that the clusters in the sequence should be upgraded to.
+      Setting this field will cause the creation of a rollout to the specified version.
+      Any rollout of the same type already running on the first stage of the sequence will be cancelled to allow for the creation of the new rollout.
+      Should be a valid [semantic version](https://semver.org/).
+      Version aliases are supported, as described in the [cluster version docs](https://docs.cloud.google.com/kubernetes-engine/versioning#specifying_cluster_version).
+      Note that the `latest` and `-` aliases are not supported for this field.
+      Supported formats: `1.X`, `1.X.Y`, `1.X.Y-gke.N`.
+  - name: 'min_node_version'
+    type: String
+    description: |
+      Minimum node version that the clusters in the sequence should be upgraded to.
+      Setting this field will cause the creation of a rollout to the specified version.
+      Any rollout of the same type already running on the first stage of the sequence will be cancelled to allow for the creation of the new rollout.
+      Should be a valid [semantic version](https://semver.org/).
+      Version aliases are supported, as described in the [cluster version docs](https://docs.cloud.google.com/kubernetes-engine/versioning#specifying_cluster_version).
+      Note that the `latest` and `-` aliases are not supported for this field.
+      Supported formats: `1.X`, `1.X.Y`, `1.X.Y-gke.N`.
+
 samples:
   - name: 'gke_hub_rollout_sequence_basic'
     primary_resource_id: 'rollout_sequence'
+    external_providers:
+      - 'time'
     steps:
       - name: 'gke_hub_rollout_sequence_create'
         resource_id_vars:
           rollout_sequence_id: 'rs-basic'
+          project_id: 'rs-project'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
+          billing_acct: 'BILLING_ACCT'
         ignore_read_extra:
           - 'labels'
           - 'rollout_sequence_id'
@@ -177,6 +232,40 @@ samples:
       - name: 'gke_hub_rollout_sequence_update'
         resource_id_vars:
           rollout_sequence_id: 'rs-basic'
+          project_id: 'rs-project'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
+          org_id: 'ORG_ID'
+          billing_acct: 'BILLING_ACCT'
         include_step_doc: true
+  - name: 'gke_hub_rollout_sequence_user_triggered'
+    primary_resource_id: 'rollout_sequence'
+    external_providers:
+      - 'time'
+    steps:
+      - name: 'gke_hub_rollout_sequence_user_triggered_create'
+        resource_id_vars:
+          rollout_sequence_id: 'rs-user-triggered'
+          project_id: 'rs-project'
+          network_name: 'rs-network'
+          subnetwork_name: 'rs-subnet'
+          cluster_name: 'rs-cluster'
+          membership_id: 'rs-membership'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_acct: 'BILLING_ACCT'
+        ignore_read_extra:
+          - 'min_control_plane_version'
+      - name: 'gke_hub_rollout_sequence_user_triggered_update'
+        resource_id_vars:
+          rollout_sequence_id: 'rs-user-triggered'
+          project_id: 'rs-project'
+          network_name: 'rs-network'
+          subnetwork_name: 'rs-subnet'
+          cluster_name: 'rs-cluster'
+          membership_id: 'rs-membership'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_acct: 'BILLING_ACCT'
+        ignore_read_extra:
+          - 'min_control_plane_version'
+          - 'min_node_version'
