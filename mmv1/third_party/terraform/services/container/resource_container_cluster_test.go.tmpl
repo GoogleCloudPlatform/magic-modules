@@ -19399,6 +19399,11 @@ func TestAccContainerCluster_desiredEmulatedVersion(t *testing.T) {
 			// Step 2 (Soak Upgrade): Upgrade master to target version (RAPID latest) and activate soak
 			{
 				Config: testAccContainerCluster_desiredEmulatedVersionSoak(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					// Assert that the computed emulated_version field is populated in state during soak
 					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "emulated_version"),
@@ -19413,6 +19418,11 @@ func TestAccContainerCluster_desiredEmulatedVersion(t *testing.T) {
 			// Step 3 (Declarative Complete): Set desired_emulated_version to complete the upgrade
 			{
 				Config: testAccContainerCluster_desiredEmulatedVersionComplete(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					// Assert that the computed emulated_version field is cleared in state after completion
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "emulated_version", ""),
@@ -19633,6 +19643,11 @@ func TestAccContainerCluster_desiredEmulatedVersionAutopilot(t *testing.T) {
 			// Step 2 (Soak Upgrade): Upgrade regional master to target version (RAPID latest) with soak active
 			{
 				Config: testAccContainerCluster_desiredEmulatedVersionAutopilotSoak(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					// Assert that the computed emulated_version field is populated in state during soak
 					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "emulated_version"),
@@ -19647,6 +19662,11 @@ func TestAccContainerCluster_desiredEmulatedVersionAutopilot(t *testing.T) {
 			// Step 3 (Declarative Complete): Set desired_emulated_version to complete the upgrade
 			{
 				Config: testAccContainerCluster_desiredEmulatedVersionAutopilotComplete(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					// Assert that the computed emulated_version field is cleared in state after completion
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "emulated_version", ""),
