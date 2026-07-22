@@ -44,6 +44,10 @@ async:
   include_project: false
 autogen_status: UG9saWN5T3JjaGVzdHJhdG9y
 autogen_async: true
+custom_diff:
+  - policyOrchestratorCustomizeDiff
+custom_code:
+  constants: templates/terraform/constants/osconfigv2_policy_orchestrator.go.tmpl
 samples:
   - name: osconfigv2_policy_orchestrator_basic
     primary_resource_id: policy_orchestrator

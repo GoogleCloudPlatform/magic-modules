@@ -9,6 +9,8 @@ description: "Opt resource into MMv1 list-resource generation by setting `genera
 
 This workflow produces a single PR scoped to **one product** that flips `generate_list_resource: true` on every eligible MMv1 resource in that product, generates the downstream code, runs the generated list-query tests, and opens the PR. Do **one product per PR**, with as many eligible resources as pass.
 
+Consult `.agents/knowledge/index.md` for the topics this task touches and open the relevant sources.
+
 ## Prerequisites
 
 * You are in the `magic-modules` root directory.

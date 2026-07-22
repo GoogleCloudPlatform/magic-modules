@@ -45,6 +45,8 @@ async:
   include_project: true
 autogen_status: UG9saWN5T3JjaGVzdHJhdG9yRm9yT3JnYW5pemF0aW9u
 autogen_async: true
+custom_diff:
+  - policyOrchestratorCustomizeDiff
 samples:
   - name: osconfigv2_policy_orchestrator_for_organization_basic
     primary_resource_id: policy_orchestrator_for_organization
