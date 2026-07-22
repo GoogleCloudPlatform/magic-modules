@@ -1350,6 +1350,7 @@ func TestAccDataprocCluster_withIdentityConfig(t *testing.T) {
 				Config: testAccDataprocCluster_withIdentityConfig(rnd, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.identity_config", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.identity_config", "cluster_config.0.security_config.0.identity_config.0.enable_ssh", "true"),
 				),
 			},
 		},
@@ -3486,6 +3487,7 @@ resource "google_dataproc_cluster" "identity_config" {
         user_service_account_mapping = {
           "bob@company.com" = "bob-sa@iam.gserviceaccouts.com"
         }
+        enable_ssh = true
       }
     }
   }
