@@ -1130,10 +1130,12 @@ properties:
     description: |-
       Optional. Traffic distribution configuration for the Reasoning Engine.
 
-      ~> **Note:** Because revision IDs do not exist before the resource is created, the best practice for initial deployment is to set `traffic_split_always_latest {}`. Once the resource is created, you can update the configuration to a manual split using the newly generated revision IDs or short names (e.g. `rev-1`).
+      ~> **Note:** Because revision IDs do not exist before the resource is created, the best practice for initial deployment is to set `traffic_split_always_latest {}`. Once the resource is created, you can update the configuration to a manual split using newly generated revision IDs, short names (e.g. `rev-1`), or keywords such as `LATEST` and `PREVIOUS`.
     properties:
       - name: 'trafficSplitManual'
         type: NestedObject
+        conflicts:
+          - 'traffic_config.0.traffic_split_always_latest'
         description: |-
           Optional. Manual traffic distribution configuration, where the user specifies the
           Runtime Revision IDs and the percentage of traffic to send to each.
@@ -1151,7 +1153,7 @@ properties:
                   diff_suppress_func: 'vertexAiReasoningEngineRuntimeRevisionNameDiffSuppress'
                   custom_expand: 'templates/terraform/custom_expand/vertex_ai_reasoning_engine_runtime_revision_name.go.tmpl'
                   description: |-
-                    Required. The Runtime Revision name to which to send this portion of traffic.
+                    Required. The Runtime Revision name to which to send this portion of traffic. Accepts revision IDs, short names (e.g. `rev-1`), or keywords such as `LATEST` and `PREVIOUS`. Note: Keywords like `LATEST` and `PREVIOUS` resolve at apply time to the concrete underlying revision ID and remain pinned until `traffic_config` is updated in Terraform.
                   required: true
                 - name: 'percent'
                   type: Integer
@@ -1160,6 +1162,8 @@ properties:
                   required: true
       - name: 'trafficSplitAlwaysLatest'
         type: NestedObject
+        conflicts:
+          - 'traffic_config.0.traffic_split_manual'
         description: |-
           Optional. Traffic distribution configuration, where all traffic is sent to the
           latest Runtime Revision.
