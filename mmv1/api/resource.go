@@ -970,8 +970,6 @@ func buildWriteOnlyField(name string, originalField *Type) *Type {
 }
 
 func configureWriteOnlyConstraints(originalField, writeOnlyField, versionField *Type) {
-	originalFieldWasRequired := originalField.Required
-	originalField.Required = false
 	writeOnlyField.Required = false
 	writeOnlyField.IgnoreRead = true
 	versionField.Required = false
@@ -983,7 +981,7 @@ func configureWriteOnlyConstraints(originalField, writeOnlyField, versionField *
 	writeOnlyField.RequiredWith = []string{versionFieldPath}
 	versionField.RequiredWith = []string{writeOnlyFieldPath}
 
-	if originalFieldWasRequired || len(originalField.ExactlyOneOf) > 0 {
+	if originalField.Required || len(originalField.ExactlyOneOf) > 0 {
 		if originalField.ExactlyOneOfGroup == nil {
 			base := []string{originalFieldPath, writeOnlyFieldPath}
 			originalField.ExactlyOneOfGroup = &base
