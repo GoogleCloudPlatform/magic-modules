@@ -1272,6 +1272,7 @@ func TestAccSqlDatabaseInstance_updateMCPEnabled(t *testing.T) {
 	})
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -1302,6 +1303,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testi
 		},
 	})
 }
+{{- end }}
 
 func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t *testing.T) {
 	t.Parallel()
@@ -7384,6 +7386,7 @@ resource "google_sql_database_instance" "instance" {
 `, projectId, projectId, orgId, billingAccount, instanceName)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName string, networkName string, projectId string) string {
 	return fmt.Sprintf(`
 resource "google_project_service_identity" "gcp_sa_cloud_sql" {
@@ -7472,6 +7475,7 @@ resource "google_compute_network" "default" {
 }
 `, projectId, projectId, projectId, projectId, networkName)
 }
+{{- end }}
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, projectId string, orgId string, billingAccount string) string {
 	return fmt.Sprintf(`
