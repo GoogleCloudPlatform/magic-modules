@@ -1,0 +1,47 @@
+resource "google_vertex_ai_persistent_resource" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "name"}}"
+  location = "us-central1"
+  display_name = "example-resource"
+  
+  labels = {
+    env = "test"
+  }
+  
+  network = "projects/my-project/global/networks/my-network"
+  
+  psc_interface_config {
+    dns_peering_configs {
+      dns_name      = "example.com"
+      target_domain = "example.com"
+    }
+    network_attachment = "projects/my-project/regions/us-central1/networkAttachments/my-network-attachment"
+  }
+  
+  reserved_ip_ranges = ["10.0.0.0/24"]
+  
+  resource_pools {
+    id = "head-node"
+    machine_spec {
+      machine_type = "a2-highgpu-1g"
+      accelerator_count = 1
+      accelerator_type = "NVIDIA_TESLA_A100"
+      gpu_partition_size = "1"
+      tpu_topology = "2x2"
+    }
+    replica_count = 1
+    disk_spec {
+      boot_disk_size_gb = 100
+      boot_disk_type    = "pd-ssd"
+    }
+  }
+  
+  resource_runtime_spec {
+    ray_spec {
+      image_uri = "us-docker.pkg.dev/vertex-ai/training/ray-cpu.2-33.py310:latest"
+    }
+    service_account_spec {
+      enable_custom_service_account = true
+      service_account               = "my-service-account@my-project.iam.gserviceaccount.com"
+    }
+  }
+}
