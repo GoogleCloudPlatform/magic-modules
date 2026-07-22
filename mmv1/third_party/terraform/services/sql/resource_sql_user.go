@@ -715,18 +715,10 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 		if err != nil {
 			return nil, fmt.Errorf("error getting identity: %s", err)
 		}
-		var projectStr, instanceStr, hostStr, nameStr string
+
+		var projectStr string
 		if v, ok := identity.GetOk("project"); ok {
 			projectStr = v.(string)
-		}
-		if v, ok := identity.GetOk("instance"); ok {
-			instanceStr = v.(string)
-		}
-		if v, ok := identity.GetOk("host"); ok {
-			hostStr = v.(string)
-		}
-		if v, ok := identity.GetOk("name"); ok {
-			nameStr = v.(string)
 		}
 		if projectStr == "" {
 			projectStr = meta.(*transport_tpg.Config).Project
@@ -734,17 +726,33 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 		if err := d.Set("project", projectStr); err != nil {
 			return nil, fmt.Errorf("Error setting project: %s", err)
 		}
+
+		var instanceStr string
+		if v, ok := identity.GetOk("instance"); ok {
+			instanceStr = v.(string)
+		}
 		if err := d.Set("instance", instanceStr); err != nil {
 			return nil, fmt.Errorf("Error setting instance: %s", err)
+		}
+
+		var hostStr string
+		if v, ok := identity.GetOk("host"); ok {
+			hostStr = v.(string)
 		}
 		if hostStr != "" {
 			if err := d.Set("host", hostStr); err != nil {
 				return nil, fmt.Errorf("Error setting host: %s", err)
 			}
 		}
+
+		var nameStr string
+		if v, ok := identity.GetOk("name"); ok {
+			nameStr = v.(string)
+		}
 		if err := d.Set("name", nameStr); err != nil {
 			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
+
 		if hostStr != "" {
 			d.SetId(fmt.Sprintf("%s/%s/%s/%s", projectStr, instanceStr, hostStr, nameStr))
 		} else {
@@ -790,6 +798,7 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 		if err := d.Set("name", parts[4]); err != nil {
 			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
+
 	} else {
 		return nil, fmt.Errorf("Invalid specifier. Expecting {project}/{instance}/{name} for postgres instance and {project}/{instance}/{host}/{name} for MySQL instance")
 	}
