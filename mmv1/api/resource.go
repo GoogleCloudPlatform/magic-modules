@@ -982,11 +982,12 @@ func configureWriteOnlyConstraints(originalField, writeOnlyField, versionField *
 	versionField.RequiredWith = []string{writeOnlyFieldPath}
 
 	if originalField.Required || len(originalField.ExactlyOneOf) > 0 {
+		originalField.Required = false
 		if originalField.ExactlyOneOfGroup == nil {
 			base := []string{originalFieldPath, writeOnlyFieldPath}
 			originalField.ExactlyOneOfGroup = &base
 		} else {
-			*originalField.ExactlyOneOfGroup = deduplicateSliceOfStrings(append(*originalField.ExactlyOneOfGroup, originalFieldPath, writeOnlyFieldPath))
+			*originalField.ExactlyOneOfGroup = append(*originalField.ExactlyOneOfGroup, writeOnlyFieldPath)
 		}
 		writeOnlyField.ExactlyOneOfGroup = originalField.ExactlyOneOfGroup
 	} else {
@@ -997,14 +998,14 @@ func configureWriteOnlyConstraints(originalField, writeOnlyField, versionField *
 		writeOnlyField.Conflicts = newConflicts
 
 		if originalField.ConflictsGroup != nil {
-			*originalField.ConflictsGroup = deduplicateSliceOfStrings(append(*originalField.ConflictsGroup, writeOnlyFieldPath))
+			*originalField.ConflictsGroup = append(*originalField.ConflictsGroup, writeOnlyFieldPath)
 		} else {
-			originalField.Conflicts = deduplicateSliceOfStrings(append(originalField.Conflicts, writeOnlyFieldPath))
+			originalField.Conflicts = append(originalField.Conflicts, writeOnlyFieldPath)
 		}
 	}
 
 	if originalField.AtLeastOneOfGroup != nil {
-		*originalField.AtLeastOneOfGroup = deduplicateSliceOfStrings(append(*originalField.AtLeastOneOfGroup, originalFieldPath, writeOnlyFieldPath))
+		*originalField.AtLeastOneOfGroup = append(*originalField.AtLeastOneOfGroup, writeOnlyFieldPath)
 		writeOnlyField.AtLeastOneOfGroup = originalField.AtLeastOneOfGroup
 	}
 }
