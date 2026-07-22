@@ -81,18 +81,15 @@ Every PR must contain at least one release note block in the PR body.
 Refer to the official guide for detailed release note rules, categories, and examples:
 * [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md)
 
+> [!IMPORTANT]
+> **Note to AI Agents:** View `docs/content/code-review/release-notes.md` from the repository root to determine the correct release note type (e.g., `enhancement`, `bug`, `none`, `new-resource`, `deprecation`, etc.) and follow the end-user impact guidelines.
+
 #### Release Note Block Format
 ```markdown
 ```release-note:TYPE
 CONTENT
 ```
 ```
-
-Common types and formatting rules are defined in the official release notes guide:
-* [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md)
-
-> [!IMPORTANT]
-> Always read [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md) to select the correct release note type (e.g., `enhancement`, `bug`, `none`, `new-resource`, `deprecation`, etc.) and follow the end-user impact guidelines.
 
 #### Sample PR Body Content
 ```markdown
