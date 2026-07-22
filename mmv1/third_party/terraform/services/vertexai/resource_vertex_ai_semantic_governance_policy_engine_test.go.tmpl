@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -21,6 +22,24 @@ import (
 // the singleton.
 func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 	t.Parallel()
+
+	// SGPE gateway_config provisioning needs the AI Platform service agent to
+	// create/mutate DNS records and PSC forwarding rules in the customer
+	// project. Those permissions are NOT in the default
+	// `roles/aiplatform.serviceAgent` (defaults include only get/list/use on
+	// compute.addresses and no dns.* at all), so we grant them explicitly on
+	// the CI project via bootstrap_iam (additive, retry-safe). Matches the
+	// google_vertex_ai_reasoning_engine PSC-interface test precedent.
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+			Role:   "roles/dns.admin",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+			Role:   "roles/compute.networkAdmin",
+		},
+	})
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),

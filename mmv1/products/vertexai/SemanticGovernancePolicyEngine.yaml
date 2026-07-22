@@ -78,11 +78,27 @@ samples:
       - name: 'vertex_ai_semantic_governance_policy_engine_basic'
   - name: 'vertex_ai_semantic_governance_policy_engine_full'
     primary_resource_id: 'sgpe'
+    # gateway_config provisioning creates DNS records and PSC forwarding rules
+    # in the customer project as the AI Platform service agent. The default
+    # roles/aiplatform.serviceAgent doesn't include those; grant them additively
+    # for the test-runner project. Matches google_vertex_ai_reasoning_engine
+    # PSC-interface precedent. Inert while exclude_test is set, but keeps
+    # intent explicit if this sample is ever un-excluded.
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/dns.admin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/compute.networkAdmin"
     exclude_test: true # same singleton reason as _basic; covered by handwritten lifecycle test
     steps:
       - name: 'vertex_ai_semantic_governance_policy_engine_full'
   - name: 'vertex_ai_semantic_governance_policy_engine_multi_gateway'
     primary_resource_id: 'sgpe'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/dns.admin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/compute.networkAdmin"
     exclude_test: true # same singleton reason as _basic; covered by handwritten lifecycle test
     steps:
       - name: 'vertex_ai_semantic_governance_policy_engine_multi_gateway'
