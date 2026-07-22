@@ -27,10 +27,6 @@ func ResourceGoogleServiceAccountKey() *schema.Resource {
 			Version: 1,
 			SchemaFunc: func() map[string]*schema.Schema {
 				return map[string]*schema.Schema{
-					"service_account_id": {
-						Type:              schema.TypeString,
-						RequiredForImport: true,
-					},
 					"name": {
 						Type:              schema.TypeString,
 						RequiredForImport: true,
@@ -159,8 +155,7 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 
 	d.SetId(sak.Name)
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
-		"service_account_id": serviceAccountName,
-		"name":               sak.Name,
+		"name": sak.Name,
 	}); err != nil {
 		return err
 	}
@@ -219,8 +214,7 @@ func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{
 	}
 
 	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
-		"service_account_id": d.Get("service_account_id").(string),
-		"name":               sak.Name,
+		"name": sak.Name,
 	})
 }
 

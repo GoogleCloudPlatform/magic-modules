@@ -36,8 +36,7 @@ func TestAccListGoogleServiceAccountKey_queryIdentity(t *testing.T) {
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("google_service_account_key.all", 1),
 					querycheck.ExpectIdentity("google_service_account_key.all", map[string]knownvalue.Check{
-						"name":               knownvalue.NotNull(),
-						"service_account_id": knownvalue.NotNull(),
+						"name": knownvalue.NotNull(),
 					}),
 				},
 			},
