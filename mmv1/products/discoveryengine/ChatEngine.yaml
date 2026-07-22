@@ -21,8 +21,9 @@ references:
     Vertex AI Conversation: https://cloud.google.com/dialogflow/cx/docs/concept/generative
   api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines
 docs:
-base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}
+base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines
 generate_list_resource: true
+list_filter: 'solution_type=SOLUTION_TYPE_CHAT'
 self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}
 create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines?engineId={{engine_id}}
 delete_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}

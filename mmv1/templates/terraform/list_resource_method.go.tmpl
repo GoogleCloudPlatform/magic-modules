@@ -55,6 +55,9 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
 		ItemName:       "{{ $.CollectionUrlKey }}",
+		{{- if $.ListFilter }}
+		Filter:         "{{ $.ListFilter }}",
+		{{- end }}
 		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 			headers := make(http.Header)
 			var err error
