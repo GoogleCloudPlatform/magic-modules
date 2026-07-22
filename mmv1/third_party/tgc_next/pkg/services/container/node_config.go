@@ -2807,8 +2807,13 @@ func flattenAdvancedMachineFeaturesConfig(v interface{}) []map[string]interface{
 		return nil
 	}
 
+	threadsPerCore := c["threadsPerCore"]
+	if threadsPerCore == nil {
+		threadsPerCore = 0
+	}
+
 	transformed := map[string]interface{}{
-		"threads_per_core":             c["threadsPerCore"],
+		"threads_per_core":             threadsPerCore,
 		"enable_nested_virtualization": c["enableNestedVirtualization"],
 		"performance_monitoring_unit":  c["performanceMonitoringUnit"],
 	}

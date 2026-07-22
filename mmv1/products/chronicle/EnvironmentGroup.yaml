@@ -15,12 +15,10 @@
 name: EnvironmentGroup
 description: >
   Environment groups let you organize multiple environments into logical categories, making it easier to manage large organizations or multiple customers as a Managed Security Service Provider (MSSP).
-
-min_version: 'beta'
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.environmentGroups'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.environmentGroups'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environmentGroups
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environmentGroups/{{environment_group_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/environmentGroups
@@ -33,7 +31,6 @@ autogen_status: RW52aXJvbm1lbnRHcm91cA==
 samples:
   - name: chronicle_environmentgroup_update
     primary_resource_id: sample
-    min_version: beta
     steps:
       - name: "chronicle_environmentgroup_basic"
         test_env_vars:

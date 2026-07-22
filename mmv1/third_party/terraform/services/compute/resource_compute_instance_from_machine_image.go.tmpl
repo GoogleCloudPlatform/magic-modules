@@ -161,13 +161,33 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		}
 	}
 
-	instanceBytes, err := json.Marshal(instance)
+	instanceBody, err := tpgresource.ConvertToMap(instance)
 	if err != nil {
-		return fmt.Errorf("Error marshaling instance: %s", err)
+		return fmt.Errorf("Error converting instance: %s", err)
 	}
-	instanceBody := map[string]interface{}{}
-	if err = json.Unmarshal(instanceBytes, &instanceBody); err != nil {
-		return fmt.Errorf("Error processing instance body: %s", err)
+
+	if paramsBody, err := expandParams(d); err != nil {
+		return fmt.Errorf("Error creating params: %s", err)
+	} else {
+		instanceBody["params"] = paramsBody
+	}
+
+	metadataMap, err := resourceInstanceMetadata(d)
+	if err != nil {
+		return fmt.Errorf("Error creating metadata: %s", err)
+	}
+	instanceBody["metadata"] = metadataMap
+
+	partnerMetadataMap, err := resourceInstancePartnerMetadata(d)
+	if err != nil {
+		return fmt.Errorf("Error creating partner metadata: %s", err)
+	}
+	if len(partnerMetadataMap) > 0 {
+		partnerMetadataConverted, err := convertPartnerMetadataToCompute(partnerMetadataMap)
+		if err != nil {
+			return fmt.Errorf("Error converting partner metadata: %s", err)
+		}
+		instanceBody["partnerMetadata"] = partnerMetadataConverted
 	}
 
 	sa := d.Get("service_account").([]interface{})
@@ -215,37 +235,57 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 	instanceBody["disks"] = disks
 
-	// when we make the original call to expandComputeInstance expandScheduling is called, which sets default values.
-	// However, we want the values to be read from the machine image instead.
-	if _, hasSchedule := d.GetOk("scheduling"); !hasSchedule {
-		if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
-			if schedulingRaw, ok := srcProps["scheduling"].(map[string]interface{}); ok {
-				// Drop zero-value fields so the marshaled body matches the
-				// behavior of the typed compute.Scheduling JSON tags (omitempty).
-				filtered := map[string]interface{}{}
-				for k, v := range schedulingRaw {
-					switch val := v.(type) {
-					case bool:
-						if val {
-							filtered[k] = v
-						}
-					case string:
-						if val != "" {
-							filtered[k] = v
-						}
-					case float64:
-						if val != 0 {
-							filtered[k] = v
-						}
-					case nil:
-						// skip
-					default:
-						filtered[k] = v
+	// expandComputeInstance no longer sets scheduling in the typed struct, so we handle
+	// it explicitly here. When the user has scheduling configured, use it; otherwise
+	// inherit scheduling from the machine image.
+	if _, hasSchedule := d.GetOk("scheduling"); hasSchedule {
+		schedulingBody, err := expandScheduling(d.Get("scheduling"))
+		if err != nil {
+			return fmt.Errorf("Error expanding scheduling: %s", err)
+		}
+		if schedulingBody != nil {
+			// Strip nil Duration fields so the source machine image values are inherited
+			// instead of being overridden with null. Use json.Marshal to detect typed nils
+			// (map[string]interface{}(nil)) that are not equal to untyped nil.
+			for _, k := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "gracefulShutdown", "preemptionNoticeDuration"} {
+				if v, ok := schedulingBody[k]; ok {
+					if b, err := json.Marshal(v); err == nil && string(b) == "null" {
+						delete(schedulingBody, k)
 					}
 				}
-				instanceBody["scheduling"] = filtered
 			}
+			instanceBody["scheduling"] = schedulingBody
 		}
+	} else if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
+		if schedulingRaw, ok := srcProps["scheduling"].(map[string]interface{}); ok {
+			// Drop zero-value fields so the marshaled body matches the
+			// behavior of the typed compute.Scheduling JSON tags (omitempty).
+			filtered := map[string]interface{}{}
+			for k, v := range schedulingRaw {
+				switch val := v.(type) {
+				case bool:
+					if val {
+						filtered[k] = v
+					}
+				case string:
+					if val != "" {
+						filtered[k] = v
+					}
+				case float64:
+					if val != 0 {
+						filtered[k] = v
+					}
+				case nil:
+					// skip
+				default:
+					filtered[k] = v
+				}
+			}
+			instanceBody["scheduling"] = filtered
+		}
+	}
+	if amf := expandAdvancedMachineFeatures(d); amf != nil {
+		instanceBody["advancedMachineFeatures"] = amf
 	}
 
 	log.Printf("[INFO] Requesting instance creation")

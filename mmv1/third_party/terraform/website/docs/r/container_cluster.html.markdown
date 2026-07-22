@@ -616,6 +616,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
     Defaults to disabled for Standard clusters; set `enabled = true` to enable.
     It can not be enabled for Autopilot clusters.
 
+* `node_readiness_config` - (Optional) The status of the Node Readiness Controller addon. It is disabled by default. Set `enabled = true` to enable.
+  Structure is [documented below](#nested_node_readiness_config).
+
 This example `addons_config` disables two addons:
 
 ```hcl
@@ -629,6 +632,10 @@ addons_config {
   }
 }
 ```
+<a name="nested_node_readiness_config"></a>The `node_readiness_config` block supports:
+
+* `enabled` - (Required) Enable the Node Readiness Controller addon for your cluster.
+
 <a name="nested_binary_authorization"></a>The `binary_authorization` block supports:
 
 * `enabled` - (DEPRECATED) Enable Binary Authorization for this cluster. Deprecated in favor of `evaluation_mode`.
@@ -1321,9 +1328,9 @@ sole_tenant_config {
 
 <a name="nested_node_image_config"></a>The `node_image_config` block supports:
 
-* `image` (Optional) - The name of the image to use for this node.
+* `image` (Optional) - The Operating System image for the node pool. This is a private feature, please contact your Google account team for allowlisting this feature.
 
-* `image_project` (Optional) - The project containing the image to use for this node.
+* `image_project` (Optional) - The GCP project storing the Operating System image for the node pool. This is a private feature, please contact your Google account team for allowlisting this feature.
 
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 

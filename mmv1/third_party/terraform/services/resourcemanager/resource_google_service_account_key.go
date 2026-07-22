@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"google.golang.org/api/iam/v1"
+	iam "google.golang.org/api/iam/v1"
 )
 
 func ResourceGoogleServiceAccountKey() *schema.Resource {
@@ -192,6 +192,10 @@ func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{
 		}
 	}
 
+	return flattenServiceAccountKey(d, config, sak)
+}
+
+func flattenServiceAccountKey(d *schema.ResourceData, config *transport_tpg.Config, sak *iam.ServiceAccountKey) error {
 	if err := d.Set("name", sak.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}

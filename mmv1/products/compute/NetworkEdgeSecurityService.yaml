@@ -29,6 +29,10 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices/{{name}}'
+# This API only supports aggregatedList (projects/{project}/aggregated/networkEdgeSecurityServices),
+# not a per-region list endpoint. The list resource generation is disabled until the template
+# supports the aggregated response format (items nested under region keys).
+# generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -48,6 +52,8 @@ samples:
     primary_resource_id: 'default'
     steps:
       - name: 'compute_network_edge_security_service_basic'
+        vars:
+          region: 'us-east1'
         resource_id_vars:
           resource_name: 'my-edge-security-service'
         test_env_vars:
