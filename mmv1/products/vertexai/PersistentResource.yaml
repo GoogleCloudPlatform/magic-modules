@@ -161,39 +161,6 @@ properties:
               type: Integer
               description: The number of accelerators to attach to the machine.
               immutable: true
-            - name: reservationAffinity
-              type: NestedObject
-              description: |-
-                A ReservationAffinity can be used to configure a Vertex AI resource (e.g., a
-                DeployedModel) to draw its Compute Engine resources from a Shared
-                Reservation, or exclusively from on-demand capacity.
-              immutable: true
-              properties:
-                - name: reservationAffinityType
-                  type: String
-                  required: true
-                  description: |-
-                    Specifies the reservation affinity type.
-                    Possible values:
-                    NO_RESERVATION
-                    ANY_RESERVATION
-                    SPECIFIC_RESERVATION
-                  immutable: true
-                - name: key
-                  type: String
-                  description: |-
-                    Corresponds to the label key of a reservation resource. To target a
-                    SPECIFIC_RESERVATION by name, use `compute.googleapis.com/reservation-name`
-                    as the key and specify the name of your reservation as its value.
-                  immutable: true
-                - name: values
-                  type: Array
-                  description: |-
-                    Corresponds to the label values of a reservation resource. This must be the
-                    full resource name of the reservation or reservation block.
-                  item_type:
-                    type: String
-                  immutable: true
         - name: replicaCount
           type: String
           description: The total number of machines to use for this resource pool.
