@@ -1,5 +1,23 @@
 func chronicleRuleDeploymentNilRunFrequencyDiffSuppressFunc(_, old, new string, _ *schema.ResourceData) bool {
-    if new == "" {
+    // Ignore run frequency when it is not specified. This is a fix for
+	// https://github.com/hashicorp/terraform-provider-google/issues/21347.
+	if new == "" {
+		return true
+	}
+	// Suppress diffs for coerced run frequencies. With the release of customizable
+	// schedules, setting a multi-event rule to LIVE or HOURLY will set the backend
+	// state to LIVE_CUSTOMIZABLE or HOURLY_CUSTOMIZABLE, respectively. So by
+	// suppressing this diff we avoid a permadiff.
+	if (old == "LIVE_CUSTOMIZABLE" && new == "LIVE") || (old == "HOURLY_CUSTOMIZABLE" && new == "HOURLY") {
+		return true
+	}
+	// For single-event rules, we coerce HOURLY and DAILY to LIVE. Note that this
+	// creates an edge case when a legacy multi-event rule is set to LIVE and the
+	// new requested state is HOURLY - in this case, nothing will happen. There is
+	// no good way to differentiate this, so the only solution is for the user to
+	// update their terraform config to begin using the new CUSTOMIZABLE run
+	// frequencies.
+	if old == "LIVE" && (new == "HOURLY" || new == "DAILY") {
 		return true
 	}
 	return false
