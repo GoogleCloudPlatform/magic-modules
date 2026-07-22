@@ -27,7 +27,7 @@ This document outlines the structured 5-step lifecycle for formal implementation
 *   **Transfers to Step 5:** Human-readable Markdown report explaining whether the test succeeded or failed, and what discrepancy was found.
 
 ### 5. Fix
-*   This is a Remediation Planning step (similar to Triage). Take the results from `qa-test-runner` and compare against reference guides or user suggestions. Propose a specific fix code change to the user. 
+*   This is a Remediation Planning step (similar to Triage). Take the results from `qa-test-runner`, classify symptoms against `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (Scenarios 1-5+), and compare against reference guides or user suggestions. Propose a specific fix code change to the user (or invoke `test-fixer` subagent). 
 *   Execute the `fix` skill (located in `.agents/skills/operations/fix/`) to perform this planning.
 
 ---
