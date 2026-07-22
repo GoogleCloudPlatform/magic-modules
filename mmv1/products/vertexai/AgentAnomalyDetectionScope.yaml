@@ -38,11 +38,13 @@ immutable: true
 timeouts:
   insert_minutes: 40
   delete_minutes: 20
-# AAD's LRO endpoint doesn't support base_url_override, so we skip OpAsync
-# and instead poll the resource's GET endpoint in post_create/post_delete.
-custom_code:
-  post_create: templates/terraform/post_create/vertex_ai_agent_anomaly_detection_scope.go.tmpl
-  post_delete: templates/terraform/post_delete/vertex_ai_agent_anomaly_detection_scope.go.tmpl
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
 examples:
   - name: 'vertex_ai_agent_anomaly_detection_scope_basic'
     primary_resource_id: 'scope'
