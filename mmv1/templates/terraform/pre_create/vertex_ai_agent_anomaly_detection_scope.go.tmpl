@@ -1,6 +1,0 @@
-// Override the Vertex AI base URL for AAD resources, which serve on the REP
-// endpoint (aiplatform.{{region}}.rep.googleapis.com) instead of the standard
-// Vertex AI endpoint ({{region}}-aiplatform.googleapis.com). This also ensures
-// LRO polling uses the correct host.
-region := d.Get("region").(string)
-config.VertexAIBasePath = fmt.Sprintf("https://aiplatform.%s.rep.googleapis.com/v1beta1/", region)

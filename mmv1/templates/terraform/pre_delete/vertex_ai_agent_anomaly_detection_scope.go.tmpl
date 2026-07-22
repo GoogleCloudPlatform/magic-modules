@@ -1,3 +1,0 @@
-// Override the Vertex AI base URL for AAD resources (see pre_create for details).
-region := d.Get("region").(string)
-config.VertexAIBasePath = fmt.Sprintf("https://aiplatform.%s.rep.googleapis.com/v1beta1/", region)
