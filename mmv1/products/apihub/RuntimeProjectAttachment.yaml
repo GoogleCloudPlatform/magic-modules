@@ -28,7 +28,7 @@ examples:
   - name: apihub_runtime_project_attachment_basic
     primary_resource_id: apihub_runtime_project_attachment
     vars:
-      project_id: 'apihub-proj'
+      project_id: 'ah-proj'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'

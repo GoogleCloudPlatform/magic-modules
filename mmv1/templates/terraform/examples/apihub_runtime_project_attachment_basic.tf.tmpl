@@ -1,6 +1,6 @@
 resource "google_project" "host_project" {
-    name       = "hprj-{{index $.Vars "project_id"}}"
-    project_id = "hprj-{{index $.Vars "project_id"}}"
+    name       = "h-{{index $.Vars "project_id"}}"
+    project_id = "h-{{index $.Vars "project_id"}}"
     org_id     = "{{index $.TestEnvVars "org_id"}}"
     billing_account = "{{index $.TestEnvVars "billing_account"}}"
     deletion_policy = "DELETE"
@@ -28,8 +28,8 @@ resource "google_apihub_host_project_registration" "host_project_reg" {
 }
 
 resource "google_project" "runtime_project" {
-    name       = "rprj-{{index $.Vars "project_id"}}"
-    project_id = "rprj-{{index $.Vars "project_id"}}"
+    name       = "r-{{index $.Vars "project_id"}}"
+    project_id = "r-{{index $.Vars "project_id"}}"
     org_id     = "{{index $.TestEnvVars "org_id"}}"
     billing_account = "{{index $.TestEnvVars "billing_account"}}"
     deletion_policy = "DELETE"
