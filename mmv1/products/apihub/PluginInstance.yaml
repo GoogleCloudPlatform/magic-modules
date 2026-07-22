@@ -88,6 +88,10 @@ properties:
       Format:
       `projects/{project}/locations/{location}/plugins/{plugin}/instances/{instance}`
     output: true
+  - name: sourceProjectId
+    type: String
+    description: |-
+      Optional. The source project id of the plugin instance. This will be the id of runtime project in case of gcp based plugins and org id in case of non gcp based plugins. This field will be a required field for Google provided on-ramp plugins.
   - name: disable
     type: Boolean
     default_value: false
