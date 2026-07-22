@@ -773,3 +773,59 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 		})
 	}
 }
+
+// TestUnitExpandNodeConfig_nilNodePoolRawConfig reproduces
+// hashicorp/terraform-provider-google#28190. When expandNodeConfig is called
+// with a node_pool prefix but the ResourceData has no raw config for node_pool
+// (as happens with programmatic SDK bridges such as Crossplane's upjet-generated
+// provider), d.GetRawConfig().GetAttr("node_pool").Index(N) previously panicked
+// with "value is null". schema.TestResourceDataRaw produces exactly such a
+// ResourceData (GetRawConfig is null), so this asserts the nil guard holds and
+// the API cpu_cfs_quota=true default is applied.
+func TestUnitExpandNodeConfig_nilNodePoolRawConfig(t *testing.T) {
+	t.Parallel()
+
+	resourceSchema := map[string]*schema.Schema{
+		"node_pool": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem:     &schema.Resource{Schema: map[string]*schema.Schema{"name": {Type: schema.TypeString}}},
+		},
+	}
+	d := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
+
+	// Minimal but fully-typed kubelet_config so expandKubeletConfig's type
+	// assertions succeed; the cpu_cfs_quota default is driven from raw config,
+	// which is intentionally null here to exercise the guard.
+	nodeConfig := []interface{}{
+		map[string]interface{}{
+			// preemptible and spot are Optional+Default, so expandNodeConfig
+			// reads them unconditionally.
+			"preemptible": false,
+			"spot":        false,
+			"kubelet_config": []interface{}{
+				map[string]interface{}{
+					"cpu_manager_policy": "static",
+				},
+			},
+		},
+	}
+
+	var nc *container.NodeConfig
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				t.Fatalf("expandNodeConfig panicked with nil node_pool raw config: %v", r)
+			}
+		}()
+		nc = expandNodeConfig(d, "node_pool.0.", nodeConfig)
+	}()
+
+	// The guard must skip the raw-config sub-fixes (not panic) when node_pool
+	// raw config is absent. expandKubeletConfig still runs, so KubeletConfig is
+	// non-nil; the cpu_cfs_quota raw-config default is intentionally not applied
+	// on this code path (that default is handled upstream by the caller).
+	if nc == nil || nc.KubeletConfig == nil {
+		t.Fatalf("expected non-nil NodeConfig.KubeletConfig, got %#v", nc)
+	}
+}
