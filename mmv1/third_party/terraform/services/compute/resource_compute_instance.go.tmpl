@@ -2233,6 +2233,14 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": project,
+		"zone":    z,
+		"name":    instance.Name,
+	}); err != nil {
+		return err
+	}
+
 	return resourceComputeInstanceRead(d, meta)
 }
 
@@ -2318,6 +2326,14 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
 
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": project,
+		"zone":    zone,
+		"name":    instance.Name,
+	}); err != nil {
 		return err
 	}
 
@@ -2675,11 +2691,7 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compu
     }
     {{- end }}
 
-	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
-		"project": project,
-		"zone":    zone,
-		"name":    instance.Name,
-	})
+	return nil
 }
 
 func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -4188,6 +4200,14 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 	// We made it, disable partial mode
 	d.Partial(false)
+
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": project,
+		"zone":    zone,
+		"name":    instance.Name,
+	}); err != nil {
+		return err
+	}
 
 	return resourceComputeInstanceRead(d, meta)
 }
