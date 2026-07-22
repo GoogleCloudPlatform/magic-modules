@@ -1,13 +1,13 @@
-# TODO(jennjiang): Temporarily hardcoded to gp-prod-bugbash-7 for VCR test.
-# Revert to data.google_project.project.project_id once ci-test-project-188019
-# orphaned scope is cleaned up. b/527074080
-locals {
-  project_id = "gp-prod-bugbash-7"
+# TODO(jennjiang): Temporary import block to adopt and clean up orphaned scope
+# on ci-test-project-188019. Remove after VCR recording succeeds. b/527074080
+import {
+  id = "projects/ci-test-project-188019/locations/us/agentAnomalyDetectionScopes/tf-test-agent-anomaly-detection-scopeerde9ec01y"
+  to = google_vertex_ai_agent_anomaly_detection_scope.{{$.PrimaryResourceId}}
 }
 
 resource "google_logging_project_bucket_config" "{{index $.Vars "log_bucket_id"}}" {
   provider       = google-beta
-  project        = local.project_id
+  project        = data.google_project.project.project_id
   location       = "us"
   retention_days = 30
   bucket_id      = "{{index $.Vars "log_bucket_id"}}"
@@ -15,14 +15,21 @@ resource "google_logging_project_bucket_config" "{{index $.Vars "log_bucket_id"}
 
 resource "google_vertex_ai_agent_anomaly_detection_scope" "{{$.PrimaryResourceId}}" {
   provider                         = google-beta
-  project                          = local.project_id
   region                           = "us"
-  agent_anomaly_detection_scope_id = "{{index $.Vars "scope_id"}}"
+  agent_anomaly_detection_scope_id = "tf-test-agent-anomaly-detection-scopeerde9ec01y"
   display_name                     = "Basic AAD scope"
   log_buckets = [
     google_logging_project_bucket_config.{{index $.Vars "log_bucket_id"}}.id,
   ]
   observability_buckets = [
-    "projects/${local.project_id}/locations/us/buckets/_Trace/datasets/Spans",
+    "projects/${data.google_project.project.project_id}/locations/us/buckets/_Trace/datasets/Spans",
   ]
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+data "google_project" "project" {
+  provider = google-beta
 }
