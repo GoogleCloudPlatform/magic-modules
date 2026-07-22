@@ -433,7 +433,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     var opRes map[string]interface{}
     err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
     config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }},{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}}{{ end -}} "Creating {{ $.Name -}}", userAgent,
-        d.Timeout(schema.TimeoutCreate){{if $.BaseUrlOverride -}}, "{{$.BaseUrlOverride}}"{{- end}})
+        d.Timeout(schema.TimeoutCreate))
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
@@ -512,7 +512,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
     config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Creating {{ $.Name -}}", userAgent,
-        d.Timeout(schema.TimeoutCreate){{if $.BaseUrlOverride -}}, "{{$.BaseUrlOverride}}"{{- end}})
+        d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
@@ -1061,8 +1061,8 @@ if len(updateMask) > 0 {
     location := tpgresource.LocationFromId(d.Id())
 {{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
-        d.Timeout(schema.TimeoutUpdate){{if $.BaseUrlOverride -}}, "{{$.BaseUrlOverride}}"{{- end}})
+         config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
+        d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
         return err
@@ -1250,7 +1250,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{- end}}
  	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
  	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
- 	        d.Timeout(schema.TimeoutUpdate){{if $.BaseUrlOverride -}}, "{{$.BaseUrlOverride}}"{{- end}})
+ 	        d.Timeout(schema.TimeoutUpdate))
  	    if err != nil {
  	        return err
 	    }
@@ -1421,7 +1421,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 {{- end}}
     err = {{ $.ClientNamePascal }}OperationWaitTime(
         config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Deleting {{ $.Name -}}", userAgent,
-        d.Timeout(schema.TimeoutDelete){{if $.BaseUrlOverride -}}, "{{$.BaseUrlOverride}}"{{- end}})
+        d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
         return err

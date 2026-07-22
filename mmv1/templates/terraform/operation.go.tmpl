@@ -56,9 +56,6 @@ type {{ $.ProductMetadata.Name }}OperationWaiter struct {
 {{- if $.ProductMetadata.OperationRetry }}
   retryCount int
 {{- end }}
-  // BaseUrlOverride overrides the product base URL for resources that serve
-  // on a different endpoint (e.g. REP endpoints). Empty = use product default.
-  BaseUrlOverride string
   tpgresource.CommonOperationWaiter
 }
 
@@ -67,12 +64,7 @@ func (w *{{ $.ProductMetadata.Name }}OperationWaiter) QueryOp() (interface{}, er
     return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
   }
   // Returns the proper get.
-  var url string
-  if w.BaseUrlOverride != "" {
-    url = w.BaseUrlOverride
-  } else {
-    url = transport_tpg.BaseUrl(Product, w.Config)
-  }
+  url := transport_tpg.BaseUrl(Product, w.Config)
   url += fmt.Sprintf("{{ replaceAll $.GetAsync.Operation.BaseUrl "{{op_id}}" "%s" }}", w.CommonOperationWaiter.Op.Name)
 {{- if $.ProductMetadata.Version.RepEnabled }}
   if strings.Contains(url, "{{"{{"}}location{{"}}"}}") && w.Location == "" {
@@ -104,11 +96,10 @@ func (w *{{ $.ProductMetadata.Name }}OperationWaiter) IsRetryable(err error) boo
 {{- end }}
 
 
-func create{{ $.ProductMetadata.Name }}Waiter(config *transport_tpg.Config, op map[string]interface{}, {{- if $.IncludeProjectForOperation }} project,{{- end }}{{- if $.ProductMetadata.Version.RepEnabled }} location, {{- end }} activity, userAgent, baseUrlOverride string) (*{{ $.ProductMetadata.Name }}OperationWaiter, error) {
+func create{{ $.ProductMetadata.Name }}Waiter(config *transport_tpg.Config, op map[string]interface{}, {{- if $.IncludeProjectForOperation }} project,{{- end }}{{- if $.ProductMetadata.Version.RepEnabled }} location, {{- end }} activity, userAgent string) (*{{ $.ProductMetadata.Name }}OperationWaiter, error) {
   w := &{{ $.ProductMetadata.Name }}OperationWaiter{
     Config:    config,
     UserAgent: userAgent,
-    BaseUrlOverride: baseUrlOverride,
 {{- if $.IncludeProjectForOperation }}
     Project: project,
 {{- end }}
@@ -128,12 +119,8 @@ func create{{ $.ProductMetadata.Name }}Waiter(config *transport_tpg.Config, op m
 */}}
 
 // nolint: deadcode,unused {{/* TODO rewrite: remove the comment */}}
-func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{},{{- if $.IncludeProjectForOperation }} project,{{- end }}{{- if $.ProductMetadata.Version.RepEnabled }} location,{{- end }} activity, userAgent string, timeout time.Duration, baseUrlOverride ...string) error {
-  override := ""
-  if len(baseUrlOverride) > 0 {
-    override = baseUrlOverride[0]
-  }
-  w, err := create{{ $.ProductMetadata.Name }}Waiter(config, op, {{- if $.IncludeProjectForOperation }} project, {{- end }}{{- if $.ProductMetadata.Version.RepEnabled }} location, {{ end }} activity, userAgent, override)
+func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{},{{- if $.IncludeProjectForOperation }} project,{{- end }}{{- if $.ProductMetadata.Version.RepEnabled }} location,{{- end }} activity, userAgent string, timeout time.Duration) error {
+  w, err := create{{ $.ProductMetadata.Name }}Waiter(config, op, {{- if $.IncludeProjectForOperation }} project, {{- end }}{{- if $.ProductMetadata.Version.RepEnabled }} location, {{ end }} activity, userAgent)
   if err != nil {
       return err
   }
@@ -147,16 +134,12 @@ func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTimeWithResponse(
   return json.Unmarshal(rawResponse, response)
 }
 
-func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, {{- if $.IncludeProjectForOperation }} project,{{- end }}{{- if $.ProductMetadata.Version.RepEnabled }} location,{{- end }} activity, userAgent string, timeout time.Duration, baseUrlOverride ...string) error {
+func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, {{- if $.IncludeProjectForOperation }} project,{{- end }}{{- if $.ProductMetadata.Version.RepEnabled }} location,{{- end }} activity, userAgent string, timeout time.Duration) error {
   if val, ok := op["name"]; !ok || val == "" {
     // This was a synchronous call - there is no operation to wait for.
     return nil
   }
-  override := ""
-  if len(baseUrlOverride) > 0 {
-    override = baseUrlOverride[0]
-  }
-  w, err := create{{ $.ProductMetadata.Name }}Waiter(config, op, {{- if $.IncludeProjectForOperation }} project, {{- end }}{{- if $.ProductMetadata.Version.RepEnabled }} location, {{ end }} activity, userAgent, override)
+  w, err := create{{ $.ProductMetadata.Name }}Waiter(config, op, {{- if $.IncludeProjectForOperation }} project, {{- end }}{{- if $.ProductMetadata.Version.RepEnabled }} location, {{ end }} activity, userAgent)
   if err != nil {
       // If w is nil, the op was synchronous.
       return err
