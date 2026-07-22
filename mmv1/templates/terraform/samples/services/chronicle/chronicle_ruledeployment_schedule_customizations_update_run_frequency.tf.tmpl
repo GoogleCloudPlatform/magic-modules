@@ -1,0 +1,33 @@
+resource "google_chronicle_rule" "my-rule" {
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ text = <<-EOT
+             rule test_rule {
+               meta:
+                 description = "test multi-event rule"
+               events:
+                 $e1.metadata.event_type = "USER_LOGIN"
+                 $e1.principal.user.userid = $user
+                 $e2.metadata.event_type = "USER_LOGOUT"
+                 $e2.principal.user.userid = $user
+               match:
+                 $user over 10m
+               condition:
+                 $e1 and $e2
+             }
+         EOT
+}
+
+resource "google_chronicle_rule_deployment" "{{$.PrimaryResourceId}}" {
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ rule = element(split("/", resource.google_chronicle_rule.my-rule.name), length(split("/", resource.google_chronicle_rule.my-rule.name)) - 1)
+ enabled = true
+ alerting = true
+ archived = false
+ run_frequency = "HOURLY_CUSTOMIZABLE"
+ schedule_customizations {
+   ensure_enrichment_completeness = false
+   late_arriving_data_adjustment  = "300s"
+ }
+}
