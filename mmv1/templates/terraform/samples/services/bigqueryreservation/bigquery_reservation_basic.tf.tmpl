@@ -10,4 +10,7 @@ resource "google_bigquery_reservation" "{{$.PrimaryResourceId}}" {
 	autoscale {
    	  max_slots = 100
     }
+	labels = {
+	  "environment" = "production"
+	}
 }
