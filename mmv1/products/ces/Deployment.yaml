@@ -91,6 +91,19 @@ properties:
       - name: disableDtmf
         type: Boolean
         description: Whether to disable DTMF (dual-tone multi-frequency).
+      - name: instagramConfig
+        type: NestedObject
+        description: Configuration specific to Instagram deployments.
+        properties:
+          - name: instagramAccountId
+            type: String
+            required: true
+            description: The Instagram Account ID.
+      - name: noiseSuppressionLevel
+        type: String
+        description: |-
+          The noise suppression level of the channel profile.
+          Available values are "low", "moderate", "high", "very_high".
       - name: personaProperty
         type: NestedObject
         description: Represents the persona property of a channel.
@@ -156,6 +169,21 @@ properties:
                 description: |-
                   Indicates whether reCAPTCHA verification for the web widget is enabled.
                 send_empty_value: true
+      - name: whatsappConfig
+        type: NestedObject
+        description: Configuration specific to WhatsApp deployments.
+        properties:
+          - name: phoneNumber
+            type: String
+            description: The phone number in E.164 format.
+          - name: phoneNumberId
+            type: String
+            required: true
+            description: The Meta phone number ID.
+          - name: wabaId
+            type: String
+            required: true
+            description: The WhatsApp Business Account ID.
   - name: createTime
     type: String
     description: Timestamp when this deployment was created.
@@ -171,6 +199,50 @@ properties:
       operation. If the etag is empty, the update will overwrite any concurrent
       changes.
     output: true
+  - name: experimentConfig
+    type: NestedObject
+    description: Experiment configuration for the deployment.
+    properties:
+      - name: versionRelease
+        type: NestedObject
+        description: Version release for the experiment.
+        properties:
+          - name: state
+            type: String
+            description: |-
+              State of the version release.
+              Possible values: STATE_UNSPECIFIED, PENDING, RUNNING, DONE, EXPIRED.
+          - name: trafficAllocations
+            type: Array
+            description: Traffic allocations for the version release.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: appVersion
+                  type: String
+                  description: |-
+                    App version of the traffic allocation.
+                    Format: `projects/{project}/locations/{location}/apps/{app}/versions/{version}`
+                - name: id
+                  type: String
+                  description: Id of the traffic allocation. Free format string, up to 128 characters.
+                - name: trafficPercentage
+                  type: Integer
+                  description: Traffic percentage of the traffic allocation. Must be between 0 and 100.
+  - name: instagramCredentials
+    type: NestedObject
+    description: |-
+      Ephemeral Meta credentials required when configuring a Instagram channel
+      profile.
+    properties:
+      - name: authCode
+        type: String
+        required: true
+        description: The Meta auth code provided by the embedded signup flow.
+      - name: conversationProfileId
+        type: String
+        required: true
+        description: The Conversation Profile ID to use for the deployment.
   - name: name
     type: String
     description: |-
@@ -183,3 +255,33 @@ properties:
     type: String
     description: Timestamp when this deployment was last updated.
     output: true
+  - name: whatsappCredentials
+    type: NestedObject
+    description: |-
+      Ephemeral Meta credentials required when configuring a WhatsApp channel
+      profile.
+    properties:
+      - name: authCode
+        type: String
+        required: true
+        description: The Meta auth code provided by the embedded signup flow.
+      - name: businessAccountId
+        type: String
+        required: true
+        description: The Business Account ID to use for the phone number.
+      - name: conversationProfileId
+        type: String
+        required: true
+        description: The Conversation Profile ID to use for the deployment.
+      - name: phoneNumber
+        type: String
+        required: true
+        description: The phone number to register with WhatsApp.
+      - name: pin
+        type: String
+        required: true
+        description: The 6-digit PIN created by the user for two-step verification.
+      - name: wabaId
+        type: String
+        required: true
+        description: The WhatsApp Business Account ID.

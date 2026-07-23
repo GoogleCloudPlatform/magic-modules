@@ -469,21 +469,25 @@ resource "google_ces_guardrail" "ces_guardrail_code_callback" {
         description = "Example callback"
         disabled    = false
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = true
     }
     after_agent_callback {
         description = "Example callback"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = true
     }
     before_model_callback {
         description = "Example callback"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = true
     }
     after_model_callback {
         description = "Example callback"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = true
     }
   }
 }
@@ -526,21 +530,25 @@ resource "google_ces_guardrail" "ces_guardrail_code_callback" {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = false
     }
     after_agent_callback {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = false
     }
     before_model_callback {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = false
     }
     after_model_callback {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = false
     }
   }
 }
@@ -785,6 +793,129 @@ resource "google_ces_guardrail" "ces_guardrail_llm_prompt_security_fail_open" {
   enabled = true
   llm_prompt_security {
     fail_open = true
+  }
+}
+`, context)
+}
+
+func TestAccCESGuardrail_cesGuardrailModelArmorExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESGuardrailDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESGuardrail_cesGuardrailModelArmorExample_full(context),
+			},
+			{
+				ResourceName:            "google_ces_guardrail.ces_guardrail_model_armor",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id", "guardrail_id"},
+			},
+			{
+				Config: testAccCESGuardrail_cesGuardrailModelArmorExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_guardrail.ces_guardrail_model_armor", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_guardrail.ces_guardrail_model_armor",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id", "guardrail_id"},
+			},
+		},
+	})
+}
+
+func testAccCESGuardrail_cesGuardrailModelArmorExample_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_ces_app" "ces_app_for_guardrail" {
+  app_id = "tf-test-app-id%{random_suffix}"
+  location = "us"
+  description = "App used as parent for CES Guardrail example"
+  display_name = "tf-test-my-app%{random_suffix}"
+
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_guardrail" "ces_guardrail_model_armor" {
+  guardrail_id = "tf-test-guardrail-id%{random_suffix}"
+  location     = google_ces_app.ces_app_for_guardrail.location
+  app          = google_ces_app.ces_app_for_guardrail.app_id
+  display_name = "tf-test-my-guardrail%{random_suffix}"
+  description  = "Guardrail description"
+  action {
+    generative_answer {
+        prompt = "example_prompt"
+    }
+  }
+  enabled = true
+  model_armor {
+    model_armor_template = "projects/\${data.google_project.project.project_id}/locations/us/templates/template-id"
+    sanitization_scope   = "PROMPT"
+    fail_open            = true
+  }
+}
+`, context)
+}
+
+func testAccCESGuardrail_cesGuardrailModelArmorExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_ces_app" "ces_app_for_guardrail" {
+  app_id = "tf-test-app-id%{random_suffix}"
+  location = "us"
+  description = "App used as parent for CES Guardrail example"
+  display_name = "tf-test-my-app%{random_suffix}"
+
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_guardrail" "ces_guardrail_model_armor" {
+  guardrail_id = "tf-test-guardrail-id%{random_suffix}"
+  location     = google_ces_app.ces_app_for_guardrail.location
+  app          = google_ces_app.ces_app_for_guardrail.app_id
+  display_name = "tf-test-my-guardrail%{random_suffix}"
+  description  = "Guardrail description"
+  action {
+    generative_answer {
+        prompt = "example_prompt"
+    }
+  }
+  enabled = true
+  model_armor {
+    model_armor_template = "projects/\${data.google_project.project.project_id}/locations/us/templates/template-id-updated"
+    sanitization_scope   = "PROMPT_AND_RESPONSE"
+    fail_open            = false
   }
 }
 `, context)

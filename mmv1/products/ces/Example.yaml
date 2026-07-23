@@ -116,6 +116,27 @@ properties:
                       handle the conversation from this point forward.
                       Format: `projects/{project}/locations/{location}/apps/{app}/agents/{agent}`
                     required: true
+              - name: blob
+                type: NestedObject
+                description: Blob data.
+                properties:
+                  - name: data
+                    type: String
+                    description: Raw bytes of the blob.
+                    required: true
+                  - name: mimeType
+                    type: String
+                    description: The IANA standard MIME type of the source data.
+                    required: true
+              - name: defaultVariables
+                type: String
+                description: |-
+                  A struct represents default variables at the start of the conversation,
+                  keyed by variable names.
+                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                validation:
+                  function: 'validation.StringIsJSON'
               - name: image
                 type: NestedObject
                 description: Represents an image input or output in the conversation.
@@ -133,6 +154,13 @@ properties:
                       * image/jpeg
                       * image/webp
                     required: true
+              - name: payload
+                type: String
+                description: Custom payload data.
+                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                validation:
+                  function: 'validation.StringIsJSON'
               - name: text
                 type: String
                 description: Text data.
@@ -220,6 +248,9 @@ properties:
                         type: String
                         description: |-
                           The tool ID to filter the tools to retrieve the schema for.
+              - name: transcript
+                type: String
+                description: Transcript associated with the audio.
               - name: updatedVariables
                 type: String
                 description: |-
