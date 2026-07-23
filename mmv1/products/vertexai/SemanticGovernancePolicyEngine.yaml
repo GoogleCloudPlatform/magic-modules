@@ -58,6 +58,8 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+custom_diff:
+  - 'sgpeGatewayConfigDuplicateNameCheck'
 custom_code:
   constants: 'templates/terraform/constants/semantic_governance_policy_engine.go.tmpl'
   post_read: 'templates/terraform/post_read/vertex_ai_semantic_governance_policy_engine.go.tmpl'
@@ -74,6 +76,32 @@ samples:
     exclude_test: true
     steps:
       - name: 'vertex_ai_semantic_governance_policy_engine_basic'
+  - name: 'vertex_ai_semantic_governance_policy_engine_full'
+    primary_resource_id: 'sgpe'
+    # gateway_config provisioning creates DNS records and PSC forwarding rules
+    # in the customer project as the AI Platform service agent. The default
+    # roles/aiplatform.serviceAgent doesn't include those; grant them additively
+    # for the test-runner project. Matches google_vertex_ai_reasoning_engine
+    # PSC-interface precedent. Inert while exclude_test is set, but keeps
+    # intent explicit if this sample is ever un-excluded.
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/dns.admin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/compute.networkAdmin"
+    exclude_test: true # same singleton reason as _basic; covered by handwritten lifecycle test
+    steps:
+      - name: 'vertex_ai_semantic_governance_policy_engine_full'
+  - name: 'vertex_ai_semantic_governance_policy_engine_multi_gateway'
+    primary_resource_id: 'sgpe'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/dns.admin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/compute.networkAdmin"
+    exclude_test: true # same singleton reason as _basic; covered by handwritten lifecycle test
+    steps:
+      - name: 'vertex_ai_semantic_governance_policy_engine_multi_gateway'
 parameters:
   - name: 'region'
     type: String
@@ -126,3 +154,58 @@ properties:
       INACTIVE. `FAILED` indicates provisioning did not succeed; recover by
       destroying the resource (deprovision) or re-applying (re-provision).
     output: true
+  - name: 'gatewayConfig'
+    api_name: 'gatewayConfigs'
+    type: Map
+    description: |
+      Private Service Connect networking for one or more gateways on
+      this engine, keyed by user-defined `name`. Each block provisions
+      a gateway; changing inputs updates in place; removing a block
+      deprovisions the gateway. Up to 5 gateways per engine. Duplicate
+      names are rejected at plan time.
+    key_name: 'name'
+    value_type:
+      type: NestedObject
+      properties:
+        - name: 'network'
+          type: String
+          description: |
+            The fully-qualified network URI for this gateway, e.g.
+            `projects/{project}/global/networks/{network}`.
+        - name: 'subnetwork'
+          type: String
+          description: |
+            The fully-qualified subnetwork URI for this gateway, e.g.
+            `projects/{project}/regions/{region}/subnetworks/{subnetwork}`.
+        - name: 'dnsZoneName'
+          type: String
+          description: |
+            The DNS managed-zone name for this gateway's PSC endpoint.
+            Must exist and be attached to the gateway's VPC at provision
+            time; the backend writes a per-region A record into it.
+        - name: 'state'
+          type: String
+          description: |
+            The current state of this gateway. One of: STATE_UNSPECIFIED,
+            PROVISIONING, ACTIVE, DEPROVISIONING, INACTIVE, FAILED.
+            A FAILED gateway is surfaced here without a provider error
+            (the engine as a whole may still be ACTIVE).
+          output: true
+        - name: 'ipAddress'
+          type: String
+          description: |
+            The IP address allocated for this gateway's PSC endpoint.
+            Populated by the backend after ACTIVE; empty until then.
+          output: true
+        - name: 'pscEndpoint'
+          type: String
+          description: |
+            The PSC endpoint URI for this gateway.
+          output: true
+        - name: 'dnsRecord'
+          type: String
+          description: |
+            The DNS A-record the backend wrote into `dns_zone_name` for
+            this gateway. Populated by the backend after ACTIVE; empty
+            until then.
+          output: true

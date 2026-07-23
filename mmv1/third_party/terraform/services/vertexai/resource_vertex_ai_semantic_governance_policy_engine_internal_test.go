@@ -1,7 +1,10 @@
 package vertexai
 
 import (
+	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 // Unit tests for the SemanticGovernancePolicyEngine helpers declared in
@@ -75,6 +78,105 @@ func TestUnitSGPE_PostReadDispatch_inStateBranches_no_op(t *testing.T) {
 			}
 			if len(d.setIdArgs) != 0 {
 				t.Errorf("state %q must NOT call SetId; got SetId calls %v", state, d.setIdArgs)
+			}
+		})
+	}
+}
+
+// Duplicate gateway_config.name returns an error. Message is asserted
+// verbatim since downstream tooling quotes it.
+func TestUnitSGPE_GatewayConfigChecks_duplicateName_returns_error(t *testing.T) {
+	t.Parallel()
+	d := &tpgresource.ResourceDiffMock{
+		Before: map[string]interface{}{
+			"gateway_config": []map[string]interface{}{
+				{"name": "primary", "network": "n1"},
+			},
+		},
+		After: map[string]interface{}{
+			"gateway_config": []map[string]interface{}{
+				{"name": "primary", "network": "n1"},
+				{"name": "primary", "network": "n2"},
+			},
+		},
+	}
+	err := sgpeGatewayConfigDuplicateNameCheckFunc(d)
+	if err == nil {
+		t.Fatal("expected duplicate-name error; got nil")
+	}
+	if !strings.Contains(err.Error(), `gateway_config.name "primary" is duplicated`) {
+		t.Errorf("error message did not match expected text;\n  got:      %q\n  expected substring: %q",
+			err.Error(), `gateway_config.name "primary" is duplicated`)
+	}
+}
+
+// Legitimate map deltas (in-place update, add, remove, rename,
+// empty-to-empty) all pass Check 2. Rename is a drop-then-add delta
+// with no provider-side ForceNew.
+func TestUnitSGPE_GatewayConfigChecks_legitimateUpdates_returnNil(t *testing.T) {
+	t.Parallel()
+	cases := map[string]*tpgresource.ResourceDiffMock{
+		"in-place per-element update (same names, different fields)": {
+			Before: map[string]interface{}{
+				"gateway_config": []map[string]interface{}{
+					{"name": "primary", "network": "n1"},
+					{"name": "secondary", "network": "n2"},
+				},
+			},
+			After: map[string]interface{}{
+				"gateway_config": []map[string]interface{}{
+					{"name": "primary", "network": "n1-updated"},
+					{"name": "secondary", "network": "n2"},
+				},
+			},
+		},
+		"pure add (one gateway becomes two)": {
+			Before: map[string]interface{}{
+				"gateway_config": []map[string]interface{}{
+					{"name": "primary", "network": "n1"},
+				},
+			},
+			After: map[string]interface{}{
+				"gateway_config": []map[string]interface{}{
+					{"name": "primary", "network": "n1"},
+					{"name": "secondary", "network": "n2"},
+				},
+			},
+		},
+		"pure remove (two gateways become one)": {
+			Before: map[string]interface{}{
+				"gateway_config": []map[string]interface{}{
+					{"name": "primary", "network": "n1"},
+					{"name": "secondary", "network": "n2"},
+				},
+			},
+			After: map[string]interface{}{
+				"gateway_config": []map[string]interface{}{
+					{"name": "primary", "network": "n1"},
+				},
+			},
+		},
+		"rename (drop primary, add main)": {
+			Before: map[string]interface{}{
+				"gateway_config": []map[string]interface{}{
+					{"name": "primary", "network": "n1"},
+				},
+			},
+			After: map[string]interface{}{
+				"gateway_config": []map[string]interface{}{
+					{"name": "main", "network": "n1"},
+				},
+			},
+		},
+		"empty to empty (no gateways at all)": {
+			Before: map[string]interface{}{},
+			After:  map[string]interface{}{},
+		},
+	}
+	for name, d := range cases {
+		t.Run(name, func(t *testing.T) {
+			if err := sgpeGatewayConfigDuplicateNameCheckFunc(d); err != nil {
+				t.Fatalf("expected nil error; got %v", err)
 			}
 		})
 	}
