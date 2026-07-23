@@ -579,28 +579,6 @@ func (t Type) Lineage() []string {
 	return append(t.ParentMetadata.Lineage(), google.Underscore(t.Name))
 }
 
-// PropertyLineage returns the Magic Modules property names representing where the field is
-// nested in the resource model. Unlike Lineage, it retains flattened object ancestors and
-// preserves property names without converting them to Terraform snake case.
-func (t Type) PropertyLineage() []string {
-	if t.ParentMetadata == nil {
-		return []string{t.Name}
-	}
-
-	// Skip arrays & maps because otherwise the parent field name will be duplicated.
-	if t.ParentMetadata.IsA("Array") || t.ParentMetadata.IsA("Map") {
-		return t.ParentMetadata.PropertyLineage()
-	}
-
-	return append(t.ParentMetadata.PropertyLineage(), t.Name)
-}
-
-// PropertyPath returns the Magic Modules property lineage in the path format used by
-// GetPropertySchemaPath.
-func (t Type) PropertyPath() string {
-	return strings.Join(t.PropertyLineage(), ".0.")
-}
-
 // Returns a slice of API field names representing where the field is nested within the parent resource.
 // For example, []string{"parentField", "meta", "label", "fooBar"}. For fine-grained resources, this will
 // include the field on the API resource that the fine-grained resource manages.
