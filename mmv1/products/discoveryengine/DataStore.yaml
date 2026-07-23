@@ -66,7 +66,7 @@ samples:
           data_store_id: 'data-store-id'
           kms_key_name: 'kms-key'
         test_vars_overrides:
-          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+          kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-5").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
     steps:
