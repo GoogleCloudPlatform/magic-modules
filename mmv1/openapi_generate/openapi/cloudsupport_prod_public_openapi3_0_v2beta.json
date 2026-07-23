@@ -1,0 +1,2956 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Google Cloud Support API",
+    "description": "Manages Google Cloud technical support cases for Customer Care support offerings.",
+    "version": "v2beta",
+    "x-google-revision": "0"
+  },
+  "servers": [
+    {
+      "url": "https://cloudsupport.googleapis.com",
+      "description": "Global Endpoint"
+    }
+  ],
+  "paths": {
+    "/v2beta/{id1}/{id2}/cases/{case}/attachments": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "ListAttachments",
+        "description": "List all the attachments associated with a support case.\n\nEXAMPLES:\n\ncURL:\n\n```shell\ncase=\"projects/some-project/cases/23598314\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$case/attachments\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = (\n    supportApiService.cases()\n    .attachments()\n    .list(parent=\"projects/some-project/cases/43595344\")\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "The maximum number of attachments fetched with each request.\n\nIf not provided, the default is 10. The maximum page size that will be\nreturned is 100.\n\nThe size of each page can be smaller than the requested page size and can\ninclude zero. For example, you could request 100 attachments on one page,\nreceive 0, and then on the next page, receive 90.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "A token identifying the page of results to return. If unspecified, the\nfirst page is retrieved.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAttachmentsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["cloudsupport"],
+        "operationId": "CreateAttachment",
+        "description": "Create a file attachment on a case or Cloud resource.\n\nThe attachment must have the following fields set: `filename`.\n\nEXAMPLES:\n\ncURL:\n\n```shell\necho \"This text is in a file I'm uploading using CSAPI.\" \\\n  > \"./example_file.txt\"\ncase=\"projects/some-project/cases/43594844\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  --data-binary @\"./example_file.txt\" \\\n  \"https://cloudsupport.googleapis.com/upload/v2beta/$case/attachments?attachment.filename=uploaded_via_curl.txt\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\n\nfile_path = \"./example_file.txt\"\nwith open(file_path, \"w\") as file:\n    file.write(\n        \"This text is inside a file I'm going to upload using the Cloud\n        Support API.\",\n    )\n\nrequest = supportApiService.media().upload(\n    parent=\"projects/some-project/cases/43595344\",\n    media_body=file_path\n)\nrequest.uri = request.uri.split(\"?\")[0] +\n\"?attachment.filename=uploaded_via_python.txt\" print(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request body.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAttachmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/{id1}/{id2}/cases/{case}/attachments/{attachment}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "GetAttachment",
+        "description": "Retrieve an attachment associated with a support case.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nattachment=\"projects/some-project/cases/23598314/attachments/0684M00000P3h1fQAB\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$attachment\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = (\n    supportApiService.cases()\n    .attachments()\n    .get(name=\"projects/some-project/cases/43595344/attachments/0684M00000P3h1fQAB\")\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/{id1}/{id2}/cases/{case}/attachments/{attachment}:download": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "DownloadAttachment",
+        "description": "Download a file attached to a case.\n\nWhen this endpoint is called, no \"response body\" will be returned. Instead,\nthe attachment's blob will be returned.\n\nNote: HTTP requests must append \"?alt=media\" to the URL.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nname=\"projects/some-project/cases/43594844/attachments/0674M00000WijAnZAJ\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$name:download?alt=media\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = supportApiService.media().download(\n    name=\"projects/some-project/cases/43595344/attachments/0684M00000Pw6pHQAR\"\n)\nrequest.uri = request.uri.split(\"?\")[0] + \"?alt=media\"\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Media"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/{id1}/{id2}/cases/{case}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "GetCase",
+        "description": "Retrieve a case.\n\nEXAMPLES:\n\ncURL:\n\n```shell\ncase=\"projects/some-project/cases/16033687\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$case\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\n\nrequest = supportApiService.cases().get(\n    name=\"projects/some-project/cases/43595344\",\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Case"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["cloudsupport"],
+        "operationId": "UpdateCase",
+        "description": "Update a case. Only some fields can be updated.\n\nEXAMPLES:\n\ncURL:\n\n```shell\ncase=\"projects/some-project/cases/43595344\"\ncurl \\\n  --request PATCH \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  --header \"Content-Type: application/json\" \\\n  --data '{\n    \"priority\": \"P1\"\n  }' \\\n  \"https://cloudsupport.googleapis.com/v2beta/$case?updateMask=priority\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = supportApiService.cases().patch(\n    name=\"projects/some-project/cases/43112854\",\n    body={\n        \"displayName\": \"This is Now a New Title\",\n        \"priority\": \"P2\",\n    },\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updateMask",
+            "description": "A list of attributes of the case that should be updated. Supported values\nare `priority`, `display_name`, and `subscriber_email_addresses`. If no\nfields are specified, all supported fields are updated.\n\nBe careful - if you do not provide a field mask, then you might\naccidentally clear some fields. For example, if you leave the field mask\nempty and do not provide a value for `subscriber_email_addresses`, then\n`subscriber_email_addresses` is updated to empty.",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^(\\s*[^,\\s.]+(\\s*[,.]\\s*[^,\\s.]+)*)?$",
+              "format": "google-fieldmask"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The case to update.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Case"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Case"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/{id1}/{id2}/cases": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "ListCases",
+        "description": "Retrieve all cases under a parent, but not its children.\n\nFor example, listing cases under an organization only returns the cases\nthat are directly parented by that organization. To retrieve cases\nunder an organization and its projects, use `cases.search`.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nparent=\"projects/some-project\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$parent/cases\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\n\nrequest =\n  supportApiService.cases().list(parent=\"projects/some-project\")\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "description": "An expression used to filter cases.\n\nIf it's an empty string, then no filtering happens. Otherwise, the endpoint\nreturns the cases that match the filter.\n\nExpressions use the following fields separated by `AND` and specified with\n`=`:\n\n- `state`: Can be `OPEN` or `CLOSED`.\n- `priority`: Can be `P0`, `P1`, `P2`, `P3`, or `P4`. You\ncan specify multiple values for priority using the `OR` operator. For\nexample, `priority=P1 OR priority=P2`.\n- `creator.email`: The email address of the case creator.\n\nEXAMPLES:\n\n- `state=CLOSED`\n- `state=OPEN AND creator.email=\"tester@example.com\"`\n- `state=OPEN AND (priority=P0 OR priority=P1)`",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "The maximum number of cases fetched with each request. Defaults to 10.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "A token identifying the page of results to return. If unspecified, the\nfirst page is retrieved.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productLine",
+            "description": "The product line to request cases for. If unspecified, only\nGoogle Cloud cases will be returned.",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ProductLine"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCasesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["cloudsupport"],
+        "operationId": "CreateCase",
+        "description": "Create a new case and associate it with a parent.\n\nIt must have the following fields set: `display_name`, `description`,\n`classification`, and `priority`. If you're just testing the API and don't\nwant to route your case to an agent, set `testCase=true`.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nparent=\"projects/some-project\"\ncurl \\\n  --request POST \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"display_name\": \"Test case created by me.\",\n    \"description\": \"a random test case, feel free to close\",\n    \"classification\": {\n      \"id\":\n      \"100IK2AKCLHMGRJ9CDGMOCGP8DM6UTB4BT262T31BT1M2T31DHNMENPO6KS36CPJ786L2TBFEHGN6NPI64R3CDHN8880G08I1H3MURR7DHII0GRCDTQM8\"\n    },\n    \"time_zone\": \"-07:00\",\n    \"subscriber_email_addresses\": [\n      \"foo@domain.com\",\n      \"bar@domain.com\"\n    ],\n    \"testCase\": true,\n    \"priority\": \"P3\"\n  }' \\\n  \"https://cloudsupport.googleapis.com/v2beta/$parent/cases\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = supportApiService.cases().create(\n    parent=\"projects/some-project\",\n    body={\n        \"displayName\": \"A Test Case\",\n        \"description\": \"This is a test case.\",\n        \"testCase\": True,\n        \"priority\": \"P2\",\n        \"classification\": {\n            \"id\":\n              \"100IK2AKCLHMGRJ9CDGMOCGP8DM6UTB4BT262T31BT1M2T31DHNMENPO6KS36CPJ786L2TBFEHGN6NPI64R3CDHN8880G08I1H3MURR7DHII0GRCDTQM8\"\n        },\n    },\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The case to be created.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Case"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Case"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/cases:search": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "SearchCases",
+        "description": "Search for cases using a query.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nparent=\"projects/some-project\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$parent/cases:search\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = supportApiService.cases().search(\n    parent=\"projects/some-project\", query=\"state=OPEN\"\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "parent",
+            "description": "The name of the parent resource to search for cases under.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "description": "An expression used to filter cases.\n\nExpressions use the following fields separated by `AND` and specified with\n`=`:\n\n- `state`: Can be `OPEN` or `CLOSED`.\n- `priority`: Can be `P0`, `P1`, `P2`, `P3`, or `P4`. You\ncan specify multiple values for priority using the `OR` operator. For\nexample, `priority=P1 OR priority=P2`.\n- `creator.email`: The email address of the case creator.\n\nTo search across `displayName`, `description`, and comments, use a global\nrestriction with no keyword or operator. For example, `\"my search\"`.\n\nTo search only cases updated after a certain date, use `update_time`\nrestricted with that particular date, time, and timezone in ISO datetime\nformat. For example, `update_time>\"2020-01-01T00:00:00-05:00\"`.\n`update_time` only supports the greater than operator (`>`).\n\nIf you are using the `v2` version of the API, you must specify the case\nparent in the `parent` field. If you provide an empty `query`, all cases\nunder the parent resource will be returned.\n\nIf you are using the `v2beta` version of the API, you must specify the case\nparent in the `query` field using one of the two fields below, which are\nonly available for `v2beta`. The `parent` field will be ignored.\n\n- `organization`: An organization name in the form\n`organizations/`.\n- `project`: A project name in the form `projects/`.\n\nExamples:\n\nFor `v2`:\n\n- `state=CLOSED`\n- `state=OPEN AND creator.email=\"tester@example.com\"`\n- `state=OPEN AND (priority=P0 OR priority=P1)`\n- `update_time>\"2020-01-01T00:00:00-05:00\"`\n\nFor `v2beta`:\n\n- `organization=\"organizations/123456789\"`\n- `project=\"projects/my-project-id\"`\n- `project=\"projects/123456789\"`\n- `organization=\"organizations/123456789\" AND state=CLOSED`\n- `project=\"projects/my-project-id\" AND creator.email=\"tester@example.com\"`\n- `project=\"projects/my-project-id\" AND (priority=P0 OR priority=P1)`",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "The maximum number of cases fetched with each request. The default page\nsize is 10.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "A token identifying the page of results to return. If unspecified, the\nfirst page is retrieved.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchCasesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/{id1}/{id2}/cases/{case}:escalate": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["cloudsupport"],
+        "operationId": "EscalateCase",
+        "description": "Escalate a case, starting the Google Cloud Support escalation management\nprocess.\n\nThis operation is only available for some support services. Go to\nhttps://cloud.google.com/support and look for 'Technical support\nescalations' in the feature list to find out which ones let you\ndo that.\n\nEXAMPLES:\n\ncURL:\n\n```shell\ncase=\"projects/some-project/cases/43595344\"\ncurl \\\n  --request POST \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  --header \"Content-Type: application/json\" \\\n  --data '{\n    \"escalation\": {\n      \"reason\": \"BUSINESS_IMPACT\",\n      \"justification\": \"This is a test escalation.\"\n    }\n  }' \\\n  \"https://cloudsupport.googleapis.com/v2beta/$case:escalate\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = supportApiService.cases().escalate(\n    name=\"projects/some-project/cases/43595344\",\n    body={\n        \"escalation\": {\n            \"reason\": \"BUSINESS_IMPACT\",\n            \"justification\": \"This is a test escalation.\",\n        },\n    },\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request body.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EscalateCaseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Case"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/{id1}/{id2}/cases/{case}:close": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["cloudsupport"],
+        "operationId": "CloseCase",
+        "description": "Close a case.\n\nEXAMPLES:\n\ncURL:\n\n```shell\ncase=\"projects/some-project/cases/43595344\"\ncurl \\\n  --request POST \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$case:close\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = supportApiService.cases().close(\n    name=\"projects/some-project/cases/43595344\"\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request body.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseCaseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Case"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/caseClassifications:search": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "SearchCaseClassifications",
+        "description": "Retrieve valid classifications to use when creating a support case.\n\nClassifications are hierarchical. Each classification is a string\ncontaining all levels of the hierarchy separated by `\" > \"`. For example,\n`\"Technical Issue > Compute > Compute Engine\"`.\n\nClassification IDs returned by this endpoint are valid for at least six\nmonths. When a classification is deactivated, this endpoint immediately\nstops returning it. After six months, `case.create` requests using the\nclassification will fail.\n\nEXAMPLES:\n\ncURL:\n\n```shell\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  'https://cloudsupport.googleapis.com/v2beta/caseClassifications:search?query=display_name:\"*Compute%20Engine*\"'\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=\"v2beta\",\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version=v2\",\n)\nrequest = supportApiService.caseClassifications().search(\n    query='display_name:\"*Compute Engine*\"'\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "description": "An expression used to filter case classifications.\n\nIf it's an empty string, then no filtering happens. Otherwise, case\nclassifications will be returned that match the filter.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "The maximum number of classifications fetched with each request.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "A token identifying the page of results to return. If unspecified, the\nfirst page is retrieved.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "product.productLine",
+            "description": "The product line of the Product.",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ProductLine"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchCaseClassificationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/{id1}/{id2}/cases/{case}/comments": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "ListComments",
+        "description": "List all the comments associated with a case.\n\nEXAMPLES:\n\ncURL:\n\n```shell\ncase=\"projects/some-project/cases/43595344\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$case/comments\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = (\n    supportApiService.cases()\n    .comments()\n    .list(parent=\"projects/some-project/cases/43595344\")\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "The maximum number of comments to fetch. Defaults to 10.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "A token identifying the page of results to return. If unspecified, the\nfirst page is returned.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCommentsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["cloudsupport"],
+        "operationId": "CreateComment",
+        "description": "Add a new comment to a case.\n\nThe comment must have the following fields set: `body`.\n\nEXAMPLES:\n\ncURL:\n\n```shell\ncase=\"projects/some-project/cases/43591344\"\ncurl \\\n  --request POST \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"body\": \"This is a test comment.\"\n  }' \\\n  \"https://cloudsupport.googleapis.com/v2beta/$case/comments\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = (\n    supportApiService.cases()\n    .comments()\n    .create(\n        parent=\"projects/some-project/cases/43595344\",\n        body={\"body\": \"This is a test comment.\"},\n    )\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The comment to be added.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/{id1}/{id2}/cases/{case}/comments/{comment}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "GetComment",
+        "description": "Retrieve a comment.\n\nEXAMPLES:\n\ncURL:\n\n```shell\ncomment=\"projects/some-project/cases/43595344/comments/234567890\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$comment\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\n\nrequest = supportApiService.cases().comments().get(\n    name=\"projects/some-project/cases/43595344/comments/234567890\",\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "comment",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/{id1}/{id2}/cases/{case}:showFeed": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "ShowFeed",
+        "description": "Show items in the feed of this case, including case emails,\nattachments, and comments.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id1",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id2",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderBy",
+            "description": "Optional. Field to order feed items by, followed by `asc` or `desc`\npostfix. The only valid field is\n`creation_time`. This list is case-insensitive, default sorting order is\nascending, and the redundant space characters are insignificant.\n\nExample: `creation_time desc`",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "Optional. The maximum number of feed items fetched with each request.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "Optional. A token identifying the page of results to return. If unspecified, it\nretrieves the first page.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShowFeedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/organizations/{organization}/supportEventSubscriptions": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["cloudsupport"],
+        "operationId": "CreateSupportEventSubscription",
+        "description": "Creates a support event subscription for an organization.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nparent=\"organizations/123456789\"\ncurl \\\n  --request POST \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"pub_sub_topic\": \"projects/my-project/topics/my-topic\"\n  }' \\\n  \"https://cloudsupport.googleapis.com/v2beta/$parent/supportEventSubscriptions\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\nrequest = supportApiService.supportEventSubscriptions().create(\n    parent=\"organizations/123456789\",\n    body={\n        \"pub_sub_topic\": \"projects/my-project/topics/my-topic\"\n    },\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The Pub/Sub configuration to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportEventSubscription"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportEventSubscription"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "ListSupportEventSubscriptions",
+        "description": "Lists support event subscriptions.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nparent=\"organizations/123456789\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$parent/supportEventSubscriptions\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\n\nrequest = supportApiService.supportEventSubscriptions().list(\n    parent=\"organizations/123456789\"\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "description": "Optional. Filter expression based on AIP-160.\nSupported fields:\n- pub_sub_topic\n- state\n\nExamples:\n- `pub_sub_topic=\"projects/example-project/topics/example-topic\"`\n- `state=WORKING`\n- `pub_sub_topic=\"projects/example-project/topics/example-topic\" AND\nstate=WORKING`",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "showDeleted",
+            "description": "Optional. Whether to show deleted subscriptions. By default, deleted subscriptions\nare not returned.",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "Optional. The maximum number of support event subscriptions to return.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "Optional. A token identifying the page of results to return. If unspecified, the\nfirst page is retrieved.\n\nWhen paginating, all other parameters provided to\n`ListSupportEventSubscriptions` must match the call that provided the page\ntoken.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSupportEventSubscriptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/organizations/{organization}/supportEventSubscriptions/{supporteventsubscription}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["cloudsupport"],
+        "operationId": "GetSupportEventSubscription",
+        "description": "Gets a support event subscription.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nsupport_event_subscription=\"organizations/123456789/supportEventSubscriptions/abcdef123456\"\ncurl \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$support_event_subscription\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\n\nrequest = supportApiService.supportEventSubscriptions().get(\n    name=\"organizations/123456789/supportEventSubscriptions/abcdef123456\"\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supporteventsubscription",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportEventSubscription"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["cloudsupport"],
+        "operationId": "UpdateSupportEventSubscription",
+        "description": "Updates a support event subscription.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nsupport_event_subscription=\"organizations/123456789/supportEventSubscriptions/abcdef123456\"\ncurl \\\n  --request PATCH \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  --header \"Content-Type: application/json\" \\\n  --data '{\n    \"pub_sub_topic\": \"projects/my-project/topics/new-topic\"\n  }' \\\n  \"https://cloudsupport.googleapis.com/v2beta/$support_event_subscription?updateMask=pub_sub_topic\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\n\nrequest = supportApiService.supportEventSubscriptions().patch(\n    name=\"organizations/123456789/supportEventSubscriptions/abcdef123456\",\n    body={\n        \"pub_sub_topic\": \"projects/my-project/topics/new-topic\"\n    },\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supporteventsubscription",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updateMask",
+            "description": "Optional. The list of fields to update. The only supported value is pub_sub_topic.",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^(\\s*[^,\\s.]+(\\s*[,.]\\s*[^,\\s.]+)*)?$",
+              "format": "google-fieldmask"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The support event subscription to update.\nThe `name` field is used to identify the configuration to update.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportEventSubscription"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportEventSubscription"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["cloudsupport"],
+        "operationId": "DeleteSupportEventSubscription",
+        "description": "Soft deletes a support event subscription.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nsupport_event_subscription=\"organizations/123456789/supportEventSubscriptions/abcdef123456\"\ncurl \\\n  --request DELETE \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$support_event_subscription\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\n\nrequest = supportApiService).supportEventSubscriptions().delete(\n    name=\"organizations/123456789/supportEventSubscriptions/abcdef123456\"\n)\nprint(request.execute())\n```",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supporteventsubscription",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportEventSubscription"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/organizations/{organization}/supportEventSubscriptions/{supporteventsubscription}:undelete": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["cloudsupport"],
+        "operationId": "UndeleteSupportEventSubscription",
+        "description": "Undeletes a support event subscription.\n\nEXAMPLES:\n\ncURL:\n\n```shell\nsupport_event_subscription=\"organizations/123456789/supportEventSubscriptions/abcdef123456\"\ncurl \\\n  --request POST \\\n  --header \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n  \"https://cloudsupport.googleapis.com/v2beta/$support_event_subscription:undelete\"\n```\n\nPython:\n\n```python\nimport googleapiclient.discovery\n\napi_version = \"v2beta\"\nsupportApiService = googleapiclient.discovery.build(\n    serviceName=\"cloudsupport\",\n    version=api_version,\n    discoveryServiceUrl=f\"https://cloudsupport.googleapis.com/$discovery/rest?version={api_version}\",\n)\n\nrequest = supportApiService.supportEventSubscriptions().undelete(\n    name=\"organizations/123456789/supportEventSubscriptions/abcdef123456\"\n)\nprint(request.execute())\n```\nUndeletes a support event subscription.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supporteventsubscription",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request body.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndeleteSupportEventSubscriptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportEventSubscription"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/organizations/{organization}/supportEventSubscriptions/{supporteventsubscription}:expunge": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["cloudsupport"],
+        "operationId": "ExpungeSupportEventSubscription",
+        "description": "Expunges a support event subscription.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supporteventsubscription",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request body.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpungeSupportEventSubscriptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "alt": {
+        "name": "$alt",
+        "description": "Data format for response.",
+        "schema": {
+          "default": "json",
+          "enum": [
+            "json",
+            "media",
+            "proto"
+          ],
+          "x-google-enum-descriptions": [
+            "Responses with Content-Type of application/json",
+            "Media download with context-dependent Content-Type",
+            "Responses with Content-Type of application/x-protobuf"
+          ],
+          "type": "string"
+        },
+        "in": "query"
+      },
+      "callback": {
+        "name": "$callback",
+        "description": "JSONP",
+        "schema": {
+          "type": "string"
+        },
+        "in": "query"
+      },
+      "prettyPrint": {
+        "name": "$prettyPrint",
+        "description": "Returns response with indentations and line breaks.",
+        "schema": {
+          "default": "true",
+          "type": "boolean"
+        },
+        "in": "query"
+      },
+      "_.xgafv": {
+        "name": "$.xgafv",
+        "description": "V1 error format.",
+        "schema": {
+          "enum": [
+            "1",
+            "2"
+          ],
+          "x-google-enum-descriptions": [
+            "v1 error format",
+            "v2 error format"
+          ],
+          "type": "string"
+        },
+        "in": "query"
+      }
+    },
+    "securitySchemes": {
+      "google_oauth_implicit": {
+        "type": "oauth2",
+        "description": "Google Oauth 2.0 implicit authentication flow.",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account."
+            }
+          }
+        }
+      },
+      "google_oauth_code": {
+        "type": "oauth2",
+        "description": "Google Oauth 2.0 authorizationCode authentication flow.",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+            "tokenUrl": "https://oauth2.googleapis.com/token",
+            "refreshUrl": "https://oauth2.googleapis.com/token",
+            "scopes": {
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account."
+            }
+          }
+        }
+      },
+      "bearer_auth": {
+        "type": "http",
+        "description": "Http bearer authentication.",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "ListAttachmentsResponse": {
+        "description": "The response message for the ListAttachments endpoint.",
+        "type": "object",
+        "properties": {
+          "attachments": {
+            "description": "The list of attachments associated with a case.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Attachment"
+            }
+          },
+          "nextPageToken": {
+            "description": "A token to retrieve the next page of results. Set this in the `page_token`\nfield of subsequent `cases.attachments.list` requests. If unspecified,\nthere are no more results to retrieve.",
+            "type": "string"
+          }
+        }
+      },
+      "Attachment": {
+        "description": "An Attachment contains metadata about a file that was uploaded to a\ncase - it is NOT a file itself. That being said, the name of an Attachment\nobject can be used to download its accompanying file through the\n`media.download` endpoint.\n\nWhile attachments can be uploaded in the console at the\nsame time as a comment, they're associated on a \"case\" level, not a\n\"comment\" level.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Output only. Identifier. The resource name of the attachment.",
+            "readOnly": true,
+            "x-google-identifier": true,
+            "type": "string"
+          },
+          "createTime": {
+            "description": "Output only. The time at which the attachment was created.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "creator": {
+            "description": "Output only. The user who uploaded the attachment. Note, the name and email will be\nobfuscated if the attachment was uploaded by Google support.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/Actor"
+            }]
+          },
+          "filename": {
+            "description": "The filename of the attachment (e.g. `\"graph.jpg\"`).",
+            "type": "string"
+          },
+          "mimeType": {
+            "description": "Output only. The MIME type of the attachment (e.g. text/plain).",
+            "readOnly": true,
+            "type": "string"
+          },
+          "sizeBytes": {
+            "description": "Output only. The size of the attachment in bytes.",
+            "readOnly": true,
+            "type": "string",
+            "format": "int64"
+          }
+        }
+      },
+      "Actor": {
+        "description": "An Actor represents an entity that performed an action. For example, an actor\ncould be a user who posted a comment on a support case, a user who\nuploaded an attachment, or a service account that created a support case.",
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "description": "The name to display for the actor. If not provided, it is inferred from\ncredentials supplied during case creation. When an email is provided, a\ndisplay name must also be provided. This will be obfuscated if the user\nis a Google Support agent.",
+            "type": "string"
+          },
+          "email": {
+            "description": "The email address of the actor. If not provided, it is inferred from the\ncredentials supplied during case creation. When a name is provided, an\nemail must also be provided. If the user is a Google Support agent, this is\nobfuscated.\n\nThis field is deprecated. Use `username` instead.",
+            "deprecated": true,
+            "type": "string"
+          },
+          "googleSupport": {
+            "description": "Output only. Whether the actor is a Google support actor.",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "username": {
+            "description": "Output only. The username of the actor. It may look like an email or other format\nprovided by the identity provider. If not provided, it is inferred\nfrom the credentials supplied. When a name is provided, a username must\nalso be provided. If the user is a Google Support agent, this will not be\nset.",
+            "readOnly": true,
+            "type": "string"
+          }
+        }
+      },
+      "CreateAttachmentRequest": {
+        "description": "The request message for the CreateAttachment endpoint.",
+        "type": "object",
+        "properties": {
+          "attachment": {
+            "description": "Required. The attachment to be created.",
+            "allOf": [{
+              "$ref": "#/components/schemas/Attachment"
+            }]
+          }
+        },
+        "required": [
+          "attachment"
+        ]
+      },
+      "Media": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "uint64"
+          },
+          "token": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "length": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "int64"
+          },
+          "filename": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "referenceType": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation"
+            ],
+            "enum": [
+              "PATH",
+              "BLOB_REF",
+              "INLINE",
+              "GET_MEDIA",
+              "COMPOSITE_MEDIA",
+              "BIGSTORE_REF",
+              "DIFF_VERSION_RESPONSE",
+              "DIFF_CHECKSUMS_RESPONSE",
+              "DIFF_DOWNLOAD_RESPONSE",
+              "DIFF_UPLOAD_REQUEST",
+              "DIFF_UPLOAD_RESPONSE",
+              "COSMO_BINARY_REFERENCE",
+              "ARBITRARY_BYTES"
+            ]
+          },
+          "path": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "blobRef": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "deprecated": true,
+            "type": "string",
+            "format": "byte"
+          },
+          "inline": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "mediaId": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "hash": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "deprecated": true,
+            "type": "string"
+          },
+          "algorithm": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "deprecated": true,
+            "type": "string"
+          },
+          "compositeMedia": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompositeMedia"
+            }
+          },
+          "bigstoreObjectRef": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "deprecated": true,
+            "type": "string",
+            "format": "byte"
+          },
+          "objectId": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/ObjectId"
+            }]
+          },
+          "blobstore2Info": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/Blobstore2Info"
+            }]
+          },
+          "diffVersionResponse": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/DiffVersionResponse"
+            }]
+          },
+          "diffChecksumsResponse": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/DiffChecksumsResponse"
+            }]
+          },
+          "diffDownloadResponse": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/DiffDownloadResponse"
+            }]
+          },
+          "diffUploadRequest": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/DiffUploadRequest"
+            }]
+          },
+          "diffUploadResponse": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/DiffUploadResponse"
+            }]
+          },
+          "contentTypeInfo": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/ContentTypeInfo"
+            }]
+          },
+          "downloadParameters": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/DownloadParameters"
+            }]
+          },
+          "crc32cHash": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "md5Hash": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "sha1Hash": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "sha256Hash": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "sha512Hash": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "isPotentialRetry": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "boolean"
+          },
+          "cosmoBinaryReference": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "hashVerified": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "boolean"
+          }
+        }
+      },
+      "CompositeMedia": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "length": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "int64"
+          },
+          "referenceType": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation",
+              "# gdata.* are outside protos with mising documentation"
+            ],
+            "enum": [
+              "PATH",
+              "BLOB_REF",
+              "INLINE",
+              "BIGSTORE_REF",
+              "COSMO_BINARY_REFERENCE"
+            ]
+          },
+          "path": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "blobRef": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "deprecated": true,
+            "type": "string",
+            "format": "byte"
+          },
+          "inline": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "objectId": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/ObjectId"
+            }]
+          },
+          "blobstore2Info": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/Blobstore2Info"
+            }]
+          },
+          "cosmoBinaryReference": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "crc32cHash": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "md5Hash": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "sha1Hash": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          }
+        }
+      },
+      "ObjectId": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "bucketName": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "objectName": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "generation": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "int64"
+          }
+        }
+      },
+      "Blobstore2Info": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "blobId": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "blobGeneration": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "int64"
+          },
+          "readToken": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "uploadMetadataContainer": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "downloadReadHandle": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "downloadExternalReadToken": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          },
+          "uploadFragmentListCreationInfo": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          }
+        }
+      },
+      "DiffVersionResponse": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "objectVersion": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "objectSizeBytes": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "int64"
+          }
+        }
+      },
+      "DiffChecksumsResponse": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "objectVersion": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "objectSizeBytes": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "int64"
+          },
+          "chunkSizeBytes": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "int64"
+          },
+          "checksumsLocation": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/CompositeMedia"
+            }]
+          },
+          "objectLocation": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/CompositeMedia"
+            }]
+          }
+        }
+      },
+      "DiffDownloadResponse": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "objectLocation": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/CompositeMedia"
+            }]
+          }
+        }
+      },
+      "DiffUploadRequest": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "objectVersion": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "objectInfo": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/CompositeMedia"
+            }]
+          },
+          "checksumsInfo": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/CompositeMedia"
+            }]
+          }
+        }
+      },
+      "DiffUploadResponse": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "objectVersion": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "originalObject": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "allOf": [{
+              "$ref": "#/components/schemas/CompositeMedia"
+            }]
+          }
+        }
+      },
+      "ContentTypeInfo": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "bestGuess": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "fromHeader": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "fromFileName": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "fromUrlPath": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "fromBytes": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "fromFusionId": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string"
+          },
+          "fusionIdDetectionMetadata": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "string",
+            "format": "byte"
+          }
+        }
+      },
+      "DownloadParameters": {
+        "description": "# gdata.* are outside protos with mising documentation",
+        "type": "object",
+        "properties": {
+          "allowGzipCompression": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "boolean"
+          },
+          "ignoreRange": {
+            "description": "# gdata.* are outside protos with mising documentation",
+            "type": "boolean"
+          }
+        }
+      },
+      "Case": {
+        "description": "A Case is an object that contains the details of a support case. It\ncontains fields for the time it was created, its priority, its\nclassification, and more. Cases can also have comments and attachments that\nget added over time.\n\nA case is parented by a Google Cloud organization or project.\n\nOrganizations are identified by a number, so the name of a case parented by\nan organization would look like this:\n\n```\norganizations/123/cases/456\n```\n\nProjects have two unique identifiers, an ID and a number, and they look like\nthis:\n\n```\nprojects/abc/cases/456\n```\n\n```\nprojects/123/cases/456\n```\n\nYou can use either of them when calling the API. To learn more\nabout project identifiers, see [AIP-2510](https://google.aip.dev/cloud/2510).",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Identifier. The resource name for the case.",
+            "x-google-identifier": true,
+            "type": "string"
+          },
+          "displayName": {
+            "description": "The short summary of the issue reported in this case.",
+            "type": "string"
+          },
+          "description": {
+            "description": "A broad description of the issue.",
+            "type": "string"
+          },
+          "classification": {
+            "description": "The issue classification applicable to this case.",
+            "allOf": [{
+              "$ref": "#/components/schemas/CaseClassification"
+            }]
+          },
+          "timeZone": {
+            "description": "The timezone of the user who created the support case.\nIt should be in a format IANA recognizes: https://www.iana.org/time-zones.\nThere is no additional validation done by the API.",
+            "type": "string"
+          },
+          "subscriberEmailAddresses": {
+            "description": "The email addresses to receive updates on this case.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "severity": {
+            "description": "REMOVED. The severity of this case. Use priority instead.",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Severity is undefined or has not been set yet.",
+              "Extreme impact on a production service. Service is hard down.",
+              "Critical impact on a production service. Service is currently unusable.",
+              "Severe impact on a production service. Service is usable but greatly\nimpaired.",
+              "Medium impact on a production service.  Service is available, but\nmoderately impaired.",
+              "General questions or minor issues.  Production service is fully\navailable."
+            ],
+            "enum": [
+              "SEVERITY_UNSPECIFIED",
+              "S0",
+              "S1",
+              "S2",
+              "S3",
+              "S4"
+            ]
+          },
+          "state": {
+            "description": "Output only. The current status of the support case.",
+            "readOnly": true,
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Case is in an unknown state.",
+              "The case has been created but no one is assigned to work on it yet.",
+              "The case is currently being handled by Google support.",
+              "Google is waiting for a response.",
+              "A solution has been offered for the case, but it isn't yet closed.",
+              "The case has been resolved."
+            ],
+            "enum": [
+              "STATE_UNSPECIFIED",
+              "NEW",
+              "IN_PROGRESS_GOOGLE_SUPPORT",
+              "ACTION_REQUIRED",
+              "SOLUTION_PROVIDED",
+              "CLOSED"
+            ]
+          },
+          "createTime": {
+            "description": "Output only. The time this case was created.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "description": "Output only. The time this case was last updated.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "creator": {
+            "description": "The user who created the case.\n\nNote: The name and email will be obfuscated if the case was created by\nGoogle Support.",
+            "allOf": [{
+              "$ref": "#/components/schemas/Actor"
+            }]
+          },
+          "contactEmail": {
+            "description": "A user-supplied email address to send case update notifications for. This\nshould only be used in BYOID flows, where we cannot infer the user's email\naddress directly from their EUCs.",
+            "type": "string"
+          },
+          "escalated": {
+            "description": "Whether the case is currently escalated.",
+            "type": "boolean"
+          },
+          "testCase": {
+            "description": "Whether this case was created for internal API testing and should not be\nacted on by the support team.",
+            "type": "boolean"
+          },
+          "languageCode": {
+            "description": "The language the user has requested to receive support in. This should be a\nBCP 47 language code (e.g., `\"en\"`, `\"zh-CN\"`, `\"zh-TW\"`, `\"ja\"`, `\"ko\"`).\nIf no language or an unsupported language is specified, this field defaults\nto English (en).\n\nLanguage selection during case creation may affect your available support\noptions. For a list of supported languages and their support working hours,\nsee: https://cloud.google.com/support/docs/language-working-hours",
+            "type": "string"
+          },
+          "priority": {
+            "description": "The priority of this case.",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Priority is undefined or has not been set yet.",
+              "Extreme impact on a production service. Service is hard down.",
+              "Critical impact on a production service. Service is currently unusable.",
+              "Severe impact on a production service. Service is usable but greatly\nimpaired.",
+              "Medium impact on a production service.  Service is available, but\nmoderately impaired.",
+              "General questions or minor issues.  Production service is fully\navailable."
+            ],
+            "enum": [
+              "PRIORITY_UNSPECIFIED",
+              "P0",
+              "P1",
+              "P2",
+              "P3",
+              "P4"
+            ]
+          }
+        }
+      },
+      "CaseClassification": {
+        "description": "A Case Classification represents the topic that a case is about. It's very\nimportant to use accurate classifications, because they're\nused to route your cases to specialists who can help you.\n\nA classification always has an ID that is its unique identifier.\nA valid ID is required when creating a case.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique ID for a classification. Must be specified for case creation.\n\nTo retrieve valid classification IDs for case creation, use\n`caseClassifications.search`.\n\nClassification IDs returned by `caseClassifications.search` are guaranteed\nto be valid for at least 6 months. If a given classification is\ndeactiveated, it will immediately stop being returned. After 6 months,\n`case.create` requests using the classification ID will fail.",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "A display name for the classification.\n\nThe display name is not static and can change. To uniquely and consistently\nidentify classifications, use the `CaseClassification.id` field.",
+            "type": "string"
+          },
+          "product": {
+            "description": "The full product the classification corresponds to.",
+            "allOf": [{
+              "$ref": "#/components/schemas/Product"
+            }]
+          }
+        }
+      },
+      "Product": {
+        "description": "The product a case may be associated with.",
+        "type": "object",
+        "properties": {
+          "productLine": {
+            "description": "The product line of the Product.",
+            "allOf": [{
+              "$ref": "#/components/schemas/ProductLine"
+            }]
+          }
+        }
+      },
+      "ListCasesResponse": {
+        "description": "The response message for the ListCases endpoint.",
+        "type": "object",
+        "properties": {
+          "cases": {
+            "description": "The list of cases associated with the parent after any\nfilters have been applied.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Case"
+            }
+          },
+          "nextPageToken": {
+            "description": "A token to retrieve the next page of results. Set this in the `page_token`\nfield of subsequent `cases.list` requests. If unspecified, there are no\nmore results to retrieve.",
+            "type": "string"
+          }
+        }
+      },
+      "SearchCasesResponse": {
+        "description": "The response message for the SearchCases endpoint.",
+        "type": "object",
+        "properties": {
+          "cases": {
+            "description": "The list of cases associated with the parent after any\nfilters have been applied.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Case"
+            }
+          },
+          "nextPageToken": {
+            "description": "A token to retrieve the next page of results. Set this in the\n`page_token` field of subsequent `cases.search` requests. If unspecified,\nthere are no more results to retrieve.",
+            "type": "string"
+          }
+        }
+      },
+      "EscalateCaseRequest": {
+        "description": "The request message for the EscalateCase endpoint.",
+        "type": "object",
+        "properties": {
+          "escalation": {
+            "description": "The escalation information to be sent with the escalation request.",
+            "allOf": [{
+              "$ref": "#/components/schemas/Escalation"
+            }]
+          }
+        }
+      },
+      "Escalation": {
+        "description": "An escalation of a support case.",
+        "type": "object",
+        "properties": {
+          "reason": {
+            "description": "Required. The reason why the Case is being escalated.",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "The escalation reason is in an unknown state or has not been specified.",
+              "The case is taking too long to resolve.",
+              "The support agent does not have the expertise required to successfully\nresolve the issue.",
+              "The issue is having a significant business impact."
+            ],
+            "enum": [
+              "REASON_UNSPECIFIED",
+              "RESOLUTION_TIME",
+              "TECHNICAL_EXPERTISE",
+              "BUSINESS_IMPACT"
+            ]
+          },
+          "justification": {
+            "description": "Required. A free text description to accompany the `reason` field above.\nProvides additional context on why the case is being escalated.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "justification"
+        ]
+      },
+      "CloseCaseRequest": {
+        "description": "The request message for the CloseCase endpoint.",
+        "type": "object"
+      },
+      "SearchCaseClassificationsResponse": {
+        "description": "The response message for SearchCaseClassifications endpoint.",
+        "type": "object",
+        "properties": {
+          "caseClassifications": {
+            "description": "The classifications retrieved.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CaseClassification"
+            }
+          },
+          "nextPageToken": {
+            "description": "A token to retrieve the next page of results. Set this in the `page_token`\nfield of subsequent `caseClassifications.list` requests. If unspecified,\nthere are no more results to retrieve.",
+            "type": "string"
+          }
+        }
+      },
+      "ListCommentsResponse": {
+        "description": "The response message for the ListComments endpoint.",
+        "type": "object",
+        "properties": {
+          "comments": {
+            "description": "List of the comments associated with the case.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
+          },
+          "nextPageToken": {
+            "description": "A token to retrieve the next page of results. Set this in the `page_token`\nfield of subsequent `cases.comments.list` requests. If unspecified, there\nare no more results to retrieve.",
+            "type": "string"
+          }
+        }
+      },
+      "Comment": {
+        "description": "A comment associated with a support case.\n\nCase comments are the primary way for Google Support to communicate with a\nuser who has opened a case. When a user responds to Google Support, the\nuser's responses also appear as comments.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Output only. Identifier. The resource name of the comment.",
+            "readOnly": true,
+            "x-google-identifier": true,
+            "type": "string"
+          },
+          "createTime": {
+            "description": "Output only. The time when the comment was created.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "creator": {
+            "description": "Output only. The user or Google Support agent who created the comment.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/Actor"
+            }]
+          },
+          "body": {
+            "description": "The full comment body.\n\nMaximum of 12800 characters.",
+            "type": "string"
+          },
+          "plainTextBody": {
+            "description": "Output only. DEPRECATED. DO NOT USE.\n\nA duplicate of the `body` field.\n\nThis field is only present for legacy reasons.",
+            "readOnly": true,
+            "deprecated": true,
+            "type": "string"
+          }
+        }
+      },
+      "ShowFeedResponse": {
+        "description": "The response message for the ShowFeed endpoint.",
+        "type": "object",
+        "properties": {
+          "feedItems": {
+            "description": "The list of feed items associated with the given Case.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedItem"
+            }
+          },
+          "nextPageToken": {
+            "description": "A token to retrieve the next page of results. This should be set in the\n`page_token` field of subsequent `ShowFeedRequests`.\nIf unspecified, there are no more results to retrieve.",
+            "type": "string"
+          }
+        }
+      },
+      "FeedItem": {
+        "description": "A feed item associated with a support case.",
+        "type": "object",
+        "properties": {
+          "comment": {
+            "description": "Output only. A comment added to the case.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/Comment"
+            }]
+          },
+          "attachment": {
+            "description": "Output only. An attachment attached to the case.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/Attachment"
+            }]
+          },
+          "emailMessage": {
+            "description": "Output only. An email message received in reply to the case.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/EmailMessage"
+            }]
+          },
+          "deletedAttachment": {
+            "description": "Output only. A deleted attachment that used to be associated with the support case.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/Attachment"
+            }]
+          },
+          "eventTime": {
+            "description": "Output only. Time corresponding to the event of this item.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EmailMessage": {
+        "description": "An email associated with a support case.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Identifier. Resource name for the email message.",
+            "x-google-identifier": true,
+            "type": "string"
+          },
+          "createTime": {
+            "description": "Output only. Time when this email message object was created.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor": {
+            "description": "Output only. The user or Google Support agent that created this email message. This is\ninferred from the headers on the email message.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/Actor"
+            }]
+          },
+          "subject": {
+            "description": "Output only. Subject of the email.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "recipientEmailAddresses": {
+            "description": "Output only. Email addresses the email was sent to.",
+            "readOnly": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ccEmailAddresses": {
+            "description": "Output only. Email addresses CCed on the email.",
+            "readOnly": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "bodyContent": {
+            "description": "Output only. The full email message body. A best-effort attempt is made to remove\nextraneous reply threads.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/TextContent"
+            }]
+          }
+        }
+      },
+      "TextContent": {
+        "description": "Stores text attached to a support object.",
+        "type": "object",
+        "properties": {
+          "plainText": {
+            "description": "Content in this field should be rendered and interpreted as-is.",
+            "type": "string"
+          }
+        }
+      },
+      "SupportEventSubscription": {
+        "description": "A support event subscription.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Identifier. The resource name of the support event subscription.",
+            "x-google-identifier": true,
+            "type": "string"
+          },
+          "pubSubTopic": {
+            "description": "Required. The name of the Pub/Sub topic to publish notifications to.\nFormat: projects/{project}/topics/{topic}",
+            "type": "string"
+          },
+          "state": {
+            "description": "Output only. The state of the subscription.",
+            "readOnly": true,
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Unspecified state.",
+              "Subscription is active and working.",
+              "Subscription is failing. Notifications cannot be published for some\nreason.",
+              "Subscription has been deleted and is pending purge. Notifications are not\nsent for deleted subscriptions. Deleted subscriptions are purged after\ntheir `purge_time` has passed."
+            ],
+            "enum": [
+              "STATE_UNSPECIFIED",
+              "WORKING",
+              "FAILING",
+              "DELETED"
+            ]
+          },
+          "failureReason": {
+            "description": "Output only. Reason why subscription is failing. State of subscription\nmust be FAILING in order for this to have a value.",
+            "readOnly": true,
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Unspecified failure reason.",
+              "The service account (i.e.\ncloud-support-apievents@system.gserviceaccount.com) lacks the permission\nto publish to the customer's Pub/Sub topic.",
+              "The specified Pub/Sub topic does not exist.",
+              "Message failed to publish due to a system-side error."
+            ],
+            "enum": [
+              "FAILURE_REASON_UNSPECIFIED",
+              "PERMISSION_DENIED",
+              "TOPIC_NOT_FOUND",
+              "OTHER"
+            ]
+          },
+          "createTime": {
+            "description": "Output only. The time at which the subscription was created.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "description": "Output only. The time at which the subscription was last updated.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "deleteTime": {
+            "description": "Output only. The time at which the subscription was deleted.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "purgeTime": {
+            "description": "Output only. The time at which the subscription will be purged.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "pubSubTopic"
+        ]
+      },
+      "ListSupportEventSubscriptionsResponse": {
+        "description": "Response message for ListSupportEventSubscriptions.",
+        "type": "object",
+        "properties": {
+          "supportEventSubscriptions": {
+            "description": "The support event subscriptions.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportEventSubscription"
+            }
+          },
+          "nextPageToken": {
+            "description": "A token, which can be sent as `page_token` to retrieve the next page.\nIf this field is omitted, there are no subsequent pages.",
+            "type": "string"
+          }
+        }
+      },
+      "UndeleteSupportEventSubscriptionRequest": {
+        "description": "Request message for UndeleteSupportEventSubscription.",
+        "type": "object"
+      },
+      "ExpungeSupportEventSubscriptionRequest": {
+        "description": "Request message for ExpungeSupportEventSubscription.",
+        "type": "object"
+      },
+      "Empty": {
+        "description": "A generic empty message that you can re-use to avoid defining duplicated\nempty messages in your APIs. A typical example is to use it as the request\nor the response type of an API method. For instance:\n\n    service Foo {\n      rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);\n    }",
+        "type": "object"
+      },
+      "ProductLine": {
+        "type": "string",
+        "x-google-enum-descriptions": [
+          "Unknown product type.",
+          "Google Cloud",
+          "Google Maps"
+        ],
+        "enum": [
+          "PRODUCT_LINE_UNSPECIFIED",
+          "GOOGLE_CLOUD",
+          "GOOGLE_MAPS"
+        ]
+      }
+    }
+  }
+  ,
+  "externalDocs": {
+    "description": "Find more info here.",
+    "url": "https://cloud.google.com/support/docs/apis"
+  }
+}
