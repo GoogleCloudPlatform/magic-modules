@@ -1,0 +1,69 @@
+package memorystore
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceMemorystoreAclPolicy() *schema.Resource {
+	// Generate datasource schema from resource
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceMemorystoreAclPolicy().Schema)
+
+	// Set 'Required' schema elements
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "acl_policy_id")
+	// Set 'Optional' schema elements
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "location")
+
+	return &schema.Resource{
+		Read:   dataSourceMemorystoreAclPolicyRead,
+		Schema: dsSchema,
+	}
+}
+
+func dataSourceMemorystoreAclPolicyRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+	location, err := tpgresource.GetLocation(d, config)
+	if err != nil {
+		return err
+	}
+
+	aclPolicyId := d.Get("acl_policy_id").(string)
+
+	id := fmt.Sprintf("projects/%s/locations/%s/aclPolicies/%s", project, location, aclPolicyId)
+	d.SetId(id)
+
+	// Setting location field, as this is set as a required field in instance resource to build the url
+	d.Set("location", location)
+
+	err = resourceMemorystoreAclPolicyRead(d, meta)
+	if err != nil {
+		return err
+	}
+
+	if err := tpgresource.SetDataSourceLabels(d); err != nil {
+		return err
+	}
+
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_memorystore_acl_policy",
+		ProductName: "memorystore",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceMemorystoreAclPolicy(),
+	}.Register()
+}

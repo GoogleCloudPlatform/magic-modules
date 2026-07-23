@@ -284,6 +284,16 @@ properties:
       IAM_AUTH
     immutable: true
     default_from_api: true
+  - name: aclPolicy
+    type: String
+    description: |
+      The name of the ACL policy to attach to the instance.
+      Format: projects/{project}/locations/{location}/aclPolicies/{acl_policy}
+  - name: isAclPolicyInSync
+    type: Boolean
+    description: |
+      Whether the ACL policy is in sync with the cluster.
+    output: true
   - name: transitEncryptionMode
     type: String
     description: "Optional. Immutable. In-transit encryption mode of the instance. \n Possible values:\n TRANSIT_ENCRYPTION_DISABLED\nSERVER_AUTHENTICATION"

@@ -385,6 +385,15 @@ properties:
       - AUTH_MODE_UNSPECIFIED
       - AUTH_MODE_IAM_AUTH
       - AUTH_MODE_DISABLED
+  - name: aclPolicy
+    type: String
+    description: |
+      Optional. The name of the ACL policy to attach to the cluster.
+  - name: isAclPolicyInSync
+    type: Boolean
+    description: |
+      Optional. Whether the ACL policy is in sync with the cluster.
+    output: true
   - name: transitEncryptionMode
     type: Enum
     description: |
