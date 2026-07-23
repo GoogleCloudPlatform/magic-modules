@@ -84,7 +84,7 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"gateway_config.*",
-						map[string]string{"name": "primary", "state": "ACTIVE"}),
+						map[string]string{"name": "alpha", "state": "ACTIVE"}),
 				),
 			},
 			// ImportStateVerify — round-trip stability of the Map ->
@@ -103,11 +103,11 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"gateway_config.*",
-						map[string]string{"name": "primary", "state": "ACTIVE"}),
+						map[string]string{"name": "alpha", "state": "ACTIVE"}),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"gateway_config.*",
-						map[string]string{"name": "secondary", "state": "ACTIVE"}),
+						map[string]string{"name": "beta", "state": "ACTIVE"}),
 				),
 			},
 			{
@@ -115,7 +115,7 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// Rename "primary" -> "main"; "secondary" stays ACTIVE.
+			// Rename "alpha" -> "gamma"; "beta" stays ACTIVE.
 			// The provider sends one PATCH; sibling invariance is a
 			// backend contract.
 			{
@@ -127,16 +127,16 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"gateway_config.*",
-						map[string]string{"name": "main", "state": "ACTIVE"}),
+						map[string]string{"name": "gamma", "state": "ACTIVE"}),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"gateway_config.*",
-						map[string]string{"name": "secondary", "state": "ACTIVE"}),
-					// Explicitly assert "primary" is gone (drop-add rename
+						map[string]string{"name": "beta", "state": "ACTIVE"}),
+					// Explicitly assert "alpha" is gone (drop-add rename
 					// semantics: the old key must not resurface).
 					testAccCheckSGPEGatewayConfigNamesExact(t,
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
-						[]string{"main", "secondary"}),
+						[]string{"gamma", "beta"}),
 				),
 			},
 			{
@@ -189,6 +189,17 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
 // (mirrors google_vertex_ai_index_endpoint's PSC test pattern).
 // The gateway_config removal step splits the SGPE Update from the
 // zone/subnet/network destroy to avoid a parallel containerNotEmpty.
+//
+// Gateway names are the fixed set alpha/beta/gamma rather than the more
+// obvious primary/secondary/main. The backend derives deterministic
+// customer-project resource names from the gateway name (sgpe-ip-<name>,
+// sgpe-psce-<name>); a partially-failed earlier run in the shared CI
+// project left sgpe-ip-primary bound to a now-deleted VPC, and the
+// backend silently reuses that stale address on the next run, so any
+// fixture reusing the name "primary" collides. alpha/beta/gamma sidestep
+// the known residue. The underlying backend cleanup/resilience gaps are
+// tracked separately (see EXTERNAL_TODOS T-1); this is not a substitute
+// for that fix.
 
 const testAccSGPESharedNetworking = `
 resource "google_compute_network" "sgpe_network" {
@@ -231,7 +242,7 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
   region = "us-central1"
 
   gateway_config {
-    name          = "primary"
+    name          = "alpha"
     network       = google_compute_network.sgpe_network.id
     subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
@@ -251,14 +262,14 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
   region = "us-central1"
 
   gateway_config {
-    name          = "primary"
+    name          = "alpha"
     network       = google_compute_network.sgpe_network.id
     subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
   }
 
   gateway_config {
-    name          = "secondary"
+    name          = "beta"
     network       = google_compute_network.sgpe_network.id
     subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
@@ -278,14 +289,14 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
   region = "us-central1"
 
   gateway_config {
-    name          = "main"
+    name          = "gamma"
     network       = google_compute_network.sgpe_network.id
     subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
   }
 
   gateway_config {
-    name          = "secondary"
+    name          = "beta"
     network       = google_compute_network.sgpe_network.id
     subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
