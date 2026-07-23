@@ -102,14 +102,45 @@ line 6`
 	// Note: validFunc needs to be in our registry for this test to work
 	// Let's use 'title' which we know is valid
 	content = strings.Replace(content, "validFunc", "title .Name", 1)
-	
+
 	path := createTestFile(t, content)
 	results, _ := CheckInvalidFuncsForFile(path)
-	
+
 	if len(results) == 0 {
 		t.Fatal("expected an error on line 5, got none")
 	}
 	if !strings.Contains(results[0], "line 5") {
 		t.Errorf("expected error to mention line 5, got: %s", results[0])
+	}
+}
+
+func TestFuncCheck_FullRepoScan(t *testing.T) {
+	// This test scans the actual repository templates.
+	// We navigate up from tools/template-check/gotemplate to the repo root.
+	root, err := filepath.Abs("../../../")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(path, ".go.tmpl") {
+			t.Run(filepath.Base(path), func(t *testing.T) {
+				results, err := CheckInvalidFuncsForFile(path)
+				if err != nil {
+					t.Errorf("error checking %s: %v", path, err)
+				}
+				if len(results) > 0 {
+					t.Errorf("found invalid functions in %s: %v", path, results)
+				}
+			})
+		}
+		return nil
+	})
+
+	if err != nil {
+		t.Fatalf("failed to walk repo: %v", err)
 	}
 }
