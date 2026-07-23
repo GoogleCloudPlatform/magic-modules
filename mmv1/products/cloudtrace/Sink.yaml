@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,21 +17,21 @@ description: |
   Describes a sink used to export traces to a BigQuery dataset. The sink must
   be created within a project.
 
-  ~> **Note:** The Cloud Trace API identifies a sink by its canonical resource
-  name, which references the project by its project **number**. The exported
-  `name` attribute and the resource `id` therefore use the project number, and
-  the BigQuery `destination` must also reference the project by number.
+  ~> **Note:** The Cloud Trace API addresses a sink by its canonical resource
+  name, which references the project by its project **number**, not its project
+  ID. The `project` field must therefore be set to the project number, and the
+  BigQuery `destination` must reference the project by number as well.
 references:
   guides:
     'Trace data exports overview': 'https://cloud.google.com/trace/docs/trace-export-overview'
   api: 'https://cloud.google.com/trace/docs/reference/rest/v2beta1/projects.traceSinks'
 min_version: beta
 base_url: projects/{{project}}/traceSinks
-self_link: '{{name}}'
+self_link: projects/{{project}}/traceSinks/{{sink_id}}
 create_url: projects/{{project}}/traceSinks
 update_verb: PATCH
 update_mask: true
-id_format: '{{name}}'
+id_format: projects/{{project}}/traceSinks/{{sink_id}}
 import_format:
   - projects/{{project}}/traceSinks/{{sink_id}}
 timeouts:
@@ -40,7 +40,6 @@ timeouts:
   delete_minutes: 20
 custom_code:
   encoder: templates/terraform/encoders/cloud_trace_sink.go.tmpl
-  custom_import: templates/terraform/custom_import/cloud_trace_sink.go.tmpl
 examples:
   - name: cloud_trace_sink_basic
     primary_resource_id: example
