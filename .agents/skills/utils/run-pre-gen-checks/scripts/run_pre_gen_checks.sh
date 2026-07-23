@@ -4,10 +4,12 @@
 #
 # Runs Phase 1 pre-generation and static checks against magic-modules in parallel.
 # Checks:
-# 1. gofmt formatting check
-# 2. tools/template-check (version-guard and unused-tmpl)
-# 3. mmv1 unit tests
-# 4. internal tools unit tests (go-changelog, issue-labeler, template-check, test-reader)
+# 1. Submodule check (disallows git submodules)
+# 2. gofmt formatting check
+# 3. tools/template-check (version-guard and unused-tmpl)
+# 4. YAML linting check on changed product YAML files (if yamllint is installed)
+# 5. mmv1 unit tests
+# 6. internal tools & magician unit tests (go-changelog, issue-labeler, template-check, test-reader, .ci/magician)
 #
 
 set -e
@@ -33,7 +35,20 @@ mkdir -p "$LOGS_DIR"
 
 echo -e "${BLUE}Running pre-generation checks in parallel...${NC}"
 
-# Check 1: Go Formatting Check (gofmt)
+# Check 1: Submodule Check
+(
+  output=$(git submodule status --recursive 2>&1)
+  if [ -n "$output" ]; then
+    echo "$output" >&2
+    echo "Submodules are not allowed" >&2
+    exit 1
+  else
+    echo "No submodules found. Submodule check passed."
+  fi
+) > "${LOGS_DIR}/submodule.log" 2>&1 &
+SUBMODULE_PID=$!
+
+# Check 2: Go Formatting Check (gofmt)
 (
   GOFMT_OUTPUT="$(gofmt -l $(git ls-files '*.go'))"
   if [ -n "$GOFMT_OUTPUT" ]; then
@@ -45,7 +60,7 @@ echo -e "${BLUE}Running pre-generation checks in parallel...${NC}"
 ) > "${LOGS_DIR}/gofmt.log" 2>&1 &
 GOFMT_PID=$!
 
-# Check 2: Template Validation Checks (tools/template-check)
+# Check 3: Template Validation Checks (tools/template-check)
 (
   cd tools/template-check
   tmpls=$(git diff --name-only --diff-filter=d origin/main ../../*.tmpl | sed 's=^=../../=g')
@@ -61,27 +76,50 @@ GOFMT_PID=$!
 ) > "${LOGS_DIR}/template.log" 2>&1 &
 TEMPLATE_PID=$!
 
-# Check 3: MMv1 Core Unit Tests
+# Check 4: YAML Linting Check (yamllint)
+(
+  if command -v yamllint >/dev/null 2>&1; then
+    yamlfiles=$(git diff --name-only --diff-filter=d origin/main -- mmv1/products 2>/dev/null || true)
+    if [ -n "$yamlfiles" ]; then
+      yamllint -c .yamllint $yamlfiles
+      echo "YAML lint check passed for modified product YAML files."
+    else
+      echo "No modified product YAML files to lint. YAML lint check passed."
+    fi
+  else
+    echo "yamllint not found in PATH; skipping YAML lint check."
+  fi
+) > "${LOGS_DIR}/yamllint.log" 2>&1 &
+YAMLLINT_PID=$!
+
+# Check 5: MMv1 Core Unit Tests
 (
   cd mmv1 && go test ./...
 ) > "${LOGS_DIR}/mmv1_unit.log" 2>&1 &
 MMV1_PID=$!
 
-# Check 4: Tool Unit Tests
+# Check 6: Tool & CI Unit Tests
 (
   (cd tools/go-changelog && go test ./...)
   (cd tools/issue-labeler && go test ./...)
   (cd tools/template-check && go test ./...)
   (cd tools/test-reader && go test ./...)
+  (cd .ci/magician && go test ./...)
 ) > "${LOGS_DIR}/tools_unit.log" 2>&1 &
 TOOLS_PID=$!
 
 set +e
+wait $SUBMODULE_PID
+SUBMODULE_STATUS=$?
+
 wait $GOFMT_PID
 GOFMT_STATUS=$?
 
 wait $TEMPLATE_PID
 TEMPLATE_STATUS=$?
+
+wait $YAMLLINT_PID
+YAMLLINT_STATUS=$?
 
 wait $MMV1_PID
 MMV1_STATUS=$?
@@ -89,6 +127,11 @@ MMV1_STATUS=$?
 wait $TOOLS_PID
 TOOLS_STATUS=$?
 set -e
+
+echo -e "\n${BLUE}=====================================================${NC}"
+echo -e "${BLUE}=== Submodule Check Logs ===${NC}"
+echo -e "${BLUE}=====================================================${NC}"
+cat "${LOGS_DIR}/submodule.log"
 
 echo -e "\n${BLUE}=====================================================${NC}"
 echo -e "${BLUE}=== Go Formatting Check Logs ===${NC}"
@@ -101,16 +144,21 @@ echo -e "${BLUE}=====================================================${NC}"
 cat "${LOGS_DIR}/template.log"
 
 echo -e "\n${BLUE}=====================================================${NC}"
+echo -e "${BLUE}=== YAML Lint Check Logs ===${NC}"
+echo -e "${BLUE}=====================================================${NC}"
+cat "${LOGS_DIR}/yamllint.log"
+
+echo -e "\n${BLUE}=====================================================${NC}"
 echo -e "${BLUE}=== MMv1 Unit Test Logs ===${NC}"
 echo -e "${BLUE}=====================================================${NC}"
 cat "${LOGS_DIR}/mmv1_unit.log"
 
 echo -e "\n${BLUE}=====================================================${NC}"
-echo -e "${BLUE}=== Tool Unit Test Logs ===${NC}"
+echo -e "${BLUE}=== Tool & Magician Unit Test Logs ===${NC}"
 echo -e "${BLUE}=====================================================${NC}"
 cat "${LOGS_DIR}/tools_unit.log"
 
-if [ $GOFMT_STATUS -ne 0 ] || [ $TEMPLATE_STATUS -ne 0 ] || [ $MMV1_STATUS -ne 0 ] || [ $TOOLS_STATUS -ne 0 ]; then
+if [ $SUBMODULE_STATUS -ne 0 ] || [ $GOFMT_STATUS -ne 0 ] || [ $TEMPLATE_STATUS -ne 0 ] || [ $YAMLLINT_STATUS -ne 0 ] || [ $MMV1_STATUS -ne 0 ] || [ $TOOLS_STATUS -ne 0 ]; then
   echo -e "\n${RED}=== Pre-generation & static checks failed! ===${NC}"
   exit 1
 else
