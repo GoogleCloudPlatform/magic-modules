@@ -22,7 +22,7 @@ resource "google_cloud_security_compliance_framework" "example" {
   description  = "An Terraform description for the framework"
   
   cloud_control_details {
-		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
+		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
 		major_revision_id = "2"
     
     parameters {
@@ -132,8 +132,8 @@ resource "google_cloud_security_compliance_framework" "example" {
   description  = "An updated description for the framework with additional details"
   
   cloud_control_details {
-    name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-data-access-governance"
-    major_revision_id = "1"
+    name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
+    major_revision_id = "2"
     
     parameters {
       name = "region"
@@ -228,7 +228,7 @@ resource "google_cloud_security_compliance_framework" "example" {
   description  = "A Terraform description for the framework using organization for backward compatibility"
   
   cloud_control_details {
-		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
+		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
 		major_revision_id = "2"
     
     parameters {
