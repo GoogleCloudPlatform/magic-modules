@@ -158,6 +158,13 @@ type Resource struct {
 	// camelcase plural name of the resource.
 	CollectionUrlKey string `yaml:"collection_url_key,omitempty"`
 
+	// [Optional] Explicit API field name for list responses. Alias for
+	// collection_url_key used by list-resource generation.
+	ListAPIFieldName string `yaml:"list_api_field_name,omitempty"`
+
+	// [Optional] List-resource specific generation configuration.
+	ListResource *resource.ListResource `yaml:"list_resource,omitempty"`
+
 	// [Optional] An ordered list of names of parameters that uniquely identify
 	// the resource.
 	// Generally, it's safe to leave empty, in which case it defaults to `name`.
@@ -500,6 +507,13 @@ func (r *Resource) setShallowDefaults() {
 
 	if r.ApiName == "" {
 		r.ApiName = r.Name
+	}
+	if r.CollectionUrlKey == "" {
+		if r.ListResource != nil && r.ListResource.ListAPIFieldName != "" {
+			r.CollectionUrlKey = r.ListResource.ListAPIFieldName
+		} else if r.ListAPIFieldName != "" {
+			r.CollectionUrlKey = r.ListAPIFieldName
+		}
 	}
 	if r.CollectionUrlKey == "" {
 		key := r.Name
