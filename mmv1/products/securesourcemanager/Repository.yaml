@@ -75,6 +75,39 @@ samples:
           deletion_policy: '"DELETE"'
         ignore_read_extra:
           - deletion_policy
+  - name: secure_source_manager_repository_service_account
+    primary_resource_id: default
+    steps:
+      - name: secure_source_manager_repository_service_account
+        resource_id_vars:
+          repository_id: my-repository
+          instance_id: my-instance
+          deletion_policy: PREVENT
+          sa_id: my-sa
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - deletion_policy
+  - name: secure_source_manager_repository_secret_scanning
+    primary_resource_id: default
+    steps:
+      - name: secure_source_manager_repository_secret_scanning
+        resource_id_vars:
+          repository_id: my-repository
+          instance_id: my-instance
+          deletion_policy: PREVENT
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - deletion_policy
+
+
 parameters:
   - name: location
     type: String
@@ -174,3 +207,26 @@ properties:
         description: |
           README template name.
           Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.
+  - name: 'serviceAccount'
+    type: String
+    description: |
+      Repository level service account.
+  - name: 'scanConfig'
+    type: NestedObject
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+    description: |
+      Provides configuration for scanning.
+    properties:
+      - name: 'secretScanConfig'
+        type: NestedObject
+        description: |
+          Configuration for secret scanning.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Enables secret scanning for the repository.
+          - name: 'inspectTemplate'
+            type: String
+            description: |
+              The DLP inspect template to use for secret scanning.
