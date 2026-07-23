@@ -87,6 +87,18 @@ samples:
           ca_pool_id: my-pool
         test_env_vars:
           project: PROJECT_NAME
+  - name: privateca_certificate_with_requested_not_before_time
+    primary_resource_id: default
+    skip_vcr: true
+    external_providers:
+      - time
+    steps:
+      - name: privateca_certificate_with_requested_not_before_time
+        resource_id_vars:
+          ca_pool_id: my-pool
+          certificate_name: my-certificate
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -133,6 +145,13 @@ properties:
     immutable: true
     # 10 years
     default_value: 315360000s
+  - name: requestedNotBeforeTime
+    type: Time
+    description: |
+      The requested not_before_time of this Certificate. This field may only be set
+      if the allow_requester_specified_not_before_time field is set to true for the
+      issuing CaPool.
+    immutable: true
   - name: revocationDetails
     type: NestedObject
     description: |
