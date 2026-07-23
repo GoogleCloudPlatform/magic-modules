@@ -1,0 +1,6 @@
+if _, ok := d.GetOkExists("refresh_time"); !ok {
+		currentTime := time.Now().Format(time.RFC3339)
+		if err := d.Set("refresh_time", currentTime); err != nil {
+			return fmt.Errorf("error setting refresh_time to current time: %v", err)
+		}
+}
