@@ -982,6 +982,11 @@ func canonicalizeKeyAndroidSettings(des, initial *KeyAndroidSettings, opts ...dc
 	} else {
 		cDes.AllowedPackageNames = des.AllowedPackageNames
 	}
+	if dcl.BoolCanonicalize(des.SupportNonGoogleAppStoreDistribution, initial.SupportNonGoogleAppStoreDistribution) || dcl.IsZeroValue(des.SupportNonGoogleAppStoreDistribution) {
+		cDes.SupportNonGoogleAppStoreDistribution = initial.SupportNonGoogleAppStoreDistribution
+	} else {
+		cDes.SupportNonGoogleAppStoreDistribution = des.SupportNonGoogleAppStoreDistribution
+	}
 
 	return cDes
 }
@@ -1034,6 +1039,9 @@ func canonicalizeNewKeyAndroidSettings(c *Client, des, nw *KeyAndroidSettings) *
 	if dcl.StringArrayCanonicalize(des.AllowedPackageNames, nw.AllowedPackageNames) {
 		nw.AllowedPackageNames = des.AllowedPackageNames
 	}
+	if dcl.BoolCanonicalize(des.SupportNonGoogleAppStoreDistribution, nw.SupportNonGoogleAppStoreDistribution) {
+		nw.SupportNonGoogleAppStoreDistribution = des.SupportNonGoogleAppStoreDistribution
+	}
 
 	return nw
 }
@@ -1084,6 +1092,39 @@ func canonicalizeNewKeyAndroidSettingsSlice(c *Client, des, nw []KeyAndroidSetti
 	return items
 }
 
+func canonicalizeKeyIosSettingsAppleDeveloperId(des, initial *KeyIosSettingsAppleDeveloperId, opts ...dcl.ApplyOption) *KeyIosSettingsAppleDeveloperId {
+	if des == nil {
+		return initial
+	}
+	if des.empty {
+		return des
+	}
+
+	if initial == nil {
+		return des
+	}
+
+	cDes := &KeyIosSettingsAppleDeveloperId{}
+
+	if dcl.StringCanonicalize(des.KeyId, initial.KeyId) || dcl.IsZeroValue(des.KeyId) {
+		cDes.KeyId = initial.KeyId
+	} else {
+		cDes.KeyId = des.KeyId
+	}
+	if dcl.StringCanonicalize(des.PrivateKey, initial.PrivateKey) || dcl.IsZeroValue(des.PrivateKey) {
+		cDes.PrivateKey = initial.PrivateKey
+	} else {
+		cDes.PrivateKey = des.PrivateKey
+	}
+	if dcl.StringCanonicalize(des.TeamId, initial.TeamId) || dcl.IsZeroValue(des.TeamId) {
+		cDes.TeamId = initial.TeamId
+	} else {
+		cDes.TeamId = des.TeamId
+	}
+
+	return cDes
+}
+
 func canonicalizeKeyIosSettings(des, initial *KeyIosSettings, opts ...dcl.ApplyOption) *KeyIosSettings {
 	if des == nil {
 		return initial
@@ -1108,6 +1149,7 @@ func canonicalizeKeyIosSettings(des, initial *KeyIosSettings, opts ...dcl.ApplyO
 	} else {
 		cDes.AllowedBundleIds = des.AllowedBundleIds
 	}
+	cDes.AppleDeveloperId = canonicalizeKeyIosSettingsAppleDeveloperId(des.AppleDeveloperId, initial.AppleDeveloperId, opts...)
 
 	return cDes
 }
@@ -1140,6 +1182,33 @@ func canonicalizeKeyIosSettingsSlice(des, initial []KeyIosSettings, opts ...dcl.
 
 }
 
+func canonicalizeNewKeyIosSettingsAppleDeveloperId(c *Client, des, nw *KeyIosSettingsAppleDeveloperId) *KeyIosSettingsAppleDeveloperId {
+
+	if des == nil {
+		return nw
+	}
+
+	if nw == nil {
+		if dcl.IsEmptyValueIndirect(des) {
+			c.Config.Logger.Info("Found explicitly empty value for KeyIosSettingsAppleDeveloperId while comparing non-nil desired to nil actual.  Returning desired object.")
+			return des
+		}
+		return nil
+	}
+
+	if dcl.StringCanonicalize(des.KeyId, nw.KeyId) {
+		nw.KeyId = des.KeyId
+	}
+	if dcl.StringCanonicalize(des.PrivateKey, nw.PrivateKey) {
+		nw.PrivateKey = des.PrivateKey
+	}
+	if dcl.StringCanonicalize(des.TeamId, nw.TeamId) {
+		nw.TeamId = des.TeamId
+	}
+
+	return nw
+}
+
 func canonicalizeNewKeyIosSettings(c *Client, des, nw *KeyIosSettings) *KeyIosSettings {
 
 	if des == nil {
@@ -1160,6 +1229,7 @@ func canonicalizeNewKeyIosSettings(c *Client, des, nw *KeyIosSettings) *KeyIosSe
 	if dcl.StringArrayCanonicalize(des.AllowedBundleIds, nw.AllowedBundleIds) {
 		nw.AllowedBundleIds = des.AllowedBundleIds
 	}
+	nw.AppleDeveloperId = canonicalizeNewKeyIosSettingsAppleDeveloperId(c, des.AppleDeveloperId, nw.AppleDeveloperId)
 
 	return nw
 }
@@ -1784,6 +1854,55 @@ func compareKeyAndroidSettingsNewStyle(d, a interface{}, fn dcl.FieldName) ([]*d
 		}
 		diffs = append(diffs, ds...)
 	}
+	if ds, err := dcl.Diff(desired.SupportNonGoogleAppStoreDistribution, actual.SupportNonGoogleAppStoreDistribution, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("SupportNonGoogleAppStoreDistribution")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	return diffs, nil
+}
+
+func compareKeyIosSettingsAppleDeveloperIdNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.FieldDiff, error) {
+	var diffs []*dcl.FieldDiff
+
+	desired, ok := d.(*KeyIosSettingsAppleDeveloperId)
+	if !ok {
+		desiredNotPointer, ok := d.(KeyIosSettingsAppleDeveloperId)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a KeyIosSettingsAppleDeveloperId or *KeyIosSettingsAppleDeveloperId", d)
+		}
+		desired = &desiredNotPointer
+	}
+	actual, ok := a.(*KeyIosSettingsAppleDeveloperId)
+	if !ok {
+		actualNotPointer, ok := a.(KeyIosSettingsAppleDeveloperId)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a KeyIosSettingsAppleDeveloperId", a)
+		}
+		actual = &actualNotPointer
+	}
+
+	if ds, err := dcl.Diff(desired.KeyId, actual.KeyId, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("KeyId")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.PrivateKey, actual.PrivateKey, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("PrivateKey")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.TeamId, actual.TeamId, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("TeamId")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
 	return diffs, nil
 }
 
@@ -1815,6 +1934,12 @@ func compareKeyIosSettingsNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.F
 	}
 
 	if ds, err := dcl.Diff(desired.AllowedBundleIds, actual.AllowedBundleIds, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("AllowedBundleIds")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	if ds, err := dcl.Diff(desired.AppleDeveloperId, actual.AppleDeveloperId, dcl.DiffInfo{ObjectFunction: compareKeyIosSettingsAppleDeveloperIdNewStyle, EmptyObject: EmptyKeyIosSettingsAppleDeveloperId, OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("AppleDeveloperId")); len(ds) != 0 || err != nil {
 		if err != nil {
 			return nil, err
 		}
