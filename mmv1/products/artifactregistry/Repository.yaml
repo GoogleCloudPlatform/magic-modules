@@ -130,9 +130,15 @@ samples:
         resource_id_vars:
           repository_id: my-repository
           desc: example remote docker repository with no cache (connector mode)
+          secret_id: example-secret
+          secret_resource_id: example-remote-secret
+          username: remote-username
+          secret_data: remote-password
         test_vars_overrides:
           # for backward compatible
           desc: '"example remote docker repository with no cache (connector mode)" + randomSuffix'
+        ignore_read_extra:
+          - remote_repository_config.0.disable_upstream_validation
   - name: artifact_registry_repository_remote_apt
     primary_resource_id: my-repo
     steps:

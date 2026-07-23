@@ -634,6 +634,26 @@ resource "google_artifact_registry_repository" "rr-test" {
 
 func testAccArtifactRegistryRepository_remoteNoCache(repositoryID string, remoteDescription string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_secret_manager_secret" "secret" {
+  secret_id = "tf-test-example-secret-%s"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret_version" {
+  secret = google_secret_manager_secret.secret.id
+  secret_data = "tf-test-password"
+}
+
+resource "google_secret_manager_secret_iam_member" "secret-access" {
+  secret_id = google_secret_manager_secret.secret.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+}
+
 resource "google_artifact_registry_repository" "rr-test-nocache" {
   repository_id = "%s"
   location      = "us-central1"
@@ -642,18 +662,45 @@ resource "google_artifact_registry_repository" "rr-test-nocache" {
   mode          = "REMOTE_REPOSITORY"
 
   remote_repository_config {
-    description = "%s"
+    description                 = "%s"
+    disable_upstream_validation = true
     docker_repository {
       public_repository = "DOCKER_HUB"
+    }
+    upstream_credentials {
+      username_password_credentials {
+        username                = "test-user"
+        password_secret_version = google_secret_manager_secret_version.secret_version.name
+      }
     }
     no_cache {}
   }
 }
-`, repositoryID, remoteDescription)
+`, repositoryID, repositoryID, remoteDescription)
 }
 
 func testAccArtifactRegistryRepository_remoteNoCacheRemoved(repositoryID string, remoteDescription string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_secret_manager_secret" "secret" {
+  secret_id = "tf-test-example-secret-%s"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret_version" {
+  secret = google_secret_manager_secret.secret.id
+  secret_data = "tf-test-password"
+}
+
+resource "google_secret_manager_secret_iam_member" "secret-access" {
+  secret_id = google_secret_manager_secret.secret.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+}
+
 resource "google_artifact_registry_repository" "rr-test-nocache" {
   repository_id = "%s"
   location      = "us-central1"
@@ -662,13 +709,20 @@ resource "google_artifact_registry_repository" "rr-test-nocache" {
   mode          = "REMOTE_REPOSITORY"
 
   remote_repository_config {
-    description = "%s"
+    description                 = "%s"
+    disable_upstream_validation = true
     docker_repository {
       public_repository = "DOCKER_HUB"
     }
+    upstream_credentials {
+      username_password_credentials {
+        username                = "test-user"
+        password_secret_version = google_secret_manager_secret_version.secret_version.name
+      }
+    }
   }
 }
-`, repositoryID, remoteDescription)
+`, repositoryID, repositoryID, remoteDescription)
 }
 
 {{ end }}
