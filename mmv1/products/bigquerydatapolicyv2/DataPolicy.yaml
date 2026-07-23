@@ -171,6 +171,7 @@ properties:
     required: true
   - name: dataGovernanceTag
     type: NestedObject
+    immutable: true
     description: |-
       Data Governance tag bound to the Data Policy.
     properties:
