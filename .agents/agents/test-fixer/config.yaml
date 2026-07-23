@@ -18,7 +18,7 @@ custom_agent:
            - Consult `.agents/knowledge/index.md` and `docs/content/` (especially `docs/content/develop/diffs.md` and `docs/content/breaking-changes/`) for contribution rules and fix patterns.
 
         2. **Classify Failure Scenario & Isolate Root Cause**:
-           Classify symptoms against the central decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (Scenarios 1-8):
+           Classify symptoms against the central decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (all catalog scenarios):
            - Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symptom patterns, root cause analysis steps, and remediation recipes.
 
         3. **Implement Fix in Magic Modules**:
