@@ -1,0 +1,166 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+  ...
+*/ -}}
+{{$.CodeHeader TemplatePath}}
+{{- $needsAttr := false -}}
+{{- range $.GettableProperties -}}
+    {{- if .Output -}}
+        {{- if eq .Type "NestedObject" -}}
+            {{- $needsAttr = true -}}
+        {{- else if and (eq .Type "Array") (eq .ItemType.Type "NestedObject") -}}
+            {{- $needsAttr = true -}}
+        {{- else if and (eq .Type "Map") (eq .ValueType.Type "NestedObject") -}}
+            {{- $needsAttr = true -}}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+    "context"
+    "fmt"
+{{- if $needsAttr }}
+    "github.com/hashicorp/terraform-plugin-framework/attr"
+{{- end }}
+    "github.com/hashicorp/terraform-plugin-framework/ephemeral"
+    "github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
+    "github.com/hashicorp/terraform-plugin-framework/types"
+
+{{- if or $.HasProject $.HasRegion $.HasZone }}
+    "{{ $.ImportPath }}/fwresource"
+{{- end }}
+    "{{ $.ImportPath }}/fwtransport"
+    "{{ $.ImportPath }}/registry"
+    transport_tpg "{{ $.ImportPath }}/transport"
+)
+
+var _ ephemeral.EphemeralResource = &google{{$.ResourceName}}EphemeralResource{}
+
+func init() {
+    registry.FrameworkEphemeralResource{
+        Name:        "{{ $.TerraformName }}",
+        ProductName: "{{ lower $.ProductMetadata.Name }}",
+        Func:        Google{{$.ResourceName}}EphemeralResource,
+    }.Register()
+}
+
+func Google{{$.ResourceName}}EphemeralResource() ephemeral.EphemeralResource {
+    return &google{{$.ResourceName}}EphemeralResource{}
+}
+
+type google{{$.ResourceName}}EphemeralResource struct {
+    providerConfig *transport_tpg.Config
+}
+
+type {{$.ResourceName}}EphemeralModel struct {
+{{- range $prop := $.OrderProperties $.AllUserProperties }}
+    {{- if .FlattenObject -}}
+        {{- range $p := .ResourceMetadata.OrderProperties .UserProperties }}
+    {{ camelize $p.Name "upper" }} types.{{ $p.GetFWType }} `tfsdk:"{{ underscore $p.Name }}"`
+        {{- end }}
+    {{- else }}
+    {{ camelize .Name "upper" }} types.{{ .GetFWType }} `tfsdk:"{{ underscore .Name }}"`
+    {{- end }}
+{{- end }}
+{{ if $.HasProject }}	Project types.String `tfsdk:"project"`
+{{ end -}}
+}
+
+func (p *google{{$.ResourceName}}EphemeralResource) Metadata(_ context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
+    resp.TypeName = req.ProviderTypeName + "_{{ underscore $.ResourceName }}"
+}
+
+func (p *google{{$.ResourceName}}EphemeralResource) Schema(_ context.Context, _ ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
+    resp.Schema = schema.Schema{
+        Attributes: map[string]schema.Attribute{
+{{- range $prop := $.OrderProperties $.AllUserProperties }}
+            {{ template "SchemaPropertyEphemeral" $prop -}}
+{{- end }}
+{{ if $.HasProject }}			"project": schema.StringAttribute{
+                Optional: true,
+                Computed: true,
+            },
+{{ end -}}
+        },
+    }
+}
+
+func (p *google{{$.ResourceName}}EphemeralResource) Configure(_ context.Context, req ephemeral.ConfigureRequest, resp *ephemeral.ConfigureResponse) {
+    if req.ProviderData == nil {
+        return
+    }
+    pd, ok := req.ProviderData.(*transport_tpg.Config)
+    if !ok {
+        resp.Diagnostics.AddError(
+            "Unexpected Ephemeral Resource Configure Type",
+            fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+        )
+        return
+    }
+    p.providerConfig = pd
+}
+
+func (p *google{{$.ResourceName}}EphemeralResource) Open(ctx context.Context, req ephemeral.OpenRequest, resp *ephemeral.OpenResponse) {
+    var data {{$.ResourceName}}EphemeralModel
+
+    resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    config := p.providerConfig
+    userAgent := p.providerConfig.UserAgent
+
+    billingProject := ""
+{{ if $.HasProject }}
+    project := fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), &resp.Diagnostics)
+    if resp.Diagnostics.HasError() {
+        return
+    }
+    billingProject = project.ValueString()
+    data.Project = project
+{{ end }}
+
+    var schemaDefaultVals fwtransport.DefaultVars
+{{ if $.HasProject }}	schemaDefaultVals.Project = data.Project
+{{ end -}}
+{{ if $.HasRegion }}
+    region := fwresource.GetRegionFramework(data.Region, types.StringValue(config.Region), &resp.Diagnostics)
+    if resp.Diagnostics.HasError() {
+        return
+    }
+    schemaDefaultVals.Region = region
+{{ end -}}
+{{ if $.HasZone }}
+    zone := fwresource.GetZoneFramework(data.Zone, types.StringValue(config.Zone), &resp.Diagnostics)
+    if resp.Diagnostics.HasError() {
+        return
+    }
+    schemaDefaultVals.Zone = zone
+{{ end }}
+    url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+        Config:    config,
+        Method:    "GET",
+        Project:   billingProject,
+        RawURL:    url,
+        UserAgent: userAgent,
+    }, &resp.Diagnostics)
+    if err != nil {
+        resp.Diagnostics.AddError("Error reading {{ $.Name }}", err.Error())
+        return
+    }
+
+{{- range $prop := $.GettableProperties }}
+    {{- template "FlattenPropertyEphemeral" $prop }}
+{{- end }}
+    _ = res
+
+    resp.Diagnostics.Append(resp.Result.Set(ctx, &data)...)
+}
