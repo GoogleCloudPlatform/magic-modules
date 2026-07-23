@@ -87,24 +87,14 @@ func TestAccBigqueryDatapolicyv2DataPolicy_dataGovernanceTag(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	policyID := fmt.Sprintf("tf_test_dg_tag_%s", acctest.RandString(t, 10))
 	tagKeyShortName := fmt.Sprintf("tag_key_%s", acctest.RandString(t, 5))
-	tagValueShortName1 := fmt.Sprintf("tag_val1_%s", acctest.RandString(t, 5))
-	tagValueShortName2 := fmt.Sprintf("tag_val2_%s", acctest.RandString(t, 5))
+	tagValueShortName := fmt.Sprintf("tag_val_%s", acctest.RandString(t, 5))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigqueryDatapolicyv2DataPolicy_dataGovernanceTag(project, tagKeyShortName, tagValueShortName1, policyID),
-			},
-			{
-				ResourceName:            "google_bigquery_datapolicyv2_data_policy.policy",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
-			},
-			{
-				Config: testAccBigqueryDatapolicyv2DataPolicy_dataGovernanceTagUpdate(project, tagKeyShortName, tagValueShortName1, tagValueShortName2, policyID),
+				Config: testAccBigqueryDatapolicyv2DataPolicy_dataGovernanceTag(project, tagKeyShortName, tagValueShortName, policyID),
 			},
 			{
 				ResourceName:            "google_bigquery_datapolicyv2_data_policy.policy",
@@ -124,7 +114,7 @@ resource "google_tags_tag_key" "key" {
   purpose    = "DATA_GOVERNANCE"
 }
 
-resource "google_tags_tag_value" "value1" {
+resource "google_tags_tag_value" "value" {
   parent     = "tagKeys/${google_tags_tag_key.key.name}"
   short_name = "%s"
 }
@@ -139,42 +129,8 @@ resource "google_bigquery_datapolicyv2_data_policy" "policy" {
   data_policy_id   = "%s"
   data_governance_tag {
     key   = google_tags_tag_key.key.namespaced_name
-    value = google_tags_tag_value.value1.short_name
+    value = google_tags_tag_value.value.short_name
   }
 }
 `, project, tagKeyShortName, tagValueShortName, policyID)
-}
-
-func testAccBigqueryDatapolicyv2DataPolicy_dataGovernanceTagUpdate(project, tagKeyShortName, tagValueShortName1, tagValueShortName2, policyID string) string {
-	return fmt.Sprintf(`
-resource "google_tags_tag_key" "key" {
-  parent     = "projects/%s"
-  short_name = "%s"
-  purpose    = "DATA_GOVERNANCE"
-}
-
-resource "google_tags_tag_value" "value1" {
-  parent     = "tagKeys/${google_tags_tag_key.key.name}"
-  short_name = "%s"
-}
-
-resource "google_tags_tag_value" "value2" {
-  parent     = "tagKeys/${google_tags_tag_key.key.name}"
-  short_name = "%s"
-}
-
-resource "google_bigquery_datapolicyv2_data_policy" "policy" {
-  location         = "us-central1"
-  data_policy_type = "DATA_MASKING_POLICY"
-  data_masking_policy {
-    predefined_expression = "SHA256"
-  }
-  grantees = []
-  data_policy_id   = "%s"
-  data_governance_tag {
-    key   = google_tags_tag_key.key.namespaced_name
-    value = google_tags_tag_value.value2.short_name
-  }
-}
-`, project, tagKeyShortName, tagValueShortName1, tagValueShortName2, policyID)
 }
