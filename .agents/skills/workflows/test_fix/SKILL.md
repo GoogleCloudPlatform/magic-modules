@@ -16,11 +16,14 @@ Consult `.agents/knowledge/index.md` for the topics the failure touches and open
 ### 1. Failure Information Intake
 * Execute the `intake-test-failure` skill (`.agents/skills/utils/intake-test-failure/SKILL.md`) on the input provided by the user (GitHub issue URL, direct prompt text, GCS log link, or local log file).
 * Check for GitHub issue labels such as `test-failure`, `test-failure-100`, `test-failure-50`, or any `test-failure-*` label to confirm test failure classification.
+* Inspect issue failure rates to determine `target_provider` (`ga`, `beta`, or `both`).
 * Produce the **Normalized Failure Payload**:
   ```yaml
   normalized_failure_payload:
     test_name: "<ExactTestFunctionName>"
-    error_message: "<Concise error string or failed assertion>"
+    target_provider: "ga" # "ga", "beta", or "both"
+    error_message: |
+      <Full error output, go test backtrace, and stdout plan diff for GA and/or Beta>
     parsed_logs_dir: "debug_output/<test_name>/" # (Optional)
   ```
 
@@ -28,26 +31,26 @@ Consult `.agents/knowledge/index.md` for the topics the failure touches and open
 
 ### 2. Failure Scenario Classification & Remediation (Choose Path)
 
-Match failure symptoms against the central decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (Scenarios 1-5+).
+Match failure symptoms against the central decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (Scenarios 1-8).
 
 Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symptom patterns, root causes, and remediation recipes.
 
 #### Path A: Automated Subagent (Mandatory Default)
 * **Action:** Invoke the `test-fixer` subagent (`.agents/agents/test-fixer/`) using the `invoke_subagent` tool.
 * **Prompt:** Pass the **Normalized Failure Payload** to `test-fixer`.
-* **Wait:** The subagent will classify the failure scenario, consult `.agents/knowledge/index.md` for relevant design rules, edit `magic-modules` source files, run `make provider` and `make build`, and execute acceptance tests to verify `PASS`.
+* **Wait:** The subagent will classify the failure scenario, consult `.agents/knowledge/index.md` for relevant design rules, edit `magic-modules` source files, run `make provider VERSION=<ga|beta>` and `make build`, and execute target acceptance tests for `ga`, `beta`, or `both` to verify `PASS`.
 * **Handoff:**
   - If `test-fixer` reports success, present the fix summary to the user.
   - If `test-fixer` reports unresolved issues, switch to **Path B (Interactive Debugging)**.
 
 #### Path B: Interactive Debugging (Fallback)
 * Use the `qa-test-runner` subagent to isolate logs and inspect request/response JSONs.
-* Match symptoms against Scenario 1-4 decision trees and apply source modifications using `triage` and `fix` skills.
-* Execute `generate-provider` (`make provider`) and re-run acceptance tests manually to verify.
+* Match symptoms against Scenario 1-8 decision trees and apply source modifications using `triage` and `fix` skills.
+* Execute provider generation (`make provider VERSION=<ga|beta>`) and re-run acceptance tests for each target provider version (`ga`, `beta`, or `both`) to verify `PASS`.
 
 ---
 
 ### 3. Verification & PR Handoff
-* Verify that the test output reports `PASS`.
+* Verify that test output reports `PASS` for all failing targets (`ga`, `beta`, or `both`).
 * Verify that no test-dodging flags (`ignore_read`, `default_from_api`, etc.) were introduced without justification.
 * If requested by the user (e.g. "create a PR for the fix"), automatically invoke the `create-pr` skill (`.agents/skills/operations/create-pr/`) to open a pull request.

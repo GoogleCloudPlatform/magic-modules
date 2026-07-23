@@ -23,15 +23,21 @@ This skill converts raw, unstructured, or varied failure reports into a standard
 #### Path A: GitHub Issue URL
 - Use `read_url_content` (or `gh issue view` if CLI available) to read the issue content and inspect its GitHub labels.
 - Check if labels contain `test-failure`, `test-failure-100`, `test-failure-50`, or any similar `test-failure*` labels to confirm this is an acceptance test failure issue.
+- **Determine Target Provider Version (`ga`, `beta`, or `both`)**:
+  - Inspect the issue `Failure rates` section (e.g. `ga: 100%`, `beta: 0%` -> `target_provider: ga`; `ga: 0%`, `beta: 100%` -> `target_provider: beta`; `ga: 100%`, `beta: 100%` -> `target_provider: both`).
+  - Match provider-specific GCS error message links in the issue body:
+    - `ga error message` (e.g. `.../test-errors/ga/.../*.txt`)
+    - `beta error message` (e.g. `.../test-errors/beta/.../*.txt`)
+  - **Fetch the complete content of each failing provider's error text file using `gcloud storage cat`** to populate `error_message`.
 - Distinguish between **Error Message Links** and **Debug Log Links** in the issue body:
-  - **Error Message Link** (e.g. `https://storage.cloud.google.com/nightly-test-data/test-errors/.../*.txt`): Contains the exact `go test` output, backtrace, and `stdout` plan diff. **Always fetch the complete content of this file using `gcloud storage cat` to populate `error_message`.**
-  - **Debug Log Link** (e.g. `https://storage.cloud.google.com/teamcity-logs/.../*.txt`): Contains the full `TF_LOG=DEBUG` provider trace. Fetch and process via `tf_debug_parser.py` for `parsed_logs_dir`.
+  - **Error Message Links**: Contain the exact `go test` output, backtraces, and `stdout` plan diffs for GA and/or Beta runs.
+  - **Debug Log Links**: Contain the full `TF_LOG=DEBUG` provider trace (`ga debug log` / `beta debug log`). Fetch and process via `tf_debug_parser.py` for `parsed_logs_dir`.
 - Search the issue body or fetched error log file for:
   - Impacted acceptance test name (e.g., `TestAcc<Resource>_<Scenario>`).
   - Full error text, backtrace, and `stdout` plan diff.
 
 #### Path B: Direct Prompt / Text Entry
-- Extract `test_name` and full `error_message` directly from user input.
+- Extract `test_name`, `target_provider` (`ga`, `beta`, or `both`), and full `error_message` directly from user input.
 - Extract any GCS or local log paths provided.
 
 #### Path C: Remote / GCS Log URLs
@@ -56,13 +62,14 @@ If a debug log (local or GCS) is present:
 
 ### Step 3: Produce Complete Normalized Failure Payload
 
-Assemble and present the normalized payload in the following format. **CRITICAL: Do NOT truncate multi-line error output, assertion backtraces, or `stdout` plan diffs. Use a multi-line YAML block scalar (`|`) to preserve full error context:**
+Assemble and present the normalized payload in the following format. **CRITICAL: Include `target_provider` (`ga`, `beta`, or `both`) and do NOT truncate multi-line error output, assertion backtraces, or `stdout` plan diffs. Use a multi-line YAML block scalar (`|`) to preserve full error context:**
 
 ```yaml
 normalized_failure_payload:
   test_name: "<ExactTestFunctionName>"
+  target_provider: "ga"  # "ga", "beta", or "both"
   error_message: |
-    <Full error output, go test backtrace, and stdout plan diff>
+    <Full error output, go test backtrace, and stdout plan diff for GA and/or Beta>
   parsed_logs_dir: "debug_output/<test_name>/"  # Optional
 ```
 

@@ -8,6 +8,7 @@ custom_agent:
 
         Input Payload Structure:
         - `test_name`: Exact test function name (e.g. `TestAccRedisCluster_basic`).
+        - `target_provider`: Target provider version to verify (`ga`, `beta`, or `both`).
         - `error_message`: Assertion error or API failure message.
         - `parsed_logs_dir` (Optional): Directory containing parsed API request/response outline and JSON payloads.
 
@@ -17,7 +18,7 @@ custom_agent:
            - Consult `.agents/knowledge/index.md` and `docs/content/` (especially `docs/content/develop/diffs.md` and `docs/content/breaking-changes/`) for contribution rules and fix patterns.
 
         2. **Classify Failure Scenario & Isolate Root Cause**:
-           Classify symptoms against the central decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (Scenarios 1-5+):
+           Classify symptoms against the central decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (Scenarios 1-8):
            - Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symptom patterns, root cause analysis steps, and remediation recipes.
 
         3. **Implement Fix in Magic Modules**:
@@ -27,26 +28,30 @@ custom_agent:
            - Follow baseline rules: do NOT introduce test-dodging flags (`ignore_read`, `default_from_api`, `ImportStateVerifyIgnore`) without explicit justification comments explaining the underlying API constraints.
 
         4. **Generate Downstream Code**:
-           - Execute provider generation (`make provider` from `mmv1/` or appropriate directory) to update downstream provider code.
+           - Generate the target provider version based on `target_provider`:
+             - For `ga` or `both`: `make provider VERSION=ga OUTPUT_PATH=<path_to_tpg>`
+             - For `beta` or `both`: `make provider VERSION=beta OUTPUT_PATH=<path_to_tpgb>`
 
         5. **Build Downstream Provider**:
-           - Verify that downstream compilation succeeds (`make build`).
+           - Verify that downstream compilation succeeds (`make build`) in the corresponding provider repository.
 
-        6. **Re-Run Target Acceptance Test**:
-           - Execute the target test in the downstream repository (e.g. `make testacc TEST=./google-beta/services/<service> TESTARGS='-run=<test_name>'`).
-           - Verify that the test outputs `PASS`.
+        6. **Re-Run Target Acceptance Test (Verification Loop)**:
+           - Execute acceptance test for each failing provider target (`target_provider` = `ga`, `beta`, or `both`):
+             - **GA Run**: `make testacc TEST=./google/services/<service> TESTARGS='-run=<test_name>'` in `terraform-provider-google`
+             - **Beta Run**: `make testacc TEST=./google-beta/services/<service> TESTARGS='-run=<test_name>'` in `terraform-provider-google-beta`
+           - Verify that all executed tests output `PASS`.
 
         7. **Summary Report**:
-           - Output a concise report detailing initial failure, scenario classification, root cause, code changes in `magic-modules`, and test re-run verification result.
+           - Output a concise report detailing initial failure, target provider version (`ga`, `beta`, or `both`), scenario classification, root cause, code changes in `magic-modules`, and test re-run verification result for all target versions.
 
     - title: "Report Format"
       content: |
         You must return a clear, human-readable Markdown report explaining:
-        - **Target Test**: Test name and failure summary.
+        - **Target Test & Provider**: Test name, target provider version (`ga`, `beta`, or `both`), and failure summary.
         - **Scenario Classification**: Matched scenario (e.g. Scenario 1: State Drift, Scenario 2: Payload Serialization).
         - **Root Cause**: Technical analysis of why the failure occurred.
         - **Applied Fix**: Modified files in `magic-modules` and key changes made.
-        - **Verification Output**: Execution result of the re-run test.
+        - **Verification Output**: Execution results of the re-run test for GA and/or Beta.
 
   tool_names:
     - view_file
