@@ -157,14 +157,13 @@ properties:
     type: NestedObject
     description: |
       Encryption configuration for the database
-    immutable: true
+    send_empty_value: true
     properties:
       - name: 'kmsKeyName'
         type: String
         description: |
           Fully qualified name of the KMS key to use to encrypt this database. This key must exist
           in the same location as the Spanner Database.
-        immutable: true
         exactly_one_of:
           - encryption_config.0.kms_key_name
           - encryption_config.0.kms_key_names
@@ -173,7 +172,6 @@ properties:
         description: |
           Fully qualified name of the KMS keys to use to encrypt this database. The keys must exist
           in the same locations as the Spanner Database.
-        immutable: true
         default_from_api: true
         custom_flatten: templates/terraform/custom_flatten/spanner_database_kms_key_names.go.tmpl
         item_type:
