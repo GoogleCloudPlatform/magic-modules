@@ -98,6 +98,11 @@ func (listR *{{ $.ResourceName -}}ListResource) List(ctx context.Context, listRe
 {{- range $scope := $.ListScopeProperties }}
 {{- if or (eq $scope.Name "project") (eq $scope.Name "region") (eq $scope.Name "zone") (eq $scope.Name "location") }}
 	{{ $scope.CamelizeProperty }} := listR.Get{{ $scope.TitlelizeProperty }}(data.{{ $scope.TitlelizeProperty }})
+{{- else if $scope.DefaultValue }}
+	{{ $scope.CamelizeProperty }} := data.{{ $scope.TitlelizeProperty }}.ValueString()
+	if {{ $scope.CamelizeProperty }} == "" {
+		{{ $scope.CamelizeProperty }} = "{{ $scope.DefaultValue }}"
+	}
 {{- else }}
 	{{ $scope.CamelizeProperty }} := data.{{ $scope.TitlelizeProperty }}.ValueString()
 {{- end }}
