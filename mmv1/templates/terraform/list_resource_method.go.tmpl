@@ -25,7 +25,11 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		if err := resourceData.Set("{{ underscore $scope.Name }}", {{ $scope.CamelizeProperty }}); err != nil {
 			return fmt.Errorf("error setting {{ underscore $scope.Name }} on temporary resource data: %w", err)
 		}
-	}
+	}{{- if $scope.DefaultValue }} else {
+		if err := resourceData.Set("{{ underscore $scope.Name }}", "{{ $scope.DefaultValue }}"); err != nil {
+			return fmt.Errorf("error setting {{ underscore $scope.Name }} on temporary resource data: %w", err)
+		}
+	}{{- end }}
 {{- end }}
 
 	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.BaseUrl}}")
@@ -55,6 +59,9 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
 		ItemName:       "{{ $.CollectionUrlKey }}",
+		{{- if $.ListFilter }}
+		Filter:         "{{ $.ListFilter }}",
+		{{- end }}
 		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 			headers := make(http.Header)
 			var err error
