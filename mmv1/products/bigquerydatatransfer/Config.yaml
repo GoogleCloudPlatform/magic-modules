@@ -131,9 +131,11 @@ properties:
     type: NestedObject
     description: |
       Options customizing the data transfer schedule.
+    custom_flatten: 'templates/terraform/custom_flatten/bigquery_data_transfer_schedule_options.go.tmpl'
     properties:
       - name: 'disableAutoScheduling'
         type: Boolean
+        send_empty_value: true
         description: |
           If true, automatic scheduling of data transfer runs for this
           configuration will be disabled. The runs can be started on ad-hoc
