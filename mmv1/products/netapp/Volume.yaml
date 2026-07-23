@@ -555,6 +555,8 @@ properties:
       [Volume migration](https://docs.cloud.google.com/netapp/volumes/docs/migrate/ontap/overview) and
       [external replication](https://docs.cloud.google.com/netapp/volumes/docs/protect-data/replicate-ontap/overview)
       are two types of Hybrid Replication. This parameter block specifies the parameters for a hybrid replication.
+    # This parameter is only used at CREATE. READs will omit it.
+    ignore_read: true
     properties:
       - name: replication
         type: String
