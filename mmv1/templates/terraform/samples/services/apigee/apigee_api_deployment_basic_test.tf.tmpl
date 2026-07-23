@@ -67,6 +67,12 @@ resource "google_apigee_environment" "apigee_environment" {
   display_name = "environment-1"
 }
 
+resource "google_service_account" "service_account" {
+  account_id   = "service-account-id%{random_suffix}"
+  display_name = "Service Account"
+  project      = google_project.project.project_id
+}
+
 resource "google_apigee_api" "test_apigee_api" {
   name            = "test-proxy"
   org_id          = google_project.project.project_id
@@ -75,8 +81,9 @@ resource "google_apigee_api" "test_apigee_api" {
 }
 
 resource "google_apigee_api_deployment" "{{$.PrimaryResourceId}}" {
-  environment = google_apigee_environment.apigee_environment.name
-  org_id = google_apigee_api.test_apigee_api.org_id
-  revision = google_apigee_api.test_apigee_api.latest_revision_id
-  proxy_id = google_apigee_api.test_apigee_api.name
+  environment     = google_apigee_environment.apigee_environment.name
+  org_id          = google_apigee_api.test_apigee_api.org_id
+  revision        = google_apigee_api.test_apigee_api.latest_revision_id
+  proxy_id        = google_apigee_api.test_apigee_api.name
+  service_account = google_service_account.service_account.email
 }
