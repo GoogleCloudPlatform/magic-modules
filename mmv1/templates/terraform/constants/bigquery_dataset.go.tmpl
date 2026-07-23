@@ -31,17 +31,11 @@ func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, err
 }
 
 func customCollationDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	// 1. Check if the configuration is explicitly set to an empty string.
-	// We use GetRawConfig to see what the user actually wrote,
-	// before the SDK "fills in" computed values.
+	// Use raw config so we can distinguish an explicit "" from an omitted value.
 	conf := d.GetRawConfig()
 	if !conf.IsNull() && conf.GetAttr("default_collation").IsKnown() && !conf.GetAttr("default_collation").IsNull() {
 		val := conf.GetAttr("default_collation").AsString()
-
-		// 2. If config is "", but the state (old value) is NOT "", force an update.
-		old, _ := d.GetChange("default_collation")
-		if old != "" && val == "" {
-			// THIS is what goes inside the block:
+		if val == "" && d.HasChange("default_collation") {
 			if err := d.SetNew("default_collation", ""); err != nil {
 				return err
 			}
