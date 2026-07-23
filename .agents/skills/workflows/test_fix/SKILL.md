@@ -31,7 +31,7 @@ Consult `.agents/knowledge/index.md` for the topics the failure touches and open
 
 ### 2. Failure Scenario Classification & Remediation (Choose Path)
 
-Match failure symptoms against the central decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (Scenarios 1-8).
+Match failure symptoms against the central decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (all catalog scenarios).
 
 Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symptom patterns, root causes, and remediation recipes.
 
@@ -45,7 +45,7 @@ Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symp
 
 #### Path B: Interactive Debugging (Fallback)
 * Use the `qa-test-runner` subagent to isolate logs and inspect request/response JSONs.
-* Match symptoms against Scenario 1-8 decision trees and apply source modifications using `triage` and `fix` skills.
+* Match symptoms against decision tree scenarios and apply source modifications using `triage` and `fix` skills.
 * Execute provider generation (`make provider VERSION=<ga|beta>`) and re-run acceptance tests for each target provider version (`ga`, `beta`, or `both`) to verify `PASS`.
 
 ---
