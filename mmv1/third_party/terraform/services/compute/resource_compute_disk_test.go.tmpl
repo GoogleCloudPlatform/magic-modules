@@ -316,6 +316,16 @@ func TestDiskImageDiffSuppress(t *testing.T) {
 			New:                "ubuntu-minimal-2404-lts-amd64",
 			ExpectDiffSuppress: false,
 		},
+		"matching fedora coreos testing devel family": {
+			Old:                "https://www.googleapis.com/compute/v1/projects/fedora-coreos-cloud/global/images/fedora-coreos-43-20260411-20-dev0-gcp-x86-64",
+			New:                "family/fedora-coreos-testing-devel",
+			ExpectDiffSuppress: true,
+		},
+		"matching fedora coreos testing devel arm64 family": {
+			Old:                "https://www.googleapis.com/compute/v1/projects/fedora-coreos-cloud/global/images/fedora-coreos-43-20260411-20-dev0-gcp-aarch64",
+			New:                "family/fedora-coreos-testing-devel-arm64",
+			ExpectDiffSuppress: true,
+		},
 	}
 
 	for tn, tc := range cases {
