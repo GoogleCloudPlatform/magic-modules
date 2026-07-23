@@ -67,3 +67,49 @@ func TestFuncCheck_InvalidFunctions(t *testing.T) {
 		})
 	}
 }
+
+func TestFuncCheck_Pipelines(t *testing.T) {
+	tests := []struct {
+		name    string
+		content string
+	}{
+		{"single_pipe", `{{ .Name | camelize }}`},
+		{"multi_pipe", `{{ .Name | lower | camelize }}`},
+		{"pipe_with_args", `{{ .Name | replace "a" "b" | title }}`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			path := createTestFile(t, tt.content)
+			results, err := CheckInvalidFuncsForFile(path)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if len(results) != 0 {
+				t.Errorf("expected no errors for pipeline, got: %v", results)
+			}
+		})
+	}
+}
+
+func TestFuncCheck_LineNumbers(t *testing.T) {
+	content := `line 1
+line 2
+{{ validFunc }}
+line 4
+{{ InvalidFunc }}
+line 6`
+	// Note: validFunc needs to be in our registry for this test to work
+	// Let's use 'title' which we know is valid
+	content = strings.Replace(content, "validFunc", "title .Name", 1)
+	
+	path := createTestFile(t, content)
+	results, _ := CheckInvalidFuncsForFile(path)
+	
+	if len(results) == 0 {
+		t.Fatal("expected an error on line 5, got none")
+	}
+	if !strings.Contains(results[0], "line 5") {
+		t.Errorf("expected error to mention line 5, got: %s", results[0])
+	}
+}
