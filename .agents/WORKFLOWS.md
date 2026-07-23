@@ -9,7 +9,7 @@ specific one.
 1.  **Source of Truth:** `magic-modules` contains YAML schema definitions in `mmv1/` and templates. Code is generated into downstream providers.
 2.  **Use Skills:** Discover and leverage `.agents/skills/` to perform complex tasks.
 3.  **Verify before a PR:** generate, build, and run the tests relevant to the change. A task is not done because it compiles.
-4.  **Never weaken the baseline:** no disabling or skipping tests, and no test-dodging behavior flags (`ignore_read`, `default_from_api`, `ImportStateVerifyIgnore`) without an adjacent comment justifying the API behavior that requires them.
+4.  **Never weaken baseline test coverage:** no disabling or skipping tests, and no test-dodging behavior flags (`ignore_read`, `ImportStateVerifyIgnore`) without an adjacent comment justifying the API behavior that requires them.
 5.  **PR descriptions are brief:** what changed and why, in a few sentences.
 
 ## Available Workflows:

@@ -190,21 +190,22 @@ func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, pro
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
 	resourceConverters := map[string]string{
-		"converters/google/resources/resource_converters.go":                       "third_party/tgc/resource_converters.go.tmpl",
-		"converters/google/resources/services/bigquery/iam_bigquery_dataset.go":    "third_party/terraform/services/bigquery/iam_bigquery_dataset.go.tmpl",
-		"converters/google/resources/services/compute/client.go":                   "third_party/terraform/services/compute/client.go.tmpl",
-		"converters/google/resources/services/compute/compute_instance.go":         "third_party/tgc/services/compute/compute_instance.go.tmpl",
-		"converters/google/resources/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
-		"converters/google/resources/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
-		"converters/google/resources/services/kms/iam_kms_crypto_key.go":           "third_party/terraform/services/kms/iam_kms_crypto_key.go.tmpl",
-		"converters/google/resources/services/kms/iam_kms_key_ring.go":             "third_party/terraform/services/kms/iam_kms_key_ring.go.tmpl",
-		"converters/google/resources/services/pubsub/iam_pubsub_subscription.go":   "third_party/terraform/services/pubsub/iam_pubsub_subscription.go.tmpl",
-		"converters/google/resources/services/resourcemanager/iam_folder.go":       "third_party/terraform/services/resourcemanager/iam_folder.go.tmpl",
-		"converters/google/resources/services/resourcemanager/iam_organization.go": "third_party/terraform/services/resourcemanager/iam_organization.go.tmpl",
-		"converters/google/resources/services/resourcemanager/iam_project.go":      "third_party/terraform/services/resourcemanager/iam_project.go.tmpl",
-		"converters/google/resources/services/spanner/client.go":                   "third_party/terraform/services/spanner/client.go",
-		"converters/google/resources/services/spanner/iam_spanner_database.go":     "third_party/terraform/services/spanner/iam_spanner_database.go.tmpl",
-		"converters/google/resources/services/spanner/iam_spanner_instance.go":     "third_party/terraform/services/spanner/iam_spanner_instance.go.tmpl",
+		"converters/google/resources/resource_converters.go":                            "third_party/tgc/resource_converters.go.tmpl",
+		"converters/google/resources/services/bigquery/iam_bigquery_dataset.go":         "third_party/terraform/services/bigquery/iam_bigquery_dataset.go.tmpl",
+		"converters/google/resources/services/compute/client.go":                        "third_party/terraform/services/compute/client.go.tmpl",
+		"converters/google/resources/services/compute/compute_instance.go":              "third_party/tgc/services/compute/compute_instance.go.tmpl",
+		"converters/google/resources/services/compute/compute_instance_helpers.go":      "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
+		"converters/google/resources/services/compute/compute_instance_http_helpers.go": "third_party/terraform/services/compute/compute_instance_http_helpers.go.tmpl",
+		"converters/google/resources/services/compute/metadata.go":                      "third_party/terraform/services/compute/metadata.go.tmpl",
+		"converters/google/resources/services/kms/iam_kms_crypto_key.go":                "third_party/terraform/services/kms/iam_kms_crypto_key.go.tmpl",
+		"converters/google/resources/services/kms/iam_kms_key_ring.go":                  "third_party/terraform/services/kms/iam_kms_key_ring.go.tmpl",
+		"converters/google/resources/services/pubsub/iam_pubsub_subscription.go":        "third_party/terraform/services/pubsub/iam_pubsub_subscription.go.tmpl",
+		"converters/google/resources/services/resourcemanager/iam_folder.go":            "third_party/terraform/services/resourcemanager/iam_folder.go.tmpl",
+		"converters/google/resources/services/resourcemanager/iam_organization.go":      "third_party/terraform/services/resourcemanager/iam_organization.go.tmpl",
+		"converters/google/resources/services/resourcemanager/iam_project.go":           "third_party/terraform/services/resourcemanager/iam_project.go.tmpl",
+		"converters/google/resources/services/spanner/client.go":                        "third_party/terraform/services/spanner/client.go",
+		"converters/google/resources/services/spanner/iam_spanner_database.go":          "third_party/terraform/services/spanner/iam_spanner_database.go.tmpl",
+		"converters/google/resources/services/spanner/iam_spanner_instance.go":          "third_party/terraform/services/spanner/iam_spanner_instance.go.tmpl",
 	}
 
 	filteredFiles := make(map[string]string)
