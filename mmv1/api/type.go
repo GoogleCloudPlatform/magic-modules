@@ -1205,57 +1205,15 @@ func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	}
 }
 
-func propertyWithRequired(required bool) func(*Type) {
-	return func(p *Type) {
-		p.Required = required
-	}
-}
-
 func propertyWithWriteOnly(writeOnly bool) func(*Type) {
 	return func(p *Type) {
 		p.WriteOnly = writeOnly
 	}
 }
 
-func propertyWithIgnoreRead(ignoreRead bool) func(*Type) {
-	return func(p *Type) {
-		p.IgnoreRead = ignoreRead
-	}
-}
-
-func propertyWithConflicts(conflicts []string) func(*Type) {
-	return func(p *Type) {
-		p.Conflicts = conflicts
-	}
-}
-
-func propertyWithRequiredWith(requiredWith []string) func(*Type) {
-	return func(p *Type) {
-		p.RequiredWith = requiredWith
-	}
-}
-
-func propertyWithAtLeastOneOf(atLeastOneOf []string) func(*Type) {
-	return func(p *Type) {
-		p.AtLeastOneOf = atLeastOneOf
-	}
-}
-
 func propertyWithApiName(apiName string) func(*Type) {
 	return func(p *Type) {
 		p.ApiName = apiName
-	}
-}
-
-func propertyWithExactlyOneOfPointer(ptr *[]string) func(*Type) {
-	return func(p *Type) {
-		p.ExactlyOneOfGroup = ptr
-	}
-}
-
-func propertyWithAtLeastOneOfPointer(ptr *[]string) func(*Type) {
-	return func(p *Type) {
-		p.AtLeastOneOfGroup = ptr
 	}
 }
 
