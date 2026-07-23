@@ -14,7 +14,6 @@
 ---
 name: 'GlobalVmExtensionPolicy'
 description: 'A Global VM Extension Policy.'
-min_version: 'beta'
 base_url: 'projects/{{project}}/global/vmExtensionPolicies'
 self_link: 'projects/{{project}}/global/vmExtensionPolicies/{{name}}'
 update_verb: 'PATCH'
