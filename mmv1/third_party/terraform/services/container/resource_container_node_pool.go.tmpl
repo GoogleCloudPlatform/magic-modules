@@ -1582,9 +1582,19 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 	}
 
 	if np.PlacementPolicy != nil {
+		// GKE doesn't persist PlacementPolicy.Type on node pools — the
+		// field is accepted on Create/Update but returned as empty on
+		// GET. When PolicyName is set (a custom resource policy is
+		// bound), COMPACT is the only valid value for Type, so derive
+		// it from PolicyName on read to avoid spurious drift / forced
+		// in-place updates on every plan.
+		placementPolicyType := np.PlacementPolicy.Type
+		if placementPolicyType == "" && np.PlacementPolicy.PolicyName != "" {
+			placementPolicyType = "COMPACT"
+		}
 		nodePool["placement_policy"] = []map[string]interface{}{
 			{
-				"type": np.PlacementPolicy.Type,
+				"type": placementPolicyType,
 				"policy_name": np.PlacementPolicy.PolicyName,
 				"tpu_topology": np.PlacementPolicy.TpuTopology,
 			},
