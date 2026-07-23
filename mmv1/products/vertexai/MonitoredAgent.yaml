@@ -29,6 +29,8 @@ references:
   guides:
     'Agent Anomaly Detection': 'https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.monitoredAgents'
+# AAD serves on the REP endpoint, not the standard Vertex AI endpoint.
+base_url_override: 'https://aiplatform.{{region}}.rep.googleapis.com/v1beta1/'
 base_url: 'projects/{{project}}/locations/{{region}}/monitoredAgents'
 self_link: 'projects/{{project}}/locations/{{region}}/monitoredAgents/{{monitored_agent_id}}'
 id_format: 'projects/{{project}}/locations/{{region}}/monitoredAgents/{{monitored_agent_id}}'
@@ -44,13 +46,15 @@ immutable: true
 timeouts:
   insert_minutes: 3
   delete_minutes: 3
+# Use PollAsync instead of OpAsync because the LRO endpoint doesn't
+# support base_url_override (AAD serves on the REP endpoint).
 async:
   actions: ['create', 'delete']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
+  type: 'PollAsync'
+  check_response_func_existence: 'PollCheckForMonitoredAgentActive'
+  check_response_func_absence: 'PollCheckForMonitoredAgentDisabled'
+  suppress_error: false
+  target_occurrences: 1
 # Retry on NOT_FOUND during Enable — the agent may not be discovered yet
 # by the background sync job. Same pattern as Dataplex EntryLink.
 error_retry_predicates:
@@ -76,6 +80,7 @@ examples:
       scope_id: 'aad-scope'
       log_bucket_id: 'aad-log-bucket'
       observability_bucket_id: 'aad-obs-bucket'
+    skip_vcr: true
 parameters:
   - name: 'region'
     type: String

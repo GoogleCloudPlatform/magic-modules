@@ -1,8 +1,9 @@
 resource "google_logging_project_bucket_config" "{{index $.Vars "log_bucket_id"}}" {
-  project        = data.google_project.project.project_id
-  location       = "us"
-  retention_days = 30
-  bucket_id      = "{{index $.Vars "log_bucket_id"}}"
+  project          = data.google_project.project.project_id
+  location         = "us"
+  retention_days   = 30
+  bucket_id        = "{{index $.Vars "log_bucket_id"}}"
+  enable_analytics = true
 }
 
 resource "google_vertex_ai_agent_anomaly_detection_scope" "{{index $.Vars "scope_id"}}" {
