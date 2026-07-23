@@ -82,6 +82,14 @@ type Resource struct {
 	// base URL. It can often be inferred from the `create` path.
 	BaseUrl string `yaml:"base_url,omitempty"`
 
+	// [Optional] If set, overrides the product-level base URL for this resource.
+	// Use when a resource serves on a different endpoint than the rest of the
+	// product (e.g. aiplatform.{{region}}.rep.googleapis.com instead of
+	// {{region}}-aiplatform.googleapis.com). The value should include the scheme,
+	// host, and version path (e.g. "https://aiplatform.{{region}}.rep.googleapis.com/v1beta1/").
+	// Template variables like {{region}} are supported.
+	BaseUrlOverride string `yaml:"base_url_override,omitempty"`
+
 	// ====================
 	// Common Configuration
 	// ====================

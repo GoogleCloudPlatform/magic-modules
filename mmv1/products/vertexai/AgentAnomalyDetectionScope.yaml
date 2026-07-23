@@ -1,0 +1,118 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'AgentAnomalyDetectionScope'
+min_version: 'beta'
+description: |-
+  An Agent Anomaly Detection (AAD) scope defines the Cloud Logging and
+  Observability buckets that AAD monitors for anomalous agent behavior within
+  a location. Creating a scope provisions a dedicated tenant project for
+  detection. Only one scope may exist per location.
+references:
+  guides:
+    'Agent Anomaly Detection': 'https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.agentAnomalyDetectionScopes'
+# AAD serves on the REP endpoint (aiplatform.{{region}}.rep.googleapis.com),
+# not the standard Vertex AI endpoint ({{region}}-aiplatform.googleapis.com).
+base_url_override: 'https://aiplatform.{{region}}.rep.googleapis.com/v1beta1/'
+base_url: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes'
+self_link: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes/{{agent_anomaly_detection_scope_id}}'
+id_format: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes/{{agent_anomaly_detection_scope_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes/{{agent_anomaly_detection_scope_id}}'
+create_url: 'projects/{{project}}/locations/{{region}}/agentAnomalyDetectionScopes?agentAnomalyDetectionScopeId={{agent_anomaly_detection_scope_id}}'
+# The scope has no public update method, so all configurable fields are
+# immutable; changing them requires recreating the scope.
+immutable: true
+timeouts:
+  insert_minutes: 40
+  delete_minutes: 20
+# Use PollAsync instead of OpAsync because the LRO endpoint doesn't
+# support base_url_override (AAD serves on the REP endpoint).
+# PollAsync polls the resource's GET endpoint which uses base_url_override.
+async:
+  actions: ['create', 'delete']
+  type: 'PollAsync'
+  check_response_func_existence: 'PollCheckForScopeActive'
+  check_response_func_absence: 'PollCheckForScopeDeleted'
+  suppress_error: false
+  target_occurrences: 1
+examples:
+  - name: 'vertex_ai_agent_anomaly_detection_scope_basic'
+    primary_resource_id: 'scope'
+    min_version: 'beta'
+    vars:
+      scope_id: 'agent-anomaly-detection-scope'
+      log_bucket_id: 'aad-log-bucket'
+    # TODO(jennjiang): skip_vcr because ci-test-project-188019 returns
+    # FAILED_PRECONDITION on CreateScope (works on other projects).
+    # Need to debug CI project setup with reviewer. b/527074080
+    skip_vcr: true
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of the AgentAnomalyDetectionScope, e.g. us-central1.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'agentAnomalyDetectionScopeId'
+    type: String
+    description: |-
+      The ID to use for the AgentAnomalyDetectionScope, which will become the
+      final component of the scope's resource name. This value should be 1-63
+      characters and valid characters are /[a-z][0-9]-/.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The resource name of the AgentAnomalyDetectionScope, in the format
+      projects/{{project}}/locations/{{location}}/agentAnomalyDetectionScopes/{{agent_anomaly_detection_scope}}
+    output: true
+  - name: 'displayName'
+    type: String
+    description: User provided display name of the AgentAnomalyDetectionScope.
+    immutable: true
+  - name: 'logBuckets'
+    type: Array
+    item_type:
+      type: String
+    description: |-
+      Customer owned Cloud Logging bucket resource names attached to this scope.
+      Format: projects/{{project}}/locations/{{location}}/buckets/{{bucket}}.
+    required: true
+    immutable: true
+  - name: 'observabilityBuckets'
+    type: Array
+    item_type:
+      type: String
+    description: |-
+      Customer owned Cloud Observability bucket resource names attached to this
+      scope.
+      Format: projects/{{project}}/locations/{{location}}/buckets/{{bucket}}/datasets/{{dataset}}.
+    required: true
+    immutable: true
+  - name: 'state'
+    type: Enum
+    description: |-
+      The lifecycle state of the scope.
+    output: true
+    enum_values:
+      - 'CREATING'
+      - 'ACTIVE'
+      - 'DELETING'
+      - 'FAILED'
+      - 'UPDATING'
