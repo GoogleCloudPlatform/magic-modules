@@ -12,13 +12,13 @@ here, upstream — never in the downstream repos.
   provider task.
 - **`.agents/skills/`** — reusable skills the workflows compose (generation, testing, log parsing,
   troubleshooting). Each skill's `SKILL.md` frontmatter states when to use it.
-- **`.agents/knowledge/`** — the curated knowledge base (initial seeding in progress). When present,
-  consult its `index.md` at decision points and open only the entries the task needs.
+- **[.agents/knowledge/index.md](.agents/knowledge/index.md)** — the knowledge index: a short map of
+  where provider knowledge lives. Refer to this to check for relevant patterns or instructions.
 - **`.agents/archive/`** — parked tracks (currently TGC). Not maintained; do not use as reference.
 
 ## Ground rules
 
-- **Never weaken a test or check to make it pass.** No disabling or skipping tests, and no test-dodging
-  behavior flags (`ignore_read`, `default_from_api`, `ImportStateVerifyIgnore`) without an adjacent
+- **Never weaken baseline test coverage to make a test pass.** No disabling or skipping tests, and no test-dodging
+  behavior flags (`ignore_read`, `ImportStateVerifyIgnore`) without an adjacent
   comment justifying the API behavior that requires them.
 - **Verify before opening a PR**: generate, build, and run the tests relevant to what you changed.

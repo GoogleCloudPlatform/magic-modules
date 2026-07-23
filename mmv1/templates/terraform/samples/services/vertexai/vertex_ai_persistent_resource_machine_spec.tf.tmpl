@@ -1,0 +1,19 @@
+resource "google_vertex_ai_persistent_resource" "{{.PrimaryResourceId}}" {
+  name         = "{{index $.ResourceIdVars "persistent_resource_id"}}"
+  location     = "us-central1"
+
+  resource_pools {
+    machine_spec {
+      machine_type       = "a3-highgpu-8g"
+      accelerator_count  = 8
+      accelerator_type   = "NVIDIA_H100_80GB"
+    }
+
+    replica_count = "1"
+
+    disk_spec {
+      boot_disk_size_gb = 200
+      boot_disk_type    = "pd-ssd"
+    }
+  }
+}

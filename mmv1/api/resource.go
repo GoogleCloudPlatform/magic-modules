@@ -1387,7 +1387,7 @@ func (r Resource) Updatable() bool {
 	if !r.Immutable {
 		return true
 	}
-	for _, p := range r.AllPropertiesInVersion() {
+	for _, p := range r.AllNestedProperties(r.RootProperties()) {
 		if p.UpdateUrl != "" {
 			return true
 		}

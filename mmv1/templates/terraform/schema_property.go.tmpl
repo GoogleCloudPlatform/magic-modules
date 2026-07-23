@@ -52,7 +52,7 @@
 {{ end -}}
 {{ if .DiffSuppressFunc -}}
   DiffSuppressFunc: {{ .DiffSuppressFunc }},
-{{ else if eq .Type "ResourceRef" -}}
+{{ else if and (eq .Type "ResourceRef") (not .Output) -}}
   DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 {{ end -}}
 {{ if .StateFunc -}}
