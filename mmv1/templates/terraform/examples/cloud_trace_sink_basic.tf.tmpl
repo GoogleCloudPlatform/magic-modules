@@ -10,10 +10,12 @@ resource "google_bigquery_dataset" "example" {
 
 resource "google_cloud_trace_sink" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  sink_id  = "{{index $.Vars "sink_name"}}"
 
-  # The Cloud Trace API requires the destination project to be referenced by its
-  # project number, not its project ID.
+  # The Cloud Trace API references the project by its number, not its project ID,
+  # both for the sink itself and for the BigQuery destination.
+  project = data.google_project.project.number
+  sink_id = "{{index $.Vars "sink_name"}}"
+
   output_config {
     destination = "bigquery.googleapis.com/projects/${data.google_project.project.number}/datasets/${google_bigquery_dataset.example.dataset_id}"
   }

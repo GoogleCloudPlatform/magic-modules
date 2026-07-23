@@ -55,6 +55,7 @@ resource "google_bigquery_dataset" "second" {
 }
 
 resource "google_cloud_trace_sink" "sink" {
+  project = data.google_project.project.number
   sink_id = "tf-test-trace-sink-%{random_suffix}"
 
   output_config {
@@ -80,6 +81,7 @@ resource "google_bigquery_dataset" "second" {
 }
 
 resource "google_cloud_trace_sink" "sink" {
+  project = data.google_project.project.number
   sink_id = "tf-test-trace-sink-%{random_suffix}"
 
   output_config {

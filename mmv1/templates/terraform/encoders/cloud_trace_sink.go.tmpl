@@ -1,34 +1,11 @@
-// The Cloud Trace API requires the sink's canonical resource name in the request
-// body, and that name must reference the project by its NUMBER (not its ID),
-// e.g. "projects/{PROJECT_NUMBER}/traceSinks/{name}". Resolve the number here so
-// the resource can still be configured with the project ID.
+// The Cloud Trace API requires the sink's canonical resource name in the create
+// request body. It is built from the configured project and sink id; the
+// project must be given as its number (see the resource documentation).
 config := meta.(*transport_tpg.Config)
 project, err := tpgresource.GetProject(d, config)
 if err != nil {
 	return nil, err
 }
 
-projectNumber := project
-if _, atoiErr := strconv.Atoi(project); atoiErr != nil {
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return nil, err
-	}
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		RawURL:    fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v1/projects/%s", project),
-		UserAgent: userAgent,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("error resolving project number for project %q: %w", project, err)
-	}
-	if v, ok := res["projectNumber"].(string); ok && v != "" {
-		projectNumber = v
-	} else {
-		return nil, fmt.Errorf("could not determine project number for project %q", project)
-	}
-}
-
-obj["name"] = fmt.Sprintf("projects/%s/traceSinks/%s", projectNumber, d.Get("sink_id"))
+obj["name"] = fmt.Sprintf("projects/%s/traceSinks/%s", project, d.Get("sink_id"))
 return obj, nil
