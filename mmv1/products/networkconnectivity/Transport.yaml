@@ -121,11 +121,15 @@ properties:
   - name: network
     type: ResourceRef
     description: |
-      Resource URL of the Network that will be peered with this Transport. This field must be provided during resource creation and cannot be changed.
+      Resource URL of the Network that will be peered with this Transport.
+      Exactly one of `network` or `hub` must be specified. This field is
+      immutable and cannot be changed after creation.
     immutable: true
     resource: Network
     imports: selfLink
-    required: true
+    exactly_one_of:
+      - hub
+      - network
   - name: advertisedRoutes
     type: Array
     description: |
@@ -144,11 +148,16 @@ properties:
   - name: hub
     type: ResourceRef
     description: |
-      The NCC Hub that the Transport should attach to. The hub must be in the same project as the Transport.
+      The NCC Hub that the Transport should attach to. The hub must be in the
+      same project as the Transport. Exactly one of `network` or `hub` must be
+      specified. This field is immutable and cannot be changed after creation.
     min_version: beta
     resource: Hub
     imports: selfLink
     immutable: true
+    exactly_one_of:
+      - hub
+      - network
   - name: pscRoutingEnabled
     type: Boolean
     description: |
