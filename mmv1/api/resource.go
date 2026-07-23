@@ -974,9 +974,9 @@ func configureWriteOnlyConstraints(originalField, writeOnlyField, versionField *
 	writeOnlyField.IgnoreRead = true
 	versionField.Required = false
 
-	originalFieldPath := originalField.PropertyPath()
-	writeOnlyFieldPath := writeOnlyField.PropertyPath()
-	versionFieldPath := versionField.PropertyPath()
+	originalFieldPath := strings.Join(originalField.Lineage(), ".0.")
+	writeOnlyFieldPath := strings.Join(writeOnlyField.Lineage(), ".0.")
+	versionFieldPath := strings.Join(versionField.Lineage(), ".0.")
 
 	writeOnlyField.RequiredWith = []string{versionFieldPath}
 	versionField.RequiredWith = []string{writeOnlyFieldPath}

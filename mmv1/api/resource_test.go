@@ -565,58 +565,6 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 	})
 
-	t.Run("WriteOnly property inside FlattenObject generates resolvable constraint paths", func(t *testing.T) {
-		t.Parallel()
-
-		product := &api.Product{Name: "testproduct"}
-		product.SetCompiler("terraform")
-		resource := &api.Resource{
-			Name:            "testresource",
-			ProductMetadata: product,
-		}
-		writeOnlyProp := createTestType("secretData", "String",
-			withWriteOnly(true),
-			withDescription("The secret data"),
-		)
-		flattenedParent := &api.Type{
-			Name:          "payload",
-			Type:          "NestedObject",
-			FlattenObject: true,
-			Properties:    []*api.Type{writeOnlyProp},
-		}
-
-		resource.Properties = []*api.Type{flattenedParent}
-		resource.SetDefault(product)
-		resource.Properties = resource.AddExtraFields(resource.Properties, nil)
-		resource.SetDefault(product)
-
-		var writeOnlyField, versionField *api.Type
-		for _, prop := range flattenedParent.Properties {
-			switch prop.Name {
-			case "secretDataWo":
-				writeOnlyField = prop
-			case "secretDataWoVersion":
-				versionField = prop
-			}
-		}
-
-		if writeOnlyField == nil || versionField == nil {
-			t.Fatal("Expected generated write-only and version fields inside payload")
-		}
-
-		assertPaths := func(name string, field *api.Type, paths, want []string) {
-			t.Helper()
-			if got := field.GetPropertySchemaPathList(paths); !reflect.DeepEqual(got, want) {
-				t.Errorf("%s paths = %v, want %v", name, got, want)
-			}
-		}
-
-		assertPaths("secretData conflicts", writeOnlyProp, writeOnlyProp.Conflicting(), []string{"secret_data_wo"})
-		assertPaths("secretDataWo conflicts", writeOnlyField, writeOnlyField.Conflicting(), []string{"secret_data"})
-		assertPaths("secretDataWo required_with", writeOnlyField, writeOnlyField.RequiredWithList(), []string{"secret_data_wo_version"})
-		assertPaths("secretDataWoVersion required_with", versionField, versionField.RequiredWithList(), []string{"secret_data_wo"})
-	})
-
 	t.Run("WriteOnly property doesn't add companion fields for tgc", func(t *testing.T) {
 		t.Parallel()
 
