@@ -554,6 +554,11 @@ func TestAccArtifactRegistryRepository_remoteNoCache(t *testing.T) {
 				Config: testAccArtifactRegistryRepository_remoteNoCacheRemoved(repositoryID, "connector repo"),
 			},
 			{
+				ResourceName:      "google_artifact_registry_repository.rr-test-nocache",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config:   testAccArtifactRegistryRepository_remoteNoCacheRemoved(repositoryID, "connector repo"),
 				PlanOnly: true,
 			},
