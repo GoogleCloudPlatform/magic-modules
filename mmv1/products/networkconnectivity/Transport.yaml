@@ -125,7 +125,6 @@ properties:
     immutable: true
     resource: Network
     imports: selfLink
-    required: true
   - name: advertisedRoutes
     type: Array
     description: |
