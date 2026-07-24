@@ -188,9 +188,9 @@ func FlattenSchedulingHTTP(resp map[string]interface{}) []map[string]interface{}
 	v_tt, _ := resp["terminationTime"].(string)
 	schedulingMap["termination_time"] = v_tt
 	if v, ok := resp["automaticRestart"]; ok { schedulingMap["automatic_restart"] = v }
+{{- if ne $.TargetVersionName "ga" }}
 	v_sgos, _ := resp["skipGuestOsShutdown"].(bool)
 	schedulingMap["skip_guest_os_shutdown"] = v_sgos
-{{- if ne $.TargetVersionName "ga" }}
 	if v, ok := resp["maintenanceInterval"]; ok { schedulingMap["maintenance_interval"] = v }
 	if v, ok := resp["hostErrorTimeoutSeconds"]; ok { schedulingMap["host_error_timeout_seconds"] = ParseIntHTTP(v) }
 {{- end }}
@@ -241,7 +241,6 @@ func FlattenSchedulingHTTP(resp map[string]interface{}) []map[string]interface{}
 		}
 		schedulingMap["graceful_shutdown"] = []map[string]interface{}{graceMap}
 	}
-{{- end }}
 
 	if pndRaw, ok := resp["preemptionNoticeDuration"]; ok && pndRaw != nil {
 		pnd := pndRaw.(map[string]interface{})
@@ -252,6 +251,7 @@ func FlattenSchedulingHTTP(resp map[string]interface{}) []map[string]interface{}
 			},
 		}
 	}
+{{- end }}
 
 	if naRaw, ok := resp["nodeAffinities"].([]interface{}); ok && naRaw != nil {
 		nodeAffinities := make([]map[string]interface{}, len(naRaw))
