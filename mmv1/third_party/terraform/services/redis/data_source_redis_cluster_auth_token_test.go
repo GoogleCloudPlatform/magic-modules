@@ -45,7 +45,6 @@ resource "google_redis_cluster_token_auth_user" "user-basic" {
 
 resource "google_redis_cluster_auth_token" "token-basic" {
   token_auth_user = google_redis_cluster_token_auth_user.user-basic.id
-  token_id        = "tf-test-token-%{random_suffix}"
 }
 
 data "google_redis_cluster_auth_token" "default" {
