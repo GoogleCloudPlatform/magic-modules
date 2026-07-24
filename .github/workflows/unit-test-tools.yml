@@ -1,6 +1,7 @@
 name: unit-test-tools
 
-permissions: read-all
+permissions:
+  contents: read
 
 on:
   pull_request:
