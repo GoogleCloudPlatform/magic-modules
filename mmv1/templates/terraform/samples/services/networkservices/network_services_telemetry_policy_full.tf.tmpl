@@ -1,0 +1,37 @@
+resource "google_network_services_telemetry_policy" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.ResourceIdVars "resource_name"}}"
+  location     = "us-central1"
+  display_name = "Full Telemetry Policy Sample"
+  labels       = {
+    foo = "bar"
+  }
+
+  telemetry_target {
+    resources = [
+      "//staging-run.sandbox.googleapis.com/projects/{{index $.Vars "project"}}/locations/us-central1/services/my-service"
+    ]
+  }
+
+  tracing_configuration {
+    sampling_rate = 0.5
+
+    custom_span_attributes {
+      attribute_name = "env"
+      literal_value  = "prod"
+    }
+
+    custom_span_attributes {
+      attribute_name    = "user-id"
+      from_header_value = "x-user-id"
+    }
+
+    parent_based_sampling {
+      enabled       = true
+      sampling_rate = 0.8
+    }
+  }
+
+  metrics_configuration {
+    enabled = true
+  }
+}
