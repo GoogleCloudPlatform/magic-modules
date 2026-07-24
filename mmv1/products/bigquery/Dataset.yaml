@@ -41,8 +41,6 @@ include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
-custom_diff:
-  - 'customCollationDiff'
 generate_list_resource: true
 exclude_sweeper: true
 samples:
@@ -464,7 +462,6 @@ properties:
       The following values are supported:
       - 'und:ci': undetermined locale, case insensitive.
       - '': empty string. Default to case-sensitive behavior.
-    default_from_api: true
     send_empty_value: true
     custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_default_collation.go.tmpl'
   - name: 'storageBillingModel'
