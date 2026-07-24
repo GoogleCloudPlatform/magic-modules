@@ -1,0 +1,5 @@
+url = strings.Replace(url, "/v1beta1/../v1/", "/v1/", 1)
+url = strings.Replace(url, "/v1/../v1/", "/v1/", 1)
+if d.Get("force_destroy").(bool) {
+	url = url + "?force=true"
+}
