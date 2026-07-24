@@ -29,8 +29,6 @@ async:
     resource_inside_response: true
 autogen_status: U3VwcG9ydEV2ZW50U3Vic2NyaXB0aW9u
 autogen_async: true
-custom_code:
-  post_delete: 'templates/terraform/post_delete/cloud_support_event_subscription.go.tmpl'
 examples:
   - name: "cloud_support_event_subscription_basic"
     primary_resource_id: "subscription"
