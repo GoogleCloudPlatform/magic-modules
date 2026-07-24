@@ -7,10 +7,9 @@ import (
 )
 
 func TestDetectMissingIdentityCoverage(t *testing.T) {
-	// Create a temp directory structure simulating services/
+	// Create a temp directory simulating a flat service directory
+	// (servicesDir must be the direct parent of resource_*.go files).
 	tmpDir := t.TempDir()
-	serviceDir := filepath.Join(tmpDir, "compute")
-	os.MkdirAll(serviceDir, 0755)
 
 	// Resource WITH identity, WITH full CRUD coverage
 	goodResource := `package compute
@@ -38,14 +37,22 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	return nil
 }
 `
-	os.WriteFile(filepath.Join(serviceDir, "resource_google_compute_instance.go"), []byte(goodResource), 0644)
+	os.WriteFile(filepath.Join(tmpDir, "resource_google_compute_instance.go"), []byte(goodResource), 0644)
 
 	// Test file with import identity test
 	goodTest := `package compute
 
-func TestAccComputeInstance_importBlockWithResourceIdentity(t *testing.T) {}
+func TestAccComputeInstance_importBlockWithResourceIdentity(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
 `
-	os.WriteFile(filepath.Join(serviceDir, "resource_google_compute_instance_test.go"), []byte(goodTest), 0644)
+	os.WriteFile(filepath.Join(tmpDir, "resource_google_compute_instance_test.go"), []byte(goodTest), 0644)
 
 	// Resource WITH identity, MISSING Create and Update coverage
 	badResource := `package compute
@@ -71,7 +78,7 @@ func resourceComputeBadDiskUpdate(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 `
-	os.WriteFile(filepath.Join(serviceDir, "resource_google_compute_bad_disk.go"), []byte(badResource), 0644)
+	os.WriteFile(filepath.Join(tmpDir, "resource_google_compute_bad_disk.go"), []byte(badResource), 0644)
 
 	// No test file for bad_disk -> missing import test
 
@@ -113,8 +120,6 @@ func resourceComputeBadDiskUpdate(d *schema.ResourceData, meta interface{}) erro
 
 func TestDetectMissingIdentityCoverage_SkipsUnchangedResources(t *testing.T) {
 	tmpDir := t.TempDir()
-	serviceDir := filepath.Join(tmpDir, "dns")
-	os.MkdirAll(serviceDir, 0755)
 
 	// Resource with identity but missing coverage
 	resource := `package dns
@@ -133,7 +138,7 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 `
-	os.WriteFile(filepath.Join(serviceDir, "resource_dns_record_set.go"), []byte(resource), 0644)
+	os.WriteFile(filepath.Join(tmpDir, "resource_dns_record_set.go"), []byte(resource), 0644)
 
 	// Pass empty changedResources - should skip everything
 	results, err := DetectMissingIdentityCoverage(tmpDir, []string{})
