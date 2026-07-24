@@ -181,6 +181,14 @@ samples:
           cloud_run_service_name: 'cloudrun-srv'
         test_env_vars:
           project: 'PROJECT_NAME'
+  - name: 'cloud_run_service_sandbox'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'cloud_run_service_sandbox'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 virtual_fields:
   - name: 'autogenerate_revision_name'
     description: |
@@ -540,6 +548,9 @@ properties:
                           - name: 'containerPort'
                             type: Integer
                             description: Port number the container listens on. This must be a valid port number (between 1 and 65535). Defaults to "8080".
+                    - name: 'sandboxLauncher'
+                      type: boolean
+                      description: Indicates that this container can act as a sandbox supervisor and launch sandboxes.
                     - name: 'resources'
                       type: NestedObject
                       description: |-

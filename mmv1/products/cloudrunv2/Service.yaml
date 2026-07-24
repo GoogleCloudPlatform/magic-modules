@@ -222,6 +222,15 @@ samples:
           cloud_run_service_name: 'cloudrun-service'
         ignore_read_extra:
           - 'deletion_protection'
+  - name: 'cloudrunv2_service_sandbox'
+    primary_resource_id: 'default'
+    exclude_test: true
+    steps:
+      - name: 'cloudrunv2_service_sandbox'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -632,6 +641,9 @@ properties:
                     description: |-
                       Port number the container listens on. This must be a valid TCP port number, 0 < containerPort < 65536.
               max_size: 1
+            - name: 'sandboxLauncher'
+              type: boolean
+              description: Indicates that this container can act as a sandbox supervisor and launch sandboxes.
             - name: 'volumeMounts'
               type: Array
               description: |-
