@@ -224,7 +224,6 @@ samples:
           - 'deletion_protection'
   - name: 'cloudrunv2_service_sandbox'
     primary_resource_id: 'default'
-    exclude_test: true
     steps:
       - name: 'cloudrunv2_service_sandbox'
         resource_id_vars:
