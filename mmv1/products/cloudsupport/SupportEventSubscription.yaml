@@ -15,7 +15,7 @@
 name: SupportEventSubscription
 description: A support event subscription for receiving notifications from Cloud Support API.
 base_url: 'organizations/{{organization}}/supportEventSubscriptions'
-self_link: '{{name}}'
+self_link: 'organizations/{{organization}}/supportEventSubscriptions/{{name}}'
 create_url: 'organizations/{{organization}}/supportEventSubscriptions'
 update_mask: true
 update_verb: PATCH
@@ -76,6 +76,7 @@ properties:
     type: String
     description: Identifier. The resource name of the support event subscription.
     output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: pubSubTopic
     type: String
     required: true
