@@ -13,7 +13,6 @@
 
 ---
 name: "QueryTemplate"
-min_version: ga
 deletion_policy_default: "DELETE_IF_DRAFTED"
 deletion_policy_custom_docs: true
 description: |
