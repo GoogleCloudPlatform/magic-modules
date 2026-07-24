@@ -5592,6 +5592,50 @@ func TestAccComputeInstance_NetworkAttachmentUpdate(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_ServiceClassNetworkAttachment(t *testing.T) {
+	t.Parallel()
+	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
+	envRegion := envvar.GetTestRegionFromEnv()
+	var instance map[string]interface{}
+
+	providerVersion := "v1"
+
+	testNetworkAttachmentName := fmt.Sprintf("tf-test-network-attachment-%s", suffix)
+
+	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{testNetworkAttachmentName}
+	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envRegion, testNetworkAttachmentName)
+
+	context := map[string]interface{}{
+		"suffix":                  (acctest.RandString(t, 10)),
+		"network_attachment_name": testNetworkAttachmentName,
+		"region":                  envRegion,
+		"org_id":                  envvar.GetTestOrgTargetFromEnv(t),
+		"billing_account":         envvar.GetTestBillingAccountFromEnv(t),
+{{- if ne $.TargetVersionName "ga" }}
+		"service_class_id":        "gcp-tf-persistent-service-class-beta",
+{{- else }}
+    "service_class_id":        "gcp-tf-persistent-service-class-ga",
+{{- end }}
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders:        map[string]resource.ExternalProvider{"time": {}},
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_serviceClassNetworkAttachment(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasNetworkAttachment(&instance, fmt.Sprintf("https://www.googleapis.com/compute/%s/%s", providerVersion, fullFormNetworkAttachmentName)),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstance_NicStackTypeUpdate(t *testing.T) {
 	t.Parallel()
 	suffix := acctest.RandString(t, 10)
@@ -13554,6 +13598,99 @@ resource "google_compute_instance" "foobar" {
 	}
 }
 `, suffix, suffix, suffix, region, suffix, region, suffix, region, suffix, region, suffix, region, networkAttachment)
+}
+
+func testAccComputeInstance_serviceClassNetworkAttachment(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "accepted_consumer_project1" {
+  project_id      = "tf-test-prj-accept1-%{suffix}"
+  name            = "tf-test-prj-accept1-%{suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "compute_service" {
+  project = google_project.accepted_consumer_project1.project_id
+  service = "compute.googleapis.com"
+}
+
+resource "time_sleep" "wait_300_seconds" {
+  create_duration = "300s"
+  depends_on = [google_project_service.compute_service]
+}
+
+resource "google_compute_network" "test-network"{
+  project = google_project.accepted_consumer_project1.project_id
+  name = "tf-test-network-%{suffix}"
+  auto_create_subnetworks = false
+
+  depends_on = [google_project_service.compute_service]
+}
+
+resource "google_compute_subnetwork" "test-subnetwork" {
+  project = google_project.accepted_consumer_project1.project_id
+  name          = "tf-test-compute-subnet-%{suffix}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.test-network.id
+}
+
+resource "google_compute_network_attachment" "test_network_attachment" {
+  project = google_project.accepted_consumer_project1.project_id
+  name = "%{network_attachment_name}"
+  region = "us-central1"
+  description = "network attachment description"
+  connection_preference = "ACCEPT_MANUAL"
+  producer_accept_lists = [
+    "serviceclasses/%{service_class_id}"
+  ]
+
+  subnetworks = [
+    google_compute_subnetwork.test-subnetwork.self_link
+  ]
+
+  depends_on = [time_sleep.wait_300_seconds]
+}
+
+resource "google_compute_address" "producer_address" {
+  name = "tf-test-basic-address%{suffix}"
+  network_attachment = google_compute_network_attachment.test_network_attachment.id
+  service_class_id = "%{service_class_id}"
+}
+
+resource "google_compute_instance" "foobar" {
+  project = google_project.accepted_consumer_project1.project_id
+  name         = "tf-test-instance-%{suffix}"
+  machine_type = "e2-medium"
+  zone         = "%{region}-a"
+  
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.id
+    }
+  }
+  
+  network_interface {
+    network = google_compute_network.test-network.id
+    subnetwork = google_compute_subnetwork.test-subnetwork.self_link
+  }
+  
+  network_interface {
+    network_attachment = google_compute_network_attachment.test_network_attachment.self_link
+    service_class_id = "%{service_class_id}"
+  }
+  
+  metadata = {
+    foo = "bar"
+  }
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+`, context)
 }
 
 func testAccComputeInstance_nicStackTypeUpdate(suffix, region, stack_type, instance string) string {
