@@ -135,7 +135,7 @@ run_acctest_for_version() {
     if [ -n "$TEST_NAME" ]; then
       TF_LOG=DEBUG make testacc TEST="$SERVICE_PATH" TESTARGS="-run=${TEST_NAME}\$\$" > "$LOG_FILE" 2>&1
     else
-      TF_LOG=DEBUG make testacc TEST="$SERVICE_PATH" > "$LOG_FILE" 2>&1
+      TF_LOG=DEBUG make testacc TEST="$SERVICE_PATH" TESTARGS="-run=^TestAcc" > "$LOG_FILE" 2>&1
     fi
   )
   local TEST_EXIT_CODE=$?
