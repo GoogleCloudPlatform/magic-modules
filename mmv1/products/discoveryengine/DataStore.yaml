@@ -100,6 +100,13 @@ samples:
       - name: 'discoveryengine_datastore_advanced_site_search_config'
         resource_id_vars:
           data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_acl_config'
+    primary_resource_id: 'acl_config'
+    exclude_basic_doc: true
+    steps:
+      - name: 'discoveryengine_datastore_acl_config'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
 parameters:
   - name: 'location'
     type: String
@@ -190,6 +197,16 @@ properties:
       - 'NO_CONTENT'
       - 'CONTENT_REQUIRED'
       - 'PUBLIC_WEBSITE'
+  - name: 'aclEnabled'
+    type: Boolean
+    description: |
+      Immutable. Whether data in the DataStore has ACL information. If set to `true`,
+      the source data must have ACL. ACL will be ingested when data is ingested by
+      DocumentService.ImportDocuments methods. When ACL is enabled for the DataStore,
+      Document can't be accessed by calling DocumentService.GetDocument or
+      DocumentService.ListDocuments. Currently ACL is only supported in the `GENERIC`
+      industry vertical with non-`PUBLIC_WEBSITE` content config.
+    immutable: true
   - name: 'advancedSiteSearchConfig'
     type: NestedObject
     description: |
