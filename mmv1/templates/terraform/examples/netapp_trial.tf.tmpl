@@ -2,8 +2,8 @@ resource "google_netapp_trial" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
 
   # Optional: Provide an exit reason and feedback when the trial is destroyed.
-  # action_on_destroy        = "OPT_OUT"
-  # provided_opt_out_reasons = ["Too expensive", "Missing feature"]
+  action_on_destroy        = "OPT_OUT"
+  provided_opt_out_reasons = ["Too expensive", "Missing feature"]
 
   # It is highly recommended to include this lifecycle block.
   # Modifying the location will cause Terraform to destroy and recreate the trial,
