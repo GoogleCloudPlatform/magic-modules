@@ -714,6 +714,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 `, context)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccVertexAIReasoningEngine_apiParity(t *testing.T) {
 	t.Parallel()
 
@@ -723,7 +724,7 @@ func TestAccVertexAIReasoningEngine_apiParity(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -735,9 +736,12 @@ func TestAccVertexAIReasoningEngine_apiParity(t *testing.T) {
 
 func testAccVertexAIReasoningEngine_apiParity(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {}
+data "google_project" "project" {
+  provider = google-beta
+}
 
 resource "google_cloudbuild_worker_pool" "pool" {
+  provider = google-beta
   name     = "pool-%{random_suffix}"
   location = "us-central1"
   worker_config {
@@ -748,6 +752,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
 }
 
 resource "google_vertex_ai_reasoning_engine" "primary" {
+  provider     = google-beta
   display_name = "tf-test-reasoning-engine-%{random_suffix}"
   description  = "Reasoning engine testing API parity fields"
   region       = "us-central1"
@@ -790,6 +795,7 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
 }
 `, context)
 }
+{{- end }}
 
 func TestAccVertexAIReasoningEngine_apiParityExternal(t *testing.T) {
 	t.Skip("Skipping agent_gateway and runtime_revision_name due to external infrastructure dependencies")

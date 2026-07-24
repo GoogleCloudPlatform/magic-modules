@@ -30,6 +30,7 @@ create_url: projects/{{project}}/locations/{{location}}:deploy
 id_format: projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}
 timeouts:
   insert_minutes: 180
+  update_minutes: 20
   delete_minutes: 20
 exclude_import: true # the resource does not support import
 async:
@@ -44,6 +45,7 @@ async:
 exclude_read: true
 autogen_status: RW5kcG9pbnRXaXRoTW9kZWxHYXJkZW5EZXBsb3ltZW50
 custom_code:
+  custom_update: templates/terraform/custom_update/vertex_ai_endpoint_with_model_garden_deployment.go.tmpl
   post_create: templates/terraform/post_create/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl
   custom_delete: templates/terraform/custom_delete/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl
 samples:
@@ -1025,7 +1027,8 @@ properties:
 
               If traffic increases, it may dynamically be deployed onto more replicas,
               and as traffic decreases, some of these extra replicas may be freed.
-            immutable: true
+            update_url: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:mutateDeployedModel'
+            update_verb: 'POST'
             required: true
           - name: maxReplicaCount
             type: Integer
@@ -1042,7 +1045,8 @@ properties:
               quotas. Specifically, you will be charged for (max_replica_count *
               number of cores in the selected machine type) and (max_replica_count *
               number of GPUs per replica in the selected machine type).
-            immutable: true
+            update_url: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:mutateDeployedModel'
+            update_verb: 'POST'
           - name: requiredReplicaCount
             type: Integer
             description: |-
@@ -1052,6 +1056,8 @@ properties:
               available_replica_count reaches required_replica_count, and the rest of
               the replicas will be retried. If not set, the default
               required_replica_count will be min_replica_count.
+            update_url: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:mutateDeployedModel'
+            update_verb: 'POST'
           - name: autoscalingMetricSpecs
             type: Array
             description: |-
@@ -1075,7 +1081,8 @@ properties:
               autoscaling_metric_specs.metric_name
               to `aiplatform.googleapis.com/prediction/online/cpu/utilization` and
               autoscaling_metric_specs.target to `80`.
-            immutable: true
+            update_url: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:mutateDeployedModel'
+            update_verb: 'POST'
             item_type:
               type: NestedObject
               properties:
