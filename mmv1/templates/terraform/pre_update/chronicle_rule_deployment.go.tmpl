@@ -1,20 +1,33 @@
-// removeRunFrequencyFromUpdateMask removes 'runFrequency' from the updateMask in a URL.
-removeRunFrequencyFromUpdateMask := func(url string) (string) {
-    // Remove "runFrequency" and handle commas.
-    url = strings.ReplaceAll(url, "%2CrunFrequency", "")
-    url = strings.ReplaceAll(url, "runFrequency%2C", "")
-    url = strings.ReplaceAll(url, "runFrequency", "")
-
-    // Remove extra commas.
-    url = strings.ReplaceAll(url, "%2C%2C", "%2C")
-
-    //Remove trailing commas.
-    url = strings.TrimSuffix(url, "%2C")
-
-    return url
+// scheduleCustomizations uses the "runFrequency" field mask path for updates,
+// rather than "scheduleCustomizations". So if there's an update, remove the
+// "scheduleCustomizations" field mask path and add "runFrequency".
+hasScheduleCustomizationsUpdate := obj["scheduleCustomizations"] != nil
+if hasScheduleCustomizationsUpdate {
+    updateMask = slices.DeleteFunc(updateMask, func(s string) bool {
+        return s == "scheduleCustomizations"
+    })
+    if !slices.Contains(updateMask, "runFrequency") {
+        updateMask = append(updateMask, "runFrequency")
+    }
 }
 
-// Remove "runFrequency" and handle commas if run_frequency not configured by user
-if _, ok := d.GetOk("run_frequency"); !ok {
-    url = removeRunFrequencyFromUpdateMask(url)
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+    return err
+}
+
+// Because runFrequency and scheduleCustomizations share an update mask, they
+// are always updated together. That means if only one is being updated, we
+// must pass in the existing value for the other field to ensure it does not
+// revert back to the default value.
+hasRunFrequencyUpdate := obj["runFrequency"] != nil
+if hasScheduleCustomizationsUpdate && !hasRunFrequencyUpdate {
+    if rfProp, err := expandChronicleRuleDeploymentRunFrequency(d.Get("run_frequency"), d, config); err == nil && rfProp != nil {
+        obj["runFrequency"] = rfProp
+    }
+}
+if hasRunFrequencyUpdate && !hasScheduleCustomizationsUpdate {
+    if scProp, err := expandChronicleRuleDeploymentScheduleCustomizations(d.Get("schedule_customizations"), d, config); err == nil && scProp != nil {
+        obj["scheduleCustomizations"] = scProp
+    }
 }

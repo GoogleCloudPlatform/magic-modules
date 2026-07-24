@@ -52,6 +52,26 @@ samples:
       - name: 'chronicle_ruledeployment_run_frequency_missing'
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
+  - name: 'chronicle_ruledeployment_schedule_customizations'
+    primary_resource_id: 'example'
+    exclude_basic_doc: true
+    steps:
+      - name: 'chronicle_ruledeployment_schedule_customizations'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+      - name: 'chronicle_ruledeployment_schedule_customizations_update_customizations'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'schedule_customizations'
+      - name: 'chronicle_ruledeployment_schedule_customizations_update_run_frequency'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'schedule_customizations'
+      - name: 'chronicle_ruledeployment_schedule_customizations_update_both'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
 parameters:
   - name: location
     type: String
@@ -113,6 +133,25 @@ properties:
       LIVE
       HOURLY
       DAILY
+      LIVE_CUSTOMIZABLE
+      HOURLY_CUSTOMIZABLE
+  - name: scheduleCustomizations
+    type: NestedObject
+    custom_flatten: 'templates/terraform/custom_flatten/chronicle_rule_deployment_schedule_customizations.go.tmpl'
+    description: |-
+      The schedule customizations of the rule deployment. Only valid for
+      customizable run frequencies.
+    properties:
+      - name: ensureEnrichmentCompleteness
+        type: Boolean
+        send_empty_value: true
+        description: |-
+          Indicates whether to add additional delays and runs to rules to ensure
+          enrichment completeness, with the trade-off of more late-arrving detections.
+      - name: lateArrivingDataAdjustment
+        type: String
+        description: |-
+          Delay the first rule execution run to account for late-arriving data.
   - name: executionState
     type: String
     description: |-
