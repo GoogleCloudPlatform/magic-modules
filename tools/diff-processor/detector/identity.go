@@ -119,9 +119,6 @@ func checkCRUDCoverage(path string) ([]string, error) {
 			}
 		}
 	}
-	if currentFunc != nil {
-		functions = append(functions, currentFunc)
-	}
 
 	if err := scanner.Err(); err != nil {
 		return nil, err
@@ -156,10 +153,7 @@ func checkImportTest(resourcePath string) (bool, error) {
 		return true, fmt.Errorf("error reading directory %s: %w", dir, err)
 	}
 	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), "_test.go") {
-			continue
-		}
-		if !strings.HasPrefix(entry.Name(), resourcePrefix) {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), "_test.go") || !strings.HasPrefix(entry.Name(), resourcePrefix) {
 			continue
 		}
 		content, err := os.ReadFile(filepath.Join(dir, entry.Name()))
