@@ -1,0 +1,27 @@
+config := acctest.GoogleProviderConfig(t)
+url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(netapp.Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/trial")
+if err != nil {
+	return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: config.UserAgent,
+})
+if err != nil {
+	// If it fails with a 404, we are good.
+	return nil
+}
+
+if v, ok := res["state"]; ok && v != "INACTIVE" {
+	return fmt.Errorf("NetappTrial is not INACTIVE, state is %s", v)
+}

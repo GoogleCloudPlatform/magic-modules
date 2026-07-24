@@ -1,0 +1,14 @@
+if obj == nil {
+    obj = make(map[string]interface{})
+}
+
+action := "OPT_OUT"
+if v, ok := d.GetOk("action_on_destroy"); ok {
+    action = v.(string)
+}
+
+obj["exitReason"] = action
+
+if v, ok := d.GetOk("provided_opt_out_reasons"); ok {
+    obj["optOutReasons"] = v.([]interface{})
+}

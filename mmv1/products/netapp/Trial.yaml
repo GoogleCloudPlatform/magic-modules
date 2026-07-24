@@ -1,0 +1,114 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Trial
+description: "A 30-day free trial for Google Cloud NetApp Volumes.\nIt is global in scope for a project but requires to be created in a valid cloud region in which Google Cloud NetApp Volumes is available.\n\n**Note:** Modifying the `location` of this resource will cause Terraform to destroy and recreate the trial. \nBecause Google Cloud enforces a limit of one free trial per project every 12 months, this recreation will fail. \nIt is highly recommended to use the `lifecycle { prevent_destroy = true }` block on this resource.\n"
+references:
+  guides:
+    GCNV Documentation: https://docs.cloud.google.com/netapp/volumes/docs
+base_url: projects/{{project}}/locations/{{location}}/trial
+self_link: projects/{{project}}/locations/{{location}}/trial
+create_url: projects/{{project}}/locations/{{location}}/trial:subscribeTrial
+delete_url: projects/{{project}}/locations/{{location}}/trial:endTrial
+delete_verb: POST
+id_format: projects/{{project}}/locations/{{location}}/trial
+import_format:
+  - projects/{{project}}/locations/{{location}}/trial
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+exclude_sweeper: true
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete]
+  result:
+    resource_inside_response: false
+autogen_async: true
+exclude_tgc: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/netapp_trial.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/netapp_trial.go.tmpl
+examples:
+  - name: netapp_trial
+    primary_resource_id: default
+    skip_test: "Skipping due to 1 free trial per project per year quota limit."
+parameters:
+  - name: location
+    type: String
+    description: |
+      Name of the location.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: actionOnDestroy
+    type: String
+    description: |
+      The action to take when the trial is destroyed in Terraform.
+      If set to `OPT_OUT`, the trial is cancelled. If set to `UPGRADED`, the trial is transitioned to a paid account.
+    url_param_only: true
+    default_value: OPT_OUT
+  - name: providedOptOutReasons
+    type: Array
+    item_type:
+      type: String
+    description: |
+      Optional. Contains the reasons for opting out of the free trial when using the `OPT_OUT` action.
+    url_param_only: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the trial.
+      Format: projects/{project}/locations/{location}/trial
+    output: true
+  - name: startTime
+    type: Time
+    description: |
+      The time when the trial started.
+    output: true
+  - name: endTime
+    type: Time
+    description: |
+      The time when the trial ends.
+    output: true
+  - name: state
+    type: Enum
+    description: |
+      The state of the trial.
+      Possible values are: `ACTIVE`, `INACTIVE`, `ELIGIBLE`, `INELIGIBLE`.
+    output: true
+    enum_values:
+      - ACTIVE
+      - INACTIVE
+      - ELIGIBLE
+      - INELIGIBLE
+  - name: exitReason
+    type: Enum
+    description: |
+      The reason for exiting the trial.
+      Possible values are: `EXPIRED`, `UPGRADED`, `OPT_OUT`.
+    output: true
+    enum_values:
+      - EXPIRED
+      - UPGRADED
+      - OPT_OUT
+  - name: optOutReasons
+    type: Array
+    item_type:
+      type: String
+    description: |
+      Contains the reasons for opting out of the free trial if exit reason is OPT_OUT.
+    output: true
