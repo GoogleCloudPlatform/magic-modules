@@ -13,12 +13,18 @@
 ---
 name: "TokenAuthUser"
 description: "Represents a Token Auth User for a Google Cloud Memorystore (Valkey) Instance."
-base_url: "projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers"
-self_link: "projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}"
+immutable: true
+base_url: "{{instance}}/tokenAuthUsers"
+self_link: "{{instance}}/tokenAuthUsers/{{user_id}}"
 create_url: "{{instance}}:addTokenAuthUser"
-id_format: "projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}"
+id_format: "{{instance}}/tokenAuthUsers/{{user_id}}"
 import_format:
-  - "projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}"
+  - "{{instance}}/tokenAuthUsers/{{user_id}}"
+async:
+  type: OpAsync
+  include_project: true
+  operation:
+    base_url: '{{op_id}}'
 custom_code:
   encoder: templates/terraform/encoders/memorystore_token_auth_user.go.tmpl
 samples:

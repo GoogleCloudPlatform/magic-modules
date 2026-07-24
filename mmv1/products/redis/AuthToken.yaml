@@ -13,14 +13,21 @@
 ---
 name: "AuthToken"
 description: "Represents an Auth Token for a Token Auth User within a Google Cloud Redis Cluster."
+immutable: true
 base_url: "{{token_auth_user}}/authTokens"
 self_link: "{{token_auth_user}}/authTokens/{{token_id}}"
 create_url: "{{token_auth_user}}:addAuthToken"
 id_format: "{{token_auth_user}}/authTokens/{{token_id}}"
 import_format:
   - "{{token_auth_user}}/authTokens/{{token_id}}"
+async:
+  type: OpAsync
+  include_project: true
+  operation:
+    base_url: '{{op_id}}'
 custom_code:
   encoder: templates/terraform/encoders/redis_auth_token.go.tmpl
+  post_create: templates/terraform/post_create/redis_auth_token.go.tmpl
 samples:
   - name: "redis_auth_token_basic"
     primary_resource_id: "token-basic"
@@ -40,8 +47,7 @@ properties:
   - name: "token_id"
     type: "String"
     description: "The ID of the Auth Token."
-    required: true
-    url_param_only: true
+    output: true
   - name: "name"
     type: "String"
     description: "The full resource name of the Auth Token."

@@ -15,8 +15,6 @@ func DataSourceMemorystoreTokenAuthUser() *schema.Resource {
 
 	// Set 'Required' schema elements
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "instance", "user_id")
-	// Set 'Optional' schema elements
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "location")
 
 	return &schema.Resource{
 		Read:   dataSourceMemorystoreTokenAuthUserRead,
@@ -27,7 +25,7 @@ func DataSourceMemorystoreTokenAuthUser() *schema.Resource {
 func dataSourceMemorystoreTokenAuthUserRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}")
+	id, err := tpgresource.ReplaceVars(d, config, "{{instance}}/tokenAuthUsers/{{user_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

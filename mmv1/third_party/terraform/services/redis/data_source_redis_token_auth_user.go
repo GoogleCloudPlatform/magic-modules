@@ -15,8 +15,6 @@ func DataSourceRedisTokenAuthUser() *schema.Resource {
 
 	// Set 'Required' schema elements
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "cluster", "user_id")
-	// Set 'Optional' schema elements
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "region")
 
 	return &schema.Resource{
 		Read:   dataSourceRedisTokenAuthUserRead,
@@ -27,7 +25,7 @@ func DataSourceRedisTokenAuthUser() *schema.Resource {
 func dataSourceRedisTokenAuthUserRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers/{{user_id}}")
+	id, err := tpgresource.ReplaceVars(d, config, "{{cluster}}/tokenAuthUsers/{{user_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

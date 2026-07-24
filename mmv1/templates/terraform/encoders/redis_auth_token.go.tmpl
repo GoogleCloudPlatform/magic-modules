@@ -1,6 +1,2 @@
-	// API request body expects: { "authToken": { "name": "token_id" } }
-	tokenId := d.Get("token_id").(string)
-	obj["authToken"] = map[string]interface{}{
-		"name": tokenId,
-	}
-	return obj, nil
+// API request body expects empty object for custom action :addAuthToken
+return map[string]interface{}{}, nil

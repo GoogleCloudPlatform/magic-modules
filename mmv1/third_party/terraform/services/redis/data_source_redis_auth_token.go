@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceRedisAuthToken() *schema.Resource {
@@ -15,8 +14,6 @@ func DataSourceRedisAuthToken() *schema.Resource {
 
 	// Set 'Required' schema elements
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "token_auth_user", "token_id")
-	// Set 'Optional' schema elements
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "region")
 
 	return &schema.Resource{
 		Read:   dataSourceRedisAuthTokenRead,
