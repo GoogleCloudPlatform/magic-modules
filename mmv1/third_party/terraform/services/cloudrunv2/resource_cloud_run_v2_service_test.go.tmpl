@@ -1847,6 +1847,86 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccCloudRunV2Service_cloudrunv2ServiceWithScalingUtilizationTargets(t *testing.T) {
+  t.Parallel()
+  context := map[string]interface{} {
+    "random_suffix" : acctest.RandString(t, 10),
+  }
+  acctest.VcrTest(t, resource.TestCase {
+    PreCheck: func() { acctest.AccTestPreCheck(t)},
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+    CheckDestroy: testAccCheckCloudRunV2ServiceDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccCloudRunV2Service_cloudrunv2ServiceWithScalingUtilizationTargets(context),
+      },
+      {
+        ResourceName: "google_cloud_run_v2_service.default",
+        ImportState: true,
+        ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+      },
+      {
+        Config: testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithScalingUtilizationTargets(context),
+      },
+      {
+        ResourceName: "google_cloud_run_v2_service.default",
+        ImportState: true,
+        ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+      },
+    },
+  })
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceWithScalingUtilizationTargets(context map[string]interface{}) string {
+  return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  provider = google-beta
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  location = "us-central1"
+  deletion_protection = false
+  ingress = "INGRESS_TRAFFIC_ALL"
+  template {
+    scaling {
+      min_instance_count = 1
+      max_instance_count = 5
+      cpu_utilization = 0.5
+      concurrency_utilization = 0.5
+    }
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithScalingUtilizationTargets(context map[string]interface{}) string {
+  return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  provider = google-beta
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  location = "us-central1"
+  deletion_protection = false
+  ingress = "INGRESS_TRAFFIC_ALL"
+  template {
+    scaling {
+      min_instance_count = 1
+      max_instance_count = 5
+      cpu_utilization = 0.8
+      concurrency_utilization = 0.7
+    }
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}
+`, context)
+}
+{{- end }}
+
 func TestAccCloudRunV2Service_cloudrunv2ServiceWithReadinessProbe(t *testing.T) {
   t.Parallel()
   context := map[string]interface{} {
