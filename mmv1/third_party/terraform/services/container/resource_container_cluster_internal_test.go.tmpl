@@ -773,3 +773,122 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 		})
 	}
 }
+
+func TestContainerClusterPrivateClusterConfigDiffSuppress(t *testing.T) {
+	t.Parallel()
+
+	const (
+		enablePrivateEndpointKey = "private_cluster_config.0.enable_private_endpoint"
+		enablePrivateNodesKey    = "private_cluster_config.0.enable_private_nodes"
+		masterGlobalAccessKey    = "private_cluster_config.0.master_global_access_config.0.enabled"
+		ipEndpointsCountKey      = "control_plane_endpoints_config.0.ip_endpoints_config.#"
+		ipEndpointsEnabledKey    = "control_plane_endpoints_config.0.ip_endpoints_config.0.enabled"
+	)
+
+	cases := map[string]struct {
+		key              string
+		old              string
+		new              string
+		before           map[string]interface{}
+		after            map[string]interface{}
+		expectedSuppress bool
+	}{
+		// Reproduces hashicorp/terraform-provider-google#27901: with IP endpoints
+		// disabled the API forces enable_private_endpoint to true, so a configured
+		// value of false would permanently diff. The diff must be suppressed.
+		"enable_private_endpoint permadiff with ip endpoints disabled - suppress": {
+			key: enablePrivateEndpointKey,
+			old: "true",
+			new: "false",
+			before: map[string]interface{}{
+				enablePrivateEndpointKey: true,
+				enablePrivateNodesKey:    true,
+			},
+			after: map[string]interface{}{
+				enablePrivateEndpointKey: false,
+				enablePrivateNodesKey:    true,
+				ipEndpointsCountKey:      1,
+				ipEndpointsEnabledKey:    false,
+			},
+			expectedSuppress: true,
+		},
+		// Reproduces the second permadiff from #27901: with IP endpoints disabled the
+		// API forces master_global_access_config.enabled to false.
+		"master_global_access_config permadiff with ip endpoints disabled - suppress": {
+			key: masterGlobalAccessKey,
+			old: "false",
+			new: "true",
+			before: map[string]interface{}{
+				enablePrivateEndpointKey: true,
+				enablePrivateNodesKey:    true,
+			},
+			after: map[string]interface{}{
+				enablePrivateEndpointKey: false,
+				enablePrivateNodesKey:    true,
+				ipEndpointsCountKey:      1,
+				ipEndpointsEnabledKey:    false,
+			},
+			expectedSuppress: true,
+		},
+		// With IP endpoints enabled, a real change to enable_private_endpoint must
+		// still surface as a diff.
+		"enable_private_endpoint change with ip endpoints enabled - do not suppress": {
+			key: enablePrivateEndpointKey,
+			old: "true",
+			new: "false",
+			before: map[string]interface{}{
+				enablePrivateEndpointKey: true,
+				enablePrivateNodesKey:    true,
+			},
+			after: map[string]interface{}{
+				enablePrivateEndpointKey: false,
+				enablePrivateNodesKey:    true,
+			},
+			expectedSuppress: false,
+		},
+		// With IP endpoints enabled, a real change to master_global_access_config must
+		// still surface as a diff.
+		"master_global_access_config change with ip endpoints enabled - do not suppress": {
+			key: masterGlobalAccessKey,
+			old: "false",
+			new: "true",
+			before: map[string]interface{}{
+				enablePrivateEndpointKey: false,
+				enablePrivateNodesKey:    false,
+			},
+			after: map[string]interface{}{
+				enablePrivateEndpointKey: false,
+				enablePrivateNodesKey:    false,
+			},
+			expectedSuppress: false,
+		},
+		// Pre-existing behavior: removing an all-disabled private_cluster_config block
+		// is suppressed.
+		"private_cluster_config block all disabled - suppress": {
+			key: "private_cluster_config.#",
+			old: "1",
+			new: "0",
+			before: map[string]interface{}{
+				enablePrivateEndpointKey: false,
+				enablePrivateNodesKey:    false,
+			},
+			after: map[string]interface{}{
+				enablePrivateEndpointKey: false,
+				enablePrivateNodesKey:    false,
+			},
+			expectedSuppress: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			d := &tpgresource.ResourceDiffMock{
+				Before: tc.before,
+				After:  tc.after,
+			}
+			if got := containerClusterPrivateClusterConfigSuppressLogic(tc.key, tc.old, tc.new, d); got != tc.expectedSuppress {
+				t.Errorf("%s: expected suppress to be %v, but was %v", tn, tc.expectedSuppress, got)
+			}
+		})
+	}
+}
