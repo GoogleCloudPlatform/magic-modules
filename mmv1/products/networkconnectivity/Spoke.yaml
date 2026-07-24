@@ -150,10 +150,8 @@ samples:
           hub_name: '"hub1" + randomSuffix'
   - name: network_connectivity_spoke_gateway
     primary_resource_id: primary
-    min_version: beta
     steps:
       - name: network_connectivity_spoke_gateway
-        min_version: beta
         resource_id_vars:
           network_name: net-spoke
           hub_name: hub
@@ -433,7 +431,6 @@ properties:
     type: NestedObject
     description: This is a gateway that can apply specialized processing to traffic going through it.
     immutable: true
-    min_version: beta
     conflicts:
       - linked_interconnect_attachments
       - linked_router_appliance_instances
@@ -465,7 +462,6 @@ properties:
       - name: routers
         type: Array
         description: Set of Cloud Routers that are attached to this NCC-GW
-        min_version: beta
         item_type:
           type: String
           description: Cloud Router that is attached to the NCC-GW

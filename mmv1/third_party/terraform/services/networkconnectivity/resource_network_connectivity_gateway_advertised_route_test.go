@@ -1,15 +1,14 @@
-{{ if ne $.TargetVersionName `ga` -}}
 package networkconnectivity_test
 
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/networkconnectivity"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccNetworkConnectivityGatewayAdvertisedRouter_test_basic(t *testing.T) {
@@ -36,12 +35,12 @@ func TestAccNetworkConnectivityGatewayAdvertisedRouter_test_basic(t *testing.T) 
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-			 	Config: testAccNetworkConnectivitySpoke_test_update(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
-               PreApply: []plancheck.PlanCheck{
-                  plancheck.ExpectResourceAction("google_network_connectivity_gateway_advertised_route.gateway-advertised-route", plancheck.ResourceActionUpdate),
-               },
-            },
+				Config: testAccNetworkConnectivitySpoke_test_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_connectivity_gateway_advertised_route.gateway-advertised-route", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_network_connectivity_gateway_advertised_route.gateway-advertised-route",
@@ -164,6 +163,3 @@ resource "google_network_connectivity_gateway_advertised_route" "gateway-adverti
 }
 `, context)
 }
-
-
-{{- end }}
