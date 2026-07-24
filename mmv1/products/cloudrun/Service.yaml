@@ -549,7 +549,7 @@ properties:
                             type: Integer
                             description: Port number the container listens on. This must be a valid port number (between 1 and 65535). Defaults to "8080".
                     - name: 'sandboxLauncher'
-                      type: boolean
+                      type: Boolean
                       description: Indicates that this container can act as a sandbox supervisor and launch sandboxes.
                     - name: 'resources'
                       type: NestedObject
