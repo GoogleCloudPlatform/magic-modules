@@ -8,7 +8,7 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/redis"
 )
 
-func TestAccRedisTokenAuthUser_basic(t *testing.T) {
+func TestAccRedisClusterTokenAuthUser_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,10 +20,10 @@ func TestAccRedisTokenAuthUser_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisTokenAuthUser_basic(context),
+				Config: testAccRedisClusterTokenAuthUser_basic(context),
 			},
 			{
-				ResourceName:      "google_redis_token_auth_user.user-basic",
+				ResourceName:      "google_redis_cluster_token_auth_user.user-basic",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -31,7 +31,7 @@ func TestAccRedisTokenAuthUser_basic(t *testing.T) {
 	})
 }
 
-func testAccRedisTokenAuthUser_basic(context map[string]interface{}) string {
+func testAccRedisClusterTokenAuthUser_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_redis_cluster" "cluster" {
   name                        = "tf-test-redis-cluster-%{random_suffix}"
@@ -40,7 +40,7 @@ resource "google_redis_cluster" "cluster" {
   deletion_protection_enabled = false
 }
 
-resource "google_redis_token_auth_user" "user-basic" {
+resource "google_redis_cluster_token_auth_user" "user-basic" {
   cluster = google_redis_cluster.cluster.name
   user_id = "tf-test-user-%{random_suffix}"
 }

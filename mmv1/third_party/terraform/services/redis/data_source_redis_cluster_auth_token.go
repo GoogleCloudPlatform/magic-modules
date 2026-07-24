@@ -8,26 +8,26 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
-func DataSourceRedisAuthToken() *schema.Resource {
+func DataSourceRedisClusterAuthToken() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceRedisAuthToken().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceRedisClusterAuthToken().Schema)
 
 	// Set 'Required' schema elements
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "token_auth_user", "token_id")
 
 	return &schema.Resource{
-		Read:   dataSourceRedisAuthTokenRead,
+		Read:   dataSourceRedisClusterAuthTokenRead,
 		Schema: dsSchema,
 	}
 }
 
-func dataSourceRedisAuthTokenRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceRedisClusterAuthTokenRead(d *schema.ResourceData, meta interface{}) error {
 	tokenAuthUser := d.Get("token_auth_user").(string)
 	tokenId := d.Get("token_id").(string)
 	id := fmt.Sprintf("%s/authTokens/%s", tokenAuthUser, tokenId)
 	d.SetId(id)
 
-	err := resourceRedisAuthTokenRead(d, meta)
+	err := resourceRedisClusterAuthTokenRead(d, meta)
 	if err != nil {
 		return err
 	}
@@ -40,9 +40,9 @@ func dataSourceRedisAuthTokenRead(d *schema.ResourceData, meta interface{}) erro
 
 func init() {
 	registry.Schema{
-		Name:        "google_redis_auth_token",
+		Name:        "google_redis_cluster_auth_token",
 		ProductName: "redis",
 		Type:        registry.SchemaTypeDataSource,
-		Schema:      DataSourceRedisAuthToken(),
+		Schema:      DataSourceRedisClusterAuthToken(),
 	}.Register()
 }

@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-name: "AuthToken"
+name: "ClusterAuthToken"
 description: "Represents an Auth Token for a Token Auth User within a Google Cloud Redis Cluster."
 immutable: true
 base_url: "{{token_auth_user}}/authTokens"
@@ -39,7 +39,7 @@ samples:
 properties:
   - name: "token_auth_user"
     type: "ResourceRef"
-    resource: "TokenAuthUser"
+    resource: "ClusterTokenAuthUser"
     imports: "name"
     description: "The full name of the parent Token Auth User."
     required: true

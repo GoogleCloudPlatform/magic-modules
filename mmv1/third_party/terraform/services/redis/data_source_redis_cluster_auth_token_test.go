@@ -8,7 +8,7 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/redis"
 )
 
-func TestAccRedisAuthTokenDatasource(t *testing.T) {
+func TestAccRedisClusterAuthTokenDatasource(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,16 +20,16 @@ func TestAccRedisAuthTokenDatasource(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisAuthTokenDatasourceConfig(context),
+				Config: testAccRedisClusterAuthTokenDatasourceConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_redis_auth_token.default", "google_redis_auth_token.token-basic"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_redis_cluster_auth_token.default", "google_redis_cluster_auth_token.token-basic"),
 				),
 			},
 		},
 	})
 }
 
-func testAccRedisAuthTokenDatasourceConfig(context map[string]interface{}) string {
+func testAccRedisClusterAuthTokenDatasourceConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_redis_cluster" "cluster" {
   name                        = "tf-test-redis-cluster-%{random_suffix}"
@@ -38,19 +38,19 @@ resource "google_redis_cluster" "cluster" {
   deletion_protection_enabled = false
 }
 
-resource "google_redis_token_auth_user" "user-basic" {
+resource "google_redis_cluster_token_auth_user" "user-basic" {
   cluster = google_redis_cluster.cluster.name
   user_id = "tf-test-user-%{random_suffix}"
 }
 
-resource "google_redis_auth_token" "token-basic" {
-  token_auth_user = google_redis_token_auth_user.user-basic.id
+resource "google_redis_cluster_auth_token" "token-basic" {
+  token_auth_user = google_redis_cluster_token_auth_user.user-basic.id
   token_id        = "tf-test-token-%{random_suffix}"
 }
 
-data "google_redis_auth_token" "default" {
-  token_auth_user = google_redis_token_auth_user.user-basic.id
-  token_id        = google_redis_auth_token.token-basic.token_id
+data "google_redis_cluster_auth_token" "default" {
+  token_auth_user = google_redis_cluster_token_auth_user.user-basic.id
+  token_id        = google_redis_cluster_auth_token.token-basic.token_id
 }
 `, context)
 }

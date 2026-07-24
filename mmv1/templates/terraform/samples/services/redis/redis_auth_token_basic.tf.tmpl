@@ -14,14 +14,14 @@ resource "google_compute_network" "default" {
   name     = "tf-test-redis-net-{{index $.ResourceIdVars "network_name"}}"
 }
 
-resource "google_redis_token_auth_user" "default" {
+resource "google_redis_cluster_token_auth_user" "default" {
   provider = google-beta
   cluster  = google_redis_cluster.default.name
   user_id  = "test-user"
 }
 
-resource "google_redis_auth_token" "{{$.PrimaryResourceId}}" {
+resource "google_redis_cluster_auth_token" "{{$.PrimaryResourceId}}" {
   provider        = google-beta
-  token_auth_user = google_redis_token_auth_user.default.id
+  token_auth_user = google_redis_cluster_token_auth_user.default.id
   token_id        = "test-token"
 }

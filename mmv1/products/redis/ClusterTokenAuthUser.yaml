@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-name: "TokenAuthUser"
+name: "ClusterTokenAuthUser"
 description: "Represents a Token Auth User for a Google Cloud Redis Cluster."
 immutable: true
 base_url: "projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers"
