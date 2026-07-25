@@ -22,13 +22,7 @@ update_verb: PATCH
 import_format:
   - 'organizations/{{organization}}/supportEventSubscriptions/{{name}}'
   - '{{name}}'
-async:
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
 autogen_status: U3VwcG9ydEV2ZW50U3Vic2NyaXB0aW9u
-autogen_async: true
 examples:
   - name: "cloud_support_event_subscription_basic"
     primary_resource_id: "subscription"
