@@ -3,14 +3,14 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_id                = "{{index $.ResourceIdVars "collection_id"}}"
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
-  params = {
+  params                       = jsonencode({
     auth_type                  = "OAUTH_PASSWORD_GRANT"
     instance_uri               = "https://gcpconnector1.service-now.com/"
     client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
     client_secret              = "SECRET_MANAGER_RESOURCE_NAME"
     user_account               = "connectorsuserqa@google.com"
     password                   = "SECRET_MANAGER_RESOURCE_NAME"
-  }
+  })
   refresh_interval             = "86400s"
   incremental_refresh_interval = "21600s"
   entities {
