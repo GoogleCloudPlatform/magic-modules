@@ -82,11 +82,9 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 		if sf.Name == listCallConfig.ParentResourceField {
 			continue // scope dimension is itself the parent (e.g. project-iam-member)
 		}
-		if _, ok := memberResource.Schema[sf.Name]; !ok {
-			continue // resource isn't scoped by this dimension
+		if _, ok := memberResource.Schema[sf.Name]; ok {
+			listConfigFields = append(listConfigFields, sf)
 		}
-
-		listConfigFields = append(listConfigFields, sf)
 	}
 
 	if listCallConfig.EnableRoleFilter {
