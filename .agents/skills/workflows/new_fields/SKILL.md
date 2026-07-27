@@ -14,6 +14,7 @@ This document guides the agent through the task of adding new fields to an exist
 - Consult `.agents/knowledge/index.md` for the topics the resource touches and open the relevant sources.
 - Follow the standard process to add the fields to the resource's YAML definition in `mmv1/products/...` based on API documentation and repository patterns.
 - Follow the standard process to add or update tests for the resource to cover the new fields.
+  - **CRITICAL RULE:** Every resource should have at least one acceptance test that covers only required fields. This is usually called the "basic" test. Never add optional fields to this test. Instead, choose a different existing test to add the field to, or create a new test if none exists. If the resource is missing a basic test, create one. If there are optional fields in an existing basic test, move them to a different test, creating one if necessary. Fields with exactly_one_of or at_least_one_of constraints are a special case, because they are technically optional but also need to be included in the "basic" test in a way consistent with the constraint.
 
 ### 2. Run pre-gen tests
 
