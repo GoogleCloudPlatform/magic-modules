@@ -3866,3 +3866,95 @@ resource "google_dataproc_cluster" "instance_flexibility_disk_config" {
 }
 `, rnd)
 }
+
+func TestAccDataprocCluster_AttachedDiskConfig(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_attachedDiskConfig(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.attached_disk_config", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config", "cluster_config.0.master_config.0.disk_config.0.attached_disk_config.0.disk_size_gb", "40"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config", "cluster_config.0.master_config.0.disk_config.0.attached_disk_config.0.disk_type", "pd-standard"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config", "cluster_config.0.worker_config.0.disk_config.0.attached_disk_config.0.disk_size_gb", "40"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config", "cluster_config.0.worker_config.0.disk_config.0.attached_disk_config.0.disk_type", "pd-standard"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.attached_disk_config.0.disk_size_gb", "40"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.attached_disk_config.0.disk_type", "pd-standard"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.disk_size_gb", "40"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.disk_type", "hyperdisk-balanced"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_attachedDiskConfig(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "attached_disk_config" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+
+    master_config {
+      num_instances = "1"
+      machine_type  = "c4-standard-2"
+      disk_config {
+        boot_disk_size_gb = 35
+				boot_disk_type = "hyperdisk-balanced"
+				attached_disk_config {   
+					disk_size_gb = 40
+					disk_type    = "hyperdisk-balanced"
+				}
+      }
+    }
+
+    worker_config {
+      num_instances = "2"
+			machine_type = "n4d-standard-2"
+			disk_config {
+				boot_disk_size_gb = 35
+				boot_disk_type = "hyperdisk-balanced"
+				attached_disk_config {
+					disk_size_gb = 40
+					disk_type = "hyperdisk-balanced"
+				}
+			}
+		}
+		
+		preemptible_worker_config {
+			num_instances = "2"
+			instance_flexibility_policy {
+				instance_selection_list {
+					machine_types = ["e2-standard-2"]
+					rank          = 1
+					disk_config {
+						boot_disk_size_gb = 40
+						boot_disk_type = "pd-standard"
+					}
+				}
+				instance_selection_list {
+					machine_types = ["n4-standard-2"]
+					rank          = 2
+					disk_config {
+						boot_disk_size_gb = 40
+						boot_disk_type = "hyperdisk-balanced"
+						attached_disk_config {
+							disk_size_gb = 40
+							disk_type = "hyperdisk-balanced"
+						}
+					}
+				}
+			}
+		}
+	}
+}
+`, rnd)
+}
