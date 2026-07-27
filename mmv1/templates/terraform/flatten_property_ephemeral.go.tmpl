@@ -1,0 +1,533 @@
+{{- /*
+FlattenAttrTypeEphemeral generates the attr.Type expression for a property.
+Called with: the property (.)
+*/ -}}
+{{- define "FlattenAttrTypeEphemeral" -}}
+{{- if or (eq .Type "String") (eq .Type "Time") (eq .Type "Enum") (eq .Type "ResourceRef") (eq .Type "Fingerprint") -}}types.StringType
+{{- else if eq .Type "Boolean" -}}types.BoolType
+{{- else if eq .Type "Integer" -}}types.Int64Type
+{{- else if eq .Type "Double" -}}types.Float64Type
+{{- else if hasPrefix .Type "KeyValue" -}}types.MapType{ElemType: types.StringType}
+{{- else if eq .Type "Map" -}}
+  {{- if or (eq .ValueType.Type "String") (eq .ValueType.Type "Enum") (eq .ValueType.Type "ResourceRef") -}}types.MapType{ElemType: types.StringType}
+  {{- else if eq .ValueType.Type "Integer" -}}types.MapType{ElemType: types.Int64Type}
+  {{- else if eq .ValueType.Type "Boolean" -}}types.MapType{ElemType: types.BoolType}
+  {{- else if eq .ValueType.Type "Double" -}}types.MapType{ElemType: types.Float64Type}
+  {{- else if eq .ValueType.Type "NestedObject" -}}types.MapType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
+    {{- range $p := .ResourceMetadata.OrderProperties .ValueType.UserProperties }}
+    "{{ underscore $p.Name }}": {{ template "FlattenAttrTypeEphemeral" $p }},
+    {{- end }}
+  }}}
+  {{- else -}}types.StringType
+  {{- end -}}
+{{- else if eq .Type "Array" -}}
+  {{- if or (eq .ItemType.Type "String") (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") (eq .ItemType.Type "Fingerprint") (eq .ItemType.Type "Time") -}}types.ListType{ElemType: types.StringType}
+  {{- else if eq .ItemType.Type "Integer" -}}types.ListType{ElemType: types.Int64Type}
+  {{- else if eq .ItemType.Type "Boolean" -}}types.ListType{ElemType: types.BoolType}
+  {{- else if eq .ItemType.Type "Double" -}}types.ListType{ElemType: types.Float64Type}
+  {{- else if eq .ItemType.Type "NestedObject" -}}types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
+    {{- range $p := .ResourceMetadata.OrderProperties .ItemType.UserProperties }}
+    "{{ underscore $p.Name }}": {{ template "FlattenAttrTypeEphemeral" $p }},
+    {{- end }}
+  }}}
+  {{- else -}}types.ListType{ElemType: types.StringType}
+  {{- end -}}
+{{- else if eq .Type "NestedObject" -}}types.ObjectType{AttrTypes: map[string]attr.Type{
+  {{- range $p := .ResourceMetadata.OrderProperties .UserProperties }}
+  "{{ underscore $p.Name }}": {{ template "FlattenAttrTypeEphemeral" $p }},
+  {{- end }}
+}}
+{{- else -}}types.StringType
+{{- end -}}
+{{- end -}}
+
+{{- /*
+FlattenNestedChildValueEphemeral generates code to extract one property's value
+from a raw API map and write it into an attr.Value map.
+Called with: dict "prop" $p "nmVar" $nmVar "attrsVar" $attrsVar "prefix" $prefix
+  - prop:      the property to flatten
+  - nmVar:     string name of the Go variable holding the raw map[string]interface{}
+  - attrsVar:  string name of the Go variable holding the map[string]attr.Value to write into
+  - prefix:    variable name prefix for any sub-variables generated at this level
+*/ -}}
+{{- define "FlattenNestedChildValueEphemeral" -}}
+{{- $p := .prop -}}
+{{- $nmVar := .nmVar -}}
+{{- $attrsVar := .attrsVar -}}
+{{- $prefix := .prefix -}}
+{{- $childName := camelize $p.Name "upper" -}}
+{{- $childPrefix := print $prefix $childName -}}
+{{- if or (eq $p.Type "String") (eq $p.Type "Time") (eq $p.Type "Enum") (eq $p.Type "ResourceRef") (eq $p.Type "Fingerprint") }}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.StringValue(fmt.Sprintf("%v", vv))
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.StringNull()
+}
+{{- else if eq $p.Type "Boolean" }}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if bv, ok := vv.(bool); ok {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.BoolValue(bv)
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.BoolNull()
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.BoolNull()
+}
+{{- else if eq $p.Type "Integer" }}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if fv, ok := vv.(float64); ok {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.Int64Value(int64(fv))
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.Int64Null()
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.Int64Null()
+}
+{{- else if eq $p.Type "Double" }}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if fv, ok := vv.(float64); ok {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.Float64Value(fv)
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.Float64Null()
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.Float64Null()
+}
+{{- else if hasPrefix $p.Type "KeyValue" }}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if mv, ok := vv.(map[string]interface{}); ok {
+        sm{{ $childPrefix }} := make(map[string]string, len(mv))
+        for k, val := range mv {
+            sm{{ $childPrefix }}[k] = fmt.Sprintf("%v", val)
+        }
+        {{ $childPrefix }}MapVal, {{ $childPrefix }}MapDiags := types.MapValueFrom(ctx, types.StringType, sm{{ $childPrefix }})
+        resp.Diagnostics.Append({{ $childPrefix }}MapDiags...)
+        if !resp.Diagnostics.HasError() {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = {{ $childPrefix }}MapVal
+        } else {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.MapNull(types.StringType)
+        }
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.MapNull(types.StringType)
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.MapNull(types.StringType)
+}
+{{- else if eq $p.Type "Map" }}
+{{- if or (eq $p.ValueType.Type "String") (eq $p.ValueType.Type "Enum") (eq $p.ValueType.Type "ResourceRef") }}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if mv, ok := vv.(map[string]interface{}); ok {
+        sm{{ $childPrefix }} := make(map[string]string, len(mv))
+        for k, val := range mv {
+            sm{{ $childPrefix }}[k] = fmt.Sprintf("%v", val)
+        }
+        {{ $childPrefix }}MapVal, {{ $childPrefix }}MapDiags := types.MapValueFrom(ctx, types.StringType, sm{{ $childPrefix }})
+        resp.Diagnostics.Append({{ $childPrefix }}MapDiags...)
+        if !resp.Diagnostics.HasError() {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = {{ $childPrefix }}MapVal
+        } else {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.MapNull(types.StringType)
+        }
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.MapNull(types.StringType)
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.MapNull(types.StringType)
+}
+{{- else if eq $p.ValueType.Type "NestedObject" }}
+{{- $itemAttrTypesVar := print $childPrefix "ItemAttrTypes" }}
+{{ $itemAttrTypesVar }} := map[string]attr.Type{
+    {{- range $cp := $p.ResourceMetadata.OrderProperties $p.ValueType.UserProperties }}
+    "{{ underscore $cp.Name }}": {{ template "FlattenAttrTypeEphemeral" $cp }},
+    {{- end }}
+}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if rawMap{{ $childPrefix }}, ok := vv.(map[string]interface{}); ok {
+        {{ $childPrefix }}MapVals := map[string]attr.Value{}
+        for mapKey{{ $childPrefix }}, mapVal{{ $childPrefix }} := range rawMap{{ $childPrefix }} {
+            if itemNm{{ $childPrefix }}, ok := mapVal{{ $childPrefix }}.(map[string]interface{}); ok {
+                {{ $childPrefix }}ItemAttrVals := map[string]attr.Value{}
+                {{- range $cp := $p.ResourceMetadata.OrderProperties $p.ValueType.UserProperties }}
+                {{- template "FlattenNestedChildValueEphemeral" (dict "prop" $cp "nmVar" (print "itemNm" $childPrefix) "attrsVar" (print $childPrefix "ItemAttrVals") "prefix" $childPrefix) }}
+                {{- end }}
+                {{ $childPrefix }}ItemObjVal, {{ $childPrefix }}ItemObjDiags := types.ObjectValue({{ $itemAttrTypesVar }}, {{ $childPrefix }}ItemAttrVals)
+                resp.Diagnostics.Append({{ $childPrefix }}ItemObjDiags...)
+                if !resp.Diagnostics.HasError() {
+                    {{ $childPrefix }}MapVals[mapKey{{ $childPrefix }}] = {{ $childPrefix }}ItemObjVal
+                } else {
+                    {{ $childPrefix }}MapVals[mapKey{{ $childPrefix }}] = types.ObjectNull({{ $itemAttrTypesVar }})
+                }
+            } else {
+                {{ $childPrefix }}MapVals[mapKey{{ $childPrefix }}] = types.ObjectNull({{ $itemAttrTypesVar }})
+            }
+        }
+        {{ $childPrefix }}MapVal, {{ $childPrefix }}MapDiags := types.MapValue(types.ObjectType{AttrTypes: {{ $itemAttrTypesVar }}}, {{ $childPrefix }}MapVals)
+        resp.Diagnostics.Append({{ $childPrefix }}MapDiags...)
+        if !resp.Diagnostics.HasError() {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = {{ $childPrefix }}MapVal
+        } else {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.MapNull(types.ObjectType{AttrTypes: {{ $itemAttrTypesVar }}})
+        }
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.MapNull(types.ObjectType{AttrTypes: {{ $itemAttrTypesVar }}})
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.MapNull(types.ObjectType{AttrTypes: {{ $itemAttrTypesVar }}})
+}
+{{- else }}
+{{ $attrsVar }}["{{ underscore $p.Name }}"] = types.MapNull(types.StringType)
+{{- end }}
+{{- else if eq $p.Type "Array" }}
+{{- if or (eq $p.ItemType.Type "String") (eq $p.ItemType.Type "Enum") (eq $p.ItemType.Type "ResourceRef") (eq $p.ItemType.Type "Fingerprint") (eq $p.ItemType.Type "Time") }}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if av{{ $childPrefix }}, ok := vv.([]interface{}); ok {
+        ss{{ $childPrefix }} := make([]string, len(av{{ $childPrefix }}))
+        for i, item := range av{{ $childPrefix }} {
+            ss{{ $childPrefix }}[i] = fmt.Sprintf("%v", item)
+        }
+        {{ $childPrefix }}ListVal, {{ $childPrefix }}ListDiags := types.ListValueFrom(ctx, types.StringType, ss{{ $childPrefix }})
+        resp.Diagnostics.Append({{ $childPrefix }}ListDiags...)
+        if !resp.Diagnostics.HasError() {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = {{ $childPrefix }}ListVal
+        } else {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.StringType)
+        }
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.StringType)
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.StringType)
+}
+{{- else if eq $p.ItemType.Type "Integer" }}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if av{{ $childPrefix }}, ok := vv.([]interface{}); ok {
+        is{{ $childPrefix }} := make([]int64, len(av{{ $childPrefix }}))
+        for i, item := range av{{ $childPrefix }} {
+            if fv, ok := item.(float64); ok {
+                is{{ $childPrefix }}[i] = int64(fv)
+            }
+        }
+        {{ $childPrefix }}ListVal, {{ $childPrefix }}ListDiags := types.ListValueFrom(ctx, types.Int64Type, is{{ $childPrefix }})
+        resp.Diagnostics.Append({{ $childPrefix }}ListDiags...)
+        if !resp.Diagnostics.HasError() {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = {{ $childPrefix }}ListVal
+        } else {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.Int64Type)
+        }
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.Int64Type)
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.Int64Type)
+}
+{{- else if eq $p.ItemType.Type "Boolean" }}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if av{{ $childPrefix }}, ok := vv.([]interface{}); ok {
+        bs{{ $childPrefix }} := make([]bool, len(av{{ $childPrefix }}))
+        for i, item := range av{{ $childPrefix }} {
+            if bv, ok := item.(bool); ok {
+                bs{{ $childPrefix }}[i] = bv
+            }
+        }
+        {{ $childPrefix }}ListVal, {{ $childPrefix }}ListDiags := types.ListValueFrom(ctx, types.BoolType, bs{{ $childPrefix }})
+        resp.Diagnostics.Append({{ $childPrefix }}ListDiags...)
+        if !resp.Diagnostics.HasError() {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = {{ $childPrefix }}ListVal
+        } else {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.BoolType)
+        }
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.BoolType)
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.BoolType)
+}
+{{- else if eq $p.ItemType.Type "Double" }}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if av{{ $childPrefix }}, ok := vv.([]interface{}); ok {
+        fs{{ $childPrefix }} := make([]float64, len(av{{ $childPrefix }}))
+        for i, item := range av{{ $childPrefix }} {
+            if fv, ok := item.(float64); ok {
+                fs{{ $childPrefix }}[i] = fv
+            }
+        }
+        {{ $childPrefix }}ListVal, {{ $childPrefix }}ListDiags := types.ListValueFrom(ctx, types.Float64Type, fs{{ $childPrefix }})
+        resp.Diagnostics.Append({{ $childPrefix }}ListDiags...)
+        if !resp.Diagnostics.HasError() {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = {{ $childPrefix }}ListVal
+        } else {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.Float64Type)
+        }
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.Float64Type)
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.Float64Type)
+}
+{{- else if eq $p.ItemType.Type "NestedObject" }}
+{{- $itemAttrTypesVar := print $childPrefix "ItemAttrTypes" }}
+{{ $itemAttrTypesVar }} := map[string]attr.Type{
+    {{- range $cp := $p.ResourceMetadata.OrderProperties $p.ItemType.UserProperties }}
+    "{{ underscore $cp.Name }}": {{ template "FlattenAttrTypeEphemeral" $cp }},
+    {{- end }}
+}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if av{{ $childPrefix }}, ok := vv.([]interface{}); ok {
+        elems{{ $childPrefix }} := make([]attr.Value, len(av{{ $childPrefix }}))
+        for i{{ $childPrefix }}, item{{ $childPrefix }} := range av{{ $childPrefix }} {
+            if itemNm{{ $childPrefix }}, ok := item{{ $childPrefix }}.(map[string]interface{}); ok {
+                {{ $childPrefix }}ItemAttrVals := map[string]attr.Value{}
+                {{- range $cp := $p.ResourceMetadata.OrderProperties $p.ItemType.UserProperties }}
+                {{- template "FlattenNestedChildValueEphemeral" (dict "prop" $cp "nmVar" (print "itemNm" $childPrefix) "attrsVar" (print $childPrefix "ItemAttrVals") "prefix" $childPrefix) }}
+                {{- end }}
+                {{ $childPrefix }}ItemObjVal, {{ $childPrefix }}ItemObjDiags := types.ObjectValue({{ $itemAttrTypesVar }}, {{ $childPrefix }}ItemAttrVals)
+                resp.Diagnostics.Append({{ $childPrefix }}ItemObjDiags...)
+                if !resp.Diagnostics.HasError() {
+                    elems{{ $childPrefix }}[i{{ $childPrefix }}] = {{ $childPrefix }}ItemObjVal
+                } else {
+                    elems{{ $childPrefix }}[i{{ $childPrefix }}] = types.ObjectNull({{ $itemAttrTypesVar }})
+                }
+            } else {
+                elems{{ $childPrefix }}[i{{ $childPrefix }}] = types.ObjectNull({{ $itemAttrTypesVar }})
+            }
+        }
+        {{ $childPrefix }}ListVal, {{ $childPrefix }}ListDiags := types.ListValue(types.ObjectType{AttrTypes: {{ $itemAttrTypesVar }}}, elems{{ $childPrefix }})
+        resp.Diagnostics.Append({{ $childPrefix }}ListDiags...)
+        if !resp.Diagnostics.HasError() {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = {{ $childPrefix }}ListVal
+        } else {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.ObjectType{AttrTypes: {{ $itemAttrTypesVar }}})
+        }
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.ObjectType{AttrTypes: {{ $itemAttrTypesVar }}})
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.ObjectType{AttrTypes: {{ $itemAttrTypesVar }}})
+}
+{{- else }}
+{{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ListNull(types.StringType)
+{{- end }}
+{{- else if eq $p.Type "NestedObject" }}
+{{- $childAttrTypesVar := print $childPrefix "AttrTypes" }}
+{{- $childAttrValsVar := print $childPrefix "AttrVals" }}
+{{- $childNmVar := print "nm" $childPrefix }}
+{{ $childAttrTypesVar }} := map[string]attr.Type{
+    {{- range $cp := $p.ResourceMetadata.OrderProperties $p.UserProperties }}
+    "{{ underscore $cp.Name }}": {{ template "FlattenAttrTypeEphemeral" $cp }},
+    {{- end }}
+}
+if vv, ok := {{ $nmVar }}["{{ $p.ApiName }}"]; ok && vv != nil {
+    if {{ $childNmVar }}, ok := vv.(map[string]interface{}); ok {
+        {{ $childAttrValsVar }} := map[string]attr.Value{}
+        {{- range $cp := $p.ResourceMetadata.OrderProperties $p.UserProperties }}
+        {{- template "FlattenNestedChildValueEphemeral" (dict "prop" $cp "nmVar" $childNmVar "attrsVar" $childAttrValsVar "prefix" $childPrefix) }}
+        {{- end }}
+        {{ $childPrefix }}ObjVal, {{ $childPrefix }}ObjDiags := types.ObjectValue({{ $childAttrTypesVar }}, {{ $childAttrValsVar }})
+        resp.Diagnostics.Append({{ $childPrefix }}ObjDiags...)
+        if !resp.Diagnostics.HasError() {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = {{ $childPrefix }}ObjVal
+        } else {
+            {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ObjectNull({{ $childAttrTypesVar }})
+        }
+    } else {
+        {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ObjectNull({{ $childAttrTypesVar }})
+    }
+} else {
+    {{ $attrsVar }}["{{ underscore $p.Name }}"] = types.ObjectNull({{ $childAttrTypesVar }})
+}
+{{- else }}
+{{ $attrsVar }}["{{ underscore $p.Name }}"] = types.StringNull()
+{{- end }}
+{{- end -}}
+
+{{- /*
+FlattenPropertyEphemeral is the top-level entry point.
+Called with: the top-level gettable property (.)
+Generates the flatten code inside Open().
+*/ -}}
+{{- define "FlattenPropertyEphemeral" -}}
+{{- if .Output -}}
+{{- $prefix := camelize .Name "lower" -}}
+{{- $nmVar := print "nm" (camelize .Name "upper") -}}
+    if v, ok := res["{{ .ApiName }}"]; ok && v != nil {
+    {{- if or (eq .Type "String") (eq .Type "Time") (eq .Type "Enum") (eq .Type "ResourceRef") (eq .Type "Fingerprint") }}
+        data.{{ camelize .Name "upper" }} = types.StringValue(fmt.Sprintf("%v", v))
+    {{- else if eq .Type "Boolean" }}
+        if bv, ok := v.(bool); ok {
+            data.{{ camelize .Name "upper" }} = types.BoolValue(bv)
+        }
+    {{- else if eq .Type "Integer" }}
+        if fv, ok := v.(float64); ok {
+            data.{{ camelize .Name "upper" }} = types.Int64Value(int64(fv))
+        }
+    {{- else if eq .Type "Double" }}
+        if fv, ok := v.(float64); ok {
+            data.{{ camelize .Name "upper" }} = types.Float64Value(fv)
+        }
+    {{- else if hasPrefix .Type "KeyValue" }}
+        if mv, ok := v.(map[string]interface{}); ok {
+            sm := make(map[string]string, len(mv))
+            for k, val := range mv {
+                sm[k] = fmt.Sprintf("%v", val)
+            }
+            {{ $prefix }}MapVal, {{ $prefix }}MapDiags := types.MapValueFrom(ctx, types.StringType, sm)
+            resp.Diagnostics.Append({{ $prefix }}MapDiags...)
+            if !resp.Diagnostics.HasError() {
+                data.{{ camelize .Name "upper" }} = {{ $prefix }}MapVal
+            }
+        }
+    {{- else if eq .Type "Map" }}
+        {{- if or (eq .ValueType.Type "String") (eq .ValueType.Type "Enum") (eq .ValueType.Type "ResourceRef") }}
+        if mv, ok := v.(map[string]interface{}); ok {
+            sm := make(map[string]string, len(mv))
+            for k, val := range mv {
+                sm[k] = fmt.Sprintf("%v", val)
+            }
+            {{ $prefix }}MapVal, {{ $prefix }}MapDiags := types.MapValueFrom(ctx, types.StringType, sm)
+            resp.Diagnostics.Append({{ $prefix }}MapDiags...)
+            if !resp.Diagnostics.HasError() {
+                data.{{ camelize .Name "upper" }} = {{ $prefix }}MapVal
+            }
+        }
+        {{- else if eq .ValueType.Type "NestedObject" }}
+        {{- $itemAttrTypesVar := print $prefix "ItemAttrTypes" }}
+        {{ $itemAttrTypesVar }} := map[string]attr.Type{
+            {{- range $p := .ResourceMetadata.OrderProperties .ValueType.UserProperties }}
+            "{{ underscore $p.Name }}": {{ template "FlattenAttrTypeEphemeral" $p }},
+            {{- end }}
+        }
+        if rawMap, ok := v.(map[string]interface{}); ok {
+            {{ $prefix }}MapVals := map[string]attr.Value{}
+            for mapKey, mapVal := range rawMap {
+                if itemNm, ok := mapVal.(map[string]interface{}); ok {
+                    {{ $prefix }}ItemAttrVals := map[string]attr.Value{}
+                    {{- range $p := .ResourceMetadata.OrderProperties .ValueType.UserProperties }}
+                    {{- template "FlattenNestedChildValueEphemeral" (dict "prop" $p "nmVar" "itemNm" "attrsVar" (print $prefix "ItemAttrVals") "prefix" $prefix) }}
+                    {{- end }}
+                    {{ $prefix }}ItemObjVal, {{ $prefix }}ItemObjDiags := types.ObjectValue({{ $itemAttrTypesVar }}, {{ $prefix }}ItemAttrVals)
+                    resp.Diagnostics.Append({{ $prefix }}ItemObjDiags...)
+                    if !resp.Diagnostics.HasError() {
+                        {{ $prefix }}MapVals[mapKey] = {{ $prefix }}ItemObjVal
+                    } else {
+                        {{ $prefix }}MapVals[mapKey] = types.ObjectNull({{ $itemAttrTypesVar }})
+                    }
+                } else {
+                    {{ $prefix }}MapVals[mapKey] = types.ObjectNull({{ $itemAttrTypesVar }})
+                }
+            }
+            {{ $prefix }}MapVal, {{ $prefix }}MapDiags := types.MapValue(types.ObjectType{AttrTypes: {{ $itemAttrTypesVar }}}, {{ $prefix }}MapVals)
+            resp.Diagnostics.Append({{ $prefix }}MapDiags...)
+            if !resp.Diagnostics.HasError() {
+                data.{{ camelize .Name "upper" }} = {{ $prefix }}MapVal
+            }
+        }
+        {{- end }}
+    {{- else if eq .Type "Array" }}
+        {{- if or (eq .ItemType.Type "String") (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") (eq .ItemType.Type "Fingerprint") (eq .ItemType.Type "Time") }}
+        if av, ok := v.([]interface{}); ok {
+            ss := make([]string, len(av))
+            for i, item := range av {
+                ss[i] = fmt.Sprintf("%v", item)
+            }
+            {{ $prefix }}ListVal, {{ $prefix }}ListDiags := types.ListValueFrom(ctx, types.StringType, ss)
+            resp.Diagnostics.Append({{ $prefix }}ListDiags...)
+            if !resp.Diagnostics.HasError() {
+                data.{{ camelize .Name "upper" }} = {{ $prefix }}ListVal
+            }
+        }
+        {{- else if eq .ItemType.Type "Integer" }}
+        if av, ok := v.([]interface{}); ok {
+            is := make([]int64, len(av))
+            for i, item := range av {
+                if fv, ok := item.(float64); ok {
+                    is[i] = int64(fv)
+                }
+            }
+            {{ $prefix }}ListVal, {{ $prefix }}ListDiags := types.ListValueFrom(ctx, types.Int64Type, is)
+            resp.Diagnostics.Append({{ $prefix }}ListDiags...)
+            if !resp.Diagnostics.HasError() {
+                data.{{ camelize .Name "upper" }} = {{ $prefix }}ListVal
+            }
+        }
+        {{- else if eq .ItemType.Type "Boolean" }}
+        if av, ok := v.([]interface{}); ok {
+            bs := make([]bool, len(av))
+            for i, item := range av {
+                if bv, ok := item.(bool); ok {
+                    bs[i] = bv
+                }
+            }
+            {{ $prefix }}ListVal, {{ $prefix }}ListDiags := types.ListValueFrom(ctx, types.BoolType, bs)
+            resp.Diagnostics.Append({{ $prefix }}ListDiags...)
+            if !resp.Diagnostics.HasError() {
+                data.{{ camelize .Name "upper" }} = {{ $prefix }}ListVal
+            }
+        }
+        {{- else if eq .ItemType.Type "Double" }}
+        if av, ok := v.([]interface{}); ok {
+            fs := make([]float64, len(av))
+            for i, item := range av {
+                if fv, ok := item.(float64); ok {
+                    fs[i] = fv
+                }
+            }
+            {{ $prefix }}ListVal, {{ $prefix }}ListDiags := types.ListValueFrom(ctx, types.Float64Type, fs)
+            resp.Diagnostics.Append({{ $prefix }}ListDiags...)
+            if !resp.Diagnostics.HasError() {
+                data.{{ camelize .Name "upper" }} = {{ $prefix }}ListVal
+            }
+        }
+        {{- else if eq .ItemType.Type "NestedObject" }}
+        {{- $itemAttrTypesVar := print $prefix "ItemAttrTypes" }}
+        {{ $itemAttrTypesVar }} := map[string]attr.Type{
+            {{- range $p := .ResourceMetadata.OrderProperties .ItemType.UserProperties }}
+            "{{ underscore $p.Name }}": {{ template "FlattenAttrTypeEphemeral" $p }},
+            {{- end }}
+        }
+        if av, ok := v.([]interface{}); ok {
+            elems := make([]attr.Value, len(av))
+            for i, item := range av {
+                if itemNm, ok := item.(map[string]interface{}); ok {
+                    {{ $prefix }}ItemAttrVals := map[string]attr.Value{}
+                    {{- range $p := .ResourceMetadata.OrderProperties .ItemType.UserProperties }}
+                    {{- template "FlattenNestedChildValueEphemeral" (dict "prop" $p "nmVar" "itemNm" "attrsVar" (print $prefix "ItemAttrVals") "prefix" $prefix) }}
+                    {{- end }}
+                    {{ $prefix }}ItemObjVal, {{ $prefix }}ItemObjDiags := types.ObjectValue({{ $itemAttrTypesVar }}, {{ $prefix }}ItemAttrVals)
+                    resp.Diagnostics.Append({{ $prefix }}ItemObjDiags...)
+                    if !resp.Diagnostics.HasError() {
+                        elems[i] = {{ $prefix }}ItemObjVal
+                    } else {
+                        elems[i] = types.ObjectNull({{ $itemAttrTypesVar }})
+                    }
+                } else {
+                    elems[i] = types.ObjectNull({{ $itemAttrTypesVar }})
+                }
+            }
+            {{ $prefix }}ListVal, {{ $prefix }}ListDiags := types.ListValue(types.ObjectType{AttrTypes: {{ $itemAttrTypesVar }}}, elems)
+            resp.Diagnostics.Append({{ $prefix }}ListDiags...)
+            if !resp.Diagnostics.HasError() {
+                data.{{ camelize .Name "upper" }} = {{ $prefix }}ListVal
+            }
+        }
+        {{- end }}
+    {{- else if eq .Type "NestedObject" }}
+        if {{ $nmVar }}, ok := v.(map[string]interface{}); ok {
+            {{ $prefix }}AttrTypes := map[string]attr.Type{
+                {{- range $p := .ResourceMetadata.OrderProperties .UserProperties }}
+                "{{ underscore $p.Name }}": {{ template "FlattenAttrTypeEphemeral" $p }},
+                {{- end }}
+            }
+            {{ $prefix }}AttrVals := map[string]attr.Value{}
+            {{- range $p := .ResourceMetadata.OrderProperties .UserProperties }}
+            {{- template "FlattenNestedChildValueEphemeral" (dict "prop" $p "nmVar" $nmVar "attrsVar" (print $prefix "AttrVals") "prefix" $prefix) }}
+            {{- end }}
+            {{ $prefix }}ObjVal, {{ $prefix }}ObjDiags := types.ObjectValue({{ $prefix }}AttrTypes, {{ $prefix }}AttrVals)
+            resp.Diagnostics.Append({{ $prefix }}ObjDiags...)
+            if !resp.Diagnostics.HasError() {
+                data.{{ camelize .Name "upper" }} = {{ $prefix }}ObjVal
+            }
+        }
+    {{- end }}
+    }
+{{- end -}}
+{{- end -}}
