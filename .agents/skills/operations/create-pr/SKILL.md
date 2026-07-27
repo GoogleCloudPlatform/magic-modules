@@ -79,7 +79,10 @@ git push -u "$FORK_REMOTE" "$BRANCH"
 Every PR must contain at least one release note block in the PR body.
 
 Refer to the official guide for detailed release note rules, categories, and examples:
-* [docs/content/code-review/release-notes.md](../../../docs/content/code-review/release-notes.md)
+* [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md)
+
+> [!IMPORTANT]
+> **Note to AI Agents:** View `docs/content/code-review/release-notes.md` from the repository root to determine the correct release note type (e.g., `enhancement`, `bug`, `none`, `new-resource`, `deprecation`, etc.) and follow the end-user impact guidelines.
 
 #### Release Note Block Format
 ```markdown
@@ -87,8 +90,6 @@ Refer to the official guide for detailed release note rules, categories, and exa
 CONTENT
 ```
 ```
-
-Common types include `new-resource`, `new-datasource`, `new-list-resource`, `enhancement`, `bug`, `deprecation`, `breaking-change`, `note`, and `none`.
 
 #### Sample PR Body Content
 ```markdown
