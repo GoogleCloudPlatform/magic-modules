@@ -77,7 +77,7 @@ func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
 
 An **acceptance test** verifies that a resource can be created, updated, and destroyed successfully.
 
-> **Note:** All resources should have a "basic" test covering the minimal required fields. Additional tests should be added to cover all fields, with updatable fields being covered by an update step. Updatable fields are fields that can be updated without recreating the entire resource; that is, they are not marked `immutable` in MMv1 or `ForceNew` in handwritten code
+> **Important:** All resources must have a "basic" test covering only required fields, to ensure that all optional fields are truly optional. One or more additional tests must be added to cover _all_ fields. All updatable fields (that is, fields which aren't [`immutable`]({{< ref "/reference/field#immutable" >}}) in MMv1 or `ForceNew` in handwritten code) must have a test which updates their value in place.
 
 {{% tabs "add-acceptance-test" %}}
 {{< tab "MMv1" >}}
