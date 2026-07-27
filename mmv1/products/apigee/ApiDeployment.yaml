@@ -22,7 +22,7 @@ references:
 base_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
 immutable: true
 self_link: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
-create_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
+create_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments?serviceAccount={{service_account}}
 update_mask: false
 update_verb: POST
 import_format:
@@ -85,3 +85,8 @@ properties:
     description: |
       The ID of the API deployment in the format `organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments`.
     output: true
+  - name: service_account
+    type: String
+    description: |
+      The service account represents the identity of the deployed proxy, and determines what permissions it has. The format must be `{ACCOUNT_ID}@{PROJECT}.iam.gserviceaccount.com`.
+    url_param_only: true

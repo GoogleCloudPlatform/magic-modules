@@ -23,6 +23,11 @@ data "archive_file" "bundle" {
 }
 
 
+resource "google_service_account" "proxy_sa" {
+  account_id   = "apigee-proxy-sa"
+  display_name = "Apigee Proxy Service Account"
+}
+
 resource "google_apigee_api" "test_apigee_api" {
   name            = "apigee-proxy"
   org_id          = google_project.project.project_id
@@ -31,8 +36,9 @@ resource "google_apigee_api" "test_apigee_api" {
 }
 
 resource "google_apigee_api_deployment" "test_apigee_api_deployment" {
-  environment = google_apigee_environment.apigee_environment.name
-  org_id = google_apigee_api.test_apigee_api.org_id
-  revision = google_apigee_api.test_apigee_api.latest_revision_id
-  proxy_id = google_apigee_api.test_apigee_api.name
+  environment     = google_apigee_environment.apigee_environment.name
+  org_id          = google_apigee_api.test_apigee_api.org_id
+  revision        = google_apigee_api.test_apigee_api.latest_revision_id
+  proxy_id        = google_apigee_api.test_apigee_api.name
+  service_account = google_service_account.proxy_sa.email
 }
