@@ -22,7 +22,7 @@ references:
 base_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
 immutable: true
 self_link: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
-create_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments
+create_url: organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments?serviceAccount={{service_account}}
 update_mask: false
 update_verb: POST
 import_format:
@@ -50,6 +50,28 @@ samples:
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
+  - name: apigee_api_deployment_service_account
+    primary_resource_id: api_deployment_test
+    skip_vcr: true
+    exclude_test: true
+    steps:
+      - name: apigee_api_deployment_service_account
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  - name: apigee_api_deployment_service_account_test
+    primary_resource_id: api_deployment_test
+    external_providers: [time]
+    skip_vcr: true
+    exclude_basic_doc: true
+    steps:
+      - name: apigee_api_deployment_service_account_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        ignore_read_extra:
+          # service_account is a url_param_only field used during deployment creation and is not returned by the Apigee GET API.
+          - 'service_account'
 parameters:
   - name: org_id
     type: String
@@ -85,3 +107,9 @@ properties:
     description: |
       The ID of the API deployment in the format `organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments`.
     output: true
+  - name: service_account
+    type: String
+    description: |
+      The Google Cloud IAM service account to use as the identity for the deployed proxy. The format must be `{ACCOUNT_ID}@{PROJECT}.iam.gserviceaccount.com`.
+    url_param_only: true
+    immutable: true
