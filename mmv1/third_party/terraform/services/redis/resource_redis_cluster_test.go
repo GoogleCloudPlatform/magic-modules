@@ -1708,15 +1708,15 @@ resource "google_redis_cluster" "test" {
   region                      = "us-central1"
   deletion_protection_enabled = false
   
-  acl_policy                  = google_redis_acl_policy.acl_policy.id
+  acl_policy                  = google_redis_cluster_acl_policy.acl_policy.id
 }
 
-resource "google_redis_acl_policy" "acl_policy" {
-  acl_policy_id = "tf-test-policy-%{random_suffix}"
-  location      = "us-central1"
+resource "google_redis_cluster_acl_policy" "acl_policy" {
+  acl_policy_id               = "tf-test-policy-%{random_suffix}"
+  location                    = "us-central1"
   rules {
-    rule     = "on allkeys +get"
-    username = "default"
+    rule                      = "on allkeys +get"
+    username                  = "default"
   }
 }
 `, context)

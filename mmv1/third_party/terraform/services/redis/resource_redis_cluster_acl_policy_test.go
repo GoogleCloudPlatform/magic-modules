@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccRedisAclPolicy_basic(t *testing.T) {
+func TestAccRedisClusterAclPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -18,21 +18,21 @@ func TestAccRedisAclPolicy_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckRedisAclPolicyDestroyProducer(t),
+		CheckDestroy:             testAccCheckRedisClusterAclPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisAclPolicy_basic(context),
+				Config: testAccRedisClusterAclPolicy_basic(context),
 			},
 			{
-				ResourceName:      "google_redis_acl_policy.test",
+				ResourceName:      "google_redis_cluster_acl_policy.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccRedisAclPolicy_update(context),
+				Config: testAccRedisClusterAclPolicy_update(context),
 			},
 			{
-				ResourceName:      "google_redis_acl_policy.test",
+				ResourceName:      "google_redis_cluster_acl_policy.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -40,11 +40,11 @@ func TestAccRedisAclPolicy_basic(t *testing.T) {
 	})
 }
 
-func testAccRedisAclPolicy_basic(context map[string]interface{}) string {
+func testAccRedisClusterAclPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_redis_acl_policy" "test" {
-  acl_policy_id = "tf-test-policy-%{random_suffix}"
-  location      = "us-central1"
+resource "google_redis_cluster_acl_policy" "test" {
+  acl_policy_id               = "tf-test-policy-%{random_suffix}"
+  location                    = "us-central1"
   rules {
     rule     = "on allkeys +get"
     username = "default"
@@ -53,11 +53,11 @@ resource "google_redis_acl_policy" "test" {
 `, context)
 }
 
-func testAccRedisAclPolicy_update(context map[string]interface{}) string {
+func testAccRedisClusterAclPolicy_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_redis_acl_policy" "test" {
-  acl_policy_id = "tf-test-policy-%{random_suffix}"
-  location      = "us-central1"
+resource "google_redis_cluster_acl_policy" "test" {
+  acl_policy_id               = "tf-test-policy-%{random_suffix}"
+  location                    = "us-central1"
   rules {
     rule     = "on allkeys +set"
     username = "default"
@@ -66,7 +66,7 @@ resource "google_redis_acl_policy" "test" {
 `, context)
 }
 
-func TestAccRedisAclPolicy_withCluster(t *testing.T) {
+func TestAccRedisClusterAclPolicy_withCluster(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -76,10 +76,10 @@ func TestAccRedisAclPolicy_withCluster(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckRedisAclPolicyDestroyProducer(t),
+		CheckDestroy:             testAccCheckRedisClusterAclPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisAclPolicy_withCluster(context),
+				Config: testAccRedisClusterAclPolicy_withCluster(context),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -88,7 +88,7 @@ func TestAccRedisAclPolicy_withCluster(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"psc_configs"},
 			},
 			{
-				ResourceName:      "google_redis_acl_policy.test",
+				ResourceName:      "google_redis_cluster_acl_policy.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -96,14 +96,14 @@ func TestAccRedisAclPolicy_withCluster(t *testing.T) {
 	})
 }
 
-func testAccRedisAclPolicy_withCluster(context map[string]interface{}) string {
+func testAccRedisClusterAclPolicy_withCluster(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_redis_acl_policy" "test" {
-  acl_policy_id = "tf-test-policy-%{random_suffix}"
-  location      = "us-central1"
+resource "google_redis_cluster_acl_policy" "test" {
+  acl_policy_id               = "tf-test-policy-%{random_suffix}"
+  location                    = "us-central1"
   rules {
-    rule     = "on allkeys +get"
-    username = "default"
+    rule                      = "on allkeys +get"
+    username                  = "default"
   }
 }
 
@@ -113,12 +113,12 @@ resource "google_redis_cluster" "test" {
   region                      = "us-central1"
   deletion_protection_enabled = false
 
-  acl_policy                  = google_redis_acl_policy.test.id
+  acl_policy                  = google_redis_cluster_acl_policy.test.id
 }
 `, context)
 }
 
-func testAccCheckRedisAclPolicyDestroyProducer(t *testing.T) resource.TestCheckFunc {
+func testAccCheckRedisClusterAclPolicyDestroyProducer(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		return nil
 	}

@@ -12,9 +12,9 @@
 # limitations under the License.
 
 ---
-name: AclPolicy
+name: ClusterAclPolicy
 description: |
-  A Google Cloud Redis ACL policy.
+  A Google Cloud Redis Cluster ACL policy.
 base_url: projects/{{project}}/locations/{{location}}/aclPolicies
 self_link: projects/{{project}}/locations/{{location}}/aclPolicies/{{acl_policy_id}}
 create_url: projects/{{project}}/locations/{{location}}/aclPolicies?aclPolicyId={{acl_policy_id}}

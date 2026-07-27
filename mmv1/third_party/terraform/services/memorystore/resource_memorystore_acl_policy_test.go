@@ -43,11 +43,11 @@ func TestAccMemorystoreAclPolicy_basic(t *testing.T) {
 func testAccMemorystoreAclPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_memorystore_acl_policy" "test" {
-  acl_policy_id = "tf-test-policy-%{random_suffix}"
-  location      = "us-central1"
+  acl_policy_id               = "tf-test-policy-%{random_suffix}"
+  location                    = "us-central1"
   rules {
-    rule     = "on allkeys +get"
-    username = "default"
+    rule                      = "on allkeys +get"
+    username                  = "default"
   }
 }
 `, context)
@@ -56,11 +56,11 @@ resource "google_memorystore_acl_policy" "test" {
 func testAccMemorystoreAclPolicy_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_memorystore_acl_policy" "test" {
-  acl_policy_id = "tf-test-policy-%{random_suffix}"
-  location      = "us-central1"
+  acl_policy_id               = "tf-test-policy-%{random_suffix}"
+  location                    = "us-central1"
   rules {
-    rule     = "on allkeys +set"
-    username = "default"
+    rule                      = "on allkeys +set"
+    username                  = "default"
   }
 }
 `, context)
@@ -100,11 +100,11 @@ func TestAccMemorystoreAclPolicy_withInstance(t *testing.T) {
 func testAccMemorystoreAclPolicy_withInstance(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_memorystore_acl_policy" "test" {
-  acl_policy_id = "tf-test-policy-%{random_suffix}"
-  location      = "%{location}"
+  acl_policy_id               = "tf-test-policy-%{random_suffix}"
+  location                    = "%{location}"
   rules {
-    rule     = "on allkeys +get"
-    username = "default"
+    rule                      = "on allkeys +get"
+    username                  = "default"
   }
 }
 

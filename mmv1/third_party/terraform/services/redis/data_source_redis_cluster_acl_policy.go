@@ -9,9 +9,9 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceRedisAclPolicy() *schema.Resource {
+func DataSourceRedisClusterAclPolicy() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceRedisAclPolicy().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceRedisClusterAclPolicy().Schema)
 
 	// Set 'Required' schema elements
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "acl_policy_id")
@@ -19,12 +19,12 @@ func DataSourceRedisAclPolicy() *schema.Resource {
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "location")
 
 	return &schema.Resource{
-		Read:   dataSourceRedisAclPolicyRead,
+		Read:   dataSourceRedisClusterAclPolicyRead,
 		Schema: dsSchema,
 	}
 }
 
-func dataSourceRedisAclPolicyRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceRedisClusterAclPolicyRead(d *schema.ResourceData, meta interface{}) error {
 
 	config := meta.(*transport_tpg.Config)
 
@@ -45,7 +45,7 @@ func dataSourceRedisAclPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	// Setting location field, as this is set as a required field in instance resource to build the url
 	d.Set("location", location)
 
-	err = resourceRedisAclPolicyRead(d, meta)
+	err = resourceRedisClusterAclPolicyRead(d, meta)
 	if err != nil {
 		return err
 	}
@@ -63,9 +63,9 @@ func dataSourceRedisAclPolicyRead(d *schema.ResourceData, meta interface{}) erro
 
 func init() {
 	registry.Schema{
-		Name:        "google_redis_acl_policy",
+		Name:        "google_redis_cluster_acl_policy",
 		ProductName: "redis",
 		Type:        registry.SchemaTypeDataSource,
-		Schema:      DataSourceRedisAclPolicy(),
+		Schema:      DataSourceRedisClusterAclPolicy(),
 	}.Register()
 }

@@ -4,14 +4,14 @@ description: |-
   Get information about a Redis ACL policy.
 ---
 
-# google_redis_acl_policy
+# google_redis_cluster_acl_policy
 
-Get information about a Google Cloud Redis ACL policy. For more information see the [official documentation](https://cloud.google.com/memorystore/docs/redis) or the [API documentation](https://cloud.google.com/memorystore/docs/redis/reference/rest).
+Get information about a Google Cloud Redis Cluster ACL policy. For more information see the [official documentation](https://cloud.google.com/memorystore/docs/redis) or the [API documentation](https://cloud.google.com/memorystore/docs/redis/reference/rest).
 
 ## Example Usage
 
 ```hcl
-data "google_redis_acl_policy" "qa" {
+data "google_redis_cluster_acl_policy" "qa" {
   acl_policy_id = "my-acl-policy"
   location      = "us-central1"
 }
@@ -27,4 +27,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_redis_acl_policy](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_acl_policy) resource for details of all the available attributes.
+See [google_redis_cluster_acl_policy](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_cluster_acl_policy) resource for details of all the available attributes.

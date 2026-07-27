@@ -1,4 +1,4 @@
-package memorystore_test
+package redis_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccMemorystoreAclPolicyDatasource(t *testing.T) {
+func TestAccRedisClusterAclPolicyDatasource(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -19,18 +19,18 @@ func TestAccMemorystoreAclPolicyDatasource(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMemorystoreAclPolicyDatasourceConfig(context),
+				Config: testAccRedisClusterAclPolicyDatasourceConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_memorystore_acl_policy.default", "google_memorystore_acl_policy.test"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_redis_cluster_acl_policy.default", "google_redis_cluster_acl_policy.test"),
 				),
 			},
 		},
 	})
 }
 
-func testAccMemorystoreAclPolicyDatasourceConfig(context map[string]interface{}) string {
+func testAccRedisClusterAclPolicyDatasourceConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_memorystore_acl_policy" "test" {
+resource "google_redis_cluster_acl_policy" "test" {
   acl_policy_id               = "tf-test-policy-%{random_suffix}"
   location                    = "us-central1"
   rules {
@@ -39,8 +39,8 @@ resource "google_memorystore_acl_policy" "test" {
   }
 }
 
-data "google_memorystore_acl_policy" "default" {
-  acl_policy_id               = google_memorystore_acl_policy.test.acl_policy_id
+data "google_redis_cluster_acl_policy" "default" {
+  acl_policy_id               = google_redis_cluster_acl_policy.test.acl_policy_id
   location                    = "us-central1"
 }
 `, context)
