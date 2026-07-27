@@ -476,7 +476,7 @@ func TestAccComputeUrlMap_cachePolicyMultiLevelUpdate(t *testing.T) {
 }
 
 func testAccComputeUrlMap_regional(bsName, hcName, umName string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_regional_backend_service" "foobar" {
   name          = "urlmap-test-%s"
   health_checks = [google_compute_http_health_check.zero.self_link]

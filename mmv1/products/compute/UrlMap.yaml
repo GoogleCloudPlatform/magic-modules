@@ -346,22 +346,6 @@ samples:
   - name: 'url_map_http_filter_metadata'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      default_backend_service_name: 'default-backend'
-      service_a_backend_service_name: 'service-a-backend'
-      service_b_backend_service_name: 'service-b-backend'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      url_map_name: '"urlmap" + randomSuffix'
-  - name: 'url_map_image_optimization_policy'
-    primary_resource_id: 'urlmap'
-    min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'example'
-      http_health_check_name: 'health-check'
     steps:
       - name: 'url_map_http_filter_metadata'
         min_version: 'beta'
