@@ -23,6 +23,8 @@ import_format:
   - 'organizations/{{organization}}/supportEventSubscriptions/{{name}}'
   - '{{name}}'
 autogen_status: U3VwcG9ydEV2ZW50U3Vic2NyaXB0aW9u
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/cloud_support_event_subscription.go.tmpl'
 examples:
   - name: "cloud_support_event_subscription_basic"
     primary_resource_id: "subscription"
