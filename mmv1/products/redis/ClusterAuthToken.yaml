@@ -36,7 +36,7 @@ properties:
     description: "The full name of the parent Token Auth User."
     required: true
     url_param_only: true
-  - name: "token_id"
+  - name: "tokenId"
     type: "String"
     description: "The ID of the Auth Token."
     output: true
@@ -49,7 +49,7 @@ properties:
     description: "The generated auth token string."
     output: true
     sensitive: true
-  - name: "create_time"
+  - name: "createTime"
     type: "Time"
     description: "The creation time of the auth token."
     output: true
