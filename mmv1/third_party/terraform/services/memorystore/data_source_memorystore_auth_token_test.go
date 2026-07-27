@@ -21,7 +21,7 @@ func TestAccMemorystoreAuthTokenDatasource(t *testing.T) {
 		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMemorystoreAuthTokenDatasourceConfig(context),
+				Config: testAccMemorystoreAuthTokenDatasource(context),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_memorystore_auth_token.default", "google_memorystore_auth_token.token-basic"),
 				),
@@ -30,7 +30,7 @@ func TestAccMemorystoreAuthTokenDatasource(t *testing.T) {
 	})
 }
 
-func testAccMemorystoreAuthTokenDatasourceConfig(context map[string]interface{}) string {
+func testAccMemorystoreAuthTokenDatasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_memorystore_instance" "instance-basic" {
   instance_id                 = "tf-test-memorystore-instance%{random_suffix}"

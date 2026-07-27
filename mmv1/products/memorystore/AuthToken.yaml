@@ -15,11 +15,11 @@ name: "AuthToken"
 description: "Represents an Auth Token for a Token Auth User within a Google Cloud Memorystore (Valkey) Instance."
 immutable: true
 base_url: "{{token_auth_user}}/authTokens"
-self_link: "{{token_auth_user}}/authTokens/{{token_id}}"
+self_link: "{{token_auth_user}}/authTokens/{{tokenId}}"
 create_url: "{{token_auth_user}}:addAuthToken"
-id_format: "{{token_auth_user}}/authTokens/{{token_id}}"
+id_format: "{{token_auth_user}}/authTokens/{{tokenId}}"
 import_format:
-  - "{{token_auth_user}}/authTokens/{{token_id}}"
+  - "{{token_auth_user}}/authTokens/{{tokenId}}"
 async:
   type: OpAsync
   include_project: true

@@ -20,7 +20,7 @@ func TestAccRedisClusterAuthTokenDatasource(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisClusterAuthTokenDatasourceConfig(context),
+				Config: testAccRedisClusterAuthTokenDatasource(context),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_redis_cluster_auth_token.default", "google_redis_cluster_auth_token.token-basic"),
 				),
@@ -29,7 +29,7 @@ func TestAccRedisClusterAuthTokenDatasource(t *testing.T) {
 	})
 }
 
-func testAccRedisClusterAuthTokenDatasourceConfig(context map[string]interface{}) string {
+func testAccRedisClusterAuthTokenDatasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_redis_cluster" "cluster" {
   name                        = "tf-test-redis-cluster-%{random_suffix}"
