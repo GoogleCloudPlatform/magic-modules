@@ -14,5 +14,8 @@ if tokens, ok := res["authTokens"].([]interface{}); ok && len(tokens) > 0 {
 	latestToken := tokens[len(tokens)-1].(map[string]interface{})
 	if name, ok := latestToken["name"].(string); ok {
 		d.SetId(name)
+		if err := d.Set("token_id", tpgresource.GetResourceNameFromSelfLink(name)); err != nil {
+			return fmt.Errorf("Error setting token_id: %s", err)
+		}
 	}
 }

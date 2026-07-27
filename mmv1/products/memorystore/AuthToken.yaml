@@ -15,8 +15,9 @@ name: "AuthToken"
 description: "Represents an Auth Token for a Token Auth User within a Google Cloud Memorystore (Valkey) Instance."
 immutable: true
 base_url: "{{token_auth_user}}/authTokens"
-self_link: "{{token_auth_user}}/authTokens/{{token_id}}"
+self_link: "{{token_auth_user}}/authTokens"
 create_url: "{{token_auth_user}}:addAuthToken"
+delete_url: "{{token_auth_user}}/authTokens/{{token_id}}"
 id_format: "{{token_auth_user}}/authTokens/{{token_id}}"
 import_format:
   - "{{token_auth_user}}/authTokens/{{token_id}}"
@@ -26,6 +27,8 @@ async:
   operation:
     base_url: '{{op_id}}'
 custom_code:
+  custom_import: templates/terraform/custom_import/memorystore_auth_token.go.tmpl
+  decoder: templates/terraform/decoders/memorystore_auth_token.go.tmpl
   encoder: templates/terraform/encoders/memorystore_auth_token.go.tmpl
   post_create: templates/terraform/post_create/memorystore_auth_token.go.tmpl
 properties:

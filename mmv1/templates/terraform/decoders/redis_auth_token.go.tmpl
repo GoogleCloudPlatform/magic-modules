@@ -1,0 +1,11 @@
+if tokens, ok := res["authTokens"].([]interface{}); ok {
+	for _, rawToken := range tokens {
+		if tokenMap, ok := rawToken.(map[string]interface{}); ok {
+			if name, ok := tokenMap["name"].(string); ok && name == d.Id() {
+				tokenMap["tokenId"] = tpgresource.GetResourceNameFromSelfLink(name)
+				return tokenMap, nil
+			}
+		}
+	}
+}
+return nil, fmt.Errorf("AuthToken %s not found", d.Id())
