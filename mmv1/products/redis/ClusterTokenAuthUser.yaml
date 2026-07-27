@@ -24,14 +24,6 @@ async:
   type: OpAsync
 custom_code:
   encoder: templates/terraform/encoders/redis_token_auth_user.go.tmpl
-samples:
-  - name: "redis_auth_token_basic"
-    primary_resource_id: "user-basic"
-    steps:
-      - name: "redis_auth_token_basic"
-        resource_id_vars:
-          cluster_name: "my-cluster"
-          network_name: "my-network"
 properties:
   - name: "cluster"
     type: "ResourceRef"

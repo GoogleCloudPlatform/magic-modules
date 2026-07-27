@@ -14,7 +14,7 @@ Get information about a Google Cloud Redis Cluster Token Auth User. For more det
 data "google_redis_cluster_token_auth_user" "qa" {
   cluster = "my-cluster"
   user_id = "my-user"
-  region  = "us-central1"
+  region  = "europe-west4"
 }
 ```
 

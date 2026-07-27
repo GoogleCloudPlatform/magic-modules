@@ -14,7 +14,7 @@ Get information about a Google Cloud Memorystore (Valkey) Token Auth User. For m
 data "google_memorystore_token_auth_user" "qa" {
   instance = "my-instance"
   user_id  = "my-user"
-  location = "us-central1"
+  location = "europe-west4"
 }
 ```
 

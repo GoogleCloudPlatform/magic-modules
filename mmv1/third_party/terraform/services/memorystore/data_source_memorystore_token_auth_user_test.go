@@ -35,20 +35,20 @@ func testAccMemorystoreTokenAuthUserDatasourceConfig(context map[string]interfac
 resource "google_memorystore_instance" "instance-basic" {
   instance_id                 = "tf-test-memorystore-instance%{random_suffix}"
   shard_count                 = 1
-  location                    = "us-central1"
+  location                    = "europe-west4"
   authorization_mode          = "TOKEN_AUTH"
   transit_encryption_mode     = "SERVER_AUTHENTICATION"
   deletion_protection_enabled = false
 }
 
 resource "google_memorystore_token_auth_user" "user-basic" {
-  instance = google_memorystore_instance.instance-basic.name
-  user_id  = "tf-test-user-%{random_suffix}"
+  instance                    = google_memorystore_instance.instance-basic.name
+  user_id                     = "tf-test-user-%{random_suffix}"
 }
 
 data "google_memorystore_token_auth_user" "default" {
-  instance = google_memorystore_instance.instance-basic.name
-  user_id  = google_memorystore_token_auth_user.user-basic.user_id
+  instance                    = google_memorystore_instance.instance-basic.name
+  user_id                     = google_memorystore_token_auth_user.user-basic.user_id
 }
 `, context)
 }

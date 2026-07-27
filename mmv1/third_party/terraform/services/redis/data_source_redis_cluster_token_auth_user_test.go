@@ -34,18 +34,18 @@ func testAccRedisClusterTokenAuthUserDatasourceConfig(context map[string]interfa
 resource "google_redis_cluster" "cluster" {
   name                        = "tf-test-redis-cluster-%{random_suffix}"
   shard_count                 = 1
-  region                      = "us-central1"
+  region                      = "europe-west4"
   deletion_protection_enabled = false
 }
 
 resource "google_redis_cluster_token_auth_user" "user-basic" {
-  cluster = google_redis_cluster.cluster.name
-  user_id = "tf-test-user-%{random_suffix}"
+  cluster                     = google_redis_cluster.cluster.name
+  user_id                     = "tf-test-user-%{random_suffix}"
 }
 
 data "google_redis_cluster_token_auth_user" "default" {
-  cluster = google_redis_cluster.cluster.name
-  user_id = google_redis_cluster_token_auth_user.user-basic.user_id
+  cluster                     = google_redis_cluster.cluster.name
+  user_id                     = google_redis_cluster_token_auth_user.user-basic.user_id
 }
 `, context)
 }
