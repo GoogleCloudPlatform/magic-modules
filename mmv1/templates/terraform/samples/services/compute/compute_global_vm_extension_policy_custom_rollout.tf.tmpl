@@ -1,5 +1,4 @@
 resource "google_compute_global_vm_extension_policy" "{{$.PrimaryResourceId}}" {
-  provider    = google-beta
   name        = "global-ops-agent-vme-policy-%{random_suffix}"
   description = "A global VM extension policy with a custom rollout plan"
   priority    = 10
@@ -25,11 +24,9 @@ resource "google_compute_global_vm_extension_policy" "{{$.PrimaryResourceId}}" {
 }
 
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_compute_rollout_plan" "custom_rollout" {
-  provider       = google-beta
   name           = "custom-rollout-plan-%{random_suffix}"
   location_scope = "ZONAL"
 
