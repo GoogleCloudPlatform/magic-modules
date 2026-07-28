@@ -13,6 +13,7 @@
 
 ---
 name: Trial
+exclude_resource: true
 description: "A 30-day free trial for Google Cloud NetApp Volumes.\nIt is global in scope for a project but requires to be created in a valid cloud region in which Google Cloud NetApp Volumes is available.\n\n**Note:** Modifying the `location` of this resource will cause Terraform to destroy and recreate the trial. \nBecause Google Cloud enforces a limit of one free trial per project every 12 months, this recreation will fail. \nIt is highly recommended to use the `lifecycle { prevent_destroy = true }` block on this resource.\n"
 references:
   guides:
