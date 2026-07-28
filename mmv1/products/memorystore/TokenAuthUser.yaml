@@ -1,0 +1,51 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+name: "TokenAuthUser"
+description: "Represents a Token Auth User for a Google Cloud Memorystore (Valkey) Instance."
+immutable: true
+base_url: "{{instance}}/tokenAuthUsers"
+self_link: "{{instance}}/tokenAuthUsers/{{user_id}}"
+create_url: "{{instance}}:addTokenAuthUser"
+id_format: "{{instance}}/tokenAuthUsers/{{user_id}}"
+import_format:
+  - "{{instance}}/tokenAuthUsers/{{user_id}}"
+async:
+  type: OpAsync
+  include_project: true
+  operation:
+    base_url: '{{op_id}}'
+custom_code:
+  custom_import: templates/terraform/custom_import/memorystore_token_auth_user.go.tmpl
+  encoder: templates/terraform/encoders/memorystore_token_auth_user.go.tmpl
+properties:
+  - name: "instance"
+    type: "ResourceRef"
+    resource: "Instance"
+    imports: "name"
+    description: "The full name of the Memorystore instance."
+    required: true
+    url_param_only: true
+  - name: "user_id"
+    type: "String"
+    description: "The unique ID (username) of the Token Auth User."
+    required: true
+    url_param_only: true
+  - name: "name"
+    type: "String"
+    description: "The full resource name of the Token Auth User."
+    output: true
+  - name: "state"
+    type: "String"
+    description: "The current state of the Token Auth User."
+    output: true
