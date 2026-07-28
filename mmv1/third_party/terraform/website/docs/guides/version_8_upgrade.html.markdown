@@ -106,3 +106,29 @@ If your configuration relies on the old behavior — for example a
 variable-driven `count = 0` block that was never intended to detach existing
 accelerators — review your configuration before upgrading, as `terraform
 plan` may now show a forced replacement for affected instances.
+## Resource: `google_cloud_run_v2_worker_pool`
+
+### `custom_audiences` is now removed
+
+The `custom_audiences` field has been removed from this resource because it is not supported for Cloud Run v2 Worker Pools. Remove it from your configuration after upgrading.
+
+### `http_get.http_headers.port` is now removed
+
+The `http_get.http_headers.port` field of container startup probe and liveness probe have been removed from this resource because it is not supported for Cloud Run v2 Worker Pools. Remove it from your configuration after upgrading.
+
+### `http_get.http_headers.name` is now required
+
+The `http_get.http_headers.name` field of container startup probe and liveness probe are now required in this resource. If `http_get.http_headers` field is used, add the sub field `http_get.http_headers.name` to your configuration after
+upgrading.
+
+## Resource: `google_netapp_storage_pool`
+
+### `scale_tier` has been removed
+
+The `scale_tier` argument has been removed from this resource. It was previously deprecated in favor of `scale_type`. When upgrading to version 8.0.0, remove any usage of `scale_tier` from your `google_netapp_storage_pool` configurations. You should use the `scale_type` argument instead for specifying the scale type.
+
+## Resource: `google_workflows_workflow`
+
+### `source_contents` is now Required
+
+The `source_contents` argument is now Required. Previously, this field was marked as Optional in Terraform, but omitting it led to runtime errors. When upgrading to version 8.0.0, you must ensure this argument is populated in your `google_workflows_workflow` configurations. 

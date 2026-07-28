@@ -121,6 +121,7 @@ properties:
   - name: claimMapping
     type: KeyValuePairs
     description: Maps BYOID claims to SCIM claims. This is a required field for new SCIM Tenants being created.
+    required: true
   - name: purgeTime
     type: Time
     description: The timestamp that represents the time when the SCIM tenant is purged.
