@@ -29,6 +29,8 @@ id_format: projects/{{project}}/locations/{{location}}/dnsThreatDetectors/{{name
 import_format:
   - projects/{{project}}/locations/{{location}}/dnsThreatDetectors/{{name}}
   - '{{name}}'
+generate_list_resource: true
+
 timeouts:
   insert_minutes: 20
   update_minutes: 20
