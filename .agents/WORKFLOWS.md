@@ -17,5 +17,6 @@ specific one.
 *   **Default Workflow** (`.agents/skills/workflows/default/SKILL.md`): For tasks that do not involve creating a new resource (fallback for general tasks).
 *   **New Resource Workflow** (`.agents/skills/workflows/new_resource/SKILL.md`): Specifically for creating a new resource, supporting both autogen and manual generation.
 *   **Add List Resource Workflow** (`.agents/skills/workflows/add_list_resource/SKILL.md`): Opts one product's eligible MMv1 resources into list-resource generation by setting `generate_list_resource: true`, validates locally, and opens a PR.
+*   **Prepare Release Workflow** (`.agents/skills/workflows/prepare_release/SKILL.md`): Prepares and cuts weekly releases for both `terraform-provider-google` (TPG) and `terraform-provider-google-beta` (TPGB) providers.
 *   **Add IAM Support Workflow** (`.agents/skills/workflows/add_iam_resources/SKILL.md`): Adds IAM support to an existing MMv1 resource.
 *   *(Future workflows can be added here)*

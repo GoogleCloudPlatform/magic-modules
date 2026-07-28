@@ -182,6 +182,9 @@ service/cloudscheduler:
 service/cloudsecuritycompliance:
   resources:
   - google_cloud_security_compliance_.*
+service/cloudsupport:
+  resources:
+  - google_cloud_support_.*
 service/cloudtasks:
   resources:
   - google_cloud_tasks_.*
