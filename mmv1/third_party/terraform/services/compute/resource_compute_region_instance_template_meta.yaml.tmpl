@@ -207,10 +207,8 @@ fields:
   - api_field: 'properties.scheduling.gracefulShutdown.maxDuration.seconds'
     field: 'scheduling.graceful_shutdown.max_duration.seconds'
 {{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - field: 'scheduling.host_error_timeout_seconds'
     api_field: 'properties.scheduling.hostErrorTimeoutSeconds'
-{{- end }}
   - field: 'scheduling.instance_termination_action'
     api_field: 'properties.scheduling.instanceTerminationAction'
   - field: 'scheduling.local_ssd_recovery_timeout.nanos'

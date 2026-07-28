@@ -192,8 +192,8 @@ func FlattenSchedulingHTTP(resp map[string]interface{}) []map[string]interface{}
 	schedulingMap["skip_guest_os_shutdown"] = v_sgos
 {{- if ne $.TargetVersionName "ga" }}
 	if v, ok := resp["maintenanceInterval"]; ok { schedulingMap["maintenance_interval"] = v }
-	if v, ok := resp["hostErrorTimeoutSeconds"]; ok { schedulingMap["host_error_timeout_seconds"] = ParseIntHTTP(v) }
 {{- end }}
+	if v, ok := resp["hostErrorTimeoutSeconds"]; ok { schedulingMap["host_error_timeout_seconds"] = ParseIntHTTP(v) }
 
 	if maxDurRaw, ok := resp["maxRunDuration"]; ok && maxDurRaw != nil {
 		maxDur := maxDurRaw.(map[string]interface{})
