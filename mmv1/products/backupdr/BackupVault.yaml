@@ -19,7 +19,7 @@ base_url: projects/{{project}}/locations/{{location}}/backupVaults
 self_link: projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}
 create_url: projects/{{project}}/locations/{{location}}/backupVaults?backupVaultId={{backup_vault_id}}
 delete_url: projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}
-update_url: projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}?force={{force_update}}
+update_url: projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}?force={{force_update}}&forceUpdateAccessRestriction={{force_update_access_restriction}}
 update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}
@@ -85,6 +85,11 @@ parameters:
        retention set by the backup vault.
     url_param_only: true
     default_value: false
+  - name: force_update_access_restriction
+    type: Boolean
+    description: |
+      If set to true, we will force update access restriction even if some non compliant data sources are present.
+    url_param_only: true
   - name: force_delete
     type: Boolean
     description: |
@@ -152,7 +157,7 @@ properties:
     output: true
   - name: state
     type: String
-    description: "Output only. The BackupVault resource instance state. \n Possible values:\n STATE_UNSPECIFIED\n CREATING\n ACTIVE\n DELETING\n ERROR"
+    description: "Output only. The BackupVault resource instance state. \n Possible values:\n STATE_UNSPECIFIED\n CREATING\n ACTIVE\n DELETING\n ERROR\n UPDATING"
     output: true
   - name: effectiveTime
     type: String
@@ -181,7 +186,6 @@ properties:
     type: Enum
     description: |
       Access restriction for the backup vault. Default value is `WITHIN_ORGANIZATION` if not provided during creation.
-    immutable: true
     default_value: WITHIN_ORGANIZATION
     enum_values:
       - ACCESS_RESTRICTION_UNSPECIFIED
