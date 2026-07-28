@@ -37,11 +37,12 @@ resource "google_redis_cluster" "cluster" {
   name                        = "tf-test-redis-cluster-%{random_suffix}"
   shard_count                 = 1
   region                      = "europe-west4"
+  authorization_mode          = "AUTH_MODE_TOKEN_AUTH"
   deletion_protection_enabled = false
 }
 
 resource "google_redis_cluster_token_auth_user" "user-basic" {
-  cluster                     = google_redis_cluster.cluster.name
+  cluster                     = google_redis_cluster.cluster.id
   user_id                     = "tf-test-user-%{random_suffix}"
 }
 

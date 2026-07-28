@@ -14,29 +14,28 @@
 name: "ClusterTokenAuthUser"
 description: "Represents a Token Auth User for a Google Cloud Redis Cluster."
 immutable: true
-base_url: "projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers"
-self_link: "projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers/{{user_id}}"
-create_url: "projects/{{project}}/locations/{{region}}/clusters/{{cluster}}:addTokenAuthUser"
-id_format: "projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers/{{user_id}}"
+base_url: "{{cluster}}/tokenAuthUsers"
+self_link: "{{cluster}}/tokenAuthUsers/{{user_id}}"
+create_url: "{{cluster}}:addTokenAuthUser"
+id_format: "{{cluster}}/tokenAuthUsers/{{user_id}}"
 import_format:
-  - "projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers/{{user_id}}"
+  - "{{cluster}}/tokenAuthUsers/{{user_id}}"
 async:
   type: OpAsync
+  include_project: true
+  operation:
+    base_url: '{{op_id}}'
 custom_code:
+  custom_import: templates/terraform/custom_import/redis_token_auth_user.go.tmpl
   encoder: templates/terraform/encoders/redis_token_auth_user.go.tmpl
 properties:
   - name: "cluster"
     type: "ResourceRef"
     resource: "Cluster"
-    imports: "name"
+    imports: "id"
     description: "The full name of the Redis cluster."
     required: true
     url_param_only: true
-  - name: "region"
-    type: "String"
-    description: "The name of the region of the Redis cluster."
-    url_param_only: true
-    immutable: true
   - name: "user_id"
     type: "String"
     description: "The unique ID (username) of the Token Auth User."

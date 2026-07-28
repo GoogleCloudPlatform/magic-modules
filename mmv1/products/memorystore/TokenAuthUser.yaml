@@ -26,6 +26,7 @@ async:
   operation:
     base_url: '{{op_id}}'
 custom_code:
+  custom_import: templates/terraform/custom_import/memorystore_token_auth_user.go.tmpl
   encoder: templates/terraform/encoders/memorystore_token_auth_user.go.tmpl
 properties:
   - name: "instance"
