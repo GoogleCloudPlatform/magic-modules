@@ -136,7 +136,14 @@ The following arguments are supported:
 
 - - -
 
-
+* `space` -
+  (Optional)
+  The ID of the space associated with this shared flow. Any IAM policies applied
+  to the space will affect access to this shared flow. If not set, the shared
+  flow is created at the organization level. This field is only respected when
+  creating a new shared flow; it has no effect when creating a new revision for
+  an existing shared flow. Changing this field forces the resource to be
+  recreated.
 
 ## Attributes Reference
 
