@@ -33,7 +33,6 @@ import_format:
 samples:
   - name: apigee_api_deployment_basic
     primary_resource_id: api_deployment_test
-    skip_vcr: true
     exclude_test: true
     steps:
       - name: apigee_api_deployment_basic
@@ -43,7 +42,6 @@ samples:
   - name: apigee_api_deployment_basic_test
     primary_resource_id: api_deployment_test
     external_providers: [time]
-    skip_vcr: true
     exclude_basic_doc: true
     steps:
       - name: apigee_api_deployment_basic_test
@@ -52,7 +50,6 @@ samples:
           billing_account: BILLING_ACCT
   - name: apigee_api_deployment_service_account
     primary_resource_id: api_deployment_test
-    skip_vcr: true
     exclude_test: true
     steps:
       - name: apigee_api_deployment_service_account
@@ -62,7 +59,6 @@ samples:
   - name: apigee_api_deployment_service_account_test
     primary_resource_id: api_deployment_test
     external_providers: [time]
-    skip_vcr: true
     exclude_basic_doc: true
     steps:
       - name: apigee_api_deployment_service_account_test
