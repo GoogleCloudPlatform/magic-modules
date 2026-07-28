@@ -2691,7 +2691,11 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance *compu
     }
     {{- end }}
 
-	return nil
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": project,
+		"zone":    zone,
+		"name":    instance.Name,
+	})
 }
 
 func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
