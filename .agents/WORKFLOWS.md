@@ -31,10 +31,9 @@ specific one.
 *   **Prepare Release Workflow** (`.agents/skills/workflows/prepare_release/SKILL.md`): Prepares and cuts weekly releases for both `terraform-provider-google` (TPG) and `terraform-provider-google-beta` (TPGB) providers.
 *   **Test Monitor Workflow** (`.agents/skills/workflows/test_monitor/SKILL.md`): For fetching, triaging, analyzing, and reporting on nightly acceptance test results across Beta and GA providers.
 *   **Add IAM Support Workflow** (`.agents/skills/workflows/add_iam_resources/SKILL.md`): Adds IAM support to an existing MMv1 resource.
+*   **Bug Fix Workflow** (`.agents/skills/workflows/bug_fix/SKILL.md`): For triaging, planning, fixing, and verifying reported provider bugs.
 *   *(Future workflows can be added here)*
 
 ## Subagents:
 
 *   **`test-fixer`** (`.agents/agents/test-fixer/`): Automates diagnosis, remediation in Magic Modules, provider generation, and re-testing for failing acceptance tests.
-
-
