@@ -199,7 +199,8 @@ def main():
     else:
         print(f"Failed to fetch GitHub issues: {gh_res.stderr}")
 
-    output_file = "tmp/test-status/persistent_failures.md"
+    report_date = beta_date or ga_date or get_date_str(0)
+    output_file = f"tmp/test-status/test-report-{report_date}.md"
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     
     # 1. Group latest run failures across ALL tests in latest run

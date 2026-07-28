@@ -38,7 +38,7 @@ The `test-monitor` workflow provides a non-destructive monitoring lifecycle that
 *   Analyze API error payloads and debug logs to categorize the failure domain (e.g., Provider Panic, Quota Exceeded, API Permission / IAM, Model Availability, State Mismatch, Flakiness).
 
 ### 5. Generate Monitoring Report
-*   Save the final Markdown report to `tmp/test-status/persistent_failures.md`.
+*   Save the final Markdown report to `tmp/test-status/test-report-<date>.md` (e.g., `tmp/test-status/test-report-2026-07-28.md`).
 *   Present the executive summary, Section 1 (High-Impact Errors: Panics & High Volume), Section 2 (Persistent Failures Grouped by Error Signature), and Section 3 (Detailed Per-Test Failure Table) to the user.
 
 ---

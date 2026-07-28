@@ -17,7 +17,7 @@ description: "Skill to automatically triage failing tests by reading test-metada
 Run the automated triage script from the workspace root:
 *   **Script**: `.agents/skills/automate-test-triage/scripts/triage.py`
 *   **Command**: `python3 .agents/skills/automate-test-triage/scripts/triage.py`
-*   **Output File**: `tmp/test-status/persistent_failures.md`
+*   **Output File**: `tmp/test-status/test-report-<date>.md` (e.g., `tmp/test-status/test-report-2026-07-28.md`)
 
 ### 2. Triage & Aggregation Rules
 The script performs the following steps:
