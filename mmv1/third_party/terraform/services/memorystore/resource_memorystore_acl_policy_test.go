@@ -44,7 +44,7 @@ func testAccMemorystoreAclPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_memorystore_acl_policy" "test" {
   acl_policy_id               = "tf-test-policy-%{random_suffix}"
-  location                    = "europe-west4"
+  location                    = "us-south1"
   rules {
     rule                      = "on allkeys +get"
     username                  = "default"
@@ -57,7 +57,7 @@ func testAccMemorystoreAclPolicy_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_memorystore_acl_policy" "test" {
   acl_policy_id               = "tf-test-policy-%{random_suffix}"
-  location                    = "europe-west4"
+  location                    = "us-south1"
   rules {
     rule                      = "on allkeys +set"
     username                  = "default"
@@ -71,7 +71,7 @@ func TestAccMemorystoreAclPolicy_withInstance(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"location":      "europe-west4",
+		"location":      "us-south1",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

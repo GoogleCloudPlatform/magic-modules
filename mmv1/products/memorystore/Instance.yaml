@@ -286,6 +286,8 @@ properties:
     default_from_api: true
   - name: aclPolicy
     type: String
+    # The Memorystore API accepts aclPolicy on create/update but does not return it in GET instance responses.
+    ignore_read: true
     description: |
       The name of the ACL policy to attach to the instance.
       Format: projects/{project}/locations/{location}/aclPolicies/{acl_policy}
