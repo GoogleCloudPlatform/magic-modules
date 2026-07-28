@@ -38,7 +38,7 @@ Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symp
 #### Path A: Automated Subagent (Mandatory Default)
 * **Action:** Invoke the `test-fixer` subagent (`.agents/agents/test-fixer/`) using the `invoke_subagent` tool.
 * **Prompt:** Pass the **Normalized Failure Payload** to `test-fixer`.
-* **Wait:** The subagent will classify the failure scenario, consult `.agents/knowledge/index.md` for relevant design rules, edit `magic-modules` source files, run `make provider VERSION=<ga|beta>` and `make build`, and execute target acceptance tests for `ga`, `beta`, or `both` to verify `PASS`.
+* **Wait:** The subagent will classify the failure scenario, consult `.agents/knowledge/index.md` for relevant design rules, perform remediation (including automatically running `gcloud services enable` for shared CI projects or editing `magic-modules` test configs for test-created secondary projects), run `make provider VERSION=<ga|beta>` and `make build`, and execute target acceptance tests for `ga`, `beta`, or `both` to verify `PASS`.
 * **Handoff:**
   - If `test-fixer` reports success, present the fix summary to the user.
   - If `test-fixer` reports unresolved issues, switch to **Path B (Interactive Debugging)**.

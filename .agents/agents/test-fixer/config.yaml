@@ -20,12 +20,16 @@ custom_agent:
         2. **Classify Failure Scenario & Isolate Root Cause**:
            Classify symptoms against the central decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (all catalog scenarios):
            - Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symptom patterns, root cause analysis steps, and remediation recipes.
+           - **CRITICAL**: Do NOT classify HTTP 403 `SERVICE_DISABLED` or API Not Enabled errors as Scenario 5 (Early Exit). You MUST classify them as **Scenario 9 (API Service Not Enabled)** and execute the API Not Enabled Remediation steps.
 
         3. **Implement Fix in Magic Modules**:
            - Edit source files in `magic-modules` (`mmv1/products/...`, handwritten Go overrides, or templates).
            - Do NOT edit generated provider code directly.
            - Check `docs/content/breaking-changes/` before changing existing field types (e.g. converting Array to Set is a breaking change and prohibited outside major releases).
            - Follow baseline rules: do NOT introduce test-dodging flags (`ignore_read`, `default_from_api`, `ImportStateVerifyIgnore`) without explicit justification comments explaining the underlying API constraints.
+           - **API Not Enabled Remediation (`SERVICE_DISABLED` / HTTP 403)**:
+             - If the disabled API error targets our shared CI test project (`ci-test-project-nightly-ga`, `ci-test-project-nightly-beta`, or shared CI test runner project): automatically run `gcloud services enable <service.googleapis.com> --project=<ci-project>` via `run_command` before re-running tests. Do not modify test code for shared CI project enablement.
+             - If the disabled API error targets a secondary or test-created project within the test: modify the test configuration (`.tf.tmpl` or handwritten Go test `.go.tmpl`) to include a `google_project_service` resource or call helper functions (`EnableServiceUsageProjectServices` / Go bootstrap utilities) so the test itself enables the API in that secondary project.
 
         4. **Generate Downstream Code**:
            - Generate the target provider version based on `target_provider`:
