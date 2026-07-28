@@ -1,0 +1,4 @@
+	// API request body expects: { "tokenAuthUser": "user_id" }
+	userId := d.Get("user_id").(string)
+	obj["tokenAuthUser"] = userId
+	return obj, nil

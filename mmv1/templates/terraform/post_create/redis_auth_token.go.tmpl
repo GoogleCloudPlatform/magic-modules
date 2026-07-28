@@ -1,0 +1,21 @@
+tokenAuthUser := d.Get("token_auth_user").(string)
+url = fmt.Sprintf("%s%s/authTokens", transport_tpg.BaseUrl(Product, config), tokenAuthUser)
+res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: userAgent,
+})
+if err != nil {
+	return fmt.Errorf("Error listing authTokens for %s: %s", tokenAuthUser, err)
+}
+if tokens, ok := res["authTokens"].([]interface{}); ok && len(tokens) > 0 {
+	latestToken := tokens[len(tokens)-1].(map[string]interface{})
+	if name, ok := latestToken["name"].(string); ok {
+		d.SetId(name)
+		if err := d.Set("token_id", tpgresource.GetResourceNameFromSelfLink(name)); err != nil {
+			return fmt.Errorf("Error setting token_id: %s", err)
+		}
+	}
+}
