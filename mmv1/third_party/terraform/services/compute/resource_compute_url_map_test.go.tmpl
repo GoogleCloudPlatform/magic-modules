@@ -2684,6 +2684,7 @@ resource "google_compute_backend_service" "default" {
   name     = "backend-test-%s"
   
   protocol              = "HTTP"
+  enable_cdn            = true
   load_balancing_scheme = "EXTERNAL_MANAGED"
   health_checks         = [google_compute_health_check.default.id]
 }
@@ -2771,6 +2772,7 @@ resource "google_compute_backend_service" "default" {
   name     = "backend-test-%s"
   
   protocol              = "HTTP"
+  enable_cdn            = true
   load_balancing_scheme = "EXTERNAL_MANAGED"
   health_checks         = [google_compute_health_check.default.id]
 }
