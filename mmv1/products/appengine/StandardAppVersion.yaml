@@ -467,6 +467,7 @@ properties:
       Cannot specify both `app_engine_apis` and `app_engine_bundled_services` together.
     is_set: true
     immutable: true
+    ignore_read: true
     item_type:
       type: Enum
       enum_values:
