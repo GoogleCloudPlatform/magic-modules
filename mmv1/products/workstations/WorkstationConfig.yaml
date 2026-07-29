@@ -211,6 +211,7 @@ properties:
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
     default_value: 1200s
   - name: idleAction
+    default_value: STOP
     type: Enum
     description: |
       The action to take when the workstation has been idle for the duration specified in idle_timeout.
