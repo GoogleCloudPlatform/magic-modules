@@ -19,3 +19,8 @@ Use this skill after the `qa-test-runner` subagent returns a failure report, or 
 2. **Propose Strategy**: Propose a specific remediation strategy from `.agents/skills/utils/test-failure-decision-tree/SKILL.md` or user input.
 3. **Handoff**: Apply the change in Magic Modules, and transition to Step 3 (Generate) to compile and verify.
 
+## Remediation Scope Guardrails
+
+* **Strict Evidence-Based Scoping**: When applying fixes in Magic Modules, modify ONLY the specific field(s), resource(s), or configuration(s) directly proven by the test failure logs, backtrace, or plan diff to be causing the failure.
+* **No Assumption-Based Expansion**: Do NOT modify sibling, adjacent, or similarly-named fields on assumption without empirical evidence from the test output. Keep PR diffs strictly scoped to proven root causes.
+

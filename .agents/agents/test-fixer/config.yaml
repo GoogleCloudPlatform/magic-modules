@@ -24,6 +24,7 @@ custom_agent:
         3. **Implement Fix in Magic Modules**:
            - Edit source files in `magic-modules` (`mmv1/products/...`, handwritten Go overrides, or templates).
            - Do NOT edit generated provider code directly.
+           - **Strict Evidence-Based Scoping**: Modify ONLY the specific field(s), resource(s), or configuration(s) directly proven by the failure log, assertion error, or API diff to be causing the failure. Do NOT make assumption-based edits to adjacent or similar fields without empirical evidence from the logs.
            - Check `docs/content/breaking-changes/` before changing existing field types (e.g. converting Array to Set is a breaking change and prohibited outside major releases).
            - Follow baseline rules: do NOT introduce test-dodging flags (`ignore_read`, `default_from_api`, `ImportStateVerifyIgnore`) without explicit justification comments explaining the underlying API constraints.
            - **API Not Enabled Remediation (`SERVICE_DISABLED` / HTTP 403)**:
