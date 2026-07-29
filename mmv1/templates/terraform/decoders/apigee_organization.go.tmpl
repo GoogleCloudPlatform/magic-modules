@@ -1,0 +1,8 @@
+// For list responses, each item has an "organization" field instead of "name".
+// Map it to "name" so the rest of the flattener can find it.
+if _, hasName := res["name"]; !hasName {
+	if org, ok := res["organization"]; ok && org != nil {
+		res["name"] = org
+	}
+}
+return res, nil
