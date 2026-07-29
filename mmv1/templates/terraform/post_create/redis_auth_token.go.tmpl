@@ -1,3 +1,6 @@
+// Post_create is required because the create endpoint (addAuthToken) returns a Long Running Operation
+// whose response contains the parent TokenAuthUser object rather than the newly created AuthToken resource itself.
+// Therefore, we must list the authTokens for the user to retrieve and set the ID and token_id of the newly generated token.
 tokenAuthUser := d.Get("token_auth_user").(string)
 url = fmt.Sprintf("%s%s/authTokens", transport_tpg.BaseUrl(Product, config), tokenAuthUser)
 res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{

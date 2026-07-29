@@ -13,6 +13,10 @@
 ---
 name: "ClusterTokenAuthUser"
 description: "Represents a Token Auth User for a Google Cloud Redis Cluster."
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/memorystore/docs/cluster/
+  api: https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters.tokenAuthUsers
 immutable: true
 base_url: "{{cluster}}/tokenAuthUsers"
 self_link: "{{cluster}}/tokenAuthUsers/{{user_id}}"
@@ -28,6 +32,14 @@ async:
 custom_code:
   custom_import: templates/terraform/custom_import/redis_token_auth_user.go.tmpl
   encoder: templates/terraform/encoders/redis_token_auth_user.go.tmpl
+samples:
+  - name: redis_cluster_token_auth_user_basic
+    primary_resource_id: user-basic
+    steps:
+      - name: redis_cluster_token_auth_user_basic
+        resource_id_vars:
+          cluster_name: user-basic-cluster
+          user_id: user-basic-user
 properties:
   - name: "cluster"
     type: "ResourceRef"
