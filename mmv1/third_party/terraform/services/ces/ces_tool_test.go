@@ -287,10 +287,11 @@ func TestAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_update(t *testi
 				Config: testAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_full(context),
 			},
 			{
-				ResourceName:            "google_ces_tool.ces_tool_data_store_tool_engine_source_basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
+				ResourceName:      "google_ces_tool.ces_tool_data_store_tool_engine_source_basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// snippets_config is ignored on import because the ces.googleapis.com API does not return snippetsConfig in GET responses.
+				ImportStateVerifyIgnore: []string{"app", "location", "tool_id", "data_store_tool.0.modality_configs.0.snippets_config"},
 			},
 			{
 				Config: testAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_update(context),
@@ -301,10 +302,11 @@ func TestAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_update(t *testi
 				},
 			},
 			{
-				ResourceName:            "google_ces_tool.ces_tool_data_store_tool_engine_source_basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
+				ResourceName:      "google_ces_tool.ces_tool_data_store_tool_engine_source_basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// snippets_config is ignored on import because the ces.googleapis.com API does not return snippetsConfig in GET responses.
+				ImportStateVerifyIgnore: []string{"app", "location", "tool_id", "data_store_tool.0.modality_configs.0.snippets_config"},
 			},
 		},
 	})
