@@ -721,7 +721,7 @@ func ResourceBigQueryTable() *schema.Resource {
 				return map[string]*schema.Schema{
 					"project": {
 						Type:              schema.TypeString,
-						RequiredForImport: true,
+						OptionalForImport: true,
 					},
 					"dataset_id": {
 						Type:              schema.TypeString,
