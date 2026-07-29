@@ -23,4 +23,5 @@ Use this skill after the `qa-test-runner` subagent returns a failure report, or 
 
 * **Strict Evidence-Based Scoping**: When applying fixes in Magic Modules, modify ONLY the specific field(s), resource(s), or configuration(s) directly proven by the test failure logs, backtrace, or plan diff to be causing the failure.
 * **No Assumption-Based Expansion**: Do NOT modify sibling, adjacent, or similarly-named fields on assumption without empirical evidence from the test output. Keep PR diffs strictly scoped to proven root causes.
+* **Breaking Change Compliance & User Notification**: Consult all files in `docs/content/breaking-changes/` (`breaking-changes.md` and `make-a-breaking-change.md`) before making any schema or behavioral modifications. If a breaking change needs to be made, explicitly state it to the user and list out the reason why, referencing the applicable policy in `docs/content/breaking-changes/`.
 

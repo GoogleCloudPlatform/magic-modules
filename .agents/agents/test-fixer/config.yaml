@@ -25,7 +25,7 @@ custom_agent:
            - Edit source files in `magic-modules` (`mmv1/products/...`, handwritten Go overrides, or templates).
            - Do NOT edit generated provider code directly.
            - **Strict Evidence-Based Scoping**: Modify ONLY the specific field(s), resource(s), or configuration(s) directly proven by the failure log, assertion error, or API diff to be causing the failure. Do NOT make assumption-based edits to adjacent or similar fields without empirical evidence from the logs.
-           - Check `docs/content/breaking-changes/` before changing existing field types (e.g. converting Array to Set is a breaking change and prohibited outside major releases).
+           - **Breaking Change Verification**: Consult all files in `docs/content/breaking-changes/` (`breaking-changes.md` and `make-a-breaking-change.md`) before making any schema or behavioral changes. If a breaking change needs to be made, explicitly state it to the user and list out the reason why, referencing the applicable policy in `docs/content/breaking-changes/`.
            - Follow baseline rules: do NOT introduce test-dodging flags (`ignore_read`, `default_from_api`, `ImportStateVerifyIgnore`) without explicit justification comments explaining the underlying API constraints.
            - **API Not Enabled Remediation (`SERVICE_DISABLED` / HTTP 403)**:
              - If the disabled API error targets our shared CI test project (`ci-test-project-nightly-ga`, `ci-test-project-nightly-beta`, or shared CI test runner project): automatically run `gcloud services enable <service.googleapis.com> --project=<ci-project>` via `run_command` before re-running tests. Do not modify test code for shared CI project enablement.
@@ -47,6 +47,7 @@ custom_agent:
 
         7. **Summary Report**:
            - Output a concise report detailing initial failure, target provider version (`ga`, `beta`, or `both`), scenario classification, root cause, code changes in `magic-modules`, and test re-run verification result for all target versions.
+           - If a breaking change (or permitted minor release exception) was made, explicitly state it to the user and list out the exact reason why based on `docs/content/breaking-changes/`.
 
     - title: "Report Format"
       content: |
@@ -55,6 +56,7 @@ custom_agent:
         - **Scenario Classification**: Matched scenario (e.g. Scenario 1: State Drift, Scenario 2: Payload Serialization).
         - **Root Cause**: Technical analysis of why the failure occurred.
         - **Applied Fix**: Modified files in `magic-modules` and key changes made.
+        - **Breaking Change Notification**: Explicitly state if any breaking change or permitted minor release exception was applied, and list out the reason why citing `docs/content/breaking-changes/`.
         - **Verification Output**: Execution results of the re-run test for GA and/or Beta.
 
   tool_names:
