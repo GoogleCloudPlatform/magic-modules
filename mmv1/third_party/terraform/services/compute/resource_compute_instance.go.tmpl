@@ -2207,7 +2207,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"project": project,
 		"zone":    z,
-		"name":    instance.Name,
+		"name":    instance["name"],
 	}); err != nil {
 		return err
 	}
@@ -2299,7 +2299,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"project": project,
 		"zone":    zone,
-		"name":    instance.Name,
+		"name":    instance["name"],
 	}); err != nil {
 		return err
 	}
@@ -4120,7 +4120,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"project": project,
 		"zone":    zone,
-		"name":    instance.Name,
+		"name":    instance["name"],
 	}); err != nil {
 		return err
 	}
