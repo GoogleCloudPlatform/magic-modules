@@ -534,6 +534,7 @@ resource "google_network_services_gateway" "foobar" {
   delete_swg_autogen_router_on_destroy = true
   envoy_headers                        = "NONE"
   ip_version                           = "IPV4"
+  allow_global_access                  = true
   depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
 }
 
