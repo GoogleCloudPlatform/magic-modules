@@ -3638,7 +3638,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if opErr != nil {
 				return opErr
 			}
-			log.Printf("[DEBUG] Successfully attached disk %s", disk.Source)
+			log.Printf("[DEBUG] Successfully attached disk %s", diskBody["source"])
 		}
 	}
 

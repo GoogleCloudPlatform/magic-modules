@@ -36,7 +36,11 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 
 	id := fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, name)
 
-	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, project, zone, name)
+	baseURL, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}")
+	if err != nil {
+		return err
+	}
+	url := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", baseURL, project, zone, name)
 	instance, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
