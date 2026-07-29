@@ -1160,6 +1160,42 @@ func schemaNodeConfig() *schema.Schema {
 									},
 								},
 							},
+							"custom_node_init": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `The custom node init settings.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"init_script": {
+											Type:        schema.TypeList,
+											Optional:    true,
+											MaxItems:    1,
+											Description: `The init script configuration.`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"gcs_uri": {
+														Type:        schema.TypeString,
+														Optional:    true,
+														Description: `The GCS URI of the init script.`,
+													},
+													"gcs_generation": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Computed:    true,
+														Description: `The GCS generation of the init script.`,
+													},
+													"gcp_secret_manager_secret_uri": {
+														Type:        schema.TypeString,
+														Optional:    true,
+														Description: `The Secret Manager secret URI of the init script.`,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -2164,6 +2200,10 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 		linuxNodeConfig.SwapConfig = expandSwapConfig(v)
 	}
 
+	if v, ok := cfg["custom_node_init"]; ok {
+		linuxNodeConfig.CustomNodeInit = expandCustomNodeInit(v)
+	}
+
 	return linuxNodeConfig
 }
 
@@ -2767,8 +2807,13 @@ func flattenAdvancedMachineFeaturesConfig(v interface{}) []map[string]interface{
 		return nil
 	}
 
+	threadsPerCore := c["threadsPerCore"]
+	if threadsPerCore == nil {
+		threadsPerCore = 0
+	}
+
 	transformed := map[string]interface{}{
-		"threads_per_core":             c["threadsPerCore"],
+		"threads_per_core":             threadsPerCore,
 		"enable_nested_virtualization": c["enableNestedVirtualization"],
 		"performance_monitoring_unit":  c["performanceMonitoringUnit"],
 	}
@@ -3347,6 +3392,7 @@ func flattenLinuxNodeConfig(v interface{}) []map[string]interface{} {
 		"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c["nodeKernelModuleLoading"]),
 		"swap_config":                  flattenSwapConfig(c["swapConfig"]),
 		"accurate_time_config":         flattenAccurateTimeConfig(c["accurateTimeConfig"]),
+		"custom_node_init":             flattenCustomNodeInit(c["customNodeInit"]),
 	}
 
 	return []map[string]interface{}{transformed}
@@ -3796,4 +3842,94 @@ func flattenGpuDirectConfig(v interface{}) string {
 		return ""
 	}
 	return strategy
+}
+
+func expandCustomNodeInit(v interface{}) *container.CustomNodeInit {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.CustomNodeInit{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	customNodeInit := &container.CustomNodeInit{}
+	if v, ok := cfg["init_script"]; ok {
+		customNodeInit.InitScript = expandInitScript(v)
+	}
+	return customNodeInit
+}
+
+func expandInitScript(v interface{}) *container.InitScript {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.InitScript{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	initScript := &container.InitScript{}
+	if v, ok := cfg["gcs_uri"]; ok {
+		initScript.GcsUri = v.(string)
+	}
+	if v, ok := cfg["gcs_generation"]; ok {
+		initScript.GcsGeneration = int64(v.(int))
+	}
+	if v, ok := cfg["gcp_secret_manager_secret_uri"]; ok {
+		initScript.GcpSecretManagerSecretUri = v.(string)
+	}
+	return initScript
+}
+
+func flattenCustomNodeInit(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{}
+	if is, ok := c["initScript"].(map[string]interface{}); ok {
+		transformed["init_script"] = flattenInitScript(is)
+	}
+	return []map[string]interface{}{transformed}
+}
+
+func flattenInitScript(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{}
+	if val, ok := c["gcsUri"]; ok {
+		transformed["gcs_uri"] = val
+	}
+	if val, ok := c["gcsGeneration"]; ok {
+		var gen interface{} = val
+		if strGen, ok := val.(string); ok {
+			if intGen, err := strconv.Atoi(strGen); err == nil {
+				gen = intGen
+			}
+		} else if floatGen, ok := val.(float64); ok {
+			gen = int(floatGen)
+		}
+		transformed["gcs_generation"] = gen
+	}
+	if val, ok := c["gcpSecretManagerSecretUri"]; ok {
+		transformed["gcp_secret_manager_secret_uri"] = val
+	}
+	return []map[string]interface{}{transformed}
 }

@@ -103,8 +103,9 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 			productsToGenerate = append(productsToGenerate, p.PackagePath)
 		}
 	} else {
-		var productToGenerate = fmt.Sprintf("products/%s", product)
-		productsToGenerate = []string{productToGenerate}
+		for _, prod := range strings.Split(product, ",") {
+			productsToGenerate = append(productsToGenerate, fmt.Sprintf("products/%s", strings.TrimSpace(prod)))
+		}
 	}
 
 	for _, productApi := range loadedProducts {
@@ -122,8 +123,8 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 	})
 
 	// In order to only copy/compile files once per provider this must be called outside
-	// of the products loop. Create an MMv1 provider with an arbitrary product (the first loaded).
-	providerToGenerate := newProvider(providerName, version, productsForVersion[0], startTime, wrappedFS)
+	// of the products loop. Create an MMv1 provider with a nil product to trigger shared file behavior.
+	providerToGenerate := newProvider(providerName, version, nil, startTime, wrappedFS)
 	providerToGenerate.CopyCommonFiles(outputPath, generateCode, generateDocs)
 
 	if generateCode {
@@ -148,6 +149,11 @@ func GenerateProduct(version, providerName string, productApi *api.Product, outp
 	log.Printf("%s: Generating files", productApi.PackagePath)
 	providerToGenerate := newProvider(providerName, version, productApi, startTime, fsys)
 	providerToGenerate.Generate(outputPath, resourceToGenerate, generateCode, generateDocs)
+
+	providerToGenerate.CopyCommonFiles(outputPath, generateCode, generateDocs)
+	if generateCode {
+		providerToGenerate.CompileCommonFiles(outputPath, []*api.Product{productApi}, "")
+	}
 }
 
 func newProvider(providerName, version string, productApi *api.Product, startTime time.Time, fsys fs.FS) provider.Provider {

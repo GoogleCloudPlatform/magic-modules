@@ -90,7 +90,7 @@ jobs:
           cd repo
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # For PRs, get only changed files
-            yamlfiles=$(git diff --name-only origin/${GITHUB_BASE_REF} -- mmv1/products)
+            yamlfiles=$(git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF} -- mmv1/products)
             if [ ! -z "$yamlfiles" ]; then
               echo "yamlfiles=${yamlfiles//$'\n'/ }" >> $GITHUB_OUTPUT
             fi

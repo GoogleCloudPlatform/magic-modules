@@ -32,22 +32,15 @@ var _ list.ListResource = &IamMemberListResource{}
 var _ list.ListResourceWithRawV5Schemas = &IamMemberListResource{}
 var _ list.ListResourceWithConfigure = &IamMemberListResource{}
 
-// scopeField is a GcP target-scope dimesion that an IAm member list resource
-// may expose in its list config block.
-type scopeField struct {
-	name     string
-	optional bool
-}
-
 // suportedScopeFields are the scope dimensions added to a list config
-// automatically when the menber resource's schma declares them.
-// project/region/zone are optional (provider block supplies defaults);
-// location is required (GCP has no provider-level location default).
-var supportedScopeFields = []scopeField{
-	{name: "project", optional: true},
-	{name: "region", optional: true},
-	{name: "zone", optional: true},
-	{name: "location", optional: false},
+// automatically when the member resource's schema declares them.
+// All are optional: when ommited, the value is resolved downstream from the provider
+// config(GetProject/GetRegion/GetZone/GetLocation) or environment variables.
+var supportedScopeFields = []tpgresource.ListConfigField{
+	{Name: "project", Kind: tpgresource.ListConfigKindString, Optional: true},
+	{Name: "region", Kind: tpgresource.ListConfigKindString, Optional: true},
+	{Name: "zone", Kind: tpgresource.ListConfigKindString, Optional: true},
+	{Name: "location", Kind: tpgresource.ListConfigKindString, Optional: true},
 }
 
 // IamMemberListCallConfig holds resource-specific pieces for transport.ListCall.
@@ -86,18 +79,12 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 	// Auto-expose target-scope dimensions (project/region/zone/location) when the
 	// member resource declares them and they are not  already the parent field.
 	for _, sf := range supportedScopeFields {
-		if sf.name == listCallConfig.ParentResourceField {
+		if sf.Name == listCallConfig.ParentResourceField {
 			continue // scope dimension is itself the parent (e.g. project-iam-member)
 		}
-		if _, ok := memberResource.Schema[sf.name]; !ok {
-			continue // resource isn't scoped by this dimension
+		if _, ok := memberResource.Schema[sf.Name]; ok {
+			listConfigFields = append(listConfigFields, sf)
 		}
-
-		listConfigFields = append(listConfigFields, tpgresource.ListConfigField{
-			Name:     sf.name,
-			Kind:     tpgresource.ListConfigKindString,
-			Optional: sf.optional,
-		})
 	}
 
 	if listCallConfig.EnableRoleFilter {
@@ -176,9 +163,8 @@ func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req l
 
 	// Set every target-identifying field (parent + scope dimensions like project/region/
 	// zone/location) from the list config onto the ResourceData the updater reads.
-	// Provider-default fallback for project/region/zone is handled downstream by the
-	// updater's GetProject/Getregion/GetZone when a value is omitted; location is
-	// Required in the list config so it is always supplied.
+	// Provider-default fallback is handled downstream by the updators's
+	// updater's GetProject/GetRegion/GetZone/GetLocation when a value is omitted.
 	for name := range r.iamResourceSchema {
 		var v types.String
 		d := req.Config.GetAttribute(ctx, path.Root(name), &v)
