@@ -106,8 +106,6 @@ samples:
           deletion_policy: '"DELETE"'
         ignore_read_extra:
           - deletion_policy
-
-
 parameters:
   - name: location
     type: String
