@@ -9112,8 +9112,8 @@ func containerClusterAddedScopesSuppress(k, old, new string, d *schema.ResourceD
 }
 
 // privateClusterConfigDiffSuppressData is the subset of *schema.ResourceData read by
-// containerClusterPrivateClusterConfigSuppressLogic. Accepting an interface lets the
-// logic be unit tested with tpgresource.ResourceDiffMock.
+// containerClusterApiDictatedPrivateEndpointField. Accepting an interface lets the logic
+// be unit tested with tpgresource.ResourceDiffMock.
 type privateClusterConfigDiffSuppressData interface {
 	GetChange(string) (interface{}, interface{})
 	GetOk(string) (interface{}, bool)
@@ -9121,19 +9121,7 @@ type privateClusterConfigDiffSuppressData interface {
 
 // We want to suppress diffs for empty/disabled private cluster config.
 func containerClusterPrivateClusterConfigSuppress(k, old, new string, d *schema.ResourceData) bool {
-	return containerClusterPrivateClusterConfigSuppressLogic(k, old, new, d)
-}
-
-func containerClusterPrivateClusterConfigSuppressLogic(k, old, new string, d privateClusterConfigDiffSuppressData) bool {
-	// When control plane IP endpoints are disabled (DNS-only access), the GKE API
-	// dictates enable_private_endpoint and master_global_access_config.enabled and
-	// ignores writes to them: expandControlPlaneEndpointsConfig returns early without
-	// sending either field. flattenPrivateClusterConfig still reads them back
-	// unconditionally, so any user-configured value permanently diffs against the
-	// fixed value the API returns.
-	if containerClusterIpEndpointsDisabled(d) &&
-		(k == "private_cluster_config.0.enable_private_endpoint" ||
-			k == "private_cluster_config.0.master_global_access_config.0.enabled") {
+	if containerClusterApiDictatedPrivateEndpointField(k, d) {
 		return true
 	}
 
@@ -9162,10 +9150,24 @@ func containerClusterPrivateClusterConfigSuppressLogic(k, old, new string, d pri
 		//   && private_endpoint_subnetwork is unset in terraform (new value == "")
 		//   && private_endpoint_subnetwork is returned from resource (old value != "")
 		_, hasMasterCidr := d.GetOk("private_cluster_config.0.master_ipv4_cidr_block")
-		// CompareSelfLinkOrResourceName ignores its ResourceData argument.
-		return (hasMasterCidr && new == "" && old != "") || tpgresource.CompareSelfLinkOrResourceName(k, old, new, nil)
+		return (hasMasterCidr && new == "" && old != "") || tpgresource.CompareSelfLinkOrResourceName(k, old, new, d)
 	}
 	return false
+}
+
+// containerClusterApiDictatedPrivateEndpointField reports whether k is a
+// private_cluster_config field whose value the GKE API dictates rather than accepting from
+// the user. With control plane IP endpoints disabled (DNS-only access),
+// expandControlPlaneEndpointsConfig returns early without sending
+// enable_private_endpoint or master_global_access_config.enabled, while
+// flattenPrivateClusterConfig still reads both back unconditionally, so any configured
+// value permanently diffs against the fixed value the API returns.
+func containerClusterApiDictatedPrivateEndpointField(k string, d privateClusterConfigDiffSuppressData) bool {
+	if k != "private_cluster_config.0.enable_private_endpoint" &&
+		k != "private_cluster_config.0.master_global_access_config.0.enabled" {
+		return false
+	}
+	return containerClusterIpEndpointsDisabled(d)
 }
 
 // containerClusterIpEndpointsDisabled reports whether control_plane_endpoints_config
