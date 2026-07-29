@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	tfversion "github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/bigquery"
@@ -52,6 +53,61 @@ func TestAccBigQueryTable_Basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccBigQueryTable_importWithIdentity(t *testing.T) {
+	t.Parallel()
+	t.Skip("terraform_labels cannot be ignored during a resource identity import test")
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableBasicSchema(datasetID, tableID),
+			},
+			{
+				Config:          testAccBigQueryTableImportIdentity(datasetID, tableID),
+				ResourceName:    "google_bigquery_table.test",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+			{
+				Config: testAccBigQueryTableBasicSchema(datasetID, tableID),
+			},
+		},
+	})
+}
+
+func testAccBigQueryTableImportIdentity(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = true
+  table_id            = "%s"
+  dataset_id          = google_bigquery_dataset.test.dataset_id
+
+  schema = <<EOH
+[
+  {
+    "name": "id",
+    "type": "INTEGER"
+  }
+]
+EOH
+
+}
+`, datasetID, tableID)
 }
 
 func TestAccBigQueryTable_IgnoreSchemaDataPoliciesMerge(t *testing.T) {
