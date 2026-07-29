@@ -21,15 +21,15 @@ func TestResourceMinVersionObj(t *testing.T) {
 	p := api.Product{
 		Name: "test",
 		Versions: []*product.Version{
-			&product.Version{
+			{
 				Name:    "beta",
 				BaseUrl: "beta_url",
 			},
-			&product.Version{
+			{
 				Name:    "ga",
 				BaseUrl: "ga_url",
 			},
-			&product.Version{
+			{
 				Name:    "alpha",
 				BaseUrl: "alpha_url",
 			},
@@ -81,15 +81,15 @@ func TestResourceNotInVersion(t *testing.T) {
 	p := api.Product{
 		Name: "test",
 		Versions: []*product.Version{
-			&product.Version{
+			{
 				Name:    "beta",
 				BaseUrl: "beta_url",
 			},
-			&product.Version{
+			{
 				Name:    "ga",
 				BaseUrl: "ga_url",
 			},
-			&product.Version{
+			{
 				Name:    "alpha",
 				BaseUrl: "alpha_url",
 			},
@@ -1113,5 +1113,82 @@ func TestSamplePrimaryResourceId(t *testing.T) {
 				t.Errorf("SamplePrimaryResourceId() = %q, want %q", got, tc.expected)
 			}
 		})
+	}
+}
+
+func TestIgnoreReadProperties(t *testing.T) {
+	t.Parallel()
+
+	nestedObj := &api.Type{
+		Name: "nestedObj",
+		Type: "NestedObject",
+	}
+	nestedIgnoreRead := &api.Type{
+		Name:           "nestedIgnoreRead",
+		Type:           "String",
+		IgnoreRead:     true,
+		ParentMetadata: nestedObj,
+	}
+	nestedObj.Properties = []*api.Type{nestedIgnoreRead}
+
+	arrayObj := &api.Type{
+		Name: "arrayObj",
+		Type: "Array",
+	}
+	arrayItem := &api.Type{
+		Type:           "NestedObject",
+		ParentMetadata: arrayObj,
+	}
+	arrayIgnoreRead := &api.Type{
+		Name:           "arrayIgnoreRead",
+		Type:           "String",
+		IgnoreRead:     true,
+		ParentMetadata: arrayItem,
+	}
+	arrayItem.Properties = []*api.Type{arrayIgnoreRead}
+	arrayObj.ItemType = arrayItem
+
+	mapObj := &api.Type{
+		Name: "mapObj",
+		Type: "Map",
+	}
+	mapValue := &api.Type{
+		Type:           "NestedObject",
+		ParentMetadata: mapObj,
+	}
+	mapIgnoreRead := &api.Type{
+		Name:           "mapIgnoreRead",
+		Type:           "String",
+		IgnoreRead:     true,
+		ParentMetadata: mapValue,
+	}
+	mapValue.Properties = []*api.Type{mapIgnoreRead}
+	mapObj.ValueType = mapValue
+
+	r := &api.Resource{
+		Name: "TestResource",
+		Properties: []*api.Type{
+			{
+				Name:       "topLevelIgnoreRead",
+				Type:       "String",
+				IgnoreRead: true,
+			},
+			nestedObj,
+			arrayObj,
+			mapObj,
+		},
+	}
+
+	step := &resource.Step{}
+	got := r.IgnoreReadProperties(step)
+	want := []string{
+		"array_obj.0.array_ignore_read",
+		"map_obj.0.map_ignore_read",
+		"nested_obj.0.nested_ignore_read",
+		"top_level_ignore_read",
+	}
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("IgnoreReadProperties() mismatch (-want +got):\n%s", diff)
 	}
 }
