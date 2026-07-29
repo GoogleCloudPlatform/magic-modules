@@ -24,7 +24,10 @@ This skill converts raw, unstructured, or varied failure reports into a standard
 - Use `read_url_content` (or `gh issue view` if CLI available) to read the issue content and inspect its GitHub labels.
 - Check if labels contain `test-failure`, `test-failure-100`, `test-failure-50`, or any similar `test-failure*` labels to confirm this is an acceptance test failure issue.
 - **Determine Target Provider Version (`ga`, `beta`, or `both`)**:
-  - Inspect the issue `Failure rates` section (e.g. `ga: 100%`, `beta: 0%` -> `target_provider: ga`; `ga: 0%`, `beta: 100%` -> `target_provider: beta`; `ga: 100%`, `beta: 100%` -> `target_provider: both`).
+  - Inspect the issue `Failure rates` section:
+    - If GA failure rate > 0% and Beta == 0%, set `target_provider: "ga"`.
+    - If Beta failure rate > 0% and GA == 0%, set `target_provider: "beta"`.
+    - If both GA and Beta failure rates > 0%, set `target_provider: "both"`.
   - Match provider-specific GCS error message links in the issue body:
     - `ga error message` (e.g. `.../test-errors/ga/.../*.txt`)
     - `beta error message` (e.g. `.../test-errors/beta/.../*.txt`)
@@ -41,12 +44,16 @@ This skill converts raw, unstructured, or varied failure reports into a standard
 - Extract any GCS or local log paths provided.
 
 #### Path C: Remote / GCS Log URLs
-- For Error Log or Debug Log links (`https://storage.cloud.google.com/<bucket>/<path>` or `https://storage.googleapis.com/<bucket>/<path>`), convert the URL to `gs://<bucket>/<path>` and fetch using `gcloud storage cat`:
+- Convert HTTPS GCS URLs (`https://storage.cloud.google.com/<bucket>/<path>` or `https://storage.googleapis.com/<bucket>/<path>`) to `gs://<bucket>/<path>`.
+- For **Error Log links**, fetch the content using `gcloud storage cat`:
   ```bash
   gcloud storage cat gs://<bucket>/<path>
   ```
-- Store the error message text in full in `error_message`.
-- Save debug logs locally to `<workspace_root>/debug_output/raw_test.log` for parsing.
+  Store the complete output in `error_message`.
+- For **Debug Log links**, copy the file locally for parsing instead of printing to stdout:
+  ```bash
+  mkdir -p debug_output && gcloud storage cp gs://<bucket>/<path> debug_output/raw_test.log
+  ```
 
 ---
 

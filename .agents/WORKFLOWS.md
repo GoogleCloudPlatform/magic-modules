@@ -17,7 +17,7 @@ specific one.
 
 | GitHub Label Pattern | Issue Category | Target Workflow Skill |
 | :--- | :--- | :--- |
-| `test-failure`, `test-failure-*` | Acceptance Test Failure | `.agents/skills/workflows/test_fix/SKILL.md` |
+| `test-failure`, `test-failure-*` (e.g. `test-failure-0`, `test-failure-10`, `test-failure-50`, `test-failure-100`) | Acceptance Test Failure | `.agents/skills/workflows/test_fix/SKILL.md` |
 | `new-resource` | New Resource Creation | `.agents/skills/workflows/new_resource/SKILL.md` |
 | `list-resource` | List Resource Addition | `.agents/skills/workflows/add_list_resource/SKILL.md` |
 | *No matching label / un-labeled* | General Modification / Bug Fix | Fallback to `.agents/skills/workflows/default/SKILL.md` (or inspect issue body) |
@@ -36,4 +36,5 @@ specific one.
 *   **`test-fixer`** (`.agents/agents/test-fixer/`): Automates diagnosis, remediation in Magic Modules, provider generation, and re-testing for failing acceptance tests.
 *   **`qa-test-runner`** (`.agents/agents/qa-test-runner/`): Runs target tests and parses debug logs without modifying files.
 *   **`repo-sync`** (`.agents/agents/repo-sync/`): Aligns git histories between Magic Modules and downstream providers.
+
 

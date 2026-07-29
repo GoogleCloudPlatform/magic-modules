@@ -15,7 +15,7 @@ Consult `.agents/knowledge/index.md` for the topics the failure touches and open
 
 ### 1. Failure Information Intake
 * Execute the `intake-test-failure` skill (`.agents/skills/utils/intake-test-failure/SKILL.md`) on the input provided by the user (GitHub issue URL, direct prompt text, GCS log link, or local log file).
-* Check for GitHub issue labels such as `test-failure`, `test-failure-100`, `test-failure-50`, or any `test-failure-*` label to confirm test failure classification.
+* Check for GitHub issue labels such as `test-failure`, `test-failure-100`, `test-failure-50`, or any `test-failure-*` label (e.g., `test-failure-0`, `test-failure-10`) to confirm test failure classification.
 * Inspect issue failure rates to determine `target_provider` (`ga`, `beta`, or `both`).
 * Produce the **Normalized Failure Payload**:
   ```yaml
@@ -41,11 +41,11 @@ Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symp
 * **Wait:** The subagent will classify the failure scenario, consult `.agents/knowledge/index.md` for relevant design rules, perform remediation (including automatically running `gcloud services enable` for shared CI projects or editing `magic-modules` test configs for test-created secondary projects), run `make provider VERSION=<ga|beta>` and `make build`, and execute target acceptance tests for `ga`, `beta`, or `both` to verify `PASS`.
 * **Handoff:**
   - If `test-fixer` reports success, present the fix summary to the user.
-  - If `test-fixer` reports unresolved issues, switch to **Path B (Interactive Debugging)**.
+  - If `test-fixer` reports unresolved issues, switch to **Path B (Interactive Debugging)** and consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md`.
 
 #### Path B: Interactive Debugging (Fallback)
 * Use the `qa-test-runner` subagent to isolate logs and inspect request/response JSONs.
-* Match symptoms against decision tree scenarios and apply source modifications using `triage` and `fix` skills.
+* Match symptoms against the decision tree catalog in `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (all catalog scenarios) and apply source modifications using `triage` (`.agents/skills/operations/triage/`) and `fix` (`.agents/skills/operations/fix/`) skills.
 * Execute provider generation (`make provider VERSION=<ga|beta>`) and re-run acceptance tests for each target provider version (`ga`, `beta`, or `both`) to verify `PASS`.
 
 ---
