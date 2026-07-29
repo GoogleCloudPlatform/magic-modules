@@ -87,6 +87,11 @@ func TestAccBigqueryReservation_labels_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryReservation_labels_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_reservation.reservation", "labels.%", "2"),
+					resource.TestCheckResourceAttr("google_bigquery_reservation.reservation", "labels.environment", "test"),
+					resource.TestCheckResourceAttr("google_bigquery_reservation.reservation", "labels.team", "analytics"),
+				),
 			},
 			{
 				ResourceName:            "google_bigquery_reservation.reservation",
@@ -96,6 +101,11 @@ func TestAccBigqueryReservation_labels_update(t *testing.T) {
 			},
 			{
 				Config: testAccBigqueryReservation_labels_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_reservation.reservation", "labels.%", "1"),
+					resource.TestCheckResourceAttr("google_bigquery_reservation.reservation", "labels.environment", "production"),
+					resource.TestCheckNoResourceAttr("google_bigquery_reservation.reservation", "labels.team"),
+				),
 			},
 			{
 				ResourceName:            "google_bigquery_reservation.reservation",
