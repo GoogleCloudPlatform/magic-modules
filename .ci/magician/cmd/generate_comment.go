@@ -151,7 +151,11 @@ var generateCommentCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("error creating a runner: %w", err)
 		}
-		ctlr := source.NewController(filepath.Join("workspace", "go"), "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
+		workspace := os.Getenv("WORKSPACE")
+		if workspace == "" {
+			workspace = "/workspace"
+		}
+		ctlr := source.NewController(filepath.Join(workspace, "go"), "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 		prNumber, err := strconv.Atoi(env["PR_NUMBER"])
 		if err != nil {
 			return fmt.Errorf("error parsing PR_NUMBER: %w", err)
@@ -163,6 +167,7 @@ var generateCommentCmd = &cobra.Command{
 			env["BUILD_STEP"],
 			env["PROJECT_ID"],
 			env["COMMIT_SHA"],
+			workspace,
 			gh,
 			rnr,
 			ctlr,
@@ -178,7 +183,7 @@ func listGCEnvironmentVariables() string {
 	return result
 }
 
-func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
+func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha, workspace string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
 	errors := map[string][]string{"Other": []string{}}
 
 	// TODO - temporary fix to ensure the label is removed.
@@ -271,8 +276,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
 		}
 		if shortStat != "" {
-			variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
-			oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
+
+			variablePath := filepath.Join(workspace, fmt.Sprintf("commitSHA_modular-magician_%s.txt", repo.Name))
+			oldVariablePath := filepath.Join(workspace, fmt.Sprintf("commitSHA_modular-magician_%s-old.txt", repo.Name))
 			commitSHA, err := rnr.ReadFile(variablePath)
 			if err != nil {
 				errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
@@ -528,7 +534,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		return fmt.Errorf("error posting comment to PR %d: %w", prNumber, err)
 	}
 
-	if err := rnr.WriteFile("/workspace/diff_comment_id.txt", strconv.Itoa(commentId)); err != nil {
+	if err := rnr.WriteFile(filepath.Join(workspace, "diff_comment_id.txt"), strconv.Itoa(commentId)); err != nil {
 		fmt.Printf("Warning: failed to save comment ID to file: %v\n", err)
 	}
 	return nil
