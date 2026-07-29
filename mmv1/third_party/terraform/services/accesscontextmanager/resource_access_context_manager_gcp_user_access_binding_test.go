@@ -322,4 +322,3 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
 }
 `, context)
 }
-
