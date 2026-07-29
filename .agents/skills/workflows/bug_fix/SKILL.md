@@ -19,7 +19,7 @@ This document outlines the structured 6-step lifecycle for investigating, planni
 
 ### 2. Triage & Context Gathering
 *   **External context:** Read the target GitHub issue description, related bug reports, and external API documentation (e.g., REST API references) to understand GCP service behavior and parameters.
-*   **Internal context:** Search the codebase (grep) to locate where the affected fields, schemas, expanders, or flatteners are defined.
+*   **Internal context:** Consult the Knowledge Index (`.agents/knowledge/index.md`) for any relevant topics, patterns, or repository-specific instructions. Then search the codebase to locate where the affected fields, schemas, expanders, or flatteners are defined.
 *   **Historical context:** Trace Git logs, tags, and PRs in downstream provider repositories to identify the lifecycle of the affected code (e.g., when it was introduced, deprecated, or modified).
 
 ### 3. Remediation Planning (Proposal)
