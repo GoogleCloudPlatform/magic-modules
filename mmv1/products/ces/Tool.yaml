@@ -846,8 +846,8 @@ properties:
                   description: The prompt definition. If not set, default prompt will be used.
             - name: snippetsConfig
               type: NestedObject
-              # custom_flatten is set because ces.googleapis.com API omits snippetsConfig in GET responses.
-              custom_flatten: 'templates/terraform/custom_flatten/ces_tool_snippets_config.go.tmpl'
+              # ignore_read is set because the ces.googleapis.com API does not return snippetsConfig in GET responses.
+              ignore_read: true
               description: Snippets configuration.
               properties:
                 - name: enableSnippets
