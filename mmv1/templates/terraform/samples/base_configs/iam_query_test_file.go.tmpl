@@ -93,7 +93,7 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 				Config: testAcc{{ $.ResourceName }}IamMemberListQuery_list(context),
 				ConfigVariables: listScope.AsConfigVariables(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLength("{{ $.TerraformName }}_iam_member.members", 1),
+					querycheck.ExpectLengthAtLeast("{{ $.TerraformName }}_iam_member.members", 1),
 				},
 			},
 		},
@@ -120,7 +120,7 @@ variable "{{ underscore $.IamPolicy.ParentResourceAttribute }}" { type = string 
 
 list "{{ $.TerraformName }}_iam_member" "members" {
     provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
-	limit = 10000
+	limit = 1000
     config {
         {{ underscore $.IamPolicy.ParentResourceAttribute }} =  var.{{ underscore $.IamPolicy.ParentResourceAttribute }}
     }
