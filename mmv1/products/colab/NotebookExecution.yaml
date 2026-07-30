@@ -197,14 +197,12 @@ properties:
     exactly_one_of:
       - notebook_runtime_template_resource_name
       - custom_environment_spec
-      - workbench_runtime
   - name: customEnvironmentSpec
     type: NestedObject
     description: Compute configuration to use for an execution job
     exactly_one_of:
       - notebook_runtime_template_resource_name
       - custom_environment_spec
-      - workbench_runtime
     properties:
       - name: machineSpec
         type: NestedObject
@@ -264,10 +262,6 @@ properties:
   - name: workbenchRuntime
     type: NestedObject
     description: 'Configuration for a Workbench Instances-based environment.'
-    exactly_one_of:
-      - notebook_runtime_template_resource_name
-      - custom_environment_spec
-      - workbench_runtime
     properties:
       - name: customContainerImage
         type: NestedObject

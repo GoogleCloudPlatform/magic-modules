@@ -49,6 +49,12 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
     )
   }
 
+  custom_environment_spec {
+    machine_spec {
+      machine_type = "n1-standard-2"
+    }
+  }
+
   workbench_runtime {
     custom_container_image {
       repository = "us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cu113.py310"
