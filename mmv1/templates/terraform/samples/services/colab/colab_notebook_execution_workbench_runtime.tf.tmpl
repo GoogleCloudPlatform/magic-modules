@@ -57,6 +57,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
     vm_image {
       project = "cloud-notebooks-managed"
       family  = "workbench-instances"
+      name    = "workbench-instances-v20230925"
     }
   }
 
