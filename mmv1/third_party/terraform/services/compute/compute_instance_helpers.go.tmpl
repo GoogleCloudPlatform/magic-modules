@@ -1052,8 +1052,9 @@ func resourceInstanceTags(d tpgresource.TerraformResourceData) map[string]interf
 	for i, v := range vs.List() {
 		items[i] = v.(string)
 	}
-	tags := map[string]interface{}{
-		"items": items,
+	tags := map[string]interface{}{}
+	if len(items) > 0 {
+		tags["items"] = items
 	}
 	if fingerprint := d.Get("tags_fingerprint").(string); fingerprint != "" {
 		tags["fingerprint"] = fingerprint
