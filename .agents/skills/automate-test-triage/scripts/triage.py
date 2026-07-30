@@ -60,15 +60,16 @@ def get_failures(provider_type):
         if data:
             if latest_available_date is None:
                 latest_available_date = date_str
-                # Record failures in the latest available run
                 for item in data:
                     if item.get("status") == "FAILURE":
                         error_msg = item.get("error_message", "")
                         log_link = item.get("log_link") or item.get("LogLink", "")
+                        service = item.get("service") or item.get("Service") or "unknown"
                         if not is_generic_error(error_msg):
                             latest_failures[item.get("name")] = {
                                 "error": error_msg,
-                                "log": log_link
+                                "log": log_link,
+                                "service": service
                             }
 
             # Count failures across all days
@@ -91,9 +92,10 @@ def get_actual_error(error_str):
     for kw in error_keywords:
         idx = clean_error.find(kw)
         if idx != -1:
-            return clean_error[idx:]
+            err_block = clean_error[idx:]
+            return re.split(r'\n+(?:Error|Check failed|panic):', err_block)[0].strip()
             
-    return clean_error
+    return re.split(r'\n+(?:Error|Check failed|panic):', clean_error)[0].strip()
 
 def sanitize_for_comparison(error_str):
     # Replace project IDs and resource names like tf-test... or tf_test...
@@ -105,7 +107,7 @@ def sanitize_for_comparison(error_str):
     # Replace project numbers in messages like project number: 123456
     s = re.sub(r'project number: \d+', 'project number: NUMBER', s)
     # Replace folder and organization numbers like folders/123456
-    s = re.sub(r'(folders|organizations)/\d+', r'\g<1>/NUMBER', s)
+    s = re.sub(r'(folders|organizations|reasoningEngines)/\d+', r'\g<1>/NUMBER', s)
     # Replace random numbers in subject or violations
     s = re.sub(r'project:\d+', 'project:NUMBER', s)
     # Replace service account project numbers like service-123456@
@@ -134,7 +136,30 @@ def sanitize_for_comparison(error_str):
     s = re.sub(r'[a-zA-Z0-9_]+_test\.go:\d+:', 'test.go:LINE:', s)
     # Replace terraform plan unchanged hidden counts
     s = re.sub(r'\(\d+ unchanged (attributes|blocks|elements) hidden\)', r'(X unchanged \g<1> hidden)', s)
-    return s
+    # Replace google_<resource_type>.<resource_name> with google_<resource_type>.RESOURCE_NAME
+    s = re.sub(r'\b(google_[a-zA-Z0-9_-]+)\.([a-zA-Z0-9_-]+)\b', r'\1.RESOURCE_NAME', s)
+    # Replace resource "google_<resource_type>" "<resource_name>" with resource "google_<resource_type>" "RESOURCE_NAME"
+    s = re.sub(r'\bresource\s+"(google_[a-zA-Z0-9_-]+)"\s+"([a-zA-Z0-9_-]+)"', r'resource "\1" "RESOURCE_NAME"', s)
+    
+    # 1. Truncate post-test destroy failures/warnings
+    s = re.sub(r'(?s)(?:\b\w+\.go:\d+:\s*)?Error running post-test destroy.*$', '', s)
+    # 2. Sanitize Terraform configuration line numbers (e.g. on terraform_plugin_test.tf line 12)
+    s = re.sub(r'on\s+([a-zA-Z0-9_-]+\.tf)\s+line\s+\d+', r'on \1 line LINE', s)
+    # 3. Sanitize line prefix numbers (e.g. 12: resource "google_...")
+    s = re.sub(r'(?m)^\s*\d+:\s*', 'LINE: ', s)
+    
+    # 4. Sanitize random suffixes (length 8-10 or 16)
+    s = re.sub(r'([/_-])[a-z0-9]{8,10}\b', r'\1ID', s)
+    s = re.sub(r'([/_-])[a-z0-9]{16}\b', r'\1ID', s)
+    
+    # 5. Sanitize Terraform attributes containing resource names/paths
+    s = re.sub(r'\b(id|name|project|bucket|namespace|table|email|member|role|unique_id)\s*=\s*".*?"', r'\1 = "VALUE"', s)
+    
+    # 6. Sanitize Step X/Y numbers
+    s = re.sub(r'\bStep\s+\d+/\d+\b', 'Step X/Y', s)
+    
+    return s.strip()
+
 
 def find_issue_link(test_name, issues):
     exact_target = f"Failing test(s): {test_name}"
@@ -173,7 +198,8 @@ def main():
             all_failures[name]["Beta"] = {
                 "count": count,
                 "error": details["error"],
-                "log": details["log"]
+                "log": details["log"],
+                "service": details["service"]
             }
             
     for name, details in ga_failures.items():
@@ -184,7 +210,8 @@ def main():
             all_failures[name]["GA"] = {
                 "count": count,
                 "error": details["error"],
-                "log": details["log"]
+                "log": details["log"],
+                "service": details["service"]
             }
 
     # Fetch GitHub issues
@@ -204,13 +231,14 @@ def main():
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     
     # 1. Group latest run failures across ALL tests in latest run
-    latest_error_groups = defaultdict(lambda: {"tests": set(), "issues": set(), "sample_error": "", "providers": set()})
+    latest_error_groups = defaultdict(lambda: {"tests": set(), "issues": set(), "sample_error": "", "providers": set(), "services": set()})
     for name, details in beta_failures.items():
         actual_err = get_actual_error(details["error"])
         sanitized_err = sanitize_for_comparison(actual_err)
         grp = latest_error_groups[sanitized_err]
         grp["tests"].add(name)
         grp["providers"].add("Beta")
+        grp["services"].add(details.get("service", "unknown"))
         issue = find_issue_link(name, issues)
         if issue != "N/A":
             grp["issues"].add(issue)
@@ -223,6 +251,7 @@ def main():
         grp = latest_error_groups[sanitized_err]
         grp["tests"].add(name)
         grp["providers"].add("GA")
+        grp["services"].add(details.get("service", "unknown"))
         issue = find_issue_link(name, issues)
         if issue != "N/A":
             grp["issues"].add(issue)
@@ -230,7 +259,7 @@ def main():
             grp["sample_error"] = sanitized_err
 
     # 2. Group persistent failures (past 7 days)
-    error_groups = defaultdict(lambda: {"tests": set(), "issues": set(), "sample_error": "", "providers": set()})
+    error_groups = defaultdict(lambda: {"tests": set(), "issues": set(), "sample_error": "", "providers": set(), "services": set()})
     for name, providers in all_failures.items():
         issue_link = find_issue_link(name, issues)
         for prov, details in providers.items():
@@ -239,6 +268,7 @@ def main():
             group = error_groups[sanitized_err]
             group["tests"].add(name)
             group["providers"].add(prov)
+            group["services"].add(details.get("service", "unknown"))
             if issue_link != "N/A":
                 group["issues"].add(issue_link)
             if not group["sample_error"]:
@@ -256,8 +286,8 @@ def main():
         # Section 1: High-Impact Errors in Latest Run (High Volume >= 3 tests OR Critical Panic/Crash)
         f.write("## 1. High-Impact Errors in Latest Run\n\n")
         f.write("High-impact errors are flagged based on **Critical Severity** (provider panic/crash) or **High Volume** (affecting $\\ge 3$ tests).\n\n")
-        f.write("| # | Impact Category | Affected Tests | Provider | GitHub Issue(s) | Error Signature / Sample Message | Sample Affected Tests |\n")
-        f.write("| --- | --- | --- | --- | --- | --- | --- |\n")
+        f.write("| # | Impact Category | Affected Tests | Provider | GCP Service(s) | GitHub Issue(s) | Error Signature / Sample Message | Sample Affected Tests |\n")
+        f.write("| --- | --- | --- | --- | --- | --- | --- | --- |\n")
         
         def high_impact_sort_key(item):
             sanitized_err, grp = item
@@ -283,11 +313,12 @@ def main():
             
             prov_str = "Both" if len(grp_data["providers"]) > 1 else list(grp_data["providers"])[0]
             issues_str = ", ".join(sorted(list(grp_data["issues"]))) if grp_data["issues"] else "N/A"
+            services_str = ", ".join(sorted(list(grp_data["services"]))) if grp_data["services"] else "N/A"
             
             err_summary = grp_data["sample_error"][:250].replace("|", "\\|").replace("\n", "<br>")
             err_cell = f"<pre>{err_summary}</pre>"
             
-            f.write(f"| {high_impact_idx} | {impact_badge} | **{num_tests}** | {prov_str} | {issues_str} | {err_cell} | `{test_list}` |\n")
+            f.write(f"| {high_impact_idx} | {impact_badge} | **{num_tests}** | {prov_str} | {services_str} | {issues_str} | {err_cell} | `{test_list}` |\n")
             high_impact_idx += 1
 
         f.write("\n---\n\n")
@@ -295,8 +326,8 @@ def main():
         # Section 2: Persistent Failures Grouped by Error Signature (Past 7 Days)
         f.write("## 2. Persistent Failures Grouped by Error Signature (Past 7 Days)\n\n")
         f.write("Criteria: Failed in latest run and at least 4 days in past 7 days, excluding generic errors.\n\n")
-        f.write("| # | Affected Tests Count | Failure Category / Error Signature | GitHub Issue(s) | Affected Test Names |\n")
-        f.write("| --- | --- | --- | --- | --- |\n")
+        f.write("| # | Affected Tests Count | GCP Service(s) | Failure Category / Error Signature | GitHub Issue(s) | Affected Test Names |\n")
+        f.write("| --- | --- | --- | --- | --- | --- |\n")
         
         sorted_groups = sorted(error_groups.items(), key=lambda x: len(x[1]["tests"]), reverse=True)
         grp_idx = 1
@@ -307,19 +338,20 @@ def main():
                 test_list = test_list[:147] + "..."
             
             issues_str = ", ".join(sorted(list(grp_data["issues"]))) if grp_data["issues"] else "N/A"
+            services_str = ", ".join(sorted(list(grp_data["services"]))) if grp_data["services"] else "N/A"
             
             err_summary = grp_data["sample_error"][:250].replace("|", "\\|").replace("\n", "<br>")
             err_cell = f"<pre>{err_summary}</pre>"
             
-            f.write(f"| {grp_idx} | **{num_tests}** | {err_cell} | {issues_str} | `{test_list}` |\n")
+            f.write(f"| {grp_idx} | **{num_tests}** | {services_str} | {err_cell} | {issues_str} | `{test_list}` |\n")
             grp_idx += 1
             
         f.write("\n---\n\n")
         
         # Section 3: Detailed Per-Test Failure Table
         f.write("## 3. Detailed Per-Test Persistent Failures Table\n\n")
-        f.write("| # | Test Name | Provider | Failures (Days) | GitHub Issue | Log Link | Error Message |\n")
-        f.write("| --- | --- | --- | --- | --- | --- | --- |\n")
+        f.write("| # | Test Name | GCP Service | Provider | Failures (Days) | GitHub Issue | Log Link | Error Message |\n")
+        f.write("| --- | --- | --- | --- | --- | --- | --- | --- |\n")
         
         row_idx = 1
         for name in sorted(all_failures.keys()):
@@ -337,8 +369,9 @@ def main():
                     table_error = ga_error.replace("|", "\\|").replace("\n", "<br>")
                     table_error = f"<pre>{table_error}</pre>"
                     log_display = f"[Log]({ga_details['log']})" if ga_details['log'] else "N/A"
+                    service_str = ga_details.get("service", "N/A")
                     
-                    f.write(f"| {row_idx} | {name} | Both (GA shown) | {ga_details['count']} | {issue_link} | {log_display} | {table_error} |\n")
+                    f.write(f"| {row_idx} | {name} | {service_str} | Both (GA shown) | {ga_details['count']} | {issue_link} | {log_display} | {table_error} |\n")
                     row_idx += 1
                     continue
             
@@ -351,8 +384,9 @@ def main():
                     table_error = f"<pre>{table_error}</pre>"
                     
                     log_display = f"[Log]({details['log']})" if details["log"] else "N/A"
+                    service_str = details.get("service", "N/A")
                     
-                    f.write(f"| {row_idx} | {name} | {prov} | {details['count']} | {issue_link} | {log_display} | {table_error} |\n")
+                    f.write(f"| {row_idx} | {name} | {service_str} | {prov} | {details['count']} | {issue_link} | {log_display} | {table_error} |\n")
                     row_idx += 1
 
     print(f"\nResults written to {output_file}")
