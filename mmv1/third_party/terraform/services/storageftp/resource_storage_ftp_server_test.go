@@ -26,9 +26,9 @@ func TestAccStorageFtpServer_updateInternal(t *testing.T) {
 				Config: testAccStorageFtpServer_internalInitial(serverId1),
 			},
 			{
-				ResourceName:            "google_storage_ftp_server.internal_server",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_storage_ftp_server.internal_server",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// Ignore location and server_id as they are URL-only parameters.
 				ImportStateVerifyIgnore: []string{"location", "server_id"},
 			},
@@ -41,9 +41,9 @@ func TestAccStorageFtpServer_updateInternal(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:            "google_storage_ftp_server.internal_server",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_storage_ftp_server.internal_server",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// Ignore location and server_id as they are URL-only parameters.
 				ImportStateVerifyIgnore: []string{"location", "server_id"},
 			},
@@ -56,9 +56,9 @@ func TestAccStorageFtpServer_updateInternal(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:            "google_storage_ftp_server.internal_server",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_storage_ftp_server.internal_server",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// Ignore location and server_id as they are URL-only parameters.
 				ImportStateVerifyIgnore: []string{"location", "server_id"},
 			},
@@ -81,9 +81,9 @@ func TestAccStorageFtpServer_updateExternal(t *testing.T) {
 				Config: testAccStorageFtpServer_externalInitial(serverId1),
 			},
 			{
-				ResourceName:            "google_storage_ftp_server.external_server",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_storage_ftp_server.external_server",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// Ignore location and server_id as they are URL-only parameters.
 				ImportStateVerifyIgnore: []string{"location", "server_id"},
 			},
@@ -96,9 +96,9 @@ func TestAccStorageFtpServer_updateExternal(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:            "google_storage_ftp_server.external_server",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_storage_ftp_server.external_server",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// Ignore location and server_id as they are URL-only parameters.
 				ImportStateVerifyIgnore: []string{"location", "server_id"},
 			},
@@ -111,9 +111,9 @@ func TestAccStorageFtpServer_updateExternal(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:            "google_storage_ftp_server.external_server",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_storage_ftp_server.external_server",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// Ignore location and server_id as they are URL-only parameters.
 				ImportStateVerifyIgnore: []string{"location", "server_id"},
 			},
