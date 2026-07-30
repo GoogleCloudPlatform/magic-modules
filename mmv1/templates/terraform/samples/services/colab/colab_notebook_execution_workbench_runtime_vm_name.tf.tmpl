@@ -6,7 +6,7 @@ resource "google_storage_bucket" "output_bucket" {
 }
 
 resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
-  display_name = "Notebook execution workbench runtime"
+  display_name = "Notebook execution workbench runtime vm name"
   location = "us-central1"
 
   direct_notebook_source {
@@ -50,9 +50,9 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   }
 
   workbench_runtime {
-    custom_container_image {
-      repository = "us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cu113.py310"
-      tag        = "latest"
+    vm_image {
+      project = "cloud-notebooks-managed"
+      name    = "workbench-instances-v20230925"
     }
   }
 
