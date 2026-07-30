@@ -37,4 +37,15 @@ if v, ok :=  res["localityLbPolicy"]; ok {
 	}
 }
 
+// Move authenticationConfig to generatedAuthenticationConfig and clear it when identity is set.
+// This prevents diffs since the API generates this value automatically.
+if tlsSettings, ok := res["tlsSettings"].(map[string]interface{}); ok {
+    if identity, ok := tlsSettings["identity"].(string); ok && identity != "" {
+        if authConfig, ok := tlsSettings["authenticationConfig"].(string); ok {
+            tlsSettings["generatedAuthenticationConfig"] = authConfig
+            delete(tlsSettings, "authenticationConfig")
+        }
+    }
+}
+
 return res, nil
