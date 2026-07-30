@@ -60,7 +60,7 @@ provider "google" {}
 
 list "google_bigquery_table" "all_in_dataset" {
   provider = google
-
+  limit = 1000
   config {
     project    = %q
     dataset_id = %q
