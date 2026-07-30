@@ -39,6 +39,17 @@ samples:
           agent_connectivity_template_id: my-connectivity-template
         test_env_vars:
           project: PROJECT_NAME
+  - name: network_services_agent_connectivity_template_advanced
+    primary_resource_id: default
+    steps:
+      - name: network_services_agent_connectivity_template_advanced
+        resource_id_vars:
+          agent_connectivity_template_id: my-connectivity-template
+          network_name: my-network
+          subnetwork_name: my-subnetwork
+          network_attachment_name: my-attachment
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: agentConnectivityTemplateId
     type: String
