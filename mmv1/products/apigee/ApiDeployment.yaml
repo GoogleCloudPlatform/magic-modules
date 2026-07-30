@@ -30,7 +30,6 @@ import_format:
   - organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}
   - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}/deployments'
   - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}'
-generate_list_resource: true
 samples:
   - name: apigee_api_deployment_basic
     primary_resource_id: api_deployment_test
