@@ -1932,7 +1932,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 	if npcMap != nil {
 		instance["networkPerformanceConfig"] = npcMap
 	}
-	if tagsMap := resourceInstanceTags(d); tagsMap != nil {
+	if tagsMap := resourceInstanceTagsOmitEmpty(d); tagsMap != nil {
 		instance["tags"] = tagsMap
 	}
 	if labels := tpgresource.ExpandEffectiveLabels(d); len(labels) > 0 {
@@ -2813,7 +2813,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 {{ end }}
 	if d.HasChange("tags") {
-		tagsBody := resourceInstanceTags(d)
+		tagsBody := resourceInstanceTagsOmitEmpty(d)
 		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setTags")
 		if err != nil {
 			return fmt.Errorf("Error generating URL: %s", err)

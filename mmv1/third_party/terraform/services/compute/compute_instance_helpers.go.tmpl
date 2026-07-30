@@ -1052,8 +1052,24 @@ func resourceInstanceTags(d tpgresource.TerraformResourceData) map[string]interf
 	for i, v := range vs.List() {
 		items[i] = v.(string)
 	}
+	return map[string]interface{}{
+		"items":       items,
+		"fingerprint": d.Get("tags_fingerprint").(string),
+	}
+}
+
+func resourceInstanceTagsOmitEmpty(d tpgresource.TerraformResourceData) map[string]interface{} {
 	tags := map[string]interface{}{}
-	if len(items) > 0 {
+	v := d.Get("tags")
+	if v == nil {
+		return tags
+	}
+	vs := v.(*schema.Set)
+	if vs.Len() > 0 {
+		items := make([]string, vs.Len())
+		for i, v := range vs.List() {
+			items[i] = v.(string)
+		}
 		tags["items"] = items
 	}
 	if fingerprint := d.Get("tags_fingerprint").(string); fingerprint != "" {
