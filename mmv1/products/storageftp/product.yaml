@@ -19,3 +19,5 @@ scopes:
 versions:
   - name: beta
     base_url: https://ftp.googleapis.com/v1alpha/
+  - name: ga
+    base_url: https://ftp.googleapis.com/v1alpha/
