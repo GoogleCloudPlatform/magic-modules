@@ -99,7 +99,7 @@ properties:
     required: true
     immutable: true
     description: |
-      The path of the access. 
+      The path of the access.
       The path is immutable once set. Exactly one path can be set.
     enum_values:
       - CLIENT_TO_AGENT
