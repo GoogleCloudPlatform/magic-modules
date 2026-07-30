@@ -3,10 +3,11 @@ data "google_project" "project" {}
 resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResourceId}}" {
   agent_connectivity_template_id = "{{index $.ResourceIdVars "agent_connectivity_template_id"}}"
   location                       = "us-central1"
-  description                    = "A basic configuration for Agent Connectivity Template"
+  description                    = "An updated configuration for Agent Connectivity Template"
   labels = {
-    env  = "test"
-    tier = "gold"
+    env  = "prod"
+    tier = "platinum"
+    new_label = "added"
   }
 
   access_types = ["PUBLIC"]

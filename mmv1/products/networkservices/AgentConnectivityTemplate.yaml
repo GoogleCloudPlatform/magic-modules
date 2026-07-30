@@ -7,12 +7,12 @@ references:
   api: https://cloud.google.com/network-services/docs/reference/network-services/rest/v1/projects.locations.agentConnectivityTemplates
 docs:
 base_url: projects/{{project}}/locations/{{location}}/agentConnectivityTemplates
-self_link: projects/{{project}}/locations/{{location}}/agentConnectivityTemplates/{{name}}
-create_url: projects/{{project}}/locations/{{location}}/agentConnectivityTemplates?agentConnectivityTemplateId={{name}}
+self_link: projects/{{project}}/locations/{{location}}/agentConnectivityTemplates/{{agent_connectivity_template_id}}
+create_url: projects/{{project}}/locations/{{location}}/agentConnectivityTemplates?agentConnectivityTemplateId={{agent_connectivity_template_id}}
 update_mask: true
 update_verb: PATCH
 import_format:
-  - projects/{{project}}/locations/{{location}}/agentConnectivityTemplates/{{name}}
+  - projects/{{project}}/locations/{{location}}/agentConnectivityTemplates/{{agent_connectivity_template_id}}
 timeouts:
   insert_minutes: 30
   update_minutes: 30
@@ -31,17 +31,22 @@ samples:
     steps:
       - name: network_services_agent_connectivity_template_basic
         resource_id_vars:
-          name: my-connectivity-template
+          agent_connectivity_template_id: my-connectivity-template
+        test_env_vars:
+          project: PROJECT_NAME
+      - name: network_services_agent_connectivity_template_basic_update
+        resource_id_vars:
+          agent_connectivity_template_id: my-connectivity-template
         test_env_vars:
           project: PROJECT_NAME
 parameters:
-  - name: name
+  - name: agentConnectivityTemplateId
     type: String
     description: |
-      Name of the AgentConnectivityTemplate resource.
+      Short name of the AgentConnectivityTemplate resource.
     required: true
-    ignore_read: true
-    custom_expand: templates/terraform/custom_expand/network_services_agent_connectivity_template_name.go.tmpl
+    url_param_only: true
+    immutable: true
   - name: location
     type: String
     description: |
@@ -49,6 +54,11 @@ parameters:
     url_param_only: true
     required: true
 properties:
+  - name: name
+    type: String
+    description: |
+      Identifier. Name of the resource.
+    output: true
   - name: createTime
     type: Time
     description: |
@@ -89,7 +99,7 @@ properties:
     required: true
     immutable: true
     description: |
-      The path of the access.
+      The path of the access. 
       The path is immutable once set. Exactly one path can be set.
     enum_values:
       - CLIENT_TO_AGENT

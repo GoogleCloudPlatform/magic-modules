@@ -41,7 +41,7 @@ resource "google_project_service" "agent_registry" {
 }
 
 resource "google_network_services_agent_connectivity_template" "default" {
-  name     = "{{index $.ResourceIdVars "name"}}-template"
+  agent_connectivity_template_id = "{{index $.ResourceIdVars "name"}}-template"
   location = "us-central1"
   description = "A basic configuration for Agent Connectivity Template"
   labels = {
