@@ -53,6 +53,11 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
     machine_spec {
       machine_type = "n1-standard-2"
     }
+
+    persistent_disk_spec {
+      disk_type    = "pd-standard"
+      disk_size_gb = 200
+    }
   }
 
   workbench_runtime {

@@ -248,6 +248,8 @@ properties:
             diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - name: shieldedInstanceConfig
         type: NestedObject
+        # GCP API does not return shieldedInstanceConfig in GET responses for NotebookExecutionJob.
+        ignore_read: true
         description: 'Optional. Shielded VM configuration.'
         properties:
           - name: enableIntegrityMonitoring
