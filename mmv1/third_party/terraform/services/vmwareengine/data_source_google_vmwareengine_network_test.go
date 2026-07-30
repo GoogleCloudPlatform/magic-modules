@@ -1,6 +1,7 @@
 package vmwareengine_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -14,9 +15,10 @@ func TestAccDataSourceVmwareEngineNetwork_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   acctest.RandString(t, 10),
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":        acctest.RandString(t, 10),
+		"org_id":               envvar.GetTestOrgFromEnv(t),
+		"billing_account":      envvar.GetTestBillingAccountFromEnv(t),
+		"vmwareengine_project": os.Getenv("GOOGLE_VMWAREENGINE_PROJECT"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -38,7 +40,7 @@ func TestAccDataSourceVmwareEngineNetwork_basic(t *testing.T) {
 }
 
 func testAccDataSourceVmwareEngineNetworkConfig(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+	projectSetup := `
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
@@ -59,22 +61,39 @@ resource "time_sleep" "sleep" {
     google_project_service.vmwareengine,
   ]
 }
+`
+	projectVar := "google_project.project.project_id"
+	dependsOnLine := `
+  depends_on = [
+    time_sleep.sleep # Sleep allows permissions in the new project to propagate
+  ]
+`
+
+	if isProjectCreationDisabled() {
+		projectSetup = ""
+		projectVar = `"%{vmwareengine_project}"`
+		dependsOnLine = ""
+	}
+
+	context["project_setup"] = projectSetup
+	context["project_var"] = projectVar
+	context["depends_on_line"] = dependsOnLine
+
+	return acctest.Nprintf(`
+%{project_setup}
 
 resource "google_vmwareengine_network" "nw" {
-  project           = google_project.project.project_id
+  project           = %{project_var}
   name              = "tf-test-sample-network%{random_suffix}"
   location          = "global" # Standard network needs to be global
   type              = "STANDARD"
   description       = "VMwareEngine standard network sample"
-
-  depends_on = [
-    time_sleep.sleep # Sleep allows permissions in the new project to propagate
-  ]
+  %{depends_on_line}
 }
 
 data "google_vmwareengine_network" "ds" {
   name     = google_vmwareengine_network.nw.name
-  project  = google_project.project.project_id
+  project  = %{project_var}
   location = "global"
 }
 `, context)

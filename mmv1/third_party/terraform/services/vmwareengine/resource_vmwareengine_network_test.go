@@ -2,6 +2,7 @@ package vmwareengine_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -14,10 +15,11 @@ import (
 func TestAccVmwareengineNetwork_vmwareEngineNetworkUpdate(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
-		"region":          "me-west1", // region with allocated quota
-		"random_suffix":   acctest.RandString(t, 10),
-		"organization":    envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"region":               getTestRegion(), // region with allocated quota
+		"random_suffix":        acctest.RandString(t, 10),
+		"organization":         envvar.GetTestOrgFromEnv(t),
+		"billing_account":      envvar.GetTestBillingAccountFromEnv(t),
+		"vmwareengine_project": os.Getenv("GOOGLE_VMWAREENGINE_PROJECT"),
 	}
 
 	configTemplate := vmwareEngineNetworkConfigTemplate(context)
@@ -52,6 +54,18 @@ func TestAccVmwareengineNetwork_vmwareEngineNetworkUpdate(t *testing.T) {
 }
 
 func vmwareEngineNetworkConfigTemplate(context map[string]interface{}) string {
+	if isProjectCreationDisabled() {
+		return acctest.Nprintf(`
+resource "google_vmwareengine_network" "default-nw" {
+  project     = "%{vmwareengine_project}"
+  name        = "%{region}-default"
+  location    = "%{region}"
+  type        = "LEGACY"
+  description = "%s"
+}
+`, context)
+	}
+
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "default-nw" {
   project     = google_project_service.acceptance.project

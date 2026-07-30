@@ -21,11 +21,12 @@ func TestAccVmwareengineExternalAddress_vmwareEngineExternalAddressUpdate(t *tes
 	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
-		"region":               "me-west1", // region with allocated quota
+		"region":               getTestRegion(), // region with allocated quota
 		"random_suffix":        acctest.RandString(t, 10),
 		"org_id":               envvar.GetTestOrgFromEnv(t),
 		"billing_account":      envvar.GetTestBillingAccountFromEnv(t),
 		"vmwareengine_project": os.Getenv("GOOGLE_VMWAREENGINE_PROJECT"),
+		"node_type":            getTestNodeType(),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -127,7 +128,7 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-ea-ear-pc" {
   management_cluster {
     cluster_id = "tf-test-sample-external-address-cluster%{random_suffix}"
     node_type_configs {
-      node_type_id = "standard-72"
+      node_type_id = "%{node_type}"
       node_count   = 1
     }
   }
