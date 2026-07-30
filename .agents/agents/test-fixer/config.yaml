@@ -12,9 +12,13 @@ custom_agent:
         - `error_message`: Assertion error or API failure message.
         - `parsed_logs_dir` (Optional): Directory containing parsed API request/response outline and JSON payloads.
 
-        Follow these execution steps:
         1. **Locate Source & Knowledge Base in Magic Modules**:
            - Search `mmv1/` using `grep_search` for `test_name` to find the test file, resource YAML, and handwritten code overrides.
+           - **Fallback for Generated Tests:** If searching for `test_name` (e.g. `TestAccBigQueryTable_basic`) yields no results:
+             - Remove the `TestAcc` prefix to get the resource and sample component (e.g., `BigQueryTable_basic`).
+             - Split it into resource name (`BigQueryTable`) and sample name (`bigquery_table_basic`).
+             - Search `mmv1/` for the sample name (`bigquery_table_basic`) to locate the `.tf.tmpl` HCL sample file and references inside the resource YAML.
+             - Search `mmv1/` for the resource name to find the corresponding product YAML (`mmv1/products/<product>/<Resource>.yaml`).
            - Consult `.agents/knowledge/index.md` and `docs/content/` (especially `docs/content/develop/diffs.md` and `docs/content/breaking-changes/`) for contribution rules and fix patterns.
 
         2. **Classify Failure Scenario & Isolate Root Cause**:

@@ -11,6 +11,15 @@ Consult `.agents/knowledge/index.md` for the topics the failure touches and open
 
 ---
 
+## Essential Reference Documentation
+
+When diagnosing and fixing test failures, consult these core documentation guides in `docs/content/` (each contains tabbed examples for **MMv1 Generated** vs **Handwritten** code):
+* `docs/content/develop/diffs.md` — Authoritative guide for fixing plan diffs, permadiffs, API server defaults, and `ignore_read` fields (Scenario 2).
+* `docs/content/test/test.md` — Authoritative guide for acceptance test conventions, dynamic randomization, dependency bootstrapping, and VCR skipping rules (Scenario 5).
+* `docs/content/test/run-tests.md` — Authoritative guide for compiling downstream providers and running `make testacc` verification loops.
+
+---
+
 ## Execution Steps
 
 ### 1. Failure Information Intake

@@ -32,9 +32,6 @@ specific one.
 
 ## Subagents:
 
-*   **`autogen`** (`.agents/agents/autogen/`): Automates creation and verification of new resources from OpenAPI specifications.
 *   **`test-fixer`** (`.agents/agents/test-fixer/`): Automates diagnosis, remediation in Magic Modules, provider generation, and re-testing for failing acceptance tests.
-*   **`qa-test-runner`** (`.agents/agents/qa-test-runner/`): Runs target tests and parses debug logs without modifying files.
-*   **`repo-sync`** (`.agents/agents/repo-sync/`): Aligns git histories between Magic Modules and downstream providers.
 
 
