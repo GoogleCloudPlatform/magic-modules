@@ -13,6 +13,9 @@ service/agentidentity:
 service/agentregistry:
   resources:
   - google_agent_registry_.*
+service/aiplatform-agent-anomaly-detection:
+  resources:
+  - google_vertex_ai_agent_anomaly_detection_.*
 service/aiplatform-agent-engine:
   resources:
   - google_vertex_ai_reasoning_engine.*
@@ -179,6 +182,9 @@ service/cloudscheduler:
 service/cloudsecuritycompliance:
   resources:
   - google_cloud_security_compliance_.*
+service/cloudsupport:
+  resources:
+  - google_cloud_support_.*
 service/cloudtasks:
   resources:
   - google_cloud_tasks_.*
@@ -196,6 +202,7 @@ service/compute-commitment:
   resources:
   - google_compute_region_commitment.*
 service/compute-health:
+  team: compute-health
   resources:
   - google_compute_health_check
   - google_compute_http_health_check
@@ -330,6 +337,9 @@ service/compute-vpn:
   - google_compute_ha_vpn_gateway
   - google_compute_external_vpn_gateway
   - google_compute_vpn_.*
+service/config:
+  resources:
+  - google_config_deployment
 service/contactcenterinsights:
   resources:
   - google_contact_center_insights_.*
@@ -448,6 +458,7 @@ service/firebase:
   - google_firebase_storage.*
   - google_firebase_web.*
   - google_firebaserules_.*
+  - google_firebase_remote_config_.*
 service/firebaseailogic:
   team: firebase-terraform
   resources:

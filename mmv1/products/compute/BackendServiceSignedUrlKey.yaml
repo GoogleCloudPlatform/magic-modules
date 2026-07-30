@@ -22,6 +22,7 @@ references:
   api: https://cloud.google.com/compute/docs/reference/rest/v1/backendServices
 base_url: projects/{{project}}/global/backendServices/{{backend_service}}
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/global/backendServices/{{backend_service}}
 create_url: projects/{{project}}/global/backendServices/{{backend_service}}/addSignedUrlKey
 delete_url: projects/{{project}}/global/backendServices/{{backend_service}}/deleteSignedUrlKey?keyName={{name}}

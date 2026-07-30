@@ -213,6 +213,23 @@ samples:
           'deletion_protection': 'false'
         ignore_read_extra:
           - 'deletion_protection'
+  - name: 'cloudrunv2_service_tags'
+    primary_resource_id: 'default'
+    exclude_test: true
+    steps:
+      - name: 'cloudrunv2_service_tags'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
+  - name: 'cloudrunv2_service_sandbox'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'cloudrunv2_service_sandbox'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -273,6 +290,14 @@ properties:
       All system annotations in v1 now have a corresponding field in v2 Service.
 
       This field follows Kubernetes annotations' namespacing, limits, and rules.
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
+    immutable: true
+    ignore_read: true
   - name: 'createTime'
     type: Time
     description: |-
@@ -615,6 +640,9 @@ properties:
                     description: |-
                       Port number the container listens on. This must be a valid TCP port number, 0 < containerPort < 65536.
               max_size: 1
+            - name: 'sandboxLauncher'
+              type: Boolean
+              description: Indicates that this container can act as a sandbox supervisor and launch sandboxes.
             - name: 'volumeMounts'
               type: Array
               description: |-

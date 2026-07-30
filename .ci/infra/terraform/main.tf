@@ -69,6 +69,12 @@ resource "google_organization_iam_member" "sa_cloudkms_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_cloudsupport_subscription_editor" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/cloudsupport.subscriptionEditor"
+  member = google_service_account.sa.member
+}
+
 resource "google_organization_iam_member" "sa_compute_xpn_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/compute.xpnAdmin"

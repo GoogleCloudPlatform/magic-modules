@@ -95,6 +95,44 @@ resource "google_container_cluster" "primary" {
 }
 ```
 
+## Example Usage - Rollback-safe (Two-Step) Upgrades
+
+To perform a rollback-safe (two-step) control plane upgrade, you first specify a soak duration in the `rollback_safe_upgrade` block when changing the `min_master_version`. This upgrades the master but keeps the control plane emulating the older version.
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name               = "my-gke-cluster"
+  location           = "us-central1"
+  initial_node_count = 1
+  min_master_version = "1.32.4-gke.200" # Upgrading to the 1.32 minor track
+
+  # Phase 1: Explicitly opt-in to a rollback-safe upgrade
+  rollback_safe_upgrade {
+    control_plane_soak_duration = "604800s" # Soak for 7 days
+  }
+}
+```
+
+After the soak period concludes, you can declaratively complete the upgrade by specifying the target `desired_emulated_version`.
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name               = "my-gke-cluster"
+  location           = "us-central1"
+  initial_node_count = 1
+  min_master_version = "1.32.4-gke.200"
+
+  rollback_safe_upgrade {
+    control_plane_soak_duration = "604800s"
+  }
+
+  # Phase 2: Complete the upgrade (updates emulated_version to 1.32)
+  desired_emulated_version = "1.32"
+}
+```
+
+~> **Note:** If you omit the `control_plane_soak_duration` field completely, GKE bypasses the two-step feature and performs a standard one-step upgrade. You must specify a duration between 6 hours and 7 days.
+
 ## Argument Reference
 
 * `name` - (Required) The name of the cluster, unique within the project and
@@ -253,6 +291,10 @@ Structure is [documented below](#nested_master_auth).
 -> If you are using the `google_container_engine_versions` datasource with a regional cluster, ensure that you have provided a `location`
 to the datasource. A region can have a different set of supported versions than its corresponding zones, and not all zones in a
 region are guaranteed to support the same version.
+
+* `rollback_safe_upgrade` - (Optional) Configuration for rollback-safe (two-step) upgrades. Structure is [documented below](#nested_rollback_safe_upgrade).
+
+* `desired_emulated_version` - (Optional) The desired emulated version for the cluster. Used to complete a rollback-safe upgrade after a soak period. Must be in major.minor format (e.g., "1.31"). To complete the upgrade declaratively, set this field to the target minor version. Removing this field from your configuration will not trigger completion.
 
 * `monitoring_config` - (Optional) Monitoring configuration for the cluster.
     Structure is [documented below](#nested_monitoring_config).
@@ -574,6 +616,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
     Defaults to disabled for Standard clusters; set `enabled = true` to enable.
     It can not be enabled for Autopilot clusters.
 
+* `node_readiness_config` - (Optional) The status of the Node Readiness Controller addon. It is disabled by default. Set `enabled = true` to enable.
+  Structure is [documented below](#nested_node_readiness_config).
+
 This example `addons_config` disables two addons:
 
 ```hcl
@@ -587,6 +632,10 @@ addons_config {
   }
 }
 ```
+<a name="nested_node_readiness_config"></a>The `node_readiness_config` block supports:
+
+* `enabled` - (Required) Enable the Node Readiness Controller addon for your cluster.
+
 <a name="nested_binary_authorization"></a>The `binary_authorization` block supports:
 
 * `enabled` - (DEPRECATED) Enable Binary Authorization for this cluster. Deprecated in favor of `evaluation_mode`.
@@ -996,6 +1045,10 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
     * `NETWORK_TIER_STANDARD`: Standard network tier.
 
 
+<a name="nested_rollback_safe_upgrade"></a>The `rollback_safe_upgrade` block supports:
+
+* `control_plane_soak_duration` - (Optional) A user-defined period that the cluster remains in the rollbackable state. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "604800s" for 7 days. Minimum is 6 hours, maximum is 7 days. If omitted, the two-step upgrade is skipped and a standard one-step upgrade is performed.
+
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
 * `client_certificate_config` - (Required) Whether client certificate authorization is enabled for this cluster.  For example:
@@ -1275,9 +1328,9 @@ sole_tenant_config {
 
 <a name="nested_node_image_config"></a>The `node_image_config` block supports:
 
-* `image` (Optional) - The name of the image to use for this node.
+* `image` (Optional) - The Operating System image for the node pool. This is a private feature, please contact your Google account team for allowlisting this feature.
 
-* `image_project` (Optional) - The project containing the image to use for this node.
+* `image_project` (Optional) - The GCP project storing the Operating System image for the node pool. This is a private feature, please contact your Google account team for allowlisting this feature.
 
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 
@@ -1789,6 +1842,8 @@ linux_node_config {
 
 * `accurate_time_config` - (Optional) Accurate time configuration for the node. Structure is [documented below](#nested_accurate_time_config).
 
+* `custom_node_init` - (Optional) Custom node init settings. Structure is [documented below](#nested_custom_node_init).
+
 <a name="nested_swap_config"></a>The `swap_config` block supports:
 
 * `enabled` - (Optional) Enables or disables swap for the node pool.
@@ -1854,6 +1909,18 @@ linux_node_config {
     * `POLICY_UNSPECIFIED`: Default if unset. GKE selects the image based on node type. For CPU and TPU nodes, the image will not allow loading external kernel modules. For GPU nodes, the image will allow loading any module, whether it is signed or not.
     * `ENFORCE_SIGNED_MODULES`: Enforced signature verification: Node pools will use a Container-Optimized OS image configured to allow loading of *Google-signed* external kernel modules. Loadpin is enabled but configured to exclude modules, and kernel module signature checking is enforced.
     * `DO_NOT_ENFORCE_SIGNED_MODULES`: Mirrors existing DEFAULT behavior: For CPU and TPU nodes, the image will not allow loading external kernel modules. For GPU nodes, the image will allow loading any module, whether it is signed or not.
+
+<a name="nested_custom_node_init"></a>The `custom_node_init` block supports:
+
+* `init_script` - (Optional) The init script configuration. Structure is [documented below](#nested_init_script).
+
+<a name="nested_init_script"></a>The `init_script` block supports:
+
+* `gcs_uri` - (Optional) The Google Cloud Storage URI for storing the init script. Format: `gs://BUCKET_NAME/OBJECT_NAME`. The service account on the nodepool must have read access to the object. Conflicts with `gcp_secret_manager_secret_uri`. If `gcs_uri` is used, `gcs_generation` is required.
+
+* `gcs_generation` - (Optional) The generation of the init script in Google Cloud Storage. If `gcs_uri` is used, `gcs_generation` is required.
+
+* `gcp_secret_manager_secret_uri` - (Optional) The Google Cloud Secret Manager secret version URI for storing the init script. Format: `projects/PROJECT_ID/secrets/SECRET_NAME/versions/VERSION`. The service account on the nodepool must have access to the secret version. Conflicts with `gcs_uri`.
 
 <a name="nested_containerd_config"></a>The `containerd_config` block supports:
 
@@ -2043,6 +2110,8 @@ exported:
 * `fleet.0.membership_location` - The location of the fleet membership,  extracted from `fleet.0.membership`. You can use this field to configure `membership_location` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
 
 * `enterprise_config.0.cluster_tier` - The effective tier of the cluster.
+
+* `emulated_version` - The current emulated Kubernetes version running on the GKE cluster control plane.
 
 ## Timeouts
 

@@ -63,6 +63,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	{{- end }}
 	{{- range $scope := $.ListScopeProperties }}
 		{{- $n := underscore $scope.Name }}
+		{{- if not (index $step.TestContextVars $n) }}
 		{{- if or (eq $n "region") (eq $n "location") }}
 		"{{$n}}": envvar.GetTestRegionFromEnv(),
 		{{- else if eq $n "zone" }}
@@ -70,6 +71,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 		{{- else if eq $n "project" }}
 		{{- if not (index $step.TestEnvVars "project") }}
 		"project": envvar.GetTestProjectFromEnv(),
+		{{- end }}
 		{{- end }}
 		{{- end }}
 	{{- end }}
