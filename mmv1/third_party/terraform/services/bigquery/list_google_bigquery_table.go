@@ -101,13 +101,6 @@ func flattenGoogleBigQueryTableListItem(res map[string]interface{}, d *schema.Re
 	project := d.Get("project").(string)
 	datasetID := d.Get("dataset_id").(string)
 
-	if v, ok := tableRef["projectId"].(string); ok && v != "" {
-		project = v
-	}
-	if v, ok := tableRef["datasetId"].(string); ok && v != "" {
-		datasetID = v
-	}
-
 	labels := make(map[string]string)
 	if rawLabels, ok := res["labels"].(map[string]interface{}); ok {
 		for key, value := range rawLabels {
