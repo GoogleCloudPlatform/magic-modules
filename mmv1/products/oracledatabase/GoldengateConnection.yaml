@@ -21,6 +21,10 @@ create_url: projects/{{project}}/locations/{{location}}/goldengateConnections?go
 id_format: projects/{{project}}/locations/{{location}}/goldengateConnections/{{goldengate_connection_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/goldengateConnections/{{goldengate_connection_id}}
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
 async:
   type: OpAsync
   operation:

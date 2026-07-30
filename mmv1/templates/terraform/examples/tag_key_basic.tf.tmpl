@@ -1,5 +1,0 @@
-resource "google_tags_tag_key" "{{$.PrimaryResourceId}}" {
-  parent = "organizations/{{index $.TestEnvVars "org_id"}}"
-  short_name = "{{index $.Vars "short_name"}}"
-  description = "For {{index $.Vars "short_name"}} resources."
-}

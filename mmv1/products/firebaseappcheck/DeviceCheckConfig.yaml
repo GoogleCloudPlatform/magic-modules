@@ -12,56 +12,59 @@
 # limitations under the License.
 
 ---
-name: 'DeviceCheckConfig'
+name: DeviceCheckConfig
 description: |
   An app's DeviceCheck configuration object. Note that the Team ID registered with your
   app is used as part of the validation process. Make sure your `google_firebase_apple_app` has a team_id present.
 references:
   guides:
-    'Official Documentation': 'https://firebase.google.com/docs/app-check'
-  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.deviceCheckConfig'
+    Official Documentation: https://firebase.google.com/docs/app-check
+  api: https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.deviceCheckConfig
 docs:
-base_url: 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig'
-self_link: 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig'
-create_url: 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig?updateMask=tokenTtl,keyId,privateKey'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/apps/{{app_id}}/deviceCheckConfig
+self_link: projects/{{project}}/apps/{{app_id}}/deviceCheckConfig
+create_url: projects/{{project}}/apps/{{app_id}}/deviceCheckConfig?updateMask=tokenTtl,keyId,privateKey
 update_mask: true
-exclude_delete: true
+create_verb: PATCH
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig'
+  - projects/{{project}}/apps/{{app_id}}/deviceCheckConfig
   - '{{project}}/{{app_id}}'
   - '{{app_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+exclude_delete: true
 custom_code:
-examples:
-  - name: 'firebase_app_check_device_check_config_full'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      bundle_id: 'bundle.id.devicecheck'
-      key_id: 'Key ID'
-      private_key_path: 'path/to/private-key.p8'
-      team_id: '9987654321'
-      token_ttl: '7200s'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      # Don't add random suffix
-      'private_key_path': '"test-fixtures/private-key-2.p8"'
-      'team_id': '"9987654321"'
-      'token_ttl': '"7200s"'
-      # Need the time_sleep resource
-      # for backward compatible
-      bundle_id: '"bundle.id.devicecheck" + randomSuffix'
-      # for backward compatible
-      key_id: '"Key ID" + randomSuffix'
-    external_providers: ["random", "time"]
+samples:
+  - name: firebase_app_check_device_check_config_full
+    primary_resource_id: default
+    min_version: beta
+    external_providers: [random, time]
+    steps:
+      - name: firebase_app_check_device_check_config_full
+        min_version: beta
+        resource_id_vars:
+          bundle_id: bundle.id.devicecheck
+          key_id: Key ID
+          private_key_path: path/to/private-key.p8
+          team_id: '9987654321'
+          token_ttl: 7200s
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          # Don't add random suffix
+          private_key_path: '"test-fixtures/private-key-2.p8"'
+          team_id: '"9987654321"'
+          token_ttl: '"7200s"'
+          # Need the time_sleep resource
+          # for backward compatible
+          bundle_id: '"bundle.id.devicecheck" + randomSuffix'
+          # for backward compatible
+          key_id: '"Key ID" + randomSuffix'
 parameters:
-  - name: 'app_id'
+  - name: app_id
     type: String
     description: |
       The ID of an
@@ -70,12 +73,12 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The relative resource name of the DeviceCheck configuration object
     output: true
-  - name: 'tokenTtl'
+  - name: tokenTtl
     type: String
     description: |
       Specifies the duration for which App Check tokens exchanged from DeviceCheck artifacts will be valid.
@@ -83,19 +86,19 @@ properties:
 
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
     default_from_api: true
-  - name: 'keyId'
+  - name: keyId
     type: String
     description: |
       The key identifier of a private key enabled with DeviceCheck, created in your Apple Developer account.
     required: true
-  - name: 'privateKey'
+  - name: privateKey
     type: String
     description: |
       The contents of the private key (.p8) file associated with the key specified by keyId.
     required: true
     ignore_read: true
     sensitive: true
-  - name: 'privateKeySet'
+  - name: privateKeySet
     type: Boolean
     description: |
       Whether the privateKey field was previously set. Since App Check will never return the

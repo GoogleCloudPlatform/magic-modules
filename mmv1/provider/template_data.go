@@ -323,7 +323,7 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	}
 
 	sourceByte := contents.Bytes()
-	if len(sourceByte) == 0 {
+	if len(bytes.TrimSpace(sourceByte)) == 0 {
 		return
 	}
 

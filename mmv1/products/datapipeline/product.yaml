@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'DataPipeline'
-display_name: 'DataPipeline'
-versions:
-  - name: 'ga'
-    base_url: 'https://datapipelines.googleapis.com/v1/'
+name: DataPipeline
+display_name: DataPipeline
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://datapipelines.googleapis.com/v1/

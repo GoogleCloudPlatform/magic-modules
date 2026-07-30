@@ -1,0 +1,9 @@
+resource "google_chronicle_big_query_export" "{{$.PrimaryResourceId}}" {
+  location = "{{index $.Vars "location"}}"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  udm_events_settings {
+    enabled        = true
+    retention_days = 7
+  }
+}
