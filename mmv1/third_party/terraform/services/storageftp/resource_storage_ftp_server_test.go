@@ -1,0 +1,216 @@
+package storageftp_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storageftp"
+)
+
+func TestAccStorageFtpServer_updateInternal(t *testing.T) {
+	t.Parallel()
+
+	serverId1 := fmt.Sprintf("tf-sftp-int-%s", acctest.RandString(t, 10))
+	serverId2 := fmt.Sprintf("tf-sftp-int2-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckStorageFtpServerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageFtpServer_internalInitial(serverId1),
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.internal_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// Ignore location and server_id as they are URL-only parameters.
+				ImportStateVerifyIgnore: []string{"location", "server_id"},
+			},
+			{
+				Config: testAccStorageFtpServer_internalUpdated(serverId1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_storage_ftp_server.internal_server", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.internal_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// Ignore location and server_id as they are URL-only parameters.
+				ImportStateVerifyIgnore: []string{"location", "server_id"},
+			},
+			{
+				Config: testAccStorageFtpServer_internalUpdated(serverId2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_storage_ftp_server.internal_server", plancheck.ResourceActionDestroyBeforeCreate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.internal_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// Ignore location and server_id as they are URL-only parameters.
+				ImportStateVerifyIgnore: []string{"location", "server_id"},
+			},
+		},
+	})
+}
+
+func TestAccStorageFtpServer_updateExternal(t *testing.T) {
+	t.Parallel()
+
+	serverId1 := fmt.Sprintf("tf-sftp-ext-%s", acctest.RandString(t, 10))
+	serverId2 := fmt.Sprintf("tf-sftp-ext2-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckStorageFtpServerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageFtpServer_externalInitial(serverId1),
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.external_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// Ignore location and server_id as they are URL-only parameters.
+				ImportStateVerifyIgnore: []string{"location", "server_id"},
+			},
+			{
+				Config: testAccStorageFtpServer_externalUpdated(serverId1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_storage_ftp_server.external_server", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.external_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// Ignore location and server_id as they are URL-only parameters.
+				ImportStateVerifyIgnore: []string{"location", "server_id"},
+			},
+			{
+				Config: testAccStorageFtpServer_externalUpdated(serverId2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_storage_ftp_server.external_server", plancheck.ResourceActionDestroyBeforeCreate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.external_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// Ignore location and server_id as they are URL-only parameters.
+				ImportStateVerifyIgnore: []string{"location", "server_id"},
+			},
+		},
+	})
+}
+
+func testAccStorageFtpServer_internalInitial(serverId string) string {
+	return fmt.Sprintf(`
+resource "google_storage_ftp_server" "internal_server" {
+  provider     = google-beta
+  location     = "us-west1"
+  server_id    = "%s"
+  display_name = "Initial Internal SFTP Server"
+  access_type  = "INTERNAL"
+
+  internal_config {
+    consumer_accept_list {
+      project          = "projects/${data.google_project.project.project_id}"
+      connection_limit = 10
+    }
+    consumer_reject_list {
+      project = "projects/${data.google_project.project.number}"
+    }
+  }
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+`, serverId)
+}
+
+func testAccStorageFtpServer_internalUpdated(serverId string) string {
+	return fmt.Sprintf(`
+resource "google_storage_ftp_server" "internal_server" {
+  provider     = google-beta
+  location     = "us-west1"
+  server_id    = "%s"
+  display_name = "Updated Internal SFTP Server"
+  access_type  = "INTERNAL"
+
+  internal_config {
+    consumer_accept_list {
+      project          = "projects/${data.google_project.project.project_id}"
+      connection_limit = 25
+    }
+    consumer_reject_list {
+      project = "projects/${data.google_project.project.number}"
+    }
+    consumer_reject_list {
+      project = "projects/920946329098"
+    }
+  }
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+`, serverId)
+}
+
+func testAccStorageFtpServer_externalInitial(serverId string) string {
+	return fmt.Sprintf(`
+resource "google_storage_ftp_server" "external_server" {
+  provider     = google-beta
+  location     = "us-west1"
+  server_id    = "%s"
+  display_name = "Initial External SFTP Server"
+  access_type  = "EXTERNAL"
+
+  external_config {
+    allowed_cidr_blocks = [
+      "192.168.1.0/24",
+      "10.0.0.0/8",
+    ]
+  }
+}
+`, serverId)
+}
+
+func testAccStorageFtpServer_externalUpdated(serverId string) string {
+	return fmt.Sprintf(`
+resource "google_storage_ftp_server" "external_server" {
+  provider     = google-beta
+  location     = "us-west1"
+  server_id    = "%s"
+  display_name = "Updated External SFTP Server"
+  access_type  = "EXTERNAL"
+
+  external_config {
+    allowed_cidr_blocks = [
+      "172.16.0.0/12",
+      "10.0.0.0/16",
+      "192.168.0.0/16",
+    ]
+  }
+}
+`, serverId)
+}
