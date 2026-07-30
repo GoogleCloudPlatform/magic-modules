@@ -51,6 +51,15 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		return err
 	}
 
+{{- if $.ListResponseIsArray }}
+	return transport_tpg.ListArrayPages(transport_tpg.ListArrayPagesOptions{
+		Config:         config,
+		TempData:       resourceData,
+		Resource:       Resource{{ $.ResourceName -}}(),
+		ListURL:        url,
+		BillingProject: billingProject,
+		UserAgent:      userAgent,
+{{- else }}
 	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
 		Config:         config,
 		TempData:       resourceData,
@@ -62,6 +71,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		{{- if $.ListFilter }}
 		Filter:         "{{ $.ListFilter }}",
 		{{- end }}
+{{- end }}
 		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 			headers := make(http.Header)
 			var err error
