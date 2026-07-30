@@ -1,7 +1,6 @@
-//go:build !ga
-// +build !ga
-
 package storageftp_test
+
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -217,3 +216,5 @@ resource "google_storage_ftp_server" "external_server" {
 }
 `, serverId)
 }
+
+{{- end }}
