@@ -237,6 +237,35 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 	}
 	{{- end }}
 
+	delete(instance, "canIpForward")
+	delete(instance, "deletionProtection")
+	forceableScalars := map[string]string{
+		"can_ip_forward":             "canIpForward",
+		"deletion_protection":        "deletionProtection",
+		"description":                "description",
+		"hostname":                   "hostname",
+		"machine_type":               "machineType",
+		"min_cpu_platform":           "minCpuPlatform",
+		"name":                       "name",
+		"key_revocation_action_type": "keyRevocationActionType",
+{{- if ne $.TargetVersionName "ga" }}
+		"erase_windows_vss_signature": "eraseWindowsVssSignature",
+{{- end }}
+	}
+	for field, key := range forceableScalars {
+		if _, exists := d.GetOkExists(field); !exists {
+			continue
+		}
+		if _, present := instance[key]; !present {
+			instance[key] = d.Get(field)
+		}
+	}
+	if _, exists := d.GetOkExists("zone"); exists {
+		if _, present := instance["zone"]; !present {
+			instance["zone"] = ""
+		}
+	}
+
 	log.Printf("[INFO] Requesting instance creation")
 	insertUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances")
 	if err != nil {
