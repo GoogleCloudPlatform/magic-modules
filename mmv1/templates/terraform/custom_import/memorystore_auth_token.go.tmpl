@@ -12,6 +12,9 @@ id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}token_auth_user{{"}}"}}/a
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }
+if err := d.Set("name", id); err != nil {
+	return nil, fmt.Errorf("Error setting name: %s", err)
+}
 d.SetId(id)
 
 return []*schema.ResourceData{d}, nil
