@@ -62,7 +62,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
 
   workbench_runtime {
     custom_container_image {
-      repository = "us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cu113.py310"
+      repository = "us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cpu.py310"
       tag        = "latest"
     }
   }
