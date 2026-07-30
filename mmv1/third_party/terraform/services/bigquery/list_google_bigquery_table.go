@@ -87,7 +87,7 @@ func (listR *GoogleBigQueryTableListResource) List(ctx context.Context, listReq 
 	}
 }
 
-func flattenGoogleBigQueryTableListItem(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+func flattenGoogleBigQueryTableListItem(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config, project, datasetID string) error {
 	tableRef, ok := res["tableReference"].(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("missing tableReference in BigQuery tables list response")
@@ -97,9 +97,6 @@ func flattenGoogleBigQueryTableListItem(res map[string]interface{}, d *schema.Re
 	if !ok || tableID == "" {
 		return fmt.Errorf("missing tableReference.tableId in BigQuery tables list response")
 	}
-
-	project := d.Get("project").(string)
-	datasetID := d.Get("dataset_id").(string)
 
 	labels := make(map[string]string)
 	if rawLabels, ok := res["labels"].(map[string]interface{}); ok {
@@ -156,7 +153,9 @@ func ListBigQueryTables(config *transport_tpg.Config, project, datasetID string,
 		BillingProject: billingProject,
 		UserAgent:      userAgent,
 		ItemName:       "tables",
-		Flattener:      flattenGoogleBigQueryTableListItem,
-		Callback:       callback,
+		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
+			return flattenGoogleBigQueryTableListItem(res, d, config, project, datasetID)
+		},
+		Callback: callback,
 	})
 }
