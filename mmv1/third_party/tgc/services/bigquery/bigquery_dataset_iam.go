@@ -8,9 +8,12 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
+// Provide a separate asset type constant so we don't have to worry about name conflicts between IAM and non-IAM converter files
+const BigqueryDatasetIAMAssetType string = "bigquery.googleapis.com/Dataset"
+
 func ResourceConverterBigqueryDatasetIamPolicy() cai.ResourceConverter {
 	return cai.ResourceConverter{
-		AssetType:         "bigquery.googleapis.com/Dataset",
+		AssetType:         BigqueryDatasetIAMAssetType,
 		Convert:           GetBigqueryDatasetIamPolicyCaiObject,
 		MergeCreateUpdate: MergeBigqueryDatasetIamPolicy,
 	}
@@ -18,7 +21,7 @@ func ResourceConverterBigqueryDatasetIamPolicy() cai.ResourceConverter {
 
 func ResourceConverterBigqueryDatasetIamBinding() cai.ResourceConverter {
 	return cai.ResourceConverter{
-		AssetType:         "bigquery.googleapis.com/Dataset",
+		AssetType:         BigqueryDatasetIAMAssetType,
 		Convert:           GetBigqueryDatasetIamBindingCaiObject,
 		FetchFullResource: FetchBigqueryDatasetIamPolicy,
 		MergeCreateUpdate: MergeBigqueryDatasetIamBinding,
@@ -28,7 +31,7 @@ func ResourceConverterBigqueryDatasetIamBinding() cai.ResourceConverter {
 
 func ResourceConverterBigqueryDatasetIamMember() cai.ResourceConverter {
 	return cai.ResourceConverter{
-		AssetType:         "bigquery.googleapis.com/Dataset",
+		AssetType:         BigqueryDatasetIAMAssetType,
 		Convert:           GetBigqueryDatasetIamMemberCaiObject,
 		FetchFullResource: FetchBigqueryDatasetIamPolicy,
 		MergeCreateUpdate: MergeBigqueryDatasetIamMember,
@@ -86,7 +89,7 @@ func newBigqueryDatasetIamAsset(
 
 	return []cai.Asset{{
 		Name: name,
-		Type: "bigquery.googleapis.com/Dataset",
+		Type: BigqueryDatasetIAMAssetType,
 		IAMPolicy: &cai.IAMPolicy{
 			Bindings: bindings,
 		},
@@ -104,6 +107,6 @@ func FetchBigqueryDatasetIamPolicy(d tpgresource.TerraformResourceData, config *
 		d,
 		config,
 		"//bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}",
-		"bigquery.googleapis.com/Dataset",
+		BigqueryDatasetIAMAssetType,
 	)
 }

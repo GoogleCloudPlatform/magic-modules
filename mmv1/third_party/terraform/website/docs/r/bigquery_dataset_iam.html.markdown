@@ -228,6 +228,30 @@ The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/c
 $ terraform import google_bigquery_dataset_iam_member.default "projects/{{project_id}}/datasets/{{dataset_id}} roles/viewer user:foo@example.com"
 ```
 
+#### Import via resource identity
+
+`google_bigquery_dataset_iam_member` also supports plannable import via [resource identity](https://developer.hashicorp.com/terraform/language/block/import#identity) (Terraform 1.12+):
+
+```tf
+import {
+  to = google_bigquery_dataset_iam_member.default
+  identity = {
+    project    = "your-project-id"
+    dataset_id = "your_dataset_id"
+    role       = "roles/viewer"
+    member     = "user:foo@example.com"
+  }
+}
+```
+
+Identity attributes:
+
+* `project` - (Optional) The project id. May be omitted if a default project is configured on the provider.
+* `dataset_id` - (Required) The dataset id. Full resource form `projects/{project}/datasets/{dataset}` is also accepted.
+* `role` - (Required) The IAM role being granted.
+* `member` - (Required) The identity that the role is granted to.
+* `condition_title` - (Optional) Title of the IAM condition, when importing a conditional binding.
+
 ### Importing IAM bindings
 
 IAM binding imports use space-delimited identifiers that contain the resource's `dataset_id` and `role`. For example:
