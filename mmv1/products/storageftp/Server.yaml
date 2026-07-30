@@ -39,15 +39,19 @@ custom_code:
   constants: 'templates/terraform/constants/storage_ftp_server.go.tmpl'
 samples:
   - name: 'storage_ftp_server_internal'
+    min_version: beta
     primary_resource_id: 'internal_server'
     steps:
       - name: 'storage_ftp_server_internal'
+        min_version: beta
         resource_id_vars:
           server_id: 'sftp-int'
   - name: 'storage_ftp_server_external'
+    min_version: beta
     primary_resource_id: 'external_server'
     steps:
       - name: 'storage_ftp_server_external'
+        min_version: beta
         resource_id_vars:
           server_id: 'sftp-ext'
 parameters:
