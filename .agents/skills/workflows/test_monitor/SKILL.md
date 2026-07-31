@@ -24,10 +24,10 @@ The `test-monitor` workflow provides a non-destructive monitoring lifecycle that
 ### 2. Triage & Aggregate Failure Trends
 *   Execute the `automate-test-triage` skill by running `python3 .agents/skills/automate-test-triage/scripts/triage.py` from the root workspace.
 *   Group today's latest run failures by error signature and flag High-Impact errors based on:
-    1. 🚨 **Critical Severity**: Provider panic or crash (`panic:`), prioritized at the top of Section 1 regardless of test count.
+    1. 🚨 **Critical Severity**: Provider panic/crash (`panic:`, `runtime error:`, `SIGSEGV`) or API enablement errors in CI test environment projects, prioritized at the top of Section 1 regardless of test count.
     2. ⚠️ **High Volume**: Error signatures affecting $\ge 3$ tests in the latest run.
-*   Filter for persistent test failures (failing in latest run AND $\ge 4$ out of the past 7 days).
-*   Filter out generic non-actionable errors (e.g., error code 13, generic internal error).
+*   Separate non-actionable errors requiring human intervention (Quota / Rate Limit / Stockout, Internal Error / Error Code 13, Tenant Project Creation) into Section 2.
+*   Filter for persistent actionable test failures (failing in latest run AND $\ge 4$ out of the past 7 days).
 
 ### 3. Cross-Reference GitHub Issues
 *   Fetch open issues labelled `test-failure` from `hashicorp/terraform-provider-google` using `gh issue list`.
@@ -39,7 +39,7 @@ The `test-monitor` workflow provides a non-destructive monitoring lifecycle that
 
 ### 5. Generate Monitoring Report
 *   Save the final Markdown report to `tmp/test-status/test-report-<date>.md` (e.g., `tmp/test-status/test-report-2026-07-28.md`).
-*   Present the executive summary, Section 1 (High-Impact Errors: Panics & High Volume), Section 2 (Persistent Failures Grouped by Error Signature), and Section 3 (Detailed Per-Test Failure Table) to the user.
+*   Present the executive summary and 4 report sections (where every section table includes clickable GCS debug log links `[Log](url)`, expanded 500-character error summaries, and links to Section 4) to the user: Section 1 (High-Impact Actionable Errors: Panics & API Enablement in Test Env, High Volume), Section 2 (Test Failures Requiring Human Action), Section 3 (Persistent Actionable Failures Grouped by Error Signature), and Section 4 (Detailed Test Failures Grouped by Service Package, showing all latest-run failures with failed out of total tests, percentages, and a Human Action Required? column).
 
 ---
 
