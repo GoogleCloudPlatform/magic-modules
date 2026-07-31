@@ -65,18 +65,18 @@ parameters:
   - name: 'serverId'
     type: String
     description: |
-      The unique identifier for the server. Maximum 30 characters.
+      A unique ID for the server. Must start with a lowercase letter, and end with a lowercase letter or number. Can contain lowercase letters, numbers, and hyphens. Maximum 30 characters.
     required: true
     immutable: true
     max_size: 30
     url_param_only: true
     validation:
-      regex: '^[a-zA-Z0-9-]$'
+      regex: '^[a-z0-9-]$'
 properties:
   - name: 'displayName'
     type: String
     description: |
-      An optional user-specified display name for the SFTP server.
+      A display name for the server.
     required: false
   - name: 'accessType'
     type: Enum
@@ -112,7 +112,7 @@ properties:
             - name: 'connectionLimit'
               type: Integer
               description: |
-                The connection limit allowed for this consumer project.
+                The maximum number of Private Service Connect endpoints that can be created in the consumer project.
               required: true
       - name: 'consumerRejectList'
         type: Array
@@ -140,7 +140,7 @@ properties:
       - name: 'allowedCidrBlocks'
         type: Array
         is_set: true
-        send_empty_value: true
+        min_size: 1
         description: |
           A list of allowed IPv4 or IPv6 CIDR block ranges that can connect to this server.
         item_type:
