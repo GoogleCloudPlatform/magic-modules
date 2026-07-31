@@ -20,6 +20,7 @@ base_url: 'projects/{{project}}/global/firewallPolicies'
 self_link: 'projects/{{project}}/global/firewallPolicies/{{name}}'
 create_url: 'projects/{{project}}/global/firewallPolicies'
 update_verb: 'PATCH'
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -34,11 +35,13 @@ async:
 include_in_tgc_next: true
 custom_code:
 legacy_long_form_project: true
-examples:
+samples:
   - name: 'network_firewall_policy_full'
     primary_resource_id: 'policy'
-    vars:
-      policy_name: 'tf-test-policy'
+    steps:
+      - name: 'network_firewall_policy_full'
+        resource_id_vars:
+          policy_name: 'tf-test-policy'
 iam_policy:
   parent_resource_attribute: 'name'
 parameters:

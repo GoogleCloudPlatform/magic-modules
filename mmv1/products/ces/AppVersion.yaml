@@ -1,3 +1,4 @@
+---
 # Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
 name: AppVersion
 description: Description
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/versions
@@ -20,14 +20,16 @@ create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/versions?ap
 id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/versions/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/versions/{{name}}
-examples:
+samples:
   - name: "ces_app_version_basic"
     primary_resource_id: "my-app-version"
-    vars:
-      app_version_display_name: 'my-app-version'
-      app_display_name: 'my-app'
-      app_version_id: 'app-version-id'
-      app_id: 'app-id'
+    steps:
+      - name: "ces_app_version_basic"
+        resource_id_vars:
+          app_version_display_name: 'my-app-version'
+          app_display_name: 'my-app'
+          app_version_id: 'app-version-id'
+          app_id: 'app-id'
 autogen_status: QXBwVmVyc2lvbg==
 parameters:
   - name: location
@@ -299,8 +301,7 @@ properties:
                 Default agent type. The agent uses instructions and callbacks specified in
                 the agent to perform the task using a large language model.
               output: true
-              properties:
-                []
+              properties: []
             - name: modelSettings
               type: NestedObject
               description: Model settings contains various configurations for the LLM model.
@@ -1708,13 +1709,11 @@ properties:
                       output: true
                     - name: uniqueItems
                       type: Boolean
-                      description: Indicate the items in the array must be unique. Only applies
-                        to TYPE.ARRAY.
+                      description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
                       output: true
                     - name: defs
                       type: String
-                      description: A map of definitions for use by ref. Only allowed at the root
-                        of the schema.
+                      description: A map of definitions for use by ref. Only allowed at the root of the schema.
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
@@ -1735,8 +1734,7 @@ properties:
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: anyOf
                       type: String
-                      description: Optional. The instance value should be valid against at least
-                        one of the schemas in this list.
+                      description: Optional. The instance value should be valid against at least one of the schemas in this list.
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: prefixItems
@@ -1821,13 +1819,11 @@ properties:
                       output: true
                     - name: uniqueItems
                       type: Boolean
-                      description: Indicate the items in the array must be unique. Only applies
-                        to TYPE.ARRAY.
+                      description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
                       output: true
                     - name: defs
                       type: String
-                      description: A map of definitions for use by ref. Only allowed at the root
-                        of the schema.
+                      description: A map of definitions for use by ref. Only allowed at the root of the schema.
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
@@ -1848,8 +1844,7 @@ properties:
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: anyOf
                       type: String
-                      description: Optional. The instance value should be valid against at least
-                        one of the schemas in this list.
+                      description: Optional. The instance value should be valid against at least one of the schemas in this list.
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: prefixItems
@@ -2024,13 +2019,11 @@ properties:
                                 properties:
                                   - name: collection
                                     type: String
-                                    description: Resource name of the collection the data store
-                                      belongs to.
+                                    description: Resource name of the collection the data store belongs to.
                                     output: true
                                   - name: collectionDisplayName
                                     type: String
-                                    description: Display name of the collection the data store belongs
-                                      to.
+                                    description: Display name of the collection the data store belongs to.
                                     output: true
                                   - name: dataSource
                                     type: String
@@ -2147,8 +2140,7 @@ properties:
                             output: true
                           - name: modelSettings
                             type: NestedObject
-                            description: Model settings contains various configurations for the
-                              LLM model.
+                            description: Model settings contains various configurations for the LLM model.
                             output: true
                             properties:
                               - name: model
@@ -2167,8 +2159,7 @@ properties:
                                 output: true
                           - name: prompt
                             type: String
-                            description: The prompt definition. If not set, default prompt will be
-                              used.
+                            description: The prompt definition. If not set, default prompt will be used.
                             output: true
                       - name: summarizationConfig
                         type: NestedObject
@@ -2181,8 +2172,7 @@ properties:
                             output: true
                           - name: modelSettings
                             type: NestedObject
-                            description: Model settings contains various configurations for the
-                              LLM model.
+                            description: Model settings contains various configurations for the LLM model.
                             output: true
                             properties:
                               - name: model
@@ -2201,8 +2191,7 @@ properties:
                                 output: true
                           - name: prompt
                             type: String
-                            description: The prompt definition. If not set, default prompt will be
-                              used.
+                            description: The prompt definition. If not set, default prompt will be used.
                             output: true
                 - name: name
                   type: String
@@ -2340,13 +2329,11 @@ properties:
                             type: String
                         - name: tokenEndpoint
                           type: String
-                          description: The token endpoint in the OAuth provider to exchange for an
-                            access token.
+                          description: The token endpoint in the OAuth provider to exchange for an access token.
                           output: true
                     - name: serviceAccountAuthConfig
                       type: NestedObject
-                      description: Configurations for authentication using a custom service
-                        account.
+                      description: Configurations for authentication using a custom service account.
                       output: true
                       properties:
                         - name: serviceAccount
@@ -2369,7 +2356,7 @@ properties:
                       allow_empty_object: true
                       send_empty_value: true
                       output: true
-                      properties: []  # Explicitly show no properties
+                      properties: [] # Explicitly show no properties
                 - name: description
                   type: String
                   description: |-
@@ -2379,8 +2366,7 @@ properties:
                   output: true
                 - name: ignoreUnknownFields
                   type: Boolean
-                  description: If true, the agent will ignore unknown fields in the API
-                    response.
+                  description: If true, the agent will ignore unknown fields in the API response.
                   output: true
                 - name: name
                   type: String
@@ -2510,8 +2496,7 @@ properties:
               output: true
             - name: displayName
               type: String
-              description: The display name of the toolset. Must be unique within the same
-                app.
+              description: The display name of the toolset. Must be unique within the same app.
               output: true
             - name: etag
               type: String
@@ -2522,8 +2507,7 @@ properties:
                 changes.
             - name: executionType
               type: String
-              description: |2-
-
+              description: |-
                 Possible values:
                 SYNCHRONOUS
                 ASYNCHRONOUS
@@ -2610,13 +2594,11 @@ properties:
                             type: String
                         - name: tokenEndpoint
                           type: String
-                          description: The token endpoint in the OAuth provider to exchange for an
-                            access token.
+                          description: The token endpoint in the OAuth provider to exchange for an access token.
                           output: true
                     - name: serviceAccountAuthConfig
                       type: NestedObject
-                      description: Configurations for authentication using a custom service
-                        account.
+                      description: Configurations for authentication using a custom service account.
                       output: true
                       properties:
                         - name: serviceAccount

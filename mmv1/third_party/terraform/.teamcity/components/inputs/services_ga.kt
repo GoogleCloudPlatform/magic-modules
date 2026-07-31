@@ -31,6 +31,16 @@ var ServicesListGa = mapOf(
         "displayName" to "Activedirectory",
         "path" to "./google/services/activedirectory"
     ),
+    "agentidentity" to mapOf(
+        "name" to "agentidentity",
+        "displayName" to "Agent Identity",
+        "path" to "./google/services/agentidentity"
+    ),
+    "agentregistry" to mapOf(
+        "name" to "agentregistry",
+        "displayName" to "Agent Registry",
+        "path" to "./google/services/agentregistry"
+    ),
     "alloydb" to mapOf(
         "name" to "alloydb",
         "displayName" to "Alloydb",
@@ -240,6 +250,11 @@ var ServicesListGa = mapOf(
         "name" to "cloudsecuritycompliance",
         "displayName" to "Cloud Security Compliance",
         "path" to "./google/services/cloudsecuritycompliance"
+    ),
+    "cloudsupport" to mapOf(
+        "name" to "cloudsupport",
+        "displayName" to "Cloudsupport",
+        "path" to "./google/services/cloudsupport"
     ),
     "cloudtasks" to mapOf(
         "name" to "cloudtasks",

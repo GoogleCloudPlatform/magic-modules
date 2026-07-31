@@ -990,3 +990,128 @@ func TestIdentityPropertiesFlattenObject(t *testing.T) {
 		t.Errorf("expected IdentityProperties to include flattened identifier \"datasetId\", got %v", got)
 	}
 }
+
+func TestSamplePrimaryResourceId(t *testing.T) {
+	t.Parallel()
+
+	p := &api.Product{
+		Name: "test",
+		Versions: []*product.Version{
+			{
+				Name:    "ga",
+				BaseUrl: "ga_url",
+			},
+			{
+				Name:    "beta",
+				BaseUrl: "beta_url",
+			},
+		},
+	}
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    string
+	}{
+		{
+			description: "empty samples returns empty string",
+			resource: api.Resource{
+				Samples:           []*resource.Sample{},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "",
+		},
+		{
+			description: "samples with higher min_version returns empty string",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "beta-res",
+						MinVersion:        "beta",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "",
+		},
+		{
+			description: "valid sample returns primary resource id",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "ga-res",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "ga-res",
+		},
+		{
+			description: "only the first sample should be used",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "first-res",
+						MinVersion:        "ga",
+					},
+					{
+						PrimaryResourceId: "second-res",
+						MinVersion:        "ga",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "first-res",
+		},
+		{
+			description: "excludetest should be honored using first non-excluded sample",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "excluded-res",
+						ExcludeTest:       true,
+					},
+					{
+						PrimaryResourceId: "included-res",
+						ExcludeTest:       false,
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "included-res",
+		},
+		{
+			description: "fallback to first matching excluded sample when all are excluded",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "excluded-first",
+						ExcludeTest:       true,
+					},
+					{
+						PrimaryResourceId: "excluded-second",
+						ExcludeTest:       true,
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "excluded-first",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.SamplePrimaryResourceId(); got != tc.expected {
+				t.Errorf("SamplePrimaryResourceId() = %q, want %q", got, tc.expected)
+			}
+		})
+	}
+}

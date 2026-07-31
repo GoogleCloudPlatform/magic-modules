@@ -113,6 +113,24 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
           cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-full-%s", acctest.RandString(t, 10))
           cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-full-%s", acctest.RandString(t, 10))
+  - name: oracledatabase_cloud_vmcluster_exascale
+    primary_resource_id: my_vmcluster
+    steps:
+      - name: oracledatabase_cloud_vmcluster_exascale
+        resource_id_vars:
+          project: my-project
+          cloud_vm_cluster_id: my-instance
+          cloud_exadata_infrastructure_id: my-exadata
+          exascale_db_storage_vault_id: my-vault
+          deletion_protection: "true"
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oci-terraform-testing-prod"'
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-exascale-%s", acctest.RandString(t, 10))
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-exascale-%s", acctest.RandString(t, 10))
+          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-vault-for-vmcluster-exascale-%s", acctest.RandString(t, 10))
 virtual_fields:
   - name: deletion_protection
     type: Boolean
@@ -300,6 +318,15 @@ properties:
         type: String
         description: 'OCI Cluster name. '
         default_from_api: true
+      - name: storageManagementType
+        type: String
+        description: |-
+          The storage management type of the VM Cluster.
+          Possible values:
+          STORAGE_MANAGEMENT_TYPE_UNSPECIFIED
+          ASM
+          EXASCALE
+        output: true
   - name: labels
     type: KeyValueLabels
     description: 'Labels or tags associated with the VM Cluster. '
@@ -364,3 +391,11 @@ properties:
           PARTIALLY_CONNECTED
           DISCONNECTED
           UNKNOWN
+  - name: exascaleDbStorageVault
+    type: String
+    description: |-
+      The name of ExascaleDbStorageVault associated with the VM Cluster.
+      Format:
+      projects/{project}/locations/{location}/exascaleDbStorageVaults/{exascale_db_storage_vault}
+    immutable: true
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName

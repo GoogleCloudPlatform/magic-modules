@@ -45,15 +45,19 @@ async:
 collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
-examples:
+samples:
   - name: 'global_network_endpoint_group'
     primary_resource_id: 'neg'
-    vars:
-      neg_name: 'my-lb-neg'
+    steps:
+      - name: 'global_network_endpoint_group'
+        resource_id_vars:
+          neg_name: 'my-lb-neg'
   - name: 'global_network_endpoint_group_ip_address'
     primary_resource_id: 'neg'
-    vars:
-      neg_name: 'my-lb-neg'
+    steps:
+      - name: 'global_network_endpoint_group_ip_address'
+        resource_id_vars:
+          neg_name: 'my-lb-neg'
 parameters:
 properties:
   - name: 'name'

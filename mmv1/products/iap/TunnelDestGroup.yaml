@@ -45,10 +45,12 @@ iam_policy:
     - 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
     - '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
 custom_code:
-examples:
+samples:
   - name: 'iap_destgroup'
     primary_resource_id: 'dest_group'
     external_providers: ["random", "time"]
+    steps:
+      - name: 'iap_destgroup'
 parameters:
   - name: 'region'
     type: String
