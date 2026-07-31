@@ -26,6 +26,9 @@ func dataSourceRedisClusterAuthTokenRead(d *schema.ResourceData, meta interface{
 	tokenId := d.Get("token_id").(string)
 	id := fmt.Sprintf("%s/authTokens/%s", tokenAuthUser, tokenId)
 	d.SetId(id)
+	if err := d.Set("name", id); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
 
 	err := resourceRedisClusterAuthTokenRead(d, meta)
 	if err != nil {

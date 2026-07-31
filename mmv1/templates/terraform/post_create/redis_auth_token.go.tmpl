@@ -1,6 +1,6 @@
 // Post_create is required because the create endpoint (addAuthToken) returns a Long Running Operation
 // whose response contains the parent TokenAuthUser object rather than the newly created AuthToken resource itself.
-// Therefore, we must list the authTokens for the user to retrieve and set the ID and token_id of the newly generated token.
+// Therefore, we must list the authTokens for the user to retrieve and set the ID, name, and token_id of the newly generated token.
 tokenAuthUser := d.Get("token_auth_user").(string)
 url = fmt.Sprintf("%s%s/authTokens", transport_tpg.BaseUrl(Product, config), tokenAuthUser)
 res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -17,6 +17,9 @@ if tokens, ok := res["authTokens"].([]interface{}); ok && len(tokens) > 0 {
 	latestToken := tokens[len(tokens)-1].(map[string]interface{})
 	if name, ok := latestToken["name"].(string); ok {
 		d.SetId(name)
+		if err := d.Set("name", name); err != nil {
+			return fmt.Errorf("Error setting name: %s", err)
+		}
 		if err := d.Set("token_id", tpgresource.GetResourceNameFromSelfLink(name)); err != nil {
 			return fmt.Errorf("Error setting token_id: %s", err)
 		}
