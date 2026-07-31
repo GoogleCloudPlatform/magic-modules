@@ -1,8 +1,3 @@
-data "google_compute_image" "my_image" {
-  family  = "workbench-instances"
-  project = "cloud-notebooks-managed"
-}
-
 resource "google_storage_bucket" "output_bucket" {
   name          = "{{index $.ResourceIdVars "bucket"}}"
   location      = "US"
@@ -68,7 +63,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   workbench_runtime {
     vm_image {
       project = "cloud-notebooks-managed"
-      name    = data.google_compute_image.my_image.name
+      name    = "workbench-instances-v20260713"
     }
   }
 
