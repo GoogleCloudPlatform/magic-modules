@@ -399,6 +399,14 @@ properties:
           The DNS name of the instance for PSC connectivity.
           Name convention: <uid>.<uid>.<region>.alloydb-psc.goog
         output: true
+      - name: pscAutoConnectionPolicyState
+        type: Enum
+        description: |
+          The state of the PSC auto connection policy for the instance.
+        enum_values:
+          - PSC_AUTO_CONNECTION_POLICY_STATE_UNSPECIFIED
+          - ENABLED
+          - DISABLED
       - name: pscInterfaceConfigs
         type: Array
         description: |
@@ -449,6 +457,16 @@ properties:
               description: |
                 The status of the service connection policy.
               output: true
+            - name: serviceConnectionPolicy
+              type: String
+              description: |
+                The PSC service connection policy name for the auto connection.
+              output: true
+            - name: serviceConnectionPolicyCreationState
+              type: String
+              description: |
+                The state of the PSC service connection policy creation for the auto connection.
+              output: true
             - name: dnsAutomationInfos
               type: Array
               description: |
@@ -493,6 +511,19 @@ properties:
       - name: effective_psc_auto_dns_enabled
         type: Boolean
         description: The effective state of the PSC auto DNS for the instance.
+        output: true
+      - name: effective_psc_auto_connection_policy
+        type: Boolean
+        description: |
+          Indicates if the PSC auto connection policy is enabled for the instance.
+          For older instances, this will be off by default, but for newer instances,
+          this will be auto-enabled.
+        output: true
+      - name: service_connection_policy
+        type: String
+        description: |
+          The PSC service connection policy name for the instance.
+          The format is "projects/<PROJECT_ID>/regions/<REGION_ID>/serviceConnectionPolicies/<alloydb-$NETWORK-$RANDOM-scp>".
         output: true
       - name: psc_auto_dns_names
         type: Array
