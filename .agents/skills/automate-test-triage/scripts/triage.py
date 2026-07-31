@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import json
 import os
@@ -6,8 +7,11 @@ import subprocess
 import sys
 from collections import defaultdict
 
-def get_date_str(days_ago):
-    today = datetime.date.today()
+def get_date_str(days_ago, base_date=None):
+    if base_date is None:
+        today = datetime.date.today()
+    else:
+        today = base_date
     target_date = today - datetime.timedelta(days=days_ago)
     return target_date.strftime("%Y-%m-%d")
 
@@ -135,7 +139,7 @@ def is_panic_or_crash(error_msg):
     priority, _ = classify_severity(error_msg)
     return priority == 100
 
-def get_failures(provider_type):
+def get_failures(provider_type, base_date=None):
     failure_counts = defaultdict(int)
     latest_failures = {} # Store name -> {error: msg, log: link}
     latest_available_date = None
@@ -143,7 +147,7 @@ def get_failures(provider_type):
 
     # Check past 7 days (including today)
     for i in range(7):
-        date_str = get_date_str(i)
+        date_str = get_date_str(i, base_date=base_date)
         data = fetch_results(date_str, provider_type)
         if data:
             if latest_available_date is None:
@@ -295,8 +299,16 @@ def format_human_action_cell(error_str):
     return "No (Actionable)"
 
 def main():
-    beta_failures, beta_counts, beta_date, beta_stats = get_failures("beta")
-    ga_failures, ga_counts, ga_date, ga_stats = get_failures("ga")
+    parser = argparse.ArgumentParser(description="Automate test triage and reporting.")
+    parser.add_argument("--date", help="Target end date (YYYY-MM-DD) for 7-day window. Defaults to today.", default=None)
+    args = parser.parse_args()
+
+    base_date = None
+    if args.date:
+        base_date = datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
+
+    beta_failures, beta_counts, beta_date, beta_stats = get_failures("beta", base_date=base_date)
+    ga_failures, ga_counts, ga_date, ga_stats = get_failures("ga", base_date=base_date)
 
     # Combine failures for 7-day persistent window
     all_failures = defaultdict(dict)
@@ -338,7 +350,7 @@ def main():
     else:
         print(f"Failed to fetch GitHub issues: {gh_res.stderr}")
 
-    report_date = beta_date or ga_date or get_date_str(0)
+    report_date = beta_date or ga_date or get_date_str(0, base_date=base_date)
     output_file = f"tmp/test-status/test-report-{report_date}.md"
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     

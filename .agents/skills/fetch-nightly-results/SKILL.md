@@ -8,7 +8,7 @@ description: "Skill to fetch latest nightly test results and metadata for Beta o
 > **Note to AI Agents:** Use this skill to retrieve test statuses, duration, error messages, and log links from `test-metadata`. Direct `gcloud storage cat` is the primary method; an optional helper script is provided if multi-day or complex filtering is required.
 
 ## Prerequisites
-* `gcloud` CLI installed and authenticated with access to `gs://nightly-test-data`.
+* `gcloud` CLI installed and authenticated with access to `gs://nightly-test-data` (requires `roles/storage.objectViewer` permission). If permission or authentication fails, verify your login via `gcloud auth login`.
 * Must be executed from within the `magic-modules` workspace.
 
 ## Primary Execution Steps (Direct GCS Command)
@@ -25,6 +25,7 @@ Execute `gcloud storage cat` to read the test metadata:
 ```bash
 gcloud storage cat gs://nightly-test-data/test-metadata/{version}/{date}-{version}.json
 ```
+*   *Error Handling*: If `gcloud` returns a permission or authentication error (`permission denied`, `401`, `403`), check `gcloud auth login` and ensure read access (`roles/storage.objectViewer`) to `gs://nightly-test-data`.
 
 ### 3. JSON Payload Fields
 Each element in `test-metadata` contains all test details:

@@ -19,11 +19,11 @@ The `test-monitor` workflow provides a non-destructive monitoring lifecycle that
 ## Execution Steps
 
 ### 1. Fetch Test Results
-*   Execute the `fetch-nightly-results` skill to retrieve test status JSON files for both GA and Beta providers from Google Cloud Storage (`gs://nightly-test-data/test-metadata/`) for the latest available run and past 7 days using `gcloud storage cat`.
+*   Execute the `fetch-nightly-results` skill to retrieve test status JSON files for both GA and Beta providers from Google Cloud Storage (`gs://nightly-test-data/test-metadata/`) for the latest available run and past 7 days using `gcloud storage cat` (if GCS authentication or permission fails, verify `gcloud auth login` and `roles/storage.objectViewer` access).
 
 ### 2. Triage & Aggregate Failure Trends
-*   Execute the `automate-test-triage` skill by running `python3 .agents/skills/automate-test-triage/scripts/triage.py` from the root workspace.
-*   Group today's latest run failures by error signature and flag High-Impact errors based on:
+*   Execute the `automate-test-triage` skill by running `python3 .agents/skills/automate-test-triage/scripts/triage.py` from the root workspace (or pass `--date YYYY-MM-DD` to specify a target end date for the 7-day window).
+*   Group the target date's latest run failures by error signature and flag High-Impact errors based on:
     1. 🚨 **Critical Severity**: Provider panic/crash (`panic:`, `runtime error:`, `SIGSEGV`) or API enablement errors in CI test environment projects, prioritized at the top of Section 1 regardless of test count.
     2. ⚠️ **High Volume**: Error signatures affecting $\ge 3$ tests in the latest run.
 *   Separate non-actionable errors requiring human intervention (Quota / Rate Limit / Stockout, Internal Error / Error Code 13, Tenant Project Creation) into Section 2.

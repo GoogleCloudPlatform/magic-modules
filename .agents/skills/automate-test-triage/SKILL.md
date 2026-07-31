@@ -8,7 +8,7 @@ description: "Skill to automatically triage failing tests by reading test-metada
 > **Note to AI Agents:** Use this skill to automate triaging failing tests from GCS `test-metadata` JSON files over a multi-day window for monitoring purposes. Do NOT modify source files or create code fixes.
 
 ## Prerequisites
-* Access to `gs://nightly-test-data/test-metadata/` via `gcloud storage cat`.
+* Access to `gs://nightly-test-data/test-metadata/` via `gcloud storage cat` (requires `roles/storage.objectViewer` permission; verify with `gcloud auth login` if permission denied).
 * `gh` CLI installed for querying GitHub issues.
 
 ## Execution Steps
@@ -16,12 +16,12 @@ description: "Skill to automatically triage failing tests by reading test-metada
 ### 1. Execute Triage Script
 Run the automated triage script from the workspace root:
 *   **Script**: `.agents/skills/automate-test-triage/scripts/triage.py`
-*   **Command**: `python3 .agents/skills/automate-test-triage/scripts/triage.py`
+*   **Command**: `python3 .agents/skills/automate-test-triage/scripts/triage.py` (or specify a target date with `--date YYYY-MM-DD`, e.g., `python3 .agents/skills/automate-test-triage/scripts/triage.py --date 2026-07-23`)
 *   **Output File**: `tmp/test-status/test-report-<date>.md` (e.g., `tmp/test-status/test-report-2026-07-28.md`)
 
 ### 2. Triage & Aggregation Rules
 The script performs the following steps:
-1. **Fetch Metadata**: Reads `gs://nightly-test-data/test-metadata/{version}/{date}-{version}.json` for GA and Beta providers across the past 7 days using `gcloud storage cat`.
+1. **Fetch Metadata**: Reads `gs://nightly-test-data/test-metadata/{version}/{date}-{version}.json` for GA and Beta providers across the 7-day window ending on the target date (defaults to today) using `gcloud storage cat`. If a GCS permission or authentication failure occurs, the script immediately reports an error with remediation instructions (`gcloud auth login`, `roles/storage.objectViewer`) and aborts execution.
 2. **Extract Error Output**: Reads `error_message` and `log_link` directly from each test entry in `test-metadata`.
 3. **High-Impact Classification (Section 1)**: Identifies actionable failures in today's latest run flagged by:
    * 🚨 **Critical Severity**: Provider panic/crash (`panic:`, `runtime error:`, `SIGSEGV`) or API enablement errors in CI test environment projects, regardless of test count.
