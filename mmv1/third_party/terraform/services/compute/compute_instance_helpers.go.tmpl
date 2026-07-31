@@ -1534,13 +1534,23 @@ func expandComputeInstanceSourceEncryptionKey(d tpgresource.TerraformResourceDat
 	}
 
 	cekRes := cek.([]interface{})[0].(map[string]interface{})
-	return map[string]interface{}{
-		"rsaEncryptedKey":      cekRes["rsa_encrypted_key"].(string),
-		"rawKey":               cekRes["raw_key"].(string),
-		"kmsKeyName":           cekRes["kms_key_self_link"].(string),
-		"sha256":               cekRes["sha256"].(string),
-		"kmsKeyServiceAccount": cekRes["kms_key_service_account"].(string),
+	result := map[string]interface{}{}
+	if v, _ := cekRes["rsa_encrypted_key"].(string); v != "" {
+		result["rsaEncryptedKey"] = v
 	}
+	if v, _ := cekRes["raw_key"].(string); v != "" {
+		result["rawKey"] = v
+	}
+	if v, _ := cekRes["kms_key_self_link"].(string); v != "" {
+		result["kmsKeyName"] = v
+	}
+	if v, _ := cekRes["sha256"].(string); v != "" {
+		result["sha256"] = v
+	}
+	if v, _ := cekRes["kms_key_service_account"].(string); v != "" {
+		result["kmsKeyServiceAccount"] = v
+	}
+	return result
 }
 
 func flattenComputeInstanceSourceEncryptionKey(v map[string]interface{}) []map[string]interface{} {

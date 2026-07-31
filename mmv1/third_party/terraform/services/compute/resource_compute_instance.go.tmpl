@@ -4076,9 +4076,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return err
 			}
-			if err := tpgresource.Convert(freshInstMap, instance); err != nil {
-				return fmt.Errorf("Error parsing instance response: %s", err)
-			}
+			instance = freshInstMap
 		}
 		for _, patch := range updatesToNIWhileStopped {
 			instanceMap, err := tpgresource.ConvertToMap(instance)
@@ -4811,16 +4809,19 @@ func expandScratchDisks(d *schema.ResourceData, config *transport_tpg.Config, pr
 	n := d.Get("scratch_disk.#").(int)
 	scratchDisks := make([]interface{}, 0, n)
 	for i := 0; i < n; i++ {
-		scratchDisks = append(scratchDisks, map[string]interface{}{
+		scratchDisk := map[string]interface{}{
 			"autoDelete": true,
 			"type":       "SCRATCH",
 			"deviceName": d.Get(fmt.Sprintf("scratch_disk.%d.device_name", i)).(string),
 			"interface":  d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string),
-			"diskSizeGb": strconv.Itoa(d.Get(fmt.Sprintf("scratch_disk.%d.size", i)).(int)),
 			"initializeParams": map[string]interface{}{
 				"diskType": diskType.RelativeLink(),
 			},
-		})
+		}
+		if size := d.Get(fmt.Sprintf("scratch_disk.%d.size", i)).(int); size > 0 {
+			scratchDisk["diskSizeGb"] = strconv.Itoa(size)
+		}
+		scratchDisks = append(scratchDisks, scratchDisk)
 	}
 
 	return scratchDisks, nil
