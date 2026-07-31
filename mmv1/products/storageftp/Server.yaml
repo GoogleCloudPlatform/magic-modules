@@ -68,7 +68,10 @@ parameters:
       The unique identifier for the server. Maximum 30 characters.
     required: true
     immutable: true
+    max_size: 30
     url_param_only: true
+    validation:
+      regex: '^[a-zA-Z0-9-]$'
 properties:
   - name: 'displayName'
     type: String
