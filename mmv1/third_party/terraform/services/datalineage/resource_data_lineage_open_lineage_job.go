@@ -27,10 +27,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/hashicorp/terraform-provider-google/google/registry"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/verify"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/registry"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/verify"
 
 	"google.golang.org/api/googleapi"
 )
@@ -109,7 +109,8 @@ func ResourceDataLineageOpenLineageJob() *schema.Resource {
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: `Description of the OpenLineage job.`,
+				ForceNew:    true,
+				Description: `Description of the OpenLineage job. Changes to description do not trigger updates.`,
 			},
 			"input": {
 				Type:        schema.TypeList,
