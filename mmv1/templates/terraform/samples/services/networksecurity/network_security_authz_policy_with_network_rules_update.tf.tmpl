@@ -91,9 +91,7 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
 
           principal {
             ignore_case = {{index $.Vars "not_sources_principal_ignore_case"}}
-            prefix = "{{index $.Vars "not_sources_principal_prefix"}}"
-            suffix = "{{index $.Vars "not_sources_principal_suffix"}}"
-            contains = "{{index $.Vars "not_sources_principal_contains"}}"
+            exact = "{{index $.Vars "not_sources_principal"}}"
           }
         }
       }
@@ -108,9 +106,7 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
           
           principal {
             ignore_case = {{index $.Vars "sources_principal_ignore_case"}}
-            prefix = "{{index $.Vars "sources_principal_prefix"}}"
-            suffix = "{{index $.Vars "sources_principal_suffix"}}"
-            contains = "{{index $.Vars "sources_principal_contains"}}"
+            exact = "{{index $.Vars "sources_principal"}}"
           }
         }
       }

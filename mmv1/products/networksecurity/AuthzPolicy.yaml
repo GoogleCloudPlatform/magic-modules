@@ -123,22 +123,18 @@ samples:
           resource_name: authz-policy
         vars:
           not_sources_prefix: 10.1.7.0
-          not_sources_principal_prefix: spiffe://
-          not_sources_principal_suffix: 
-          not_sources_principal_contains: 
+          not_sources_principal: spiffe://example/ns/default/sa/example-updated
           not_sources_principal_ignore_case: true
           sources_prefix: 10.4.0.0
-          sources_principal_prefix: spiffe://
-          sources_principal_suffix: 
-          sources_principal_contains: 
+          sources_principal: spiffe://example.com/ns/prod/sa/app-updated
           sources_principal_ignore_case: true
           to_operations_snis_prefix: google.com
-          to_operations_snis_suffix: 
-          to_operations_snis_contains: 
+          to_operations_snis_suffix: null
+          to_operations_snis_contains: null
           to_operations_snis_ignore_case: true
           to_not_operations_snis_prefix: google.com
-          to_not_operations_snis_suffix: 
-          to_not_operations_snis_contains: 
+          to_not_operations_snis_suffix: null
+          to_not_operations_snis_contains: null
           to_not_operations_snis_ignore_case: true
           network_rules_when: request.host.endsWith('.example.com')
         test_env_vars:
@@ -153,22 +149,18 @@ samples:
           resource_name: authz-policy
         vars:
           not_sources_prefix: 10.1.8.0
-          not_sources_principal_prefix: 
-          not_sources_principal_suffix: beta/sa/app-updated
-          not_sources_principal_contains: 
+          not_sources_principal: spiffe://example/ns/default/sa/example-updated
           not_sources_principal_ignore_case: true
           sources_prefix: 10.5.0.0
-          sources_principal_prefix: 
-          sources_principal_suffix: prod/sa/app-updated
-          sources_principal_contains: 
+          sources_principal: spiffe://example.com/ns/prod/sa/app-updated
           sources_principal_ignore_case: true
-          to_operations_snis_prefix: 
+          to_operations_snis_prefix: null
           to_operations_snis_suffix: /samples
-          to_operations_snis_contains: 
+          to_operations_snis_contains: null
           to_operations_snis_ignore_case: true
-          to_not_operations_snis_prefix: 
+          to_not_operations_snis_prefix: null
           to_not_operations_snis_suffix: /samples
-          to_not_operations_snis_contains: 
+          to_not_operations_snis_contains: null
           to_not_operations_snis_ignore_case: true
           network_rules_when: request.host.endsWith('.example.com')
         test_env_vars:
@@ -183,21 +175,17 @@ samples:
           resource_name: authz-policy
         vars:
           not_sources_prefix: 10.1.9.0
-          not_sources_principal_prefix: 
-          not_sources_principal_suffix: 
-          not_sources_principal_contains: example.com/ns/
+          not_sources_principal: spiffe://example/ns/default/sa/example-updated
           not_sources_principal_ignore_case: true
           sources_prefix: 10.6.0.0
-          sources_principal_prefix: 
-          sources_principal_suffix: 
-          sources_principal_contains: example.com/ns/
+          sources_principal: spiffe://example.com/ns/prod/sa/app-updated
           sources_principal_ignore_case: true
-          to_operations_snis_prefix: 
-          to_operations_snis_suffix: 
+          to_operations_snis_prefix: null
+          to_operations_snis_suffix: null
           to_operations_snis_contains: /beta/
           to_operations_snis_ignore_case: true
-          to_not_operations_snis_prefix: 
-          to_not_operations_snis_suffix: 
+          to_not_operations_snis_prefix: null
+          to_not_operations_snis_suffix: null
           to_not_operations_snis_contains: /v1/
           to_not_operations_snis_ignore_case: true
           network_rules_when: request.host.endsWith('.example.com')
@@ -1012,24 +1000,6 @@ properties:
                                 The input string must match exactly the string specified here.
                                 Examples:
                                 * abc only matches the value abc.
-                            - name: prefix
-                              type: String
-                              description: |
-                                The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
-                                Examples:
-                                * abc matches the value abc.xyz
-                            - name: suffix
-                              type: String
-                              description: |
-                                The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
-                                Examples:
-                                * abc matches the value xyz.abc
-                            - name: contains
-                              type: String
-                              description: |
-                                The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
-                                Examples:
-                                * abc matches the value xyz.abc.def
                   - name: resources
                     type: Array
                     description: |
@@ -1139,24 +1109,6 @@ properties:
                                 The input string must match exactly the string specified here.
                                 Examples:
                                 * abc only matches the value abc.
-                            - name: prefix
-                              type: String
-                              description: |
-                                The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
-                                Examples:
-                                * abc matches the value abc.xyz
-                            - name: suffix
-                              type: String
-                              description: |
-                                The input string must have the suffix specified here. Note: empty suffix is not allowed, please use regex instead.
-                                Examples:
-                                * abc matches the value xyz.abc
-                            - name: contains
-                              type: String
-                              description: |
-                                The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
-                                Examples:
-                                * abc matches the value xyz.abc.def
                   - name: resources
                     type: Array
                     description: |
