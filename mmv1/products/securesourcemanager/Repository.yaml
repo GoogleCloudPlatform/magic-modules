@@ -106,6 +106,21 @@ samples:
           deletion_policy: '"DELETE"'
         ignore_read_extra:
           - deletion_policy
+  - name: secure_source_manager_repository_secret_scanning_default
+    primary_resource_id: default
+    steps:
+      - name: secure_source_manager_repository_secret_scanning_default
+        resource_id_vars:
+          repository_id: my-repository
+          instance_id: my-instance
+          deletion_policy: PREVENT
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - deletion_policy
+
 parameters:
   - name: location
     type: String
@@ -226,5 +241,6 @@ properties:
               Enables secret scanning for the repository.
           - name: 'inspectTemplate'
             type: String
+            default_from_api: true
             description: |
               The DLP inspect template to use for secret scanning.
