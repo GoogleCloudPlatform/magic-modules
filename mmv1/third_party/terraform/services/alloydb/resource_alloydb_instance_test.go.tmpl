@@ -1116,6 +1116,10 @@ func TestAccAlloydbInstance_updatePscAutoConnections(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAlloydbInstance_pscAutoConnections(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "psc_instance_info.0.effective_psc_auto_dns_enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "psc_instance_info.0.effective_psc_auto_connection_policy", "true"),
+				),
 			},
 			{
 				Config: testAccAlloydbInstance_updatePscAutoConnections(context),
@@ -1134,10 +1138,12 @@ resource "google_alloydb_instance" "default" {
     cpu_count = 2
   }
   psc_instance_config {
-	psc_auto_connections {
-		consumer_project = "${data.google_project.project.project_id}"
-		consumer_network = "projects/${data.google_project.project.project_id}/global/networks/%{network_name}"
-	}
+    psc_auto_connection_policy_state = "ENABLED"
+    psc_auto_dns_state = "PSC_AUTO_DNS_STATE_ENABLED"
+    psc_auto_connections {
+      consumer_project = "${data.google_project.project.project_id}"
+      consumer_network = "projects/${data.google_project.project.project_id}/global/networks/%{network_name}"
+    }
   }
 }
 resource "google_alloydb_cluster" "default" {
