@@ -18,6 +18,8 @@ const schemaDiffDesc = `Return a simple summary of the schema diff for this buil
 
 var schemaDiff = diff.ComputeSchemaDiff(oldProvider.ResourceMap(), newProvider.ResourceMap())
 
+var newResourceMap = newProvider.ResourceMap()
+
 type simpleSchemaDiff struct {
 	AddedResources, ModifiedResources, RemovedResources []string
 }

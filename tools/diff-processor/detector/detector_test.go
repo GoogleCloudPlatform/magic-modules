@@ -541,3 +541,136 @@ func TestDetectMissingDocsForDatasource(t *testing.T) {
 		})
 	}
 }
+
+func TestDetectMissingIdentityDocs(t *testing.T) {
+	makeIdentity := func(fields map[string]*schema.Schema) *schema.ResourceIdentity {
+		return &schema.ResourceIdentity{
+			SchemaFunc: func() map[string]*schema.Schema { return fields },
+		}
+	}
+
+	for _, test := range []struct {
+		name          string
+		schemaDiff    diff.SchemaDiff
+		newResourceMap map[string]*schema.Resource
+		repo          string
+		want          map[string]MissingDocDetails
+	}{
+		{
+			name: "identity field documented",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					ResourceConfig: diff.ResourceConfigDiff{
+						New: &schema.Resource{},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"a_resource": {
+					Identity: makeIdentity(map[string]*schema.Schema{
+						"field_one": {Type: schema.TypeString},
+					}),
+				},
+			},
+			repo: "../testdata",
+			want: map[string]MissingDocDetails{},
+		},
+		{
+			name: "identity field not documented",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					ResourceConfig: diff.ResourceConfigDiff{
+						New: &schema.Resource{},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"a_resource": {
+					Identity: makeIdentity(map[string]*schema.Schema{
+						"undocumented_id": {Type: schema.TypeString},
+					}),
+				},
+			},
+			repo: "../testdata",
+			want: map[string]MissingDocDetails{
+				"a_resource": {
+					Name:     "a_resource",
+					FilePath: "/website/docs/r/a_resource.html.markdown",
+					Fields:   []string{"undocumented_id"},
+				},
+			},
+		},
+		{
+			name: "deleted resource is skipped",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					ResourceConfig: diff.ResourceConfigDiff{
+						New: nil,
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"a_resource": {
+					Identity: makeIdentity(map[string]*schema.Schema{
+						"undocumented_id": {Type: schema.TypeString},
+					}),
+				},
+			},
+			repo: "../testdata",
+			want: map[string]MissingDocDetails{},
+		},
+		{
+			name: "no identity is skipped",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					ResourceConfig: diff.ResourceConfigDiff{
+						New: &schema.Resource{},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"a_resource": {},
+			},
+			repo: "../testdata",
+			want: map[string]MissingDocDetails{},
+		},
+		{
+			name: "doc file missing - identity field flagged",
+			schemaDiff: diff.SchemaDiff{
+				"nonexistent_resource": diff.ResourceDiff{
+					ResourceConfig: diff.ResourceConfigDiff{
+						New: &schema.Resource{},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"nonexistent_resource": {
+					Identity: makeIdentity(map[string]*schema.Schema{
+						"project": {Type: schema.TypeString},
+					}),
+				},
+			},
+			repo: "../testdata",
+			want: map[string]MissingDocDetails{
+				"nonexistent_resource": {
+					Name:     "nonexistent_resource",
+					FilePath: "/website/docs/r/nonexistent_resource.html.markdown",
+					Fields:   []string{"project"},
+				},
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := DetectMissingIdentityDocs(test.schemaDiff, test.newResourceMap, test.repo)
+			if err != nil {
+				t.Fatalf("DetectMissingIdentityDocs = %v, want nil", err)
+			}
+			for r := range got {
+				sort.Strings(got[r].Fields)
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("DetectMissingIdentityDocs mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

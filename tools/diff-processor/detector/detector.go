@@ -15,6 +15,67 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
+// DetectMissingIdentityDocs checks resources that define a ResourceIdentity but
+// have identity fields that are not documented in the corresponding doc file.
+// Returns a map of resource names to MissingDocDetails for any resources with
+// undocumented identity fields.
+func DetectMissingIdentityDocs(schemaDiff diff.SchemaDiff, newResourceMap map[string]*schema.Resource, repoPath string) (map[string]MissingDocDetails, error) {
+	ret := make(map[string]MissingDocDetails)
+	for resource, resourceDiff := range schemaDiff {
+		// Skip deleted resources.
+		if resourceDiff.ResourceConfig.New == nil {
+			continue
+		}
+
+		res, ok := newResourceMap[resource]
+		if !ok {
+			continue
+		}
+
+		// Skip resources without identity.
+		if res.Identity == nil {
+			continue
+		}
+		identityFields := res.Identity.SchemaMap()
+		if len(identityFields) == 0 {
+			continue
+		}
+
+		docFilePath, err := resourceToDocFile(resource, repoPath)
+		var fieldsInDoc map[string]bool
+		if err == nil {
+			content, readErr := os.ReadFile(docFilePath)
+			if readErr != nil {
+				return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, readErr)
+			}
+			parser := documentparser.NewParser()
+			if parseErr := parser.Parse(content); parseErr != nil {
+				return nil, fmt.Errorf("failed to parse document %s: %w", docFilePath, parseErr)
+			}
+			fieldsInDoc = listToMap(parser.FlattenFields())
+		} else {
+			fieldsInDoc = make(map[string]bool)
+		}
+
+		var missing []string
+		for fieldName := range identityFields {
+			if !fieldsInDoc[fieldName] {
+				missing = append(missing, fieldName)
+			}
+		}
+
+		if len(missing) > 0 {
+			sort.Strings(missing)
+			ret[resource] = MissingDocDetails{
+				Name:     resource,
+				FilePath: strings.ReplaceAll(docFilePath, repoPath, ""),
+				Fields:   missing,
+			}
+		}
+	}
+	return ret, nil
+}
+
 type MissingTestInfo struct {
 	UntestedFields []string
 	SuggestedTest  string
