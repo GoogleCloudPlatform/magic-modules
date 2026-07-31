@@ -71,6 +71,10 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
 
   service_account = "{{index $.TestEnvVars "service_account"}}"
 
+  labels = {
+    "env" = "test"
+  }
+
   depends_on = [
     google_storage_bucket.output_bucket,
   ]
