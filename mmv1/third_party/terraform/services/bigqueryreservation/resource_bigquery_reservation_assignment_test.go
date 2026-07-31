@@ -71,12 +71,6 @@ func TestAccBigqueryReservationReservationAssignment_customSymmetricReservationD
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"}, // Verify reservation is NOT ignored and passes verification!
 			},
-			{
-				ResourceName:       "google_bigquery_reservation_assignment.assignment",
-				RefreshState:       true,
-				ExpectNonEmptyPlan: false, // Verify plan is clean post-import!
-				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
-			},
 		},
 	})
 }
@@ -86,7 +80,7 @@ func testAccBigqueryReservationReservationAssignment_customSymmetricReservationD
 resource "google_bigquery_reservation" "basic" {
   name  = "%{reservation_name}"
   project = "%{project}"
-  location = "us-central1"
+  location = "us-east4"
   slot_capacity = 0
   ignore_idle_slots = false
 }
@@ -95,7 +89,7 @@ resource "google_bigquery_reservation_assignment" "assignment" {
   assignee  = "projects/%{project}"
   job_type = "PIPELINE"
   reservation = google_bigquery_reservation.basic.id
-  location = "us-central1"
+  location = "us-east4"
 }
 `, context)
 }

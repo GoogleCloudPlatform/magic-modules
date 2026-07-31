@@ -1,4 +1,7 @@
 config := acctest.GoogleProviderConfig(t)
+if reservation, ok := rs.Primary.Attributes["reservation"]; ok {
+	rs.Primary.Attributes["reservation"] = tpgresource.GetResourceNameFromSelfLink(reservation)
+}
 url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(bigqueryreservation.Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/reservations/{{"{{"}}reservation{{"}}"}}/assignments")
 if err != nil {
 	return err
