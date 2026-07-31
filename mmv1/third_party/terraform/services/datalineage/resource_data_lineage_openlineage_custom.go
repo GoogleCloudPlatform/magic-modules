@@ -2,13 +2,14 @@ package datalineage
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 func resourceDataLineageOpenLineageJobCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -56,14 +57,26 @@ func resourceDataLineageOpenLineageJobCreate(ctx context.Context, d *schema.Reso
 
 	log.Printf("[DEBUG] Creating new OpenLineageJob: %#v", obj)
 
-	res, diagnostics := emitEvent(ctx, event, config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	res, diagnostics := emitEvent(ctx, d, event, config, userAgent, d.Timeout(schema.TimeoutCreate))
 	if diagnostics != nil {
 		return diagnostics
 	}
 
-	process := res.GetProcess()
+	process, err := getResponseString(res, "process")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	run, err := getResponseString(res, "run")
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err = d.Set("knowledge_catalog", flattenKnowledgeCatalog(process, res.GetRun()))
+	err = d.Set("knowledge_catalog", flattenKnowledgeCatalog(process, run))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -76,7 +89,12 @@ func resourceDataLineageOpenLineageJobCreate(ctx context.Context, d *schema.Reso
 
 func resourceDataLineageOpenLineageJobRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*transport_tpg.Config)
-	run, diagnostics := getLatestRunForProcess(ctx, config, d.Id())
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	run, diagnostics := getLatestRunForProcess(ctx, d, config, d.Id(), userAgent)
 	if diagnostics != nil {
 		return diagnostics
 	}
@@ -92,7 +110,7 @@ func resourceDataLineageOpenLineageJobRead(ctx context.Context, d *schema.Resour
 }
 
 func resourceDataLineageOpenLineageJobUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clientSideFields := map[string]bool{"deletion_policy": true}
+	clientSideFields := map[string]bool{"deletion_policy": true, "description": true}
 	clientSideOnly := true
 	for field := range ResourceDataLineageOpenLineageJob().Schema {
 		if d.HasChange(field) && !clientSideFields[field] {
@@ -149,12 +167,26 @@ func resourceDataLineageOpenLineageJobUpdate(ctx context.Context, d *schema.Reso
 
 	event := buildRunEvent(obj)
 
-	response, diagnostics := emitEvent(ctx, event, config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	response, diagnostics := emitEvent(ctx, d, event, config, userAgent, d.Timeout(schema.TimeoutUpdate))
 	if diagnostics != nil {
 		return diagnostics
 	}
 
-	err = d.Set("knowledge_catalog", flattenKnowledgeCatalog(response.GetProcess(), response.GetRun()))
+	process, err := getResponseString(response, "process")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	run, err := getResponseString(response, "run")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("knowledge_catalog", flattenKnowledgeCatalog(process, run))
 
 	if err != nil {
 		return diag.Errorf("Error updating OpenLineageJob %q: %s", d.Id(), err)
@@ -174,11 +206,34 @@ func resourceDataLineageOpenLineageJobDelete(ctx context.Context, d *schema.Reso
 		return nil
 	}
 	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := deleteProcess(ctx, config, d.Id())
+	err = deleteProcess(ctx, d, config, d.Id(), userAgent)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	log.Printf("[DEBUG] Finished deleting OpenLineageJob %q", d.Id())
 	return nil
+}
+
+func getResponseString(res map[string]interface{}, field string) (string, error) {
+	if v, ok := res[field].(string); ok && v != "" {
+		return v, nil
+	}
+	if field == "process" {
+		if v, ok := res["process_name"].(string); ok && v != "" {
+			return v, nil
+		}
+	}
+
+	if v, ok := res["knowledge_catalog"].(map[string]interface{}); ok {
+		if out, ok := v[field].(string); ok && out != "" {
+			return out, nil
+		}
+	}
+
+	return "", fmt.Errorf("response did not include %q", field)
 }
