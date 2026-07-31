@@ -15,10 +15,35 @@ def get_date_str(days_ago):
     target_date = today - datetime.timedelta(days=days_ago)
     return target_date.strftime("%Y-%m-%d")
 
+def is_permission_error(stderr_text, stdout_text=""):
+    combined = (stderr_text + " " + stdout_text).lower()
+    auth_indicators = [
+        "permission denied",
+        "permissiondenied",
+        "403",
+        "401",
+        "access_token_scope_insufficient",
+        "invalid_grant",
+        "unauthenticated",
+        "invalid authentication credentials",
+        "does not have storage.objects.get access",
+        "could not refresh access token",
+        "insufficient permissions",
+        "refresherror",
+    ]
+    return any(indicator in combined for indicator in auth_indicators)
+
 def fetch_metadata(provider, date_str):
     uri = f"gs://nightly-test-data/test-metadata/{provider}/{date_str}-{provider}.json"
     res = subprocess.run(["gcloud", "storage", "cat", uri], capture_output=True, text=True)
     if res.returncode != 0:
+        if is_permission_error(res.stderr, res.stdout):
+            error_details = (res.stderr or res.stdout or "").strip()
+            print(f"\n[ERROR] Permission or authentication failure while fetching {uri}:", file=sys.stderr)
+            if error_details:
+                print(f"{error_details}\n", file=sys.stderr)
+            print("Please check your gcloud authentication ('gcloud auth login') and ensure you have read access ('roles/storage.objectViewer') to gs://nightly-test-data.", file=sys.stderr)
+            sys.exit(1)
         return None
     try:
         return json.loads(res.stdout)
