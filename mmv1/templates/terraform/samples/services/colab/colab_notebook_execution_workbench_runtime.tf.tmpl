@@ -62,7 +62,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
 
   workbench_runtime {
     custom_container_image {
-      repository = "us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cpu.py310"
+      repository = "gcr.io/deeplearning-platform-release/base-cpu.py310"
       tag        = "latest"
     }
   }
@@ -70,6 +70,10 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
 
   service_account = "{{index $.TestEnvVars "service_account"}}"
+
+  labels = {
+    "foo" = "bar"
+  }
 
   depends_on = [
     google_storage_bucket.output_bucket,

@@ -322,3 +322,6 @@ properties:
       - execution_user
       - service_account
     description: 'The service account to run the execution as.'
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'The labels with user-defined metadata to organize your NotebookExecutions.'
