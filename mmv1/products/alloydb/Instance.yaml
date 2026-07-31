@@ -449,6 +449,34 @@ properties:
               description: |
                 The status of the service connection policy.
               output: true
+      - name: pscAutoDnsState
+        type: Enum
+        description: |
+          The state of the PSC auto DNS.
+          For new instances, the PSC auto DNS is enabled
+          by default. Use `effective_psc_auto_dns_enabled` to check the
+          effective state of the PSC auto DNS.
+        default_from_api: true
+        enum_values:
+          - PSC_AUTO_DNS_STATE_UNSPECIFIED
+          - PSC_AUTO_DNS_STATE_ENABLED
+          - PSC_AUTO_DNS_STATE_DISABLED
+  - name: pscInstanceInfo
+    type: NestedObject
+    description: |
+      Instance-level PSC information.
+    output: true
+    properties:
+      - name: effective_psc_auto_dns_enabled
+        type: Boolean
+        description: The effective state of the PSC auto DNS for the instance.
+        output: true
+      - name: psc_auto_dns_names
+        type: Array
+        description: Specifies the auto DNS names for the instance.
+        item_type:
+          type: String
+        output: true
   - name: networkConfig
     type: NestedObject
     default_from_api: true
