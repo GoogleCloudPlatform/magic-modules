@@ -7,6 +7,10 @@ description: "Process raw failure info (GitHub issue URL, direct prompt text, GC
 
 This skill converts raw, unstructured, or varied failure reports into a standardized **Normalized Failure Payload** ready for consumption by the `test-fixer` subagent or developer remediation workflow.
 
+## Prerequisites
+* `gcloud` CLI installed and authenticated with access to `gs://nightly-test-data` or target GCS log buckets (requires `roles/storage.objectViewer` permission). If permission or authentication fails when running `gcloud storage`, verify login via `gcloud auth login`.
+* `gh` CLI installed (optional, for querying GitHub issues).
+
 ## Input Formats Handled
 
 1. **GitHub Issue URL** (e.g., `https://github.com/hashicorp/terraform-provider-google/issues/28244`)
@@ -31,7 +35,7 @@ This skill converts raw, unstructured, or varied failure reports into a standard
   - Match provider-specific GCS error message links in the issue body:
     - `ga error message` (e.g. `.../test-errors/ga/.../*.txt`)
     - `beta error message` (e.g. `.../test-errors/beta/.../*.txt`)
-  - **Fetch the complete content of each failing provider's error text file using `gcloud storage cat`** to populate `error_message`.
+  - **Fetch the complete content of each failing provider's error text file using `gcloud storage cat`** to populate `error_message` (if a GCS permission or authentication failure occurs, immediately report remediation instructions to check `gcloud auth login` and `roles/storage.objectViewer` access, and abort execution).
 - Distinguish between **Error Message Links** and **Debug Log Links** in the issue body:
   - **Error Message Links**: Contain the exact `go test` output, backtraces, and `stdout` plan diffs for GA and/or Beta runs.
   - **Debug Log Links**: Contain the full `TF_LOG=DEBUG` provider trace (`ga debug log` / `beta debug log`). Fetch and process via `tf_debug_parser.py` for `parsed_logs_dir`.
@@ -54,6 +58,7 @@ This skill converts raw, unstructured, or varied failure reports into a standard
   ```bash
   mkdir -p debug_output && gcloud storage cp gs://<bucket>/<path> debug_output/raw_test.log
   ```
+- **Error Handling**: If `gcloud storage cat` or `gcloud storage cp` fails with a permission or authentication error (`permission denied`, `401`, `403`), immediately output an error message instructing the user to check `gcloud auth login` and ensure `roles/storage.objectViewer` access to the GCS bucket, and abort execution.
 
 ---
 
