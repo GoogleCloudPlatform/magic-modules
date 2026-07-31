@@ -1,6 +1,7 @@
 package vmwareengine_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -71,8 +72,10 @@ resource "time_sleep" "sleep" {
 
 	if isProjectCreationDisabled() {
 		projectSetup = ""
-		projectVar = `"%{vmwareengine_project}"`
+		projectVar = fmt.Sprintf(`"%s"`, context["vmwareengine_project"].(string))
 		dependsOnLine = ""
+	} else {
+		projectSetup = acctest.Nprintf(projectSetup, context)
 	}
 
 	context["project_setup"] = projectSetup

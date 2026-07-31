@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/services/vmwareengine"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -19,6 +20,14 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
+	// Bootstrap KMS key in the same region as the private cloud
+	kmsKey := kms.BootstrapKMSKeyInLocation(t, getTestRegion())
+
+	saSuffix := "gcp-sa-vmwareengine.iam.gserviceaccount.com"
+	if strings.Contains(os.Getenv("GOOGLE_VMWAREENGINE_CUSTOM_ENDPOINT"), "autopush") {
+		saSuffix = "gcp-sa-autopush-vmwareengine.iam.gserviceaccount.com"
+	}
+
 	context := map[string]interface{}{
 		"region":               getTestRegion(), // region with allocated quota
 		"random_suffix":        acctest.RandString(t, 10),
@@ -27,8 +36,12 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 		"vmwareengine_project": os.Getenv("GOOGLE_VMWAREENGINE_PROJECT"),
 		"node_type":            getTestNodeType(),
 		"limited_nodes":        isLimitedNodes(),
+		"kms_key_name":         kmsKey.CryptoKey.Name,
+		"sa_suffix":            saSuffix,
 	}
 
+	// 1. Create with CMEK
+	context["use_cmek"] = true
 	steps := []resource.TestStep{
 		{
 			Config: testVmwareenginePrivateCloudCreateConfig(context),
@@ -44,6 +57,8 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				testAccCheckGoogleVmwareengineVcenterCredentialsMeta("data.google_vmwareengine_vcenter_credentials.vcenter-ds"),
 				testAccCheckGoogleVmwareengineUpgradesMeta("data.google_vmwareengine_upgrades.upgrades-ds"),
 				testAccCheckGoogleVmwareengineAnnouncementsMeta("data.google_vmwareengine_announcements.announcements-ds"),
+				resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "encryption_config.0.type", "CMEK"),
+				resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "encryption_config.0.kms_key_name", kmsKey.CryptoKey.Name),
 			),
 		},
 		{
@@ -53,8 +68,9 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 			ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
 		},
 
+		// 2. Perform noop update (change description, keep CMEK)
 		{
-			Config: testVmwareenginePrivateCloudUpdateNodeConfig(context),
+			Config: testVmwareenginePrivateCloudUpdateNodeConfig(context, "Updated description, keeping CMEK"),
 			Check: resource.ComposeTestCheckFunc(
 				acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_vmwareengine_private_cloud.ds",
@@ -63,6 +79,9 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 						"deletion_delay_hours",
 						"send_deletion_delay_hours_if_zero",
 					}),
+				resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "description", "Updated description, keeping CMEK"),
+				resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "encryption_config.0.type", "CMEK"),
+				resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "encryption_config.0.kms_key_name", kmsKey.CryptoKey.Name),
 			),
 		},
 		{
@@ -73,6 +92,60 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 		},
 	}
 
+	// 3. Transition to GMEK (set type to GMEK)
+	gmekContext := make(map[string]interface{})
+	for k, v := range context {
+		gmekContext[k] = v
+	}
+	gmekContext["use_cmek"] = false
+
+	steps = append(steps,
+		resource.TestStep{
+			Config: testVmwareenginePrivateCloudUpdateNodeConfig(gmekContext, "Reverted to GMEK"),
+			Check: resource.ComposeTestCheckFunc(
+				acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+					"data.google_vmwareengine_private_cloud.ds",
+					"google_vmwareengine_private_cloud.vmw-engine-pc",
+					[]string{
+						"deletion_delay_hours",
+						"send_deletion_delay_hours_if_zero",
+					}),
+				resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "description", "Reverted to GMEK"),
+				resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "encryption_config.0.type", "GMEK"),
+			),
+		},
+		resource.TestStep{
+			ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
+			ImportState:             true,
+			ImportStateVerify:       true,
+			ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+		},
+
+		// 4. Transition back to CMEK
+		resource.TestStep{
+			Config: testVmwareenginePrivateCloudUpdateNodeConfig(context, "Updated back to CMEK"),
+			Check: resource.ComposeTestCheckFunc(
+				acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+					"data.google_vmwareengine_private_cloud.ds",
+					"google_vmwareengine_private_cloud.vmw-engine-pc",
+					[]string{
+						"deletion_delay_hours",
+						"send_deletion_delay_hours_if_zero",
+					}),
+				resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "description", "Updated back to CMEK"),
+				resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "encryption_config.0.type", "CMEK"),
+				resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "encryption_config.0.kms_key_name", kmsKey.CryptoKey.Name),
+			),
+		},
+		resource.TestStep{
+			ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
+			ImportState:             true,
+			ImportStateVerify:       true,
+			ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+		},
+	)
+
+	// Steps beyond are only run in the standard (production) environment.
 	if !isLimitedNodes() {
 		steps = append(steps,
 			resource.TestStep{
@@ -85,6 +158,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 							"deletion_delay_hours",
 							"send_deletion_delay_hours_if_zero",
 						}),
+					resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "encryption_config.0.type", "CMEK"),
 				),
 			},
 			resource.TestStep{
@@ -112,6 +186,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 							"deletion_delay_hours",
 							"send_deletion_delay_hours_if_zero",
 						}),
+					resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "encryption_config.0.type", "CMEK"),
 				),
 			},
 			resource.TestStep{
@@ -168,14 +243,14 @@ func testVmwareenginePrivateCloudCreateConfig(context map[string]interface{}) st
 		testVmwareengineAnnouncementsConfig(context)
 }
 
-func testVmwareenginePrivateCloudUpdateNodeConfig(context map[string]interface{}) string {
+func testVmwareenginePrivateCloudUpdateNodeConfig(context map[string]interface{}, description string) string {
 	pcType := "STANDARD"
 	nodeCount := 3
 	if val, ok := context["limited_nodes"]; ok && val.(bool) {
 		pcType = "STANDARD"
 		nodeCount = 1
 	}
-	return testVmwareenginePrivateCloudConfig(context, "sample updated description", pcType, nodeCount, 8) + testVmwareengineVcenterNSXCredentialsConfig(context)
+	return testVmwareenginePrivateCloudConfig(context, description, pcType, nodeCount, 8) + testVmwareengineVcenterNSXCredentialsConfig(context)
 }
 
 func testVmwareenginePrivateCloudUpdateAutoscaleConfig(context map[string]interface{}) string {
@@ -219,6 +294,23 @@ func testVmwareengineSubnetUpdateConfig(context map[string]interface{}) string {
 	return testVmwareenginePrivateCloudAutoscaleConfig(context, "sample updated description", "STANDARD", 3, 0) + testVmwareengineSubnetConfig(context, "192.168.2.0/26")
 }
 
+func testVmwareenginePrivateCloudCmekSetupConfig(context map[string]interface{}) string {
+	if useCmek, ok := context["use_cmek"]; ok && useCmek.(bool) {
+		return acctest.Nprintf(`
+data "google_project" "project" {
+  project_id = "%{vmwareengine_project}"
+}
+
+resource "google_kms_crypto_key_iam_member" "vmwareengine-key" {
+  crypto_key_id = "%{kms_key_name}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@%{sa_suffix}"
+}
+`, context)
+	}
+	return ""
+}
+
 func testVmwareenginePrivateCloudConfig(context map[string]interface{}, description, pcType string, nodeCount, delayHours int) string {
 	context["node_count"] = nodeCount
 	context["delay_hrs"] = delayHours
@@ -231,7 +323,31 @@ func testVmwareenginePrivateCloudConfig(context map[string]interface{}, descript
 	}
 	context["custom_core_count_line"] = customCoreCountLine
 
-	return acctest.Nprintf(`
+	encryptionConfigBlock := ""
+	dependsOnLine := ""
+	if useCmekVal, ok := context["use_cmek"]; ok {
+		if useCmek, ok := useCmekVal.(bool); ok {
+			if useCmek {
+				encryptionConfigBlock = acctest.Nprintf(`
+  encryption_config {
+    type         = "CMEK"
+    kms_key_name = "%{kms_key_name}"
+  }
+`, context)
+				dependsOnLine = "depends_on = [google_kms_crypto_key_iam_member.vmwareengine-key]"
+			} else {
+				encryptionConfigBlock = `
+  encryption_config {
+    type = "GMEK"
+  }
+`
+			}
+		}
+	}
+	context["encryption_config_block"] = encryptionConfigBlock
+	context["depends_on_line"] = dependsOnLine
+
+	return testVmwareenginePrivateCloudCmekSetupConfig(context) + acctest.Nprintf(`
 resource "google_vmwareengine_network" "vmw-engine-nw" {
   project = "%{vmwareengine_project}"
   name              = "tf-test-pc-nw-%{random_suffix}"
@@ -260,6 +376,9 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
       %{custom_core_count_line}
     }
   }
+
+  %{encryption_config_block}
+  %{depends_on_line}
 }
 
 data "google_vmwareengine_private_cloud" "ds" {
@@ -285,7 +404,31 @@ func testVmwareenginePrivateCloudAutoscaleConfig(context map[string]interface{},
 	}
 	context["custom_core_count_line"] = customCoreCountLine
 
-	return acctest.Nprintf(`
+	encryptionConfigBlock := ""
+	dependsOnLine := ""
+	if useCmekVal, ok := context["use_cmek"]; ok {
+		if useCmek, ok := useCmekVal.(bool); ok {
+			if useCmek {
+				encryptionConfigBlock = acctest.Nprintf(`
+  encryption_config {
+    type         = "CMEK"
+    kms_key_name = "%{kms_key_name}"
+  }
+`, context)
+				dependsOnLine = "depends_on = [google_kms_crypto_key_iam_member.vmwareengine-key]"
+			} else {
+				encryptionConfigBlock = `
+  encryption_config {
+    type = "GMEK"
+  }
+`
+			}
+		}
+	}
+	context["encryption_config_block"] = encryptionConfigBlock
+	context["depends_on_line"] = dependsOnLine
+
+	return testVmwareenginePrivateCloudCmekSetupConfig(context) + acctest.Nprintf(`
 resource "google_vmwareengine_network" "vmw-engine-nw" {
   project = "%{vmwareengine_project}"
   name              = "tf-test-pc-nw-%{random_suffix}"
@@ -336,6 +479,9 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
       cool_down_period = "1800s"
     }
   }
+
+  %{encryption_config_block}
+  %{depends_on_line}
 }
 
 data "google_vmwareengine_private_cloud" "ds" {

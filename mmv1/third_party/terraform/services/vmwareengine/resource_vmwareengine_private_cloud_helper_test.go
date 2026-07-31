@@ -22,7 +22,6 @@ func isLimitedNodes() bool {
 	return os.Getenv("GOOGLE_VMWAREENGINE_LIMITED_NODES") == "true"
 }
 
-
 func getTestRegion() string {
 	if r := os.Getenv("GOOGLE_VMWAREENGINE_REGION"); r != "" {
 		return r
