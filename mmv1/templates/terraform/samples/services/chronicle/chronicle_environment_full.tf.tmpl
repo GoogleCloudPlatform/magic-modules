@@ -10,6 +10,7 @@ resource "google_chronicle_environment" "{{$.PrimaryResourceId}}" {
   aliases_json            = jsonencode([])
   data_access_scopes_json = jsonencode([])
   retention_duration = 3
+  weight             = 2
 
   deletion_protection  = false
 }

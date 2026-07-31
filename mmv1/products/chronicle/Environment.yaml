@@ -119,3 +119,8 @@ properties:
     required: true
     immutable: true
     description: Environment data retention in months.
+  - name: weight
+    type: Integer
+    description: |-
+      The weight of the environment, enabling customers to control distribution of resources between the separate environments in a single instance of Chronicle SOAR.
+
