@@ -1,0 +1,26 @@
+resource "google_vertex_ai_evaluation_metric" "{{$.PrimaryResourceId}}" {
+  evaluation_metric_id = "{{index $.ResourceIdVars "evaluation_metric_id"}}"
+  region               = "us-central1"
+  display_name         = "Full Test Evaluation Metric"
+  description          = "An evaluation metric with all fields for Terraform acceptance testing"
+
+  metric = jsonencode({
+    llmBasedMetricSpec = {
+      metricPromptTemplate = "Rate the quality of the following response on a scale of 1 to 5. Response: {response}"
+    }
+  })
+
+  labels = {
+    env  = "test"
+    team = "evaluation"
+  }
+
+  gcs_uri = "gs://{{index $.ResourceIdVars "bucket_name"}}/metric-spec.json"
+}
+
+resource "google_storage_bucket" "metric_bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}

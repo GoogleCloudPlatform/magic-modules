@@ -48,6 +48,15 @@ samples:
           evaluation_metric_id: 'example-metric'
         test_env_vars:
           project: PROJECT_NAME
+  - name: vertex_ai_evaluation_metric_full
+    primary_resource_id: example
+    steps:
+      - name: vertex_ai_evaluation_metric_full
+        resource_id_vars:
+          evaluation_metric_id: 'example-metric-full'
+          bucket_name: 'eval-metric-test-bucket'
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: region
     type: String
@@ -119,6 +128,9 @@ properties:
     type: String
     description: |
       The Google Cloud Storage URI that stores the metric specification.
+    # The API accepts gcs_uri on create but does not return it in GET
+    # responses, so the value must be preserved from the user's config.
+    ignore_read: true
   - name: encryptionSpec
     type: NestedObject
     description: |
