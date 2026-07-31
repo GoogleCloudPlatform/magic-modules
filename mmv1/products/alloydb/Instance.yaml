@@ -449,6 +449,29 @@ properties:
               description: |
                 The status of the service connection policy.
               output: true
+            - name: dnsAutomationInfos
+              type: Array
+              description: |
+                Information about the DNS automation for the PSC auto connection.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: state
+                    type: Enum
+                    description: |
+                      The state of the DNS automation for the PSC auto connection.
+                    enum_values:
+                      - STATE_UNSPECIFIED
+                      - PENDING_CREATE
+                      - ACTIVE
+                      - PENDING_DELETE
+                      - CREATE_FAILED
+                      - DELETE_FAILED
+                  - name: fullyQualifiedDomainName
+                    type: String
+                    description: |
+                      The fully qualified domain name of the instance for DNS automation.
+                      Example: "<cluster-uid>.<instance-uid>.<region>.alloydb-psc-auto.goog.".
       - name: pscAutoDnsState
         type: Enum
         description: |
