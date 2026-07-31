@@ -1091,3 +1091,41 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 }
 `, context)
 }
+
+func TestAccVertexAIReasoningEngine_containerSpecPort(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:             testAccVertexAIReasoningEngine_containerSpecPort(context),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_containerSpecPort(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  provider     = google-beta
+  display_name = "tf-test-reasoning-engine-%{random_suffix}"
+  description  = "Reasoning engine testing container_spec.port field"
+  region       = "us-central1"
+
+  spec {
+    container_spec {
+      image_uri = "us-central1-docker.pkg.dev/my-project/my-repo/my-image:latest"
+      port      = 8080
+    }
+  }
+}
+`, context)
+}
