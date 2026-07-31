@@ -1,0 +1,55 @@
+resource "google_project" "host_project" {
+    name       = "h-{{index $.Vars "project_id"}}"
+    project_id = "h-{{index $.Vars "project_id"}}"
+    org_id     = "{{index $.TestEnvVars "org_id"}}"
+    billing_account = "{{index $.TestEnvVars "billing_account"}}"
+    deletion_policy = "DELETE"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+    create_duration = "60s"
+    depends_on = [google_project.host_project]
+}
+
+# Enable API hub API on host project
+resource "google_project_service" "apihub_service" {
+    project = google_project.host_project.project_id
+    service = "apihub.googleapis.com"
+    depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_apihub_host_project_registration" "host_project_reg" {
+    project = google_project.host_project.project_id
+    location = "asia-south1"
+    host_project_registration_id = google_project.host_project.project_id
+    gcp_project = "projects/${google_project.host_project.project_id}"
+
+    depends_on = [google_project_service.apihub_service]
+}
+
+resource "google_project" "runtime_project" {
+    name       = "r-{{index $.Vars "project_id"}}"
+    project_id = "r-{{index $.Vars "project_id"}}"
+    org_id     = "{{index $.TestEnvVars "org_id"}}"
+    billing_account = "{{index $.TestEnvVars "billing_account"}}"
+    deletion_policy = "DELETE"
+}
+
+# Enable API hub API on runtime project
+resource "google_project_service" "apihub_service_runtime" {
+    project = google_project.runtime_project.project_id
+    service = "apihub.googleapis.com"
+    depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_apihub_runtime_project_attachment" "{{$.PrimaryResourceId}}" {
+    project = google_project.host_project.project_id
+    location = "asia-south1"
+    runtime_project_attachment_id = google_project.runtime_project.project_id
+    runtime_project = "projects/${google_project.runtime_project.project_id}"
+
+    depends_on = [
+        google_apihub_host_project_registration.host_project_reg,
+        google_project_service.apihub_service_runtime
+    ]
+}

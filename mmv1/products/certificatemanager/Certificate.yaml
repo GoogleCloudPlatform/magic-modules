@@ -92,6 +92,12 @@ samples:
       - name: certificate_manager_self_managed_certificate
         resource_id_vars:
           cert_name: self-managed-cert
+      # Second step updates the self-managed certificate data in place
+      # (via PATCH) to verify it does not force recreation. See
+      # https://github.com/hashicorp/terraform-provider-google/issues/17312
+      - name: certificate_manager_self_managed_certificate_update
+        resource_id_vars:
+          cert_name: self-managed-cert
   - name: certificate_manager_self_managed_certificate_regional
     primary_resource_id: default
     steps:
@@ -196,7 +202,10 @@ properties:
       Certificate data for a SelfManaged Certificate.
       SelfManaged Certificates are uploaded by the user. Updating such
       certificates before they expire remains the user's responsibility.
-    immutable: true
+
+      The certificate data can be updated in place; changes to `pem_certificate`
+      and `pem_private_key` are applied via the API's PATCH method instead of
+      forcing recreation of the certificate.
     ignore_read: true
     exactly_one_of:
       - self_managed
@@ -208,7 +217,6 @@ properties:
           The certificate chain in PEM-encoded form.
 
           Leaf certificate comes first, followed by intermediate ones if any.
-        immutable: true
         sensitive: true
         is_missing_in_cai: true
         exactly_one_of:
@@ -219,7 +227,6 @@ properties:
         type: String
         description: |
           The private key of the leaf certificate in PEM-encoded form.
-        immutable: true
         sensitive: true
         is_missing_in_cai: true
         exactly_one_of:
@@ -232,7 +239,6 @@ properties:
           The certificate chain in PEM-encoded form.
 
           Leaf certificate comes first, followed by intermediate ones if any.
-        immutable: true
         exactly_one_of:
           - self_managed.0.certificate_pem
           - self_managed.0.pem_certificate
@@ -240,7 +246,6 @@ properties:
         type: String
         description: |
           The private key of the leaf certificate in PEM-encoded form.
-        immutable: true
         sensitive: true
         is_missing_in_cai: true
         exactly_one_of:

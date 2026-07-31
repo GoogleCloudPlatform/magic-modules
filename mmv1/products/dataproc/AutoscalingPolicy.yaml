@@ -60,6 +60,7 @@ properties:
     api_name: id
     type: String
     required: true
+    immutable: true
     description: |
       The policy id. The id must contain only letters (a-z, A-Z), numbers (0-9), underscores (_),
       and hyphens (-). Cannot begin or end with underscore or hyphen. Must consist of between

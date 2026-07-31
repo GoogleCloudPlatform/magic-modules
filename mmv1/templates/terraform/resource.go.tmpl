@@ -119,11 +119,11 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end}}
 
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout({{ $.Timeouts.InsertMinutes -}} * time.Minute),
+            Create: schema.DefaultTimeout({{ $.GetTimeouts.InsertMinutes -}} * time.Minute),
 {{- if or (or $.Updatable $.RootLabels) $.VirtualFields }}
-            Update: schema.DefaultTimeout({{ $.Timeouts.UpdateMinutes -}} * time.Minute),
+            Update: schema.DefaultTimeout({{ $.GetTimeouts.UpdateMinutes -}} * time.Minute),
 {{- end}}
-            Delete: schema.DefaultTimeout({{ $.Timeouts.DeleteMinutes -}} * time.Minute),
+            Delete: schema.DefaultTimeout({{ $.GetTimeouts.DeleteMinutes -}} * time.Minute),
         },
 {{ if $.SchemaVersion }}
         SchemaVersion: {{ $.SchemaVersion -}},

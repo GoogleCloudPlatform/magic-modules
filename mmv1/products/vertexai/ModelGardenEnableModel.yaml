@@ -30,32 +30,35 @@ references:
     Overview of Model Garden: https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models
   api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.publishers.models/enableModel
 docs:
+base_url: projects/{{project}}/{{publisher_model_name}}:enableModel
 # Only available in the v1beta1 (beta) API surface.
 min_version: beta
-base_url: projects/{{project}}/{{publisher_model_name}}:enableModel
-create_url: projects/{{project}}/{{publisher_model_name}}:enableModel
-self_link: projects/{{project}}/{{publisher_model_name}}
-id_format: projects/{{project}}/{{publisher_model_name}}
 immutable: true
+self_link: projects/{{project}}/{{publisher_model_name}}
+create_url: projects/{{project}}/{{publisher_model_name}}:enableModel
+id_format: projects/{{project}}/{{publisher_model_name}}
+timeouts:
+  insert_minutes: 20
+exclude_import: true
+exclude_sweeper: true
+exclude_delete: true
 # EnableModel is a synchronous action-only method with no Read, Delete, or
 # Import support, so the lifecycle is create-only.
 exclude_read: true
-exclude_delete: true
-exclude_import: true
-exclude_sweeper: true
-timeouts:
-  insert_minutes: 20
 custom_code:
   post_create: templates/terraform/post_create/resource_vertexai_model_garden_enable_model.go.tmpl
-examples:
+samples:
   - name: vertex_ai_model_garden_enable_model_basic
     min_version: beta
     primary_resource_id: enable
     # Handwritten test required since the resource does not support read,
     # delete, or import.
     exclude_test: true
-    vars:
-      publisher_model_name: publishers/google/models/paligemma@paligemma-224-float32
+    steps:
+      - name: vertex_ai_model_garden_enable_model_basic
+        min_version: beta
+        resource_id_vars:
+          publisher_model_name: publishers/google/models/paligemma@paligemma-224-float32
 parameters:
   - name: publisherModelName
     type: String

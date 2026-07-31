@@ -131,7 +131,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	hclData["node_config"] = flattenNodeConfig(asset.Resource.Data["nodeConfig"], nil)
 	hclData["description"] = asset.Resource.Data["description"]
 	hclData["security_posture_config"] = flattenSecurityPostureConfig(asset.Resource.Data["securityPostureConfig"])
-	hclData["enterprise_config"] = flattenEnterpriseConfig(asset.Resource.Data["enterpriseConfig"])
+	// enterprise_config is deprecated and will be removed in a future major release; do not convert
 	hclData["anonymous_authentication_config"] = flattenAnonymousAuthenticationConfig(asset.Resource.Data["anonymousAuthenticationConfig"])
 	hclData["node_creation_config"] = flattenNodeCreationConfig(asset.Resource.Data["nodeCreationConfig"])
 	hclData["notification_config"] = flattenNotificationConfig(asset.Resource.Data["notificationConfig"])
@@ -259,26 +259,6 @@ func flattenSecurityPostureConfig(v interface{}) []map[string]interface{} {
 	transformed := map[string]interface{}{
 		"mode":               spc["mode"],
 		"vulnerability_mode": spc["vulnerabilityMode"],
-	}
-
-	return []map[string]interface{}{transformed}
-}
-
-func flattenEnterpriseConfig(v interface{}) []map[string]interface{} {
-	if v == nil {
-		return nil
-	}
-	ec, ok := v.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	transformed := make(map[string]interface{})
-	if ec["desiredTier"] != nil {
-		transformed["desired_tier"] = ec["desiredTier"]
-	}
-
-	if len(transformed) == 0 {
-		return nil
 	}
 
 	return []map[string]interface{}{transformed}
@@ -662,6 +642,19 @@ func flattenClusterAddonsConfig(v interface{}, enableAutopilot bool) []map[strin
 		}
 	}
 
+	if val, ok := c["nodeReadinessConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
+		result["node_readiness_config"] = []map[string]interface{}{
+			{
+				"enabled": enabled,
+			},
+		}
+	}
+
 	return []map[string]interface{}{result}
 }
 
@@ -798,8 +791,12 @@ func flattenVerticalPodAutoscaling(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
+	enabled := c["enabled"]
+	if enabled == nil {
+		enabled = false
+	}
 	transformed := map[string]interface{}{
-		"enabled": c["enabled"],
+		"enabled": enabled,
 	}
 
 	return []map[string]interface{}{transformed}
@@ -1122,6 +1119,36 @@ func flattenMaintenancePolicy(v interface{}) []map[string]interface{} {
 
 			transformed["recurring_window"] = []map[string]interface{}{windowMap}
 		}
+
+		if recurringMaintenanceWindow, ok := window["recurringMaintenanceWindow"].(map[string]interface{}); ok && recurringMaintenanceWindow != nil {
+			windowMap := map[string]interface{}{}
+			windowMap["window_start_time"] = []map[string]interface{}{}
+			startTime, _ := recurringMaintenanceWindow["windowStartTime"].(map[string]interface{})
+			windowMap["window_start_time"] = []map[string]interface{}{
+				{
+					"hours":   startTime["hours"],
+					"minutes": startTime["minutes"],
+					"seconds": startTime["seconds"],
+				},
+			}
+
+			delay, _ := recurringMaintenanceWindow["delayUntil"].(map[string]interface{})
+			if delay != nil {
+				windowMap["delayUntil"] = []map[string]interface{}{
+					{
+						"year":  delay["year"],
+						"month": delay["month"],
+						"day":   delay["day"],
+					},
+				}
+			}
+
+			windowMap["window_duration"] = recurringMaintenanceWindow["windowDuration"]
+			windowMap["recurrence"] = recurringMaintenanceWindow["recurrence"]
+
+			transformed["recurring_maintenance_window"] = []map[string]interface{}{windowMap}
+		}
+
 	}
 
 	if disruptionBudget, ok := mp["disruptionBudget"].(map[string]interface{}); ok && disruptionBudget != nil {
@@ -1140,8 +1167,9 @@ func flattenMaintenancePolicy(v interface{}) []map[string]interface{} {
 	}
 
 	_, hasDaily := transformed["daily_maintenance_window"]
-	_, hasRecurring := transformed["recurring_window"]
-	if !hasDaily && !hasRecurring {
+	_, hasRecurringWindow := transformed["recurring_window"]
+	_, hasRecurringMaintenance := transformed["recurring_maintenance_window"]
+	if !hasDaily && !hasRecurringWindow && !hasRecurringMaintenance {
 		return nil
 	}
 

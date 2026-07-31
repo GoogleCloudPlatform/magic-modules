@@ -69,6 +69,24 @@ samples:
         test_env_vars:
           GOOGLE_BILLING_PROJECT: PROJECT
           USER_PROJECT_OVERRIDE: "true"
+  - name: biglake_iceberg_catalog_federated_unity
+    primary_resource_id: my_iceberg_catalog
+    steps:
+      - name: biglake_iceberg_catalog_federated_unity
+        resource_id_vars:
+          name: my_iceberg_catalog
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: PROJECT
+          USER_PROJECT_OVERRIDE: "true"
+  - name: biglake_iceberg_catalog_federated_glue
+    primary_resource_id: my_iceberg_catalog
+    steps:
+      - name: biglake_iceberg_catalog_federated_glue
+        resource_id_vars:
+          name: my_iceberg_catalog
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: PROJECT
+          USER_PROJECT_OVERRIDE: "true"
 parameters:
   - name: name
     type: String
@@ -105,16 +123,26 @@ properties:
     type: String
     description: Output only. The service account used for credential vending. It might be empty if credential vending was never enabled for the catalog.
     output: true
+  - name: biglake_service_account_id
+    api_name: biglake-service-account-id
+    type: String
+    description: Output only. The unique ID of the service account used for credential vending. Used for federation scenarios.
+    output: true
   - name: catalog_type
     api_name: catalog-type
     type: Enum
-    description: The catalog type of the IcebergCatalog.
+    description: |
+      The catalog type of the IcebergCatalog.
+      * `CATALOG_TYPE_GCS_BUCKET`: Google Cloud Storage bucket catalog type.
+      * `CATALOG_TYPE_BIGLAKE`: BigLake catalog type.
+      * `CATALOG_TYPE_FEDERATED`: Federated catalog type, for integrating with external Iceberg REST Catalogs such as Databricks Unity Catalog or AWS Glue.
     required: true
     immutable: true
     output: false
     enum_values:
       - CATALOG_TYPE_GCS_BUCKET
       - CATALOG_TYPE_BIGLAKE
+      - CATALOG_TYPE_FEDERATED
   - name: default_location
     api_name: default-location
     type: String
@@ -141,6 +169,9 @@ properties:
     type: String
     description: Output only. The last modification time of the IcebergCatalog.
     output: true
+  - name: description
+    type: String
+    description: A user-provided description of the catalog. Maximum 1024 UTF-8 characters.
   - name: replicas
     type: Array
     item_type:
@@ -178,3 +209,129 @@ properties:
           A list of GCS locations (e.g., `gs://my-other-bucket/...`) that are
           permitted for use by resources within this catalog. Each entry can be
           either a GCS bucket or a path within it.
+  - name: federated_catalog_options
+    api_name: federated-catalog-options
+    type: NestedObject
+    description: |
+      Options for a CATALOG_TYPE_FEDERATED catalog. Required when catalog_type
+      is CATALOG_TYPE_FEDERATED.
+    properties:
+      - name: secret_name
+        api_name: secret-name
+        type: String
+        description: |
+          The secret resource name in Secret Manager, in the format
+          `projects/{projectId}/locations/{location}/secrets/{secret_id}`.
+          Used to store credentials for authenticating with the remote catalog.
+      - name: service_directory_name
+        api_name: service-directory-name
+        type: String
+        description: |
+          The Service Directory service name for private network connectivity
+          through Cross-Cloud Interconnect.
+      - name: refresh_options
+        api_name: refresh-options
+        type: NestedObject
+        description: Configuration for metadata synchronization from the remote catalog.
+        properties:
+          - name: refresh_schedule
+            api_name: refresh-schedule
+            type: NestedObject
+            description: Schedule for periodic metadata refresh.
+            properties:
+              - name: refresh_interval
+                api_name: refresh-interval
+                type: String
+                description: |
+                  The interval between metadata refreshes, expressed as a duration
+                  string (e.g., `300s`).
+                  The value must be at least 300s or 0s to disable refresh.
+          - name: refresh_scope
+            api_name: refresh-scope
+            type: NestedObject
+            description: Scope of metadata to synchronize from the remote catalog.
+            properties:
+              - name: namespace_filters
+                api_name: namespace-filters
+                type: Array
+                item_type:
+                  type: String
+                description: |
+                  A list of namespace filters to limit which namespaces are
+                  synchronized from the remote catalog.
+      - name: refresh_status
+        api_name: refresh-status
+        type: NestedObject
+        description: Output only. The status of the most recent metadata refresh.
+        output: true
+        properties:
+          - name: start_time
+            api_name: start-time
+            type: String
+            description: Output only. The start time of the most recent refresh.
+            output: true
+          - name: end_time
+            api_name: end-time
+            type: String
+            description: Output only. The end time of the most recent refresh.
+            output: true
+          - name: status
+            type: NestedObject
+            description: Output only. The error result of the last failed refresh, if any.
+            output: true
+            properties:
+              - name: code
+                type: Integer
+                description: Output only. The status code, which should be an enum value of google.rpc.Code.
+                output: true
+              - name: message
+                type: String
+                description: Output only. A developer-facing error message in English.
+                output: true
+      - name: unity_catalog_info
+        api_name: unity-catalog-info
+        type: NestedObject
+        description: |
+          Configuration for a Databricks Unity Catalog remote catalog. Exactly
+          one of unity_catalog_info or glue_catalog_info must be specified.
+        properties:
+          - name: instance_name
+            api_name: instance-name
+            type: String
+            description: The Databricks workspace instance name.
+            required: true
+            immutable: true
+          - name: catalog_name
+            api_name: catalog-name
+            type: String
+            description: The name of the catalog within the Unity Catalog instance.
+            required: true
+            immutable: true
+          - name: service_principal_application_id
+            api_name: service-principal-application-id
+            type: String
+            description: The application ID of the Databricks service principal for OIDC authentication.
+      - name: glue_catalog_info
+        api_name: glue-catalog-info
+        type: NestedObject
+        description: |
+          Configuration for an AWS Glue remote catalog. Exactly one of
+          unity_catalog_info or glue_catalog_info must be specified.
+        properties:
+          - name: warehouse
+            api_name: warehouse
+            type: String
+            description: The AWS Glue warehouse identifier (account ID or S3 table bucket).
+            required: true
+            immutable: true
+          - name: aws_region
+            api_name: aws-region
+            type: String
+            description: The AWS region where the Glue catalog is located.
+            required: true
+            immutable: true
+          - name: aws_role_arn
+            api_name: aws-role-arn
+            type: String
+            description: The ARN of the AWS IAM role to assume for accessing the Glue catalog.
+            required: true
