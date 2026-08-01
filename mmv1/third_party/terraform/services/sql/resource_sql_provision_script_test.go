@@ -3,7 +3,7 @@ package sql_test
 import (
 	"fmt"
 	"regexp"
-	//"strings"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
