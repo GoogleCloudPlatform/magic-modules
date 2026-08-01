@@ -143,6 +143,7 @@ def get_failures(provider_type, base_date=None):
     failure_counts = defaultdict(int)
     latest_failures = {} # Store name -> {error: msg, log: link}
     latest_available_date = None
+    latest_sha = ""
     service_stats = defaultdict(lambda: {"total": 0, "failed": 0})
 
     # Check past 7 days (including today)
@@ -153,6 +154,8 @@ def get_failures(provider_type, base_date=None):
             if latest_available_date is None:
                 latest_available_date = date_str
                 for item in data:
+                    if not latest_sha and item.get("commit_sha"):
+                        latest_sha = item.get("commit_sha")
                     service = item.get("service") or item.get("Service") or "unknown"
                     service_stats[service]["total"] += 1
                     if item.get("status") == "FAILURE":
@@ -170,7 +173,7 @@ def get_failures(provider_type, base_date=None):
                 if item.get("status") == "FAILURE":
                     failure_counts[item.get("name")] += 1
                     
-    return latest_failures, failure_counts, latest_available_date, service_stats
+    return latest_failures, failure_counts, latest_available_date, service_stats, latest_sha
 
 def get_actual_error(error_str):
     lines = [line.strip() for line in error_str.split('\n') if not (line.startswith("=== RUN") or line.startswith("=== PAUSE") or line.startswith("=== CONT") or line.startswith("--- FAIL:") or line.strip() == "FAIL")]
@@ -307,8 +310,8 @@ def main():
     if args.date:
         base_date = datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
 
-    beta_failures, beta_counts, beta_date, beta_stats = get_failures("beta", base_date=base_date)
-    ga_failures, ga_counts, ga_date, ga_stats = get_failures("ga", base_date=base_date)
+    beta_failures, beta_counts, beta_date, beta_stats, beta_sha = get_failures("beta", base_date=base_date)
+    ga_failures, ga_counts, ga_date, ga_stats, ga_sha = get_failures("ga", base_date=base_date)
 
     # Combine failures for 7-day persistent window
     all_failures = defaultdict(dict)
@@ -412,10 +415,12 @@ def main():
         
         if beta_date:
             b_pct_str = f" — {(len(beta_failures)/beta_total_tests)*100.0:.1f}% failure rate" if beta_total_tests > 0 else ""
-            f.write(f"**Latest Beta run**: {beta_date} ({len(beta_failures)} / {beta_total_tests} failing tests{b_pct_str})\n")
+            b_sha_str = f" ([{beta_sha}](https://github.com/hashicorp/terraform-provider-google-beta/commit/{beta_sha}))" if beta_sha else ""
+            f.write(f"**Latest Beta run**: {beta_date}{b_sha_str} ({len(beta_failures)} / {beta_total_tests} failing tests{b_pct_str})\n\n")
         if ga_date:
             g_pct_str = f" — {(len(ga_failures)/ga_total_tests)*100.0:.1f}% failure rate" if ga_total_tests > 0 else ""
-            f.write(f"**Latest GA run**: {ga_date} ({len(ga_failures)} / {ga_total_tests} failing tests{g_pct_str})\n")
+            g_sha_str = f" ([{ga_sha}](https://github.com/hashicorp/terraform-provider-google/commit/{ga_sha}))" if ga_sha else ""
+            f.write(f"**Latest GA run**: {ga_date}{g_sha_str} ({len(ga_failures)} / {ga_total_tests} failing tests{g_pct_str})\n")
         latest_run_date = beta_date or ga_date or ""
         date_str = f" ({latest_run_date})" if latest_run_date else ""
         f.write("\n### 📑 Table of Contents\n")
