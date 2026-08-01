@@ -150,14 +150,13 @@ resource "google_sql_provision_script" "script" {
 }
 `
 
-
 func TestAccSqlProvisionScript_secret_mySql(t *testing.T) {
 	t.Parallel()
 	project := envvar.GetTestProjectFromEnv()
 
 	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	secret := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	user     := "testuser"
+	user := "testuser"
 	script := "CREATE USER IF NOT EXISTS 'user'@'%' IDENTIFIED BY RANDOM PASSWORD; GRANT SELECT ON *.* to 'user'@'%';"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

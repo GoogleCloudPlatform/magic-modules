@@ -63,10 +63,10 @@ func ResourceSqlProvisionScript() *schema.Resource {
 			},
 
 			"user": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				RequiredWith:[]string{"password_secret_version"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				RequiredWith: []string{"password_secret_version"},
 				Description: `The name of the built-in database user to authenticate as. For MySQL user,
 				omit the '@' and hostname. The user should exist as a built-in user in the database.
 				When user and password_secret_version are provided, the script is run using this user. Otherwise,
@@ -75,10 +75,10 @@ func ResourceSqlProvisionScript() *schema.Resource {
 			},
 
 			"password_secret_version": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				RequiredWith:[]string{"user"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				RequiredWith: []string{"user"},
 				Description: `The resource name of the Secret Manager secret storing the password. The secret
 				should be a regional secret and stored in the exact same region as the Cloud SQL instance.
 				Follow https://docs.cloud.google.com/secret-manager/regional-secrets/create-regional-secret.
@@ -126,7 +126,7 @@ func resourceSqlProvisionScriptCreate(d *schema.ResourceData, meta interface{}) 
 	database := d.Get("database").(string)
 	script := d.Get("script").(string)
 	user := d.Get("user").(string)
-	secret :=d.Get("password_secret_version").(string)
+	secret := d.Get("password_secret_version").(string)
 
 	var executeSqlPayload *sqladmin.ExecuteSqlPayload
 	if user == "" || secret == "" {
@@ -138,11 +138,11 @@ func resourceSqlProvisionScriptCreate(d *schema.ResourceData, meta interface{}) 
 		}
 	} else {
 		executeSqlPayload = &sqladmin.ExecuteSqlPayload{
-			SqlStatement: script,
-			Database:     database,
-			User: user,
+			SqlStatement:          script,
+			Database:              database,
+			User:                  user,
 			PasswordSecretVersion: secret,
-			Application:  "Hashicorp_Terraform",
+			Application:           "Hashicorp_Terraform",
 		}
 	}
 
