@@ -37,25 +37,28 @@ func TestAccGKEHub2Fleet_gkehubFleetBasicExample_update(t *testing.T) {
 				Config: testAccGKEHub2Fleet_basic(context),
 			},
 			{
-				ResourceName:      "google_gke_hub_fleet.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_gke_hub_fleet.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccGKEHub2Fleet_update(context),
 			},
 			{
-				ResourceName:      "google_gke_hub_fleet.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_gke_hub_fleet.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccGKEHub2Fleet_removedDefaultClusterConfig(context),
 			},
 			{
-				ResourceName:      "google_gke_hub_fleet.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_gke_hub_fleet.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -105,7 +108,7 @@ resource "google_gke_hub_fleet" "default" {
 	compliance_posture_config {
 		mode = "ENABLED"
 		compliance_standards {
-			standard = "cis-gke"
+			standard = "cis-gke-v1.5.0"
 		}
 	}
   }
