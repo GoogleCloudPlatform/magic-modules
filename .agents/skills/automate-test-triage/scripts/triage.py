@@ -73,14 +73,40 @@ def has_actionable_error_context(msg_lower, raw_msg):
     ]
     return any(indicator in msg_lower for indicator in actionable_indicators)
 
+def is_quota_or_stockout_error(msg_lower, raw_msg):
+    # 1. Structured GCP error codes and protobuf types
+    structured_markers = [
+        "google.rpc.quotafailure",
+        "rate_limit_exceeded",
+        "zone_resource_pool_exhausted",
+        "resource_exhausted",
+        "stockout",
+        "error 429",
+        "429 too many requests",
+        "the folder operation violates fanout constraints",
+    ]
+    if any(k in msg_lower for k in structured_markers):
+        return True
+
+    # 2. Semantic regex / concept matching (grammar-agnostic)
+    # Quota & Rate-Limit concept (e.g. "quota exceeded", "quotas are exceeded", "rate limit exceeded", "you do not have quota")
+    if re.search(r'\b(quota|rate\s*limit)s?\b.*\b(exceed|exhaust|limit|violate)e?d?\b', msg_lower):
+        return True
+    if "you do not have quota" in msg_lower or "quota limit" in msg_lower or "has been exceeded" in msg_lower:
+        return True
+
+    # Stockout & Capacity concept (e.g. "no resource available", "not enough resources available", "insufficient capacity")
+    if re.search(r'\b(insufficient|not\s+enough|no|lack\s+of)\b.*\b(capacity|resource|stock)s?\b', msg_lower):
+        return True
+
+    # Location / Zone / Region retry advice concept (e.g. "try a different zone, or try again later", "try again in a different zone")
+    if re.search(r'\btry\s+(again\s+in\s+|a\s+different\s+)?(later|zone|region|location)\b', msg_lower) and ("resource" in msg_lower or "capacity" in msg_lower or "available" in msg_lower):
+        return True
+
+    return False
+
 HUMAN_ACTION_RULES = [
-    ("Quota / Resource Availability", lambda msg_lower, raw_msg: any(k in msg_lower for k in [
-        "quota exhausted", "quota exceeded", "quotas are exceeded", "quotas exceeded", "resource quota exceeded",
-        "you do not have quota", "quota limit", "has been exceeded", "the folder operation violates fanout constraints",
-        "does not have enough resources available", "no resource available", "zone_resource_pool_exhausted",
-        "insufficient capacity", "try a different region, or try again later",
-        "ratelimitexceeded", "rate limit exceeded", "error 429", "429 too many requests"
-    ])),
+    ("Quota / Resource Availability", is_quota_or_stockout_error),
     ("Internal Error (Error Code 13)", lambda msg_lower, raw_msg: (
         any(k in msg_lower for k in ["error code 13", "error 13", "internal error"])
         and not has_actionable_error_context(msg_lower, raw_msg)
