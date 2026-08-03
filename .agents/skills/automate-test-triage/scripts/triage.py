@@ -75,9 +75,10 @@ def has_actionable_error_context(msg_lower, raw_msg):
 
 HUMAN_ACTION_RULES = [
     ("Quota / Resource Availability", lambda msg_lower, raw_msg: any(k in msg_lower for k in [
-        "quota exhausted", "quota exceeded", "quota_exceeded", "you do not have quota",
-        "quota limit", "has been exceeded", "the folder operation violates fanout constraints",
-        "does not have enough resources available", "zone_resource_pool_exhausted",
+        "quota exhausted", "quota exceeded", "quotas are exceeded", "quotas exceeded", "resource quota exceeded",
+        "you do not have quota", "quota limit", "has been exceeded", "the folder operation violates fanout constraints",
+        "does not have enough resources available", "no resource available", "zone_resource_pool_exhausted",
+        "insufficient capacity", "try a different region, or try again later",
         "ratelimitexceeded", "rate limit exceeded", "error 429", "429 too many requests"
     ])),
     ("Internal Error (Error Code 13)", lambda msg_lower, raw_msg: (
