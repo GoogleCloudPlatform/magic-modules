@@ -58,20 +58,14 @@ def has_actionable_error_context(msg_lower, raw_msg):
     Returns True if an error message contains specific, actionable Terraform/provider/test error details
     that should prevent it from being dismissed as a generic non-actionable Internal Error.
     """
-    actionable_indicators = [
-        "panic:", "runtime error:", "sigsegv",
-        "has not been used in project",
-        "plan was not empty", "inconsistent result", "inconsistent final plan",
-        "root object was present, but now absent",
-        "importstateverify", "cannot import non-existent",
-        "check failed", "expected to be set", "expected state",
-        "conflicting configuration arguments", "invalid resource type",
-        "blocks of type", "inconsistent dependency lock file",
-        "error 400", "error 404", "error 409",
-        "invalid_argument", "failed_precondition", "permission_denied",
-        "missing required argument", "unsupported argument"
+    actionable_patterns = [
+        r'\b(?:panic:|runtime\s+error:|sigsegv|nil\s+pointer\s+dereference)\b',
+        r'\b(?:plan\s+was\s+not\s+empty|inconsistent\s+(?:result|final\s+plan)|root\s+object\s+was\s+present,\s+but\s+now\s+absent)\b',
+        r'\b(?:importstateverify|cannot\s+import\s+non-existent|check\s+failed|expected\s+to\s+be\s+set|expected\s+state)\b',
+        r'\b(?:conflicting\s+configuration\s+arguments|invalid\s+resource\s+type|blocks\s+of\s+type|inconsistent\s+dependency\s+lock\s+file)\b',
+        r'\b(?:error\s+40[049]|invalid_argument|failed_precondition|permission_denied|missing\s+required\s+argument|unsupported\s+argument)\b',
     ]
-    return any(indicator in msg_lower for indicator in actionable_indicators)
+    return any(re.search(pat, msg_lower) for pat in actionable_patterns)
 
 def is_quota_or_stockout_error(msg_lower, raw_msg):
     # 1. Structured GCP error codes and protobuf types
@@ -105,17 +99,58 @@ def is_quota_or_stockout_error(msg_lower, raw_msg):
 
     return False
 
+def is_internal_error_13(msg_lower, raw_msg):
+    if has_actionable_error_context(msg_lower, raw_msg):
+        return False
+
+    structured_markers = [
+        "grpc.status\": 13",
+        "error code 13",
+        "error 13",
+        "code: 'internal'",
+        "error 500",
+        "error 503",
+        "error 502",
+        "backenderror",
+    ]
+    if any(k in msg_lower for k in structured_markers):
+        return True
+
+    if re.search(r'\b(?:internal\s+(?:server\s+)?error|an?\s+internal\s+error\s+has\s+occurred|internal\s+error\s+during\s+operation)\b', msg_lower):
+        return True
+
+    return False
+
+def is_tenant_project_creation_error(msg_lower, raw_msg):
+    return bool(re.search(r'\b(?:fail(?:ed|ure)?|error|unable|could\s+not)\b.*\btenant\s+project\b|\btenant\s+project\b.*\b(?:fail(?:ed|ure)?|error|unable|creation)\b', msg_lower))
+
+def is_project_allowlist_or_permission_error(msg_lower, raw_msg):
+    structured_markers = [
+        "reason: \"project_not_allowlisted\"",
+        "reason: \"service_disabled\"",
+        "reason: \"api_not_enabled\"",
+        "reason: \"consumer_invalid\"",
+    ]
+    if any(k in msg_lower for k in structured_markers):
+        return True
+
+    if re.search(r'\b(?:not\s+allowlisted|not\s+in\s+allowlist|require(?:s|d)?\s+allowlist(?:ing)?|unallowlisted|allowlisted\s+for)\b', msg_lower):
+        return True
+
+    if re.search(r'\b(?:not\s+allowed|prohibited|unauthorized|disabled|not\s+enabled|access\s+denied)\b.*\bproject\b|\bproject\b.*\b(?:not\s+allowed|not\s+allowlisted|allowlist|not\s+enabled|disabled|unauthorized)\b', msg_lower):
+        if any(w in msg_lower for w in ["api", "engine", "service", "allowlist", "terraform"]):
+            return True
+
+    if re.search(r'\b(?:api|service)\s+has\s+not\s+been\s+used\s+in\s+project\b|\b(?:enable|activate)\s+(?:it|the\s+api)\s+by\s+visiting\b', msg_lower):
+        return True
+
+    return False
+
 HUMAN_ACTION_RULES = [
     ("Quota / Resource Availability", is_quota_or_stockout_error),
-    ("Internal Error (Error Code 13)", lambda msg_lower, raw_msg: (
-        any(k in msg_lower for k in ["error code 13", "error 13", "internal error"])
-        and not has_actionable_error_context(msg_lower, raw_msg)
-    )),
-    ("Tenant Project Creation Failure", lambda msg_lower, raw_msg: "failed to perform tenant project creation" in msg_lower),
-    ("Project Allowlist / API Permission Required", lambda msg_lower, raw_msg: any(k in msg_lower for k in [
-        "not allowlisted", "is not allowlisted", "allowlisted for", "not in allowlist",
-        "is not allowed for project", "not allowed for project"
-    ])),
+    ("Internal Error (Error Code 13)", is_internal_error_13),
+    ("Tenant Project Creation Failure", is_tenant_project_creation_error),
+    ("Project Allowlist / API Permission Required", is_project_allowlist_or_permission_error),
 ]
 
 def classify_human_action(error_msg):
@@ -143,10 +178,9 @@ TEST_ENV_PROJECTS = [
 
 SEVERITY_RULES = [
     # (Priority, Category ID, Display Badge, Matcher Function)
-    (100, "PANIC", "🚨 **CRITICAL (Panic/Crash)**", lambda msg_lower, raw_msg: "panic: " in raw_msg or "runtime error:" in msg_lower or "sigsegv" in msg_lower),
+    (100, "PANIC", "🚨 **CRITICAL (Panic/Crash)**", lambda msg_lower, raw_msg: bool(re.search(r'\b(?:panic:|runtime\s+error:|sigsegv|nil\s+pointer\s+dereference)\b', raw_msg, re.IGNORECASE))),
     (90,  "API_ENV", "🚨 **CRITICAL (API Not Enabled in Test Env)**", lambda msg_lower, raw_msg: (
-        "has not been used in project" in msg_lower
-        and "before or it is disabled" in msg_lower
+        bool(re.search(r'\b(?:has\s+not\s+been\s+used\s+in\s+project|before\s+or\s+it\s+is\s+disabled)\b', msg_lower))
         and any(p in msg_lower for p in TEST_ENV_PROJECTS)
     )),
 ]
