@@ -71,7 +71,9 @@ Every Terraform resource and acceptance test in `magic-modules` is either **Gene
   - **Handwritten Overrides**: Add retry wrappers (`transport_tpg.SendRequestWithTimeout` / `time.Sleep`) in handwritten overrides (`mmv1/third_party/terraform/services/<service>/`).
 
 ### Scenario 5: Acceptance Test Naming, Randomization & Setup Bug
-* **Inspection:** Check whether the failing test is **Generated** (`mmv1/templates/terraform/samples/<service>/<sample>.tf.tmpl`) or **Handwritten** (`mmv1/third_party/terraform/services/<service>/<resource>_test.go`).
+* **Inspection:**
+  - Check whether the failing test is **Generated** (`mmv1/templates/terraform/samples/<service>/<sample>.tf.tmpl`) or **Handwritten** (`mmv1/third_party/terraform/services/<service>/<resource>_test.go`).
+  - **Beta-Only Resource Leaking into GA Check:** If a test fails in GA (`target_provider: "ga"`) with a lockfile/provider error (e.g. `provider registry.terraform.io/hashicorp/google-beta: required by this configuration`), or if the tested resource has `min_version: beta` in `mmv1/products/<product>/<Resource>.yaml`, immediately check if the handwritten test file in `mmv1/third_party/terraform/services/<product>/` is named `*.go` instead of `*.go.tmpl`. Do **NOT** attempt to promote the resource to GA or modify provider HCL blocks.
 * **Documentation Reference:** Consult `docs/content/test/test.md` for tabbed code examples of MMv1 and Handwritten test naming, randomization, dependency bootstrapping, and VCR mode skipping.
 * **Remedies for Generated Tests:**
   - Replace static resource names with `{{index $.ResourceIdVars "var_name"}}`.
@@ -82,7 +84,7 @@ Every Terraform resource and acceptance test in `magic-modules` is either **Gene
   - Replace static resource names with dynamic random strings using `acctest.RandString(t, 10)` in test contexts (`"instance_name": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))`) or `%{random_suffix}` variables.
   - **Bootstrapping Dependencies**: Use `kms.BootstrapKMSKey(t)`, `tpgcompute.BootstrapSharedTestNetwork(t, ...)`, and `resourcemanager.BootstrapIamMembers(t, ...)`.
   - **VCR Skipping**: Call `acctest.SkipIfVcr(t)` or `acctest.SkipTestUntil(t, "YYYY-MM-DD")`.
-  - If a test depends on beta-only resources, wrap test execution with `{{- if ne $.TargetVersionName "ga" }}` ... `{{- end }}`.
+  - **Beta-Only Resource Version Guard**: If a test depends on beta-only resources (`min_version: beta`), rename the file from `.go` to `.go.tmpl` and wrap the test implementation with `{{ if ne $.TargetVersionName "ga" }}` ... `{{ end }}` (do not generate an `{{ else }}` placeholder comment in GA).
 
 ### Scenario 6: Outdated / Deprecated API Parameter Version
 * **Inspection:** Check API error message for invalid parameter versions (e.g., `oggoracle:21.18...` or deprecated image families).
