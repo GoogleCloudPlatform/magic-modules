@@ -230,6 +230,15 @@ samples:
           cloud_run_service_name: 'cloudrun-service'
         ignore_read_extra:
           - 'deletion_protection'
+  - name: 'cloudrunv2_service_sandbox_templates'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'cloudrunv2_service_sandbox_templates'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+          secret_id: 'secret-1'
+        ignore_read_extra:
+          - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
