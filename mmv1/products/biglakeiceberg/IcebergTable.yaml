@@ -101,6 +101,7 @@ properties:
       The location of the table.
     immutable: true
     default_from_api: true
+    diff_suppress_func: icebergTableLocationDiffSuppress
   - name: schema
     type: NestedObject
     required: true
