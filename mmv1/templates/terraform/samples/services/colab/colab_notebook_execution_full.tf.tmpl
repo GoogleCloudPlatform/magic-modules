@@ -80,10 +80,6 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
   notebook_runtime_template_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/notebookRuntimeTemplates/${google_colab_runtime_template.my_runtime_template.name}"
 
-  labels = {
-    "env" = "test"
-  }
-
   depends_on = [
     google_storage_bucket_object.notebook,
     google_storage_bucket.output_bucket,
