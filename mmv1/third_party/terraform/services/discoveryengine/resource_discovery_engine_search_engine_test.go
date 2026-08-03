@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
+	"github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
 )
 
 func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_update(t *testing.T) {
@@ -147,4 +147,42 @@ resource "google_discovery_engine_search_engine" "basic" {
   }
 }
 `, context)
+}
+
+func TestDiscoveryEngineSearchEngineFeaturesDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Key, Old, New      string
+		ExpectDiffSuppress bool
+	}{
+		"suppress server-provided feature when unset in config": {
+			Key:                "features.enable-end-user-sharing-with-groups",
+			Old:                "FEATURE_STATE_OFF",
+			New:                "",
+			ExpectDiffSuppress: true,
+		},
+		"suppress features map length diff": {
+			Key:                "features.%",
+			Old:                "3",
+			New:                "2",
+			ExpectDiffSuppress: true,
+		},
+		"do not suppress when server-provided feature is set in config": {
+			Key:                "features.enable-end-user-sharing-with-groups",
+			Old:                "FEATURE_STATE_OFF",
+			New:                "FEATURE_STATE_ON",
+			ExpectDiffSuppress: false,
+		},
+		"do not suppress user feature diff": {
+			Key:                "features.agent-sharing-without-admin-approval",
+			Old:                "FEATURE_STATE_ON",
+			New:                "FEATURE_STATE_OFF",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if discoveryengine.DiscoveryEngineSearchEngineFeaturesDiffSuppress(tc.Key, tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
 }
