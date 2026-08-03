@@ -1,7 +1,11 @@
 package iambeta
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -67,21 +71,29 @@ func dataSourceIAMBetaWorkloadIdentityPoolOpenIdConfigRead(d *schema.ResourceDat
 	}
 
 	poolName := d.Get("workload_identity_pool_id").(string)
-	url := fmt.Sprintf("https://sts.googleapis.com/v1/%s/.well-known/openid-configuration", poolName)
+	url := fmt.Sprintf("https://sts.googleapis.com/v1/%s/.well-known/openid-configuration?alt=json", poolName)
 
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   "NO_BILLING_PROJECT_OVERRIDE",
-		RawURL:    url,
-		UserAgent: userAgent,
-	})
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("Error creating request: %s", err)
+	}
+	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("Error fetching OpenID configuration: %s", err)
 	}
+	defer resp.Body.Close()
 
-	if res == nil {
-		return fmt.Errorf("OpenID configuration not found for %s", poolName)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Error fetching OpenID configuration: HTTP %d", resp.StatusCode)
+	}
+
+	var res map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+		return fmt.Errorf("Error parsing OpenID configuration: %s", err)
 	}
 
 	if err := d.Set("issuer", res["issuer"]); err != nil {
