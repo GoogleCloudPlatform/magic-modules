@@ -299,7 +299,7 @@ def format_human_action_cell(error_str):
     cat = classify_human_action(error_str)
     if cat is not None:
         return f"👤 **Yes ({cat})**"
-    return "No (Actionable)"
+    return "🤖 **No (Agent-Actionable)**"
 
 def main():
     parser = argparse.ArgumentParser(description="Automate test triage and reporting.")
@@ -424,15 +424,16 @@ def main():
         latest_run_date = beta_date or ga_date or ""
         date_str = f" ({latest_run_date})" if latest_run_date else ""
         f.write("\n### 📑 Table of Contents\n")
-        f.write("* [1. High-Impact Actionable Errors in Latest Run](#section-1)\n")
+        f.write("* [1. High-Impact Agent-Actionable Errors in Latest Run](#section-1)\n")
         f.write("* [2. Test Failures Requiring Human Action (Non-Actionable by Agents)](#section-2)\n")
-        f.write("* [3. Persistent Actionable Failures Grouped by Error Signature (Past 7 Days)](#section-3)\n")
+        f.write("* [3. Persistent Agent-Actionable Failures Grouped by Error Signature (Past 7 Days)](#section-3)\n")
         f.write(f"* [4. Detailed Test Failures Grouped by Service Package{date_str}](#section-4)\n")
         f.write("\n---\n\n")
         
-        # Section 1: High-Impact Actionable Errors in Latest Run (Critical Severity OR High Volume >= 3 tests)
-        f.write("<details open>\n<summary><h2 id=\"section-1\">1. High-Impact Actionable Errors in Latest Run</h2></summary>\n<br>\n\n")
-        f.write("High-impact actionable errors are flagged based on **Critical Severity** (e.g., provider panic/crash, API enablement error in test environment) or **High Volume** (affecting $\\ge 3$ tests).\n")
+        # Section 1: High-Impact Agent-Actionable Errors in Latest Run (Critical Severity OR High Volume >= 3 tests)
+        f.write("<details open>\n<summary><h2 id=\"section-1\">1. High-Impact Agent-Actionable Errors in Latest Run</h2></summary>\n<br>\n\n")
+        f.write("High-impact agent-actionable errors are flagged based on **Critical Severity** (e.g., provider panic/crash, API enablement error in test environment) or **High Volume** (affecting $\\ge 3$ tests).\n")
+        f.write("> 🤖 **What does \"Agent-Actionable\" mean?** An error is **agent-actionable** if it represents a provider code defect, schema regression, or permadiff that an autonomous AI agent can automatically detect, triage, and repair through a sequence of automated code remediation actions—enabling headless automated remediation without requiring human intervention.\n")
         f.write("> ℹ️ **Note:** Error messages in this table are truncated to 500 characters for readability. For complete, untruncated error messages and per-test details, see **[Section 4: Detailed Test Failures Grouped by Service Package](#section-4)**.\n\n")
         f.write("| # | Impact Category | Affected Tests | Provider | GCP Service(s) | GitHub Issue(s) | Log Link | Error Signature / Sample Message | Sample Affected Tests |\n")
         f.write("| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
@@ -540,9 +541,9 @@ def main():
                 
         f.write("\n</details>\n<br>\n\n---\n\n")
         
-        # Section 3: Persistent Actionable Failures Grouped by Error Signature (Past 7 Days)
-        f.write("<details open>\n<summary><h2 id=\"section-3\">3. Persistent Actionable Failures Grouped by Error Signature (Past 7 Days)</h2></summary>\n<br>\n\n")
-        f.write("Criteria: Failed in latest run and at least 4 days in past 7 days, excluding non-actionable errors requiring human action.\n")
+        # Section 3: Persistent Agent-Actionable Failures Grouped by Error Signature (Past 7 Days)
+        f.write("<details open>\n<summary><h2 id=\"section-3\">3. Persistent Agent-Actionable Failures Grouped by Error Signature (Past 7 Days)</h2></summary>\n<br>\n\n")
+        f.write("Criteria: Persistent **agent-actionable** failures (failing in latest run and at least 4 days in past 7 days) that can be automatically detected and remediated by autonomous agents without human intervention.\n")
         f.write("> ℹ️ **Note:** Error messages in this table are truncated to 500 characters for readability. For complete, untruncated error messages and per-test details, see **[Section 4: Detailed Test Failures Grouped by Service Package](#section-4)**.\n\n")
         f.write("| # | Affected Tests Count | GCP Service(s) | Failure Category / Error Signature | GitHub Issue(s) | Log Link | Affected Test Names |\n")
         f.write("| --- | --- | --- | --- | --- | --- | --- |\n")
@@ -577,7 +578,7 @@ def main():
         latest_run_date = beta_date or ga_date or ""
         date_str = f" ({latest_run_date})" if latest_run_date else ""
         f.write(f"<details open>\n<summary><h2 id=\"section-4\">4. Detailed Test Failures Grouped by Service Package{date_str}</h2></summary>\n<br>\n\n")
-        f.write("All test failures from the latest run are grouped by GCP Service package. Each collapsible section displays how many tests failed out of total tests run in that package, with a column indicating whether human intervention is required.\n")
+        f.write("All test failures from the latest run are grouped by GCP Service package. Each collapsible section displays how many tests failed out of total tests run in that package, with a column indicating whether human intervention is required (`👤 **Yes**` for infrastructure/quota issues vs. `🤖 **No (Agent-Actionable)**` for provider code defects fixable by agents).\n")
         f.write("> ℹ️ **Note:** Unlike Sections 1–3, error messages in this section are displayed in **full without truncation** for comprehensive debugging.\n\n")
         
         combined_latest_tests = defaultdict(dict)
