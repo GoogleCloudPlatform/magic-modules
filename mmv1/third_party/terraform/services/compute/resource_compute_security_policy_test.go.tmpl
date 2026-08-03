@@ -999,7 +999,7 @@ resource "google_compute_network" "default" {
 
 resource "google_compute_subnetwork" "default" {
   provider      = google-beta
-  name          = "test-subnet"
+  name          = "%{network_name}-subnet"
   region        = "us-west2"
   network       = google_compute_network.default.id
   ip_cidr_range = "10.10.0.0/24"
