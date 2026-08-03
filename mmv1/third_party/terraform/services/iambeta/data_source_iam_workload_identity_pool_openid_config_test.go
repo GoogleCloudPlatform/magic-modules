@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,8 +14,8 @@ func TestAccDataSourceIAMBetaWorkloadIdentityPoolOpenIdConfig_basic(t *testing.T
 	t.Parallel()
 
 	context := map[string]interface{}{
-		// Use the current test project number so STS allows authenticated queries to its Agent System Pool
-		"project_number": envvar.GetTestProjectNumberFromEnv(),
+		// Pre-existing Google-owned organization (google.com) with Agent System Pool
+		"org_id": "433637338589",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -26,10 +25,10 @@ func TestAccDataSourceIAMBetaWorkloadIdentityPoolOpenIdConfig_basic(t *testing.T
 			{
 				Config: testAccDataSourceIAMBetaWorkloadIdentityPoolOpenIdConfigBasic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "issuer", regexp.MustCompile(`^https://sts\.googleapis\.com/v1/projects/[0-9]+/locations/global/workloadIdentityPools/agents\.global\.proj-[0-9]+\.system\.id\.goog$`)),
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "jwks_uri", regexp.MustCompile(`^https://sts\.googleapis\.com/v1/projects/[0-9]+/locations/global/workloadIdentityPools/agents\.global\.proj-[0-9]+\.system\.id\.goog/openid/jwks$`)),
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "authorization_endpoint", regexp.MustCompile(`^https://sts\.googleapis\.com/v1/projects/[0-9]+/locations/global/workloadIdentityPools/agents\.global\.proj-[0-9]+\.system\.id\.goog/authorize$`)),
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "token_endpoint", regexp.MustCompile(`^https://sts\.googleapis\.com/v1/projects/[0-9]+/locations/global/workloadIdentityPools/agents\.global\.proj-[0-9]+\.system\.id\.goog/token$`)),
+					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "issuer", regexp.MustCompile(`^https://sts\.googleapis\.com/v1/organizations/433637338589/locations/global/workloadIdentityPools/agents\.global\.org-433637338589\.system\.id\.goog$`)),
+					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "jwks_uri", regexp.MustCompile(`^https://sts\.googleapis\.com/v1/organizations/433637338589/locations/global/workloadIdentityPools/agents\.global\.org-433637338589\.system\.id\.goog/openid/jwks$`)),
+					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "authorization_endpoint", regexp.MustCompile(`^https://sts\.googleapis\.com/v1/organizations/433637338589/locations/global/workloadIdentityPools/agents\.global\.org-433637338589\.system\.id\.goog/authorize$`)),
+					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "token_endpoint", regexp.MustCompile(`^https://sts\.googleapis\.com/v1/organizations/433637338589/locations/global/workloadIdentityPools/agents\.global\.org-433637338589\.system\.id\.goog/token$`)),
 					resource.TestCheckResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "response_types_supported.#", "1"),
 					resource.TestCheckResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "response_types_supported.0", "id_token"),
 					resource.TestCheckResourceAttr("data.google_iam_workload_identity_pool_openid_config.example", "subject_types_supported.#", "1"),
@@ -45,7 +44,7 @@ func TestAccDataSourceIAMBetaWorkloadIdentityPoolOpenIdConfig_basic(t *testing.T
 func testAccDataSourceIAMBetaWorkloadIdentityPoolOpenIdConfigBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_iam_workload_identity_pool_openid_config" "example" {
-	workload_identity_pool_id = "projects/%{project_number}/locations/global/workloadIdentityPools/agents.global.proj-%{project_number}.system.id.goog"
+	workload_identity_pool_id = "organizations/%{org_id}/locations/global/workloadIdentityPools/agents.global.org-%{org_id}.system.id.goog"
 }
 `, context)
 }

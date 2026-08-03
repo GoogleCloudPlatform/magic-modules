@@ -72,6 +72,7 @@ func dataSourceIAMBetaWorkloadIdentityPoolOpenIdConfigRead(d *schema.ResourceDat
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
+		Project:   "NO_BILLING_PROJECT_OVERRIDE",
 		RawURL:    url,
 		UserAgent: userAgent,
 	})
