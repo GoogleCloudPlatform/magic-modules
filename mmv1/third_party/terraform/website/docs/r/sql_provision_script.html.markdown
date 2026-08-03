@@ -10,7 +10,7 @@ Executes a SQL script to provision in-database resources on a Cloud SQL Instance
 
 ~> **Note:** The SQL script and its execution response might transit through intermediate locations between your client and the location of the target instance.
 
-~> **Note:** If you let Terraform connect to the instance via [IAM database authentication](https://cloud.google.com/sql/docs/mysql/authentication) to execute the script, the identity account used to apply your Terraform config must exist as an IAM user or IAM service account in the instance. You also need to grant roles or privileges to this IAM user or IAM service account so it has permission to execute statements in your provision scripts. See the example below.
+~> **Note:** If you let Terraform connect to the instance via [IAM database authentication](https://cloud.google.com/sql/docs/mysql/authentication) to execute the script, the identity account used to apply your Terraform config must exist as an IAM user, IAM service account, or IAM group in the instance. You also need to grant roles or privileges to this IAM account so it has permission to execute statements in your provision scripts. See the example below.
  
 
 
@@ -203,6 +203,19 @@ The following arguments are supported:
     required for Postgres instances. It's optional for MySQL, but some of your queries may require
     a database. You can create and use a database in the script or explicitly reference a
     google_sql_database.
+
+* `user` - (Optional) The name of the built-in database user to authenticate as. For MySQL user,
+    omit '@' and the hostname. The user should exist as a built-in user in the database.
+    When `user` and `password_secret_version` are provided, the script is run using this user.
+    Otherwise, the script is run using the identity account used to apply your Terraform config.
+    Changing this forces the script to be run using the new user.
+
+* `password_secret_version` - (Optional) The resource name of the Secret Manager secret storing the
+    password. The secret should be a regional secret and stored in the exact same region as the Cloud
+    SQL instance. Follow https://docs.cloud.google.com/secret-manager/regional-secrets/create-regional-secret.
+    When user and password_secret_version are provided, the script is run using this user.
+    Otherwise, the script is run using the identity account used to apply your Terraform config.
+    Changing this field forces the script to be run again.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it is not provided,
     the provider project is used.

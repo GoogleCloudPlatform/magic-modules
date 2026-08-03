@@ -68,7 +68,7 @@ func ResourceSqlProvisionScript() *schema.Resource {
 				ForceNew:     true,
 				RequiredWith: []string{"password_secret_version"},
 				Description: `The name of the built-in database user to authenticate as. For MySQL user,
-				omit the '@' and hostname. The user should exist as a built-in user in the database.
+				omit '@' and the hostname. The user should exist as a built-in user in the database.
 				When user and password_secret_version are provided, the script is run using this user. Otherwise,
 				the script is run using the identity account used to apply your Terraform config.
 				Changing this forces the script to be run using the new user.`,
