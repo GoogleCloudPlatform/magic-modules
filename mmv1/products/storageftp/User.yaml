@@ -1,0 +1,128 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'User'
+kind: 'storageftp#user'
+min_version: beta
+description: |
+  A Storage FTP User resource supporting directory mappings and user credentials for an SFTP Server.
+base_url: 'projects/{{project}}/locations/{{location}}/servers/{{server_id}}/users'
+self_link: 'projects/{{project}}/locations/{{location}}/servers/{{server_id}}/users/{{user_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/servers/{{server_id}}/users?user_id={{user_id}}'
+id_format: 'projects/{{project}}/locations/{{location}}/servers/{{server_id}}/users/{{user_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/servers/{{server_id}}/users/{{user_id}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  actions: ['create', 'delete', 'update']
+autogen_async: true
+custom_code:
+  constants: 'templates/terraform/constants/storage_ftp_user.go.tmpl'
+samples:
+  - name: 'storage_ftp_user_basic'
+    min_version: beta
+    primary_resource_id: 'user_ftp'
+    steps:
+      - name: 'storage_ftp_user_basic'
+        min_version: beta
+        resource_id_vars:
+          user_id: 'sftp-user'
+          server_id: 'sftp-srv'
+          bucket_name: 'sftp-bucket'
+          account_id: 'sftp-sa'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location (region) of the Storage FTP User.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: 'serverId'
+    type: String
+    description: |
+      The ID of the server.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: 'userId'
+    type: String
+    description: |
+      The unique ID for the user.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: 'storageDirectoryMappings'
+    type: Array
+    is_set: true
+    set_hash_func: 'resourceStorageFtpUserStorageDirectoryMappingsHash'
+    description: |
+      Directory mappings for the Storage FTP user.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'bucket'
+          type: String
+          description: |
+            The Cloud Storage bucket name. Omit the gs://.
+        - name: 'bucketPrefix'
+          type: String
+          description: |
+            The path of a folder within the bucket to set as the root directory for this directory mapping.
+        - name: 'directory'
+          type: String
+          description: |
+            The directory path in the virtual file system.
+        - name: 'permission'
+          type: Enum
+          description: |
+            The access level for the directory. For read-only access, set this value to READ_ONLY. For read and write access, set this value to READ_WRITE.
+          enum_values:
+            - 'READ_ONLY'
+            - 'READ_WRITE'
+  - name: 'customerServiceAccount'
+    type: String
+    description: |
+      The email address of the service account associated with the user.
+    required: true
+  - name: 'userCredentials'
+    type: Array
+    max_size: 1
+    description: |
+      The credentials associated with the user.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'credentialName'
+          type: String
+          description: |
+            The name of the credential.
+        - name: 'credentialType'
+          type: String
+          description: |
+            The type of the credential.
+        - name: 'sshPublicKeyBody'
+          type: String
+          diff_suppress_func: 'resourceStorageFtpUserSshPublicKeyDiffSuppress'
+          description: |
+            The SSH public key body. A file either absolute or relative path should be provided which contains the ssh public key using file() interpolation in Terraform, not recommended to have key as a literal string in config.
