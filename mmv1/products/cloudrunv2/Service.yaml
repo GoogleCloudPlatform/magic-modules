@@ -1183,15 +1183,6 @@ properties:
         description: |-
           Configuration for sandboxes.
         properties:
-          - name: 'resources'
-            type: NestedObject
-            description: |-
-              Compute Resource requirements shared by all sandboxes launched through the `sandbox` CLI.
-            properties:
-              - name: 'limits'
-                type: KeyValuePairs
-                description: |-
-                  Limits describes the maximum amount of compute resources allowed. Only `memory` and `cpu` keys in the map are supported.
           - name: 'templates'
             type: Array
             description: |-
@@ -1239,34 +1230,6 @@ properties:
                         default_value: ""
                         description: |-
                           Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
-                      - name: 'valueSource'
-                        type: NestedObject
-                        description: |-
-                          Source for the environment variable's value.
-                        properties:
-                          - name: 'secretKeyRef'
-                            type: NestedObject
-                            description: |-
-                              Selects a secret and a specific version from Cloud Secret Manager.
-                            properties:
-                              - name: 'secret'
-                                type: String
-                                description: |-
-                                  The name of the secret in Cloud Secret Manager. Format: {secretName} if the secret is in the same project. projects/{project}/secrets/{secretName} if the secret is in a different project.
-                                required: true
-                              - name: 'version'
-                                type: String
-                                description: |-
-                                  The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version.
-                - name: 'resources'
-                  type: NestedObject
-                  description: |-
-                    Compute Resource requirements by this container.
-                  properties:
-                    - name: 'limits'
-                      type: KeyValuePairs
-                      description: |-
-                        Limits describes the maximum amount of compute resources allowed. Only `memory` and `cpu` keys in the map are supported.
                 - name: 'volumeMounts'
                   type: Array
                   description: |-
