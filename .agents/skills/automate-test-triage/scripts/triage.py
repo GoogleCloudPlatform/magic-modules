@@ -124,11 +124,23 @@ def is_internal_error_13(msg_lower, raw_msg):
 def is_tenant_project_creation_error(msg_lower, raw_msg):
     return bool(re.search(r'\b(?:fail(?:ed|ure)?|error|unable|could\s+not)\b.*\btenant\s+project\b|\btenant\s+project\b.*\b(?:fail(?:ed|ure)?|error|unable|creation)\b', msg_lower))
 
+TEST_ENV_PROJECTS = [
+    "ci-test-project",
+    "ci-test-project-188019", "1067888929963",
+    "ci-test-project-nightly-ga", "594424405950",
+    "ci-test-project-nightly-beta", "653407317329",
+    "tf-vcr-private", "808590572184"
+]
+
 def is_project_allowlist_or_permission_error(msg_lower, raw_msg):
+    # Do NOT classify as a non-actionable allowlist error if it is simply an API enablement error in a test environment project!
+    # (An agent can automatically run 'gcloud services enable <api>' to fix those!)
+    is_api_disabled = bool(re.search(r'\b(?:has\s+not\s+been\s+used\s+in\s+project|before\s+or\s+it\s+is\s+disabled|reason:\s*"?service_disabled"?|api_not_enabled|enable\s+it\s+by\s+visiting)\b', msg_lower))
+    if is_api_disabled and any(p in msg_lower for p in TEST_ENV_PROJECTS):
+        return False
+
     structured_markers = [
         "reason: \"project_not_allowlisted\"",
-        "reason: \"service_disabled\"",
-        "reason: \"api_not_enabled\"",
         "reason: \"consumer_invalid\"",
     ]
     if any(k in msg_lower for k in structured_markers):
@@ -137,12 +149,9 @@ def is_project_allowlist_or_permission_error(msg_lower, raw_msg):
     if re.search(r'\b(?:not\s+allowlisted|not\s+in\s+allowlist|require(?:s|d)?\s+allowlist(?:ing)?|unallowlisted|allowlisted\s+for)\b', msg_lower):
         return True
 
-    if re.search(r'\b(?:not\s+allowed|prohibited|unauthorized|disabled|not\s+enabled|access\s+denied)\b.*\bproject\b|\bproject\b.*\b(?:not\s+allowed|not\s+allowlisted|allowlist|not\s+enabled|disabled|unauthorized)\b', msg_lower):
+    if re.search(r'\b(?:not\s+allowed|prohibited|unauthorized|access\s+denied)\b.*\bproject\b|\bproject\b.*\b(?:not\s+allowed|not\s+allowlisted|allowlist|unauthorized)\b', msg_lower):
         if any(w in msg_lower for w in ["api", "engine", "service", "allowlist", "terraform"]):
             return True
-
-    if re.search(r'\b(?:api|service)\s+has\s+not\s+been\s+used\s+in\s+project\b|\b(?:enable|activate)\s+(?:it|the\s+api)\s+by\s+visiting\b', msg_lower):
-        return True
 
     return False
 
@@ -169,18 +178,11 @@ def classify_human_action(error_msg):
 def is_generic_error(error_msg):
     return classify_human_action(error_msg) is not None
 
-TEST_ENV_PROJECTS = [
-    "ci-test-project-188019", "1067888929963",
-    "ci-test-project-nightly-ga", "594424405950",
-    "ci-test-project-nightly-beta", "653407317329",
-    "tf-vcr-private", "808590572184"
-]
-
 SEVERITY_RULES = [
     # (Priority, Category ID, Display Badge, Matcher Function)
     (100, "PANIC", "🚨 **CRITICAL (Panic/Crash)**", lambda msg_lower, raw_msg: bool(re.search(r'\b(?:panic:|runtime\s+error:|sigsegv|nil\s+pointer\s+dereference)\b', raw_msg, re.IGNORECASE))),
     (90,  "API_ENV", "🚨 **CRITICAL (API Not Enabled in Test Env)**", lambda msg_lower, raw_msg: (
-        bool(re.search(r'\b(?:has\s+not\s+been\s+used\s+in\s+project|before\s+or\s+it\s+is\s+disabled)\b', msg_lower))
+        bool(re.search(r'\b(?:has\s+not\s+been\s+used\s+in\s+project|before\s+or\s+it\s+is\s+disabled|reason:\s*"?service_disabled"?|api_not_enabled|enable\s+it\s+by\s+visiting)\b', msg_lower))
         and any(p in msg_lower for p in TEST_ENV_PROJECTS)
     )),
 ]
