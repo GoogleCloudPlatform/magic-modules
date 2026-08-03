@@ -32,6 +32,7 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+generate_list_resource: true
 include_in_tgc_next: true
 custom_code:
   encoder: templates/terraform/encoders/cloudbuild_bitbucketserver_config.go.tmpl
