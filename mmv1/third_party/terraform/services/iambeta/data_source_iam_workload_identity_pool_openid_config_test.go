@@ -49,4 +49,3 @@ data "google_iam_workload_identity_pool_openid_config" "example" {
 }
 `, context)
 }
-
