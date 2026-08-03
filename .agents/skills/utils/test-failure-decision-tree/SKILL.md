@@ -15,6 +15,18 @@ Every Terraform resource and acceptance test in `magic-modules` is either **Gene
 
 ---
 
+## Global Handwritten Test Naming Convention & Execution Rule
+
+For **generated acceptance tests** (MMv1 samples in `mmv1/templates/terraform/samples/`), Magic Modules automatically generates test function names (`TestAcc...`) during `make provider`.
+
+However, when adding any new **handwritten Go test function** (`resource_PRODUCT_RESOURCE_test.go` or other `*_test.go` files under `mmv1/third_party/terraform/services/<service>/`), always verify that the test function name matches its execution tier:
+- **Handwritten Unit Tests** (in-memory logic, diff suppressors, custom decoders/encoders, flatteners/expanders, validation): MUST be named `Test<FunctionName>` (e.g., `TestDiscoveryEngineSearchEngineFeaturesDiffSuppress`) **without** the `TestAcc` prefix.
+- **Handwritten Acceptance Tests** (live API CRUD tests, VCR-recorded tests): MUST be named `TestAcc<Resource>_<Scenario>`.
+
+`TestAcc` is strictly reserved for acceptance tests run via `make testacc`. Naming a handwritten unit test with `TestAcc` causes it to be filtered out of standard unit test runs and misclassified by CI.
+
+---
+
 ## Decision Matrix Catalog
 
 | Scenario ID | Symptom / Error Pattern | Root Cause Category | Primary File Location & Remedy |
@@ -53,7 +65,10 @@ Every Terraform resource and acceptance test in `magic-modules` is either **Gene
   - **Unreturned / Secret Fields (`ignore_read: true`)**: For fields never returned in GET responses (passwords, secrets), set `ignore_read: true` and `sensitive: true` in YAML. In handwritten tests, set flattened value from `d.Get(...)` and add the field to `ImportStateVerifyIgnore`.
   - **List/Array Element Reordering**: Use custom flatteners calling `tpgresource.SortStringsByConfigOrder` or `tpgresource.SortMapsByConfigOrder` so API response ordering matches user config order.
   - **Avoid Creation DiffSuppress Traps**: Remove erroneous `DiffSuppressFunc: EmptyOrDefaultStringSuppress(...)` if it suppresses configured values on resource creation, causing state drift.
-  - **Server-Injected Annotations / Metadata Drift**: For plan diffs caused by server-added annotations or labels not present in user config (e.g., `run.googleapis.com/...-disabled`), add regex diff suppression matching server-injected keys in resource constants (`constants/<resource>.go.tmpl`), product YAML schema, or custom decoder/handwritten schema.
+  - **Server-Injected Map Entries / Metadata Drift (Annotations, Labels, Features, Properties)**: For plan diffs caused by server-added annotations, labels, features, or properties not present in user config (e.g., `run.googleapis.com/...-disabled` or default feature flags):
+    - **Do NOT use `ignore_read: true`** on `KeyValuePairs` / map attributes, as that disables drift detection for legitimate user-initiated modifications.
+    - **Instead, define a custom `diff_suppress_func`** in `custom_code.constants` (`constants/<resource>.go.tmpl`) that returns `true` when the key matches a server-provided key AND `new == ""`, and also returns `true` for the map item count delta (`strings.Contains(k, "map_field.%")`). For all other keys or explicit user modifications (`new != ""`), return `false`.
+    - **YAML Syntax Rule (`custom_code`)**: When adding `constants:` or other hooks to product YAML files, check if a `custom_code:` block already exists (e.g. for `encoder:`/`decoder:`). Merge into the existing block instead of adding a duplicate `custom_code:` root key.
   - **Handwritten Resources:** If the resource is fully handwritten (code located under `mmv1/third_party/terraform/services/<service>/resource_<resource_name>.go`), directly edit the schema definition or CRUD method implementation in the Go file to add `DiffSuppressFunc`, adjust the Read function, or handle defaults in the resource map.
 
 ### Scenario 3: API 400 Payload Mismatch & Decoder/Expander Errors
@@ -71,7 +86,9 @@ Every Terraform resource and acceptance test in `magic-modules` is either **Gene
   - **Handwritten Overrides**: Add retry wrappers (`transport_tpg.SendRequestWithTimeout` / `time.Sleep`) in handwritten overrides (`mmv1/third_party/terraform/services/<service>/`).
 
 ### Scenario 5: Acceptance Test Naming, Randomization & Setup Bug
-* **Inspection:** Check whether the failing test is **Generated** (`mmv1/templates/terraform/samples/<service>/<sample>.tf.tmpl`) or **Handwritten** (`mmv1/third_party/terraform/services/<service>/<resource>_test.go`).
+* **Inspection:**
+  - Check whether the failing test is **Generated** (`mmv1/templates/terraform/samples/<service>/<sample>.tf.tmpl`) or **Handwritten** (`mmv1/third_party/terraform/services/<service>/<resource>_test.go`).
+  - **Beta-Only Resource Leaking into GA Check:** If a test fails in GA (`target_provider: "ga"`) with a lockfile/provider error (e.g. `provider registry.terraform.io/hashicorp/google-beta: required by this configuration`), or if the tested resource has `min_version: beta` in `mmv1/products/<product>/<Resource>.yaml`, immediately check if the handwritten test file in `mmv1/third_party/terraform/services/<product>/` is named `*.go` instead of `*.go.tmpl`. Do **NOT** attempt to promote the resource to GA or modify provider HCL blocks.
 * **Documentation Reference:** Consult `docs/content/test/test.md` for tabbed code examples of MMv1 and Handwritten test naming, randomization, dependency bootstrapping, and VCR mode skipping.
 * **Remedies for Generated Tests:**
   - Replace static resource names with `{{index $.ResourceIdVars "var_name"}}`.
@@ -82,7 +99,7 @@ Every Terraform resource and acceptance test in `magic-modules` is either **Gene
   - Replace static resource names with dynamic random strings using `acctest.RandString(t, 10)` in test contexts (`"instance_name": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))`) or `%{random_suffix}` variables.
   - **Bootstrapping Dependencies**: Use `kms.BootstrapKMSKey(t)`, `tpgcompute.BootstrapSharedTestNetwork(t, ...)`, and `resourcemanager.BootstrapIamMembers(t, ...)`.
   - **VCR Skipping**: Call `acctest.SkipIfVcr(t)` or `acctest.SkipTestUntil(t, "YYYY-MM-DD")`.
-  - If a test depends on beta-only resources, wrap test execution with `{{- if ne $.TargetVersionName "ga" }}` ... `{{- end }}`.
+  - **Beta-Only Resource Version Guard**: If a test depends on beta-only resources (`min_version: beta`), rename the file from `.go` to `.go.tmpl` and wrap the test implementation with `{{ if ne $.TargetVersionName "ga" }}` ... `{{ end }}` (do not generate an `{{ else }}` placeholder comment in GA).
 
 ### Scenario 6: Outdated / Deprecated API Parameter Version
 * **Inspection:** Check API error message for invalid parameter versions (e.g., `oggoracle:21.18...` or deprecated image families).
