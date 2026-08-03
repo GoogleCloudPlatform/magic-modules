@@ -112,6 +112,10 @@ HUMAN_ACTION_RULES = [
         and not has_actionable_error_context(msg_lower, raw_msg)
     )),
     ("Tenant Project Creation Failure", lambda msg_lower, raw_msg: "failed to perform tenant project creation" in msg_lower),
+    ("Project Allowlist / API Permission Required", lambda msg_lower, raw_msg: any(k in msg_lower for k in [
+        "not allowlisted", "is not allowlisted", "allowlisted for", "not in allowlist",
+        "is not allowed for project", "not allowed for project"
+    ])),
 ]
 
 def classify_human_action(error_msg):
