@@ -664,6 +664,9 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     python_function {
         name = "example_function"
         python_code = "def example_function() -> int: return 0"
+        service_directory_config {
+            service = "projects/example/locations/us/namespaces/namespace/services/service"
+        }
     }
 }
 `, context)
@@ -695,6 +698,9 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     python_function {
         name = "example_function_updated"
         python_code = "def example_function_updated() -> int: return 0"
+        service_directory_config {
+            service = "projects/example/locations/us/namespaces/namespace/services/service-updated"
+        }
     }
 }
 `, context)
@@ -971,6 +977,9 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
             python_function {
                 name        = "transform_function"
                 python_code = "def transform_function(x: int) -> int: return x"
+                service_directory_config {
+                    service = "projects/example/locations/us/namespaces/namespace/services/service"
+                }
             }
         }
         text_response_config {
@@ -1038,6 +1047,9 @@ resource "google_ces_tool" "ces_tool_widget_basic" {
             python_function {
                 name        = "transform_function_updated"
                 python_code = "def transform_function_updated(x: int) -> int: return x"
+                service_directory_config {
+                    service = "projects/example/locations/us/namespaces/namespace/services/service-updated"
+                }
             }
         }
         text_response_config {
