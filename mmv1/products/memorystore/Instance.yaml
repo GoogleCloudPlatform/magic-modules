@@ -281,7 +281,9 @@ properties:
     description: |-
       Optional. Immutable. Authorization mode of the instance. Possible values:
        AUTH_DISABLED
-      IAM_AUTH
+      IAM_AUTH.
+
+      TOKEN_AUTH is also supported, but only available in the google-beta provider.
     immutable: true
     default_from_api: true
   - name: transitEncryptionMode

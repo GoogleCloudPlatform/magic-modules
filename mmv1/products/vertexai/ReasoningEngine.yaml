@@ -158,7 +158,18 @@ samples:
           name: 're-gran-ttl'
         ignore_read_extra:
           - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_traffic_config'
+    primary_resource_id: 'reasoning_engine'
+    min_version: beta
+    steps:
+      - name: 'vertex_ai_reasoning_engine_traffic_config'
+        min_version: beta
+        resource_id_vars:
+          name: 're-traffic-cfg'
+        ignore_read_extra:
+          - 'deletion_policy'
 custom_code:
+  constants: 'templates/terraform/constants/vertex_ai_reasoning_engine.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/reasoning_engine_deletion_policy.go.tmpl'
   post_update: 'templates/terraform/post_update/sleep_10s.go.tmpl'
   pre_update: 'templates/terraform/pre_update/vertex_ai_reasoning_engine.go.tmpl'
@@ -955,6 +966,36 @@ properties:
                 description: |-
                   The model used to generate memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
                 required: true
+              - name: 'generationTriggerConfig'
+                type: NestedObject
+                description: |-
+                  Optional. Configuration for triggering memory generation.
+                properties:
+                  - name: 'generationRule'
+                    type: NestedObject
+                    description: |-
+                      Optional. The active rule that determines when to flush the buffer. If not set,
+                      then the stream will be force flushed immediately.
+                    properties:
+                      - name: 'idleDuration'
+                        type: String
+                        description: |-
+                          Optional. Specifies to trigger generation if the stream is inactive for the
+                          specified duration after the most recent event. The duration must have a
+                          minute-level granularity.
+                      - name: 'fixedInterval'
+                        type: String
+                        description: |-
+                          Optional. Specifies to trigger generation at a fixed interval. The duration
+                          must have a minute-level granularity.
+                      - name: 'eventCount'
+                        type: Integer
+                        description: |-
+                          Optional. Specifies to trigger generation when the event count reaches this limit.
+                      - name: 'overlapEventCount'
+                        type: Integer
+                        description: |-
+                          Optional. Re-include the last N already-processed events in the next window.
           - name: 'similaritySearchConfig'
             type: NestedObject
             description: |-
@@ -1118,9 +1159,13 @@ properties:
     default_from_api: true
     description: |-
       Optional. Traffic distribution configuration for the Reasoning Engine.
+
+      ~> **Note:** Because revision IDs do not exist before the resource is created, the best practice for initial deployment is to set `traffic_split_always_latest {}`. Once the resource is created, you can update the configuration to a manual split using newly generated revision IDs, short names (e.g. `rev-1`), or keywords such as `LATEST` and `PREVIOUS`.
     properties:
       - name: 'trafficSplitManual'
         type: NestedObject
+        conflicts:
+          - 'traffic_config.0.traffic_split_always_latest'
         description: |-
           Optional. Manual traffic distribution configuration, where the user specifies the
           Runtime Revision IDs and the percentage of traffic to send to each.
@@ -1135,8 +1180,10 @@ properties:
               properties:
                 - name: 'runtimeRevisionName'
                   type: String
+                  diff_suppress_func: 'vertexAiReasoningEngineRuntimeRevisionNameDiffSuppress'
+                  custom_expand: 'templates/terraform/custom_expand/vertex_ai_reasoning_engine_runtime_revision_name.go.tmpl'
                   description: |-
-                    Required. The Runtime Revision name to which to send this portion of traffic.
+                    Required. The Runtime Revision name to which to send this portion of traffic. Accepts revision IDs, short names (e.g. `rev-1`), or keywords such as `LATEST` and `PREVIOUS`. Note: Keywords like `LATEST` and `PREVIOUS` resolve at apply time to the concrete underlying revision ID and remain pinned until `traffic_config` is updated in Terraform.
                   required: true
                 - name: 'percent'
                   type: Integer
@@ -1145,6 +1192,8 @@ properties:
                   required: true
       - name: 'trafficSplitAlwaysLatest'
         type: NestedObject
+        conflicts:
+          - 'traffic_config.0.traffic_split_manual'
         description: |-
           Optional. Traffic distribution configuration, where all traffic is sent to the
           latest Runtime Revision.
