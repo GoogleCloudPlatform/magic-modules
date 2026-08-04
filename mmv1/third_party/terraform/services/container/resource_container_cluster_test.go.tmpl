@@ -19926,6 +19926,8 @@ func TestAccContainerCluster_withHighScaleCheckpointingConfig(t *testing.T) {
 
 func testAccContainerCluster_switchHighScaleCheckpointingConfig(clusterName, networkName, subnetworkName string, enabled bool) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {}
+
 resource "google_container_cluster" "with_hsc_config" {
   name                = "%s"
   location            = "us-central1-a"
@@ -19933,6 +19935,10 @@ resource "google_container_cluster" "with_hsc_config" {
   network             = "%s"
   subnetwork          = "%s"
   deletion_protection = false
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
 
   addons_config {
     high_scale_checkpointing_config {
