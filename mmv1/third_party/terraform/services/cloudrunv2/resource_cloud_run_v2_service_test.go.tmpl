@@ -2056,14 +2056,12 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceMaxInstanceCountNoPermadiff(t *te
 				Config: testAccCloudRunV2Service_cloudrunv2ServiceWithoutMaxInstanceCount(context),
 			},
 			{
-				// Re-apply the same config. Expect no changes (empty plan) to prove there
-				// is no permadiff caused by the API-populated max_instance_count default.
-				Config: testAccCloudRunV2Service_cloudrunv2ServiceWithoutMaxInstanceCount(context),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectEmptyPlan(),
-					},
-				},
+				// Plan-only step against the same config. After the first apply the API has
+				// populated max_instance_count with a computed default. Without
+				// default_from_api: true the provider would produce a diff (0 → <api-value>),
+				// causing this step to fail via ExpectNonEmptyPlan defaulting to false.
+				Config:   testAccCloudRunV2Service_cloudrunv2ServiceWithoutMaxInstanceCount(context),
+				PlanOnly: true,
 			},
 		},
 	})
