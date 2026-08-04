@@ -8,6 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/datastream"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/sql"
 )
 
 func TestAccDatastreamConnectionProfile_update(t *testing.T) {
@@ -629,6 +634,9 @@ resource "google_datastream_connection_profile" "default" {
       client_certificate           = file("text-fixtures/cert.pem")
       secret_manager_stored_client_key = google_secret_manager_secret_version.client_key_secret_version.id
     }
+	additional_options = {
+		readPreference = "secondary"
+	}
     standard_connection_format {
       direct_connection = true
     }
@@ -721,6 +729,10 @@ resource "google_datastream_connection_profile" "default" {
       client_certificate           = file("text-fixtures/cert.pem")
       secret_manager_stored_client_key = google_secret_manager_secret_version.client_key_secret_version.id
     }
+	additional_options = {
+		readPreference   = "primary"  // <-- Changed
+		connectTimeoutMS = "5000"     // <-- Added
+	}
     standard_connection_format {
       direct_connection = true
     }

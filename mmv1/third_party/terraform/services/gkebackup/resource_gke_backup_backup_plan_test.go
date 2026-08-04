@@ -5,6 +5,9 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/container"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/gkebackup"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -15,8 +18,8 @@ func TestAccGKEBackupBackupPlan_update(t *testing.T) {
 	context := map[string]interface{}{
 		"project":         envvar.GetTestProjectFromEnv(),
 		"random_suffix":   acctest.RandString(t, 10),
-		"network_name":    acctest.BootstrapSharedTestNetwork(t, "gke-cluster"),
-		"subnetwork_name": acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster")),
+		"network_name":    tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster"),
+		"subnetwork_name": tpgcompute.BootstrapSubnet(t, "gke-cluster", tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -171,7 +174,7 @@ resource "google_container_cluster" "primary" {
   network       = "%{network_name}"
   subnetwork    = "%{subnetwork_name}"
 }
-	
+  
 resource "google_gke_backup_backup_plan" "backupplan" {
   name = "tf-test-testplan%{random_suffix}"
   cluster = google_container_cluster.primary.id
@@ -222,7 +225,7 @@ resource "google_container_cluster" "primary" {
   network       = "%{network_name}"
   subnetwork    = "%{subnetwork_name}"
 }
-	
+  
 resource "google_gke_backup_backup_plan" "backupplan" {
   name = "tf-test-testplan%{random_suffix}"
   cluster = google_container_cluster.primary.id
@@ -296,7 +299,7 @@ resource "google_container_cluster" "primary" {
   network       = "%{network_name}"
   subnetwork    = "%{subnetwork_name}"
 }
-	
+  
 resource "google_gke_backup_backup_plan" "backupplan" {
   name = "tf-test-testplan%{random_suffix}"
   cluster = google_container_cluster.primary.id

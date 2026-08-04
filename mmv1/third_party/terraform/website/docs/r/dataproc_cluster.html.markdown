@@ -156,6 +156,14 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
       [Duration](https://developers.google.com/protocol-buffers/docs/proto3#json)).
       Only supported on Dataproc image versions 1.2 and higher.
       For more context see the [docs](https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters/patch#query-parameters)
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+
 - - -
 
 <a name="nested_virtual_cluster_config"></a>The `virtual_cluster_config` block supports:
@@ -459,7 +467,9 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
     * `node_group_uri` - (Required) The URI of a sole-tenant node group resource that the cluster will be created on.
 
 * `confidential_instance_config` - (Optional) Confidential Instance Config for clusters using [Confidential VMs](https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/confidential-compute)
-    * `enable_confidential_compute` - (Optional) Defines whether the instance should have confidential compute enabled.
+    * `enable_confidential_compute` - (Optional) Defines whether the instance should have confidential compute enabled. `enable_confidential_compute` is deprecated and will be removed in a future major release. Use `confidential_instance_type` instead.
+    
+    * `confidential_instance_type` - (Optional) Defines the confidential compute type of the instance. Valid values are `"CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED"`, `"SEV"`, `"SEV_SNP"`, `"TDX"`.
 
 * `shielded_instance_config` (Optional) Shielded Instance Config for clusters using [Compute Engine Shielded VMs](https://cloud.google.com/security/shielded-cloud/shielded-vm).
 
@@ -506,6 +516,14 @@ cluster_config {
       instance_selection_list {
         machine_types = ["n2-standard-2","n1-standard-2"]
         rank          = 1
+        disk_config {
+          boot_disk_size_gb = 30
+          boot_disk_type    = "pd-standard"
+          attached_disk_config {
+            disk_size_gb = 30
+            disk_type    = "pd-standard"
+          }
+        }
       }
       instance_selection_list {
         machine_types = ["n2d-standard-2"]
@@ -553,12 +571,31 @@ cluster_config {
 	Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile
 	Memory Express). See
 	[local SSD performance](https://cloud.google.com/compute/docs/disks/local-ssd#performance).
+
+        * `attached_disk_config` - (Optional) Attached disk configuration.
+            * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
+            * `disk_type` - (Optional) The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".
+            * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+            * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
 * `instance_flexibility_policy` (Optional) Instance flexibility Policy allowing a mixture of VM shapes.
 
     * `instance_selection_list` - (Optional) List of instance selection options that the group will use when creating new VMs.
         * `machine_types` - (Optional) Full machine-type names, e.g. `"n1-standard-16"`.
 
         * `rank` - (Optional) Preference of this instance selection. A lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.
+
+        * `disk_config` - (Optional) Disk configuration to apply to the instances in this instance selection.
+            * `boot_disk_size_gb` - (Optional) Size of the primary disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.
+            * `boot_disk_type` - (Optional) The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard".
+            * `num_local_ssds` - (Optional) The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.
+            * `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+            * `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
+            * `local_ssd_interface` - (Optional) Interface type of local SSDs (no Local SSDs or NVMe).
+            * `attached_disk_config` - (Optional) Attached disk configuration.
+                * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
+                * `disk_type` - (Optional) The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".
+                * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+                * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
 
 * `accelerators` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
 
@@ -590,6 +627,14 @@ cluster_config {
       instance_selection_list {
         machine_types = ["n2-standard-2","n1-standard-2"]
         rank          = 1
+        disk_config {
+          boot_disk_size_gb = 30
+          boot_disk_type    = "pd-standard"
+          attached_disk_config {
+            disk_size_gb = 30
+            disk_type    = "pd-standard"
+          }
+        }
       }
       instance_selection_list {
         machine_types = ["n2d-standard-2"]
@@ -634,6 +679,12 @@ cluster_config {
     * `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each worker cluster node. Defaults to 0.
 
+    * `attached_disk_config` - (Optional) Attached disk configuration.
+        * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
+        * `disk_type` - (Optional) The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".
+        * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+        * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
+
 * `image_uri` (Optional) The URI for the image to use for this worker.  See [the guide](https://cloud.google.com/dataproc/docs/guides/dataproc-images)
     for more information.
 
@@ -644,6 +695,19 @@ cluster_config {
         * `machine_types` - (Optional) Full machine-type names, e.g. `"n1-standard-16"`.
 
         * `rank` - (Optional) Preference of this instance selection. A lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.
+
+        * `disk_config` - (Optional) Disk configuration to apply to the instances in this instance selection.
+            * `boot_disk_size_gb` - (Optional) Size of the primary disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.
+            * `boot_disk_type` - (Optional) The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard".
+            * `num_local_ssds` - (Optional) The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.
+            * `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+            * `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
+            * `local_ssd_interface` - (Optional) Interface type of local SSDs (no Local SSDs or NVMe).
+            * `attached_disk_config` - (Optional) Attached disk configuration.
+                * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
+                * `disk_type` - (Optional) The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".
+                * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+                * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
 
 * `accelerators` (Optional) The Compute Engine accelerator configuration for these instances. Can be specified multiple times.
 
@@ -716,6 +780,12 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each preemptible worker node. Defaults to 0.
+
+        * `attached_disk_config` - (Optional) Attached disk configuration.
+            * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
+            * `disk_type` - (Optional) The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".
+            * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+            * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
 
 * `instance_flexibility_policy` (Optional) Instance flexibility Policy allowing a mixture of VM shapes and provisioning models.
 

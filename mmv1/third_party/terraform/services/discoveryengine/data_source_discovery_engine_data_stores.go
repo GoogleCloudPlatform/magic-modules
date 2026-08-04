@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package discoveryengine
 
 import (
@@ -92,7 +90,7 @@ func dataSourceGoogleDiscoveryEngineDataStoresRead(d *schema.ResourceData, meta 
 		billingProject = bp
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{DiscoveryEngineBasePath}}projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores")
 	if err != nil {
 		return err
 	}

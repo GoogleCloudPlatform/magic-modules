@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/version"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -143,6 +144,11 @@ func Provider() *schema.Provider {
 				Optional: true,
 			},
 
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"request_reason": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -208,6 +214,16 @@ func Provider() *schema.Provider {
 				Optional:     true,
 				ValidateFunc: ValidateCustomEndpoint,
 			},
+
+			// Generated Products. Although these will only be _populated_ for registered products, they
+			// must always be present to match the FW provider's schema (which must match its ProviderModel struct.)
+			{{- range $product := $.Products }}
+			"{{ underscore $product.Name }}_custom_endpoint": &schema.Schema{
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateCustomEndpoint,
+			},
+			{{- end }}
 		},
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -220,14 +236,6 @@ func Provider() *schema.Provider {
 		DataSourcesMap: registry.DatasourceMap(),
 {{- end }}
 		ResourcesMap: registry.ResourceMap(),
-	}
-
-	for _, p := range registry.ListProducts() {
-		provider.Schema[p.CustomEndpointField] = &schema.Schema{
-			Type:         schema.TypeString,
-			Optional:     true,
-			ValidateFunc: ValidateCustomEndpoint,
-		}
 	}
 
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -287,6 +295,10 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		}
 	}
 
+	if v, ok := d.GetOk("deletion_policy"); ok {
+		config.DeletionPolicy = v.(string)
+	}
+
 	if v, ok := d.GetOk("request_reason"); ok {
 		config.RequestReason = v.(string)
 	}
@@ -312,13 +324,13 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// only check environment variables if none of these values are set in config- this
 	// means config beats env var in all cases.
 	if config.ExternalCredentials == nil && config.AccessToken == "" && config.Credentials == "" {
-		config.Credentials = transport_tpg.MultiEnvSearch([]string{
+		config.Credentials = envvar.MultiEnvSearch([]string{
 			"GOOGLE_CREDENTIALS",
 			"GOOGLE_CLOUD_KEYFILE_JSON",
 			"GCLOUD_KEYFILE_JSON",
 		})
 
-		config.AccessToken = transport_tpg.MultiEnvSearch([]string{
+		config.AccessToken = envvar.MultiEnvSearch([]string{
 			"GOOGLE_OAUTH_ACCESS_TOKEN",
 		})
 	}
@@ -328,7 +340,7 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		customEndpoint := ""
 		if v := d.Get(p.CustomEndpointField).(string); v != "" {
 			customEndpoint = v
-		} else if v = transport_tpg.MultiEnvSearch([]string{p.CustomEndpointEnvVar}); v != "" {
+		} else if v = envvar.MultiEnvSearch([]string{p.CustomEndpointEnvVar}); v != "" {
 			customEndpoint = v
 		}
 		if customEndpoint != "" {
@@ -391,11 +403,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		return nil, diag.FromErr(err)
 	}
 	config.BatchingConfig = batchCfg
-
-	// Registered products
-	{{- range $product := $.Products }}
-	config.{{ $product.Name }}BasePath = transport_tpg.BaseUrl(registry.GetProduct("{{ lower $product.Name }}"), &config)
-	{{- end }}
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {

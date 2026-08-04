@@ -44,6 +44,8 @@ references:
 base_url: projects/{{project}}/regions/{{region}}/subnetworks
 immutable: true
 has_self_link: true
+generate_list_resource: true
+bypass_clientside_update_check: true
 collection_url_key: items
 iam_policy:
   allowed_iam_role: roles/compute.networkUser
@@ -55,6 +57,8 @@ id_format: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
 custom_diff:
   - customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)
   - sendSecondaryIpRangeIfEmptyDiff
+  - resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff
+  - resourceComputeSubnetworkSecondaryIpRangeCustomDiff
 sweeper:
   url_substitutions:
     - region: us-west2
@@ -76,104 +80,150 @@ custom_code:
   constants: templates/terraform/constants/subnetwork.tmpl
   post_update: templates/terraform/post_update/compute_subnetwork.go.tmpl
   tgc_decoder: templates/tgc_next/decoders/compute_subnetwork.go.tmpl
-examples:
+samples:
   - name: subnetwork_basic
     primary_resource_id: network-with-private-secondary-ip-ranges
-    vars:
-      network_name: test-network
-      subnetwork_name: test-subnetwork
+    steps:
+      - name: subnetwork_basic
+        resource_id_vars:
+          network_name: test-network
+          subnetwork_name: test-subnetwork
   - name: subnetwork_logging_config
     primary_resource_id: subnet-with-logging
-    vars:
-      network_name: log-test-network
-      subnetwork_name: log-test-subnetwork
+    steps:
+      - name: subnetwork_logging_config
+        resource_id_vars:
+          network_name: log-test-network
+          subnetwork_name: log-test-subnetwork
   - name: subnetwork_internal_l7lb
     primary_resource_id: network-for-l7lb
     min_version: beta
-    vars:
-      network_name: l7lb-test-network
-      subnetwork_name: l7lb-test-subnetwork
+    steps:
+      - name: subnetwork_internal_l7lb
+        min_version: beta
+        resource_id_vars:
+          network_name: l7lb-test-network
+          subnetwork_name: l7lb-test-subnetwork
   - name: subnetwork_ipv6
     primary_resource_id: subnetwork-ipv6
-    vars:
-      network_name: ipv6-test-network
-      subnetwork_name: ipv6-test-subnetwork
+    steps:
+      - name: subnetwork_ipv6
+        resource_id_vars:
+          network_name: ipv6-test-network
+          subnetwork_name: ipv6-test-subnetwork
   - name: subnetwork_internal_ipv6
     primary_resource_id: subnetwork-internal-ipv6
-    vars:
-      network_name: internal-ipv6-test-network
-      subnetwork_name: internal-ipv6-test-subnetwork
+    steps:
+      - name: subnetwork_internal_ipv6
+        resource_id_vars:
+          network_name: internal-ipv6-test-network
+          subnetwork_name: internal-ipv6-test-subnetwork
   - name: subnetwork_purpose_private_nat
     primary_resource_id: subnetwork-purpose-private-nat
     min_version: beta
-    vars:
-      network_name: subnet-purpose-test-network
-      subnetwork_name: subnet-purpose-test-subnetwork
+    steps:
+      - name: subnetwork_purpose_private_nat
+        min_version: beta
+        resource_id_vars:
+          network_name: subnet-purpose-test-network
+          subnetwork_name: subnet-purpose-test-subnetwork
   - name: subnetwork_resolve_subnet_mask
     primary_resource_id: subnetwork-resolve-subnet-mask
-    vars:
-      network_name: subnet-resolve-subnet-mask-test-network
-      subnetwork_name: subnet-resolve-subnet-mask-test-subnetwork
+    steps:
+      - name: subnetwork_resolve_subnet_mask
+        resource_id_vars:
+          network_name: subnet-resolve-subnet-mask-test-network
+          subnetwork_name: subnet-resolve-subnet-mask-test-subnetwork
   - name: subnetwork_cidr_overlap
     primary_resource_id: subnetwork-cidr-overlap
-    vars:
-      network_name: net-cidr-overlap
-      subnetwork_name: subnet-cidr-overlap
+    steps:
+      - name: subnetwork_cidr_overlap
+        resource_id_vars:
+          network_name: net-cidr-overlap
+          subnetwork_name: subnet-cidr-overlap
   - name: subnetwork_reserved_internal_range
     primary_resource_id: subnetwork-reserved-internal-range
     min_version: beta
-    vars:
-      network_name: network-reserved-internal-range
-      subnetwork_name: subnetwork-reserved-internal-range
+    steps:
+      - name: subnetwork_reserved_internal_range
+        min_version: beta
+        resource_id_vars:
+          network_name: network-reserved-internal-range
+          subnetwork_name: subnetwork-reserved-internal-range
   - name: subnetwork_reserved_secondary_range
     primary_resource_id: subnetwork-reserved-secondary-range
     min_version: beta
-    vars:
-      network_name: network-reserved-secondary-range
-      primary_range_name: reserved-primary
-      secondary_range_name: reserved-secondary
-      subnetwork_name: subnetwork-reserved-secondary-range
+    steps:
+      - name: subnetwork_reserved_secondary_range
+        min_version: beta
+        resource_id_vars:
+          network_name: network-reserved-secondary-range
+          primary_range_name: reserved-primary
+          secondary_range_name: reserved-secondary
+          subnetwork_name: subnetwork-reserved-secondary-range
   - name: subnetwork_ipv6_only_internal
     primary_resource_id: subnetwork-ipv6-only
-    exclude_docs: true
-    vars:
-      network_name: network-ipv6-only
-      subnetwork_name: subnet-ipv6-only
+    exclude_basic_doc: true
+    steps:
+      - name: subnetwork_ipv6_only_internal
+        resource_id_vars:
+          network_name: network-ipv6-only
+          subnetwork_name: subnet-ipv6-only
   - name: subnetwork_with_subnet_mode_pdp
     primary_resource_id: subnetwork-with-subnet-mode-pdp
-    exclude_docs: true
-    vars:
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
-      network_name: network-byoipv6-external
-      subnetwork_name: subnet-mode-pdp-subnet
-    test_vars_overrides:
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+    exclude_basic_doc: true
+    steps:
+      - name: subnetwork_with_subnet_mode_pdp
+        resource_id_vars:
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+          network_name: network-byoipv6-external
+          subnetwork_name: subnet-mode-pdp-subnet
+        test_vars_overrides:
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
   - name: subnetwork_with_internal_subnet_mode_pdp
     primary_resource_id: subnetwork-with-internal-subnet-mode-pdp
-    exclude_docs: true
-    vars:
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
-      network_name: network-byoipv6-internal
-      subnetwork_name: internal-subnet-mode-pdp-subnet
-    test_vars_overrides:
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+    exclude_basic_doc: true
+    steps:
+      - name: subnetwork_with_internal_subnet_mode_pdp
+        resource_id_vars:
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+          network_name: network-byoipv6-internal
+          subnetwork_name: internal-subnet-mode-pdp-subnet
+        test_vars_overrides:
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
   - name: subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix
     primary_resource_id: subnetwork-with-internal-subnet-mode-pdp-explicit-ip-prefix
-    exclude_docs: true
-    vars:
-      internal_ipv6_prefix: '"2001:db8:1::/64"'
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
-      network_name: network-byoipv6-internal-prefix
-      subnetwork_name: subnet-mode-pdp-subnet-internal-prefix
-    test_vars_overrides:
-      internal_ipv6_prefix: fmt.Sprintf("2001:db8:1:%d::/64", acctest.RandIntRange(t, 0, 9999))
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
+    exclude_basic_doc: true
+    steps:
+      - name: subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix
+        resource_id_vars:
+          internal_ipv6_prefix: '"2001:db8:1::/64"'
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
+          network_name: network-byoipv6-internal-prefix
+          subnetwork_name: subnet-mode-pdp-subnet-internal-prefix
+        test_vars_overrides:
+          internal_ipv6_prefix: fmt.Sprintf("2001:db8:1:%d::/64", acctest.RandIntRange(t, 0, 9999))
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
   - name: subnetwork_ipv6_only_external
     primary_resource_id: subnetwork-ipv6-only
-    exclude_docs: true
-    vars:
-      network_name: network-ipv6-only
-      subnetwork_name: subnet-ipv6-only
+    exclude_basic_doc: true
+    steps:
+      - name: subnetwork_ipv6_only_external
+        resource_id_vars:
+          network_name: network-ipv6-only
+          subnetwork_name: subnet-ipv6-only
+  - name: subnetwork_with_secondary_ipv6_range
+    primary_resource_id: subnetwork_with_secondary_ipv6_range
+    min_version: 'beta'
+    steps:
+      - name: subnetwork_with_secondary_ipv6_range
+        resource_id_vars:
+          network_name: network-with-secondary-ranges
+          subnetwork_name: subnet-with-secondary-ranges
+          pap_name: pap-for-secondary-ranges
+          pdp_name: pdp-for-secondary-ranges
+          sub_pdp_name: sub-pdp-for-secondary-ranges
+        min_version: 'beta'
 virtual_fields:
   - name: send_secondary_ip_range_if_empty
     type: Boolean
@@ -224,6 +274,8 @@ properties:
     custom_tgc_flatten: 'templates/tgc_next/custom_flatten/compute_subnetwork_ip_cidr_range.go.tmpl'
   - name: reservedInternalRange
     type: ResourceRef
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_flatten: 'templates/terraform/custom_flatten/networkconnectivity_prefixed_name.go.tmpl'
     description: |
       The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
       E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
@@ -300,7 +352,6 @@ properties:
     update_id: secondaryIpRanges
     fingerprint_name: fingerprint
     send_empty_value: true
-    unordered_list: true
     default_from_api: true
     item_type:
       type: NestedObject
@@ -327,11 +378,32 @@ properties:
             function: verify.ValidateIpCidrRange
           default_from_api: true
         - name: reservedInternalRange
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          custom_flatten: 'templates/terraform/custom_flatten/networkconnectivity_prefixed_name.go.tmpl'
           type: ResourceRef
           description: |
             The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
             E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
           resource: InternalRange
+          imports: selfLink
+        - name: ipVersion
+          type: Enum
+          description: |
+            The IP version of the secondary range. If not specified, IPV4 is used.
+          default_from_api: true
+          min_version: 'beta'
+          enum_values:
+            - IPV4
+            - IPV6
+        - name: ipCollection
+          type: ResourceRef
+          description: |
+            Reference to a Public Delegated Prefix (PDP) for BYOIP.
+            This field should be specified for configuring BYOGUA internal IPv6 secondary range.
+            When specified along with the ip_cidr_range, the ip_cidr_range must lie within the PDP referenced by the `ipCollection` field.
+            When specified without the ip_cidr_range, the range is auto-allocated from the PDP referenced by the `ipCollection` field.
+          min_version: 'beta'
+          resource: PublicDelegatedPrefix
           imports: selfLink
   - name: privateIpGoogleAccess
     type: Boolean
@@ -499,7 +571,10 @@ properties:
       Partial URL, as in:
         * `projects/{{projectId}}/regions/region/publicDelegatedPrefixes/{{sub-pdp-name}}`
         * `regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
-    ignore_read: true
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    fingerprint_name: fingerprint
     is_missing_in_cai: true
   - name: ipv6GceEndpoint
     type: Enum
@@ -557,6 +632,9 @@ properties:
     description: |
       'Configures subnet mask resolution for this subnetwork.'
     immutable: true
+    is_missing_in_cai: true
     enum_values:
       - ARP_ALL_RANGES
       - ARP_PRIMARY_RANGE
+      - ARP_BROADCAST_PRIMARY_RANGE
+      - ARP_BROADCAST_PRIMARY_RANGE_WITH_LEARNING

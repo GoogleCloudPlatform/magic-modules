@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/certificatemanager"
 )
 
 func TestAccCertificateManagerDnsAuthorization_update(t *testing.T) {

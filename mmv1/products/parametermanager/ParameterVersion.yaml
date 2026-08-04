@@ -12,96 +12,108 @@
 # limitations under the License.
 
 ---
-name: 'ParameterVersion'
+name: ParameterVersion
 description: |
   A Parameter Version resource that stores the actual value of the parameter.
 references:
   guides:
-  api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions'
+  api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions
 docs:
 base_url: '{{parameter}}/versions'
 self_link: '{{parameter}}/versions/{{parameter_version_id}}'
 create_url: '{{parameter}}/versions?parameter_version_id={{parameter_version_id}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{%project}}/locations/global/parameters/{{%parameter_id}}/versions/{{%parameter_version_id}}'
+  - projects/{{%project}}/locations/global/parameters/{{%parameter_id}}/versions/{{%parameter_version_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-examples:
-  - name: 'parameter_version_basic'
-    primary_resource_id: 'parameter-version-basic'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-    test_vars_overrides:
-      # for backward compatible
-      parameter_id: '"parameter" + randomSuffix'
-  - name: 'parameter_version_with_json_format'
-    primary_resource_id: 'parameter-version-with-json-format'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-    test_vars_overrides:
-      # for backward compatible
-      parameter_id: '"parameter" + randomSuffix'
-  - name: 'parameter_version_with_kms_key'
-    primary_resource_id: 'parameter-version-with-kms-key'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-      kms_key: 'kms-key'
-    test_vars_overrides:
-      'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
-      # for backward compatible
-      parameter_id: '"parameter" + randomSuffix'
-    bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  - name: 'parameter_version_with_yaml_format'
-    primary_resource_id: 'parameter-version-with-yaml-format'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-    test_vars_overrides:
-      # for backward compatible
-      parameter_id: '"parameter" + randomSuffix'
-  - name: 'parameter_version_with_json_format_with_file'
-    primary_resource_id: 'parameter-version-with-json-format-with-file'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-      data: parameter-json-data.json
-    test_vars_overrides:
-      'data': '"./test-fixtures/parameter_data_json_format.json"'
-      # for backward compatible
-      parameter_id: '"parameter" + randomSuffix'
-  - name: 'parameter_version_with_yaml_format_with_file'
-    primary_resource_id: 'parameter-version-with-yaml-format-with-file'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-      data: parameter-yaml-data.yaml
-    test_vars_overrides:
-      'data': '"./test-fixtures/parameter_data_yaml_format.yaml"'
-      # for backward compatible
-      parameter_id: '"parameter" + randomSuffix'
-custom_code:
-  custom_import: 'templates/terraform/custom_import/parameter_manager_parameter_version.go.tmpl'
 exclude_identity_generation: true
+custom_code:
+  custom_import: templates/terraform/custom_import/parameter_manager_parameter_version.go.tmpl
+samples:
+  - name: parameter_version_basic
+    primary_resource_id: parameter-version-basic
+    steps:
+      - name: parameter_version_basic
+        resource_id_vars:
+          parameter_id: parameter
+          parameter_version_id: parameter_version
+        test_vars_overrides:
+          # for backward compatible
+          parameter_id: '"parameter" + randomSuffix'
+  - name: parameter_version_with_json_format
+    primary_resource_id: parameter-version-with-json-format
+    steps:
+      - name: parameter_version_with_json_format
+        resource_id_vars:
+          parameter_id: parameter
+          parameter_version_id: parameter_version
+        test_vars_overrides:
+          # for backward compatible
+          parameter_id: '"parameter" + randomSuffix'
+  - name: parameter_version_with_kms_key
+    primary_resource_id: parameter-version-with-kms-key
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com
+        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    steps:
+      - name: parameter_version_with_kms_key
+        resource_id_vars:
+          parameter_id: parameter
+          parameter_version_id: parameter_version
+          kms_key: kms-key
+        test_vars_overrides:
+          kms_key: kms.BootstrapKMSKey(t).CryptoKey.Name
+          # for backward compatible
+          parameter_id: '"parameter" + randomSuffix'
+  - name: parameter_version_with_yaml_format
+    primary_resource_id: parameter-version-with-yaml-format
+    steps:
+      - name: parameter_version_with_yaml_format
+        resource_id_vars:
+          parameter_id: parameter
+          parameter_version_id: parameter_version
+        test_vars_overrides:
+          # for backward compatible
+          parameter_id: '"parameter" + randomSuffix'
+  - name: parameter_version_with_json_format_with_file
+    primary_resource_id: parameter-version-with-json-format-with-file
+    steps:
+      - name: parameter_version_with_json_format_with_file
+        resource_id_vars:
+          parameter_id: parameter
+          parameter_version_id: parameter_version
+          data: parameter-json-data.json
+        test_vars_overrides:
+          data: '"./test-fixtures/parameter_data_json_format.json"'
+          # for backward compatible
+          parameter_id: '"parameter" + randomSuffix'
+  - name: parameter_version_with_yaml_format_with_file
+    primary_resource_id: parameter-version-with-yaml-format-with-file
+    steps:
+      - name: parameter_version_with_yaml_format_with_file
+        resource_id_vars:
+          parameter_id: parameter
+          parameter_version_id: parameter_version
+          data: parameter-yaml-data.yaml
+        test_vars_overrides:
+          data: '"./test-fixtures/parameter_data_yaml_format.yaml"'
+          # for backward compatible
+          parameter_id: '"parameter" + randomSuffix'
 parameters:
-  - name: 'parameter'
+  - name: parameter
     type: ResourceRef
     description: |
       Parameter Manager Parameter resource.
     url_param_only: true
     required: true
     immutable: true
-    resource: 'Parameter'
-    imports: 'name'
-  - name: 'parameter_version_id'
+    resource: Parameter
+    imports: name
+  - name: parameter_version_id
     type: String
     description: |
       Version ID of the Parameter Version Resource. This must be unique within the Parameter.
@@ -109,36 +121,36 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the Parameter Version. Format:
       `projects/{{project}}/locations/global/parameters/{{parameter_id}}/versions/{{parameter_version_id}}`
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The time at which the Parameter Version was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       The time at which the Parameter Version was updated.
     output: true
-  - name: 'disabled'
+  - name: disabled
     type: Boolean
     description: |
       The current state of Parameter Version. This field is only applicable for updating Parameter Version.
-  - name: 'payload'
+  - name: payload
     type: NestedObject
     description: |
       The payload content of a ParameterVersion resource.
     flatten_object: true
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/parameter_version_parameter_data.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/parameter_version_parameter_data.go.tmpl
     properties:
-      - name: 'parameter_data'
+      - name: parameter_data
         type: String
         description: |
           The Parameter data.
@@ -146,8 +158,8 @@ properties:
         required: true
         immutable: true
         sensitive: true
-        custom_expand: 'templates/terraform/custom_expand/base64.go.tmpl'
-  - name: 'kmsKeyVersion'
+        custom_expand: templates/terraform/custom_expand/base64.go.tmpl
+  - name: kmsKeyVersion
     type: String
     output: true
     description: |

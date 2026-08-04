@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'StorageInsights'
-display_name: 'Cloud Storage Insights'
-versions:
-  - name: 'ga'
-    base_url: 'https://storageinsights.googleapis.com/v1/'
+name: StorageInsights
+display_name: Cloud Storage Insights
 scopes:
-  - 'https://www.googleapis.com/auth/devstorage.full_control'
+  - https://www.googleapis.com/auth/devstorage.full_control
+versions:
+  - name: ga
+    base_url: https://storageinsights.googleapis.com/v1/

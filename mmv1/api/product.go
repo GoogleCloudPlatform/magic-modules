@@ -72,6 +72,10 @@ type Product struct {
 
 	ClientName string `yaml:"client_name,omitempty"`
 
+	// RepByDefault is if this product should default to REP endpoints if
+	// available. Changing this requires REP to be supported in *ALL* regions
+	RepByDefault bool `yaml:"rep_by_default,omitempty"`
+
 	// The version of the product which is currently being generated.
 	Version *product.Version `yaml:"-"`
 
@@ -81,9 +85,8 @@ type Product struct {
 	// ImportPath contains the prefix used for importing packages in generated files.
 	ImportPath string `yaml:"-"`
 
-	// RepByDefault is if this product should default to REP endpoints if
-	// available. Changing this requires REP to be supported in *ALL* regions
-	RepByDefault bool `yaml:"rep_by_default,omitempty"`
+	// Runtime contains information about the currently-running generation process.
+	Runtime Runtime `yaml:"-"`
 }
 
 func (p *Product) UnmarshalYAML(value *yaml.Node) error {

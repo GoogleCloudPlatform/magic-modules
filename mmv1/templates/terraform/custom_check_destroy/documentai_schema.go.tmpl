@@ -1,0 +1,25 @@
+// Delete is eventually consistent; wait for a moment.
+time.Sleep(10*time.Second)
+
+config := acctest.GoogleProviderConfig(t)
+url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(documentai.Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/schemas/{{"{{"}}name{{"}}"}}")
+if err != nil {
+	return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: config.UserAgent,
+})
+if err == nil {
+	return fmt.Errorf("DocumentAISchema still exists at %s", url)
+}

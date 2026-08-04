@@ -50,9 +50,18 @@ if d.HasChange("gce_setup.0.metadata") {
 if d.HasChange("effective_labels") {
     newUpdateMask = append(newUpdateMask, "labels")
 }
+if d.HasChange("enable_deletion_protection") {
+    newUpdateMask = append(newUpdateMask, "enable_deletion_protection")
+}
 if d.HasChange("gce_setup.0.container_image") {
     newUpdateMask = append(newUpdateMask, "gce_setup.container_image")
     stopInstance = true
+}
+if d.HasChange("gce_setup.0.min_cpu_platform") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.min_cpu_platform")
+}
+if d.HasChange("gce_setup.0.data_disks.0.resource_policies") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.data_disks.resource_policies")
 }
 updateMask = newUpdateMask
 // Overwrite the previously set mask.

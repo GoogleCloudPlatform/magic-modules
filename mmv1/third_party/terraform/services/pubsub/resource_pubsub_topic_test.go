@@ -7,6 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccPubsubTopic_update(t *testing.T) {
@@ -46,10 +50,10 @@ func TestAccPubsubTopic_update(t *testing.T) {
 func TestAccPubsubTopic_cmek(t *testing.T) {
 	t.Parallel()
 
-	kms := acctest.BootstrapKMSKey(t)
+	bootstrapped := kms.BootstrapKMSKey(t)
 	topicName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
 			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -62,7 +66,7 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubTopic_cmek(topicName, kms.CryptoKey.Name),
+				Config: testAccPubsubTopic_cmek(topicName, bootstrapped.CryptoKey.Name),
 			},
 			{
 				ResourceName:      "google_pubsub_topic.topic",
@@ -345,12 +349,12 @@ func TestAccPubsubTopic_tags(t *testing.T) {
 	t.Parallel()
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "pubsub-topic-tagkey", nil)
+	tagKey := tags.BootstrapSharedTestOrganizationTagKey(t, "pubsub-topic-tagkey", nil)
 	context := map[string]interface{}{
 		"topic":    topic,
 		"org":      envvar.GetTestOrgFromEnv(t),
 		"tagKey":   tagKey,
-		"tagValue": acctest.BootstrapSharedTestOrganizationTagValue(t, "pubsub-topic-tagvalue", tagKey),
+		"tagValue": tags.BootstrapSharedTestOrganizationTagValue(t, "pubsub-topic-tagvalue", tagKey),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

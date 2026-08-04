@@ -5,6 +5,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/vertexai"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"strings"
@@ -292,7 +295,7 @@ func testAccCheckVertexAIEndpointWithModelGardenDeploymentDestroyProducer(t *tes
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{VertexAIBasePath}}projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(vertexai.Product, config)+"projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}")
 			if err != nil {
 				return err
 			}
@@ -315,6 +318,152 @@ func testAccCheckVertexAIEndpointWithModelGardenDeploymentDestroyProducer(t *tes
 			}
 		}
 
+		return nil
+	}
+}
+
+func TestAccVertexAIEndpointWithModelGardenDeployment_updateReplicaCountInPlace(t *testing.T) {
+	t.Parallel()
+	t.Skip("b/514579514 for manual test logs")
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	var endpointBefore, endpointAfter string
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointWithModelGardenDeploymentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIEndpointWithModelGardenDeployment_updateReplicaCountInPlace(context, 2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_inplace",
+						"deploy_config.0.dedicated_resources.0.max_replica_count", "2"),
+					captureEndpointAttribute(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_inplace",
+						"endpoint", &endpointBefore),
+				),
+			},
+			{
+				Config: testAccVertexAIEndpointWithModelGardenDeployment_updateReplicaCountInPlace(context, 3),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_inplace",
+						"deploy_config.0.dedicated_resources.0.max_replica_count", "3"),
+					captureEndpointAttribute(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_inplace",
+						"endpoint", &endpointAfter),
+					func(s *terraform.State) error {
+						if endpointBefore == "" || endpointAfter == "" {
+							return fmt.Errorf("endpoint id not captured (before=%q after=%q)",
+								endpointBefore, endpointAfter)
+						}
+						if endpointBefore != endpointAfter {
+							return fmt.Errorf(
+								"endpoint id changed across in-place update (before=%q after=%q); "+
+									"resource was recreated instead of mutated in place",
+								endpointBefore, endpointAfter)
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
+}
+
+func testAccVertexAIEndpointWithModelGardenDeployment_updateReplicaCountInPlace(context map[string]interface{}, maxReplicas int) string {
+	context["max_replicas"] = maxReplicas
+	return acctest.Nprintf(`
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "test_inplace" {
+  publisher_model_name = "publishers/google/models/paligemma@paligemma-224-float32"
+  location             = "us-central1"
+
+  model_config {
+    accept_eula = true
+  }
+
+  deploy_config {
+    dedicated_resources {
+      machine_spec {
+        machine_type      = "g2-standard-12"
+        accelerator_type  = "NVIDIA_L4"
+        accelerator_count = 1
+      }
+      min_replica_count = 1
+      max_replica_count = %{max_replicas}
+    }
+  }
+}
+`, context)
+}
+
+func TestAccVertexAIEndpointWithModelGardenDeployment_machineTypeStillForcesReplacement(t *testing.T) {
+	t.Parallel()
+	t.Skip("b/514579514 for manual test logs")
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointWithModelGardenDeploymentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIEndpointWithModelGardenDeployment_machineType(context, "g2-standard-12"),
+			},
+			{
+				Config:             testAccVertexAIEndpointWithModelGardenDeployment_machineType(context, "g2-standard-16"),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func testAccVertexAIEndpointWithModelGardenDeployment_machineType(context map[string]interface{}, machineType string) string {
+	context["machine_type"] = machineType
+	return acctest.Nprintf(`
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "test_machine_type" {
+  publisher_model_name = "publishers/google/models/paligemma@paligemma-224-float32"
+  location             = "us-central1"
+
+  model_config {
+    accept_eula = true
+  }
+
+  deploy_config {
+    dedicated_resources {
+      machine_spec {
+        machine_type      = "%{machine_type}"
+        accelerator_type  = "NVIDIA_L4"
+        accelerator_count = 1
+      }
+      min_replica_count = 1
+      max_replica_count = 1
+    }
+  }
+}
+`, context)
+}
+
+func captureEndpointAttribute(resourceName, attr string, dest *string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found in state: %s", resourceName)
+		}
+		v, ok := rs.Primary.Attributes[attr]
+		if !ok || v == "" {
+			return fmt.Errorf("attribute %q is empty on %s", attr, resourceName)
+		}
+		*dest = v
 		return nil
 	}
 }

@@ -46,8 +46,8 @@ immutable: true
 timeouts:
   insert_minutes: 30
   update_minutes: 30
-    # Deletes can take 20-30 minutes to complete, since they depend
-    # on the provisioning process either succeeding or failing completely.
+  # Deletes can take 20-30 minutes to complete, since they depend
+  # on the provisioning process either succeeding or failing completely.
   delete_minutes: 30
 async:
   actions: ['create', 'delete', 'update']
@@ -66,25 +66,29 @@ collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_managed_ssl_certificate.go.tmpl'
 include_in_tgc_next: true
-examples:
+samples:
   - name: 'managed_ssl_certificate_basic'
     primary_resource_id: 'default'
-    vars:
-      cert_name: 'test-cert'
-      proxy_name: 'test-proxy'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      dns_zone_name: 'dnszone'
-      forwarding_rule_name: 'forwarding-rule'
-      http_health_check_name: 'http-health-check'
-    test_vars_overrides:
-      # for backward compatible
-      dns_zone_name: '"dnszone" + randomSuffix'
+    steps:
+      - name: 'managed_ssl_certificate_basic'
+        resource_id_vars:
+          cert_name: 'test-cert'
+          proxy_name: 'test-proxy'
+          url_map_name: 'url-map'
+          backend_service_name: 'backend-service'
+          dns_zone_name: 'dnszone'
+          forwarding_rule_name: 'forwarding-rule'
+          http_health_check_name: 'http-health-check'
+        test_vars_overrides:
+          # for backward compatible
+          dns_zone_name: '"dnszone" + randomSuffix'
   - name: 'managed_ssl_certificate_recreation'
     primary_resource_id: 'cert'
     external_providers: ["random", "time"]
-      # Random provider
+    # Random provider
     skip_vcr: true
+    steps:
+      - name: 'managed_ssl_certificate_recreation'
 parameters:
 properties:
   - name: 'creationTimestamp'

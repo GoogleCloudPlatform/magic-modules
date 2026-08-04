@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/migrationcenter"
 )
 
 func TestAccMigrationCenterPreferenceSet_preferenceSetUpdate(t *testing.T) {
@@ -22,6 +23,15 @@ func TestAccMigrationCenterPreferenceSet_preferenceSetUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMigrationCenterPreferenceSet_preferenceSetStart(context),
+			},
+			{
+				ResourceName:            "google_migration_center_preference_set.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "preference_set_id"},
+			},
+			{
+				Config: testAccMigrationCenterPreferenceSet_preferenceSetUpdate(context),
 			},
 			{
 				ResourceName:            "google_migration_center_preference_set.default",
@@ -64,7 +74,9 @@ resource "google_migration_center_preference_set" "default" {
     }
     sizing_optimization_strategy = "SIZING_OPTIMIZATION_STRATEGY_MODERATE"
     commitment_plan = "COMMITMENT_PLAN_ONE_YEAR"
-    preferred_regions = ["us-central1"]
+    region_preferences {
+      preferred_regions = ["us-central1"]
+    }
   }
 }
 `, context)

@@ -16,7 +16,6 @@ name: 'Job'
 description: |
   A scheduled job that can publish a PubSub message or an HTTP request
   every X interval of time, using a crontab format string.
-
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/scheduler/'
@@ -30,43 +29,58 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+error_retry_predicates:
+  - transport_tpg.Is409SyncMutateCannotBeQueuedError
 custom_code:
   constants: 'templates/terraform/constants/scheduler.tmpl'
   encoder: 'templates/terraform/encoders/cloud_scheduler.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/cloud_scheduler.go.tmpl'
   post_create: 'templates/terraform/post_create/cloud_scheduler.go.tmpl'
   post_update: 'templates/terraform/post_update/cloud_scheduler.go.tmpl'
+generate_list_resource: true
 custom_diff:
   - 'validateAuthHeaders'
-examples:
+samples:
   - name: 'scheduler_job_pubsub'
     primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
-      topic_name: 'job-topic'
+    steps:
+      - name: 'scheduler_job_pubsub'
+        resource_id_vars:
+          job_name: 'test-job'
+          topic_name: 'job-topic'
   - name: 'scheduler_job_http'
     primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
+    steps:
+      - name: 'scheduler_job_http'
+        resource_id_vars:
+          job_name: 'test-job'
   - name: 'scheduler_job_paused'
     primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
+    steps:
+      - name: 'scheduler_job_paused'
+        resource_id_vars:
+          job_name: 'test-job'
   - name: 'scheduler_job_app_engine'
     primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
+    steps:
+      - name: 'scheduler_job_app_engine'
+        resource_id_vars:
+          job_name: 'test-job'
   - name: 'scheduler_job_oauth'
     primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
+    steps:
+      - name: 'scheduler_job_oauth'
+        resource_id_vars:
+          job_name: 'test-job'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+          region: 'REGION'
   - name: 'scheduler_job_oidc'
     primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
+    steps:
+      - name: 'scheduler_job_oidc'
+        resource_id_vars:
+          job_name: 'test-job'
 parameters:
   - name: 'region'
     type: String

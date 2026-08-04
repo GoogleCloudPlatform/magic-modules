@@ -49,7 +49,7 @@ custom_code:
   constants: 'templates/terraform/constants/clouddomains_registration.go.tmpl'
   encoder: 'templates/terraform/encoders/clouddomains_registration.go.tmpl'
   post_create: 'templates/terraform/post_create/clouddomains_registration.go.tmpl'
-examples:
+samples:
   - name: 'clouddomains_registration_full'
     primary_resource_id: 'my_registration'
     # Must be tested in staging environment with all-time unique domains
@@ -64,6 +64,9 @@ examples:
     #   - 'contact_settings.0.technical_contact.0.phone_number'
     #   - 'contact_settings.0.technical_contact.0.fax_number'
     #   - 'contact_settings.0.technical_contact.0.postal_address'
+
+    steps:
+      - name: 'clouddomains_registration_full'
 parameters:
   - name: 'location'
     type: String

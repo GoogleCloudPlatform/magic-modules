@@ -31,13 +31,7 @@ func NewDefaultPreResolver(errorLogger *zap.Logger) *DefaultPreResolver {
 	}
 }
 
-func (r *DefaultPreResolver) Resolve(jsonPlan []byte) map[string][]*models.FakeResourceDataWithMeta {
-	// ReadResourceChanges
-	changes, err := tfplan.ReadResourceChanges(jsonPlan)
-	if err != nil {
-		return nil
-	}
-
+func (r *DefaultPreResolver) Resolve(changes []*tfjson.ResourceChange) map[string][]*models.FakeResourceDataWithMeta {
 	return r.AddResourceChanges(changes)
 }
 

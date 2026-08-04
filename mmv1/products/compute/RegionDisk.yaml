@@ -71,26 +71,34 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
-examples:
+samples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
-    vars:
-      region_disk_name: 'my-region-disk'
-      disk_name: 'my-disk'
-      snapshot_name: 'my-snapshot'
+    steps:
+      - name: 'region_disk_basic'
+        resource_id_vars:
+          region_disk_name: 'my-region-disk'
+          disk_name: 'my-disk'
+          snapshot_name: 'my-snapshot'
   - name: 'region_disk_async'
     primary_resource_id: 'primary'
-    vars:
-      region_disk_name: 'primary-region-disk'
-      secondary_region_disk_name: 'secondary-region-disk'
+    steps:
+      - name: 'region_disk_async'
+        resource_id_vars:
+          region_disk_name: 'primary-region-disk'
+          secondary_region_disk_name: 'secondary-region-disk'
   - name: 'region_disk_features'
     primary_resource_id: 'regiondisk'
-    vars:
-      region_disk_name: 'my-region-features-disk'
+    steps:
+      - name: 'region_disk_features'
+        resource_id_vars:
+          region_disk_name: 'my-region-features-disk'
   - name: 'region_disk_hyperdisk_balanced_ha_write_many'
     primary_resource_id: 'primary'
-    vars:
-      region_disk_name: 'my-region-hyperdisk'
+    steps:
+      - name: 'region_disk_hyperdisk_balanced_ha_write_many'
+        resource_id_vars:
+          region_disk_name: 'my-region-hyperdisk'
 parameters:
   - name: 'region'
     type: ResourceRef

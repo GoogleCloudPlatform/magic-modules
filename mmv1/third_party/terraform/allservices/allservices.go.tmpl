@@ -1,0 +1,10 @@
+// Package allservices imports all services in the provider. This greatly increases build time and should only be used
+// in cases where access to all services is truly required.
+package allservices
+
+import (
+	// Register products/resources
+	{{- range $product := $.Products }}
+	_ "github.com/hashicorp/terraform-provider-google/google/services/{{ $product.ApiName }}"
+	{{- end }}
+)

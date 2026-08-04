@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'PrincipalAccessBoundaryPolicy'
+name: PrincipalAccessBoundaryPolicy
 description: |
   An IAM Principal Access Boundary Policy resource. This resource has no effect on accesses until is bound to a target through policy bindings.
   You can see further documentation on policy bindings in:
@@ -21,71 +21,75 @@ description: |
     - [Projects](/providers/hashicorp/google/latest/docs/resources/iam_projects_policy_binding)
 references:
   guides:
-    'Create and apply Principal Access Boundaries': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create'
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v3/organizations.locations.principalAccessBoundaryPolicies'
-id_format: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}'
-base_url: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies'
-self_link: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}'
-create_url: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies?principalAccessBoundaryPolicyId={{principal_access_boundary_policy_id}}'
-update_verb: 'PATCH'
+    Create and apply Principal Access Boundaries: https://cloud.google.com/iam/docs/principal-access-boundary-policies-create
+  api: https://cloud.google.com/iam/docs/reference/rest/v3/organizations.locations.principalAccessBoundaryPolicies
+base_url: organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies
+self_link: organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}
+create_url: organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies?principalAccessBoundaryPolicyId={{principal_access_boundary_policy_id}}
 update_mask: true
+update_verb: PATCH
+id_format: organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}
 import_format:
-  - 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}'
+  - organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
   include_project: true
-examples:
-  - name: 'iam_principal_access_boundary_policy'
-    primary_resource_id: 'pab-policy-for-org'
-    external_providers: ["time"]
-    test_env_vars:
-      org_id: 'ORG_ID'
-    vars:
-      display_name: 'PAB policy for Organization'
-      pab_id: 'pab-policy-for-org'
-    test_vars_overrides:
-      # for backward compatible
-      display_name: '"PAB policy for Organization" + randomSuffix'
-  - name: 'iam_organizations_policy_binding'
-    primary_resource_id: 'my-pab-policy'
-    external_providers: ["time"]
-    test_env_vars:
-      org_id: 'ORG_ID'
-    vars:
-      pab_policy_id: 'my-pab-policy'
-      display_name: 'Binding for all principals in the Organization'
-      org_binding_id: 'binding-for-all-org-principals'
-    # This example is already used as a test in OrganizationsPolicyBinding
-    test_vars_overrides:
-      # for backward compatible
-      display_name: '"Binding for all principals in the Organization" + randomSuffix'
+autogen_async: true
+samples:
+  - name: iam_principal_access_boundary_policy
+    primary_resource_id: pab-policy-for-org
+    external_providers: [time]
+    steps:
+      - name: iam_principal_access_boundary_policy
+        test_env_vars:
+          org_id: ORG_ID
+        resource_id_vars:
+          display_name: PAB policy for Organization
+          pab_id: pab-policy-for-org
+        test_vars_overrides:
+          # for backward compatible
+          display_name: '"PAB policy for Organization" + randomSuffix'
+  - name: iam_organizations_policy_binding
+    primary_resource_id: my-pab-policy
+    external_providers: [time]
     exclude_test: true
+    steps:
+      - name: iam_organizations_policy_binding
+        test_env_vars:
+          org_id: ORG_ID
+        resource_id_vars:
+          pab_policy_id: my-pab-policy
+          display_name: Binding for all principals in the Organization
+          org_binding_id: binding-for-all-org-principals
+        # This example is already used as a test in OrganizationsPolicyBinding
+        test_vars_overrides:
+          # for backward compatible
+          display_name: '"Binding for all principals in the Organization" + randomSuffix'
 parameters:
-  - name: 'organization'
+  - name: organization
     type: String
     description: |
       The parent organization of the principal access boundary policy.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location the principal access boundary policy is in.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'principalAccessBoundaryPolicyId'
+  - name: principalAccessBoundaryPolicyId
     type: String
     description: |
       The ID to use to create the principal access boundary policy.
@@ -94,48 +98,48 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Identifier. The resource name of the principal access boundary policy.  The following format is supported:
        `organizations/{organization_id}/locations/{location}/principalAccessBoundaryPolicies/{policy_id}`
     output: true
-  - name: 'uid'
+  - name: uid
     type: String
     description: |
       Output only. The globally unique ID of the principal access boundary policy.
     output: true
-  - name: 'etag'
+  - name: etag
     type: String
     description: |
       The etag for the principal access boundary. If this is provided on update, it must match the server's etag.
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       The description of the principal access boundary policy. Must be less than or equal to 63 characters.
-  - name: 'annotations'
+  - name: annotations
     type: KeyValueAnnotations
     description: |
       User defined annotations. See https://google.aip.dev/148#annotations
       for more details such as format and size limitations
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       Output only. The time when the principal access boundary policy was created.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: String
     description: |
       Output only. The time when the principal access boundary policy was most recently updated.
     output: true
-  - name: 'details'
+  - name: details
     type: NestedObject
     description: |
       Principal access boundary policy details
     default_from_api: true
     properties:
-      - name: 'rules'
+      - name: rules
         type: Array
         description: |
           A list of principal access boundary policy rules. The number of rules in a policy is limited to 500.
@@ -143,11 +147,11 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'description'
+            - name: description
               type: String
               description: |
                 The description of the principal access boundary policy rule. Must be less than or equal to 256 characters.
-            - name: 'resources'
+            - name: resources
               type: Array
               description: |
                 A list of Cloud Resource Manager resources. The resource
@@ -161,13 +165,13 @@ properties:
               required: true
               item_type:
                 type: String
-            - name: 'effect'
+            - name: effect
               type: String
               description: |
                 The access relationship of principals to the resources in this rule.
                 Possible values: ALLOW
               required: true
-      - name: 'enforcementVersion'
+      - name: enforcementVersion
         type: String
         description: |
           The version number that indicates which Google Cloud services

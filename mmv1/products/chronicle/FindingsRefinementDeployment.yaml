@@ -1,0 +1,131 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: FindingsRefinementDeployment
+description: The FindingsRefinementDeployment resource represents the deployment state of a findings refinement.
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/FindingsRefinementDeployment'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment?updateMask=*
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/findingsRefinements/{{findings_refinement}}/deployment
+update_mask: true
+create_verb: PATCH
+update_verb: PATCH
+# The API does not support deletion of FindingsRefinementsDeployment resources.
+exclude_delete: true
+autogen_status: RmluZGluZ3NSZWZpbmVtZW50RGVwbG95bWVudA==
+samples:
+  - name: 'chronicle_findings_refinement_deployment_update'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'chronicle_findings_refinement_deployment_full'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        resource_id_vars:
+          display_name: findings_refinement_display_name
+        vars:
+          enabled: true
+      - name: 'chronicle_findings_refinement_deployment_update'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        resource_id_vars:
+          display_name: findings_refinement_display_name
+        vars:
+          enabled: false
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: findings_refinement
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: archived
+    type: Boolean
+    description: |-
+      The archive state of the findings refinement deployment.
+      Cannot be set to true unless enabled is set to false.
+      If currently set to true, enabled cannot be updated to true.
+  - name: detectionExclusionApplication
+    type: NestedObject
+    description: Describes the detectors a detection exclusion is applied to.
+    properties:
+      - name: curatedRuleSets
+        type: Array
+        description: |-
+          The CuratedRuleSets this detection exclusion applies to.
+          Format:
+          projects/{project}/locations/{location}/instances/{instance}/curatedRuleSetCategories/{category}/curatedRuleSets/{rule_set}
+        item_type:
+          type: String
+      - name: curatedRules
+        type: Array
+        description: |-
+          The CuratedRules this detection exclusion applies to.
+          Format:
+          projects/{project}/locations/{location}/instances/{instance}/curatedRules/{rule}
+        item_type:
+          type: String
+      - name: deletedCuratedRuleSets
+        type: Array
+        description: |-
+          The deleted CuratedRuleSets this detection exclusion applies to.
+          Indicates to the customer that the detection exclusion no longer applies
+          to the rule sets, so the detection exclusion should be updated.
+          Format:
+          projects/{project}/locations/{location}/instances/{instance}/curatedRuleSetCategories/{category}/curatedRuleSets/{rule_set}
+        output: true
+        item_type:
+          type: String
+      - name: rules
+        type: Array
+        description: |-
+          The Rules this detection exclusion applies to.
+          Format:
+          projects/{project}/locations/{location}/instances/{instance}/rules/{rule}
+        item_type:
+          type: String
+  - name: enabled
+    type: Boolean
+    description: |-
+      Whether the findings refinement is currently deployed continuously against
+      incoming findings.
+  - name: name
+    type: String
+    output: true
+    description: |-
+      The resource name of the findings refinement deployment.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/findingsRefinements/{findings_refinement}/deployment
+  - name: updateTime
+    type: String
+    description: The timestamp when the findings refinement deployment was last updated.
+    output: true

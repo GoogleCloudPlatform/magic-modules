@@ -1,0 +1,989 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Report
+description: Report represents an analytical assessment report summarizing infrastructure size, costs, and target suggestions.
+base_url: projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config}}/reports
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config}}/reports/{{report_id}}
+create_url: projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config}}/reports?reportId={{report_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/reportConfigs/{{report_config}}/reports/{{report_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: UmVwb3J0QXV0b2dlblYyQWdlbnQ=
+autogen_async: true
+samples:
+  - name: migration_center_report_basic
+    primary_resource_id: default
+    steps:
+      - name: migration_center_report_basic
+        resource_id_vars:
+          report_id: report-test
+          report_config_id: report-config-test
+          pref_set_id: pref-set-test
+          group_id: group-test
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: report_config
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: reportId
+    type: String
+    required: true
+    description: |-
+      User specified id for the report. It will become the last component
+      of the report name. The id must be unique within the project, must
+      conform with RFC-1034, is restricted to lower-cased letters, and has a
+      maximum length of 63 characters. The id must match the regular expression:
+      [a-z]([a-z0-9-]{0,61}[a-z0-9])?.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: Creation timestamp.
+    output: true
+  - name: description
+    type: String
+    description: Free-text description.
+  - name: displayName
+    type: String
+    description: User-friendly display name. Maximum length is 63 characters.
+  - name: name
+    type: String
+    description: Name of resource.
+    output: true
+  - name: state
+    type: String
+    description: |-
+      Report creation state.
+      Possible values:
+      PENDING
+      SUCCEEDED
+      FAILED
+    output: true
+  - name: summary
+    type: NestedObject
+    output: true
+    description: |-
+      Describes the Summary view of a Report, which contains aggregated values
+      for all the groups and preference sets included in this Report.
+    properties:
+      - name: allAssetsStats
+        output: true
+        type: NestedObject
+        description: Aggregate statistics for a collection of assets.
+        properties:
+          - name: coreCountHistogram
+            output: true
+            type: NestedObject
+            description: |-
+              A Histogram Chart shows a distribution of values into buckets, showing
+              a count of values which fall into a bucket.
+            properties:
+              - name: buckets
+                output: true
+                type: Array
+                description: |-
+                  Buckets in the histogram.
+                  There will be `n+1` buckets matching `n` lower bounds in the request.
+                  The first bucket will be from -infinity to the first bound.
+                  Subsequent buckets will be between one bound and the next.
+                  The final bucket will be from the final bound to infinity.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: count
+                      output: true
+                      type: String
+                      description: Count of items in the bucket.
+                    - name: lowerBound
+                      output: true
+                      type: String
+                      description: Lower bound - inclusive.
+                    - name: upperBound
+                      output: true
+                      type: String
+                      description: Upper bound - exclusive.
+          - name: memoryBytesHistogram
+            output: true
+            type: NestedObject
+            description: |-
+              A Histogram Chart shows a distribution of values into buckets, showing
+              a count of values which fall into a bucket.
+            properties:
+              - name: buckets
+                output: true
+                type: Array
+                description: |-
+                  Buckets in the histogram.
+                  There will be `n+1` buckets matching `n` lower bounds in the request.
+                  The first bucket will be from -infinity to the first bound.
+                  Subsequent buckets will be between one bound and the next.
+                  The final bucket will be from the final bound to infinity.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: count
+                      output: true
+                      type: String
+                      description: Count of items in the bucket.
+                    - name: lowerBound
+                      output: true
+                      type: String
+                      description: Lower bound - inclusive.
+                    - name: upperBound
+                      output: true
+                      type: String
+                      description: Upper bound - exclusive.
+          - name: memoryUtilizationChart
+            output: true
+            type: NestedObject
+            description: |-
+              Utilization Chart is a specific type of visualization which displays
+              a metric classified into "Used" and "Free" buckets.
+            properties:
+              - name: free
+                output: true
+                type: String
+                description: Aggregate value which falls into the "Free" bucket.
+              - name: used
+                output: true
+                type: String
+                description: Aggregate value which falls into the "Used" bucket.
+          - name: operatingSystem
+            output: true
+            type: NestedObject
+            description: Describes a collection of data points rendered as a Chart.
+            properties:
+              - name: dataPoints
+                output: true
+                type: Array
+                description: |-
+                  Each data point in the chart is represented as a name-value pair
+                  with the name being the x-axis label, and the value being the y-axis
+                  value.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: label
+                      output: true
+                      type: String
+                      description: The X-axis label for this data point.
+                    - name: value
+                      output: true
+                      type: Double
+                      description: The Y-axis value for this data point.
+          - name: softwareInstances
+            output: true
+            type: NestedObject
+            description: Describes a collection of data points rendered as a Chart.
+            properties:
+              - name: dataPoints
+                output: true
+                type: Array
+                description: |-
+                  Each data point in the chart is represented as a name-value pair
+                  with the name being the x-axis label, and the value being the y-axis
+                  value.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: label
+                      output: true
+                      type: String
+                      description: The X-axis label for this data point.
+                    - name: value
+                      output: true
+                      type: Double
+                      description: The Y-axis value for this data point.
+          - name: storageBytesHistogram
+            output: true
+            type: NestedObject
+            description: |-
+              A Histogram Chart shows a distribution of values into buckets, showing
+              a count of values which fall into a bucket.
+            properties:
+              - name: buckets
+                output: true
+                type: Array
+                description: |-
+                  Buckets in the histogram.
+                  There will be `n+1` buckets matching `n` lower bounds in the request.
+                  The first bucket will be from -infinity to the first bound.
+                  Subsequent buckets will be between one bound and the next.
+                  The final bucket will be from the final bound to infinity.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: count
+                      output: true
+                      type: String
+                      description: Count of items in the bucket.
+                    - name: lowerBound
+                      output: true
+                      type: String
+                      description: Lower bound - inclusive.
+                    - name: upperBound
+                      output: true
+                      type: String
+                      description: Upper bound - exclusive.
+          - name: storageUtilizationChart
+            output: true
+            type: NestedObject
+            description: |-
+              Utilization Chart is a specific type of visualization which displays
+              a metric classified into "Used" and "Free" buckets.
+            properties:
+              - name: free
+                output: true
+                type: String
+                description: Aggregate value which falls into the "Free" bucket.
+              - name: used
+                output: true
+                type: String
+                description: Aggregate value which falls into the "Used" bucket.
+          - name: totalAssets
+            output: true
+            type: String
+            description: Count of the number of unique assets in this collection.
+          - name: totalCores
+            output: true
+            type: String
+            description: Sum of the CPU core count of all the assets in this collection.
+          - name: totalMemoryBytes
+            output: true
+            type: String
+            description: Sum of the memory in bytes of all the assets in this collection.
+          - name: totalStorageBytes
+            output: true
+            type: String
+            description: Sum of persistent storage in bytes of all the assets in this collection.
+      - name: groupFindings
+        output: true
+        type: Array
+        description: Findings for each Group included in this report.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: assetAggregateStats
+              output: true
+              type: NestedObject
+              description: Aggregate statistics for a collection of assets.
+              properties:
+                - name: coreCountHistogram
+                  output: true
+                  type: NestedObject
+                  description: |-
+                    A Histogram Chart shows a distribution of values into buckets, showing
+                    a count of values which fall into a bucket.
+                  properties:
+                    - name: buckets
+                      output: true
+                      type: Array
+                      description: |-
+                        Buckets in the histogram.
+                        There will be `n+1` buckets matching `n` lower bounds in the request.
+                        The first bucket will be from -infinity to the first bound.
+                        Subsequent buckets will be between one bound and the next.
+                        The final bucket will be from the final bound to infinity.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: count
+                            output: true
+                            type: String
+                            description: Count of items in the bucket.
+                          - name: lowerBound
+                            output: true
+                            type: String
+                            description: Lower bound - inclusive.
+                          - name: upperBound
+                            output: true
+                            type: String
+                            description: Upper bound - exclusive.
+                - name: memoryBytesHistogram
+                  output: true
+                  type: NestedObject
+                  description: |-
+                    A Histogram Chart shows a distribution of values into buckets, showing
+                    a count of values which fall into a bucket.
+                  properties:
+                    - name: buckets
+                      output: true
+                      type: Array
+                      description: |-
+                        Buckets in the histogram.
+                        There will be `n+1` buckets matching `n` lower bounds in the request.
+                        The first bucket will be from -infinity to the first bound.
+                        Subsequent buckets will be between one bound and the next.
+                        The final bucket will be from the final bound to infinity.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: count
+                            output: true
+                            type: String
+                            description: Count of items in the bucket.
+                          - name: lowerBound
+                            output: true
+                            type: String
+                            description: Lower bound - inclusive.
+                          - name: upperBound
+                            output: true
+                            type: String
+                            description: Upper bound - exclusive.
+                - name: memoryUtilizationChart
+                  output: true
+                  type: NestedObject
+                  description: |-
+                    Utilization Chart is a specific type of visualization which displays
+                    a metric classified into "Used" and "Free" buckets.
+                  properties:
+                    - name: free
+                      output: true
+                      type: String
+                      description: Aggregate value which falls into the "Free" bucket.
+                    - name: used
+                      output: true
+                      type: String
+                      description: Aggregate value which falls into the "Used" bucket.
+                - name: operatingSystem
+                  output: true
+                  type: NestedObject
+                  description: Describes a collection of data points rendered as a Chart.
+                  properties:
+                    - name: dataPoints
+                      output: true
+                      type: Array
+                      description: |-
+                        Each data point in the chart is represented as a name-value pair
+                        with the name being the x-axis label, and the value being the y-axis
+                        value.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: label
+                            output: true
+                            type: String
+                            description: The X-axis label for this data point.
+                          - name: value
+                            output: true
+                            type: Double
+                            description: The Y-axis value for this data point.
+                - name: softwareInstances
+                  output: true
+                  type: NestedObject
+                  description: Describes a collection of data points rendered as a Chart.
+                  properties:
+                    - name: dataPoints
+                      output: true
+                      type: Array
+                      description: |-
+                        Each data point in the chart is represented as a name-value pair
+                        with the name being the x-axis label, and the value being the y-axis
+                        value.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: label
+                            output: true
+                            type: String
+                            description: The X-axis label for this data point.
+                          - name: value
+                            output: true
+                            type: Double
+                            description: The Y-axis value for this data point.
+                - name: storageBytesHistogram
+                  output: true
+                  type: NestedObject
+                  description: |-
+                    A Histogram Chart shows a distribution of values into buckets, showing
+                    a count of values which fall into a bucket.
+                  properties:
+                    - name: buckets
+                      output: true
+                      type: Array
+                      description: |-
+                        Buckets in the histogram.
+                        There will be `n+1` buckets matching `n` lower bounds in the request.
+                        The first bucket will be from -infinity to the first bound.
+                        Subsequent buckets will be between one bound and the next.
+                        The final bucket will be from the final bound to infinity.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: count
+                            output: true
+                            type: String
+                            description: Count of items in the bucket.
+                          - name: lowerBound
+                            output: true
+                            type: String
+                            description: Lower bound - inclusive.
+                          - name: upperBound
+                            output: true
+                            type: String
+                            description: Upper bound - exclusive.
+                - name: storageUtilizationChart
+                  output: true
+                  type: NestedObject
+                  description: |-
+                    Utilization Chart is a specific type of visualization which displays
+                    a metric classified into "Used" and "Free" buckets.
+                  properties:
+                    - name: free
+                      output: true
+                      type: String
+                      description: Aggregate value which falls into the "Free" bucket.
+                    - name: used
+                      output: true
+                      type: String
+                      description: Aggregate value which falls into the "Used" bucket.
+                - name: totalAssets
+                  output: true
+                  type: String
+                  description: Count of the number of unique assets in this collection.
+                - name: totalCores
+                  output: true
+                  type: String
+                  description: Sum of the CPU core count of all the assets in this collection.
+                - name: totalMemoryBytes
+                  output: true
+                  type: String
+                  description: Sum of the memory in bytes of all the assets in this collection.
+                - name: totalStorageBytes
+                  output: true
+                  type: String
+                  description: Sum of persistent storage in bytes of all the assets in this collection.
+            - name: description
+              output: true
+              type: String
+              description: Description for the Group.
+            - name: displayName
+              output: true
+              type: String
+              description: Display Name for the Group.
+            - name: overlappingAssetCount
+              output: true
+              type: String
+              description: This field is deprecated, do not rely on it having a value.
+            - name: preferenceSetFindings
+              output: true
+              type: Array
+              description: Findings for each of the PreferenceSets for this group.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: computeEngineFinding
+                    output: true
+                    type: NestedObject
+                    description: A set of findings that applies to assets destined for Compute Engine.
+                    properties:
+                      - name: allocatedAssetCount
+                        output: true
+                        type: String
+                        description: Count of assets which were allocated.
+                      - name: allocatedDiskTypes
+                        output: true
+                        type: Array
+                        description: Set of disk types allocated to assets.
+                        item_type:
+                          type: String
+                      - name: allocatedRegions
+                        output: true
+                        type: Array
+                        description: Set of regions in which the assets were allocated.
+                        item_type:
+                          type: String
+                      - name: machineSeriesAllocations
+                        output: true
+                        type: Array
+                        description: Distribution of assets based on the Machine Series.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: allocatedAssetCount
+                              output: true
+                              type: String
+                              description: Count of assets allocated to this machine series.
+                            - name: machineSeries
+                              output: true
+                              type: NestedObject
+                              description: |-
+                                A machine series, for a target product
+                                (e.g. Compute Engine, Google Cloud VMware Engine).
+                              properties:
+                                - name: code
+                                  output: true
+                                  type: String
+                                  description: |-
+                                    Code to identify a machine series.
+                                    Consult this for more details on the available series for Compute Engine:
+                                    https://cloud.google.com/compute/docs/machine-resource#machine_type_comparison
+                                    Consult this for more details on the available series for Google Cloud
+                                    VMware Engine:
+                                    https://cloud.google.com/vmware-engine/pricing
+                  - name: description
+                    output: true
+                    type: String
+                    description: Description for the Preference Set.
+                  - name: displayName
+                    output: true
+                    type: String
+                    description: Display Name of the Preference Set
+                  - name: machinePreferences
+                    output: true
+                    type: NestedObject
+                    description: |-
+                      VirtualMachinePreferences enables you to create sets of assumptions, for
+                      example, a geographical location and pricing track, for your migrated virtual
+                      machines. The set of preferences influence recommendations for migrating
+                      virtual machine assets.
+                    properties:
+                      - name: commitmentPlan
+                        output: true
+                        type: String
+                        description: |-
+                          Possible values:
+                          COMMITMENT_PLAN_NONE
+                          COMMITMENT_PLAN_ONE_YEAR
+                          COMMITMENT_PLAN_THREE_YEARS
+                      - name: computeEnginePreferences
+                        output: true
+                        type: NestedObject
+                        description: The user preferences relating to Compute Engine target platform.
+                        properties:
+                          - name: licenseType
+                            output: true
+                            type: String
+                            description: |-
+                              Possible values:
+                              LICENSE_TYPE_DEFAULT
+                              LICENSE_TYPE_BRING_YOUR_OWN_LICENSE
+                          - name: machinePreferences
+                            output: true
+                            type: NestedObject
+                            description: |-
+                              The type of machines to consider when calculating virtual machine migration
+                              insights and recommendations.
+                              Not all machine types are available in all zones and regions.
+                            properties:
+                              - name: allowedMachineSeries
+                                output: true
+                                type: Array
+                                description: |-
+                                  Compute Engine machine series to consider for insights and recommendations.
+                                  If empty, no restriction is applied on the machine series.
+                                item_type:
+                                  type: NestedObject
+                                  properties:
+                                    - name: code
+                                      output: true
+                                      type: String
+                                      description: |-
+                                        Code to identify a machine series.
+                                        Consult this for more details on the available series for Compute Engine:
+                                        https://cloud.google.com/compute/docs/machine-resource#machine_type_comparison
+                                        Consult this for more details on the available series for Google Cloud
+                                        VMware Engine:
+                                        https://cloud.google.com/vmware-engine/pricing
+                          - name: persistentDiskType
+                            output: true
+                            type: String
+                            description: |-
+                              Possible values:
+                              PERSISTENT_DISK_TYPE_STANDARD
+                              PERSISTENT_DISK_TYPE_BALANCED
+                              PERSISTENT_DISK_TYPE_SSD
+                      - name: regionPreferences
+                        output: true
+                        type: NestedObject
+                        description: The user preferences relating to target regions.
+                        properties:
+                          - name: preferredRegions
+                            output: true
+                            type: Array
+                            description: |-
+                              A list of preferred regions,
+                              ordered by the most preferred region first.
+                              Set only valid Google Cloud region names.
+                              See https://cloud.google.com/compute/docs/regions-zones
+                              for available regions.
+                            item_type:
+                              type: String
+                      - name: sizingOptimizationStrategy
+                        output: true
+                        type: String
+                        description: |-
+                          Possible values:
+                          SIZING_OPTIMIZATION_STRATEGY_SAME_AS_SOURCE
+                          SIZING_OPTIMIZATION_STRATEGY_MODERATE
+                          SIZING_OPTIMIZATION_STRATEGY_AGGRESSIVE
+                      - name: soleTenancyPreferences
+                        output: true
+                        type: NestedObject
+                        description: Preferences concerning Sole Tenancy nodes and VMs.
+                        properties:
+                          - name: commitmentPlan
+                            output: true
+                            type: String
+                            description: |-
+                              Commitment plan to consider when calculating costs for virtual machine
+                              insights and recommendations.
+                              If you are unsure which value to set, a 3 year commitment plan is often a
+                              good value to start with.
+                              Possible values:
+                              ON_DEMAND
+                              COMMITMENT_1_YEAR
+                              COMMITMENT_3_YEAR
+                          - name: cpuOvercommitRatio
+                            output: true
+                            type: Double
+                            description: |-
+                              CPU overcommit ratio.
+                              Acceptable values are between 1.0 and 2.0 inclusive.
+                          - name: hostMaintenancePolicy
+                            output: true
+                            type: String
+                            description: |-
+                              Sole Tenancy nodes maintenance policy.
+                              Possible values:
+                              HOST_MAINTENANCE_POLICY_DEFAULT
+                              HOST_MAINTENANCE_POLICY_RESTART_IN_PLACE
+                              HOST_MAINTENANCE_POLICY_MIGRATE_WITHIN_NODE_GROUP
+                          - name: nodeTypes
+                            output: true
+                            type: Array
+                            description: |-
+                              A list of sole tenant node types.
+                              An empty list means that all possible node types will be considered.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: nodeName
+                                  output: true
+                                  type: String
+                                  description: |-
+                                    Name of the Sole Tenant node. Consult
+                                    https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes
+                      - name: targetProduct
+                        output: true
+                        type: String
+                        description: |-
+                          Possible values:
+                          COMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE
+                          COMPUTE_MIGRATION_TARGET_PRODUCT_VMWARE_ENGINE
+                          COMPUTE_MIGRATION_TARGET_PRODUCT_SOLE_TENANCY
+                      - name: vmwareEnginePreferences
+                        output: true
+                        type: NestedObject
+                        description: The user preferences relating to Google Cloud VMware Engine target platform.
+                        properties:
+                          - name: commitmentPlan
+                            output: true
+                            type: String
+                            description: |-
+                              Commitment plan to consider when calculating costs for virtual machine
+                              insights and recommendations.
+                              If you are unsure which value to set, a 3 year commitment plan is often a
+                              good value to start with.
+                              Possible values:
+                              ON_DEMAND
+                              COMMITMENT_1_YEAR_MONTHLY_PAYMENTS
+                              COMMITMENT_3_YEAR_MONTHLY_PAYMENTS
+                              COMMITMENT_1_YEAR_UPFRONT_PAYMENT
+                              COMMITMENT_3_YEAR_UPFRONT_PAYMENT
+                          - name: cpuOvercommitRatio
+                            output: true
+                            type: Double
+                            description: |-
+                              CPU overcommit ratio.
+                              Acceptable values are between 1.0 and 8.0, with 0.1 increment.
+                          - name: memoryOvercommitRatio
+                            output: true
+                            type: Double
+                            description: |-
+                              Memory overcommit ratio.
+                              Acceptable values are 1.0, 1.25, 1.5, 1.75 and 2.0.
+                          - name: storageDeduplicationCompressionRatio
+                            output: true
+                            type: Double
+                            description: |-
+                              The Deduplication and Compression ratio is based on the logical (Used
+                              Before) space required to store data before applying deduplication and
+                              compression, in relation to the physical (Used After) space required after
+                              applying deduplication and compression. Specifically, the ratio is the Used
+                              Before space divided by the Used After space. For example, if the Used
+                              Before space is 3 GB, but the physical Used After space is 1 GB, the
+                              deduplication and compression ratio is 3x. Acceptable values are
+                              between 1.0 and 4.0.
+                  - name: monthlyCostCompute
+                    output: true
+                    type: NestedObject
+                    description: Represents an amount of money with its currency type.
+                    properties:
+                      - name: currencyCode
+                        output: true
+                        type: String
+                        description: The three-letter currency code defined in ISO 4217.
+                      - name: nanos
+                        output: true
+                        type: Integer
+                        description: |-
+                          Number of nano (10^-9) units of the amount.
+                          The value must be between -999,999,999 and +999,999,999 inclusive.
+                          If `units` is positive, `nanos` must be positive or zero.
+                          If `units` is zero, `nanos` can be positive, zero, or negative.
+                          If `units` is negative, `nanos` must be negative or zero.
+                          For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
+                      - name: units
+                        output: true
+                        type: String
+                        description: |-
+                          The whole units of the amount.
+                          For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
+                  - name: monthlyCostNetworkEgress
+                    output: true
+                    type: NestedObject
+                    description: Represents an amount of money with its currency type.
+                    properties:
+                      - name: currencyCode
+                        output: true
+                        type: String
+                        description: The three-letter currency code defined in ISO 4217.
+                      - name: nanos
+                        output: true
+                        type: Integer
+                        description: |-
+                          Number of nano (10^-9) units of the amount.
+                          The value must be between -999,999,999 and +999,999,999 inclusive.
+                          If `units` is positive, `nanos` must be positive or zero.
+                          If `units` is zero, `nanos` can be positive, zero, or negative.
+                          If `units` is negative, `nanos` must be negative or zero.
+                          For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
+                      - name: units
+                        output: true
+                        type: String
+                        description: |-
+                          The whole units of the amount.
+                          For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
+                  - name: monthlyCostOsLicense
+                    output: true
+                    type: NestedObject
+                    description: Represents an amount of money with its currency type.
+                    properties:
+                      - name: currencyCode
+                        output: true
+                        type: String
+                        description: The three-letter currency code defined in ISO 4217.
+                      - name: nanos
+                        output: true
+                        type: Integer
+                        description: |-
+                          Number of nano (10^-9) units of the amount.
+                          The value must be between -999,999,999 and +999,999,999 inclusive.
+                          If `units` is positive, `nanos` must be positive or zero.
+                          If `units` is zero, `nanos` can be positive, zero, or negative.
+                          If `units` is negative, `nanos` must be negative or zero.
+                          For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
+                      - name: units
+                        output: true
+                        type: String
+                        description: |-
+                          The whole units of the amount.
+                          For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
+                  - name: monthlyCostOther
+                    output: true
+                    type: NestedObject
+                    description: Represents an amount of money with its currency type.
+                    properties:
+                      - name: currencyCode
+                        output: true
+                        type: String
+                        description: The three-letter currency code defined in ISO 4217.
+                      - name: nanos
+                        output: true
+                        type: Integer
+                        description: |-
+                          Number of nano (10^-9) units of the amount.
+                          The value must be between -999,999,999 and +999,999,999 inclusive.
+                          If `units` is positive, `nanos` must be positive or zero.
+                          If `units` is zero, `nanos` can be positive, zero, or negative.
+                          If `units` is negative, `nanos` must be negative or zero.
+                          For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
+                      - name: units
+                        output: true
+                        type: String
+                        description: |-
+                          The whole units of the amount.
+                          For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
+                  - name: monthlyCostStorage
+                    output: true
+                    type: NestedObject
+                    description: Represents an amount of money with its currency type.
+                    properties:
+                      - name: currencyCode
+                        output: true
+                        type: String
+                        description: The three-letter currency code defined in ISO 4217.
+                      - name: nanos
+                        output: true
+                        type: Integer
+                        description: |-
+                          Number of nano (10^-9) units of the amount.
+                          The value must be between -999,999,999 and +999,999,999 inclusive.
+                          If `units` is positive, `nanos` must be positive or zero.
+                          If `units` is zero, `nanos` can be positive, zero, or negative.
+                          If `units` is negative, `nanos` must be negative or zero.
+                          For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
+                      - name: units
+                        output: true
+                        type: String
+                        description: |-
+                          The whole units of the amount.
+                          For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
+                  - name: monthlyCostTotal
+                    output: true
+                    type: NestedObject
+                    description: Represents an amount of money with its currency type.
+                    properties:
+                      - name: currencyCode
+                        output: true
+                        type: String
+                        description: The three-letter currency code defined in ISO 4217.
+                      - name: nanos
+                        output: true
+                        type: Integer
+                        description: |-
+                          Number of nano (10^-9) units of the amount.
+                          The value must be between -999,999,999 and +999,999,999 inclusive.
+                          If `units` is positive, `nanos` must be positive or zero.
+                          If `units` is zero, `nanos` can be positive, zero, or negative.
+                          If `units` is negative, `nanos` must be negative or zero.
+                          For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
+                      - name: units
+                        output: true
+                        type: String
+                        description: |-
+                          The whole units of the amount.
+                          For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
+                  - name: soleTenantFinding
+                    output: true
+                    type: NestedObject
+                    description: A set of findings that applies to assets destined for Sole-Tenant nodes.
+                    properties:
+                      - name: allocatedAssetCount
+                        output: true
+                        type: String
+                        description: Count of assets which are allocated
+                      - name: allocatedRegions
+                        output: true
+                        type: Array
+                        description: Set of regions in which the assets are allocated
+                        item_type:
+                          type: String
+                      - name: nodeAllocations
+                        output: true
+                        type: Array
+                        description: Set of per-nodetype allocation records
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: allocatedAssetCount
+                              output: true
+                              type: String
+                              description: Count of assets allocated to these nodes
+                            - name: node
+                              output: true
+                              type: NestedObject
+                              description: A Sole Tenant node type.
+                              properties:
+                                - name: nodeName
+                                  output: true
+                                  type: String
+                                  description: |-
+                                    Name of the Sole Tenant node. Consult
+                                    https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes
+                            - name: nodeCount
+                              output: true
+                              type: String
+                              description: Count of this node type to be provisioned
+                  - name: vmwareEngineFinding
+                    output: true
+                    type: NestedObject
+                    description: A set of findings that applies to assets destined for VMWare Engine.
+                    properties:
+                      - name: allocatedAssetCount
+                        output: true
+                        type: String
+                        description: Count of assets which are allocated
+                      - name: allocatedRegions
+                        output: true
+                        type: Array
+                        description: Set of regions in which the assets were allocated
+                        item_type:
+                          type: String
+                      - name: nodeAllocations
+                        output: true
+                        type: Array
+                        description: Set of per-nodetype allocation records
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: allocatedAssetCount
+                              output: true
+                              type: String
+                              description: Count of assets allocated to these nodes
+                            - name: nodeCount
+                              output: true
+                              type: String
+                              description: Count of this node type to be provisioned
+                            - name: vmwareNode
+                              output: true
+                              type: NestedObject
+                              description: A VMWare Engine Node
+                              properties:
+                                - name: code
+                                  output: true
+                                  type: String
+                                  description: |-
+                                    Code to identify VMware Engine node series, e.g. "ve1-standard-72". Based
+                                    on the displayName of
+                                    cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.nodeTypes
+  - name: type
+    type: String
+    description: |-
+      Report type.
+      Possible values:
+      TOTAL_COST_OF_OWNERSHIP
+  - name: updateTime
+    type: String
+    description: Last update timestamp.
+    output: true

@@ -17,3 +17,5 @@ fields:
   - field: 'restore_policy.default'
   - api_field: 'updateTime'
   - field: 'version'
+  - field: 'deletion_policy'
+    provider_only: true

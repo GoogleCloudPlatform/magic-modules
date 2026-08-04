@@ -33,6 +33,27 @@ count_in_path() {
     found=$(which -a "${1}" | uniq | wc -l)
 }
 
+count_in_path "bazel"
+if [ $found -eq 0 ]; then
+    required="bazel $(cat .bazelversion)"
+    # For now, don't set exitcode. This will mean that this error doesn't show up for `make provider` unless another part of the doctor fails.
+    # exitcode=1
+    warn "yel" "   ${required} will start being required in the near future. You can opt in now by installing bazel: https://bazel.build/install. (Recommended: Use Bazelisk.)"
+else
+    set +e
+    bazel --version 2>&1 > /dev/null
+    correctVersion=$?
+    set -e
+    required="$(cat .bazelversion)"
+    if [ $correctVersion -eq 1 ]; then
+        # For now, don't set exitcode. This will mean that this error doesn't show up for `make provider` unless another part of the doctor fails.
+        # exitcode=1
+        warn "yel" "   bazel ${required} is required and not found. See https://bazel.build/install for information on installing it. (Recommended: Use Bazelisk.)"
+    else
+        warn "grn" "   found!"
+    fi
+fi
+
 count_in_path "go"
 if [ $found -eq 0 ]; then
     exitcode=1
@@ -40,15 +61,18 @@ if [ $found -eq 0 ]; then
 else
     version=($(go version))
     version=${version[2]}
+    ok=0
     if [[ "$version" < "go1.26.0" ]]; then
+        ok=1
         exitcode=1
         warn "yel" "   $version is installed, but go 1.26 or later is required. See https://golang.org/doc/install for information on installing it."
     fi
     if [[ -z "${GOPATH}" ]]; then
+        ok=1
         exitcode=1
         warn "yel" "   GOPATH is not set. Add 'export GOPATH=\$HOME/go' to your terminal's startup script and restart your terminal."
     fi
-    if [ $exitcode -eq 0 ]; then
+    if [ $ok -eq 0 ]; then
         warn "grn" "   found!"
     fi
 fi

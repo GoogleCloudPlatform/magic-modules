@@ -1,0 +1,118 @@
+package tpgiamresource
+
+import (
+	"fmt"
+	"regexp"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+// IamIdentityParam describes a single parameter of the IAM resource URI.
+type IamIdentityParam struct {
+	Key         string // raw key for values map and regex captures (e.g. "serviceId")
+	IdentityKey string // snake_case key for identity.GetOk (e.g. "service_id")
+}
+
+// IamResourceIdentityConfig holds all the per-resource data needed to parse an
+// IAM import identity into the parent resource's id
+type IamResourceIdentityConfig struct {
+	Params    []IamIdentityParam
+	UriFormat string // fmt.Sprintf format producing the canonical resource id
+}
+
+var DefaultConfigValueFuncs = map[string]func(tpgresource.TerraformResourceData, *transport_tpg.Config) (string, error){
+	"project":  tpgresource.GetProject,
+	"zone":     tpgresource.GetZone,
+	"region":   tpgresource.GetRegion,
+	"location": tpgresource.GetLocation,
+}
+
+// ParseIamResourceIdentity resolves an IAM import identity into the parent
+// resource id string (the same shape as the IAM updater's GetResourceId()).
+func ParseIamResourceIdentity(
+	d *schema.ResourceData,
+	identity *schema.IdentityData,
+	config *transport_tpg.Config,
+	rc IamResourceIdentityConfig,
+) (string, error) {
+	// Collect the raw value supplied for each param from the import identity.
+	rawVals := make([]string, len(rc.Params))
+	for i, p := range rc.Params {
+		if rv, ok := identity.GetOk(p.IdentityKey); ok {
+			if s, ok := rv.(string); ok {
+				rawVals[i] = s
+			}
+		}
+	}
+
+	if uriRe := buildUriFormatRegexp(rc.UriFormat); uriRe != nil {
+		for i := len(rawVals) - 1; i >= 0; i-- {
+			if rawVals[i] == "" {
+				continue
+			}
+			m := uriRe.FindStringSubmatch(rawVals[i])
+			if m != nil && len(m)-1 == len(rc.Params) {
+				for j := range rc.Params {
+					rawVals[j] = m[j+1]
+				}
+				break
+			}
+		}
+	}
+
+	resolved := make(map[string]string, len(rc.Params))
+	for i, p := range rc.Params {
+		val := rawVals[i]
+		if GetDefaultConfigValue := DefaultConfigValueFuncs[p.Key]; GetDefaultConfigValue != nil && val == "" {
+			defaultVal, err := GetDefaultConfigValue(d, config)
+			if err != nil {
+				return "", err
+			}
+			if defaultVal == "" {
+				return "", fmt.Errorf("could not determine %q for IAM import identity; set it on the resource or configure the provider", p.IdentityKey)
+			}
+			resolved[p.Key] = defaultVal
+			continue
+		}
+		if val == "" {
+			return "", fmt.Errorf("import identity is missing attribute %q", p.IdentityKey)
+		}
+		resolved[p.Key] = val
+	}
+
+	args := make([]any, len(rc.Params))
+	for i, p := range rc.Params {
+		args[i] = resolved[p.Key]
+	}
+
+	return fmt.Sprintf(rc.UriFormat, args...), nil
+}
+
+func buildUriFormatRegexp(uriFormat string) *regexp.Regexp {
+	parts := strings.Split(uriFormat, "%s")
+	var sb strings.Builder
+	sb.WriteString("^")
+	for i, part := range parts {
+		sb.WriteString(regexp.QuoteMeta(part))
+		if i < len(parts)-1 {
+			if i == len(parts)-2 {
+				sb.WriteString("(.+)")
+			} else {
+				// Non-final params may themselves contain '/'
+				// (e.g. "organizations/{id}"). Use a non-greedy match so the
+				// literal separator that follows anchors the split.
+				sb.WriteString("(.+?)")
+			}
+		}
+	}
+	sb.WriteString("$")
+	re, err := regexp.Compile(sb.String())
+	if err != nil {
+		return nil
+	}
+	return re
+}

@@ -1,0 +1,408 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ImportJob
+description: ImportJob represents a batch data import task that processes uploaded data files and populates Migration Center assets.
+base_url: projects/{{project}}/locations/{{location}}/importJobs
+self_link: projects/{{project}}/locations/{{location}}/importJobs/{{import_job_id}}
+create_url: projects/{{project}}/locations/{{location}}/importJobs?importJobId={{import_job_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/importJobs/{{import_job_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: SW1wb3J0Sm9iQXV0b2dlblYyQWdlbnQ=
+autogen_async: true
+samples:
+  - name: migration_center_import_job_basic
+    primary_resource_id: default
+    steps:
+      - name: migration_center_import_job_basic
+        resource_id_vars:
+          import_job_id: import-job-test
+          source_id: source-test
+        vars:
+          display_name: Terraform integration test display
+          label_value: value
+      - name: migration_center_import_job_basic
+        resource_id_vars:
+          import_job_id: import-job-test
+          source_id: source-test
+        vars:
+          display_name: Terraform integration test display updated
+          label_value: value_updated
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: importJobId
+    type: String
+    required: true
+    description: ID of the import job.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: assetSource
+    type: String
+    required: true
+    description: Reference to a source.
+  - name: completeTime
+    type: String
+    description: The timestamp when the import job was completed.
+    output: true
+  - name: createTime
+    type: String
+    description: The timestamp when the import job was created.
+    output: true
+  - name: displayName
+    type: String
+    description: User-friendly display name. Maximum length is 256 characters.
+  - name: executionReport
+    type: NestedObject
+    output: true
+    description: A resource that reports result of the import job execution.
+    properties:
+      - name: executionErrors
+        output: true
+        type: NestedObject
+        description: A resource that aggregates errors across import job files.
+        properties:
+          - name: fileValidations
+            output: true
+            type: Array
+            description: List of errors found in files.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: fileErrors
+                  output: true
+                  type: Array
+                  description: List of file level errors.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: errorDetails
+                        output: true
+                        type: String
+                        description: The error information.
+                      - name: severity
+                        output: true
+                        type: String
+                        description: |-
+                          The severity of the error.
+                          Possible values:
+                          ERROR
+                          WARNING
+                          INFO
+                - name: fileName
+                  output: true
+                  type: String
+                  description: The name of the file.
+                - name: partialReport
+                  output: true
+                  type: Boolean
+                  description: |-
+                    Flag indicating that processing was aborted due to maximum number of
+                    errors.
+                - name: rowErrors
+                  output: true
+                  type: Array
+                  description: Partial list of rows that encountered validation error.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: archiveError
+                        output: true
+                        type: NestedObject
+                        description: Error details for an archive file.
+                        properties:
+                          - name: csvError
+                            output: true
+                            type: NestedObject
+                            description: Error details for a CSV file.
+                            properties:
+                              - name: rowNumber
+                                output: true
+                                type: Integer
+                                description: The row number where the error was detected.
+                          - name: filePath
+                            type: String
+                            description: The file path inside the archive where the error was detected.
+                            output: true
+                      - name: assetTitle
+                        type: String
+                        description: The asset title.
+                        output: true
+                      - name: csvError
+                        output: true
+                        type: NestedObject
+                        description: Error details for a CSV file.
+                        properties:
+                          - name: rowNumber
+                            output: true
+                            type: Integer
+                            description: The row number where the error was detected.
+                      - name: errors
+                        output: true
+                        type: Array
+                        description: The list of errors detected in the row.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: errorDetails
+                              output: true
+                              type: String
+                              description: The error information.
+                            - name: severity
+                              output: true
+                              type: String
+                              description: |-
+                                The severity of the error.
+                                Possible values:
+                                ERROR
+                                WARNING
+                                INFO
+                      - name: rowNumber
+                        output: true
+                        type: Integer
+                        description: The row number where the error was detected.
+                      - name: vmName
+                        output: true
+                        type: String
+                        description: The name of the VM in the row.
+                      - name: vmUuid
+                        output: true
+                        type: String
+                        description: The VM UUID.
+                      - name: xlsxError
+                        output: true
+                        type: NestedObject
+                        description: Error details for an XLSX file.
+                        properties:
+                          - name: rowNumber
+                            output: true
+                            type: Integer
+                            description: The row number where the error was detected.
+                          - name: sheet
+                            output: true
+                            type: String
+                            description: The name of the sheet where the error was detected.
+          - name: jobErrors
+            output: true
+            type: Array
+            description: List of job level errors.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: errorDetails
+                  output: true
+                  type: String
+                  description: The error information.
+                - name: severity
+                  output: true
+                  type: String
+                  description: |-
+                    The severity of the error.
+                    Possible values:
+                    ERROR
+                    WARNING
+                    INFO
+      - name: framesReported
+        output: true
+        type: Integer
+        description: Total number of asset frames reported for the import job.
+      - name: totalRowsCount
+        type: Integer
+        description: Total number of rows in the import job.
+        output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs.
+  - name: name
+    type: String
+    description: The full name of the import job.
+    output: true
+  - name: state
+    type: String
+    description: |-
+      The state of the import job.
+      Possible values:
+      IMPORT_JOB_STATE_PENDING
+      IMPORT_JOB_STATE_RUNNING
+      IMPORT_JOB_STATE_COMPLETED
+      IMPORT_JOB_STATE_FAILED
+      IMPORT_JOB_STATE_VALIDATING
+      IMPORT_JOB_STATE_FAILED_VALIDATION
+      IMPORT_JOB_STATE_READY
+    output: true
+  - name: updateTime
+    type: String
+    description: The timestamp when the import job was last updated.
+    output: true
+  - name: validationReport
+    type: NestedObject
+    output: true
+    description: A resource that aggregates errors across import job files.
+    properties:
+      - name: fileValidations
+        output: true
+        type: Array
+        description: List of errors found in files.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: fileErrors
+              output: true
+              type: Array
+              description: List of file level errors.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: errorDetails
+                    output: true
+                    type: String
+                    description: The error information.
+                  - name: severity
+                    output: true
+                    type: String
+                    description: |-
+                      The severity of the error.
+                      Possible values:
+                      ERROR
+                      WARNING
+                      INFO
+            - name: fileName
+              output: true
+              type: String
+              description: The name of the file.
+            - name: partialReport
+              output: true
+              type: Boolean
+              description: |-
+                Flag indicating that processing was aborted due to maximum number of
+                errors.
+            - name: rowErrors
+              output: true
+              type: Array
+              description: Partial list of rows that encountered validation error.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: archiveError
+                    output: true
+                    type: NestedObject
+                    description: Error details for an archive file.
+                    properties:
+                      - name: csvError
+                        output: true
+                        type: NestedObject
+                        description: Error details for a CSV file.
+                        properties:
+                          - name: rowNumber
+                            output: true
+                            type: Integer
+                            description: The row number where the error was detected.
+                      - name: filePath
+                        type: String
+                        description: The file path inside the archive where the error was detected.
+                        output: true
+                  - name: assetTitle
+                    type: String
+                    description: The asset title.
+                    output: true
+                  - name: csvError
+                    output: true
+                    type: NestedObject
+                    description: Error details for a CSV file.
+                    properties:
+                      - name: rowNumber
+                        output: true
+                        type: Integer
+                        description: The row number where the error was detected.
+                  - name: errors
+                    output: true
+                    type: Array
+                    description: The list of errors detected in the row.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: errorDetails
+                          output: true
+                          type: String
+                          description: The error information.
+                        - name: severity
+                          output: true
+                          type: String
+                          description: |-
+                            The severity of the error.
+                            Possible values:
+                            ERROR
+                            WARNING
+                            INFO
+                  - name: rowNumber
+                    output: true
+                    type: Integer
+                    description: The row number where the error was detected.
+                  - name: vmName
+                    output: true
+                    type: String
+                    description: The name of the VM in the row.
+                  - name: vmUuid
+                    output: true
+                    type: String
+                    description: The VM UUID.
+                  - name: xlsxError
+                    output: true
+                    type: NestedObject
+                    description: Error details for an XLSX file.
+                    properties:
+                      - name: rowNumber
+                        output: true
+                        type: Integer
+                        description: The row number where the error was detected.
+                      - name: sheet
+                        output: true
+                        type: String
+                        description: The name of the sheet where the error was detected.
+      - name: jobErrors
+        output: true
+        type: Array
+        description: List of job level errors.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: errorDetails
+              output: true
+              type: String
+              description: The error information.
+            - name: severity
+              output: true
+              type: String
+              description: |-
+                The severity of the error.
+                Possible values:
+                ERROR
+                WARNING
+                INFO

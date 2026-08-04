@@ -50,6 +50,13 @@ The following arguments are supported:
 
 * `description` - (Optional) A human-readable description for the role.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
+
 ## Attributes Reference
 
  In addition to the arguments listed above, the following computed attributes are
@@ -74,6 +81,18 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 ```tf
 import {
   id = "projects/{{project}}/roles/{{role_id}}"
+  to = google_project_iam_custom_role.default
+}
+```
+
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Custom Roles using identity values. For example:
+
+```tf
+import {
+  identity = {
+    project = "{{project}}"
+    role_id = "{{role_id}}"
+  }
   to = google_project_iam_custom_role.default
 }
 ```

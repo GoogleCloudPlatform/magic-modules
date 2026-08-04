@@ -1,0 +1,29 @@
+resource "google_migration_center_source" "default" {
+  location  = "us-central1"
+  source_id = "{{index $.ResourceIdVars "source_id"}}"
+  type      = "SOURCE_TYPE_DISCOVERY_CLIENT"
+}
+
+resource "google_service_account" "default" {
+  account_id   = "{{index $.ResourceIdVars "sa_id"}}"
+  display_name = "Service Account for Discovery Client"
+}
+
+resource "google_service_account" "default_2" {
+  account_id   = "{{index $.ResourceIdVars "sa_id_2"}}"
+  display_name = "Second Service Account for Discovery Client"
+}
+
+resource "google_migration_center_discovery_client" "default" {
+  location            = "us-central1"
+  discovery_client_id = "{{index $.ResourceIdVars "discovery_client_id"}}"
+  source              = google_migration_center_source.default.id
+  service_account     = {{index $.Vars "service_account"}}
+  display_name        = "{{index $.Vars "display_name"}}"
+  description         = "{{index $.Vars "description"}}"
+  expire_time         = "{{index $.Vars "expire_time"}}"
+  labels = {
+    my_key     = "{{index $.Vars "label_value"}}"
+    second_key = "second_value"
+  }
+}

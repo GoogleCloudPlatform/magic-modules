@@ -276,7 +276,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir string, rnr ExecRu
 			Version:                       provider.Private.String(),
 			Head:                          head,
 		}
-		recordReplayComment, err := formatRecordReplay(recordReplayData)
+		recordReplayComment, err := formatRecordReplay(recordReplayData, os.Stdout)
 		if err != nil {
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}

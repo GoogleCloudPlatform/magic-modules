@@ -31,6 +31,16 @@ var ServicesListGa = mapOf(
         "displayName" to "Activedirectory",
         "path" to "./google/services/activedirectory"
     ),
+    "agentidentity" to mapOf(
+        "name" to "agentidentity",
+        "displayName" to "Agent Identity",
+        "path" to "./google/services/agentidentity"
+    ),
+    "agentregistry" to mapOf(
+        "name" to "agentregistry",
+        "displayName" to "Agent Registry",
+        "path" to "./google/services/agentregistry"
+    ),
     "alloydb" to mapOf(
         "name" to "alloydb",
         "displayName" to "Alloydb",
@@ -90,6 +100,11 @@ var ServicesListGa = mapOf(
         "name" to "biglake",
         "displayName" to "Biglake",
         "path" to "./google/services/biglake"
+    ),
+    "biglakehive" to mapOf(
+        "name" to "biglakehive",
+        "displayName" to "BiglakeHive",
+        "path" to "./google/services/biglakehive"
     ),
     "biglakeiceberg" to mapOf(
         "name" to "biglakeiceberg",
@@ -236,6 +251,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Cloud Security Compliance",
         "path" to "./google/services/cloudsecuritycompliance"
     ),
+    "cloudsupport" to mapOf(
+        "name" to "cloudsupport",
+        "displayName" to "Cloudsupport",
+        "path" to "./google/services/cloudsupport"
+    ),
     "cloudtasks" to mapOf(
         "name" to "cloudtasks",
         "displayName" to "Cloudtasks",
@@ -255,6 +275,11 @@ var ServicesListGa = mapOf(
         "name" to "compute",
         "displayName" to "Compute",
         "path" to "./google/services/compute"
+    ),
+    "config" to mapOf(
+        "name" to "config",
+        "displayName" to "Config",
+        "path" to "./google/services/config"
     ),
     "contactcenterinsights" to mapOf(
         "name" to "contactcenterinsights",
@@ -560,6 +585,11 @@ var ServicesListGa = mapOf(
         "name" to "kms",
         "displayName" to "Kms",
         "path" to "./google/services/kms"
+    ),
+    "licensemanager" to mapOf(
+        "name" to "licensemanager",
+        "displayName" to "License Manager",
+        "path" to "./google/services/licensemanager"
     ),
     "logging" to mapOf(
         "name" to "logging",

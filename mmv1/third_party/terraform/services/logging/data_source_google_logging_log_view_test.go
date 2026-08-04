@@ -1,0 +1,70 @@
+package logging_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/logging"
+)
+
+func TestAccDataSourceGoogleLoggingLogView_basic(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"log_view_name": "tf-test-my-view" + randomSuffix,
+		"random_suffix": randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingLogViewDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceGoogleLoggingLogView_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_logging_log_view.basic",
+						"google_logging_log_view.logging_log_view",
+						[]string{
+							"bucket",
+							"location",
+							"name",
+							"parent",
+						},
+					),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataSourceGoogleLoggingLogView_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_logging_project_bucket_config" "logging_log_view" {
+    project        = "%{project}"
+    location       = "global"
+    retention_days = 30
+    bucket_id      = "_Default"
+}
+
+resource "google_logging_log_view" "logging_log_view" {
+  name        = "%{log_view_name}"
+  bucket      = google_logging_project_bucket_config.logging_log_view.id
+  description = "A logging view configured with Terraform"
+  filter      = "SOURCE(\"projects/myproject\") AND resource.type = \"gce_instance\" AND LOG_ID(\"stdout\")"
+}
+
+data "google_logging_log_view" "basic" {
+  parent   = google_logging_log_view.logging_log_view.parent
+  location = google_logging_log_view.logging_log_view.location
+  bucket   = google_logging_log_view.logging_log_view.bucket
+  name     = google_logging_log_view.logging_log_view.name
+}
+`, context)
+}

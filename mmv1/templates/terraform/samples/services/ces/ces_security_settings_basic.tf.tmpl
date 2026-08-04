@@ -1,0 +1,10 @@
+resource "google_ces_security_settings" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+
+  endpoint_control_policy {
+    enforcement_scope = "ALWAYS"
+    allowed_origins   = ["https://example.com", "https://google.com"]
+  }
+}
+

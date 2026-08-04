@@ -12,63 +12,66 @@
 # limitations under the License.
 
 ---
-name: 'Config'
-description: >
-  Config is a singleton resource used to configure the default Dataform settings
-  for a specified location.
-min_version: 'beta'
+name: Config
+description: |
+  Config is a singleton resource used to configure the default Dataform settings for a specified location.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dataform/docs/'
-  api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations'
-
-base_url: 'projects/{{project}}/locations/{{region}}/config'
-self_link: 'projects/{{project}}/locations/{{region}}/config'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
+    Official Documentation: https://cloud.google.com/dataform/docs/
+  api: https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations
+base_url: projects/{{project}}/locations/{{region}}/config
+min_version: beta
+self_link: projects/{{project}}/locations/{{region}}/config
 update_mask: true
+create_verb: PATCH
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{region}}/config'
-exclude_delete: true
-custom_code:
-  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl
+  - projects/{{project}}/locations/{{region}}/config
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-examples:
-  - name: 'dataform_config_with_kms_key'
-    primary_resource_id: 'config'
-    min_version: 'beta'
-    vars:
-      project_name: 'project-1'
-      key_ring_name: 'example-key-ring'
-      crypto_key_name: 'example-crypto-key-name'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["time"]
-  - name: 'dataform_config_without_kms_key'
-    primary_resource_id: 'config'
-    min_version: 'beta'
-    vars:
-      project_name: 'project-1'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["time"]
+exclude_delete: true
+custom_code:
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl
+samples:
+  - name: dataform_config_with_kms_key
+    primary_resource_id: config
+    min_version: beta
+    external_providers: [time]
+    steps:
+      - name: dataform_config_with_kms_key
+        min_version: beta
+        resource_id_vars:
+          project_name: project-1
+          key_ring_name: example-key-ring
+          crypto_key_name: example-crypto-key-name
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  - name: dataform_config_without_kms_key
+    primary_resource_id: config
+    min_version: beta
+    external_providers: [time]
+    steps:
+      - name: dataform_config_without_kms_key
+        min_version: beta
+        resource_id_vars:
+          project_name: project-1
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
 parameters:
-  - name: 'region'
+  - name: region
     type: String
     required: true
-    min_version: 'beta'
-    description: 'A reference to the region'
+    min_version: beta
+    description: A reference to the region
     immutable: true
     url_param_only: true
 properties:
-  - name: 'defaultKmsKeyName'
+  - name: defaultKmsKeyName
     type: String
     min_version: beta
-    description: >
-      Optional. A reference to the customer-managed encryption key (CMEK) that
-      will be used by default to encrypt user data.
+    description: |
+      Optional. A reference to the customer-managed encryption key (CMEK) that will be used by default to encrypt user data.

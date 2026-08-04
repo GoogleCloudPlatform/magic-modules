@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networkmanagement"
 )
 
 func TestAccNetworkManagementConnectivityTests_basic(t *testing.T) {
@@ -34,6 +36,7 @@ func TestAccNetworkManagementConnectivityTests_basic(t *testing.T) {
 							"project":            {},
 							"terraform_labels.%": {},
 							"terraform_labels.goog-terraform-provisioned": {},
+							"deletion_policy": {},
 						},
 					),
 				),
@@ -49,6 +52,7 @@ func TestAccNetworkManagementConnectivityTests_basic(t *testing.T) {
 							"project":            {},
 							"terraform_labels.%": {},
 							"terraform_labels.goog-terraform-provisioned": {},
+							"deletion_policy": {},
 						},
 					),
 				),

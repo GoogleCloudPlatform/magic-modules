@@ -12,129 +12,143 @@
 # limitations under the License.
 
 ---
-name: 'Instance'
+name: Instance
 description: |
   A Google Cloud Redis instance.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/memorystore/docs/redis/'
-  api: 'https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances'
+    Official Documentation: https://cloud.google.com/memorystore/docs/redis/
+  api: https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances
 docs:
   attributes: |
     * `auth_string` - AUTH String set on the instance. This field will only be populated if auth_enabled is true.
-base_url: 'projects/{{project}}/locations/{{region}}/instances'
-create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/locations/{{region}}/instances
+create_url: projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
 update_mask: true
+update_verb: PATCH
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+custom_diff:
+  - customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)
+  - tpgresource.DefaultProviderProject
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: false
-custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/redis_instance.tmpl'
-  constants: 'templates/terraform/constants/redis_instance.go.tmpl'
-  encoder: 'templates/terraform/encoders/redis_location_id_for_fallback_zone.go.tmpl'
-  decoder: 'templates/terraform/decoders/redis_instance.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/redis_instance.go.tmpl'
-  tgc_ignore_terraform_decoder: true
-custom_diff:
-  - 'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)'
-  - 'tpgresource.DefaultProviderProject'
 exclude_default_cdiff: true
+autogen_async: true
 include_in_tgc_next: true
-examples:
-  - name: 'redis_instance_basic'
-    primary_resource_id: 'cache'
-    vars:
-      instance_name: 'memory-cache'
-      prevent_destroy: 'true'
-    test_vars_overrides:
-      'prevent_destroy': 'false'
-    oics_vars_overrides:
-      'prevent_destroy': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'redis_instance_full'
-    primary_resource_id: 'cache'
-    vars:
-      instance_name: 'ha-memory-cache'
-      network_name: 'redis-test-network'
-      prevent_destroy: 'true'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "redis-full")'
-      'prevent_destroy': 'false'
-    oics_vars_overrides:
-      'prevent_destroy': 'false'
-  - name: 'redis_instance_full_with_persistence_config'
-    primary_resource_id: 'cache-persis'
-    vars:
-      instance_name: 'ha-memory-cache-persis'
-      network_name: 'redis-test-network'
-      prevent_destroy: 'true'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "redis-full-persis")'
-      'prevent_destroy': 'false'
-    oics_vars_overrides:
-      'prevent_destroy': 'false'
-  - name: 'redis_instance_private_service'
-    primary_resource_id: 'cache'
-    vars:
-      instance_name: 'private-cache'
-      address_name: 'address'
-      network_name: 'redis-test-network'
-      prevent_destroy: 'true'
-    test_vars_overrides:
-      'prevent_destroy': 'false'
-      # for backward compatible
-      address_name: '"address" + randomSuffix'
-    oics_vars_overrides:
-      'prevent_destroy': 'false'
+custom_code:
+  extra_schema_entry: templates/terraform/extra_schema_entry/redis_instance.tmpl
+  encoder: templates/terraform/encoders/redis_location_id_for_fallback_zone.go.tmpl
+  decoder: templates/terraform/decoders/redis_instance.go.tmpl
+  constants: templates/terraform/constants/redis_instance.go.tmpl
+  pre_delete: templates/terraform/pre_delete/redis_instance.go.tmpl
+  tgc_ignore_terraform_decoder: true
+samples:
+  - name: redis_instance_basic
+    primary_resource_id: cache
+    steps:
+      - name: redis_instance_basic
+        resource_id_vars:
+          instance_name: memory-cache
+          prevent_destroy: "true"
+        test_vars_overrides:
+          prevent_destroy: "false"
+        oics_vars_overrides:
+          prevent_destroy: "false"
+        ignore_read_extra:
+          - deletion_protection
+  - name: redis_instance_full
+    primary_resource_id: cache
+    steps:
+      - name: redis_instance_full
+        resource_id_vars:
+          instance_name: ha-memory-cache
+          network_name: redis-test-network
+          prevent_destroy: "true"
+        test_vars_overrides:
+          network_name: compute.BootstrapSharedTestNetwork(t, "redis-full")
+          prevent_destroy: "false"
+        oics_vars_overrides:
+          prevent_destroy: "false"
+  - name: redis_instance_full_with_persistence_config
+    primary_resource_id: cache-persis
+    steps:
+      - name: redis_instance_full_with_persistence_config
+        resource_id_vars:
+          instance_name: ha-memory-cache-persis
+          network_name: redis-test-network
+          prevent_destroy: "true"
+        test_vars_overrides:
+          network_name: compute.BootstrapSharedTestNetwork(t, "redis-full-persis")
+          prevent_destroy: "false"
+        oics_vars_overrides:
+          prevent_destroy: "false"
+  - name: redis_instance_private_service
+    primary_resource_id: cache
     exclude_test: true
-  - name: 'redis_instance_private_service_test'
-    primary_resource_id: 'cache'
-    vars:
-      instance_name: 'private-cache'
-      network_name: 'redis-test-network'
-      prevent_destroy: 'true'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-      'prevent_destroy': 'false'
-    oics_vars_overrides:
-      'prevent_destroy': 'false'
-    exclude_docs: true
-  - name: 'redis_instance_mrr'
-    primary_resource_id: 'cache'
-    vars:
-      instance_name: 'mrr-memory-cache'
-      network_name: 'redis-test-network'
-      prevent_destroy: 'true'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "redis-mrr")'
-      'prevent_destroy': 'false'
-    oics_vars_overrides:
-      'prevent_destroy': 'false'
-  - name: 'redis_instance_cmek'
-    primary_resource_id: 'cache'
-    vars:
-      instance_name: 'cmek-memory-cache'
-      network_name: 'redis-test-network'
-      prevent_destroy: 'true'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "redis-cmek")'
-      'prevent_destroy': 'false'
-    oics_vars_overrides:
-      'prevent_destroy': 'false'
+    steps:
+      - name: redis_instance_private_service
+        resource_id_vars:
+          instance_name: private-cache
+          address_name: address
+          network_name: redis-test-network
+          prevent_destroy: "true"
+        test_vars_overrides:
+          prevent_destroy: "false"
+          # for backward compatible
+          address_name: '"address" + randomSuffix'
+        oics_vars_overrides:
+          prevent_destroy: "false"
+  - name: redis_instance_private_service_test
+    primary_resource_id: cache
+    exclude_basic_doc: true
+    steps:
+      - name: redis_instance_private_service_test
+        resource_id_vars:
+          instance_name: private-cache
+          network_name: redis-test-network
+          prevent_destroy: "true"
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+          prevent_destroy: "false"
+        oics_vars_overrides:
+          prevent_destroy: "false"
+  - name: redis_instance_mrr
+    primary_resource_id: cache
+    steps:
+      - name: redis_instance_mrr
+        resource_id_vars:
+          instance_name: mrr-memory-cache
+          network_name: redis-test-network
+          prevent_destroy: "true"
+        test_vars_overrides:
+          network_name: compute.BootstrapSharedTestNetwork(t, "redis-mrr")
+          prevent_destroy: "false"
+        oics_vars_overrides:
+          prevent_destroy: "false"
+  - name: redis_instance_cmek
+    primary_resource_id: cache
     exclude_test: true
+    steps:
+      - name: redis_instance_cmek
+        resource_id_vars:
+          instance_name: cmek-memory-cache
+          network_name: redis-test-network
+          prevent_destroy: "true"
+        test_vars_overrides:
+          network_name: compute.BootstrapSharedTestNetwork(t, "redis-cmek")
+          prevent_destroy: "false"
+        oics_vars_overrides:
+          prevent_destroy: "false"
 virtual_fields:
-  - name: 'deletion_protection'
+  - name: deletion_protection
     description: |
       Whether Terraform will be prevented from destroying the instance.
       When a`terraform destroy` or `terraform apply` would delete the instance,
@@ -145,7 +159,7 @@ virtual_fields:
     type: Boolean
 parameters:
   # TODO: resourceref?
-  - name: 'region'
+  - name: region
     type: String
     description: |
       The name of the Redis region of the instance.
@@ -155,7 +169,7 @@ parameters:
     ignore_read: true
     default_from_api: true
 properties:
-  - name: 'alternativeLocationId'
+  - name: alternativeLocationId
     type: String
     description: |
       Only applicable to STANDARD_HA tier which protects the instance
@@ -164,14 +178,14 @@ properties:
       [locationId].
     immutable: true
     default_from_api: true
-  - name: 'authEnabled'
+  - name: authEnabled
     type: Boolean
     description: |
       Optional. Indicates whether OSS Redis AUTH is enabled for the
       instance. If set to "true" AUTH is enabled on the instance.
       Default value is "false" meaning AUTH is disabled.
     default_value: false
-  - name: 'authorizedNetwork'
+  - name: authorizedNetwork
     type: String
     description: |
       The full name of the Google Compute Engine network to which the
@@ -179,24 +193,24 @@ properties:
       will be used.
     immutable: true
     default_from_api: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/redis_instance_authorized_network.tmpl'
-  - name: 'connectMode'
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_expand: templates/terraform/custom_expand/redis_instance_authorized_network.tmpl
+  - name: connectMode
     type: Enum
     description: |
       The connection mode of the Redis instance.
     immutable: true
-    default_value: "DIRECT_PEERING"
+    default_value: DIRECT_PEERING
     enum_values:
-      - 'DIRECT_PEERING'
-      - 'PRIVATE_SERVICE_ACCESS'
-  - name: 'createTime'
+      - DIRECT_PEERING
+      - PRIVATE_SERVICE_ACCESS
+  - name: createTime
     type: Time
     description: |
       The time the instance was created in RFC3339 UTC "Zulu" format,
       accurate to nanoseconds.
     output: true
-  - name: 'currentLocationId'
+  - name: currentLocationId
     type: String
     description: |
       The current zone where the Redis endpoint is placed.
@@ -205,26 +219,26 @@ properties:
       instances, this can be either [locationId] or [alternativeLocationId]
       and can change after a failover event.
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       An arbitrary and optional user-provided name for the instance.
-  - name: 'host'
+  - name: host
     type: String
     description: |
       Hostname or IP address of the exposed Redis endpoint used by clients
       to connect to the service.
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Resource labels to represent user provided metadata.
-  - name: 'redisConfigs'
+  - name: redisConfigs
     type: KeyValuePairs
     description: |
       Redis configuration parameters, according to http://redis.io/topics/config.
       Please check Memorystore documentation for the list of supported parameters:
       https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances#Instance.FIELDS.redis_configs
-  - name: 'locationId'
+  - name: locationId
     type: String
     description: |
       The zone where the instance will be provisioned. If not provided,
@@ -234,22 +248,22 @@ properties:
       be different from [locationId].
     immutable: true
     default_from_api: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The ID of the instance or a fully qualified identifier for the instance.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    custom_expand: templates/terraform/custom_expand/shortname_to_url.go.tmpl
     validation:
-      regex: '^[a-z][a-z0-9-]{0,39}[a-z0-9]$'
-  - name: 'persistenceConfig'
+      regex: ^[a-z][a-z0-9-]{0,39}[a-z0-9]$
+  - name: persistenceConfig
     type: NestedObject
     description: Persistence configuration for an instance.
     default_from_api: true
     properties:
-      - name: 'persistenceMode'
+      - name: persistenceMode
         type: Enum
         description: |
           Optional. Controls whether Persistence features are enabled. If not provided, the existing value will be used.
@@ -259,9 +273,9 @@ properties:
         required: true
         default_from_api: true
         enum_values:
-          - 'DISABLED'
-          - 'RDB'
-      - name: 'rdbSnapshotPeriod'
+          - DISABLED
+          - RDB
+      - name: rdbSnapshotPeriod
         type: Enum
         description: |
           Optional. Available snapshot periods for scheduling.
@@ -272,11 +286,11 @@ properties:
           - TWENTY_FOUR_HOURS:	Snapshot every 24 hours.
         required: false
         enum_values:
-          - 'ONE_HOUR'
-          - 'SIX_HOURS'
-          - 'TWELVE_HOURS'
-          - 'TWENTY_FOUR_HOURS'
-      - name: 'rdbNextSnapshotTime'
+          - ONE_HOUR
+          - SIX_HOURS
+          - TWELVE_HOURS
+          - TWENTY_FOUR_HOURS
+      - name: rdbNextSnapshotTime
         type: String
         description: |
           Output only. The next time that a snapshot attempt is scheduled to occur.
@@ -284,7 +298,7 @@ properties:
           to nine fractional digits.
           Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
         output: true
-      - name: 'rdbSnapshotStartTime'
+      - name: rdbSnapshotStartTime
         type: String
         description: |
           Optional. Date and time that the first snapshot was/will be attempted,
@@ -294,31 +308,31 @@ properties:
           and up to nine fractional digits.
           Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
         default_from_api: true
-  - name: 'maintenancePolicy'
+  - name: maintenancePolicy
     type: NestedObject
     description: Maintenance policy for an instance.
     properties:
-      - name: 'createTime'
+      - name: createTime
         type: String
         description: |
           Output only. The time when the policy was created.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
-      - name: 'updateTime'
+      - name: updateTime
         type: String
         description: |
           Output only. The time when the policy was last updated.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
-      - name: 'description'
+      - name: description
         type: String
         description: |
           Optional. Description of what this policy is for.
           Create/Update methods return INVALID_ARGUMENT if the
           length is greater than 512.
-      - name: 'weeklyMaintenanceWindow'
+      - name: weeklyMaintenanceWindow
         type: Array
         description: |
           Optional. Maintenance window that is applied to resources covered by this policy.
@@ -327,7 +341,7 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'day'
+            - name: day
               type: Enum
               description: |
                 Required. The day of week that maintenance updates occur.
@@ -342,15 +356,15 @@ properties:
                 - SUNDAY: Sunday
               required: true
               enum_values:
-                - 'DAY_OF_WEEK_UNSPECIFIED'
-                - 'MONDAY'
-                - 'TUESDAY'
-                - 'WEDNESDAY'
-                - 'THURSDAY'
-                - 'FRIDAY'
-                - 'SATURDAY'
-                - 'SUNDAY'
-            - name: 'duration'
+                - DAY_OF_WEEK_UNSPECIFIED
+                - MONDAY
+                - TUESDAY
+                - WEDNESDAY
+                - THURSDAY
+                - FRIDAY
+                - SATURDAY
+                - SUNDAY
+            - name: duration
               type: String
               description: |
                 Output only. Duration of the maintenance window.
@@ -358,7 +372,7 @@ properties:
                 A duration in seconds with up to nine fractional digits,
                 terminated by 's'. Example: "3.5s".
               output: true
-            - name: 'startTime'
+            - name: startTime
               type: NestedObject
               description: |
                 Required. Start time of the window in UTC time.
@@ -366,52 +380,52 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
-                - name: 'hours'
+                - name: hours
                   type: Integer
                   description: |
                     Hours of day in 24 hour format. Should be from 0 to 23.
                     An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                   validation:
-                    function: 'validation.IntBetween(0,23)'
-                - name: 'minutes'
+                    function: validation.IntBetween(0,23)
+                - name: minutes
                   type: Integer
                   description: |
                     Minutes of hour of day. Must be from 0 to 59.
                   validation:
-                    function: 'validation.IntBetween(0,59)'
-                - name: 'seconds'
+                    function: validation.IntBetween(0,59)
+                - name: seconds
                   type: Integer
                   description: |
                     Seconds of minutes of the time. Must normally be from 0 to 59.
                     An API may allow the value 60 if it allows leap-seconds.
                   validation:
-                    function: 'validation.IntBetween(0,60)'
-                - name: 'nanos'
+                    function: validation.IntBetween(0,60)
+                - name: nanos
                   type: Integer
                   description: |
                     Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
                   validation:
-                    function: 'validation.IntBetween(0,999999999)'
-  - name: 'maintenanceSchedule'
+                    function: validation.IntBetween(0,999999999)
+  - name: maintenanceSchedule
     type: NestedObject
     description: Upcoming maintenance schedule.
     output: true
     properties:
-      - name: 'startTime'
+      - name: startTime
         type: String
         description: |
           Output only. The start time of any upcoming scheduled maintenance for this instance.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
-      - name: 'endTime'
+      - name: endTime
         type: String
         description: |
           Output only. The end time of any upcoming scheduled maintenance for this instance.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
-      - name: 'scheduleDeadlineTime'
+      - name: scheduleDeadlineTime
         type: String
         description: |
           Output only. The deadline that the maintenance schedule start time
@@ -419,20 +433,20 @@ properties:
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
-  - name: 'maintenanceVersion'
+  - name: maintenanceVersion
     type: String
     description: The self service update maintenance version.
     required: false
     default_from_api: true
-  - name: 'memorySizeGb'
+  - name: memorySizeGb
     type: Integer
     description: Redis memory size in GiB.
     required: true
-  - name: 'port'
+  - name: port
     type: Integer
     description: The port number of the exposed Redis endpoint.
     output: true
-  - name: 'persistenceIamIdentity'
+  - name: persistenceIamIdentity
     type: String
     description: |
       Output only. Cloud IAM identity used by import / export operations
@@ -440,16 +454,16 @@ properties:
       The value may change over time for a given instance so should be
       checked before each import/export operation.
     output: true
-  - name: 'redisVersion'
+  - name: redisVersion
     type: String
     description: |
       The version of Redis software. If not provided, latest supported
       version will be used. Please check the API documentation linked
       at the top for the latest valid values.
     default_from_api: true
-    update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
-    update_verb: 'POST'
-  - name: 'reservedIpRange'
+    update_url: projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade
+    update_verb: POST
+  - name: reservedIpRange
     type: String
     description: |
       The CIDR range of internal addresses that are reserved for this
@@ -462,7 +476,7 @@ properties:
     # but will be a subset of the range.
     ignore_read: true
     default_from_api: true
-  - name: 'effectiveReservedIpRange'
+  - name: effectiveReservedIpRange
     type: String
     description: |
       The CIDR range of internal addresses that are reserved for this
@@ -472,7 +486,7 @@ properties:
       network.
     output: true
     api_name: reservedIpRange
-  - name: 'tier'
+  - name: tier
     type: Enum
     description: |
       The service tier of the instance. Must be one of these values:
@@ -480,22 +494,22 @@ properties:
       - BASIC: standalone instance
       - STANDARD_HA: highly available primary/replica instances
     immutable: true
-    default_value: "BASIC"
+    default_value: BASIC
     enum_values:
-      - 'BASIC'
-      - 'STANDARD_HA'
-  - name: 'transitEncryptionMode'
+      - BASIC
+      - STANDARD_HA
+  - name: transitEncryptionMode
     type: Enum
     description: |
       The TLS mode of the Redis instance, If not provided, TLS is disabled for the instance.
 
       - SERVER_AUTHENTICATION: Client to Server traffic encryption enabled with server authentication
     immutable: true
-    default_value: "DISABLED"
+    default_value: DISABLED
     enum_values:
-      - 'SERVER_AUTHENTICATION'
-      - 'DISABLED'
-  - name: 'serverCaCerts'
+      - SERVER_AUTHENTICATION
+      - DISABLED
+  - name: serverCaCerts
     type: Array
     description: |
       List of server CA certificates for the instance.
@@ -503,32 +517,32 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'serialNumber'
+        - name: serialNumber
           type: String
           description: |
             Serial number, as extracted from the certificate.
           output: true
-        - name: 'cert'
+        - name: cert
           type: String
           description: |
             The certificate data in PEM format.
           output: true
-        - name: 'createTime'
+        - name: createTime
           type: String
           description: |
             The time when the certificate was created.
           output: true
-        - name: 'expireTime'
+        - name: expireTime
           type: String
           description: |
             The time when the certificate expires.
           output: true
-        - name: 'sha1Fingerprint'
+        - name: sha1Fingerprint
           type: String
           description: |
             Sha1 Fingerprint of the certificate.
           output: true
-  - name: 'replicaCount'
+  - name: replicaCount
     type: Integer
     description: |
       Optional. The number of replica nodes. The valid range for the Standard Tier with
@@ -536,7 +550,7 @@ properties:
       for a Standard Tier instance, the only valid value is 1 and the default is 1.
       The valid value for basic tier is 0 and the default is also 0.
     default_from_api: true
-  - name: 'nodes'
+  - name: nodes
     type: Array
     description: |
       Output only. Info per node.
@@ -544,30 +558,30 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'id'
+        - name: id
           type: String
           description: |
             Node identifying string. e.g. 'node-0', 'node-1'
           output: true
-        - name: 'zone'
+        - name: zone
           type: String
           description: |
             Location of the node.
           output: true
-  - name: 'readEndpoint'
+  - name: readEndpoint
     type: String
     description: |
       Output only. Hostname or IP address of the exposed readonly Redis endpoint. Standard tier only.
       Targets all healthy replica nodes in instance. Replication is asynchronous and replica nodes
       will exhibit some lag behind the primary. Write requests must target 'host'.
     output: true
-  - name: 'readEndpointPort'
+  - name: readEndpointPort
     type: Integer
     description: |
       Output only. The port number of the exposed readonly redis endpoint. Standard tier only.
       Write requests should target 'port'.
     output: true
-  - name: 'readReplicasMode'
+  - name: readReplicasMode
     type: Enum
     description: |
       Optional. Read replica mode. Can only be specified when trying to create the instance.
@@ -578,9 +592,9 @@ properties:
       can scale up and down the number of replicas.
     default_from_api: true
     enum_values:
-      - 'READ_REPLICAS_DISABLED'
-      - 'READ_REPLICAS_ENABLED'
-  - name: 'secondaryIpRange'
+      - READ_REPLICAS_DISABLED
+      - READ_REPLICAS_ENABLED
+  - name: secondaryIpRange
     type: String
     description: |
       Optional. Additional IP range for node placement. Required when enabling read replicas on
@@ -588,8 +602,8 @@ properties:
       "auto". For PRIVATE_SERVICE_ACCESS mode value must be the name of an allocated address
       range associated with the private service access connection, or "auto".
     default_from_api: true
-    diff_suppress_func: 'secondaryIpDiffSuppress'
-  - name: 'customerManagedKey'
+    diff_suppress_func: secondaryIpDiffSuppress
+  - name: customerManagedKey
     type: String
     description: |
       Optional. The KMS key reference that you want to use to encrypt the data at rest for this Redis

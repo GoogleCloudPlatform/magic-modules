@@ -29,27 +29,34 @@ update_verb: PATCH
 legacy_name: google_folder_access_approval_settings
 import_format:
   - folders/{{folder_id}}/accessApprovalSettings
+include_in_tgc_next: true
+tgc_tests:
+  - name: TestAccAccessApprovalSettings/folder
 custom_code:
   constants: templates/terraform/constants/access_approval.go.tmpl
   pre_create: templates/terraform/update_mask.go.tmpl
   post_create: templates/terraform/post_create/sleep_5_min.go.tmpl
   post_update: templates/terraform/post_create/sleep_5_min.go.tmpl
   custom_delete: templates/terraform/custom_delete/clear_folder_access_approval_settings.go.tmpl
-examples:
+samples:
   - name: folder_access_approval_full
     primary_resource_id: folder_access_approval
     exclude_test: true
-    vars:
-      folder_name: folder-faaf
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: folder_access_approval_full
+        resource_id_vars:
+          folder_name: folder-faaf
+        test_env_vars:
+          org_id: ORG_ID
   - name: folder_access_approval_active_key_version
     primary_resource_id: folder_access_approval
     exclude_test: true
-    vars:
-      folder_name: folder-faak
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: folder_access_approval_active_key_version
+        resource_id_vars:
+          folder_name: folder-faak
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
   - name: folder_id
     type: String

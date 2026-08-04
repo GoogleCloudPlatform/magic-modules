@@ -620,8 +620,15 @@ func (vt *Tester) asyncUploadCassettes(version provider.Version, branch string, 
 	}
 }
 
+func (vt *Tester) asyncCassetteUploadPath(head string, version provider.Version) string {
+	if head == "main" {
+		return fmt.Sprintf("gs://%s/%s/fixtures/", vt.cassetteBucket, version)
+	}
+	return fmt.Sprintf("gs://%s/%s/refs/heads/%s/fixtures/", vt.cassetteBucket, version, head)
+}
+
 func (vt *Tester) uploadOneCassetteFile(head string, version provider.Version, fileName string) error {
-	uploadPath := fmt.Sprintf("gs://%s/%s/refs/heads/%s/fixtures/", vt.cassetteBucket, version, head)
+	uploadPath := vt.asyncCassetteUploadPath(head, version)
 	args := []string{
 		"storage",
 		"cp",

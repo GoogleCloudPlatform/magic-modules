@@ -38,35 +38,43 @@ custom_code:
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
+  test_check_destroy: 'templates/terraform/test_check_destroy/dialogflow_conversation_profile.go.tmpl'
 exclude_sweeper: true
-examples:
+samples:
   - name: 'dialogflow_conversation_profile_basic'
     primary_resource_id: 'basic_profile'
-    vars:
-      profile_name: 'dialogflow-profile'
+    steps:
+      - name: 'dialogflow_conversation_profile_basic'
+        resource_id_vars:
+          profile_name: 'dialogflow-profile'
   - name: 'dialogflow_conversation_profile_recognition_result_notification'
     primary_resource_id: 'recognition_result_notification_profile'
-    vars:
-      profile_name: 'dialogflow-profile'
-      topic_name: 'recognition-result-notification'
+    steps:
+      - name: 'dialogflow_conversation_profile_recognition_result_notification'
+        resource_id_vars:
+          profile_name: 'dialogflow-profile'
+          topic_name: 'recognition-result-notification'
   - name: 'dialogflow_conversation_profile_beta_bidi'
     primary_resource_id: 'bidi_profile'
     min_version: beta
-    vars:
-      profile_name: 'dialogflow-profile-bidi'
-      app_id: 'app-id'
+    steps:
+      - name: 'dialogflow_conversation_profile_beta_bidi'
+        min_version: beta
+        resource_id_vars:
+          profile_name: 'dialogflow-profile-bidi'
+          app_id: 'app-id'
 parameters:
   - name: 'location'
     type: String
     url_param_only: true
     description: |
-      desc
+      The location of the conversation profile.
     required: true
 properties:
   - name: 'name'
     type: String
     description: |
-      name
+      Identifier. The unique identifier of this conversation profile.
     output: true
   - name: 'displayName'
     type: String
@@ -213,7 +221,7 @@ properties:
                     - type: NestedObject
                       name: 'sections'
                       description: |
-                        he customized sections chosen to return when requesting a summary of a conversation.
+                        The customized sections chosen to return when requesting a summary of a conversation.
                       properties:
                         - type: Array
                           name: 'sectionTypes'
@@ -224,7 +232,7 @@ properties:
                             type: Enum
                             name: 'sectionType'
                             description: |
-                                The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
+                              The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
                             enum_values:
                               - SECTION_TYPE_UNSPECIFIED
                               - SITUATION
@@ -243,7 +251,7 @@ properties:
                           name: 'agent'
                           required: true
                           description: |
-                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
+                            The name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
                         - type: NestedObject
                           name: 'humanAgentSideConfig'
                           description: |
@@ -388,7 +396,7 @@ properties:
                     - type: NestedObject
                       name: 'sections'
                       description: |
-                        he customized sections chosen to return when requesting a summary of a conversation.
+                        The customized sections chosen to return when requesting a summary of a conversation.
                       properties:
                         - type: Array
                           name: 'sectionTypes'
@@ -399,7 +407,7 @@ properties:
                             type: Enum
                             name: 'sectionType'
                             description: |
-                                The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
+                              The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
                             enum_values:
                               - SECTION_TYPE_UNSPECIFIED
                               - SITUATION
@@ -444,7 +452,7 @@ properties:
                           name: 'agent'
                           required: true
                           description: |
-                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
+                            The name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
                         - type: NestedObject
                           name: 'humanAgentSideConfig'
                           description: |
@@ -495,7 +503,7 @@ properties:
       - type: NestedObject
         name: 'messageAnalysisConfig'
         description: |
-          desc
+          Configuration for analyzing conversation messages.
         properties:
           - type: Boolean
             name: 'enableEntityExtraction'
@@ -600,7 +608,7 @@ properties:
           - AUDIO_ENCODING_AMR
           - AUDIO_ENCODING_AMR_WB
           - AUDIO_ENCODING_OGG_OPUS
-          - AUDIOENCODING_SPEEX_WITH_HEADER_BYTE
+          - AUDIO_ENCODING_SPEEX_WITH_HEADER_BYTE
       - type: Integer
         name: 'sampleRateHertz'
         description: |
@@ -617,7 +625,7 @@ properties:
       - type: Boolean
         name: 'useTimeoutBasedEndpointing'
         description: |
-          Use timeout based endpointing, interpreting endpointer sensitivy as seconds of timeout value.
+          Use timeout based endpointing, interpreting endpointer sensitivity as seconds of timeout value.
   - type: String
     name: 'languageCode'
     description: |
@@ -672,6 +680,47 @@ properties:
               - SSML_VOICE_GENDER_MALE
               - SSML_VOICE_GENDER_FEMALE
               - SSML_VOICE_GENDER_NEUTRAL
+  - type: NestedObject
+    name: 'sipConfig'
+    min_version: beta
+    description: |
+      Configuration for SIP.
+    properties:
+      - type: Boolean
+        name: 'createConversationOnTheFly'
+        description: |
+          Asks Dialogflow Telephony to create the conversation provided in the SIP header on the fly when the call comes in.
+        send_empty_value: true
+      - type: Boolean
+        name: 'inactiveStart'
+        description: |
+          Starts the conversation with inactive SDP directives
+        send_empty_value: true
+      - type: String
+        name: 'maxAudioRecordingDuration'
+        description: |
+          Max duration for audio recording. Overrides the default value of 15 min. Max value is 8 hours.
+      - type: Boolean
+        name: 'allowVirtualAgentInteraction'
+        description: |
+          Allows interactions with a Dialogflow virtual agent even if the call is connected for SIPREC purposes.
+        send_empty_value: true
+      - type: Boolean
+        name: 'keepConversationRunning'
+        description: |
+          Keeps the conversation running even if the call is disconnected.
+        send_empty_value: true
+      - type: Array
+        name: 'copyInboundCallLegHeaders'
+        description: |
+          List of inbound call leg headers to be copied to outbound call legs created later.
+        item_type:
+          type: String
+      - type: Boolean
+        name: 'ignoreReinviteMediaDirection'
+        description: |
+          Ignores any media direction in the reINVITE SDP offer. Reuse the previous media direction.
+        send_empty_value: true
   - type: NestedObject
     name: 'newRecognitionResultNotificationConfig'
     description: |

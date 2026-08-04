@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanagerregional"
 )
 
 func TestAccDataSourceSecretManagerRegionalRegionalSecrets_basic(t *testing.T) {
@@ -31,8 +32,9 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecrets_basic(t *testing.T) {
 						"data.google_secret_manager_regional_secrets.foo",
 						"google_secret_manager_regional_secret.foo",
 						map[string]struct{}{
-							"id":      {},
-							"project": {},
+							"id":              {},
+							"project":         {},
+							"deletion_policy": {},
 						},
 					),
 				),
@@ -89,8 +91,9 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecrets_filter(t *testing.T) 
 						"google_secret_manager_regional_secret.foo",
 						"google_secret_manager_regional_secret.bar",
 						map[string]struct{}{
-							"id":      {},
-							"project": {},
+							"id":              {},
+							"project":         {},
+							"deletion_policy": {},
 						},
 					),
 				),

@@ -3,7 +3,7 @@ name: Provider Build and Unit Test
 permissions: read-all
 
 env:
-  status_suffix: "-build-and-unit-tests"
+  status_suffix: "-build-and-unit-tests (full)"
 
 on:
   workflow_dispatch:
@@ -49,17 +49,17 @@ jobs:
         curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
         -H "Accept: application/vnd.github.v3+json" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${GITHUB_EVENT_INPUTS_SHA}" \
-        -d '{
-        "context": "${GITHUB_EVENT_INPUTS_REPO}${{ env.status_suffix }}",
-        "target_url": "${STEPS_GET_JOB_OUTPUTS_URL}",
-        "state": "pending"
-        }'
+        -d "{
+        \"context\": \"${GITHUB_EVENT_INPUTS_REPO}${{ env.status_suffix }}\",
+        \"target_url\": \"${STEPS_GET_JOB_OUTPUTS_URL}\",
+        \"state\": \"pending\"
+        }"
       env:
         GITHUB_EVENT_INPUTS_SHA: ${{github.event.inputs.sha}}
         GITHUB_EVENT_INPUTS_REPO: ${{ github.event.inputs.repo }}
         STEPS_GET_JOB_OUTPUTS_URL: ${{ steps.get_job.outputs.url }}
     - name: Checkout Repository
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
         ref: ${{ github.event.inputs.branch }}
@@ -85,7 +85,7 @@ jobs:
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        make testnolint
+        make testnolint TEST="$(go list -e ./... | grep -v /scripts | tr '\n' ' ')"
     - name: Lint Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
@@ -100,11 +100,11 @@ jobs:
         curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
         -H "Accept: application/vnd.github.v3+json" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${GITHUB_EVENT_INPUTS_SHA}" \
-        -d '{
-        "context": "${GITHUB_EVENT_INPUTS_REPO}${{ env.status_suffix }}",
-        "target_url": "${STEPS_GET_JOB_OUTPUTS_URL}",
-        "state": "${JOB_STATUS}"
-        }'
+        -d "{
+        \"context\": \"${GITHUB_EVENT_INPUTS_REPO}${{ env.status_suffix }}\",
+        \"target_url\": \"${STEPS_GET_JOB_OUTPUTS_URL}\",
+        \"state\": \"${JOB_STATUS}\"
+        }"
       env:
         GITHUB_EVENT_INPUTS_SHA: ${{github.event.inputs.sha}}
         GITHUB_EVENT_INPUTS_REPO: ${{ github.event.inputs.repo }}

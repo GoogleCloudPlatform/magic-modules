@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/dataplex"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -76,7 +77,7 @@ func testAccDataplexDataScanJobTriggerRunAndWaitUntilComplete(t *testing.T, reso
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{DataplexBasePath}}projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}:run")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(dataplex.Product, config)+"projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}:run")
 		if err != nil {
 			return fmt.Errorf("Failed to generate URL for triggering datascan run: %s", err)
 		}
@@ -153,7 +154,7 @@ func testAccDataplexDataQualityRules_rules_config(context map[string]interface{}
 
 func getDataScanJobState(t *testing.T, rs *terraform.ResourceState, dataScanJobId string) (string, error) {
 	config := acctest.GoogleProviderConfig(t)
-	url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{DataplexBasePath}}projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}/jobs/"+dataScanJobId)
+	url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(dataplex.Product, config)+"projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}/jobs/"+dataScanJobId)
 	if err != nil {
 		return "", fmt.Errorf("Failed to generate URL for getting data scan job state: %s", err)
 	}

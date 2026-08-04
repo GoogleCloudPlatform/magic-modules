@@ -3,7 +3,7 @@
 {{- $sample := $config.Sample }}
 {{- $step := $config.Step }}
 {{- if $sample.BootstrapIam }}
-	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 {{- range $iam := $sample.BootstrapIam }}
 		{
 			Member: "{{$iam.Member}}",

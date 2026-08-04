@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/chronicle"
 )
 
 func TestAccChronicleRule_chronicleRuleBasicExample_update(t *testing.T) {
@@ -70,6 +71,7 @@ resource "google_chronicle_data_access_scope" "data_access_scope_test" {
 resource "google_chronicle_rule" "example" {
  location = "us"
  instance = "%{chronicle_id}"
+ scope = resource.google_chronicle_data_access_scope.data_access_scope_test.name
  text = <<-EOT
              rule test_rule { meta: events:  $updated_userid = $e.principal.user.userid  match: $updated_userid over 10m condition: $e }
          EOT

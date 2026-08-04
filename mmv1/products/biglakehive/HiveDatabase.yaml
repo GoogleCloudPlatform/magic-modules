@@ -1,0 +1,109 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'HiveDatabase'
+description: |
+  Hive Databases in Biglake Metastore. Hive Databases exist within a Hive Catalog.
+references:
+  guides:
+    'QUICKSTART_TITLE': 'https://docs.cloud.google.com/lakehouse/docs/about-spark-hive-metastore'
+min_version: beta
+# hive/v1beta is added here instead of into the base url of the product.yaml.
+# This is because the IAM policy does not contain this prefix, so it must be separated.
+base_url: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases'
+self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases/{{name}}'
+create_url: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases?hiveDatabaseId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+# The IAM policy is shared with Iceberg Catalog (biglakeiceberg).
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: GET
+  allowed_iam_role: roles/biglake.editor
+  parent_resource_attribute: name
+  sample_config_body: templates/terraform/iam/example_config_body/biglake_hive_database.tf.tmpl
+  base_url: v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{name}}
+  import_format:
+    - projects/{{project}}/catalogs/{{catalog}}/namespaces/{{name}}
+    - '{{name}}'
+samples:
+  - name: 'biglake_hive_database'
+    primary_resource_id: 'my_hive_database'
+    min_version: beta
+    steps:
+      - name: 'biglake_hive_database'
+        resource_id_vars:
+          bucket_name: example-bucket
+        vars:
+          parameters: |
+            {
+                key1 = "value1"
+                key2 = "value2"
+            }
+          description: "hive database description"
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: 'PROJECT'
+          USER_PROJECT_OVERRIDE: 'true'
+      - name: 'biglake_hive_database'
+        resource_id_vars:
+          bucket_name: example-bucket
+        vars:
+          parameters: '{key2 = "value2"}'
+          description: "updated hive database description"
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: 'PROJECT'
+          USER_PROJECT_OVERRIDE: 'true'
+parameters:
+  - name: 'catalog'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Hive catalog where the database to create is located.
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Database to create.
+properties:
+  - name: 'location_uri'
+    api_name: 'locationUri'
+    type: String
+    required: false
+    description: |
+      Cloud Storage location path where the database exists. If unspecified, the database will be stored in the catalog location.
+      Format: gs://bucket/path/to/database
+  - name: 'description'
+    type: String
+    required: false
+    description: |
+      Description of the database.
+  - name: 'parameters'
+    type: KeyValuePairs
+    required: false
+    description: |
+      Additional parameters associated with the database.
+  - name: 'create_time'
+    api_name: 'createTime'
+    type: String
+    description: Output only. The creation time of the database.
+    output: true
+  - name: 'update_time'
+    api_name: 'updateTime'
+    type: String
+    description: Output only. The update time of the database.
+    output: true

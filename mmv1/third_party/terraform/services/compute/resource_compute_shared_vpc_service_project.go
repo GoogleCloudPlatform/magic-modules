@@ -1,0 +1,219 @@
+package compute
+
+import (
+	"fmt"
+	"log"
+	"strings"
+	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"google.golang.org/api/googleapi"
+)
+
+func ResourceComputeSharedVpcServiceProject() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceComputeSharedVpcServiceProjectCreate,
+		Read:   resourceComputeSharedVpcServiceProjectRead,
+		Delete: resourceComputeSharedVpcServiceProjectDelete,
+		Update: resourceComputeSharedVpcServiceProjectUpdate,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(4 * time.Minute),
+			Delete: schema.DefaultTimeout(4 * time.Minute),
+		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
+
+		Schema: map[string]*schema.Schema{
+			"host_project": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: `The ID of a host project to associate.`,
+			},
+			"service_project": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: `The ID of the project that will serve as a Shared VPC service project.`,
+			},
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+				Description: `The deletion policy for the shared VPC service. Setting ABANDON allows the resource
+				to be abandoned rather than deleted. Possible values are: "ABANDON".`,
+				ValidateFunc: validation.StringInSlice([]string{"ABANDON", ""}, false),
+			},
+		},
+		UseJSONNumber: true,
+	}
+}
+
+func resourceComputeSharedVpcServiceProjectCreate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	hostProject := d.Get("host_project").(string)
+	serviceProject := d.Get("service_project").(string)
+
+	url := fmt.Sprintf("%sprojects/%s/enableXpnResource", transport_tpg.BaseUrl(Product, config), hostProject)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   hostProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body: map[string]interface{}{
+			"xpnResource": map[string]interface{}{
+				"id":   serviceProject,
+				"type": "PROJECT",
+			},
+		},
+	})
+	if err != nil {
+		return err
+	}
+	err = ComputeOperationWaitTime(config, res, hostProject, "Enabling Shared VPC Resource", userAgent, d.Timeout(schema.TimeoutCreate))
+	if err != nil {
+		return err
+	}
+
+	d.SetId(fmt.Sprintf("%s/%s", hostProject, serviceProject))
+
+	return nil
+}
+
+func resourceComputeSharedVpcServiceProjectRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	split := strings.Split(d.Id(), "/")
+	if len(split) != 2 {
+		return fmt.Errorf("Error parsing resource ID %s", d.Id())
+	}
+	hostProject := split[0]
+	serviceProject := split[1]
+
+	url := fmt.Sprintf("%sprojects/%s/getXpnHost", transport_tpg.BaseUrl(Product, config), serviceProject)
+	associatedHostProject, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   serviceProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		log.Printf("[WARN] Removing shared VPC service. The service project is not associated with any host")
+
+		d.SetId("")
+		return nil
+	}
+
+	if hostProject != associatedHostProject["name"].(string) {
+		log.Printf("[WARN] Removing shared VPC service. Expected associated host project to be '%s', got '%s'", hostProject, associatedHostProject["name"].(string))
+		d.SetId("")
+		return nil
+	}
+
+	if err := d.Set("host_project", hostProject); err != nil {
+		return fmt.Errorf("Error setting host_project: %s", err)
+	}
+	if err := d.Set("service_project", serviceProject); err != nil {
+		return fmt.Errorf("Error setting service_project: %s", err)
+	}
+
+	return nil
+}
+
+func resourceComputeSharedVpcServiceProjectDelete(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	hostProject := d.Get("host_project").(string)
+	serviceProject := d.Get("service_project").(string)
+
+	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
+		log.Printf("[WARN] Shared VPC service project %q deletion_policy is set to 'ABANDON', skip disabling shared VPC service project", d.Id())
+		d.SetId("")
+		return nil
+	}
+
+	if err := disableXpnResource(d, config, hostProject, serviceProject); err != nil {
+		// Don't fail if the service project is already disabled.
+		if !isDisabledXpnResourceError(err) {
+			return fmt.Errorf("Error disabling Shared VPC Resource %q: %s", serviceProject, err)
+		}
+	}
+
+	return nil
+}
+
+func disableXpnResource(d *schema.ResourceData, config *transport_tpg.Config, hostProject, project string) error {
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("%sprojects/%s/disableXpnResource", transport_tpg.BaseUrl(Product, config), hostProject)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   hostProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body: map[string]interface{}{
+			"xpnResource": map[string]interface{}{
+				"id":   project,
+				"type": "PROJECT",
+			},
+		},
+	})
+	if err != nil {
+		return err
+	}
+	err = ComputeOperationWaitTime(config, res, hostProject, "Disabling Shared VPC Resource", userAgent, d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func isDisabledXpnResourceError(err error) bool {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && len(gerr.Errors) > 0 && gerr.Errors[0].Reason == "invalidResourceUsage" {
+			return true
+		}
+	}
+	return false
+}
+
+func resourceComputeSharedVpcServiceProjectUpdate(d *schema.ResourceData, meta interface{}) error {
+	// This update method is no-op because the only updatable fields
+	// are state/config-only, i.e. they aren't sent in requests to the API.
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_shared_vpc_service_project",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceComputeSharedVpcServiceProject(),
+	}.Register()
+}

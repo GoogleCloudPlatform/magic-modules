@@ -237,6 +237,24 @@ components:
             $ref: "#/components/schemas/Food"
         recursivePet:
           $ref: "#/components/schemas/Pet"
+        readOnlyObject:
+          readOnly: true
+          type: object
+          properties:
+            name:
+              type: string
+            nested:
+              type: object
+              properties:
+                subName:
+                  type: string
+            arrayNested:
+              type: array
+              items:
+                type: object
+                properties:
+                  itemSubName:
+                    type: string
     Food:
       required:
         - name

@@ -5,6 +5,11 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -37,8 +42,8 @@ func TestAccSecretManagerSecret_import(t *testing.T) {
 func TestAccSecretManagerSecret_cmek(t *testing.T) {
 	t.Parallel()
 
-	kmscentral := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
-	kmseast := acctest.BootstrapKMSKeyInLocation(t, "us-east1")
+	kmscentral := kms.BootstrapKMSKeyInLocation(t, "us-central1")
+	kmseast := kms.BootstrapKMSKeyInLocation(t, "us-east1")
 	context1 := map[string]interface{}{
 		"pid":                  envvar.GetTestProjectFromEnv(),
 		"random_suffix":        acctest.RandString(t, 10),
@@ -161,9 +166,9 @@ func TestAccSecretManagerSecret_versionAliasesUpdate(t *testing.T) {
 func TestAccSecretManagerSecret_userManagedCmekUpdate(t *testing.T) {
 	t.Parallel()
 
-	kmscentral := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-secret-manager-managed-central-key1")
-	kmseast := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-secret-manager-managed-east-key1")
-	kmscentralother := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-secret-manager-managed-central-key2")
+	kmscentral := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-secret-manager-managed-central-key1")
+	kmseast := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-secret-manager-managed-east-key1")
+	kmscentralother := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-secret-manager-managed-central-key2")
 	context := map[string]interface{}{
 		"pid":                        envvar.GetTestProjectFromEnv(),
 		"random_suffix":              acctest.RandString(t, 10),
@@ -220,8 +225,8 @@ func TestAccSecretManagerSecret_automaticCmekUpdate(t *testing.T) {
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
-	key1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-secret-manager-automatic-key1")
-	key2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-secret-manager-automatic-key2")
+	key1 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-secret-manager-automatic-key1")
+	key2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-secret-manager-automatic-key2")
 	context := map[string]interface{}{
 		"pid":            envvar.GetTestProjectFromEnv(),
 		"random_suffix":  suffix,
@@ -494,12 +499,12 @@ func TestAccSecretManagerSecret_DeletionProtection(t *testing.T) {
 func TestAccSecretManagerSecret_tags(t *testing.T) {
 	t.Parallel()
 
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "secret_manager_secret-tagkey", map[string]interface{}{})
+	tagKey := tags.BootstrapSharedTestOrganizationTagKey(t, "secret_manager_secret-tagkey", map[string]interface{}{})
 
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "secret_manager_secret-tagvalue", tagKey),
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "secret_manager_secret-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

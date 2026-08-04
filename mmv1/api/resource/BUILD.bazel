@@ -1,4 +1,4 @@
-load("@rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "resource",
@@ -24,5 +24,17 @@ go_library(
         "//mmv1/google",
         "@com_github_golang_glog//:glog",
         "@in_gopkg_yaml_v3//:yaml_v3",
+    ],
+)
+
+go_test(
+    name = "resource_test",
+    srcs = [
+        "sample_test.go",
+        "step_test.go",
+    ],
+    deps = [
+        ":resource",
+        "@com_github_google_go_cmp//cmp",
     ],
 )

@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigqueryanalyticshub"
 )
 
 // Dummy usages to ensure imports are satisfied in both versions
@@ -55,7 +57,7 @@ func TestAccBigqueryAnalyticsHubListing_multiregion(t *testing.T) {
 	randomDatasetSuffix := acctest.RandString(t, 10)
 	datasetID := fmt.Sprintf("tf_test_listing_replica_%s", randomDatasetSuffix)
 
-	bqdataset, err := acctest.AddBigQueryDatasetReplica(t, envvar.GetTestProjectFromEnv(), datasetID, "us", "eu")
+	bqdataset, err := AddBigQueryDatasetReplica(t, envvar.GetTestProjectFromEnv(), datasetID, "us", "eu")
 	if err != nil {
 		t.Fatalf("Failed to create BigQuery dataset and add replica: %v", err)
 	}
@@ -66,7 +68,7 @@ func TestAccBigqueryAnalyticsHubListing_multiregion(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		acctest.CleanupBigQueryDatasetAndReplica(t, envvar.GetTestProjectFromEnv(), datasetID, "eu")
+		CleanupBigQueryDatasetAndReplica(t, envvar.GetTestProjectFromEnv(), datasetID, "eu")
 	})
 
 	acctest.VcrTest(t, resource.TestCase{

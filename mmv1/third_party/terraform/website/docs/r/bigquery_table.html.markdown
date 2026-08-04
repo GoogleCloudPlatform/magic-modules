@@ -128,6 +128,14 @@ The following arguments are supported:
 * `effective_labels` -
   All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
+* `deletion_policy` - 
+  (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+  When a 'terraform destroy' or 'terraform apply' would delete the resource,
+  the command will fail if this field is set to "PREVENT" in Terraform state.
+  When set to "ABANDON", the command will remove the resource from Terraform
+  management without updating or deleting the resource in the API.
+  When set to "DELETE", deleting the resource is allowed.
+
 * <a name="schema"></a>`schema` - (Optional) A JSON schema for the table.
 
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
@@ -629,6 +637,19 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 ```tf
 import {
   id = "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}"
+  to = google_bigquery_table.default
+}
+```
+
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import BigQuery tables using identity values. For example:
+
+```tf
+import {
+  identity = {
+    project    = "{{project}}"
+    dataset_id = "{{dataset_id}}"
+    table_id   = "{{table_id}}"
+  }
   to = google_bigquery_table.default
 }
 ```

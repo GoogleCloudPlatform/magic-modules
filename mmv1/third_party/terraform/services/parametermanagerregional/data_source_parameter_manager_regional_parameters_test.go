@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/parametermanagerregional"
 )
 
 func TestAccDataSourceParameterManagerRegionalRegionalParameters_basic(t *testing.T) {
@@ -30,8 +31,9 @@ func TestAccDataSourceParameterManagerRegionalRegionalParameters_basic(t *testin
 						"data.google_parameter_manager_regional_parameters.regional-parameters-datasource",
 						"google_parameter_manager_regional_parameter.regional-parameters",
 						map[string]struct{}{
-							"id":      {},
-							"project": {},
+							"id":              {},
+							"project":         {},
+							"deletion_policy": {},
 						},
 					),
 				),
@@ -89,8 +91,9 @@ func TestAccDataSourceParameterManagerRegionalRegionalParameters_filter(t *testi
 						"google_parameter_manager_regional_parameter.regional-parameters-1",
 						"google_parameter_manager_regional_parameter.regional-parameters-2",
 						map[string]struct{}{
-							"id":      {},
-							"project": {},
+							"id":              {},
+							"project":         {},
+							"deletion_policy": {},
 						},
 					),
 				),

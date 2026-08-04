@@ -2,14 +2,13 @@ load("@rules_go//go:def.bzl", "go_binary", "go_library")
 
 go_library(
     name = "cmd_lib",
-    data = ["//mmv1/templates"],  # keep
     srcs = ["main.go"],
+    data = ["//mmv1/templates"],  # keep
     importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/cmd",
     visibility = ["//visibility:private"],
     deps = [
         "//mmv1/api",
         "//mmv1/provider",
-        "@rules_go//go/runfiles",
     ],
 )
 

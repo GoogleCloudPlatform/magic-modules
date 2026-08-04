@@ -3,8 +3,11 @@ package compute_test
 import (
 	"fmt"
 	"testing"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+  tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -164,13 +167,19 @@ func testAccCheckComputeUrlMapExists(t *testing.T, n string) resource.TestCheckF
 		config := acctest.GoogleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
-		found, err := compute.NewClient(config, config.UserAgent).UrlMaps.Get(
-			config.Project, name).Do()
+		url := fmt.Sprintf("%sprojects/%s/global/urlMaps/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), config.Project, name)
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		if found.Name != name {
+		if found["name"] != name {
 			return fmt.Errorf("Url map not found")
 		}
 		return nil
@@ -464,6 +473,48 @@ func TestAccComputeUrlMap_cachePolicyMultiLevelUpdate(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccComputeUrlMap_regional(bsName, hcName, umName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_regional_backend_service" "foobar" {
+  name          = "urlmap-test-%s"
+  health_checks = [google_compute_http_health_check.zero.self_link]
+}
+
+resource "google_compute_http_health_check" "zero" {
+  name               = "urlmap-test-%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+
+resource "google_compute_regional_url_map" "foobar" {
+  name            = "urlmap-test-%s"
+  default_service = google_compute_backend_service.foobar.self_link
+
+  host_rule {
+    hosts        = ["mysite.com", "myothersite.com"]
+    path_matcher = "boop"
+  }
+
+  path_matcher {
+    default_service = google_compute_backend_service.foobar.self_link
+    name            = "boop"
+
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_backend_service.foobar.self_link
+    }
+  }
+
+  test {
+    host    = "mysite.com"
+    path    = "/*"
+    service = google_compute_backend_service.foobar.self_link
+  }
+}
+`, bsName, hcName, umName)
 }
 
 func testAccComputeUrlMap_basic1(bsName, hcName, umName string) string {

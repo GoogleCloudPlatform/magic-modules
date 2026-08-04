@@ -1,0 +1,232 @@
+package resourcemanager
+
+import (
+	"fmt"
+	"net/url"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgcloudbilling "github.com/hashicorp/terraform-provider-google/google/services/cloudbilling"
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"google.golang.org/api/cloudbilling/v1"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+)
+
+// BootstrapProject will create or get a project named
+// "<projectIDPrefix><projectIDSuffix>" that will persist across test runs,
+// where projectIDSuffix is based off of getTestProjectFromEnv(). The reason
+// for the naming is to isolate bootstrapped projects by test environment.
+// Given the existing projects being used by our team, the prefix provided to
+// this function can be no longer than 18 characters.
+func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, services []string) *cloudresourcemanager.Project {
+	org := envvar.GetTestOrgFromEnv(t)
+	parent := &cloudresourcemanager.ResourceId{
+		Type: "organization",
+		Id:   org,
+	}
+	projectIDSuffix := strings.Replace(envvar.GetTestProjectFromEnv(), "ci-test-project-", "", 1)
+	projectID := projectIDPrefix + projectIDSuffix
+
+	return BootstrapProjectWithParent(t, projectID, billingAccount, parent, services)
+}
+
+func BootstrapProjectWithParent(t *testing.T, projectID string, billingAccount string, parent *cloudresourcemanager.ResourceId, services []string) *cloudresourcemanager.Project {
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return nil
+	}
+	crmClient := rmClient.NewClient(config, config.UserAgent)
+
+	project, err := crmClient.Projects.Get(projectID).Do()
+	if err != nil {
+		if !transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
+			t.Fatalf("Error getting bootstrapped project: %s", err)
+		}
+		op, err := crmClient.Projects.Create(&cloudresourcemanager.Project{
+			ProjectId: projectID,
+			Name:      "Bootstrapped Test Project",
+			Parent:    parent,
+		}).Do()
+		if err != nil {
+			t.Fatalf("Error creating bootstrapped test project: %s", err)
+		}
+
+		opAsMap, err := tpgresource.ConvertToMap(op)
+		if err != nil {
+			t.Fatalf("Error converting create project operation to map: %s", err)
+		}
+
+		err = ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error waiting for create project operation: %s", err)
+		}
+
+		project, err = crmClient.Projects.Get(projectID).Do()
+		if err != nil {
+			t.Fatalf("Error getting bootstrapped project: %s", err)
+		}
+
+	}
+
+	if project.LifecycleState == "DELETE_REQUESTED" {
+		_, err := crmClient.Projects.Undelete(projectID, &cloudresourcemanager.UndeleteProjectRequest{}).Do()
+		if err != nil {
+			t.Fatalf("Error undeleting bootstrapped project: %s", err)
+		}
+	}
+
+	if billingAccount != "" {
+		billingClient := tpgcloudbilling.NewClient(config, config.UserAgent)
+		var pbi *cloudbilling.ProjectBillingInfo
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
+				var reqErr error
+				pbi, reqErr = billingClient.Projects.GetBillingInfo(PrefixedProject(projectID)).Do()
+				return reqErr
+			},
+			Timeout: 30 * time.Second,
+		})
+		if err != nil {
+			t.Fatalf("Error getting billing info for project %q: %v", projectID, err)
+		}
+		if strings.TrimPrefix(pbi.BillingAccountName, "billingAccounts/") != billingAccount {
+			pbi.BillingAccountName = "billingAccounts/" + billingAccount
+			err := transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() error {
+					_, err := tpgcloudbilling.NewClient(config, config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(projectID), pbi).Do()
+					return err
+				},
+				Timeout: 2 * time.Minute,
+			})
+			if err != nil {
+				t.Fatalf("Error setting billing account for project %q to %q: %s", projectID, billingAccount, err)
+			}
+		}
+	}
+
+	if len(services) > 0 {
+
+		enabledServices, err := ListCurrentlyEnabledServices(projectID, "", config.UserAgent, config, 1*time.Minute)
+		if err != nil {
+			t.Fatalf("Error listing services for project %q: %s", projectID, err)
+		}
+
+		servicesToEnable := make([]string, 0, len(services))
+		for _, service := range services {
+			if _, ok := enabledServices[service]; !ok {
+				servicesToEnable = append(servicesToEnable, service)
+			}
+		}
+
+		if len(servicesToEnable) > 0 {
+			if err := EnableServiceUsageProjectServices(servicesToEnable, projectID, "", config.UserAgent, config, 10*time.Minute); err != nil {
+				t.Fatalf("Error enabling services for project %q: %s", projectID, err)
+			}
+		}
+	}
+
+	return project
+}
+
+func BootstrapSharedTestFolder(t *testing.T, folderDisplayName string) string {
+	t.Helper()
+
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+	resourceManagerBasePath := "https://cloudresourcemanager.googleapis.com/"
+
+	parent := fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t))
+
+	searchURL := fmt.Sprintf("%sv3/folders:search?query=%s",
+		resourceManagerBasePath,
+		url.QueryEscape(fmt.Sprintf("displayName=%s AND parent=%s", folderDisplayName, parent)),
+	)
+
+	searchRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		RawURL:    searchURL,
+		UserAgent: config.UserAgent,
+	})
+
+	if err != nil {
+		t.Fatalf("error searching for bootstarp folder %q: %s", folderDisplayName, err)
+	}
+
+	if folders, ok := searchRes["folders"].([]interface{}); ok {
+		for _, folder := range folders {
+			folderMap, ok := folder.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			if folderMap["displayName"] == folderDisplayName && folderMap["parent"] == parent {
+				if name, ok := folderMap["name"].(string); ok && name != "" {
+					return name
+				}
+			}
+		}
+	}
+	createURL := fmt.Sprintf("%sv3/folders", resourceManagerBasePath)
+	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		RawURL:    createURL,
+		UserAgent: config.UserAgent,
+		Body: map[string]interface{}{
+			"displayName": folderDisplayName,
+			"parent":      parent,
+		},
+	})
+
+	if err != nil {
+		t.Fatalf("error creating bootstrap folder %q: %s", folderDisplayName, err)
+	}
+
+	opName, ok := op["name"].(string)
+	if !ok || opName == "" {
+		t.Fatalf("bootstrap folder create returned no operation name: %v", op)
+	}
+
+	opURL := fmt.Sprintf("%sv3/%s", resourceManagerBasePath, opName)
+	deadline := time.Now().Add(2 * time.Minute)
+
+	for time.Now().Before(deadline) {
+		opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    opURL,
+			UserAgent: config.UserAgent,
+		})
+
+		if err != nil {
+			t.Fatalf("error polling bootstrap folder operation %q: %s", opName, err)
+		}
+
+		if opErr, ok := opRes["error"].(map[string]interface{}); ok {
+			t.Fatalf("bootstrap folder operation %q failed: %v", opName, opErr)
+		}
+
+		if done, _ := opRes["done"].(bool); done {
+			response, ok := opRes["response"].(map[string]interface{})
+			if !ok {
+				t.Fatalf("bootstrap folder operation %q finished without response: %v", opName, opRes)
+			}
+
+			name, ok := response["name"].(string)
+			if !ok || name == "" {
+				t.Fatalf("bootstrap folder operation %q finished without folder name: %v", opName, opRes)
+			}
+			return name
+		}
+		time.Sleep(2 * time.Second)
+	}
+	t.Fatalf("timed out waiting for bootstrap folder %q creation operation %q", folderDisplayName, opName)
+	return ""
+}

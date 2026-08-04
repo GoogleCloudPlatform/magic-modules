@@ -1,0 +1,38 @@
+---
+subcategory: "Cloud (Stackdriver) Logging"
+description: |-
+  Get information about a Google Cloud Logging Log View.
+---
+
+# google_logging_log_view
+
+Get information about a Google Cloud Logging Log View. For more information, see the
+[official documentation](https://cloud.google.com/logging/docs/apis)
+and [API](https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.locations.buckets.views).
+
+## Example Usage
+
+```hcl
+data "google_logging_log_view" "default" {
+  parent   = "projects/my-project"
+  location = "global"
+  bucket   = "_Default"
+  name     = "my-view"
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `parent` - (Required) The parent of the resource.
+
+* `location` - (Required) The location of the resource.
+
+* `bucket` - (Required) The bucket of the resource.
+
+* `name` - (Required) The resource name of the view.
+
+## Attributes Reference
+
+See [google_logging_log_view](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/logging_log_view) resource for details of the available attributes.

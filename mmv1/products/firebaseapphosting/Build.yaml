@@ -23,67 +23,75 @@ immutable: true
 self_link: projects/{{project}}/locations/{{location}}/backends/{{backend}}/builds/{{build_id}}
 create_url: projects/{{project}}/locations/{{location}}/backends/{{backend}}/builds?buildId={{build_id}}
 id_format: projects/{{project}}/locations/{{location}}/backends/{{backend}}/builds/{{build_id}}
-# A Build can't be deleted while serving traffic. Old Builds will be auto cleaned up in the background.
-exclude_delete: true
-exclude_sweeper: true
 import_format:
   - projects/{{project}}/locations/{{location}}/backends/{{backend}}/builds/{{build_id}}
-  - "{{project}}/{{location}}/{{backend}}/{{build_id}}"
-  - "{{location}}/{{backend}}/{{build_id}}"
-examples:
-  - name: firebase_app_hosting_build_minimal
-    primary_resource_id: example
-    vars:
-      backend_id: "mini"
-      build_id: "mini-build"
-      service_act_id: "firebase-app-hosting-compute"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-build-min"'
-      # for backward compatible
-      backend_id: '"mini" + randomSuffix'
-  - name: firebase_app_hosting_build_full
-    primary_resource_id: example
-    vars:
-      backend_id: "full"
-      build_id: "full-build"
-      service_act_id: "firebase-app-hosting-compute"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-build-full"'
-      # for backward compatible
-      backend_id: '"full" + randomSuffix'
-  - name: firebase_app_hosting_build_github
-    primary_resource_id: example
-    vars:
-      backend_id: "mini"
-      build_id: "gh-build"
-    test_vars_overrides:
-      # for backward compatible
-      backend_id: '"mini" + randomSuffix'
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    # Can't establish a Github connection in automated tests.
-    exclude_test: true
-autogen_async: true
+  - '{{project}}/{{location}}/{{backend}}/{{build_id}}'
+  - '{{location}}/{{backend}}/{{build_id}}'
+exclude_sweeper: true
 async:
+  type: OpAsync
   operation:
     timeouts:
       insert_minutes: 20
-    base_url: "{{op_id}}"
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
   actions:
     - create
-  type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
   # Build errors are surfaced in the resource itself
   suppress_error: true
+# A Build can't be deleted while serving traffic. Old Builds will be auto cleaned up in the background.
+exclude_delete: true
 autogen_status: QnVpbGQ=
+autogen_async: true
+samples:
+  - name: firebase_app_hosting_build_minimal
+    primary_resource_id: example
+    steps:
+      - name: firebase_app_hosting_build_minimal
+        resource_id_vars:
+          backend_id: mini
+          build_id: mini-build
+          service_act_id: firebase-app-hosting-compute
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          # prevent tests from colliding with each other
+          service_act_id: '"tf-test-build-min"'
+          # for backward compatible
+          backend_id: '"mini" + randomSuffix'
+  - name: firebase_app_hosting_build_full
+    primary_resource_id: example
+    steps:
+      - name: firebase_app_hosting_build_full
+        resource_id_vars:
+          backend_id: full
+          build_id: full-build
+          service_act_id: firebase-app-hosting-compute
+        test_env_vars:
+          project_id: PROJECT_NAME
+        test_vars_overrides:
+          # prevent tests from colliding with each other
+          service_act_id: '"tf-test-build-full"'
+          # for backward compatible
+          backend_id: '"full" + randomSuffix'
+  - name: firebase_app_hosting_build_github
+    primary_resource_id: example
+    # Can't establish a Github connection in automated tests.
+    exclude_test: true
+    steps:
+      - name: firebase_app_hosting_build_github
+        resource_id_vars:
+          backend_id: mini
+          build_id: gh-build
+        test_vars_overrides:
+          # for backward compatible
+          backend_id: '"mini" + randomSuffix'
+        test_env_vars:
+          project_id: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -97,8 +105,8 @@ parameters:
     immutable: true
     url_param_only: true
     required: true
-    resource: "Backend"
-    imports: "backendId"
+    resource: Backend
+    imports: backendId
   - name: buildId
     type: String
     description: The user-specified ID of the build being created.

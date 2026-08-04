@@ -14,29 +14,66 @@
 ---
 name: PromptTemplate
 description: The PromptTemplate resource for Firebase AI Logic.
-base_url: projects/{{project}}/locations/{{location}}/templates
 references:
   guides:
     # These names are deliberately chosen to preserve this order after sorting
-    'Get started with server prompt templates': 'https://firebase.google.com/docs/ai-logic/server-prompt-templates/get-started'
-    'Product documentation for Firebase AI Logic': 'https://firebase.google.com/docs/ai-logic'
-    'Specification for Dotprompt format': 'https://google.github.io/dotprompt/getting-started'
-  api: 'https://firebase.google.com/docs/reference/ai-logic/rest/v1beta/projects.locations.templates'
-update_mask: true
+    Get started with server prompt templates: https://firebase.google.com/docs/ai-logic/server-prompt-templates/get-started
+    Product documentation for Firebase AI Logic: https://firebase.google.com/docs/ai-logic
+    Specification for Dotprompt format: https://google.github.io/dotprompt/getting-started
+  api: https://firebase.google.com/docs/reference/ai-logic/rest/v1beta/projects.locations.templates
+base_url: projects/{{project}}/locations/{{location}}/templates
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 create_url: projects/{{project}}/locations/{{location}}/templates?promptTemplateId={{template_id}}
+delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-autogen_async: false
 autogen_status: UHJvbXB0VGVtcGxhdGU=
+autogen_async: false
+custom_code:
+  pre_create: templates/terraform/pre_create/firebase_ai_logic_prompt_template.go.tmpl
+  pre_update: templates/terraform/pre_update/firebase_ai_logic_prompt_template.go.tmpl
+  pre_delete: templates/terraform/pre_delete/firebase_ai_logic_prompt_template.go.tmpl
+samples:
+  - name: firebaseailogic_prompt_template_file
+    min_version: beta
+    primary_resource_id: file
+    steps:
+      - name: firebaseailogic_prompt_template_file
+        min_version: beta
+        resource_id_vars:
+          template_id: file-template
+  - name: firebaseailogic_prompt_template_global_only
+    min_version: beta
+    primary_resource_id: global_only
+    steps:
+      - name: firebaseailogic_prompt_template_global_only
+        min_version: beta
+        resource_id_vars:
+          template_id: global-only-template
+  - name: firebaseailogic_prompt_template_basic
+    min_version: beta
+    primary_resource_id: basic
+    steps:
+      - name: firebaseailogic_prompt_template_basic
+        min_version: beta
+        resource_id_vars:
+          template_id: basic-template
 parameters:
   - name: location
     type: String
     required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
+    url_param_only: true
+  - name: regionalPropagationDisabled
+    type: Boolean
+    description: |-
+      For the `global` location only. If true, the write operation (create,
+      update, or delete) will apply to the global region only. Otherwise, the
+      operation will also propagate to all applicable regions.
     url_param_only: true
 properties:
   - name: templateId
@@ -86,15 +123,3 @@ properties:
     type: String
     description: Timestamp when the PromptTemplate was last updated.
     output: true
-min_version: beta
-examples:
-  - name: firebaseailogic_prompt_template_file
-    min_version: beta
-    primary_resource_id: file
-    vars:
-      template_id: 'file-template'
-  - name: firebaseailogic_prompt_template_basic
-    min_version: beta
-    primary_resource_id: basic
-    vars:
-      template_id: 'basic-template'

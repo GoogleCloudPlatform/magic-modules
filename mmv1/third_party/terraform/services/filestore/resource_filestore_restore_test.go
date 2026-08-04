@@ -6,6 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/backupdr"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/filestore"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccFilestoreInstance_restore(t *testing.T) {
@@ -90,7 +93,7 @@ func TestAccFilestoreInstance_restoreBackupDR(t *testing.T) {
 	instanceID := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	backupVaultID := "tf-test-backup-vault-filestore"
 	location := "us-central1"
-	backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+	backupVault := backupdr.BootstrapBackupDRVault(t, backupVaultID, location)
 
 	providerFactories := acctest.ProtoV5ProviderFactories(t)
 	acctest.VcrTest(t, resource.TestCase{

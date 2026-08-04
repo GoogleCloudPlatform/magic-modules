@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/backupdr"
 )
 
 // This test cannot be run locally without seeding your environment with a backup vault and scheduling
@@ -208,6 +209,7 @@ resource "google_backup_dr_restore_workload" "restore" {
   compute_instance_target_environment {
     project = "%{project}"
     zone    = "us-central1-a"
+    use_project_service_account = true
   }
 
   compute_instance_restore_properties {
@@ -233,11 +235,15 @@ resource "google_backup_dr_restore_workload" "restore" {
 
   compute_instance_restore_properties {
     name         = "tf-test-restored-instance-%{random_suffix}"
-    machine_type = "projects/%{project}/zones/us-central1-a/machineTypes/e2-medium"
+	machine_type = "projects/%{project}/zones/us-central1-a/machineTypes/n1-standard-2"
     description  = "Restored instance with custom properties"
     
     can_ip_forward      = true
     deletion_protection = false
+
+    confidential_instance_config {
+      enable_confidential_compute = false
+    }
 
     labels {
       key   = "environment"
@@ -256,6 +262,13 @@ resource "google_backup_dr_restore_workload" "restore" {
 
     tags {
       items = ["web", "https-server", "restored"]
+    }
+
+    params {
+      resource_manager_tags {
+        key   = "tagKeys/281480326968824"
+        value = "tagValues/281478683714361"
+      }
     }
 
     network_interfaces {
@@ -320,6 +333,7 @@ resource "google_backup_dr_restore_workload" "restore" {
   disk_target_environment {
     project = "%{project}"
     zone    = "us-central1-a"
+    use_project_service_account = true
   }
 
   disk_restore_properties {
@@ -344,6 +358,7 @@ resource "google_backup_dr_restore_workload" "restore" {
   region_disk_target_environment {
     project = "%{project}"
     region  = "us-central1"
+    use_project_service_account = true
     replica_zones = [
       "projects/%{project}/zones/us-central1-a",
       "projects/%{project}/zones/us-central1-b"
@@ -354,6 +369,11 @@ resource "google_backup_dr_restore_workload" "restore" {
     name    = "tf-test-restored-regional-disk-%{random_suffix}"
     size_gb = 200
     type    = "projects/%{project}/regions/us-central1/diskTypes/pd-balanced"
+
+	resource_manager_tags {
+	  key   = "tagKeys/281480326968824"
+	  value = "tagValues/281478683714361"
+	}
   }
 }
 `, context)

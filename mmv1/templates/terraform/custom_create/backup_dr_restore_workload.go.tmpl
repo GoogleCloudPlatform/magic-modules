@@ -47,17 +47,41 @@ processGuestOsFeatures := func(gofList []interface{}) []map[string]interface{} {
     return nil
 }
 
-processLabels := func(val interface{}) map[string]string {
-    labels := make(map[string]string)
-    if labelMap, isMap := val.(map[string]interface{}); isMap {
-        for k, v := range labelMap {
+processKeyValueEntries := func(val interface{}) map[string]string {
+    entries := make(map[string]string)
+    if val == nil {
+        return nil
+    }
+    // Accept map and repeated key/value block representations.
+    if entryMap, isMap := val.(map[string]interface{}); isMap {
+        for k, v := range entryMap {
             if vStr, ok := v.(string); ok {
-                labels[k] = vStr
+                entries[k] = vStr
+            }
+        }
+    } else if s, isSet := val.(*schema.Set); isSet {
+        for _, raw := range s.List() {
+            if item, ok := raw.(map[string]interface{}); ok {
+                if k, ok1 := item["key"].(string); ok1 {
+                    if v, ok2 := item["value"].(string); ok2 {
+                        entries[k] = v
+                    }
+                }
+            }
+        }
+    } else if list, isList := val.([]interface{}); isList {
+        for _, raw := range list {
+            if item, ok := raw.(map[string]interface{}); ok {
+                if k, ok1 := item["key"].(string); ok1 {
+                    if v, ok2 := item["value"].(string); ok2 {
+                        entries[k] = v
+                    }
+                }
             }
         }
     }
-    if len(labels) > 0 {
-        return labels
+    if len(entries) > 0 {
+        return entries
     }
     return nil
 }
@@ -95,6 +119,9 @@ if v, ok := d.GetOkExists("compute_instance_target_environment"); ok {
         if val, ok := m["zone"]; ok {
             env["zone"] = val.(string)
         }
+        if val, ok := m["use_project_service_account"]; ok {
+            env["useProjectServiceAccount"] = val.(bool)
+        }
         if len(env) > 0 {
             obj["computeInstanceTargetEnvironment"] = env
         }
@@ -112,6 +139,9 @@ if v, ok := d.GetOkExists("disk_target_environment"); ok {
         }
         if val, ok := m["zone"]; ok {
             env["zone"] = val.(string)
+        }
+        if val, ok := m["use_project_service_account"]; ok {
+            env["useProjectServiceAccount"] = val.(bool)
         }
         if len(env) > 0 {
             obj["diskTargetEnvironment"] = env
@@ -133,6 +163,9 @@ if v, ok := d.GetOkExists("region_disk_target_environment"); ok {
         }
         if zones, ok := m["replica_zones"]; ok {
             env["replicaZones"] = zones
+        }
+        if val, ok := m["use_project_service_account"]; ok {
+            env["useProjectServiceAccount"] = val.(bool)
         }
         if len(env) > 0 {
             obj["regionDiskTargetEnvironment"] = env
@@ -363,7 +396,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
         // --- Metadata & Labels ---
         // Labels
         if val, ok := m["labels"]; ok {
-            if labels := processLabels(val); labels != nil {
+            if labels := processKeyValueEntries(val); labels != nil {
                 props["labels"] = labels
             }
         }
@@ -422,7 +455,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
                     niObj["subnetwork"] = v.(string)
                 }
                 if v, ok := niMap["ip_address"]; ok && v != "" {
-                    niObj["ipAddress"] = v.(string)
+                    niObj["networkIP"] = v.(string)
                 }
                 if v, ok := niMap["ipv6_address"]; ok && v != "" {
                     niObj["ipv6Address"] = v.(string)
@@ -463,7 +496,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
                             acObj["name"] = n.(string)
                         }
                         if ei, ok := acMap["external_ip"]; ok && ei != "" {
-                            acObj["externalIp"] = ei.(string)
+                            acObj["natIP"] = ei.(string)
                         }
                         if eiv6, ok := acMap["external_ipv6"]; ok && eiv6 != "" {
                             acObj["externalIpv6"] = eiv6.(string)
@@ -506,7 +539,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
                             iacObj["name"] = n.(string)
                         }
                         if ei, ok := iacMap["external_ip"]; ok && ei != "" {
-                            iacObj["externalIp"] = ei.(string)
+                            iacObj["natIP"] = ei.(string)
                         }
                         if eiv6, ok := iacMap["external_ipv6"]; ok && eiv6 != "" {
                             iacObj["externalIpv6"] = eiv6.(string)
@@ -588,16 +621,8 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
             if pList[0] != nil {
                 p := pList[0].(map[string]interface{})
                 pObj := make(map[string]interface{})
-                if rmt, ok := p["resource_manager_tags"]; ok {
-                    rmtMap := make(map[string]string)
-                    if rmtMapVal, isMap := rmt.(map[string]interface{}); isMap {
-                        for k, v := range rmtMapVal {
-                            if vStr, ok := v.(string); ok {
-                                rmtMap[k] = vStr
-                            }
-                        }
-                    }
-                    if len(rmtMap) > 0 {
+                if rmtVal, ok := p["resource_manager_tags"]; ok {
+                    if rmtMap := processKeyValueEntries(rmtVal); rmtMap != nil {
                         pObj["resourceManagerTags"] = rmtMap
                     }
                 }
@@ -614,7 +639,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
                 aa := aaList[0].(map[string]interface{})
                 aaObj := make(map[string]interface{})
                 if cat, ok := aa["consume_allocation_type"]; ok && cat != "" {
-                    aaObj["consumeAllocationType"] = cat.(string)
+                    aaObj["consumeReservationType"] = cat.(string)
                 }
                 if k, ok := aa["key"]; ok && k != "" {
                     aaObj["key"] = k.(string)
@@ -623,7 +648,7 @@ if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
                     aaObj["values"] = v.([]interface{})
                 }
                 if len(aaObj) > 0 {
-                    props["allocationAffinity"] = aaObj
+                    props["reservationAffinity"] = aaObj
                 }
             }
         }
@@ -871,14 +896,14 @@ if v, ok := d.GetOkExists("disk_restore_properties"); ok {
         
         // Labels
         if val, ok := m["labels"]; ok {
-            if labels := processLabels(val); labels != nil {
+            if labels := processKeyValueEntries(val); labels != nil {
                 props["labels"] = labels
             }
         }
         
         // Resource manager tags
         if val, ok := m["resource_manager_tags"]; ok {
-            if rmtMap := processLabels(val); rmtMap != nil {
+            if rmtMap := processKeyValueEntries(val); rmtMap != nil {
                 props["resourceManagerTags"] = rmtMap
             }
         }
@@ -896,7 +921,7 @@ if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 // ==================== Build Restore URL & Execute Request ====================
 // Construct the restore URL using base path and url params
 url := fmt.Sprintf("%sprojects/%s/locations/%s/backupVaults/%s/dataSources/%s/backups/%s:restore",
-    config.BackupDRBasePath,
+    transport_tpg.BaseUrl(Product, config),
     project,
     d.Get("location").(string),
     d.Get("backup_vault_id").(string),

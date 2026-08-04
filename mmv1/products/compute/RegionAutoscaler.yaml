@@ -31,6 +31,7 @@ docs:
 base_url: 'projects/{{project}}/regions/{{region}}/autoscalers'
 has_self_link: true
 update_url: 'projects/{{project}}/regions/{{region}}/autoscalers?autoscaler={{name}}'
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -45,14 +46,16 @@ async:
 collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
-examples:
+samples:
   - name: 'region_autoscaler_basic'
     primary_resource_id: 'foobar'
-    vars:
-      region_autoscaler_name: 'my-region-autoscaler'
-      instance_template_name: 'my-instance-template'
-      target_pool_name: 'my-target-pool'
-      rigm_name: 'my-region-igm'
+    steps:
+      - name: 'region_autoscaler_basic'
+        resource_id_vars:
+          region_autoscaler_name: 'my-region-autoscaler'
+          instance_template_name: 'my-instance-template'
+          target_pool_name: 'my-target-pool'
+          rigm_name: 'my-region-igm'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -132,6 +135,16 @@ properties:
           and time the startup process.
         api_name: coolDownPeriodSec
         default_value: 60
+      - name: 'stabilizationPeriod'
+        type: Integer
+        description: |
+          The number of seconds that the autoscaler waits for load stabilization
+          before making scale-in decisions.
+
+          This might appear as a delay in scaling in but it is an important mechanism
+          for your application to not have fluctuating size due to short term load
+          fluctuations.
+        api_name: stabilizationPeriodSec
       - name: 'mode'
         type: String
         description: |

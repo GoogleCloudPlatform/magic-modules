@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudidentity"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -196,7 +197,7 @@ func testAccCloudIdentityGroupMembership_membershipDoesNotExistTest(t *testing.T
 
 	saId := "tf-test-sa-" + acctest.RandString(t, 10)
 	project := envvar.GetTestProjectFromEnv()
-	config := acctest.BootstrapConfig(t)
+	config := transport_tpg.BootstrapConfig(t)
 
 	r := &iam.CreateServiceAccountRequest{
 		AccountId:      saId,

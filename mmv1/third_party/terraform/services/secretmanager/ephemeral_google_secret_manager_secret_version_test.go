@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
 )
 
 func TestAccEphemeralSecretManagerSecretVersion_basic(t *testing.T) {
@@ -16,7 +17,7 @@ func TestAccEphemeralSecretManagerSecretVersion_basic(t *testing.T) {
 	secret := "tf-test-secret-" + acctest.RandString(t, 10)
 	secretData := "secret-data"
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -38,7 +39,7 @@ func TestAccEphemeralSecretManagerSecretVersion_base64(t *testing.T) {
 	secret := "tf-test-secret-" + acctest.RandString(t, 10)
 	secretData := "secret-data"
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{

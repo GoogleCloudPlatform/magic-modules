@@ -29,11 +29,6 @@ func sendSecondaryIpRangeIfEmptyDiff(_ context.Context, diff *schema.ResourceDif
 		return nil
 	}
 
-	sendZero := diff.Get("send_secondary_ip_range_if_empty").(bool)
-	if !sendZero {
-		return nil
-	}
-
 	configSecondaryIpRange := diff.GetRawConfig().GetAttr("secondary_ip_range")
 	if !configSecondaryIpRange.IsKnown() {
 		return nil
@@ -46,9 +41,20 @@ func sendSecondaryIpRangeIfEmptyDiff(_ context.Context, diff *schema.ResourceDif
 	}
 	stateValueIsEmpty := stateSecondaryIpRange.IsNull() || stateSecondaryIpRange.LengthInt() == 0
 
+	log.Printf("[DEBUG] sendSecondaryIpRangeIfEmptyDiff: configValueIsEmpty=%t, stateValueIsEmpty=%t", configValueIsEmpty, stateValueIsEmpty)
+
 	if configValueIsEmpty && !stateValueIsEmpty {
-		log.Printf("[DEBUG] setting secondary_ip_range to newly empty")
-		diff.SetNew("secondary_ip_range", make([]interface{}, 0))
+		v := diff.Get("send_secondary_ip_range_if_empty")
+		log.Printf("[DEBUG] sendSecondaryIpRangeIfEmptyDiff: send_secondary_ip_range_if_empty=%v", v)
+		// Only force if explicitly requested via the flag
+		if v != nil && v.(bool) {
+			log.Printf("[DEBUG] sendSecondaryIpRangeIfEmptyDiff: forcing secondary_ip_range to newly empty")
+			err := diff.SetNew("secondary_ip_range", make([]interface{}, 0))
+			if err != nil {
+				log.Printf("[ERROR] sendSecondaryIpRangeIfEmptyDiff: failed to SetNew: %s", err)
+				return fmt.Errorf("failed to set secondary_ip_range to empty: %w", err)
+			}
+		}
 	}
 
 	return nil
@@ -67,7 +73,7 @@ func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 	addr_netmask_old := strings.Split(old, "/")
 	addr_netmask_new := strings.Split(new, "/")
 
-	if (!((len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2))) {
+	if !((len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2)) {
 		return false
 	}
 
@@ -84,4 +90,304 @@ func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
 	netmask_equality = addr_netmask_old[1] == addr_netmask_new[1]
 
 	return addr_equality && netmask_equality
+}
+
+// CustomDiff function for secondary_ip_range.
+// Normalizes old state and new config sets before Set comparison to prevent false TypeSet diffs.
+// Specifically handles two Beta-only scenarios where state diverges from HCL config:
+// 1. Automatically inherits allocated ULA CIDRs from state when omitted in HCL config.
+// 2. Normalizes ip_collection self-links to relative paths to match user config short names.
+func resourceComputeSubnetworkSecondaryIpRangeCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	return resourceComputeSubnetworkSecondaryIpRangeCustomDiffFunc(diff)
+}
+
+func resourceComputeSubnetworkSecondaryIpRangeCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+{{ if and (ne $.TargetVersionName `ga`) (and (ne $.ProductMetadata.Compiler `terraformgoogleconversion-codegen`) (ne $.ProductMetadata.Compiler `terraformgoogleconversionnext-codegen`)) -}}
+	log.Printf("[DEBUG] CustomDiff: starting")
+	if len(diff.GetChangedKeysPrefix("secondary_ip_range")) == 0 {
+		log.Printf("[DEBUG] CustomDiff: no changed keys prefix for secondary_ip_range")
+		return nil
+	}
+
+	oldCount, newCount := diff.GetChange("secondary_ip_range.#")
+	log.Printf("[DEBUG] CustomDiff: oldCount=%v, newCount=%v", oldCount, newCount)
+	count := oldCount.(int)
+	if newCount.(int) > count {
+		count = newCount.(int)
+	}
+	if count < 1 {
+		log.Printf("[DEBUG] CustomDiff: count < 1, returning")
+		return nil
+	}
+
+	// Extract pristine user CIDR config directly from HCL
+	configCidrByName := make(map[string]string)
+	rawConfig := diff.GetRawConfig().GetAttr("secondary_ip_range")
+	if rawConfig.IsKnown() && !rawConfig.IsNull() {
+		for _, item := range rawConfig.AsValueSlice() {
+			if item.IsKnown() && !item.IsNull() && item.GetAttr("range_name").IsKnown() && !item.GetAttr("range_name").IsNull() {
+				nameVal := item.GetAttr("range_name").AsString()
+				if nameVal != "" {
+					if cidrVal := item.GetAttr("ip_cidr_range"); cidrVal.IsKnown() && !cidrVal.IsNull() {
+						configCidrByName[nameVal] = cidrVal.AsString()
+					} else {
+						configCidrByName[nameVal] = ""
+					}
+				}
+			}
+		}
+	}
+
+	// Extract old state and new proposed maps
+	oldByName := make(map[string]map[string]interface{})
+	var oldList, newList []interface{}
+	for i := 0; i < count; i++ {
+		o, n := diff.GetChange(fmt.Sprintf("secondary_ip_range.%d", i))
+		log.Printf("[DEBUG] CustomDiff: index %d: old=%v, new=%v", i, o, n)
+		if o != nil {
+			oldList = append(oldList, o)
+			if m, ok := o.(map[string]interface{}); ok && m["range_name"] != nil {
+				oldByName[m["range_name"].(string)] = m
+			}
+		}
+		if n != nil {
+			newList = append(newList, n)
+		}
+	}
+
+	// Helper: normalizes CIDR strings and ip_collection self-links
+	normalizeItem := func(m map[string]interface{}, overrideCidr string) map[string]interface{} {
+		clean := make(map[string]interface{})
+		for k, v := range m {
+			if k == "ip_cidr_range" {
+				cidrStr, _ := v.(string)
+				if overrideCidr != "" {
+					cidrStr = overrideCidr
+				}
+				if cidrStr == "" {
+					continue
+				}
+				if ip, ipNet, err := net.ParseCIDR(cidrStr); err == nil {
+					maskSize, _ := ipNet.Mask.Size()
+					cidrStr = fmt.Sprintf("%s/%d", ip.String(), maskSize)
+				}
+				clean[k] = cidrStr
+				continue
+			}
+			if v == nil || v == "" {
+				continue
+			}
+			if k == "ip_collection" {
+				if rel, err := tpgresource.GetRelativePath(v.(string)); err == nil {
+					clean[k] = rel
+				} else {
+					clean[k] = v
+				}
+			} else {
+				clean[k] = v
+			}
+		}
+		return clean
+	}
+
+	// Build clean normalized sets
+	var normalizedOld, normalizedNew []interface{}
+	for _, o := range oldList {
+		normalizedOld = append(normalizedOld, normalizeItem(o.(map[string]interface{}), ""))
+	}
+	for _, n := range newList {
+		m := n.(map[string]interface{})
+		rangeName, _ := m["range_name"].(string)
+		userCidr := configCidrByName[rangeName]
+		if userCidr == "" {
+			// Inherit allocated state CIDR for ULA ranges
+			if oldItem, ok := oldByName[rangeName]; ok && oldItem["ip_cidr_range"] != nil {
+				userCidr, _ = oldItem["ip_cidr_range"].(string)
+			}
+		}
+		normalizedNew = append(normalizedNew, normalizeItem(m, userCidr))
+	}
+
+	// Compare Sets and Clear Diff
+	var hashFunc schema.SchemaSetFunc
+	if ResourceComputeSubnetwork().Schema != nil && ResourceComputeSubnetwork().Schema["secondary_ip_range"] != nil {
+		hashFunc = schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource))
+	} else {
+		hashFunc = func(v interface{}) int {
+			buf := &bytes.Buffer{}
+			json.NewEncoder(buf).Encode(v)
+			return schema.HashString(buf.String())
+		}
+	}
+
+	log.Printf("[DEBUG] CustomDiff: normalizedOld len=%d, normalizedNew len=%d", len(normalizedOld), len(normalizedNew))
+	if schema.NewSet(hashFunc, normalizedOld).Equal(schema.NewSet(hashFunc, normalizedNew)) {
+		log.Printf("[DEBUG] CustomDiff: sets are equal, CLEARING diff")
+		if err := diff.Clear("secondary_ip_range"); err != nil {
+			return err
+		}
+	} else {
+		log.Printf("[DEBUG] CustomDiff: sets are NOT equal, keeping diff")
+	}
+
+	return nil
+{{ else -}}
+	return nil
+{{ end -}}
+}
+
+func ipEqual(old, new string) bool {
+	if old == "" || new == "" {
+		return old == new
+	}
+	addr_netmask_old := strings.Split(old, "/")
+	addr_netmask_new := strings.Split(new, "/")
+
+	if !((len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2)) {
+		return false
+	}
+
+	addr_old := net.ParseIP(addr_netmask_old[0])
+	if addr_old == nil {
+		return false
+	}
+	addr_new := net.ParseIP(addr_netmask_new[0])
+	if addr_new == nil {
+		return false
+	}
+
+	return net.IP.Equal(addr_old, addr_new) && addr_netmask_old[1] == addr_netmask_new[1]
+}
+
+func mergeSurvivor(oldEl, newEl interface{}, ipCidrExplicit bool) interface{} {
+	if oldEl == nil {
+		return newEl
+	}
+	if newEl == nil {
+		return oldEl
+	}
+
+	oldMap := oldEl.(map[string]interface{})
+	newMap := newEl.(map[string]interface{})
+
+	merged := make(map[string]interface{})
+	for k, v := range oldMap {
+		merged[k] = v
+	}
+
+	for k, v := range newMap {
+		if k == "ip_cidr_range" {
+			oldVal, _ := oldMap[k].(string)
+			newVal, _ := v.(string)
+			if ipEqual(oldVal, newVal) {
+				// If they are semantically equal, always prefer the old state value to avoid diffs
+				continue
+			}
+			if !ipCidrExplicit && oldVal != "" {
+				continue
+			}
+		}
+		merged[k] = v
+	}
+
+	return merged
+}
+
+func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if diff.Id() == "" {
+		return nil
+	}
+
+	keys := diff.GetChangedKeysPrefix("secondary_ip_range")
+	if len(keys) == 0 {
+		log.Printf("[DEBUG] SetStyleDiff: no changed keys prefix, exiting early")
+		return nil
+	}
+
+	oldRaw, newRaw := diff.GetChange("secondary_ip_range")
+	old := oldRaw.([]interface{})
+	new := newRaw.([]interface{})
+
+	log.Printf("[DEBUG] SetStyleDiff: starting. old len=%d, new len=%d", len(old), len(new))
+	log.Printf("[DEBUG] SetStyleDiff: old=%v", old)
+	log.Printf("[DEBUG] SetStyleDiff: new=%v", new)
+
+	// Extract explicit CIDRs from HCL config to prevent wrong index-based computed inheritance
+	explicitCidrByName := make(map[string]bool)
+	rawConfig := diff.GetRawConfig().GetAttr("secondary_ip_range")
+	if rawConfig.IsKnown() && !rawConfig.IsNull() {
+		for _, item := range rawConfig.AsValueSlice() {
+			if item.IsKnown() && !item.IsNull() && item.GetAttr("range_name").IsKnown() && !item.GetAttr("range_name").IsNull() {
+				nameVal := item.GetAttr("range_name").AsString()
+				if nameVal != "" {
+					if cidrVal := item.GetAttr("ip_cidr_range"); cidrVal.IsKnown() && !cidrVal.IsNull() && cidrVal.AsString() != "" {
+						explicitCidrByName[nameVal] = true
+					}
+				}
+			}
+		}
+	}
+
+	// Map existing range names to their current indices in 'old'
+	oldMap := make(map[string]int)
+	for i, r := range old {
+		if r == nil { continue }
+		m := r.(map[string]interface{})
+		oldMap[m["range_name"].(string)] = i
+	}
+
+	stableNew := make([]interface{}, len(new))
+	placed := make(map[string]bool)
+
+	// 1: Place survivors that fit in their old slots
+	for _, r := range new {
+		if r == nil { continue }
+		m := r.(map[string]interface{})
+		name := m["range_name"].(string)
+		if oldIdx, ok := oldMap[name]; ok {
+			if oldIdx < len(stableNew) {
+				// Merge config and state for survivor to preserve computed fields like ip_cidr_range
+				stableNew[oldIdx] = mergeSurvivor(old[oldIdx], r, explicitCidrByName[name])
+				placed[name] = true
+			}
+		}
+	}
+
+	// 2: Collect unplaced survivors and additions in the order they appear in 'new'
+	var unplaced []interface{}
+	for _, r := range new {
+		if r == nil { continue }
+		m := r.(map[string]interface{})
+		name := m["range_name"].(string)
+		if !placed[name] {
+			unplaced = append(unplaced, r)
+		}
+	}
+
+	// 3: Fill the remaining gaps in 'stableNew' with unplaced items
+	unplacedIdx := 0
+	for i := range stableNew {
+		if stableNew[i] == nil && unplacedIdx < len(unplaced) {
+			r := unplaced[unplacedIdx]
+			m := r.(map[string]interface{})
+			name := m["range_name"].(string)
+
+			// If it is a survivor (but was out of bounds), merge it
+			if oldIdx, ok := oldMap[name]; ok {
+				stableNew[i] = mergeSurvivor(old[oldIdx], r, explicitCidrByName[name])
+			} else {
+				stableNew[i] = r
+			}
+			unplacedIdx++
+		}
+	}
+
+	log.Printf("[DEBUG] SetStyleDiff: stableNew len=%d", len(stableNew))
+	log.Printf("[DEBUG] SetStyleDiff: stableNew=%v", stableNew)
+	err := diff.SetNew("secondary_ip_range", stableNew)
+	if err != nil {
+		log.Printf("[ERROR] SetStyleDiff: failed to SetNew: %s", err)
+		return fmt.Errorf("failed to set stableNew: %w", err)
+	}
+	return nil
 }

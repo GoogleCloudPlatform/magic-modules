@@ -1,0 +1,6 @@
+{
+  "name": "autogen",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

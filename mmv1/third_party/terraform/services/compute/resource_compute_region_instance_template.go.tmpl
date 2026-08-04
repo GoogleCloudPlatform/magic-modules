@@ -2,7 +2,6 @@
 package compute
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -17,11 +16,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
 )
 
 func ResourceComputeRegionInstanceTemplate() *schema.Resource {
@@ -35,6 +29,7 @@ func ResourceComputeRegionInstanceTemplate() *schema.Resource {
 		},
 		SchemaVersion: 1,
 		CustomizeDiff: customdiff.All(
+            tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			resourceComputeInstanceTemplateSourceImageCustomizeDiff,
@@ -138,7 +133,7 @@ func ResourceComputeRegionInstanceTemplate() *schema.Resource {
 							Optional:    true,
 							ForceNew:    true,
 							Computed:    true,
-							Description: `The size of the image in gigabytes. If not specified, it will inherit the size of its base image. For SCRATCH disks, the size must be one of 375 or 3000 GB, with a default of 375 GB.`,
+							Description: `The size of the image in gigabytes. If not specified, it will inherit the size of its base image. For SCRATCH disks, the size must be one of 375, 3000, 3500, 7000 or 14000 GB, with a default of 375 GB.`,
 						},
 
 						"disk_type": {
@@ -599,6 +594,32 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							},
 						},
 
+						{{ if ne $.TargetVersionName `ga` -}}
+						"alias_ipv6_range": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `An array of alias IPv6 ranges for this network interface. Can only be specified for network interfaces on subnet-mode networks.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ip_cidr_range": {
+										Type:             schema.TypeString,
+										Required:         true,
+										ForceNew:         true,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
+										Description:      `The IP CIDR range represented by this alias IPv6 range. This IP CIDR range must belong to the specified subnetwork and cannot contain IP addresses reserved by system or used by other network interfaces. At the time of writing only a netmask (e.g. /96) may be supplied, with a CIDR format resulting in an API error.`,
+									},
+									"subnetwork_range_name": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: `The subnetwork secondary range name specifying the secondary range from which to allocate the IP CIDR range for this alias IPv6 range. If left unspecified, the primary range of the subnetwork will be used.`,
+									},
+								},
+							},
+						},
+						{{- end }}
+
 						"stack_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -769,12 +790,12 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							Description:  `Minimum number of cpus for the instance.`,
 						},
 						"provisioning_model": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							ForceNew:     true,
-							AtLeastOneOf: schedulingInstTemplateKeys,
-							Description:  `Whether the instance is spot. If this is set as SPOT.`,
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:         true,
+							AtLeastOneOf:     schedulingInstTemplateKeys,
+							Description:      `Describes the desired provisioning model for the instance. Possible values are STANDARD, SPOT, FLEX_START, and RESERVATION_BOUND. For STANDARD, resources are provisioned immediately. For SPOT, resources are offered at a discount compared to standard pricing but may be preempted. For FLEX_START, resources are offered at a discount with flexible start times. For RESERVATION_BOUND, the instance is bound to a specific reservation and will only consume capacity from that reservation.`,
 						},
 						"instance_termination_action": {
 							Type:         schema.TypeString,
@@ -1123,6 +1144,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("STANDARD"),
 							ValidateFunc: validation.StringInSlice([]string{"STANDARD", "ENHANCED", "ARCHITECTURAL"}, false),
 							Description: `The PMU is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are "STANDARD", "ENHANCED", and "ARCHITECTURAL".`,
 						},
@@ -1274,6 +1296,33 @@ be from 0 to 999,999,999 inclusive.`,
 				ValidateFunc: validation.StringInSlice([]string{"NONE", "STOP", ""}, false),
 				Description:  `Action to be taken when a customer's encryption key is revoked. Supports "STOP" and "NONE", with "NONE" being the default.`,
 			},
+
+			"workload_identity_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `Workload identity config.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"identity": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							Description:  `Identity SPIFFE id.`,
+						},
+						"identity_certificate_enabled": {
+							Type:         schema.TypeBool,
+							Optional:     true,
+							ForceNew:     true,
+							Description:  `Specifies whether identity certificates are enabled.`,
+						},
+					},
+				},
+			},
+			//UDP schema start
+            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1311,7 +1360,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	if err != nil {
 		return err
 	}
-	PartnerMetadata, err := convertPartnerMetadataToCompute(partnerMetadataMap)
+	partnerMetadata, err := convertPartnerMetadataToCompute(partnerMetadataMap)
 	if err != nil {
 		return err
 	}
@@ -1336,39 +1385,82 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	}
 	resourcePolicies := expandInstanceTemplateResourcePolicies(d, "resource_policies")
 
-	instanceProperties := &compute.InstanceProperties{
-		CanIpForward:               d.Get("can_ip_forward").(bool),
-		Description:                d.Get("instance_description").(string),
-		GuestAccelerators:          expandInstanceTemplateGuestAccelerators(d, config),
-		MachineType:                d.Get("machine_type").(string),
-		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
-		Disks:                      disks,
-		Metadata:                   metadata,
-		{{- if ne $.TargetVersionName "ga" }}
-		PartnerMetadata:            PartnerMetadata,
-		{{- end }}
-		NetworkInterfaces:          networks,
-		NetworkPerformanceConfig:   networkPerformanceConfig,
-		Scheduling:                 scheduling,
-		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
-		Tags:                       resourceInstanceTags(d),
-		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
-		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
-		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-{{- if ne $.TargetVersionName "ga" }}
-		DisplayDevice:              expandDisplayDevice(d),
-{{- end }}
-		ResourcePolicies:           resourcePolicies,
-		ReservationAffinity:        reservationAffinity,
-		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
-	}
+	// network interfaces are already expanded to the map-based representation.
+	// Service accounts are already expanded to the map-based representation.
+	serviceAccountsIface := expandServiceAccounts(d.Get("service_account").([]interface{}))
 
+	instanceProperties := map[string]interface{}{
+		"machineType": d.Get("machine_type").(string),
+	}
+	if len(disks) > 0 {
+		instanceProperties["disks"] = disks
+	}
+	if len(networks) > 0 {
+		instanceProperties["networkInterfaces"] = networks
+	}
+	if scheduling != nil {
+		instanceProperties["scheduling"] = scheduling
+	}
+	if d.Get("can_ip_forward").(bool) {
+		instanceProperties["canIpForward"] = true
+	}
+	if v := d.Get("instance_description").(string); v != "" {
+		instanceProperties["description"] = v
+	}
+	if ga := expandInstanceTemplateGuestAccelerators(d, config); len(ga) > 0 {
+		instanceProperties["guestAccelerators"] = ga
+	}
+	if len(serviceAccountsIface) > 0 {
+		instanceProperties["serviceAccounts"] = serviceAccountsIface
+	}
+	if len(resourcePolicies) > 0 {
+		instanceProperties["resourcePolicies"] = resourcePolicies
+	}
+	if v := d.Get("min_cpu_platform").(string); v != "" {
+		instanceProperties["minCpuPlatform"] = v
+	}
+	if v := d.Get("key_revocation_action_type").(string); v != "" {
+		instanceProperties["keyRevocationActionType"] = v
+	}
+	instanceProperties["metadata"] = metadata
+	if networkPerformanceConfig != nil {
+		instanceProperties["networkPerformanceConfig"] = networkPerformanceConfig
+	}
+	if tagsMap := resourceInstanceTags(d); tagsMap != nil {
+		instanceProperties["tags"] = tagsMap
+	}
+	if cic := expandConfidentialInstanceConfig(d); cic != nil {
+		instanceProperties["confidentialInstanceConfig"] = cic
+	}
+	if sic := expandShieldedVmConfigs(d); sic != nil {
+		instanceProperties["shieldedInstanceConfig"] = sic
+	}
+	if amf := expandAdvancedMachineFeatures(d); amf != nil {
+		instanceProperties["advancedMachineFeatures"] = amf
+	}
+	if reservationAffinity != nil {
+		instanceProperties["reservationAffinity"] = reservationAffinity
+	}
+	{{- if ne $.TargetVersionName "ga" }}
+	if len(partnerMetadata) > 0 {
+		instanceProperties["partnerMetadata"] = partnerMetadata
+	}
+	if dd := expandDisplayDevice(d); dd != nil {
+		ddMap, err := tpgresource.ConvertToMap(dd)
+		if err != nil {
+			return fmt.Errorf("Error converting displayDevice: %s", err)
+		}
+		instanceProperties["displayDevice"] = ddMap
+	}
+	{{- end }}
 	if _, ok := d.GetOk("effective_labels"); ok {
-		instanceProperties.Labels = tpgresource.ExpandEffectiveLabels(d)
+		instanceProperties["labels"] = tpgresource.ExpandEffectiveLabels(d)
 	}
-
 	if _, ok := d.GetOk("resource_manager_tags"); ok {
-		instanceProperties.ResourceManagerTags = tpgresource.ExpandStringMap(d, "resource_manager_tags")
+		instanceProperties["resourceManagerTags"] = tpgresource.ExpandStringMap(d, "resource_manager_tags")
+	}
+	if workloadIdentityConfig := expandWorkloadIdentityConfig(d); workloadIdentityConfig != nil {
+		instanceProperties["workloadIdentityConfig"] = workloadIdentityConfig
 	}
 
 	var itName string
@@ -1385,10 +1477,13 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		itName = id.UniqueId()
 	}
 
-	instanceTemplate := make(map[string]interface{})
-	instanceTemplate["description"] = d.Get("description").(string)
-	instanceTemplate["properties"] = instanceProperties
-	instanceTemplate["name"] = itName
+	instanceTemplate := map[string]interface{}{
+		"properties": instanceProperties,
+		"name":       itName,
+	}
+	if v := d.Get("description").(string); v != "" {
+		instanceTemplate["description"] = v
+	}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceTemplates")
 	if err != nil {
@@ -1420,7 +1515,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 }
 
 func resourceComputeRegionInstanceTemplateUpdate(d *schema.ResourceData, meta interface{}) error {
-	// Only the field "labels" and "terraform_labels" is mutable
+	// Only the field "deletion_policy", "labels" and "terraform_labels" is mutable
 	return resourceComputeRegionInstanceTemplateRead(d, meta)
 }
 
@@ -1451,7 +1546,7 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	}
 	{{- end }}
 
-	instanceTemplate, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: config,
 		Method: "GET",
 		Project: project,
@@ -1462,36 +1557,49 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeRegionInstanceTemplate %q", d.Id()))
 	}
 
-	instancePropertiesMap := instanceTemplate["properties"]
+	// Extract id (uint64) and selfLink before JSON roundtrip.
+	var numericId string
+	switch v := res["id"].(type) {
+	case string:
+		numericId = v
+	case float64:
+		numericId = fmt.Sprintf("%.0f", v)
+	default:
+		numericId = fmt.Sprintf("%v", v)
+	}
+	selfLink, _ := res["selfLink"].(string)
 
-	instancePropertiesObj, err := json.Marshal(instancePropertiesMap)
-	if err != nil {
-		fmt.Println(err)
-		return err
+	properties, ok := res["properties"].(map[string]interface{})
+	if !ok {
+		properties = make(map[string]interface{})
 	}
 
-	instanceProperties := compute.InstanceProperties{}
-
-	if err := json.Unmarshal(instancePropertiesObj, &instanceProperties); err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	// Set the metadata fingerprint if there is one.
-	if instanceProperties.Metadata != nil {
-		if err = d.Set("metadata_fingerprint", instanceProperties.Metadata.Fingerprint); err != nil {
-			return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
+	if properties["metadata"] != nil {
+		mdRaw, _ := properties["metadata"].(map[string]interface{})
+		if fingerprint, ok := mdRaw["fingerprint"].(string); ok {
+			if err = d.Set("metadata_fingerprint", fingerprint); err != nil {
+				return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
+			}
 		}
 
-		md := instanceProperties.Metadata
-
-		_md := flattenMetadataBeta(md)
+		_md := make(map[string]interface{})
+		if itemsRaw, ok := mdRaw["items"].([]interface{}); ok {
+			for _, itemRaw := range itemsRaw {
+				if item, ok := itemRaw.(map[string]interface{}); ok {
+					k := item["key"].(string)
+					v := ""
+					if val, ok := item["value"].(string); ok {
+						v = val
+					}
+					_md[k] = v
+				}
+			}
+		}
 
 		if script, scriptExists := d.GetOk("metadata_startup_script"); scriptExists {
 			if err = d.Set("metadata_startup_script", script); err != nil {
 				return fmt.Errorf("Error setting metadata_startup_script: %s", err)
 			}
-
 			delete(_md, "startup-script")
 		}
 
@@ -1500,13 +1608,13 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		}
 	}
 
-	if err = d.Set("numeric_id", instanceTemplate["id"]); err != nil {
+	if err = d.Set("numeric_id", numericId); err != nil {
 		return fmt.Errorf("Error setting numeric_id: %s", err)
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
-	if instanceProperties.PartnerMetadata != nil {
-		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(instanceProperties.PartnerMetadata))
+	if properties["partnerMetadata"] != nil {
+		partnerMetadata, err := flattenPartnerMetadata(properties["partnerMetadata"].(map[string]interface{}))
 		if err != nil {
 			return fmt.Errorf("Error parsing partner metadata: %s", err)
 		}
@@ -1517,37 +1625,64 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	{{- end }}
 
 	// Set the tags fingerprint if there is one.
-	if instanceProperties.Tags != nil {
-		if err = d.Set("tags_fingerprint", instanceProperties.Tags.Fingerprint); err != nil {
-			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
+	if properties["tags"] != nil {
+		tags := properties["tags"].(map[string]interface{})
+		if fingerprint, ok := tags["fingerprint"].(string); ok {
+			if err = d.Set("tags_fingerprint", fingerprint); err != nil {
+				return fmt.Errorf("Error setting tags_fingerprint: %s", err)
+			}
+		}
+		if items, ok := tags["items"].([]interface{}); ok {
+			if err = d.Set("tags", items); err != nil {
+				return fmt.Errorf("Error setting tags: %s", err)
+			}
+		} else {
+			if err = d.Set("tags", nil); err != nil {
+				return fmt.Errorf("Error setting empty tags: %s", err)
+			}
 		}
 	} else {
 		if err := d.Set("tags_fingerprint", ""); err != nil {
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
-	}
-	if instanceProperties.Labels != nil {
-		if err := tpgresource.SetLabels(instanceProperties.Labels, d, "labels"); err != nil {
-			return fmt.Errorf("Error setting labels: %s", err)
+		if err := d.Set("tags", nil); err != nil {
+			return fmt.Errorf("Error setting empty tags: %s", err)
 		}
 	}
-	if err := tpgresource.SetLabels(instanceProperties.Labels, d, "terraform_labels"); err != nil {
+
+	var labels map[string]string
+	if properties["labels"] != nil {
+		labelsRaw := properties["labels"].(map[string]interface{})
+		labels = make(map[string]string)
+		for k, v := range labelsRaw {
+			labels[k] = v.(string)
+		}
+	}
+	if err := tpgresource.SetLabels(labels, d, "labels"); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(labels, d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
-	if err := d.Set("effective_labels", instanceProperties.Labels); err != nil {
+	if err := d.Set("effective_labels", labels); err != nil {
 		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
-	if err = d.Set("self_link", instanceTemplate["selfLink"]); err != nil {
+
+	if err = d.Set("self_link", selfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
-	if err := d.Set("creation_timestamp", instanceTemplate["creationTimestamp"]); err != nil {
-		return fmt.Errorf("Error setting creation_timestamp: %s", err)
+	if ct, ok := res["creationTimestamp"].(string); ok {
+		if err := d.Set("creation_timestamp", ct); err != nil {
+			return fmt.Errorf("Error setting creation_timestamp: %s", err)
+		}
 	}
-	if err = d.Set("name", instanceTemplate["name"]); err != nil {
-		return fmt.Errorf("Error setting name: %s", err)
+	if n, ok := res["name"].(string); ok {
+		if err = d.Set("name", n); err != nil {
+			return fmt.Errorf("Error setting name: %s", err)
+		}
 	}
-	if instanceProperties.Disks != nil {
-		disks, err := flattenDisks(instanceProperties.Disks, d, project)
+	if properties["disks"] != nil {
+		disks, err := FlattenDisksHTTP(properties["disks"].([]interface{}), d, project)
 		if err != nil {
 			return fmt.Errorf("error flattening disks: %s", err)
 		}
@@ -1555,125 +1690,150 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error setting disk: %s", err)
 		}
 	}
-	if err = d.Set("description", instanceTemplate["description"]); err != nil {
+	desc, _ := res["description"].(string)
+	if err = d.Set("description", desc); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
-	if err = d.Set("machine_type", instanceProperties.MachineType); err != nil {
+	mt, _ := properties["machineType"].(string)
+	if err = d.Set("machine_type", mt); err != nil {
 		return fmt.Errorf("Error setting machine_type: %s", err)
 	}
-	if err = d.Set("min_cpu_platform", instanceProperties.MinCpuPlatform); err != nil {
+	mcp, _ := properties["minCpuPlatform"].(string)
+	if err = d.Set("min_cpu_platform", mcp); err != nil {
 		return fmt.Errorf("Error setting min_cpu_platform: %s", err)
 	}
 
-	if err = d.Set("can_ip_forward", instanceProperties.CanIpForward); err != nil {
-		return fmt.Errorf("Error setting can_ip_forward: %s", err)
+	if cif, ok := properties["canIpForward"].(bool); ok {
+		if err = d.Set("can_ip_forward", cif); err != nil {
+			return fmt.Errorf("Error setting can_ip_forward: %s", err)
+		}
+	} else {
+		if err = d.Set("can_ip_forward", false); err != nil {
+			return fmt.Errorf("Error setting can_ip_forward: %s", err)
+		}
 	}
 
-	if err = d.Set("instance_description", instanceProperties.Description); err != nil {
+	idesc, _ := properties["description"].(string)
+	if err = d.Set("instance_description", idesc); err != nil {
 		return fmt.Errorf("Error setting instance_description: %s", err)
 	}
-	if err = d.Set("key_revocation_action_type", instanceProperties.KeyRevocationActionType); err != nil {
+	krat, _ := properties["keyRevocationActionType"].(string)
+	if err = d.Set("key_revocation_action_type", krat); err != nil {
 		return fmt.Errorf("Error setting key_revocation_action_type: %s", err)
 	}
 	if err = d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(instanceProperties.NetworkPerformanceConfig)); err != nil {
+	var npcMap map[string]interface{}
+	if properties["networkPerformanceConfig"] != nil {
+		npcMap = properties["networkPerformanceConfig"].(map[string]interface{})
+	}
+	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(npcMap)); err != nil {
 		return err
 	}
-	if instanceProperties.NetworkInterfaces != nil {
-		networkInterfaces, region, _, _, err := flattenNetworkInterfaces(d, config, instanceProperties.NetworkInterfaces)
+	if properties["networkInterfaces"] != nil {
+		networkInterfacesRaw := properties["networkInterfaces"].([]interface{})
+		networkInterfaces, regionIf, _, _, err := flattenNetworkInterfaces(d, config, networkInterfacesRaw)
 		if err != nil {
 			return err
 		}
 		if err = d.Set("network_interface", networkInterfaces); err != nil {
 			return fmt.Errorf("Error setting network_interface: %s", err)
 		}
-		// region is where to look up the subnetwork if there is one attached to the instance template
-		if region != "" {
-			if err = d.Set("region", region); err != nil {
+		if regionIf != "" {
+			if err = d.Set("region", regionIf); err != nil {
 				return fmt.Errorf("Error setting region: %s", err)
 			}
 		}
 	}
-	if instanceProperties.Scheduling != nil {
-		scheduling := flattenScheduling(instanceProperties.Scheduling)
+	if properties["scheduling"] != nil {
+		scheduling := FlattenSchedulingHTTP(properties["scheduling"].(map[string]interface{}))
 {{ if ne $.TargetVersionName `ga` }}
-		// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
-		// To avoid diff, we need to set the value from the state not from API response.
 		if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
-			graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
-			max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
-			max_duration["nanos"] = int64(nanos.(int))
-
-			graceful_shutdown["max_duration"] = []interface{}{max_duration}
-			scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+			if len(scheduling) > 0 && scheduling[0]["graceful_shutdown"] != nil {
+				if gs, ok := scheduling[0]["graceful_shutdown"].([]map[string]interface{}); ok && len(gs) > 0 && gs[0] != nil {
+					if md, ok := gs[0]["max_duration"].([]map[string]interface{}); ok && len(md) > 0 && md[0] != nil {
+						md[0]["nanos"] = nanos.(int)
+						gs[0]["max_duration"] = []map[string]interface{}{md[0]}
+						scheduling[0]["graceful_shutdown"] = []map[string]interface{}{gs[0]}
+					}
+				}
+			}
 		}
 {{- end }}
 		if err = d.Set("scheduling", scheduling); err != nil {
 			return fmt.Errorf("Error setting scheduling: %s", err)
 		}
 	}
-	if instanceProperties.Tags != nil {
-		if err = d.Set("tags", instanceProperties.Tags.Items); err != nil {
-			return fmt.Errorf("Error setting tags: %s", err)
-		}
-	} else {
-		if err = d.Set("tags", nil); err != nil {
-			return fmt.Errorf("Error setting empty tags: %s", err)
-		}
-	}
-	if instanceProperties.ServiceAccounts != nil {
-		if err = d.Set("service_account", flattenServiceAccounts(instanceProperties.ServiceAccounts)); err != nil {
+	if properties["serviceAccounts"] != nil {
+		if err = d.Set("service_account", flattenServiceAccounts(properties["serviceAccounts"].([]interface{}))); err != nil {
 			return fmt.Errorf("Error setting service_account: %s", err)
 		}
 	}
-	if instanceProperties.GuestAccelerators != nil {
-		if err = d.Set("guest_accelerator", flattenGuestAccelerators(instanceProperties.GuestAccelerators)); err != nil {
+	if properties["guestAccelerators"] != nil {
+		if err = d.Set("guest_accelerator", flattenGuestAccelerators(properties["guestAccelerators"].([]interface{}))); err != nil {
 			return fmt.Errorf("Error setting guest_accelerator: %s", err)
 		}
 	}
-	if instanceProperties.ShieldedInstanceConfig != nil {
-		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instanceProperties.ShieldedInstanceConfig)); err != nil {
+	if sicRaw, ok := properties["shieldedInstanceConfig"]; ok && sicRaw != nil {
+		sic := sicRaw.(map[string]interface{})
+		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(sic)); err != nil {
 			return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 		}
 	}
 
-	if instanceProperties.ConfidentialInstanceConfig != nil {
-		if err = d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instanceProperties.ConfidentialInstanceConfig)); err != nil {
+	if cicRaw, ok := properties["confidentialInstanceConfig"]; ok && cicRaw != nil {
+		if err = d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(cicRaw.(map[string]interface{}))); err != nil {
 			return fmt.Errorf("Error setting confidential_instance_config: %s", err)
 		}
 	}
-	if instanceProperties.AdvancedMachineFeatures != nil {
-		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(instanceProperties.AdvancedMachineFeatures)); err != nil {
+	if amfRaw, ok := properties["advancedMachineFeatures"]; ok && amfRaw != nil {
+		if err = d.Set("advanced_machine_features", flattenAdvancedMachineFeatures(amfRaw.(map[string]interface{}))); err != nil {
 			return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 		}
 	}
 {{- if ne $.TargetVersionName "ga" }}
-	if instanceProperties.DisplayDevice != nil {
-		if err = d.Set("enable_display", flattenEnableDisplay(instanceProperties.DisplayDevice)); err != nil {
+	if ddRaw, ok := properties["displayDevice"]; ok && ddRaw != nil {
+		if err = d.Set("enable_display", flattenEnableDisplay(ddRaw.(map[string]interface{}))); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}
 {{- end }}
 
-	if instanceProperties.ResourcePolicies != nil {
-		if err = d.Set("resource_policies", instanceProperties.ResourcePolicies); err != nil {
+	if rpRaw, ok := properties["resourcePolicies"]; ok && rpRaw != nil {
+		if err = d.Set("resource_policies", rpRaw); err != nil {
 			return fmt.Errorf("Error setting resource_policies: %s", err)
 		}
 	}
 
-	if reservationAffinity := instanceProperties.ReservationAffinity; reservationAffinity != nil {
-		if err = d.Set("reservation_affinity", flattenReservationAffinity(reservationAffinity)); err != nil {
+	if raRaw, ok := properties["reservationAffinity"]; ok && raRaw != nil {
+		if err = d.Set("reservation_affinity", flattenReservationAffinity(raRaw.(map[string]interface{}))); err != nil {
 			return fmt.Errorf("Error setting reservation_affinity: %s", err)
 		}
 	}
 
+    if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
+        return err
+    }
+
+	if wic, ok := properties["workloadIdentityConfig"]; ok && wic != nil {
+		if err = d.Set("workload_identity_config", FlattenWorkloadIdentityConfigHTTP(wic)); err != nil {
+			return fmt.Errorf("Error setting workload_identity_config: %s", err)
+		}
+	}
+    
 	return nil
 }
 
 func resourceComputeRegionInstanceTemplateDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+    
+    if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
+        return err
+    }else if ok{
+        return nil
+    }
+    	
+    config :=  meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

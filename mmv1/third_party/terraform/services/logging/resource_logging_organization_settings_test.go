@@ -8,6 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/logging"
 )
 
 var orgSettingsMu sync.Mutex
@@ -20,8 +22,8 @@ func TestAccLoggingOrganizationSettings_update(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"original_key":  acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
-		"updated_key":   acctest.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name,
+		"original_key":  kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+		"updated_key":   kms.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

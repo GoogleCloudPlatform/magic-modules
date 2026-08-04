@@ -9,6 +9,7 @@ fields:
   - field: 'additional_pipeline_options'
   - field: 'autoscaling_algorithm'
   - field: 'container_spec_gcs_path'
+  - field: 'create_ignore_already_exists'
   - field: 'effective_labels'
     provider_only: true
   - field: 'enable_streaming_engine'
@@ -37,4 +38,6 @@ fields:
     provider_only: true
   - api_field: 'transformNameMapping'
   - api_field: 'type'
+  - field: 'deletion_policy'
+    provider_only: true
 {{ end }}

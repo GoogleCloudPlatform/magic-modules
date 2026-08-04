@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -28,6 +29,8 @@ var (
 	postReplayTmplText string
 	//go:embed templates/vcr/record_replay.tmpl
 	recordReplayTmplText string
+	//go:embed templates/vcr/record_replay_rows.tmpl
+	recordReplayRowsTmplText string
 )
 
 var ttvRequiredEnvironmentVariables = [...]string{
@@ -68,6 +71,7 @@ type postReplay struct {
 	Version          string
 	Head             string
 	BuildID          string
+	BuildStepUrl     string
 }
 
 type VCRTestTableRow struct {
@@ -91,6 +95,7 @@ type recordReplay struct {
 	Version                       string
 	Head                          string
 	BuildID                       string
+	BuildStepUrl                  string
 	LogBaseUrl                    string
 	BrowseLogBaseUrl              string
 	NotRunBetaTests               []string
@@ -163,7 +168,7 @@ The following environment variables are required:
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
 
-		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, gh, rnr, ctlr, vt)
+		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, "/workspace", gh, rnr, ctlr, vt)
 	},
 }
 
@@ -175,7 +180,7 @@ func listTTVRequiredEnvironmentVariables() string {
 	return result
 }
 
-func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
+func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch, workspace string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := newBranch + "-old"
 
@@ -226,8 +231,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
 
-	buildStatusTargetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
-	if err := gh.PostBuildStatus(prNumber, "VCR-test", "pending", buildStatusTargetURL, mmCommitSha); err != nil {
+	buildStepUrl := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
+	if err := gh.PostBuildStatus(prNumber, "VCR-test", "pending", buildStepUrl, mmCommitSha); err != nil {
 		return fmt.Errorf("error posting pending status: %w", err)
 	}
 
@@ -246,13 +251,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
 
-	if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
+	if hasPanics, err := handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, workspace, replayingResult, vcr.Replaying, gh, rnr); err != nil {
 		return fmt.Errorf("error handling panics: %w", err)
 	} else if hasPanics {
 		return nil
 	}
 
-	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh, rnr); err != nil {
+	if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha, workspace, replayingResult, vcr.Replaying, gh, rnr); err != nil {
 		return fmt.Errorf("error handling build failures: %w", err)
 	} else if hasBuildFailures {
 		return nil
@@ -275,9 +280,10 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		Version:          provider.Beta.String(),
 		Head:             newBranch,
 		BuildID:          buildID,
+		BuildStepUrl:     buildStepUrl,
 	}
 
-	comment, err := formatPostReplay(postReplayData)
+	comment, err := formatPostReplay(postReplayData, os.Stdout)
 	if err != nil {
 		return fmt.Errorf("error formatting post replay comment: %w", err)
 	}
@@ -287,7 +293,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			comment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", comment, mentionStr, mmCommitSha)
 		}
 	}
-	if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
+	if err := appendVCRResultToDiffComment(prNumber, comment, workspace, gh, rnr); err != nil {
 		return fmt.Errorf("error appending comment: %w", err)
 	}
 	if len(replayingResult.FailedTests) > 0 {
@@ -318,13 +324,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
 
-		if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
+		if hasPanics, err := handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, workspace, recordingResult, vcr.Recording, gh, rnr); err != nil {
 			return fmt.Errorf("error handling panics: %w", err)
 		} else if hasPanics {
 			return nil
 		}
 
-		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh, rnr); err != nil {
+		if hasBuildFailures, err := handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha, workspace, recordingResult, vcr.Recording, gh, rnr); err != nil {
 			return fmt.Errorf("error handling build failures: %w", err)
 		} else if hasBuildFailures {
 			return nil
@@ -382,10 +388,11 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			Version:                       provider.Beta.String(),
 			Head:                          newBranch,
 			BuildID:                       buildID,
+			BuildStepUrl:                  buildStepUrl,
 			NotRunBetaTests:               notRunBeta,
 			NotRunGATests:                 notRunGa,
 		}
-		recordReplayComment, err := formatRecordReplay(recordReplayData)
+		recordReplayComment, err := formatRecordReplay(recordReplayData, os.Stdout)
 		if err != nil {
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
@@ -393,12 +400,12 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		if mentionStr != "" {
 			recordReplayComment = fmt.Sprintf("%s\n\n%s VCR tests complete for %s!", recordReplayComment, mentionStr, mmCommitSha)
 		}
-		if err := appendVCRResultToDiffComment(prNumber, recordReplayComment, gh, rnr); err != nil {
+		if err := appendVCRResultToDiffComment(prNumber, recordReplayComment, workspace, gh, rnr); err != nil {
 			return fmt.Errorf("error appending comment: %w", err)
 		}
 	}
 
-	if err := gh.PostBuildStatus(prNumber, "VCR-test", testState, buildStatusTargetURL, mmCommitSha); err != nil {
+	if err := gh.PostBuildStatus(prNumber, "VCR-test", testState, buildStepUrl, mmCommitSha); err != nil {
 		return fmt.Errorf("error posting build status: %w", err)
 	}
 	return nil
@@ -546,7 +553,7 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 	return result, testDirs, replayingErr
 }
 
-func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
+func handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, workspace string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.Panics) > 0 {
 		comment := "> [!CAUTION]\n"
 		comment += "> **Panic occurred during VCR tests**\n>\n"
@@ -568,10 +575,10 @@ func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, r
 		}
 		comment = header + comment
 
-		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
+		if err := appendVCRResultToDiffComment(prNumber, comment, workspace, gh, rnr); err != nil {
 			return true, fmt.Errorf("error appending comment: %v", err)
 		}
-		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStatusTargetURL, mmCommitSha); err != nil {
+		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStepUrl, mmCommitSha); err != nil {
 			return true, fmt.Errorf("error posting failure status: %v", err)
 		}
 		return true, nil
@@ -579,7 +586,7 @@ func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, r
 	return false, nil
 }
 
-func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
+func handleBuildFailures(prNumber, buildID, buildStepUrl, mmCommitSha, workspace string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {
 	if len(result.BuildFailures) > 0 {
 		comment := "> [!CAUTION]\n"
 		comment += "> **Build Failure during VCR tests**\n>\n"
@@ -604,10 +611,10 @@ func handleBuildFailures(prNumber, buildID, buildStatusTargetURL, mmCommitSha st
 		}
 		comment = header + comment
 
-		if err := appendVCRResultToDiffComment(prNumber, comment, gh, rnr); err != nil {
+		if err := appendVCRResultToDiffComment(prNumber, comment, workspace, gh, rnr); err != nil {
 			return true, fmt.Errorf("error appending comment: %v", err)
 		}
-		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStatusTargetURL, mmCommitSha); err != nil {
+		if err := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStepUrl, mmCommitSha); err != nil {
 			return true, fmt.Errorf("error posting failure status: %v", err)
 		}
 		return true, nil
@@ -647,11 +654,15 @@ func getMentions(prNumber string, gh GithubClient) string {
 // appendVCRResultToDiffComment appends content to the existing diff report comment
 // identified by the ID in /workspace/diff_comment_id.txt.
 // If the file is missing or the comment cannot be fetched, it falls back to posting a new comment.
-func appendVCRResultToDiffComment(prNumber string, content string, gh GithubClient, rnr ExecRunner) error {
+func appendVCRResultToDiffComment(prNumber string, content string, workspace string, gh GithubClient, rnr ExecRunner) error {
 	var diffComment *github.PullRequestComment
 
+	if workspace == "" {
+		workspace = "/workspace"
+	}
+
 	// Try to find by ID from file
-	if idStr, err := rnr.ReadFile("/workspace/diff_comment_id.txt"); err == nil {
+	if idStr, err := rnr.ReadFile(filepath.Join(workspace, "diff_comment_id.txt")); err == nil {
 		if id, err := strconv.Atoi(strings.TrimSpace(idStr)); err == nil {
 			if comment, err := gh.GetPullRequestComment(id); err == nil {
 				diffComment = &comment
@@ -675,7 +686,7 @@ func init() {
 	rootCmd.AddCommand(testTerraformVCRCmd)
 }
 
-func formatComment(fileName string, tmplText string, data any) (string, error) {
+func parseTemplate(filename string, tmplText string) *template.Template {
 	funcs := template.FuncMap{
 		"join":         strings.Join,
 		"add":          func(i, j int) int { return i + j },
@@ -685,30 +696,50 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 		"symbol":       symbol,
 		"contains":     contains,
 	}
-	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
+	tmpl, err := template.New(filename).Funcs(funcs).Parse(tmplText)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to parse %s: %s", fileName, err))
+		panic(fmt.Sprintf("Unable to parse %s: %s", filename, err))
 	}
+	return tmpl
+}
+
+func formatComment(filename string, tmplText string, data any) (string, error) {
+	tmpl := parseTemplate(filename, tmplText)
 	sb := new(strings.Builder)
-	err = tmpl.Execute(sb, data)
+	err := tmpl.Execute(sb, data)
 	if err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(sb.String()), nil
 }
 
-func formatPostReplay(data postReplay) (string, error) {
+func formatPostReplay(data postReplay, w io.Writer) (string, error) {
+	if len(data.ReplayingResult.FailedTests) > 100 {
+		fmt.Fprintln(w, "Failed replaying tests:")
+		for _, t := range data.ReplayingResult.FailedTests {
+			fmt.Fprintln(w, "* "+t)
+		}
+	}
 	return formatComment("post_replay.tmpl", postReplayTmplText, data)
 }
 
-func formatRecordReplay(data recordReplay) (string, error) {
+func formatRecordReplay(data recordReplay, w io.Writer) (string, error) {
+	if len(data.TestRows) > 100 {
+		tmpl := parseTemplate("record_replay_rows.tmpl", recordReplayRowsTmplText+`{{ template "RecordReplayRows" . }}`)
+		sb := new(strings.Builder)
+		err := tmpl.Execute(sb, data)
+		if err != nil {
+			return "", err
+		}
+		fmt.Fprintln(w, strings.TrimSpace(sb.String()))
+	}
 	logBasePath := fmt.Sprintf("%s/%s/refs/heads/%s/artifacts/%s", data.LogBucket, data.Version, data.Head, data.BuildID)
 	if data.BuildID == "" {
 		logBasePath = fmt.Sprintf("%s/%s/refs/heads/%s", data.LogBucket, data.Version, data.Head)
 	}
 	data.LogBaseUrl = fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
 	data.BrowseLogBaseUrl = fmt.Sprintf("https://console.cloud.google.com/storage/browser/%s", logBasePath)
-	return formatComment("record_replay.tmpl", recordReplayTmplText, data)
+	return formatComment("record_replay.tmpl", recordReplayRowsTmplText+recordReplayTmplText, data)
 }
 
 func contains(slice []string, item string) bool {

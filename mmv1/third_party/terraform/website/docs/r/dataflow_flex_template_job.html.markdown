@@ -89,6 +89,8 @@ The following arguments are supported:
 * `container_spec_gcs_path` - (Required) The GCS path to the Dataflow job Flex
 Template.
 
+* `create_ignore_already_exists` - (Optional) If true, if a 409 AlreadyExists error is returned on create, the provider will ignore it and adopt the existing resource.
+
 - - -
 
 * `additional_experiments` - (Optional) List of experiments that should be used by the job. An example value is `["enable_stackdriver_agent_metrics"]`.
@@ -151,6 +153,13 @@ and will remove the resource from terraform state and move on.  See above note.
 * `temp_location` - (Optional) The Cloud Storage path to use for temporary files. Must be a valid Cloud Storage URL, beginning with gs://.
 
 * `transform_name_mapping` - (Optional) Only applicable when updating a pipeline. Map of transform name prefixes of the job to be replaced with the corresponding name prefixes of the new job.Only applicable when updating a pipeline. Map of transform name prefixes of the job to be replaced with the corresponding name prefixes of the new job.
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+    When a 'terraform destroy' or 'terraform apply' would delete the resource,
+    the command will fail if this field is set to "PREVENT" in Terraform state.
+    When set to "ABANDON", the command will remove the resource from Terraform
+    management without updating or deleting the resource in the API.
+    When set to "DELETE", deleting the resource is allowed.
 
 ## Attributes Reference
 In addition to the arguments listed above, the following computed attributes are exported:

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/sql"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -15,7 +16,7 @@ func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := acctest.BootstrapSharedSQLInstanceBackupRun(t)
+	instance := BootstrapSharedSQLInstanceBackupRun(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

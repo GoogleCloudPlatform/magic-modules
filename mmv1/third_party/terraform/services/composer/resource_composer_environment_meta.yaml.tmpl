@@ -38,6 +38,7 @@ fields:
   - api_field: 'config.nodeConfig.machineType'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'config.nodeConfig.maxPodsPerNode'
+  - api_field: 'config.nodeConfig.trafficRoutingConfig.cloudRunFunctionsRouting'
 {{- end }}
   - api_field: 'config.nodeConfig.network'
   - api_field: 'config.nodeConfig.oauthScopes'
@@ -97,4 +98,6 @@ fields:
   - field: 'region'
   - api_field: 'storageConfig.bucket'
   - field: 'terraform_labels'
+    provider_only: true
+  - field: 'deletion_policy'
     provider_only: true

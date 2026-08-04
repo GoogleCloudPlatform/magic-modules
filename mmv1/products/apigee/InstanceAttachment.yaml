@@ -12,20 +12,19 @@
 # limitations under the License.
 
 ---
-name: 'InstanceAttachment'
+name: InstanceAttachment
 description: |
   An `Instance attachment` in Apigee.
 references:
   guides:
-    'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/create'
+    Creating an environment: https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/create
 docs:
 base_url: '{{instance_id}}/attachments'
+immutable: true
 self_link: '{{instance_id}}/attachments/{{name}}'
 create_url: '{{instance_id}}/attachments'
 delete_url: '{{instance_id}}/attachments/{{name}}'
-immutable: true
-mutex: 'apigeeInstanceAttachments'
 import_format:
   - '{{instance_id}}/attachments/{{name}}'
   - '{{instance_id}}/{{name}}'
@@ -33,41 +32,46 @@ timeouts:
   insert_minutes: 30
   update_minutes: 20
   delete_minutes: 30
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-custom_code:
-  custom_import: 'templates/terraform/custom_import/apigee_instance_attachment.go.tmpl'
+mutex: apigeeInstanceAttachments
 # Skipping the sweeper due to the non-standard instance_id
 exclude_sweeper: true
-examples:
-  - name: 'apigee_instance_attachment_basic'
-    vars:
-      project_id: 'my-project'
-      instance_name: 'my-instance-name'
-      environment_name: 'my-environment-name'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: true
+autogen_async: true
+custom_code:
+  custom_import: templates/terraform/custom_import/apigee_instance_attachment.go.tmpl
+samples:
+  - name: apigee_instance_attachment_basic
     exclude_test: true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - name: 'apigee_instance_attachment_basic_test'
-    primary_resource_id: 'apigee_instance_attachment'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    steps:
+      - name: apigee_instance_attachment_basic
+        resource_id_vars:
+          project_id: my-project
+          instance_name: my-instance-name
+          environment_name: my-environment-name
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
+  - name: apigee_instance_attachment_basic_test
+    primary_resource_id: apigee_instance_attachment
+    exclude_basic_doc: true
+    # Resource creation race
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers: [time]
+    steps:
+      - name: apigee_instance_attachment_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
 parameters:
-  - name: 'instanceId'
+  - name: instanceId
     type: String
     description: |
       The Apigee instance associated with the Apigee environment,
@@ -75,12 +79,12 @@ parameters:
     url_param_only: true
     required: true
 properties:
-  - name: 'environment'
+  - name: environment
     type: String
     description: |
       The resource ID of the environment.
     required: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The name of the newly created  attachment (output parameter).

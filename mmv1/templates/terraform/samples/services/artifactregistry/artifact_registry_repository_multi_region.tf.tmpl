@@ -1,0 +1,6 @@
+resource "google_artifact_registry_repository" "{{$.PrimaryResourceId}}" {
+  repository_id = "{{index $.ResourceIdVars "repository_id"}}"
+  description   = "{{index $.ResourceIdVars "desc"}}"
+  location      = "us"
+  format        = "DOCKER"
+}

@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccComputeRouter_basic(t *testing.T) {
@@ -216,9 +218,9 @@ func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
 	suffixName := acctest.RandString(t, 10)
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-routers-tagkey", "organizations/"+org, make(map[string]interface{}))
+	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "crm-routers-tagkey", "organizations/"+org, make(map[string]interface{}))
 	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-routers-tagvalue", sharedTagkey, org)
+	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "crm-routers-tagvalue", sharedTagkey, org)
 	routerName := fmt.Sprintf("tf-test-router-resource-manager-tags-%s", suffixName)
 	networkName := fmt.Sprintf("tf-test-network-resource-manager-tags-%s-net", suffixName)
 	subnetName := fmt.Sprintf("tf-test-subnet-resource-manager-tags-%s-subnet", suffixName)
@@ -246,6 +248,45 @@ func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccComputeRouter_keepaliveIntervalDefault(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-%s", testId)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouter_keepaliveIntervalDefault(routerName),
+			},
+			{
+				ResourceName:      "google_compute_router.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRouter_keepaliveIntervalDefault(routerName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  network = google_compute_network.foobar.name
+  bgp {
+    asn = 64514
+  }
+}
+`, routerName, routerName)
 }
 
 func testAccComputeRouterBasic(routerName, resourceRegion string) string {

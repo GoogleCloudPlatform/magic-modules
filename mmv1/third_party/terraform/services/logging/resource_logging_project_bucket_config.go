@@ -129,6 +129,9 @@ For example: jsonPayload.request.status`,
 			},
 		},
 	},
+	//UDP schema start
+	"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+	//UDP schema end
 }
 
 func projectBucketConfigID(d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
@@ -177,7 +180,7 @@ func resourceLoggingProjectBucketConfigAcquireOrCreate(parentType string, iDFunc
 			//logging bucket can be created only at the project level, in future api may allow for folder, org and other parent resources
 
 			log.Printf("[DEBUG] Fetching logging bucket config: %#v", id)
-			url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", id))
+			url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"%s", id))
 			if err != nil {
 				return err
 			}
@@ -222,7 +225,7 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
 	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets:createAsync?bucketId={{bucket_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/buckets:createAsync?bucketId={{bucket_id}}")
 	if err != nil {
 		return err
 	}
@@ -277,7 +280,7 @@ func resourceLoggingProjectBucketConfigRead(d *schema.ResourceData, meta interfa
 
 	log.Printf("[DEBUG] Fetching logging bucket config: %#v", d.Id())
 
-	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"%s", d.Id()))
 	if err != nil {
 		return err
 	}
@@ -334,7 +337,7 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 
 	obj := make(map[string]interface{})
 
-	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"%s", d.Id()))
 	if err != nil {
 		return err
 	}
@@ -358,12 +361,15 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 			Body:      obj,
 			Timeout:   d.Timeout(schema.TimeoutUpdate),
 		})
+		if err != nil {
+			return err
+		}
 
 		var opRes map[string]interface{}
 		// Wait for the operation to complete
 		waitErr := LoggingOperationWaitTimeWithResponse(config, res, &opRes, "Updating Bucket with analytics", userAgent, d.Timeout(schema.TimeoutCreate))
 		if waitErr != nil {
-			return fmt.Errorf("Error updating Logging Bucket Config %q: %s", d.Id(), err)
+			return fmt.Errorf("Error updating Logging Bucket Config %q: %s", d.Id(), waitErr)
 		}
 	}
 

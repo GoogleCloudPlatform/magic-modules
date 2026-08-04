@@ -10,16 +10,35 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"google.golang.org/api/iam/v1"
+	iam "google.golang.org/api/iam/v1"
 )
 
 func ResourceGoogleServiceAccountKey() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleServiceAccountKeyCreate,
 		Read:   resourceGoogleServiceAccountKeyRead,
+		Update: resourceGoogleServiceAccountKeyUpdate,
 		Delete: resourceGoogleServiceAccountKeyDelete,
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+		),
+
 		Schema: map[string]*schema.Schema{
 			// Required
 			"service_account_id": {
@@ -93,6 +112,9 @@ func ResourceGoogleServiceAccountKey() *schema.Resource {
 				Computed:    true,
 				Description: `The key can be used before this timestamp. A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".`,
 			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -132,6 +154,11 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 	}
 
 	d.SetId(sak.Name)
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"name": sak.Name,
+	}); err != nil {
+		return err
+	}
 	// Data only available on create.
 	if err := d.Set("valid_after", sak.ValidAfterTime); err != nil {
 		return fmt.Errorf("Error setting valid_after: %s", err)
@@ -182,6 +209,16 @@ func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{
 		}
 	}
 
+	if err := flattenServiceAccountKey(d, config, sak); err != nil {
+		return err
+	}
+
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"name": sak.Name,
+	})
+}
+
+func flattenServiceAccountKey(d *schema.ResourceData, config *transport_tpg.Config, sak *iam.ServiceAccountKey) error {
 	if err := d.Set("name", sak.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
@@ -191,10 +228,30 @@ func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("public_key", sak.PublicKeyData); err != nil {
 		return fmt.Errorf("Error setting public_key: %s", err)
 	}
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
+// UDP update start
+func resourceGoogleServiceAccountKeyUpdate(d *schema.ResourceData, meta interface{}) error {
+	// Only the root field "deletion_policy", "labels", "terraform_labels", and virtual fields are mutable
+	return resourceGoogleServiceAccountKeyRead(d, meta)
+}
+
+//UDP update end
+
 func resourceGoogleServiceAccountKeyDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

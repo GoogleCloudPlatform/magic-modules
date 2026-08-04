@@ -87,9 +87,13 @@ func New{{ $.ResourceName -}}Cai2hclConverter(provider *schema.Provider) models.
 }
 
 // Convert converts asset to HCL resource blocks.
-func (c *{{ $.ResourceName -}}Cai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *{{ $.ResourceName -}}Cai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
+	}
+
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(asset)
+	block, err := c.convertResourceData(assets[0], options)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +101,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) Convert(asset caiasset.Asset) ([
 	return blocks, nil
 }
 
-func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiasset.Asset, options *models.ResourceConverterOptions) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -115,14 +119,19 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 
 	assetNameParts := strings.Split(asset.Name, "/")
 
-	hclBlockName := assetNameParts[len(assetNameParts)-1]
-	digitRegex := regexp.MustCompile(`^\d+$`)
-	nameValidator := regexp.MustCompile("^[a-zA-Z_][a-zA-Z0-9_-]*$")
-	if digitRegex.MatchString(hclBlockName) || !nameValidator.MatchString(hclBlockName) {
-		hasher := sha256.New()
-		hasher.Write([]byte(hclBlockName))
-		fullHash := hex.EncodeToString(hasher.Sum(nil))
-		hclBlockName = fmt.Sprintf("resource%s", fullHash[:8])
+	var hclBlockName string
+	if options != nil && options.ResourceName != "" {
+		hclBlockName = options.ResourceName
+	} else {
+		hclBlockName = assetNameParts[len(assetNameParts)-1]
+		digitRegex := regexp.MustCompile(`^\d+$`)
+		nameValidator := regexp.MustCompile("^[a-zA-Z_][a-zA-Z0-9_-]*$")
+		if digitRegex.MatchString(hclBlockName) || !nameValidator.MatchString(hclBlockName) {
+			hasher := sha256.New()
+			hasher.Write([]byte(hclBlockName))
+			fullHash := hex.EncodeToString(hasher.Sum(nil))
+			hclBlockName = fmt.Sprintf("resource%s", fullHash[:8])
+		}
 	}
 	hclData := make(map[string]interface{})
 
@@ -171,8 +180,8 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 }
 
 {{ range $prop := $.ReadPropertiesForTgc }}
-{{- template "flattenTgcPropertyMethod" $prop -}}
-{{- end }}
+{{ template "flattenTgcPropertyMethod" $prop }}
+{{ end }}
 
 {{- if $.CustomCode.TgcDecoder }}
 func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}, hclData map[string]interface{}) (map[string]interface{}, map[string]interface{}, error) {

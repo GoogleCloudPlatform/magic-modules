@@ -1,12 +1,16 @@
 package compute_test
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccComputeInterconnect_computeInterconnectMacsecTest(t *testing.T) {
@@ -39,6 +43,10 @@ func TestAccComputeInterconnect_computeInterconnectMacsecTest(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
 			},
+			{
+				Config:      testAccComputeInterconnect_computeInterconnectChangeLocation(context),
+				ExpectError: regexp.MustCompile("The location field must match the effectiveLocation field on patch"),
+			},
 		},
 	})
 }
@@ -52,7 +60,7 @@ resource "google_compute_interconnect" "example-interconnect" {
   customer_name        = "internal_customer" # Special customer only available for Google testing.
   interconnect_type    = "DEDICATED"
   link_type            = "LINK_TYPE_ETHERNET_100G_LR"
-  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-z" # Special location only available for Google testing.
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-z" # Special location only available for Google testing.
   requested_link_count = 1
   admin_enabled        = true
   description          = "example description"
@@ -75,7 +83,7 @@ resource "google_compute_interconnect" "example-interconnect" {
   customer_name        = "internal_customer" # Special customer only available for Google testing.
   interconnect_type    = "DEDICATED"
   link_type            = "LINK_TYPE_ETHERNET_100G_LR"
-  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-z" # Special location only available for Google testing.
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-z" # Special location only available for Google testing.
   requested_link_count = 1
   admin_enabled        = true
   description          = "example description"
@@ -100,9 +108,9 @@ func TestAccComputeInterconnect_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 	org := envvar.GetTestOrgFromEnv(t)
 
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-interconnects-tagkey", "organizations/"+org, make(map[string]interface{}))
+	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "crm-interconnects-tagkey", "organizations/"+org, make(map[string]interface{}))
 	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-interconnects-tagvalue", sharedTagkey, org)
+	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "crm-interconnects-tagvalue", sharedTagkey, org)
 
 	context := map[string]interface{}{
 		"tag_key_id":    tagKeyResult["name"],
@@ -152,6 +160,26 @@ resource "google_compute_interconnect" "example-interconnect" {
       "%{tag_key_id}" = "%{tag_value_id}"
     }
   }
+}
+`, context)
+}
+
+func testAccComputeInterconnect_computeInterconnectChangeLocation(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_compute_interconnect" "example-interconnect" {
+  name                 = "tf-test-example-interconnect%{random_suffix}"
+  customer_name        = "internal_customer" # Special customer only available for Google testing.
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR"
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-a" # Changed to lciadl-a
+  requested_link_count = 1
+  admin_enabled        = true
+  description          = "example description"
+  macsec_enabled       = true
+  noc_contact_email    = "user@example.com"
+  requested_features   = ["IF_MACSEC"]
 }
 `, context)
 }

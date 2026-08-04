@@ -1,0 +1,24 @@
+# Agent Instructions
+
+Magic Modules (MMv1) defines the Google Cloud Terraform providers: resource schemas in `mmv1/products/`,
+handwritten code and tests under `mmv1/third_party/terraform/`, generated into the downstream
+`terraform-provider-google` and `terraform-provider-google-beta` repositories. Changes are always made
+here, upstream — never in the downstream repos.
+
+## Entry points
+
+- **[.agents/WORKFLOWS.md](.agents/WORKFLOWS.md)** — the workflows for provider tasks (adding
+  resources/fields, fixing issues, syncing) and the rules that govern them. Read it before starting a
+  provider task.
+- **`.agents/skills/`** — reusable skills the workflows compose (generation, testing, log parsing,
+  troubleshooting). Each skill's `SKILL.md` frontmatter states when to use it.
+- **[.agents/knowledge/index.md](.agents/knowledge/index.md)** — the knowledge index: a short map of
+  where provider knowledge lives. Refer to this to check for relevant patterns or instructions.
+- **`.agents/archive/`** — parked tracks (currently TGC). Not maintained; do not use as reference.
+
+## Ground rules
+
+- **Never weaken baseline test coverage to make a test pass.** No disabling or skipping tests, and no test-dodging
+  behavior flags (`ignore_read`, `ImportStateVerifyIgnore`) without an adjacent
+  comment justifying the API behavior that requires them.
+- **Verify before opening a PR**: generate, build, and run the tests relevant to what you changed.
