@@ -1483,22 +1483,16 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	var pathTkns []string
 	for _, pname := range strings.Split(schemaPath, ".0.") {
 		camelPname := google.Camelize(pname, "lower")
-		index := slices.IndexFunc(nestedProps, func(p *Type) bool {
-			return p.Name == camelPname
-		})
+		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
 
 		// if we couldn't find it, see if it was renamed at the top level
-		if index == -1 {
-			index = slices.IndexFunc(nestedProps, func(p *Type) bool {
-				return p.Name == schemaPath
-			})
+		if prop == nil {
+			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
 		}
 
-		if index == -1 {
+		if prop == nil {
 			return ""
 		}
-
-		prop := nestedProps[index]
 
 		nestedProps = prop.NestedProperties()
 		if !prop.FlattenObject {
@@ -1511,6 +1505,23 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	}
 
 	return strings.Join(pathTkns[:], ".0.")
+}
+
+// findPropByNameInFlattenedList searches for a property by camelCase name in a list of
+// properties. It also searches recursively inside any FlattenObject nested objects, since
+// those appear as top-level fields in the Terraform schema.
+func findPropByNameInFlattenedList(props []*Type, name string) *Type {
+	for _, p := range props {
+		if p.Name == name {
+			return p
+		}
+		if p.FlattenObject {
+			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
+				return found
+			}
+		}
+	}
+	return nil
 }
 
 func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
