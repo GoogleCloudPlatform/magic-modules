@@ -2,7 +2,6 @@ package compute
 {{- if ne $.TargetVersionName "ga" }}
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -221,17 +220,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 			return fmt.Errorf("Error expanding scheduling: %s", err)
 		}
 		if schedulingBody != nil {
-			// Strip nil Duration fields so the source machine image values are inherited
-			// instead of being overridden with null. Use json.Marshal to detect typed nils
-			// (map[string]interface{}(nil)) that are not equal to untyped nil.
-			for _, k := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "gracefulShutdown", "preemptionNoticeDuration"} {
-				if v, ok := schedulingBody[k]; ok {
-					if b, err := json.Marshal(v); err == nil && string(b) == "null" {
-						delete(schedulingBody, k)
-					}
-				}
-			}
-			instanceBody["scheduling"] = schedulingBody
+			instanceBody["scheduling"] = schedulingOmitEmpty(schedulingBody)
 		}
 	} else if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
 		if schedulingRaw, ok := srcProps["scheduling"].(map[string]interface{}); ok {

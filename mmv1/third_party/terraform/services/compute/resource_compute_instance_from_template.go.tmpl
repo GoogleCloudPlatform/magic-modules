@@ -204,11 +204,6 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		if err != nil {
 			return fmt.Errorf("Error expanding scheduling: %s", err)
 		}
-		for _, k := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "gracefulShutdown", "preemptionNoticeDuration"} {
-			if m, isMap := schedulingMap[k].(map[string]interface{}); isMap && m == nil {
-				delete(schedulingMap, k)
-			}
-		}
 		for _, key := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "preemptionNoticeDuration"} {
 			if dur, ok := schedulingMap[key].(map[string]interface{}); ok {
 				if sec, ok := dur["seconds"]; ok {
@@ -223,7 +218,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 				}
 			}
 		}
-		instance["scheduling"] = schedulingMap
+		instance["scheduling"] = schedulingOmitEmpty(schedulingMap)
 	}
 
 	{{- if ne $.TargetVersionName "ga" }}
