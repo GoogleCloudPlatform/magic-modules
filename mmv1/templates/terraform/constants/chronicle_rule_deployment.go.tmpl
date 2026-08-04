@@ -6,9 +6,10 @@ func chronicleRuleDeploymentNilRunFrequencyDiffSuppressFunc(_, old, new string, 
 	}
 	// Suppress diffs for coerced run frequencies. With the release of customizable
 	// schedules, setting a multi-event rule to LIVE or HOURLY will set the backend
-	// state to LIVE_CUSTOMIZABLE or HOURLY_CUSTOMIZABLE, respectively. So by
+	// state to LIVE_CUSTOMIZABLE or HOURLY_CUSTOMIZABLE, respectively. Non-large match
+	// window rules requesting DAILY are also coerced to HOURLY_CUSTOMIZABLE. So by
 	// suppressing this diff we avoid a permadiff.
-	if (old == "LIVE_CUSTOMIZABLE" && new == "LIVE") || (old == "HOURLY_CUSTOMIZABLE" && new == "HOURLY") {
+	if (old == "LIVE_CUSTOMIZABLE" && new == "LIVE") || (old == "HOURLY_CUSTOMIZABLE" && (new == "HOURLY" || new == "DAILY")) {
 		return true
 	}
 	// For single-event rules, we coerce HOURLY and DAILY to LIVE. Note that this

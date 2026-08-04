@@ -150,7 +150,10 @@ properties:
       LIVE_CUSTOMIZABLE
       HOURLY_CUSTOMIZABLE
 
-      Note: For multi-event rules, you must use LIVE_CUSTOMIZABLE or HOURLY_CUSTOMIZABLE for rules with match windows <=2d or DAILY for rules with match windows >2d. If you use LIVE or HOURLY, unexpected behavior may occur, such as terraform plan ignoring changes.
+      Note: Certain legacy run frequencies are deprecated. For multi-event rules, use LIVE_CUSTOMIZABLE or HOURLY_CUSTOMIZABLE (for match windows <=2d), or DAILY (for match windows >2d).
+      Legacy values LIVE and HOURLY are mapped to their customizable counterparts on the backend. DAILY for <=2d match window multi-event rules will be happed to HOURLY_CUSTOMIZABLE.
+      For single-event rules, HOURLY and DAILY are deprecated and mapped to LIVE. If you continue to use deprecated values in your Terraform configuration, Terraform will silently
+      suppress the diff and ignore the changes to prevent infinite update loops.
   - name: scheduleCustomizations
     type: NestedObject
     custom_flatten: 'templates/terraform/custom_flatten/chronicle_rule_deployment_schedule_customizations.go.tmpl'
@@ -163,7 +166,7 @@ properties:
         send_empty_value: true
         description: |-
           Indicates whether to add additional delays and runs to rules to ensure
-          enrichment completeness, with the trade-off of more late-arrving detections.
+          enrichment completeness, with the trade-off of more late-arriving detections.
       - name: lateArrivingDataAdjustment
         type: String
         description: |-
