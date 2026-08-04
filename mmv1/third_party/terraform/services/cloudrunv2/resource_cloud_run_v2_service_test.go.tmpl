@@ -2033,3 +2033,57 @@ resource "google_cloud_run_v2_service" "default" {
 }
 `, context)
 }
+
+// TestAccCloudRunV2Service_cloudrunv2ServiceMaxInstanceCountNoPermadiff is a regression test for
+// https://github.com/GoogleCloudPlatform/magic-modules/pull/18394.
+// When template.scaling.max_instance_count is not set, the API returns a computed default value.
+// Prior to the fix, the provider read that value as 0 on the next plan, producing a perpetual diff.
+func TestAccCloudRunV2Service_cloudrunv2ServiceMaxInstanceCountNoPermadiff(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Create the service without an explicit max_instance_count so the API
+				// fills in its own default value.
+				Config: testAccCloudRunV2Service_cloudrunv2ServiceWithoutMaxInstanceCount(context),
+			},
+			{
+				// Re-apply the same config. Expect no changes (empty plan) to prove there
+				// is no permadiff caused by the API-populated max_instance_count default.
+				Config: testAccCloudRunV2Service_cloudrunv2ServiceWithoutMaxInstanceCount(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceWithoutMaxInstanceCount(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name                = "tf-test-cloudrun-service%{random_suffix}"
+  location            = "us-central1"
+  deletion_protection = false
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+    scaling {
+      min_instance_count = 0
+    }
+  }
+}
+`, context)
+}
