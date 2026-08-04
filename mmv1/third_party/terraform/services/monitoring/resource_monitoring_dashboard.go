@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
 	"time"
 
@@ -15,35 +16,102 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// This recursive function takes an old map and a new map and is intended to remove the computed keys
-// from the old json string (stored in state) so that it doesn't show a diff if it's not defined in the
-// new map's json string (defined in config)
-func removeComputedKeys(old map[string]interface{}, new map[string]interface{}) map[string]interface{} {
-	for k, v := range old {
-		if _, ok := old[k]; ok && new[k] == nil {
-			delete(old, k)
-			continue
-		}
-
-		if reflect.ValueOf(v).Kind() == reflect.Map {
-			old[k] = removeComputedKeys(v.(map[string]interface{}), new[k].(map[string]interface{}))
-			continue
-		}
-
-		if reflect.ValueOf(v).Kind() == reflect.Slice {
-			for i, j := range v.([]interface{}) {
-				if reflect.ValueOf(j).Kind() == reflect.Map && len(new[k].([]interface{})) > i {
-					old[k].([]interface{})[i] = removeComputedKeys(j.(map[string]interface{}), new[k].([]interface{})[i].(map[string]interface{}))
-				}
-			}
-			continue
-		}
-	}
-
-	return old
+func stripMonitoringDashboardComputedFields(m map[string]interface{}) map[string]interface{} {
+	result := maps.Clone(m)
+	delete(result, "etag")
+	delete(result, "name")
+	return result
 }
 
-func monitoringDashboardDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+func removeKeysAbsentFromConfig(state, config map[string]interface{}) map[string]interface{} {
+	if state == nil {
+		return nil
+	}
+	if config == nil {
+		config = map[string]interface{}{}
+	}
+
+	result := make(map[string]interface{}, len(state))
+	for k, stateValue := range state {
+		configValue, exists := config[k]
+		if !exists {
+			continue
+		}
+
+		switch stateValue := stateValue.(type) {
+		case map[string]interface{}:
+			if configValue, ok := configValue.(map[string]interface{}); ok {
+				result[k] = removeKeysAbsentFromConfig(stateValue, configValue)
+			} else {
+				result[k] = stateValue
+			}
+		case []interface{}:
+			if configValue, ok := configValue.([]interface{}); ok {
+				result[k] = removeKeysAbsentFromConfigSlice(stateValue, configValue)
+			} else {
+				result[k] = stateValue
+			}
+		default:
+			result[k] = stateValue
+		}
+	}
+	return result
+}
+
+func removeKeysAbsentFromConfigSlice(state, config []interface{}) []interface{} {
+	result := make([]interface{}, len(state))
+	for i, stateValue := range state {
+		if i >= len(config) {
+			result[i] = stateValue
+			continue
+		}
+		stateMap, stateIsMap := stateValue.(map[string]interface{})
+		configMap, configIsMap := config[i].(map[string]interface{})
+		if stateIsMap && configIsMap {
+			result[i] = removeKeysAbsentFromConfig(stateMap, configMap)
+		} else {
+			result[i] = stateValue
+		}
+	}
+	return result
+}
+
+// The API omits zero-valued tile positions, while Terraform's jsonencode preserves them.
+func stripMonitoringDashboardZeroTilePositions(dashboard map[string]interface{}) map[string]interface{} {
+	result := maps.Clone(dashboard)
+	mosaicLayout, ok := result["mosaicLayout"].(map[string]interface{})
+	if !ok {
+		return result
+	}
+	tiles, ok := mosaicLayout["tiles"].([]interface{})
+	if !ok {
+		return result
+	}
+
+	normalizedTiles := make([]interface{}, len(tiles))
+	copy(normalizedTiles, tiles)
+	for i, tile := range tiles {
+		tile, ok := tile.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		tile = maps.Clone(tile)
+		if xPos, ok := tile["xPos"].(float64); ok && xPos == 0 {
+			delete(tile, "xPos")
+		}
+		if yPos, ok := tile["yPos"].(float64); ok && yPos == 0 {
+			delete(tile, "yPos")
+		}
+		normalizedTiles[i] = tile
+	}
+
+	mosaicLayout = maps.Clone(mosaicLayout)
+	mosaicLayout["tiles"] = normalizedTiles
+	result["mosaicLayout"] = mosaicLayout
+	return result
+}
+
+func monitoringDashboardDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	oldMap, err := structure.ExpandJsonFromString(old)
 	if err != nil {
 		return false
@@ -53,7 +121,12 @@ func monitoringDashboardDiffSuppress(k, old, new string, d *schema.ResourceData)
 		return false
 	}
 
-	oldMap = removeComputedKeys(oldMap, newMap)
+	oldMap = stripMonitoringDashboardComputedFields(oldMap)
+	newMap = stripMonitoringDashboardComputedFields(newMap)
+	oldMap = removeKeysAbsentFromConfig(oldMap, newMap)
+	oldMap = stripMonitoringDashboardZeroTilePositions(oldMap)
+	newMap = stripMonitoringDashboardZeroTilePositions(newMap)
+
 	return reflect.DeepEqual(oldMap, newMap)
 }
 
