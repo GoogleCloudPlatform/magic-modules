@@ -19938,6 +19938,9 @@ resource "google_container_cluster" "with_hsc_config" {
     high_scale_checkpointing_config {
       enabled = %t
     }
+    gcs_fuse_csi_driver_config {
+      enabled = true
+    }
   }
 }
 `, clusterName, networkName, subnetworkName, enabled)
