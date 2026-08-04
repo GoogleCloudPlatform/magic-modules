@@ -1093,6 +1093,40 @@ func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// Update node disk io scheduler config
+			{
+				Config: testAccContainerNodePool_withLinuxNodeConfigDiskIoScheduler(cluster, np, "bfq", "mq-deadline", networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_node_pool.with_linux_node_config",
+						"node_config.0.linux_node_config.0.disk_io_scheduler.0.node_system_io_scheduler", "bfq",
+					),
+					resource.TestCheckResourceAttr(
+						"google_container_node_pool.with_linux_node_config",
+						"node_config.0.linux_node_config.0.disk_io_scheduler.0.node_attached_disk_io_scheduler", "mq-deadline",
+					),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_linux_node_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Update node vfio config
+			{
+				Config: testAccContainerNodePool_withLinuxNodeConfigNodeVfioConfig(cluster, np, 100000, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_node_pool.with_linux_node_config",
+						"node_config.0.linux_node_config.0.node_vfio_config.0.dma_entry_limit", "100000",
+					),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_linux_node_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -4436,6 +4470,81 @@ resource "google_container_node_pool" "with_linux_node_config" {
   }
 }
 `, cluster, networkName, subnetworkName, np, linuxNodeConfig)
+}
+
+func testAccContainerNodePool_withLinuxNodeConfigDiskIoScheduler(cluster, np, sysScheduler, attachedScheduler, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+
+resource "google_container_node_pool" "with_linux_node_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    image_type = "COS_CONTAINERD"
+    linux_node_config {
+      disk_io_scheduler {
+        node_system_io_scheduler        = "%s"
+        node_attached_disk_io_scheduler = "%s"
+      }
+    }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, networkName, subnetworkName, np, sysScheduler, attachedScheduler)
+}
+
+func testAccContainerNodePool_withLinuxNodeConfigNodeVfioConfig(cluster, np string, dmaEntryLimit int, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+
+resource "google_container_node_pool" "with_linux_node_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    image_type = "COS_CONTAINERD"
+    linux_node_config {
+      node_vfio_config {
+        dma_entry_limit = %d
+      }
+    }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, networkName, subnetworkName, np, dmaEntryLimit)
 }
 
 func testAccContainerNodePool_withSwapConfig(cluster, np, networkName, subnetworkName, swapMode, extraLSSDCount string) string {

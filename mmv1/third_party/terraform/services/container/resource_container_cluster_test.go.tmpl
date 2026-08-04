@@ -2510,6 +2510,52 @@ func TestAccContainerCluster_withNodeConfigLinuxNodeConfig(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
+			// Update node disk io scheduler config
+			{
+				Config: testAccContainerCluster_withNodeConfigLinuxNodeConfigDiskIoScheduler(clusterName, networkName, subnetworkName, "bfq", "mq-deadline"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_linux_node_config",
+						"node_config.0.linux_node_config.0.disk_io_scheduler.0.node_system_io_scheduler", "bfq",
+					),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_linux_node_config",
+						"node_config.0.linux_node_config.0.disk_io_scheduler.0.node_attached_disk_io_scheduler", "mq-deadline",
+					),
+				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_container_cluster.with_linux_node_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			// Update node vfio config
+			{
+				Config: testAccContainerCluster_withNodeConfigLinuxNodeConfigNodeVfioConfig(clusterName, networkName, subnetworkName, 100000),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_linux_node_config",
+						"node_config.0.linux_node_config.0.node_vfio_config.0.dma_entry_limit", "100000",
+					),
+				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_container_cluster.with_linux_node_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
 		},
 	})
 }
@@ -10410,6 +10456,67 @@ resource "google_container_cluster" "with_linux_node_config" {
   deletion_protection = false
 }
 `, clusterName, linuxNodeConfig, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withNodeConfigLinuxNodeConfigDiskIoScheduler(clusterName, networkName, subnetworkName, sysScheduler, attachedScheduler string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+resource "google_container_cluster" "with_linux_node_config" {
+  name               = "%s"
+  location           = "us-central1-f"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.release_channel_latest_version["RAPID"]
+
+	release_channel {
+    channel = "RAPID"
+  }
+
+  node_config {
+    image_type = "COS_CONTAINERD"
+    linux_node_config {
+      disk_io_scheduler {
+        node_system_io_scheduler        = "%s"
+        node_attached_disk_io_scheduler = "%s"
+      }
+    }
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork = "%s"
+}
+`, clusterName, sysScheduler, attachedScheduler, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withNodeConfigLinuxNodeConfigNodeVfioConfig(clusterName, networkName, subnetworkName string, dmaEntryLimit int) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+resource "google_container_cluster" "with_linux_node_config" {
+  name               = "%s"
+  location           = "us-central1-f"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.release_channel_latest_version["RAPID"]
+
+	release_channel {
+    channel = "RAPID"
+  }
+
+  node_config {
+    image_type = "COS_CONTAINERD"
+    linux_node_config {
+      node_vfio_config {
+        dma_entry_limit = %d
+      }
+    }
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork = "%s"
+}
+`, clusterName, dmaEntryLimit, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withNodeConfigScopeAlias(clusterName, networkName, subnetworkName string) string {
