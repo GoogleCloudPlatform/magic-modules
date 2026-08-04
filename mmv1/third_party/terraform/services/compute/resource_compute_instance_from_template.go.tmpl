@@ -110,9 +110,23 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 	log.Printf("[DEBUG] Loading zone: %s", z)
-	zone, err := NewClient(config, userAgent).Zones.Get(project, z).Do()
+	zoneUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}")
+	if err != nil {
+		return err
+	}
+	zoneRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    zoneUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error loading zone '%s': %s", z, err)
+	}
+	zone := &compute.Zone{}
+	if err := tpgresource.Convert(zoneRes, zone); err != nil {
+		return fmt.Errorf("Error converting zone: %s", err)
 	}
 
 	instance, err := expandComputeInstance(project, d, config)
@@ -163,12 +177,24 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 	var relativeUrl string
 
 	if strings.Contains(sourceInstanceTemplate, "global/instanceTemplates") {
-		instanceTemplate, err := NewClient(config, userAgent).InstanceTemplates.Get(project, tpl.Name).Do()
+		globalTemplateUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/instanceTemplates/"+tpl.Name)
+		if err != nil {
+			return err
+		}
+		instanceTemplate, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    globalTemplateUrl,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		it = *instanceTemplate
+		if err := tpgresource.Convert(instanceTemplate, &it); err != nil {
+			return err
+		}
 		relativeUrl = tpl.RelativeLink()
 
 		instance.Disks, err = adjustInstanceFromTemplateDisks(d, config, &it, zone, project, false)
@@ -293,7 +319,28 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 	}
 
 	log.Printf("[INFO] Requesting instance creation")
-	op, err := NewClient(config, userAgent).Instances.Insert(project, zone.Name, instance).SourceInstanceTemplate(relativeUrl).Do()
+	instanceBody, err := tpgresource.ConvertToMap(instance)
+	if err != nil {
+		return fmt.Errorf("Error converting instance: %s", err)
+	}
+
+	insertUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances")
+	if err != nil {
+		return fmt.Errorf("Error generating URL: %s", err)
+	}
+	insertUrl, err = transport_tpg.AddQueryParams(insertUrl, map[string]string{"sourceInstanceTemplate": relativeUrl})
+	if err != nil {
+		return err
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    insertUrl,
+		UserAgent: userAgent,
+		Body:      instanceBody,
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
 	}
@@ -302,7 +349,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, instance.Name))
 
 	// Wait for the operation to complete
-	waitErr := ComputeOperationWaitTime(config, op, project,
+	waitErr := ComputeOperationWaitTime(config, res, project,
 		"instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource didn't actually create
