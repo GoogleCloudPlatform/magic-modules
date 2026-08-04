@@ -1,0 +1,120 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return err
+}
+
+obj := make(map[string]interface{})
+indexConfigProp, err := expandFirestoreFieldIndexConfig(d.Get("index_config"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("index_config"); ok || !reflect.DeepEqual(v, indexConfigProp) {
+	obj["indexConfig"] = indexConfigProp
+}
+ttlConfigProp, err := expandFirestoreFieldTtlConfig(d.Get("ttl_config"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("ttl_config"); ok || !reflect.DeepEqual(v, ttlConfigProp) {
+	obj["ttlConfig"] = ttlConfigProp
+}
+
+obj, err = resourceFirestoreFieldEncoder(d, meta, obj)
+if err != nil {
+	return err
+}
+
+url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/databases/{{"{{"}}database{{"}}"}}/collectionGroups/{{"{{"}}collection{{"}}"}}/fields/{{"{{"}}field{{"}}"}}")
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Creating new Field: %#v", obj)
+billingProject := ""
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for Field: %s", err)
+}
+billingProject = project
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+headers := make(http.Header)
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:               config,
+	Method:               "PATCH",
+	Project:              billingProject,
+	RawURL:               url,
+	UserAgent:            userAgent,
+	Body:                 obj,
+	Timeout:              d.Timeout(schema.TimeoutCreate),
+	Headers:              headers,
+	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.FirestoreField409RetryUnderlyingDataChanged},
+})
+if err != nil {
+	return fmt.Errorf("Error creating Field: %s", err)
+}
+
+// Store the ID now
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}name{{"}}"}}")
+if err != nil {
+	return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+if d.Get("skip_wait").(bool) {
+	// If skip_wait, the LRO will not be complete so the response will not be populated.
+	// Extract the field name from the metadata field.
+	metadata, ok := res["metadata"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("Error constructing id from result.")
+	}
+	field, ok := metadata["field"].(string)
+	if !ok {
+		return fmt.Errorf("Error constructing id from result.")
+	}
+	if err := d.Set("name", flattenFirestoreFieldName(field, d, config)); err != nil {
+		return err
+	}
+} else {
+	// Use the resource in the operation response to populate
+	// identity fields and d.Id() before read
+	var opRes map[string]interface{}
+	err = FirestoreOperationWaitTimeWithResponse(
+		config, res, &opRes, project, "Creating Field", userAgent,
+		d.Timeout(schema.TimeoutCreate))
+	if err != nil {
+		// The resource didn't actually create
+		d.SetId("")
+
+		return fmt.Errorf("Error waiting to create Field: %s", err)
+	}
+
+	if err := d.Set("name", flattenFirestoreFieldName(opRes["name"], d, config)); err != nil {
+		return err
+	}
+}
+
+// This may have caused the ID to update - update it if so.
+id, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}name{{"}}"}}")
+if err != nil {
+	return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+log.Printf("[DEBUG] Finished creating Field %q: %#v", d.Id(), res)
+
+identity, err := d.Identity()
+if err == nil && identity != nil {
+	if nameValue, ok := d.GetOk("name"); ok && nameValue.(string) != "" {
+		if err = identity.Set("name", nameValue.(string)); err != nil {
+			return fmt.Errorf("Error setting name: %s", err)
+		}
+	}
+} else {
+	log.Printf("[DEBUG] (Create) identity not set: %s", err)
+}
+
+return resourceFirestoreFieldRead(d, meta)

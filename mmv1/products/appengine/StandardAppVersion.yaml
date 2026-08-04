@@ -74,6 +74,17 @@ samples:
           org_id: ORG_ID
         ignore_read_extra:
           - delete_service_on_destroy
+  - name: app_engine_standard_app_version_bundled_services
+    primary_resource_id: gae-std-app-ver-bundled
+    steps:
+      - name: app_engine_standard_app_version_bundled_services
+        resource_id_vars:
+          project_id: tf-test-project
+          service_id: bundled-service
+          bucket_name: tf-test-gae-bkt-bundled
+          sa_email: gae-sa
+        ignore_read_extra:
+          - delete_service_on_destroy
 virtual_fields:
   - name: noop_on_destroy
     description: |
@@ -125,6 +136,10 @@ properties:
     type: Boolean
     description: |
       Allows App Engine second generation runtimes to access the legacy bundled services.
+      Cannot specify both `app_engine_apis` and 'app_engine_bundled_services` together.
+    immutable: true
+    conflicts:
+      - app_engine_bundled_services
   - name: runtimeApiVersion
     type: String
     description: |
@@ -443,3 +458,32 @@ properties:
           **Note:** When managing the number of instances at runtime through the App Engine Admin API or the (now deprecated) Python 2
           Modules API set_num_instances() you must use `lifecycle.ignore_changes = ["manual_scaling"[0].instances]` to prevent drift detection.
         required: true
+  - name: 'appEngineBundledServices'
+    type: Array
+    # Developer Note: This field is write-only because the App Engine GET Admin API
+    # does not return it in the response (we use ignore_read: true to prevent state drift to null).
+    # It is marked is_set: true to represent the list as a set in Terraform so configuration
+    # ordering differences do not trigger spurious plans.
+    description: |
+      A list of legacy bundled services to enable for this version on an App Engine second-generation runtime.
+      Cannot specify both `app_engine_apis` and `app_engine_bundled_services` together.
+    is_set: true
+    immutable: true
+    ignore_read: true
+    item_type:
+      type: Enum
+      enum_values:
+        - 'BUNDLED_SERVICE_TYPE_APP_IDENTITY_SERVICE'
+        - 'BUNDLED_SERVICE_TYPE_BLOBSTORE'
+        - 'BUNDLED_SERVICE_TYPE_CAPABILITY_SERVICE'
+        - 'BUNDLED_SERVICE_TYPE_DATASTORE_V3'
+        - 'BUNDLED_SERVICE_TYPE_IMAGES'
+        - 'BUNDLED_SERVICE_TYPE_MAIL'
+        - 'BUNDLED_SERVICE_TYPE_MEMCACHE'
+        - 'BUNDLED_SERVICE_TYPE_MODULES'
+        - 'BUNDLED_SERVICE_TYPE_SEARCH'
+        - 'BUNDLED_SERVICE_TYPE_TASKQUEUES'
+        - 'BUNDLED_SERVICE_TYPE_URLFETCH'
+        - 'BUNDLED_SERVICE_TYPE_USERS'
+    conflicts:
+      - app_engine_apis

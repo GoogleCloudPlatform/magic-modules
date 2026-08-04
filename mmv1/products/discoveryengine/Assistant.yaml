@@ -18,6 +18,7 @@ description: |
 references:
   api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.discoveryengine.v1#assistantservice
 base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants/{{assistant_id}}
 create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants?assistantId={{assistant_id}}
 delete_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/assistants/{{assistant_id}}

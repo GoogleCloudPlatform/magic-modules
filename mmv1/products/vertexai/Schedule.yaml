@@ -14,6 +14,7 @@
 ---
 name: Schedule
 description: An online schedule that triggers running pipeline jobs or notebook execution jobs.
+deprecation_message: '`google_vertex_ai_schedule` is deprecated and will be removed in a future major release. Use `google_colab_schedule` instead.'
 base_url: projects/{{project}}/locations/{{location}}/schedules
 self_link: projects/{{project}}/locations/{{location}}/schedules/{{name}}
 update_mask: true
@@ -27,7 +28,7 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: U2NoZWR1bGU=
+autogen_status: U2NoZWR1bGVBdXRvZ2VuVjJBZ2VudA==
 autogen_async: false
 samples:
   - name: vertex_ai_schedule

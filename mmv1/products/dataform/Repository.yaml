@@ -97,6 +97,20 @@ samples:
         test_vars_overrides:
           # for backward compatible
           git_repository_name: '"my/repository" + randomSuffix'
+  - name: dataform_repository_with_developer_connect
+    primary_resource_id: dataform_repository
+    min_version: beta
+    exclude_basic_doc: true
+    exclude_test: true # Can't establish a Github connection in automated tests.
+    steps:
+      - name: dataform_repository_with_developer_connect
+        min_version: beta
+        resource_id_vars:
+          connection_name: my-connection
+          repository_link_name: my-repository
+          dataform_repository_name: dataform_repository
+        test_env_vars:
+          project_id: PROJECT_NAME
 virtual_fields:
   - name: deletion_policy
     type: Enum
@@ -149,6 +163,7 @@ properties:
         exactly_one_of:
           - gitRemoteSettings.0.authenticationTokenSecretVersion
           - gitRemoteSettings.0.sshAuthenticationConfig
+          - gitRemoteSettings.0.gitRepositoryLink
       - name: sshAuthenticationConfig
         type: NestedObject
         description: Authentication fields for remote uris using SSH protocol.
@@ -156,6 +171,7 @@ properties:
         exactly_one_of:
           - gitRemoteSettings.0.authenticationTokenSecretVersion
           - gitRemoteSettings.0.sshAuthenticationConfig
+          - gitRemoteSettings.0.gitRepositoryLink
         properties:
           - name: userPrivateKeySecretVersion
             type: String
@@ -167,6 +183,14 @@ properties:
             description: Content of a public SSH key to verify an identity of a remote Git host.
             min_version: beta
             required: true
+      - name: gitRepositoryLink
+        type: String
+        description: The name of the Developer Connect GitRepositoryLink to use for machine credentials. Must be in the format projects/*/locations/*/connections/*/gitRepositoryLinks/*.
+        min_version: beta
+        exactly_one_of:
+          - gitRemoteSettings.0.authenticationTokenSecretVersion
+          - gitRemoteSettings.0.sshAuthenticationConfig
+          - gitRemoteSettings.0.gitRepositoryLink
       - name: tokenStatus
         type: String
         description: |
