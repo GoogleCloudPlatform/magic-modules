@@ -1101,6 +1101,42 @@ func schemaNodeConfig() *schema.Schema {
 									},
 								},
 							},
+							"disk_io_scheduler": {
+								Type:     schema.TypeList,
+								Optional: true,
+								MaxItems: 1,
+								Description: `Controls the configuration for the disk IO scheduler.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"node_system_io_scheduler": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Configures the IO scheduler for the boot disk or ephemeral lssd that runs node system workloads.`,
+										},
+										"node_attached_disk_io_scheduler": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Configures the IO scheduler for the attached disks.`,
+										},
+									},
+								},
+							},
+							"node_vfio_config": {
+								Type:     schema.TypeList,
+								Optional: true,
+								MaxItems: 1,
+								Description: `Contains VFIO-related configurations for this node.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"dma_entry_limit": {
+											Type:         schema.TypeInt,
+											Optional:     true,
+											ValidateFunc: validation.IntBetween(65535, 4194304),
+											Description:  `Specifies the maximum number of DMA entries (pages) that can be mapped by the VFIO IOMMU type 1 driver for a container.`,
+										},
+									},
+								},
+							},
 							"transparent_hugepage_enabled": {
 								Type:             schema.TypeString,
 								Optional:         true,
@@ -2335,6 +2371,14 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 		linuxNodeConfig.CustomNodeInit = expandCustomNodeInit(v)
 	}
 
+	if v, ok := cfg["disk_io_scheduler"]; ok {
+		linuxNodeConfig.DiskIoScheduler = expandDiskIoScheduler(v)
+	}
+
+	if v, ok := cfg["node_vfio_config"]; ok {
+		linuxNodeConfig.NodeVfioConfig = expandNodeVfioConfig(v)
+	}
+
 	return linuxNodeConfig
 }
 
@@ -2445,6 +2489,54 @@ func expandNodeKernelModuleLoading(v interface{}) *container.NodeKernelModuleLoa
 	}
 
 	return NodeKernelModuleLoading
+}
+
+func expandDiskIoScheduler(v interface{}) *container.DiskIoScheduler {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.DiskIoScheduler{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	diskIoScheduler := &container.DiskIoScheduler{}
+
+	if v, ok := cfg["node_system_io_scheduler"]; ok {
+		diskIoScheduler.NodeSystemIoScheduler = v.(string)
+	}
+
+	if v, ok := cfg["node_attached_disk_io_scheduler"]; ok {
+		diskIoScheduler.NodeAttachedDiskIoScheduler = v.(string)
+	}
+
+	return diskIoScheduler
+}
+
+func expandNodeVfioConfig(v interface{}) *container.NodeVfioConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.NodeVfioConfig{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	nodeVfioConfig := &container.NodeVfioConfig{}
+
+	if v, ok := cfg["dma_entry_limit"]; ok {
+		nodeVfioConfig.DmaEntryLimit = int64(v.(int))
+	}
+
+	return nodeVfioConfig
 }
 
 func expandAccurateTimeConfig(v interface{}) *container.AccurateTimeConfig {
@@ -3553,6 +3645,29 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 			"swap_config":                  flattenSwapConfig(c.SwapConfig),
 			"accurate_time_config":         flattenAccurateTimeConfig(c.AccurateTimeConfig),
 			"custom_node_init":             flattenCustomNodeInit(c.CustomNodeInit),
+			"disk_io_scheduler":            flattenDiskIoScheduler(c.DiskIoScheduler),
+			"node_vfio_config":             flattenNodeVfioConfig(c.NodeVfioConfig),
+		})
+	}
+	return result
+}
+
+func flattenDiskIoScheduler(c *container.DiskIoScheduler) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"node_system_io_scheduler":        c.NodeSystemIoScheduler,
+			"node_attached_disk_io_scheduler": c.NodeAttachedDiskIoScheduler,
+		})
+	}
+	return result
+}
+
+func flattenNodeVfioConfig(c *container.NodeVfioConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"dma_entry_limit": c.DmaEntryLimit,
 		})
 	}
 	return result
