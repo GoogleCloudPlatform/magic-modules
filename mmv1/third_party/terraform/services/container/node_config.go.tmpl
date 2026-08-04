@@ -1391,6 +1391,7 @@ func schemaNodeConfig() *schema.Schema {
 								Description:  `.`,
 								ValidateFunc: validation.StringInSlice([]string{"MAINTENANCE_INTERVAL_UNSPECIFIED", "AS_NEEDED", "PERIODIC"}, false),
 							},
+	{{ if ne $.TargetVersionName `ga` -}}
 							"opportunistic_maintenance_strategy": {
 								Type:        schema.TypeList,
 								Optional:    true,
@@ -1420,6 +1421,7 @@ func schemaNodeConfig() *schema.Schema {
 									},
 								},
 							},
+	{{- end }}
 						},
 					},
 				},
