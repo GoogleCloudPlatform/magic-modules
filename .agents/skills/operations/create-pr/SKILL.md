@@ -28,6 +28,8 @@ Before creating a branch or opening a PR, verify all of the following rules:
    - Fixing a bug and adding new fields? Split into **two separate PRs**.
 2. **No Downstream Artifacts in Magic Modules:**
    - Do NOT commit generated downstream provider code (e.g. `$GOPATH/src/github.com/hashicorp/terraform-provider-google`) into `magic-modules`.
+3. **Plan Completeness:** Verify that every file listed in the implementation plan (including any necessary documentation) has been generated and staged.
+4. **Workspace Cleanup:** Run `git status --porcelain` and remove any untracked `.log`, `.test`, or temporary test artifacts across both `magic-modules` and downstream repositories before opening the PR.
 
 ---
 
@@ -109,6 +111,8 @@ compute: added `foo` field to `google_compute_instance` resource
 > [!CAUTION]
 > **DO NOT pass inline double-quoted `--body "..."` strings containing backticks.**
 > Enclosing triple backticks (` ```release-note:type ``` `) in double quotes causes `zsh`/`bash` to execute `` `release-note:type` `` as a live shell command substitution. The command fails, silently stripping the release note block from the published PR body!
+
+*   **Upstream Target:** Most likely target `--repo GoogleCloudPlatform/magic-modules` (upstream magic modules), and when in doubt ask the user.
 
 Always write the body to a temporary file via a single-quoted HEREDOC (`cat <<'EOF'`) and invoke `gh pr create` with `--body-file`:
 

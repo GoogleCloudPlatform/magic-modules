@@ -24,11 +24,13 @@ This document outlines the structured 6-step lifecycle for investigating, planni
 
 ### 3. Remediation Planning (Proposal)
 *   Analyze the triage findings and identify the root cause.
+*   **Backwards Compatibility Check:** When proposing code changes that alter schema validation (e.g., adding `ValidateFunc`), default values, or resource naming/ID formulas, check `docs/content/breaking-changes/` and explicitly note in the investigation report whether existing deployed resources or valid configurations are affected.
 *   Create a final investigation report (an artifact) detailing the root cause, affected version matrix, and analysis.
 *   Propose a resolution path to the user:
     *   If the bug can be resolved or closed without code changes, propose closing the issue (e.g. if the bug is already fixed in a released version, is a duplicate, is not a bug, or is otherwise closeable).
     *   If the bug requires code changes, propose the code modification plan (dipping into the `fix` planning skill located in `.agents/skills/operations/fix/`).
 *   **Verification Proposal:** If running an acceptance test (live or VCR) is necessary to verify either the code change or the initial analysis (e.g., to prove it's already resolved in the latest version), explicitly include the test execution in the proposed plan. Do not run tests unilaterally unless approved.
+    *   **Version Upgrade Safety (`RELEASE_DIFF=true`):** When testing bug fixes that modify schema validation, defaults, or ID/name formatting, recommend running the acceptance test with `RELEASE_DIFF=true make testacc ...` to verify zero plan diffs against the released provider baseline.
 *   **HIL steering checkpoint:** Present the analysis, proposal, and testing plan to the user. **Do not proceed to implementation or testing until the user confirms the plan.**
 
 
@@ -43,8 +45,11 @@ This document outlines the structured 6-step lifecycle for investigating, planni
 
 
 ### 6. Resolution & Issue Reporting
+*   **Plan Completeness:** Verify that every file listed in the remediation plan (including any necessary documentation) has been generated and staged.
+*   **Workspace Cleanup:** Run `git status --porcelain` and remove any untracked `.log`, `.test`, or temporary test artifacts across both repositories before reporting resolution or creating a PR.
 *   If code changes or verification tests were performed, compile these results into a separate verification/test report artifact.
 *   Draft a final, succinct GitHub response containing verified PR/commit links.
+    *   **Succinct Public Communication:** GitHub issue responses should be concise (2–3 sentences preferred): state what changed, why, and refer readers to the PR or documentation for technical deep-dives.
 *   **HIL steering checkpoint:** Present the final response draft and any new verification reports to the user for sign-off and issue closure.
 
 
