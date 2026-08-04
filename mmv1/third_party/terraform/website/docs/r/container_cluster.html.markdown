@@ -599,6 +599,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    It is enabled by default for Autopilot clusters with version 1.29 or later; set `enabled = true` to enable it explicitly.
    See [Enable the Parallelstore CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/parallelstore-csi-new-volume#enable) for more information.
 
+*  `high_scale_checkpointing_config` - (Optional) The status of the High Scale Checkpointing addon, which enables Multi-Tier Checkpointing for Machine Learning workloads. Structure is documented below:
+    * `enabled` - (Required) Whether the High Scale Checkpointing addon is enabled.
+
 *  `lustre_csi_driver_config` - (Optional) The status of the Lustre CSI driver addon,
    which allows the usage of a Lustre instances as volumes.
    It is disabled by default for Standard clusters; set `enabled = true` to enable.
