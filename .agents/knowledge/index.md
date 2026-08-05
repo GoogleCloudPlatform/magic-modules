@@ -71,3 +71,7 @@ Read this index at decision points; open only the source the task needs. Format 
 ### Test (`test/`)
 
 - **unit-test-scope** — When to write unit tests vs acceptance tests, and avoiding test bloat. — [test/unit-test-scope.md](test/unit-test-scope.md)
+
+### List resources (`list-resource/`)
+
+- **list-resource-oracle** — Living catalog of every failure pattern, gotcha, and fix encountered during list-resource generation. Read before starting any list-resource task. — [knowledge/list-resource-oracle.md](list-resource-oracle.md)
