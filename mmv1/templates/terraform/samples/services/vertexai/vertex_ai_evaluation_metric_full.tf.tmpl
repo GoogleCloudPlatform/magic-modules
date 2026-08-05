@@ -15,6 +15,10 @@ resource "google_vertex_ai_evaluation_metric" "{{$.PrimaryResourceId}}" {
     team = "evaluation"
   }
 
+  encryption_spec {
+    kms_key_name = "{{index $.ResourceIdVars "kms_key_name"}}"
+  }
+
   gcs_uri = "gs://{{index $.ResourceIdVars "bucket_name"}}/metric-spec.json"
 }
 
