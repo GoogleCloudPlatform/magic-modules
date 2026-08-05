@@ -1,0 +1,94 @@
+package networkmanagement_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+// TestAccNetworkManagementNetworkMonitoringProvider_basic verifies that a
+// NetworkMonitoringProvider can be created, read back, and imported correctly.
+// The resource is immutable (no UpdateNetworkMonitoringProvider RPC exists),
+// so the test exercises only the create → import path.
+func TestAccNetworkManagementNetworkMonitoringProvider_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: {{ if eq $.TargetVersionName "ga" }}acctest.ProtoV5ProviderFactories(t){{ else }}acctest.ProtoV5ProviderBetaFactories(t){{ end }},
+		CheckDestroy:             testAccCheckNetworkManagementNetworkMonitoringProviderDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkManagementNetworkMonitoringProvider_basic(context),
+			},
+			{
+				ResourceName:      "google_network_management_network_monitoring_provider.provider",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// location and network_monitoring_provider_id are url_param_only and
+				// are not returned in the GET response body; force_destroy is a
+				// virtual field that is never read back from the API.
+				ImportStateVerifyIgnore: []string{"force_destroy", "location", "network_monitoring_provider_id"},
+			},
+		},
+	})
+}
+
+// TestAccNetworkManagementNetworkMonitoringProvider_forceDestroy verifies that
+// setting force_destroy = true causes the DELETE request to include ?force=true,
+// which cascades deletion to any nested MonitoringPoints, NetworkPaths, and
+// WebPaths. Since this test does not register actual MonitoringPoints, it is
+// equivalent to a basic delete, but it ensures the attribute is accepted by
+// the schema and the pre_delete hook does not panic.
+func TestAccNetworkManagementNetworkMonitoringProvider_forceDestroy(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: {{ if eq $.TargetVersionName "ga" }}acctest.ProtoV5ProviderFactories(t){{ else }}acctest.ProtoV5ProviderBetaFactories(t){{ end }},
+		CheckDestroy:             testAccCheckNetworkManagementNetworkMonitoringProviderDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkManagementNetworkMonitoringProvider_forceDestroy(context),
+			},
+			{
+				ResourceName:            "google_network_management_network_monitoring_provider.provider",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy", "location", "network_monitoring_provider_id"},
+			},
+		},
+	})
+}
+
+func testAccNetworkManagementNetworkMonitoringProvider_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_management_network_monitoring_provider" "provider" {
+  {{ if ne $.TargetVersionName "ga" }}provider = google-beta{{ end }}
+  network_monitoring_provider_id = "tf-test-provider-%{random_suffix}"
+  location                       = "global"
+  provider_type                  = "EXTERNAL"
+}
+`, context)
+}
+
+func testAccNetworkManagementNetworkMonitoringProvider_forceDestroy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_management_network_monitoring_provider" "provider" {
+  {{ if ne $.TargetVersionName "ga" }}provider = google-beta{{ end }}
+  network_monitoring_provider_id = "tf-test-provider-fd-%{random_suffix}"
+  location                       = "global"
+  provider_type                  = "EXTERNAL"
+  force_destroy                  = true
+}
+`, context)
+}
