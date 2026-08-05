@@ -9,6 +9,82 @@ description: "Opt resource into MMv1 list-resource generation by setting `genera
 
 This workflow produces a change scoped to **one product** that flips `generate_list_resource: true` on every eligible MMv1 resource in that product, generates the downstream code, and runs the generated list-query tests. Do **one product per change**, with as many eligible resources as pass.
 
+## Step -1 — Select the target product (skip if PRODUCT is already provided)
+
+If no product has been specified by the caller, determine the best one to work on now.
+**Do not ask the user.** Run the analysis autonomously and report the selection with its reason.
+
+### -1a — Score every product by eligible-but-not-yet-opted-in resource count
+
+```bash
+python3 - <<'PY'
+import glob, yaml, os, re
+
+AUTO_SCOPES = {"project", "region", "zone", "location"}
+scores = {}
+
+for product_dir in sorted(glob.glob("mmv1/products/*/")):
+    product = os.path.basename(product_dir.rstrip("/"))
+    candidates = 0
+    for f in glob.glob(f"{product_dir}*.yaml"):
+        if f.endswith("product.yaml"):
+            continue
+        try:
+            d = yaml.safe_load(open(f).read())
+        except Exception:
+            continue
+        if not isinstance(d, dict):
+            continue
+        if d.get("exclude") or d.get("exclude_resource"):
+            continue
+        if d.get("exclude_identity_generation") or d.get("exclude_read"):
+            continue
+        if d.get("generate_list_resource"):
+            continue
+        ex = d.get("examples") or d.get("samples") or []
+        if not ex or not isinstance(ex[0], dict):
+            continue
+        if ex[0].get("exclude_test"):
+            continue
+        list_url = d.get("base_url") or ""
+        bad_scope = [s for s in re.findall(r"{{\s*(\w+)\s*}}", list_url)
+                     if s not in AUTO_SCOPES]
+        if bad_scope:
+            continue
+        candidates += 1
+    if candidates > 0:
+        scores[product] = candidates
+
+for p, c in sorted(scores.items(), key=lambda x: -x[1]):
+    print(f"{p}: {c}")
+PY
+```
+
+### -1b — Exclude products that already have work in progress
+
+Check for open PRs and existing fork branches so the agent never starts duplicate work:
+
+```bash
+# Open PRs on upstream with "list resources" in the title
+gh pr list --repo GoogleCloudPlatform/magic-modules --state open \
+  --search "list resources" --json title,headRefName \
+  | python3 -c "import json,sys; [print(p['headRefName']) for p in json.load(sys.stdin)]"
+
+# Existing branches in the fork
+git ls-remote origin 'refs/heads/add-*-list-resources' \
+  | awk '{print $2}' | sed 's|refs/heads/||'
+```
+
+Skip any product whose branch name (`add-<product>-list-resources`) appears in either list.
+
+### -1c — Pick the highest-scoring non-excluded product
+
+Set `PRODUCT` to that product name and continue to Step 0.
+Print one line explaining the choice, e.g.:
+`Selected product: dns (12 eligible resources, no existing PR or branch)`
+
+---
+
 ## Step 0 — Read the oracle before doing anything else
 
 ```bash
@@ -27,7 +103,7 @@ Consult `.agents/knowledge/index.md` for any other topics this task touches.
 * You are in the `magic-modules` root directory.
 * `$GOPATH` is set and `terraform-provider-google` is checked out at `$GOPATH/src/github.com/hashicorp/terraform-provider-google` (or another known path — confirm with the user).
 * Remote repositories are configured (e.g. `upstream` pointing to `GoogleCloudPlatform/magic-modules` and personal fork remote such as `origin`).
-* The user has named **one** target product (e.g. `compute`). Resources will be selected automatically by the eligibility scan.
+* `PRODUCT` is set — either provided by the caller or selected in Step -1. Resources will be selected automatically by the eligibility scan.
 
 ## Eligibility Check
 
@@ -42,8 +118,6 @@ Required *body* fields (set at create time) do **not** affect list eligibility. 
 Run the eligibility scan across the whole product and produce a candidate list before editing any YAML.
 
 ```bash
-PRODUCT=<product>   # e.g. compute
-
 python3 - "$PRODUCT" <<'PY'
 import sys, glob, yaml, os, re
 product = sys.argv[1]
