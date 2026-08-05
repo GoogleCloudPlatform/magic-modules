@@ -40,6 +40,9 @@ async:
   result:
     resource_inside_response: true
 exclude_sweeper: true
+tgc_tests:
+  - name: TestAccBeyondcorpAppConnection_skipped
+    skip: "All samples and tests were removed in standard provider."
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
