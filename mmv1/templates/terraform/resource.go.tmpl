@@ -996,9 +996,6 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 {{-              if $.UpdateMask }}
 {{ customTemplate $ "templates/terraform/update_mask.go.tmpl" false -}}
 {{              end}}
-{{-             if $.CustomCode.PreUpdate -}}{{""}}
-    {{ customTemplate $ $.CustomCode.PreUpdate true -}}
-{{              end}}
 {{              if $.NestedQuery -}}
 {{                  if $.NestedQuery.ModifyByPatch -}}
 {{/*#       Keep this after mutex - patch request data relies on current resource state */}}
@@ -1008,11 +1005,14 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     }
 {{-                 end}}
 {{-             end}}
-{{-              if $.SupportsIndirectUserProjectOverride -}}
+{{-             if $.CustomCode.PreUpdate }}
+    {{ customTemplate $ $.CustomCode.PreUpdate false -}}
+{{              end}}
+{{if $.SupportsIndirectUserProjectOverride -}}
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
-{{-             end}}
+{{- end}}
 
     // err == nil indicates that the billing_project value was found
     if bp, err := tpgresource.GetBillingProject(d, config); err == nil {

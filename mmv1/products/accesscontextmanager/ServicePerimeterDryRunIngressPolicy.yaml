@@ -25,9 +25,6 @@ description: |
   Individual ingress policies can be limited by restricting which services and/
   or actions they match using the ingressTo field.
 
-  ~> **Note:** By default, updates to this resource will remove the IngressPolicy from the
-  from the perimeter and add it back in a non-atomic manner. To ensure that the new IngressPolicy
-  is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
   ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
   the service perimeter resource must have a `lifecycle` block with `ignore_changes = [spec[0].ingress_policies]` so
   they don't fight over which ingress rules should be in the policy.
@@ -37,11 +34,12 @@ references:
   api: https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#ingresspolicy
 docs:
 base_url: ""
-immutable: true
 self_link: '{{perimeter}}'
-create_url: '{{perimeter}}'
-update_mask: true
+create_url: '{{perimeter}}?updateMask=spec.ingressPolicies'
+delete_url: '{{perimeter}}?updateMask=spec.ingressPolicies'
+update_url: '{{perimeter}}?updateMask=spec.ingressPolicies'
 create_verb: PATCH
+update_verb: PATCH
 delete_verb: PATCH
 identity:
   - ingressFrom
@@ -74,11 +72,11 @@ async:
 autogen_async: true
 exclude_tgc: true
 custom_code:
-  encoder: templates/terraform/encoders/access_context_manager_service_perimeter_dry_run_egress_policy.go.tmpl
+  encoder: templates/terraform/encoders/access_context_manager_service_perimeter_dry_run_ingress_policy.go.tmpl
   constants: templates/terraform/constants/access_context_manager.go.tmpl
   pre_create: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_ingress_policy.go.tmpl
   post_read: templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl
-  pre_update: templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl
+  pre_update: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_ingress_policy.go.tmpl
   pre_delete: templates/terraform/pre_delete/access_context_manager_service_perimeter_dry_run_ingress_policy.go.tmpl
   custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl
 samples:
@@ -107,6 +105,7 @@ parameters:
       The name of the Service Perimeter to add this resource to.
     url_param_only: true
     required: true
+    immutable: true
     resource: ServicePerimeter
     imports: name
 properties:
@@ -243,6 +242,7 @@ properties:
                       corresponding `serviceName` in `ApiOperation`.
   - name: title
     type: String
+    immutable: true
     description: |
       Human readable title. Must be unique within the perimeter. Does not affect behavior.
   - name: accessPolicyId
