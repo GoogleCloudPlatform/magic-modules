@@ -966,6 +966,36 @@ properties:
                 description: |-
                   The model used to generate memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
                 required: true
+              - name: 'generationTriggerConfig'
+                type: NestedObject
+                description: |-
+                  Optional. Configuration for triggering memory generation.
+                properties:
+                  - name: 'generationRule'
+                    type: NestedObject
+                    description: |-
+                      Optional. The active rule that determines when to flush the buffer. If not set,
+                      then the stream will be force flushed immediately.
+                    properties:
+                      - name: 'idleDuration'
+                        type: String
+                        description: |-
+                          Optional. Specifies to trigger generation if the stream is inactive for the
+                          specified duration after the most recent event. The duration must have a
+                          minute-level granularity.
+                      - name: 'fixedInterval'
+                        type: String
+                        description: |-
+                          Optional. Specifies to trigger generation at a fixed interval. The duration
+                          must have a minute-level granularity.
+                      - name: 'eventCount'
+                        type: Integer
+                        description: |-
+                          Optional. Specifies to trigger generation when the event count reaches this limit.
+                      - name: 'overlapEventCount'
+                        type: Integer
+                        description: |-
+                          Optional. Re-include the last N already-processed events in the next window.
           - name: 'similaritySearchConfig'
             type: NestedObject
             description: |-
