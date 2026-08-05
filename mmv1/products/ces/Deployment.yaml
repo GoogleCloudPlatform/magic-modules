@@ -30,6 +30,8 @@ samples:
         resource_id_vars:
           app_display_name: my-app
           app_id: app-id
+          app_version_display_name: my-app-version
+          app_version_id: app-version-id
           deployment_display_name: my-deployment
   - name: ces_deployment_full
     primary_resource_id: my-deployment
@@ -38,6 +40,8 @@ samples:
         resource_id_vars:
           app_display_name: my-app
           app_id: app-id
+          app_version_display_name: my-app-version
+          app_version_id: app-version-id
           deployment_display_name: my-deployment
 parameters:
   - name: location

@@ -58,6 +58,28 @@ samples:
           cloud_run_service_name: 'cloudrun-service'
         ignore_read_extra:
           - 'deletion_protection'
+  - name: 'cloudrunv2_service_scaling_controls'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'cloudrunv2_service_scaling_controls'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        vars:
+          cpu_util: '0.75'
+          concurrency_util: '0.5'
+        ignore_read_extra:
+          - 'deletion_protection'
+      - name: 'cloudrunv2_service_scaling_controls'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        vars:
+          cpu_util: '0.6'
+          concurrency_util: '0.8'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_limits'
     primary_resource_id: 'default'
     steps:
@@ -472,6 +494,7 @@ properties:
               Minimum number of serving instances that this resource should have. Defaults to 0. Must not be greater than maximum instance count.
           - name: 'maxInstanceCount'
             type: Integer
+            default_from_api: true
             description: |-
               Maximum number of serving instances that this resource should have. Must not be less than minimum instance count. If absent, Cloud Run will calculate
               a default value based on the project's available container instances quota in the region and specified instance size.
