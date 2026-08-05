@@ -9,25 +9,42 @@ description: "Opt resource into MMv1 list-resource generation by setting `genera
 
 This workflow produces a change scoped to **one product** that flips `generate_list_resource: true` on every eligible MMv1 resource in that product, generates the downstream code, and runs the generated list-query tests. Do **one product per change**, with as many eligible resources as pass.
 
-## Step -1 — Select the target product (skip if PRODUCT is already provided)
+## Step -1 — Autonomous product selection (when no PRODUCT is provided)
 
-If no product has been specified by the caller, determine the best one to work on now.
-**Do not ask the user.** Run the analysis autonomously and report the selection with its reason.
+Run this when the orchestrator has not specified a target product. Score every
+product by eligible-resource count, exclude any with an open list-resource PR
+or an existing fork branch, and return the highest-scoring candidate.
 
-### -1a — Score every product by eligible-but-not-yet-opted-in resource count
+### -1a. Collect exclusions
+
+```bash
+# Open PRs against upstream that mention list resources
+gh pr list \
+  --repo GoogleCloudPlatform/magic-modules \
+  --state open \
+  --json title,headRefName \
+  --limit 200 \
+  > /tmp/open_prs.json
+
+# Fork branches that follow the fixed naming convention
+git fetch origin 2>/dev/null || true
+git branch -r | grep 'origin/add-.*-list-resources' | \
+  sed 's|.*/add-\(.*\)-list-resources|\1|' \
+  > /tmp/fork_branches.txt
+```
+
+### -1b. Score every product
 
 ```bash
 python3 - <<'PY'
-import glob, yaml, os, re
+import sys, glob, yaml, os, re, json, subprocess
 
 AUTO_SCOPES = {"project", "region", "zone", "location"}
-scores = {}
 
-for product_dir in sorted(glob.glob("mmv1/products/*/")):
-    product = os.path.basename(product_dir.rstrip("/"))
-    candidates = 0
-    for f in glob.glob(f"{product_dir}*.yaml"):
-        if f.endswith("product.yaml"):
+def eligible_count(product):
+    count = 0
+    for f in glob.glob(f"mmv1/products/{product}/*.yaml"):
+        if f.endswith("/product.yaml"):
             continue
         try:
             d = yaml.safe_load(open(f).read())
@@ -47,41 +64,52 @@ for product_dir in sorted(glob.glob("mmv1/products/*/")):
         if ex[0].get("exclude_test"):
             continue
         list_url = d.get("base_url") or ""
-        bad_scope = [s for s in re.findall(r"{{\s*(\w+)\s*}}", list_url)
-                     if s not in AUTO_SCOPES]
-        if bad_scope:
+        bad = [s for s in re.findall(r"{{\s*(\w+)\s*}}", list_url) if s not in AUTO_SCOPES]
+        if bad:
             continue
-        candidates += 1
-    if candidates > 0:
-        scores[product] = candidates
+        count += 1
+    return count
 
-for p, c in sorted(scores.items(), key=lambda x: -x[1]):
-    print(f"{p}: {c}")
+pr_result = subprocess.run(
+    ["gh","pr","list","--repo","GoogleCloudPlatform/magic-modules",
+     "--state","open","--json","title,headRefName","--limit","200"],
+    capture_output=True, text=True)
+prs = json.loads(pr_result.stdout) if pr_result.returncode == 0 else []
+
+try:
+    fork_branches = open("/tmp/fork_branches.txt").read().split()
+except FileNotFoundError:
+    fork_branches = []
+
+excluded = set(fork_branches)
+for pr in prs:
+    b = pr["headRefName"].lower()
+    if "list" in pr["title"].lower() or "list" in b:
+        m = re.search(r"add-(.+?)-list-resources", b)
+        if m:
+            excluded.add(m.group(1))
+
+products = sorted([d for d in os.listdir("mmv1/products/") if os.path.isdir(f"mmv1/products/{d}")])
+scored = [(eligible_count(p), p) for p in products if p not in excluded]
+scored.sort(reverse=True)
+
+if not scored or scored[0][0] == 0:
+    print(json.dumps({"product":"","candidates":0,
+        "reason":"all products already covered or have zero eligible resources"}))
+else:
+    n, best = scored[0]
+    print(json.dumps({"product": best, "candidates": n,
+        "reason": f"highest eligible-resource count ({n}) with no open PR or fork branch"}))
 PY
 ```
 
-### -1b — Exclude products that already have work in progress
+### -1c. Respond
 
-Check for open PRs and existing fork branches so the agent never starts duplicate work:
+Respond **ONLY** with the raw JSON object the Python script printed.
+No markdown fences. No prose before or after. No extra keys.
 
-```bash
-# Open PRs on upstream with "list resources" in the title
-gh pr list --repo GoogleCloudPlatform/magic-modules --state open \
-  --search "list resources" --json title,headRefName \
-  | python3 -c "import json,sys; [print(p['headRefName']) for p in json.load(sys.stdin)]"
-
-# Existing branches in the fork
-git ls-remote origin 'refs/heads/add-*-list-resources' \
-  | awk '{print $2}' | sed 's|refs/heads/||'
-```
-
-Skip any product whose branch name (`add-<product>-list-resources`) appears in either list.
-
-### -1c — Pick the highest-scoring non-excluded product
-
-Set `PRODUCT` to that product name and continue to Step 0.
-Print one line explaining the choice, e.g.:
-`Selected product: dns (12 eligible resources, no existing PR or branch)`
+Example success: `{"product":"accessapproval","candidates":177,"reason":"highest eligible-resource count (3) with no open PR or fork branch"}`
+Example all-done: `{"product":"","candidates":0,"reason":"all products already covered or have zero eligible resources"}`
 
 ---
 
