@@ -1,6 +1,6 @@
 ---
 name: validate-list-resource
-description: "Validate a list-resource branch produced by the Coder agent: fetch the branch, run all oracle checks, and open the PR if everything passes. Invoke this skill when acting as the Validator agent in the list-resource autonomous loop."
+description: "Validate a list-resource branch produced by the Coder agent: fetch the branch, run all oracle checks, run acceptance tests, write handwritten tests if needed, and open the PR if everything passes. Invoke this skill when acting as the Validator agent in the list-resource autonomous loop."
 ---
 
 # `validate-list-resource`
@@ -8,7 +8,8 @@ description: "Validate a list-resource branch produced by the Coder agent: fetch
 > **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your current task.
 
 You are the **Validator** in the list-resource autonomous loop. The Coder has pushed a branch to the
-fork. Your job is to independently verify that branch is correct and — only if it is — open the PR.
+fork. Your job is to independently verify that branch is correct, run acceptance tests, write any
+missing handwritten tests, and — only if everything passes — open the PR.
 If anything fails, return a structured JSON verdict so the orchestrator can feed the exact failure back
 to the Coder.
 
@@ -26,6 +27,8 @@ dump.
 * `GOPATH` is set and `terraform-provider-google` is checked out at
   `$GOPATH/src/github.com/hashicorp/terraform-provider-google`.
 * `gh` CLI is authenticated (`gh auth status`).
+* GCP credentials are available: `GOOGLE_PROJECT`, `GOOGLE_REGION`, `GOOGLE_ZONE`,
+  `GOOGLE_APPLICATION_CREDENTIALS` (service account key file path) — required for acceptance tests.
 
 ---
 
@@ -151,7 +154,116 @@ Any `MISSING` line = FAIL. Match against oracle patterns before reporting:
 
 ---
 
-## Step 6 — Open the PR (only if ALL checks passed)
+## Step 6 — Run acceptance tests (Check 5)
+
+Follow `.agents/skills/utils/run-acctests/SKILL.md` for each resource that gained
+`generate_list_resource: true`. Run from the downstream provider root.
+
+### 6a — Run the generated list-query test for each resource
+
+For each opted-in resource (snake_case name derived in Step 5):
+
+```bash
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+TF_LOG=DEBUG make testacc \
+  TEST=./google/services/<product> \
+  TESTARGS='-run=TestAcc<ResourcePascalCase>ListQuery_generated$' \
+  > /tmp/test_<resource>.log 2>&1
+echo "exit: $?"
+```
+
+- If exit 0: test passed, continue to the next resource.
+- If non-zero: the generated test failed. Follow Step 6b immediately before testing the next resource.
+
+### 6b — Parse failures and fix
+
+When a generated test fails, follow `.agents/skills/utils/parse-debug-logs/SKILL.md`:
+
+```bash
+python3 .agents/scripts/tf_debug_parser.py /tmp/test_<resource>.log \
+  --extract-dir /tmp/debug_<resource>
+```
+
+Read the generated `outline.txt` and any referenced payload JSON files. Cross-reference against the
+oracle patterns:
+
+| Error pattern in outline | Oracle pattern |
+|--------------------------|----------------|
+| List returns 0 items / wrong key in response | **P-01** |
+| Region/zone mismatch between resource creation and list query | **P-04**, **P-05**, **P-06** |
+| `firewall_policy` value rejected | **P-07** |
+| API returns bare array | **P-08** |
+| Identity field name mismatch | **P-09** |
+
+**If the fix is in the YAML** (wrong `collection_url_key`, `vars` vs `resource_id_vars`, etc.): the
+Coder must fix it. Return FAIL with the exact oracle pattern ID and failure details in the feedback.
+
+**If the fix is only in the sample `.tf.tmpl` or test scaffolding** (e.g. a hardcoded region in the
+sample that does not affect the YAML `generate_list_resource: true` addition): fix it yourself,
+regenerate (`make provider … PRODUCT=<product>`), re-run the test to confirm it passes, then amend
+the commit and force-push.
+
+### 6c — Write handwritten supplementary tests (when needed)
+
+After the generated test passes, check whether a **handwritten** acceptance test for the list data
+source already exists:
+
+```bash
+ls $GOPATH/src/github.com/hashicorp/terraform-provider-google/google/services/<product>/list_<resource>_test.go 2>/dev/null
+```
+
+Write a handwritten test **only when** at least one of these is true:
+- The generated test only covers the happy path but the data source has filter parameters that need
+  separate coverage.
+- The resource's list URL has a non-standard scope param beyond `project`/`region`/`zone` that the
+  generated test does not exercise.
+- The `validate-provider-changes` oracle (Step 4) flagged a missing acceptance test for the new
+  list data source.
+
+Handwritten test file convention:
+- Path: `google/services/<product>/list_<resource>_test.go`
+- Package: `<product>_test`
+- Test function name: `TestAcc<ResourcePascalCase>ListQuery_<scenario>` (e.g. `_withFilter`,
+  `_withProject`)
+- Must include `resource.ParallelTest(t, ...)` and the standard `providertest.AccTestPreCheck(t)`
+  preamble.
+
+After writing, run the handwritten test to confirm it passes:
+
+```bash
+TF_LOG=DEBUG make testacc \
+  TEST=./google/services/<product> \
+  TESTARGS='-run=TestAcc<ResourcePascalCase>ListQuery_<scenario>$' \
+  > /tmp/test_<resource>_handwritten.log 2>&1
+echo "exit: $?"
+```
+
+Parse any failure with `parse-debug-logs` before giving up.
+
+### 6d — Commit test files and force-push
+
+After all generated and handwritten tests pass:
+
+1. Stage only the test files (do NOT stage generated `list_*.go` provider files — those stay
+   downstream and are not committed to magic-modules):
+
+```bash
+cd <magic-modules-root>
+git add mmv1/products/<product>/    # YAML changes only — already staged from Coder
+# If you wrote or modified sample .tf.tmpl files to fix P-04/P-05/P-06:
+git add mmv1/templates/terraform/examples/<product>_<resource>*.tf.tmpl
+# Amend the Coder's commit to include sample fixes:
+git commit --amend --no-edit
+git push --force-with-lease $FORK_REMOTE $BRANCH
+```
+
+> **Note:** Handwritten test `.go` files live in the downstream provider repo
+> (`$GOPATH/src/github.com/hashicorp/terraform-provider-google`), not in magic-modules. Do not
+> commit them to the magic-modules branch. The magic-modules PR generates them during CI.
+
+---
+
+## Step 7 — Open the PR (only if ALL checks passed)
 
 Follow `.agents/skills/operations/create-pr/SKILL.md` exactly.
 
