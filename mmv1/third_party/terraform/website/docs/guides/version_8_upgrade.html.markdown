@@ -107,6 +107,21 @@ The `http_get.http_headers.port` field of container startup probe and liveness p
 The `http_get.http_headers.name` field of container startup probe and liveness probe are now required in this resource. If `http_get.http_headers` field is used, add the sub field `http_get.http_headers.name` to your configuration after
 upgrading.
 
+## Resource: `google_compute_instance`
+
+### `guest_accelerator` can now be updated to a count of `0`
+
+Previously, changing an existing `guest_accelerator` block's `count` to `0` (or
+removing the block entirely) was silently ignored: no diff was produced and
+the accelerator(s) remained attached. `terraform apply` will now correctly
+plan (and apply, replacing the instance) the removal of guest accelerators
+when `guest_accelerator` is removed from config or `count` is set to `0`.
+
+If your configuration relies on the old behavior — for example a
+variable-driven `count = 0` block that was never intended to detach existing
+accelerators — review your configuration before upgrading, as `terraform
+plan` may now show a forced replacement for affected instances.
+
 ## Resource: `google_netapp_storage_pool`
 
 ### `scale_tier` has been removed
@@ -117,4 +132,4 @@ The `scale_tier` argument has been removed from this resource. It was previously
 
 ### `source_contents` is now Required
 
-The `source_contents` argument is now Required. Previously, this field was marked as Optional in Terraform, but omitting it led to runtime errors. When upgrading to version 8.0.0, you must ensure this argument is populated in your `google_workflows_workflow` configurations. 
+The `source_contents` argument is now Required. Previously, this field was marked as Optional in Terraform, but omitting it led to runtime errors. When upgrading to version 8.0.0, you must ensure this argument is populated in your `google_workflows_workflow` configurations.
