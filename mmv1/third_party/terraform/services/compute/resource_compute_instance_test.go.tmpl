@@ -5605,17 +5605,24 @@ func TestAccComputeInstance_ServiceClassNetworkAttachment(t *testing.T) {
 	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{testNetworkAttachmentName}
 	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envRegion, testNetworkAttachmentName)
 
+{{- if ne $.TargetVersionName "ga" }}
+	testServiceClassId := "gcp-tf-persistent-service-class-beta"
+{{- else }}
+	testServiceClassId := "gcp-tf-persistent-service-class-ga"
+{{- end }}
+
+  // we use different ServiceClasses between Vcr and nightly
+	if acctest.IsVcrEnabled() {
+		testServiceClassId = "gcp-tf-persistent-service-class-dev"
+	}
+
 	context := map[string]interface{}{
 		"suffix":                  (acctest.RandString(t, 10)),
 		"network_attachment_name": testNetworkAttachmentName,
 		"region":                  envRegion,
 		"org_id":                  envvar.GetTestOrgTargetFromEnv(t),
 		"billing_account":         envvar.GetTestBillingAccountFromEnv(t),
-{{- if ne $.TargetVersionName "ga" }}
-		"service_class_id":        "gcp-tf-persistent-service-class-beta",
-{{- else }}
-    "service_class_id":        "gcp-tf-persistent-service-class-ga",
-{{- end }}
+		"service_class_id":        testServiceClassId,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
