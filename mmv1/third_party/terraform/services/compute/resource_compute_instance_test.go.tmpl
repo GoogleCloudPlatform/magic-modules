@@ -2363,7 +2363,6 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 	t.Parallel()
 
@@ -2440,7 +2439,6 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeInstance_subnet_auto(t *testing.T) {
 	t.Parallel()
@@ -11038,7 +11036,6 @@ resource "google_compute_instance" "foobar" {
 `, instanceName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_hostErrorTimeoutSeconds(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
@@ -11067,7 +11064,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, context)
 }
-{{- end }}
 
 func testAccComputeInstance_shieldedVmConfig(instance string, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) string {
 	return fmt.Sprintf(`
