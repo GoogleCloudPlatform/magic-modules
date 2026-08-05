@@ -497,3 +497,135 @@ The shortcut that makes the symptom disappear without fixing the underlying caus
 Entries are numbered sequentially. Do not renumber existing entries. If a fix is superseded by a later
 generator change, mark the entry `[RESOLVED in upstream as of <date>]` but do not delete it — historical
 context is valuable.
+
+---
+
+### P-14 — HTTP 403 on acceptance test: diagnose before dropping
+
+**Symptom:**
+The generated list-query test (`TestAcc<Resource>ListQuery_generated`) fails with an HTTP 403
+(Permission Denied) when calling the resource's list endpoint.
+
+**Root cause:**
+A bare 403 has four distinct root causes with different correct resolutions. Dropping the resource
+immediately discards resources that are perfectly valid but happen to hit an environment or IAM gap:
+
+1. **Required GCP API not enabled** in the test project (environment gap — resource is supportable).
+2. **Org-scoped resource** — the list URL contains `/organizations/{org_id}` and `GOOGLE_PROJECT`
+   alone is insufficient; org-level credentials are needed.
+3. **Alpha/private feature or allowlist required** — the resource is gated behind an allowlist,
+   alpha program, or feature flag not active in the test project.
+4. **IAM permission gap** — the test service account lacks the required `<service>.<resource>.list`
+   IAM role, but the role is a standard one that can be granted.
+
+**Fix (Validator diagnosis protocol):**
+Run these checks in order; stop at the first that matches:
+
+1. Check API enablement:
+   ```bash
+   gcloud services list --project=$GOOGLE_PROJECT --enabled | grep -i '<service>'
+   ```
+   Not enabled → **HARD DROP** with reason `"API 403 — required GCP API not enabled: <service>"`.
+
+2. Check `base_url` / `list_url` in the resource YAML for `/organizations/`:
+   Not present → **HARD DROP** with reason `"API 403 — resource is org-scoped, requires GOOGLE_ORG"`.
+
+3. Check the 403 response body in `outline.txt` for `allowlist`, `alpha`, `private feature`:
+   Matched → **HARD DROP** with reason `"API 403 — requires allowlisting/alpha: <message>"`.
+
+4. Check test SA IAM roles; compare to required `<service>.<resource>.list` permission:
+   Missing standard role → return FAIL (environment issue, not a resource issue) so the SA can be
+   granted the role and the test re-run. Do NOT drop.
+   Requires org/special access → **HARD DROP** with reason `"API 403 — requires privileged access"`.
+
+**Do NOT:**
+Drop a resource on a bare 403 without running the four-step diagnosis. Dropping on an IAM gap
+permanently excludes a valid resource from all future batches.
+
+---
+
+### P-15 — HTTP 404 on acceptance test: diagnose before dropping
+
+**Symptom:**
+The generated list-query test (`TestAcc<Resource>ListQuery_generated`) fails with an HTTP 404
+(Not Found) when calling the resource's list endpoint, OR the resource creation step itself returns
+404 before the list query is even reached.
+
+**Root cause:**
+A bare 404 has four distinct root causes. The most common is a region/zone mismatch (P-04/P-05),
+which is YAML-fixable. Dropping on a 404 without diagnosis throws away fixable resources.
+
+1. **Region/zone mismatch** — resource created in a different region/zone than the list query
+   targets. The list returns 404 because it queries the wrong scope. This is oracle P-04/P-05.
+2. **Resource type genuinely unavailable** — the resource type does not exist in the given
+   project/region (e.g. a regional resource in a zone that doesn't support it).
+3. **Wrong API version** — the resource uses an `alpha` or `beta` base URL not available in the
+   test project.
+4. **List URL differs from resource URL** — the list endpoint is at a different path than the
+   CRUD endpoint. The generated `list_<resource>.go` may have derived the wrong list URL.
+
+**Fix (Validator diagnosis protocol):**
+Run these checks in order:
+
+1. Region/zone mismatch — grep `outline.txt` for mismatched region/zone values between the POST
+   (create) and GET (list) requests. If mismatch found: **YAML-fix P-04**, return FAIL to Coder.
+
+2. Resource creation status — grep `outline.txt` for the creation HTTP status. If 404/403 on
+   creation: resource type unavailable in this project/region. **HARD DROP** with reason
+   `"API 404 — resource type not available in project/region: <url>"`.
+
+3. API version — grep resource YAML for `min_version: beta` or `alpha` in base URL. If alpha/beta:
+   **HARD DROP** with reason `"API 404 — resource requires alpha/beta API not available in test project"`.
+
+4. List URL mismatch — if creation succeeded (201) but list returned 404, compare the list URL
+   in the generated `list_<resource>.go` to the API documentation. If different: **YAML-fix**,
+   return FAIL noting that `list_url` must be set explicitly in the resource YAML.
+
+5. None of the above: **HARD DROP** with reason
+   `"API 404 — root cause undetermined after diagnosis. See /tmp/debug_<resource>/outline.txt"`.
+
+**Do NOT:**
+Drop a resource on a bare 404 before running diagnosis step 1 (region mismatch check). The most
+common 404 in list-query tests is P-04 — a fixable YAML issue, not a permanent ineligibility.
+
+---
+
+### P-16 — Generator template changes must be in a separate PR from YAML batch changes
+
+**Symptom:**
+The Coder or Validator modified a core generator template file (e.g. `list_resource.go.tmpl`,
+`query_test_file.go.tmpl`) as part of the same branch that adds `generate_list_resource: true` to
+a batch of YAML files. The PR is rejected in review because template changes affect all products
+and require independent review.
+
+**Root cause:**
+Generator template changes (`mmv1/templates/terraform/*.go.tmpl`, excluding per-resource `examples/`
+and `decoders/`) affect the generated output for every product — not just the one being batched. They
+carry higher review risk and must be evaluated independently so reviewers can assess cross-product
+impact. Bundling them with a YAML batch PR makes the diff harder to review and raises the chance of
+an accidental regression in another product being silently merged.
+
+**Files that trigger this rule (must be in a separate PR):**
+- `mmv1/templates/terraform/list_resource.go.tmpl`
+- `mmv1/templates/terraform/list_resource_method.go.tmpl`
+- `mmv1/templates/terraform/samples/base_configs/query_test_file.go.tmpl`
+- Any other `mmv1/templates/terraform/*.go.tmpl` not in `examples/` or `decoders/`
+
+**Files that are allowed in the YAML batch PR (do NOT split these):**
+- `mmv1/products/<product>/*.yaml` — the YAML edits
+- `mmv1/templates/terraform/examples/<product>_*.tf.tmpl` — per-resource sample config fixes
+- `mmv1/templates/terraform/decoders/<product>_*.go.tmpl` — per-resource custom decoders
+- `mmv1/third_party/terraform/services/<product>/` — handwritten custom code
+
+**Fix (Validator Step 6f):**
+1. Identify template files in the diff (Step 1b).
+2. Strip them from the YAML batch branch (`git checkout upstream/main -- <file>`).
+3. Re-test any resource that relied on the template fix; if it no longer passes, drop it with
+   reason `"requires generator template fix (P-NN) before it can be included in a YAML batch PR"`.
+4. Create a separate branch from `upstream/main` containing only the template changes.
+5. Open a PR for the template branch with `release-note:none`.
+6. Reference the template PR in the YAML batch PR body as a dependency.
+
+**Do NOT:**
+Include both YAML batch changes and generator template changes in the same PR. The template PR
+must merge and its CI must pass before the YAML batch PR that depends on it is considered ready.
