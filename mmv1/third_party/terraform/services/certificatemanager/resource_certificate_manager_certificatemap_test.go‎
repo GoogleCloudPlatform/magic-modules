@@ -10,18 +10,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	
 )
 
 func TestAccCertificateManagerCertificateMap_tags(t *testing.T) {
 	t.Parallel()
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "cert-map-tagkey", map[string]interface{}{})
+	tagKey := tags.BootstrapSharedTestOrganizationTagKey(t, "cert-map-tagkey", map[string]interface{}{})
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "cert-map-tagvalue", tagKey),
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "cert-map-tagvalue", tagKey),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -110,7 +110,13 @@ func checkCertificateManagerCertificateMapWithTags(t *testing.T) func(s *terrafo
 			certificateMap_id := parts[5]
 
 			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/certificateMaps/%s", project, location, certificateMap_id)
-			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
+			// Handle global vs regional endpoints for tag bindings
+			var listBindingsURL string
+			if location == "global" {
+				listBindingsURL = fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", url.QueryEscape(parentURL))
+			} else {
+				listBindingsURL = fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
+			}
 
 			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,

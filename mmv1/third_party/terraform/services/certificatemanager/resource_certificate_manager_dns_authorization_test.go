@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/certificatemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -76,12 +77,12 @@ resource "google_certificate_manager_dns_authorization" "default" {
 
 func TestAccCertificateManagerDnsAuthorization_tags(t *testing.T) {
 	t.Parallel()
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "dns-authz-tagkey", map[string]interface{}{})
+	tagKey := tags.BootstrapSharedTestOrganizationTagKey(t, "dns-authz-tagkey", map[string]interface{}{})
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "dns-authz-tagvalue", tagKey),
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "dns-authz-tagvalue", tagKey),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -91,7 +92,7 @@ func TestAccCertificateManagerDnsAuthorization_tags(t *testing.T) {
 			{
 				Config: testAccCertificateManagerDnsAuthorizationWithTags(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_certificate_manager_dns_authorization", "tags.%"),
+					resource.TestCheckResourceAttrSet("google_certificate_manager_dns_authorization.test", "tags.%"),
 					checkCertificateManagerDnsAuthorizationWithTags(t),
 				),
 			},
@@ -99,7 +100,7 @@ func TestAccCertificateManagerDnsAuthorization_tags(t *testing.T) {
 				ResourceName:            "google_certificate_manager_dns_authorization.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"tags"},
+				ImportStateVerifyIgnore: []string{"tags", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -170,7 +171,7 @@ func checkCertificateManagerDnsAuthorizationWithTags(t *testing.T) func(s *terra
 			dnsAuthorizations_id := parts[5]
 
 			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/dnsAuthorizations/%s", project, location, dnsAuthorizations_id)
-			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
+			listBindingsURL := fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", url.QueryEscape(parentURL))
 
 			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,

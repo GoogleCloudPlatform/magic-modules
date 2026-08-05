@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/certificatemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -104,12 +105,12 @@ resource "google_certificate_manager_trust_config" "default" {
 
 func TestAccCertificateManagerTrustConfig_tags(t *testing.T) {
 	t.Parallel()
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "trust-config-tagkey", map[string]interface{}{})
+	tagKey := tags.BootstrapSharedTestOrganizationTagKey(t, "trust-config-tagkey", map[string]interface{}{})
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "trust-config-tagvalue", tagKey),
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "trust-config-tagvalue", tagKey),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -127,7 +128,7 @@ func TestAccCertificateManagerTrustConfig_tags(t *testing.T) {
 				ResourceName:            "google_certificate_manager_trust_config.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"tags"},
+				ImportStateVerifyIgnore: []string{"tags", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -198,7 +199,12 @@ func checkCertificateManagerTrustConfigWithTags(t *testing.T) func(s *terraform.
 			trustConfigs_id := parts[5]
 
 			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/trustConfigs/%s", project, location, trustConfigs_id)
-			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
+			var listBindingsURL string
+			if location == "global" || location == "" {
+				listBindingsURL = fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", url.QueryEscape(parentURL))
+			} else {
+				listBindingsURL = fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
+			}
 
 			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
