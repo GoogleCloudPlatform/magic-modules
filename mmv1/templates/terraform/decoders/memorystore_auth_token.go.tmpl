@@ -1,0 +1,4 @@
+if name, ok := res["name"].(string); ok {
+	res["tokenId"] = tpgresource.GetResourceNameFromSelfLink(name)
+}
+return res, nil
