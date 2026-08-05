@@ -34,7 +34,7 @@ func (c *ContainerNodePoolCai2hclConverter) Convert(assets []caiasset.Asset, opt
 	}
 
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(assets[0])
+	block, err := c.convertResourceData(assets[0], options)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (c *ContainerNodePoolCai2hclConverter) Convert(assets []caiasset.Asset, opt
 	return blocks, nil
 }
 
-func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.Asset, options *models.ResourceConverterOptions) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -75,8 +75,14 @@ func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.A
 	if err != nil {
 		return nil, err
 	}
+	var hclBlockName string
+	if options != nil && options.ResourceName != "" {
+		hclBlockName = options.ResourceName
+	} else {
+		hclBlockName = asset.Resource.Data["name"].(string)
+	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, asset.Resource.Data["name"].(string)},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }
@@ -221,9 +227,13 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[st
 	}
 
 	if v, ok := np["placementPolicy"].(map[string]interface{}); ok {
+		policyType := v["type"]
+		if policyType == nil {
+			policyType = ""
+		}
 		nodePool["placement_policy"] = []map[string]interface{}{
 			{
-				"type":         v["type"],
+				"type":         policyType,
 				"policy_name":  v["policyName"],
 				"tpu_topology": v["tpuTopology"],
 			},
@@ -231,9 +241,13 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[st
 	}
 
 	if v, ok := np["queuedProvisioning"].(map[string]interface{}); ok {
+		enabled := v["enabled"]
+		if enabled == nil {
+			enabled = false
+		}
 		nodePool["queued_provisioning"] = []map[string]interface{}{
 			{
-				"enabled": v["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}

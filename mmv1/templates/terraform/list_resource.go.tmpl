@@ -19,11 +19,21 @@
 
 package {{ lower $.ProductMetadata.Name }}
 
+{{ $hasIntegerIdentity := false -}}
+{{- range $id := $.IdentityProperties -}}
+  {{- if eq $id.Type "Integer" -}}
+    {{- $hasIntegerIdentity = true -}}
+  {{- end -}}
+{{- end -}}
+
 import (
 	"context"
 	"errors"
 	"fmt"
 	"net/http"
+	{{- if $hasIntegerIdentity }}
+	"strconv"
+	{{- end }}
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
@@ -93,6 +103,7 @@ func (listR *{{ $.ResourceName -}}ListResource) List(ctx context.Context, listRe
 {{- end }}
 {{- end }}
 
+	errStreamClosed := errors.New("stream closed")
 	stream.Results = func(push func(list.ListResult) bool) {
 		err := List{{ $.ResourceName }}s(
 			listR.Client,
@@ -107,17 +118,19 @@ func (listR *{{ $.ResourceName -}}ListResource) List(ctx context.Context, listRe
 				}
 
 				if !push(result) {
-					return errors.New("stream closed")
+					return errStreamClosed
 				}
 				return nil
 			},
 		)
-		if err != nil {
-			diags.AddError("API Error", err.Error())
-			result := listReq.NewListResult(ctx)
-			result.Diagnostics = diags
-			push(result)
+		// A closed stream is not an error: return without pushing again.
+		if err == nil || errors.Is(err, errStreamClosed) {
+			return
 		}
+		diags.AddError("API Error", err.Error())
+		result := listReq.NewListResult(ctx)
+		result.Diagnostics = diags
+		push(result)
 	}
 }
 

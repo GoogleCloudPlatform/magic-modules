@@ -26,7 +26,6 @@ base_url: 'projects/{{project}}'
 create_url: 'projects/{{project}}/setCloudArmorTier'
 update_url: 'projects/{{project}}/setCloudArmorTier'
 update_verb: 'POST'
-
 read_query_params: '?fields=cloudArmorTier'
 import_format:
   - 'projects/{{project}}'
@@ -43,18 +42,22 @@ async:
     resource_inside_response: false
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/only_remove_from_state.go.tmpl'
-examples:
+samples:
   - name: 'compute_project_cloud_armor_tier_basic'
     primary_resource_id: 'cloud_armor_tier_config'
     exclude_test: true
+    steps:
+      - name: 'compute_project_cloud_armor_tier_basic'
   - name: 'compute_project_cloud_armor_tier_project_set'
     primary_resource_id: 'cloud_armor_tier_config'
-    vars:
-      project_id: 'your_project_id'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
     exclude_test: true
+    steps:
+      - name: 'compute_project_cloud_armor_tier_project_set'
+        resource_id_vars:
+          project_id: 'your_project_id'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
 parameters:
 properties:
   - name: 'cloudArmorTier'

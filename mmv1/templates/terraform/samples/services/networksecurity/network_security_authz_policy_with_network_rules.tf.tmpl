@@ -1,0 +1,130 @@
+resource "google_compute_network" "default" {
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  project                 = "{{index $.TestEnvVars "project"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "{{index $.ResourceIdVars "subnet_name"}}"
+  project       = "{{index $.TestEnvVars "project"}}"
+  region        = "us-east4"
+  ip_cidr_range = "10.1.2.0/24"
+  network       = google_compute_network.default.id
+}
+
+resource "google_compute_subnetwork" "proxy_only" {
+  name          = "{{index $.ResourceIdVars "proxy_subnet_name"}}"
+  project       = "{{index $.TestEnvVars "project"}}"
+  region        = "us-east4"
+  ip_cidr_range = "10.129.0.0/23"
+
+  purpose = "REGIONAL_MANAGED_PROXY"
+  role    = "ACTIVE"
+
+  network = google_compute_network.default.id
+}
+
+resource "google_network_security_gateway_security_policy" "default" {
+  name     = "{{index $.ResourceIdVars "swp_policy"}}"
+  project  = "{{index $.TestEnvVars "project"}}"
+  location = "us-east4"
+}
+
+resource "google_compute_address" "swp_ip" {
+  name         = "{{index $.ResourceIdVars "gateway_name"}}" # Alterado para amarrar com a regra de nomenclatura do GCP
+  project      = "{{index $.TestEnvVars "project"}}"
+  region       = "us-east4"
+
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+}
+
+resource "google_network_services_gateway" "swp_gateway" {
+  name     = "{{index $.ResourceIdVars "gateway_name"}}"
+  project  = "{{index $.TestEnvVars "project"}}"
+  location = "us-east4"
+
+  type = "SECURE_WEB_GATEWAY"
+
+  addresses = [google_compute_address.swp_ip.address]
+  ports     = [443]
+  delete_swg_autogen_router_on_destroy = true
+  scope      = "swp-scope"
+  network    = google_compute_network.default.id
+  subnetwork = google_compute_subnetwork.default.id
+
+  gateway_security_policy = google_network_security_gateway_security_policy.default.id
+
+  depends_on = [
+    google_compute_subnetwork.proxy_only
+  ]
+}
+
+resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
+  name           = "{{index $.ResourceIdVars "resource_name"}}"
+  project        = "{{index $.TestEnvVars "project"}}"
+  location       = "us-east4"
+
+  description    = "SWP authorization policy"
+  policy_profile = "REQUEST_AUTHZ"
+
+  target {
+    load_balancing_scheme = "INTERNAL_MANAGED"
+
+    resources = [
+      google_network_services_gateway.swp_gateway.id
+    ]
+  }
+
+  action = "ALLOW"
+
+  network_rules {
+    from {
+      not_sources {
+        ip_blocks {
+          prefix = "{{index $.Vars "not_sources_prefix"}}"
+          length = 24
+        }
+
+        principals {
+          principal_selector = "CLIENT_CERT_URI_SAN"
+
+          principal {
+            exact = "{{index $.Vars "not_sources_principal"}}"
+          }
+        }
+      }
+      sources {
+        ip_blocks {
+          length = 24
+          prefix = "{{index $.Vars "sources_prefix"}}"
+        }
+        
+        principals {
+          principal_selector = "CLIENT_CERT_URI_SAN"
+          
+          principal {
+            exact = "{{index $.Vars "sources_principal"}}"
+          }
+        }
+      }
+    }
+
+    to {
+      operations {
+        snis {
+          exact = "{{index $.Vars "to_operations_snis_exact"}}"
+        }
+      }
+    }
+  }
+
+  labels = {
+    environment = "test"
+    managed_by  = "terraform"
+  }
+
+  lifecycle {
+    create_before_destroy = false
+  }
+}

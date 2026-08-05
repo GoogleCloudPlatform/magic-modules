@@ -1,0 +1,27 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	// The API resolves address resource URIs to raw IPs. If the user
+	// configured a URI, preserve it in state so Terraform doesn't see
+	// a diff between the URI (config) and IP (API response).
+	// This only preserves when the resource already exists (not on create),
+	// so the address field is still sent correctly in the CREATE request.
+	configured := d.Get("address").(string)
+	if configured != "" && strings.Contains(configured, "/") && d.Id() != "" {
+		return configured
+	}
+	return v
+}

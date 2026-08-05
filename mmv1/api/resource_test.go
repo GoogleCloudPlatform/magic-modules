@@ -208,6 +208,72 @@ func TestResourceServiceVersion(t *testing.T) {
 	}
 }
 
+func TestProviderDefaultFieldsAreSynthesizedAndDeduplicated(t *testing.T) {
+	t.Parallel()
+
+	version := &product.Version{Name: "ga", BaseUrl: "https://example.googleapis.com/v1/"}
+
+	cases := []struct {
+		description  string
+		obj          api.Resource
+		listScope    bool
+		expectedName map[string]int
+	}{
+		{
+			description: "identity synthesizes project without duplication",
+			obj: api.Resource{
+				BaseUrl: "projects/{{project}}/foos",
+				Parameters: []*api.Type{
+					{Name: "project", Type: "String"},
+				},
+			},
+			expectedName: map[string]int{"project": 1},
+		},
+		{
+			description: "list scope synthesizes missing defaults and deduplicates",
+			obj: api.Resource{
+				BaseUrl: "projects/{{project}}/zones/{{zone}}/foos",
+				Parameters: []*api.Type{
+					{Name: "project", Type: "String"},
+					{Name: "zone", Type: "String", IgnoreRead: true, Exclude: true},
+				},
+				ProductMetadata: &api.Product{
+					Versions: []*product.Version{version},
+					Version:  version,
+				},
+			},
+			listScope:    true,
+			expectedName: map[string]int{"project": 1, "zone": 1},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+
+			var got []*api.Type
+			if tc.listScope {
+				got = tc.obj.ListScopeProperties()
+			} else {
+				got = tc.obj.IdentityProperties()
+			}
+
+			counts := map[string]int{}
+			for _, p := range got {
+				counts[p.Name]++
+			}
+
+			for name, want := range tc.expectedName {
+				if gotCount := counts[name]; gotCount != want {
+					t.Fatalf("expected %s exactly %d time(s), got %d", name, want, gotCount)
+				}
+			}
+		})
+	}
+}
+
 // TestMagicianLocation verifies that the current package is being executed from within
 // the RELATIVE_MAGICIAN_LOCATION ("mmv1/") directory structure. This ensures that references
 // to files relative to this location will remain valid even if the repository structure
@@ -880,6 +946,171 @@ func TestResource_TestDependencies(t *testing.T) {
 			got := tc.resource.TestDependencies()
 			if diff := cmp.Diff(tc.want, got); diff != "" {
 				t.Errorf("TestDependencies() mismatch (-want +got:\n%s", diff)
+			}
+		})
+	}
+}
+
+// TestIdentityPropertiesFlattenObject ensures that identifiers nested under a
+// property marked with flatten_object (e.g. datasetReference.datasetId ->
+// dataset_id) are collapsed and included in the identity schema. Without this,
+// importing by resource identity panics because the identifier is missing from
+// the generated identity schema.
+func TestIdentityPropertiesFlattenObject(t *testing.T) {
+	t.Parallel()
+
+	res := &api.Resource{
+		Name:            "Dataset",
+		BaseUrl:         "projects/{{project}}/datasets",
+		ImportFormat:    []string{"projects/{{project}}/datasets/{{dataset_id}}"},
+		ProductMetadata: &api.Product{Name: "BigQuery"},
+	}
+	res.Properties = []*api.Type{
+		{
+			Name:             "datasetReference",
+			Type:             "NestedObject",
+			FlattenObject:    true,
+			ResourceMetadata: res,
+			Properties: []*api.Type{
+				{
+					Name:     "datasetId",
+					Type:     "String",
+					Required: true,
+				},
+			},
+		},
+	}
+
+	got := make([]string, 0)
+	for _, p := range res.IdentityProperties() {
+		got = append(got, p.Name)
+	}
+
+	if !slices.Contains(got, "datasetId") {
+		t.Errorf("expected IdentityProperties to include flattened identifier \"datasetId\", got %v", got)
+	}
+}
+
+func TestSamplePrimaryResourceId(t *testing.T) {
+	t.Parallel()
+
+	p := &api.Product{
+		Name: "test",
+		Versions: []*product.Version{
+			{
+				Name:    "ga",
+				BaseUrl: "ga_url",
+			},
+			{
+				Name:    "beta",
+				BaseUrl: "beta_url",
+			},
+		},
+	}
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    string
+	}{
+		{
+			description: "empty samples returns empty string",
+			resource: api.Resource{
+				Samples:           []*resource.Sample{},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "",
+		},
+		{
+			description: "samples with higher min_version returns empty string",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "beta-res",
+						MinVersion:        "beta",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "",
+		},
+		{
+			description: "valid sample returns primary resource id",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "ga-res",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "ga-res",
+		},
+		{
+			description: "only the first sample should be used",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "first-res",
+						MinVersion:        "ga",
+					},
+					{
+						PrimaryResourceId: "second-res",
+						MinVersion:        "ga",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "first-res",
+		},
+		{
+			description: "excludetest should be honored using first non-excluded sample",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "excluded-res",
+						ExcludeTest:       true,
+					},
+					{
+						PrimaryResourceId: "included-res",
+						ExcludeTest:       false,
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "included-res",
+		},
+		{
+			description: "fallback to first matching excluded sample when all are excluded",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "excluded-first",
+						ExcludeTest:       true,
+					},
+					{
+						PrimaryResourceId: "excluded-second",
+						ExcludeTest:       true,
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "excluded-first",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.SamplePrimaryResourceId(); got != tc.expected {
+				t.Errorf("SamplePrimaryResourceId() = %q, want %q", got, tc.expected)
 			}
 		})
 	}

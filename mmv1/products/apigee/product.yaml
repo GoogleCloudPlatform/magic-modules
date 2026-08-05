@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Apigee'
-display_name: 'Apigee'
-versions:
-  - name: 'ga'
-    base_url: 'https://apigee.googleapis.com/v1/'
+name: Apigee
+display_name: Apigee
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://apigee.googleapis.com/v1/

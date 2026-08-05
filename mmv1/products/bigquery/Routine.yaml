@@ -41,58 +41,84 @@ iam_policy:
     - 'projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}'
     - '{{routine_id}}'
 custom_code:
-examples:
+samples:
   - name: 'bigquery_routine_basic'
     primary_resource_id: 'sproc'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_basic'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_json'
     primary_resource_id: 'sproc'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_json'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_tvf'
     primary_resource_id: 'sproc'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_tvf'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
+  - name: 'bigquery_routine_table_type'
+    primary_resource_id: 'sproc'
+    steps:
+      - name: 'bigquery_routine_table_type'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_pyspark'
     primary_resource_id: 'pyspark'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_pyspark'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          connection_id: 'connection_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_pyspark_mainfile'
     primary_resource_id: 'pyspark_mainfile'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_pyspark_mainfile'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          connection_id: 'connection_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_spark_jar'
     primary_resource_id: 'spark_jar'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_spark_jar'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          connection_id: 'connection_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_data_governance_type'
     primary_resource_id: 'custom_masking_routine'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
+    steps:
+      - name: 'bigquery_routine_data_governance_type'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_remote_function'
     primary_resource_id: 'remote_function'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
     exclude_test: true
+    steps:
+      - name: 'bigquery_routine_remote_function'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          connection_id: 'connection_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_python_function'
     primary_resource_id: 'python_function'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
     min_version: beta
+    steps:
+      - name: 'bigquery_routine_python_function'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
+        min_version: beta
 parameters:
 properties:
   - name: 'routineReference'
@@ -109,10 +135,7 @@ properties:
         immutable: true
       - name: 'routineId'
         type: String
-        description:
-          The ID of the the routine. The ID must contain only letters (a-z,
-          A-Z), numbers (0-9), or underscores (_). The maximum length is 256
-          characters.
+        description: The ID of the the routine. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum length is 256 characters.
         required: true
         immutable: true
   - name: 'routineType'
@@ -163,6 +186,7 @@ properties:
           enum_values:
             - 'FIXED_TYPE'
             - 'ANY_TYPE'
+            - 'FIXED_TABLE'
         - name: 'mode'
           type: Enum
           description: |
@@ -189,6 +213,37 @@ properties:
           custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
           validation:
             function: 'validation.StringIsJSON'
+        - name: 'tableType'
+          type: NestedObject
+          description: |
+            If argumentKind is FIXED_TABLE, a schema for the table type.
+          properties:
+            - name: 'columns'
+              type: Array
+              description: |
+                The columns in the table type.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'name'
+                    type: String
+                    description: |
+                      The name of the column.
+                  - name: 'type'
+                    type: String
+                    description: |
+                      A JSON schema for the data type of the column. Required unless argumentKind = ANY_TYPE.
+                      ~>**NOTE**: Because this field expects a JSON string, any changes to the string
+                      will create a diff, even if the JSON itself hasn't changed. If the API returns
+                      a different value for the same schema, e.g. it switched the order of values
+                      or replaced STRUCT field type with RECORD field type, we currently cannot
+                      suppress the recurring diff this causes. As a workaround, we recommend using
+                      the schema as returned by the API.
+                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                    validation:
+                      function: 'validation.StringIsJSON'
   - name: 'returnType'
     type: String
     description: |
@@ -402,3 +457,9 @@ properties:
         type: String
         description: |
           Language runtime version. Example: `python-3.11`.
+      - name: 'containerRequestConcurrency'
+        type: String
+        description: |
+          Maximum number of concurrent requests per Python UDF container instance. For more
+          information, see [Configure container limits for Python
+          UDFs](https://cloud.google.com/bigquery/docs/user-defined-functions-python#configure-container-limits)

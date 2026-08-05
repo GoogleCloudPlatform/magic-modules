@@ -31,6 +31,16 @@ var ServicesListBeta = mapOf(
         "displayName" to "Activedirectory",
         "path" to "./google-beta/services/activedirectory"
     ),
+    "agentidentity" to mapOf(
+        "name" to "agentidentity",
+        "displayName" to "Agent Identity",
+        "path" to "./google-beta/services/agentidentity"
+    ),
+    "agentregistry" to mapOf(
+        "name" to "agentregistry",
+        "displayName" to "Agent Registry",
+        "path" to "./google-beta/services/agentregistry"
+    ),
     "alloydb" to mapOf(
         "name" to "alloydb",
         "displayName" to "Alloydb",
@@ -90,6 +100,11 @@ var ServicesListBeta = mapOf(
         "name" to "biglake",
         "displayName" to "Biglake",
         "path" to "./google-beta/services/biglake"
+    ),
+    "biglakehive" to mapOf(
+        "name" to "biglakehive",
+        "displayName" to "BiglakeHive",
+        "path" to "./google-beta/services/biglakehive"
     ),
     "biglakeiceberg" to mapOf(
         "name" to "biglakeiceberg",
@@ -235,6 +250,11 @@ var ServicesListBeta = mapOf(
         "name" to "cloudsecuritycompliance",
         "displayName" to "Cloud Security Compliance",
         "path" to "./google-beta/services/cloudsecuritycompliance"
+    ),
+    "cloudsupport" to mapOf(
+        "name" to "cloudsupport",
+        "displayName" to "Cloudsupport",
+        "path" to "./google-beta/services/cloudsupport"
     ),
     "cloudtasks" to mapOf(
         "name" to "cloudtasks",

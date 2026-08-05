@@ -22,11 +22,6 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/configurations/{{configuration_id}}
-examples:
-  - name: licensemanager_configuration_basic
-    primary_resource_id: "example-configuration"
-    vars:
-      configuration_id: "example-configuration"
 async:
   operation:
     base_url: '{{op_id}}'
@@ -39,10 +34,17 @@ async:
 autogen_status: Q29uZmlndXJhdGlvbg==
 autogen_async: true
 custom_code:
-  encoder: 'templates/terraform/encoders/licensemanager_configuration.go.tmpl'
-  post_read: 'templates/terraform/post_read/licensemanager_configuration.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/licensemanager_configuration.go.tmpl'
-  post_update: 'templates/terraform/post_update/licensemanager_configuration.go.tmpl'
+  encoder: templates/terraform/encoders/licensemanager_configuration.go.tmpl
+  post_read: templates/terraform/post_read/licensemanager_configuration.go.tmpl
+  pre_update: templates/terraform/pre_update/licensemanager_configuration.go.tmpl
+  post_update: templates/terraform/post_update/licensemanager_configuration.go.tmpl
+samples:
+  - name: licensemanager_configuration_basic
+    primary_resource_id: example-configuration
+    steps:
+      - name: licensemanager_configuration_basic
+        resource_id_vars:
+          configuration_id: example-configuration
 parameters:
   - name: location
     type: String
@@ -67,8 +69,7 @@ properties:
     output: true
   - name: state
     type: String
-    description: |-
-      State of the configuration.
+    description: State of the configuration.
     output: true
   - name: updateTime
     type: String
@@ -81,7 +82,7 @@ properties:
     type: String
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
     description: Name of the product for which you are setting the license configuration. For supported products see https://docs.cloud.google.com/compute/docs/instances/windows/license-manager#supported-license-products. Available values include Office2021ProfessionalPlus
   # ignore_read is set because the count is returned nested inside currentBillingInfo
   # (userCountBilling/packCountBilling). Populated via post_read custom code.
@@ -90,8 +91,8 @@ properties:
     required: true
     ignore_read: true
     update_mask_fields:
-      - 'currentBillingInfo'
-      - 'nextBillingInfo'
+      - currentBillingInfo
+      - nextBillingInfo
     description: Number of units to bill for. When licensing a product that is billed per-user, this means number of users. When licensing a product that is billed per-pack (e.g. SQL Server), this means the number of packs.
   # ignore_read is set because active is a virtual boolean attribute derived from the API's
   # 'state' field (STATE_ACTIVE vs STATE_SUSPENDED). Populated via post_read custom code.

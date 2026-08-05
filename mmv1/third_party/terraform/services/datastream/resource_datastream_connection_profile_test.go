@@ -634,6 +634,9 @@ resource "google_datastream_connection_profile" "default" {
       client_certificate           = file("text-fixtures/cert.pem")
       secret_manager_stored_client_key = google_secret_manager_secret_version.client_key_secret_version.id
     }
+	additional_options = {
+		readPreference = "secondary"
+	}
     standard_connection_format {
       direct_connection = true
     }
@@ -726,6 +729,10 @@ resource "google_datastream_connection_profile" "default" {
       client_certificate           = file("text-fixtures/cert.pem")
       secret_manager_stored_client_key = google_secret_manager_secret_version.client_key_secret_version.id
     }
+	additional_options = {
+		readPreference   = "primary"  // <-- Changed
+		connectTimeoutMS = "5000"     // <-- Added
+	}
     standard_connection_format {
       direct_connection = true
     }

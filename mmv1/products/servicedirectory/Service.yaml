@@ -12,52 +12,53 @@
 # limitations under the License.
 
 ---
-name: 'Service'
+name: Service
 description: |
   An individual service. A service contains a name and optional metadata.
 references:
   guides:
-    'Configuring a service': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_service'
-  api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1/projects.locations.namespaces.services'
+    Configuring a service: https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_service
+  api: https://cloud.google.com/service-directory/docs/reference/rest/v1/projects.locations.namespaces.services
 docs:
 base_url: '{{name}}'
 self_link: '{{name}}'
 create_url: '{{namespace}}/services?serviceId={{service_id}}'
-update_verb: 'PATCH'
+update_verb: PATCH
+iam_policy:
+  exclude_import_test: true
+  method_name_separator: ':'
+  fetch_iam_policy_verb: POST
+  parent_resource_attribute: name
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}'
+  - projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-iam_policy:
-  exclude_import_test: true
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'name'
+exclude_sweeper: true
 exclude_identity_generation: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/service_directory_service.go.tmpl'
-  encoder: 'templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl'
-  decoder: 'templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/service_directory.go.tmpl'
-
-exclude_sweeper: true
-examples:
-  - name: 'service_directory_service_basic'
-    primary_resource_id: 'example'
-    vars:
-      service_id: 'example-service'
-      namespace_id: 'example-namespace'
+  encoder: templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl
+  decoder: templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl
+  pre_update: templates/terraform/pre_update/service_directory.go.tmpl
+  custom_import: templates/terraform/custom_import/service_directory_service.go.tmpl
+samples:
+  - name: service_directory_service_basic
+    primary_resource_id: example
+    steps:
+      - name: service_directory_service_basic
+        resource_id_vars:
+          service_id: example-service
+          namespace_id: example-namespace
 parameters:
-  - name: 'namespace'
+  - name: namespace
     type: String
     description: |
       The resource name of the namespace this service will belong to.
     url_param_only: true
     required: true
     ignore_read: true
-  - name: 'serviceId'
+  - name: serviceId
     type: String
     description: |
       The Resource ID must be 1-63 characters long, including digits,
@@ -66,15 +67,15 @@ parameters:
     required: true
     immutable: true
     validation:
-      function: 'verify.ValidateRFC1035Name(2, 63)'
+      function: verify.ValidateRFC1035Name(2, 63)
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name for the service in the
       format `projects/*/locations/*/namespaces/*/services/*`.
     output: true
-  - name: 'metadata'
+  - name: metadata
     type: KeyValuePairs
     description: |
       Metadata for the service. This data can be consumed

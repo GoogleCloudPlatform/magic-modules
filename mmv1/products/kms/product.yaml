@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'KMS'
-display_name: 'Cloud Key Management Service'
-versions:
-  - name: 'ga'
-    base_url: 'https://cloudkms.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://cloudkms.googleapis.com/v1/'
+name: KMS
+display_name: Cloud Key Management Service
 scopes:
-  - 'https://www.googleapis.com/auth/cloudkms'
+  - https://www.googleapis.com/auth/cloudkms
+versions:
+  - name: ga
+    base_url: https://cloudkms.googleapis.com/v1/
+  - name: beta
+    base_url: https://cloudkms.googleapis.com/v1/

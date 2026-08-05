@@ -11,12 +11,6 @@ import (
 	{{- end }}
 	"sort"
 
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
-
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -50,53 +44,71 @@ func BetaMetadataUpdate(oldMDMap map[string]interface{}, newMDMap map[string]int
 	MetadataUpdate(oldMDMap, newMDMap, serverMD)
 }
 
-func expandComputeMetadata(m map[string]interface{}) []*compute.MetadataItems {
-	metadata := make([]*compute.MetadataItems, 0, len(m))
+func expandComputeMetadata(m map[string]interface{}) []interface{} {
+	metadata := make([]interface{}, 0, len(m))
 	var keys []string
 	for key := range m {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
-	// Append new metadata to existing metadata
 	for _, key := range keys {
 		v := m[key].(string)
-		metadata = append(metadata, &compute.MetadataItems{
-			Key:   key,
-			Value: &v,
+		metadata = append(metadata, map[string]interface{}{
+			"key":   key,
+			"value": v,
 		})
 	}
-
 	return metadata
 }
 
-func flattenMetadataBeta(metadata *compute.Metadata) map[string]string {
+func flattenMetadataBeta(metadata map[string]interface{}) map[string]string {
 	metadataMap := make(map[string]string)
 	if metadata == nil {
 		return metadataMap
 	}
-	for _, item := range metadata.Items {
-		metadataMap[item.Key] = *item.Value
+	items, _ := metadata["items"].([]interface{})
+	for _, raw := range items {
+		item, ok := raw.(map[string]interface{})
+		if !ok || item == nil {
+			continue
+		}
+		key, _ := item["key"].(string)
+		if key == "" {
+			continue
+		}
+		val, _ := item["value"].(string)
+		metadataMap[key] = val
 	}
 	return metadataMap
 }
 
-// This function differs from flattenMetadataBeta only in that it takes
-// compute.metadata rather than compute.metadata as an argument. It should
-// be removed in favour of flattenMetadataBeta if/when all resources using it get
-// beta support.
-func FlattenMetadata(metadata *compute.Metadata) map[string]interface{} {
+func FlattenMetadata(metadata map[string]interface{}) map[string]interface{} {
 	metadataMap := make(map[string]interface{})
 	if metadata == nil {
 		return metadataMap
 	}
-	for _, item := range metadata.Items {
-		metadataMap[item.Key] = *item.Value
+	items, _ := metadata["items"].([]interface{})
+	for _, raw := range items {
+		item, ok := raw.(map[string]interface{})
+		if !ok || item == nil {
+			continue
+		}
+		key, _ := item["key"].(string)
+		if key == "" {
+			continue
+		}
+		val, _ := item["value"].(string)
+		metadataMap[key] = val
 	}
 	return metadataMap
 }
 
-func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (*compute.Metadata, error) {
-	m := &compute.Metadata{}
+// resourceInstanceMetadata builds the instance metadata as a JSON-shaped
+// map[string]interface{} mirroring the compute.Metadata API type (camelCase
+// keys: "items" -> [{"key", "value"}], "fingerprint"). Empty values are omitted
+// to mirror the Apiary struct's omitempty tags.
+func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (map[string]interface{}, error) {
+	m := map[string]interface{}{}
 	mdMap := d.Get("metadata").(map[string]interface{})
 	if v, ok := d.GetOk("metadata_startup_script"); ok && v.(string) != "" {
 		if w, ok := mdMap["startup-script"]; ok {
@@ -108,7 +120,7 @@ func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (*compute.Met
 		mdMap["startup-script"] = v
 	}
 	if len(mdMap) > 0 {
-		m.Items = make([]*compute.MetadataItems, 0, len(mdMap))
+		items := make([]interface{}, 0, len(mdMap))
 		var keys []string
 		for k := range mdMap {
 			keys = append(keys, k)
@@ -116,19 +128,24 @@ func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (*compute.Met
 		sort.Strings(keys)
 		for _, k := range keys {
 			v := mdMap[k].(string)
-			m.Items = append(m.Items, &compute.MetadataItems{
-				Key:   k,
-				Value: &v,
+			items = append(items, map[string]interface{}{
+				"key":   k,
+				"value": v,
 			})
 		}
+		m["items"] = items
 
 		// Set the fingerprint. If the metadata has never been set before
-		// then this will just be blank.
-		m.Fingerprint = d.Get("metadata_fingerprint").(string)
+		// then this will just be blank, in which case we omit it to mirror
+		// the compute.Metadata omitempty behaviour.
+		if fp := d.Get("metadata_fingerprint").(string); fp != "" {
+			m["fingerprint"] = fp
+		}
 	}
 
 	return m, nil
 }
+
 {{- if ne $.TargetVersionName "ga" }}
 
 func resourceInstancePartnerMetadata(d tpgresource.TerraformResourceData) (map[string]interface{}, error) {
@@ -169,44 +186,35 @@ func flattenPartnerMetadata(partnerMetadata map[string]interface{}) (map[string]
 	return partnerMetadataMap, nil
 }
 
-func convertPartnerMetadataToCompute(pm map[string]interface{}) (map[string]compute.StructuredEntries, error) {
-	result := make(map[string]compute.StructuredEntries)
+// convertPartnerMetadataToCompute builds the partner metadata as a JSON-shaped
+// map[string]interface{} mirroring the compute.StructuredEntries API type (each
+// value is the parsed entries object, or an empty object for nil).
+func convertPartnerMetadataToCompute(pm map[string]interface{}) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
 	for key, value := range pm {
 		if value == nil {
-			result[key] = compute.StructuredEntries{}
+			result[key] = map[string]interface{}{}
 			continue
 		}
-		seBytes, err := json.Marshal(value)
-		if err != nil {
-			return nil, err
-		}
-		var se compute.StructuredEntries
-		if err := json.Unmarshal(seBytes, &se); err != nil {
-			return nil, err
-		}
-		result[key] = se
+		result[key] = value
 	}
 	return result, nil
 }
 
-func convertPartnerMetadataFromCompute(pm map[string]compute.StructuredEntries) map[string]interface{} {
+func convertPartnerMetadataFromCompute(pm map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
-	for key, value := range pm {
-		if value.Entries == nil {
+	for key, raw := range pm {
+		value, ok := raw.(map[string]interface{})
+		if !ok || value == nil {
 			result[key] = nil
 			continue
 		}
-		seBytes, err := json.Marshal(value)
-		if err != nil {
+		entries, hasEntries := value["entries"]
+		if !hasEntries || entries == nil {
 			result[key] = nil
 			continue
 		}
-		var m map[string]interface{}
-		if err := json.Unmarshal(seBytes, &m); err != nil {
-			result[key] = nil
-			continue
-		}
-		result[key] = m
+		result[key] = value
 	}
 	return result
 }

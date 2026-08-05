@@ -1,3 +1,4 @@
+---
 # Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,21 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
 name: ProjectAccessPolicy
 api_resource_type_kind: AccessPolicy
-min_version: beta
 description: |
   Represents an IAM v3 Access Policy parented by a Project. This policy defines rules
   that allow or deny access to resources within the specified project based on principals and conditions.
   See the Cloud IAM documentation for more details on Access Policies.
 references:
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v3beta/projects.locations.accessPolicies'
-id_format: projects/{{project}}/locations/{{location}}/accessPolicies/{{access_policy_id}}
+  api: https://cloud.google.com/iam/docs/reference/rest/v3beta/projects.locations.accessPolicies
 base_url: projects/{{project}}/locations/{{location}}/accessPolicies
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/accessPolicies/{{access_policy_id}}
 create_url: projects/{{project}}/locations/{{location}}/accessPolicies?accessPolicyId={{access_policy_id}}
 update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/accessPolicies/{{access_policy_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/accessPolicies/{{access_policy_id}}
 async:
@@ -39,44 +39,44 @@ async:
 autogen_status: QWNjZXNzUG9saWN5
 autogen_async: true
 samples:
-  - name: 'access_policy_project_test'
-    primary_resource_id: 'example'
+  - name: access_policy_project_test
+    primary_resource_id: example
     steps:
-      - name: 'access_policy_project_minimal'
+      - name: access_policy_project_minimal
         test_env_vars:
-          org_id: 'ORG_ID'
-          billing_account: 'BILLING_ACCT'
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         resource_id_vars:
-          project_name: 'ap-project-'
-          account_id: 'svc-acc-'
-          access_policy_id: 'my-project-policy-'
-      - name: 'access_policy_project_full'
+          project_name: ap-project-
+          account_id: svc-acc-
+          access_policy_id: my-project-policy-
+      - name: access_policy_project_full
         test_env_vars:
-          org_id: 'ORG_ID'
-          billing_account: 'BILLING_ACCT'
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         resource_id_vars:
-          project_name: 'ap-project-'
-          account_id: 'svc-acc-'
-          excluded_account_id: 'exc-svc-acc-'
-          access_policy_id: 'my-project-policy-'
+          project_name: ap-project-
+          account_id: svc-acc-
+          excluded_account_id: exc-svc-acc-
+          access_policy_id: my-project-policy-
         vars:
-          display_name: 'Project Access Policy'
-          allow_rule_description: 'Allow rule for a service account with excluded principals'
-          deny_rule_description: 'Deny rule for all public principals except excluded principals'
-      - name: 'access_policy_project_full'
+          display_name: Project Access Policy
+          allow_rule_description: Allow rule for a service account with excluded principals
+          deny_rule_description: Deny rule for all public principals except excluded principals
+      - name: access_policy_project_full
         test_env_vars:
-          org_id: 'ORG_ID'
-          billing_account: 'BILLING_ACCT'
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         resource_id_vars:
-          project_name: 'ap-project-'
-          account_id: 'svc-acc-'
-          excluded_account_id: 'exc-svc-acc-'
-          access_policy_id: 'my-project-policy-'
+          project_name: ap-project-
+          account_id: svc-acc-
+          excluded_account_id: exc-svc-acc-
+          access_policy_id: my-project-policy-
         vars:
-          display_name: 'Project Access Policy Updated'
-          allow_rule_description: 'Updated Allow rule for a service account with excluded principals'
-          deny_rule_description: 'Updated Deny rule for all public principals except excluded principals'
-    external_providers: ["time"]
+          display_name: Project Access Policy Updated
+          allow_rule_description: Updated Allow rule for a service account with excluded principals
+          deny_rule_description: Updated Deny rule for all public principals except excluded principals
+    external_providers: [time]
 parameters:
   - name: location
     type: String
