@@ -1,0 +1,12 @@
+resource "google_redis_cluster" "{{$.PrimaryResourceId}}-cluster" {
+  name                        = "{{index $.ResourceIdVars "cluster_name"}}"
+  shard_count                 = 1
+  region                      = "us-central1"
+  authorization_mode          = "AUTH_MODE_TOKEN_AUTH"
+  deletion_protection_enabled = false
+}
+
+resource "google_redis_cluster_token_auth_user" "{{$.PrimaryResourceId}}" {
+  cluster                     = google_redis_cluster.{{$.PrimaryResourceId}}-cluster.id
+  user_id                     = "{{index $.ResourceIdVars "user_id"}}"
+}
