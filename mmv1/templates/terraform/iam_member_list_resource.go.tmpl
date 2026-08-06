@@ -40,8 +40,8 @@ func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
         {{ $.ResourceName }}IamUpdaterProducer,
         tpgiamresource.IamMemberListCallConfig{ 
         ParentResourceField: "{{ $.IamPolicy.ParentResourceAttribute }}",
-        EnableRoleFilter:    true,
-        EnableMemberFilter:  true,
+        EnableRoleFilter:    {{ $.IamPolicy.RoleFilterEnabled }},
+        EnableMemberFilter:  {{ $.IamPolicy.MemberFilterEnabled }},
     },
  )
 

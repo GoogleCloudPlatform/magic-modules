@@ -140,6 +140,14 @@ type IamPolicy struct {
 	// [Optional] Generate a list resources (terraform query) for the mmv1 generated
 	// IAM member resources
 	GenerateListResource bool `yaml:"generate_list_resource,omitempty"`
+
+	// EnableListRoleFilter controls whether the generated list resource exposes a role filter.
+	// Defaults to true when unset; set to false to disable the role filter.
+	EnableListRoleFilter *bool `yaml:"enable_list_role_filter,omitempty"`
+
+	// EnableListMemberFilter controls whether the generated list resource exposes a member filter.
+	// Defaults to true when unset; set to false to disable the member filter.
+	EnableListMemberFilter *bool `yaml:"enable_list_member_filter,omitempty"`
 }
 
 // newIamPolicyWithDefaults returns an IamPolicy object with default values set.
@@ -208,4 +216,14 @@ func (p *IamPolicy) Validate(rName string) (es []error) {
 	}
 
 	return es
+}
+
+// RoleFilterEnabled reports whether the list role filter should be enabled (default true).
+func (p *IamPolicy) RoleFilterEnabled() bool {
+	return p.EnableListRoleFilter == nil || *p.EnableListRoleFilter
+}
+
+// MemberFilterEnabled reports whether the list member filter should be enabled (default true).
+func (p *IamPolicy) MemberFilterEnabled() bool {
+	return p.EnableListMemberFilter == nil || *p.EnableListMemberFilter
 }
