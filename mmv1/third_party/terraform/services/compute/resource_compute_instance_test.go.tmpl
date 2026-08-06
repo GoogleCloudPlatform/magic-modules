@@ -5595,7 +5595,7 @@ func TestAccComputeInstance_NetworkAttachmentUpdate(t *testing.T) {
 func TestAccComputeInstance_ServiceClassNetworkAttachment(t *testing.T) {
 	t.Parallel()
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
-	envRegion := envvar.GetTestRegionFromEnv()
+	envRegion := "us-central1"
 	var instance map[string]interface{}
 
 	providerVersion := "v1"
@@ -13639,14 +13639,14 @@ resource "google_compute_subnetwork" "test-subnetwork" {
   project = google_project.accepted_consumer_project1.project_id
   name          = "tf-test-compute-subnet-%{suffix}"
   ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
+  region        = "%{region}"
   network       = google_compute_network.test-network.id
 }
 
 resource "google_compute_network_attachment" "test_network_attachment" {
   project = google_project.accepted_consumer_project1.project_id
   name = "%{network_attachment_name}"
-  region = "us-central1"
+  region = "%{region}"
   description = "network attachment description"
   connection_preference = "ACCEPT_MANUAL"
   producer_accept_lists = [
