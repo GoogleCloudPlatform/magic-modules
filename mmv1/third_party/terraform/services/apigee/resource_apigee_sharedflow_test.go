@@ -45,7 +45,7 @@ func TestAccApigeeSharedFlow_apigeeSharedflowTestExample(t *testing.T) {
 				ResourceName:            "google_apigee_sharedflow.test_apigee_sharedflow",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"config_bundle", "detect_md5hash", "md5hash"},
+				ImportStateVerifyIgnore: []string{"config_bundle", "detect_md5hash", "md5hash", "org_id"},
 			},
 			{
 				Config: testAccApigeeSharedFlow_apigeeSharedflowTestExampleUpdate(context),
@@ -54,7 +54,7 @@ func TestAccApigeeSharedFlow_apigeeSharedflowTestExample(t *testing.T) {
 				ResourceName:            "google_apigee_sharedflow.test_apigee_sharedflow",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"config_bundle", "detect_md5hash", "md5hash"},
+				ImportStateVerifyIgnore: []string{"config_bundle", "detect_md5hash", "md5hash", "org_id"},
 			},
 		},
 	})
@@ -126,7 +126,9 @@ resource "google_apigee_organization" "apigee_org" {
 
 resource "google_apigee_sharedflow" "test_apigee_sharedflow" {
   name            = "tf-test-apigee-sharedflow"
-  org_id          = google_project.project.project_id
+  # Use the fully-qualified org id ("organizations/<id>") to exercise org_id
+  # prefix normalization (hashicorp/terraform-provider-google#25876).
+  org_id          = google_apigee_organization.apigee_org.id
   config_bundle   = "./test-fixtures/apigee_sharedflow_bundle.zip"
   depends_on      = [google_apigee_organization.apigee_org]
 }
@@ -238,7 +240,7 @@ resource "google_apigee_organization" "apigee_org" {
 
 resource "google_apigee_sharedflow" "test_apigee_sharedflow" {
   name            = "tf-test-apigee-sharedflow"
-  org_id          = google_project.project.project_id
+  org_id          = google_apigee_organization.apigee_org.id
   config_bundle   = "./test-fixtures/apigee_sharedflow_bundle2.zip"
   depends_on      = [google_apigee_organization.apigee_org]
 }
