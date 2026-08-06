@@ -1243,6 +1243,27 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					patchRuleUpdateMask = append(patchRuleUpdateMask, "header_action")
 				}
 
+				if fmt.Sprintf("%v", oRules[priority]["action"]) != fmt.Sprintf("%v", nRules[priority]["action"]) {
+					patchRuleUpdateMask = append(patchRuleUpdateMask, "action")
+				}
+
+				if fmt.Sprintf("%v", oRules[priority]["description"]) != fmt.Sprintf("%v", nRules[priority]["description"]) {
+					patchRuleUpdateMask = append(patchRuleUpdateMask, "description")
+				}
+
+				if fmt.Sprintf("%v", oRules[priority]["match"]) != fmt.Sprintf("%v", nRules[priority]["match"]) {
+					patchRuleUpdateMask = append(patchRuleUpdateMask, "match")
+				}
+
+				if fmt.Sprintf("%v", oRules[priority]["preview"]) != fmt.Sprintf("%v", nRules[priority]["preview"]) {
+					patchRuleUpdateMask = append(patchRuleUpdateMask, "preview")
+				}
+
+				if fmt.Sprintf("%v", oRules[priority]["redirect_options"]) != fmt.Sprintf("%v", nRules[priority]["redirect_options"]) {
+					patchRuleUpdateMask = append(patchRuleUpdateMask, "redirect_options")
+				}
+
+
 				// If the rule is in new, and its priority is in old, but its hash is different than the one in old, update it.
 				patchRuleURL := fmt.Sprintf("%sprojects/%s/global/securityPolicies/%s/patchRule?priority=%d", transport_tpg.BaseUrl(Product, config), project, sp, priority)
 				if len(patchRuleUpdateMask) > 0 {
