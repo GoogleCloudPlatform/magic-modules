@@ -38,6 +38,7 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+generate_list_resource: true
 samples:
   - name: network_services_agent_gateway_full
     primary_resource_id: default
