@@ -46,6 +46,7 @@ sweeper:
   identifier_field: "organization"
 custom_code:
   encoder: 'templates/terraform/encoders/apigee_organization.go.tmpl'
+  decoder: 'templates/terraform/decoders/apigee_organization.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_organization.go.tmpl'
 samples:
   - name: 'apigee_organization_cloud_basic'
