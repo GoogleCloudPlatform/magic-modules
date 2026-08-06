@@ -508,24 +508,24 @@ properties:
       Instance-level PSC information.
     output: true
     properties:
-      - name: effective_psc_auto_dns_enabled
+      - name: effectivePscAutoDnsEnabled
         type: Boolean
         description: The effective state of the PSC auto DNS for the instance.
         output: true
-      - name: effective_psc_auto_connection_policy
+      - name: effectivePscAutoConnectionPolicy
         type: Boolean
         description: |
           Indicates if the PSC auto connection policy is enabled for the instance.
           For older instances, this will be off by default, but for newer instances,
           this will be auto-enabled.
         output: true
-      - name: service_connection_policy
+      - name: serviceConnectionPolicy
         type: String
         description: |
           The PSC service connection policy name for the instance.
           The format is "projects/<PROJECT_ID>/regions/<REGION_ID>/serviceConnectionPolicies/<alloydb-$NETWORK-$RANDOM-scp>".
         output: true
-      - name: psc_auto_dns_names
+      - name: pscAutoDnsNames
         type: Array
         description: Specifies the auto DNS names for the instance.
         item_type:
