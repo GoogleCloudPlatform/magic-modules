@@ -452,6 +452,7 @@ properties:
   - name: networkConfig
     type: NestedObject
     default_from_api: true
+    custom_flatten: templates/terraform/custom_flatten/alloydb_instance_networkconfig_flatten.go.tmpl
     description: |
       Instance level network configuration.
     properties:

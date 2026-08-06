@@ -1,0 +1,75 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	original, ok := v.(map[string]interface{})
+	if !ok || len(original) == 0 {
+		return flattenAlloydbInstanceEmptyNetworkConfig(d)
+	}
+	transformed := make(map[string]interface{})
+	transformed["authorized_external_networks"] =
+		flattenAlloydbInstanceNetworkConfigAuthorizedExternalNetworks(original["authorizedExternalNetworks"], d, config)
+	transformed["enable_public_ip"] =
+		flattenAlloydbInstanceNetworkConfigEnablePublicIp(original["enablePublicIp"], d, config)
+	transformed["enable_outbound_public_ip"] =
+		flattenAlloydbInstanceNetworkConfigEnableOutboundPublicIp(original["enableOutboundPublicIp"], d, config)
+	transformed["allocated_ip_range_override"] =
+		flattenAlloydbInstanceNetworkConfigAllocatedIpRangeOverride(original["allocatedIpRangeOverride"], d, config)
+	return []interface{}{transformed}
+}
+
+func flattenAlloydbInstanceEmptyNetworkConfig(d *schema.ResourceData) interface{} {
+	// The API returns nil/empty for networkConfig when enable_public_ip and
+	// enable_outbound_public_ip are both false (the default). Keep the user's
+	// existing boolean values to avoid a permadiff.
+	return []interface{}{
+		map[string]interface{}{
+			"enable_public_ip":          d.Get("network_config.0.enable_public_ip"),
+			"enable_outbound_public_ip": d.Get("network_config.0.enable_outbound_public_ip"),
+		},
+	}
+}
+
+func flattenAlloydbInstanceNetworkConfigAuthorizedExternalNetworks(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			// Do not include empty json objects coming back from the api
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"cidr_range": flattenAlloydbInstanceNetworkConfigAuthorizedExternalNetworksCidrRange(original["cidrRange"], d, config),
+		})
+	}
+	return transformed
+}
+
+func flattenAlloydbInstanceNetworkConfigAuthorizedExternalNetworksCidrRange(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAlloydbInstanceNetworkConfigEnablePublicIp(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAlloydbInstanceNetworkConfigEnableOutboundPublicIp(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAlloydbInstanceNetworkConfigAllocatedIpRangeOverride(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
