@@ -1844,6 +1844,10 @@ linux_node_config {
 
 * `node_kernel_module_loading` - (Optional) Settings for kernel module loading. Structure is [documented below](#nested_node_kernel_module_loading_config).
 
+* `disk_io_scheduler` - (Optional) Controls the configuration for the disk IO scheduler. Structure is [documented below](#nested_disk_io_scheduler_config).
+
+* `node_vfio_config` - (Optional) Contains VFIO-related configurations for this node. Structure is [documented below](#nested_node_vfio_config).
+
 * `swap_config` - (Optional) Swap configuration for the node. Structure is [documented below](#nested_swap_config).
 
 * `accurate_time_config` - (Optional) Accurate time configuration for the node. Structure is [documented below](#nested_accurate_time_config).
@@ -1915,6 +1919,16 @@ linux_node_config {
     * `POLICY_UNSPECIFIED`: Default if unset. GKE selects the image based on node type. For CPU and TPU nodes, the image will not allow loading external kernel modules. For GPU nodes, the image will allow loading any module, whether it is signed or not.
     * `ENFORCE_SIGNED_MODULES`: Enforced signature verification: Node pools will use a Container-Optimized OS image configured to allow loading of *Google-signed* external kernel modules. Loadpin is enabled but configured to exclude modules, and kernel module signature checking is enforced.
     * `DO_NOT_ENFORCE_SIGNED_MODULES`: Mirrors existing DEFAULT behavior: For CPU and TPU nodes, the image will not allow loading external kernel modules. For GPU nodes, the image will allow loading any module, whether it is signed or not.
+
+<a name="nested_disk_io_scheduler_config"></a>The `disk_io_scheduler` block supports:
+
+* `node_system_io_scheduler` - (Optional) Configures the IO scheduler for the boot disk or ephemeral lssd that runs node system workloads. Supported values are `mq-deadline`, `bfq`, `kyber`, `none`.
+
+* `node_attached_disk_io_scheduler` - (Optional) Configures the IO scheduler for the attached disks. Supported values are `mq-deadline`, `bfq`, `kyber`, `none`.
+
+<a name="nested_node_vfio_config"></a>The `node_vfio_config` block supports:
+
+* `dma_entry_limit` - (Optional) Specifies the maximum number of DMA entries (pages) that can be mapped by the VFIO IOMMU type 1 driver for a container. Supported values are integers between `65535` and `4194304`.
 
 <a name="nested_custom_node_init"></a>The `custom_node_init` block supports:
 
