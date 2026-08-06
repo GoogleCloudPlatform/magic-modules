@@ -189,6 +189,15 @@ resource "google_data_lineage_open_lineage_job" "with_facets" {
           }
         }
       }
+	  dataset_input {
+        field     = "condition"
+        name      = "warehouse/raw_dataset_with_facets/source_table_1"
+        namespace = "gs://example-bucket/"
+        transformation {
+          subtype = "FILTER"
+          type    = "INDIRECT"
+        }
+      }
     }
   }
 }
