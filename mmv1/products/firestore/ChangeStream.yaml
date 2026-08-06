@@ -1,0 +1,123 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ChangeStream
+description: |
+  A change stream resource for a Cloud Firestore Database.
+  Change streams enable real-time tracking of document changes (creates, updates, deletes)
+  across collections within a Cloud Firestore database.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/firestore/docs/
+  api: TODO
+docs:
+  warning: |
+    This resource creates a Firestore Change Stream on a project that already has
+    a Firestore database.
+base_url: projects/{{project}}/databases/{{database}}/changeStreams
+create_url: projects/{{project}}/databases/{{database}}/changeStreams?changeStreamId={{name}}
+self_link: projects/{{project}}/databases/{{database}}/changeStreams/{{name}}
+id_format: projects/{{project}}/databases/{{database}}/changeStreams/{{name}}
+import_format:
+  - projects/{{project}}/databases/{{database}}/changeStreams/{{name}}
+  - '{{project}}/{{database}}/{{name}}'
+  - '{{database}}/{{name}}'
+update_mask: true
+update_verb: PATCH
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+samples:
+  - name: firestore_change_stream_basic
+    primary_resource_id: change_stream
+    external_providers: ["time"]
+    steps:
+      - name: firestore_change_stream_basic
+        resource_id_vars:
+          database_id: database-id
+          change_stream_id: my-change-stream
+        test_env_vars:
+          project_id: PROJECT_NAME
+  - name: firestore_change_stream_full
+    primary_resource_id: change_stream
+    external_providers: ["time"]
+    steps:
+      - name: firestore_change_stream_full
+        resource_id_vars:
+          database_id: database-id
+          change_stream_id: my-change-stream
+        test_env_vars:
+          project_id: PROJECT_NAME
+parameters:
+  - name: database
+    type: String
+    description: |
+      The Firestore database ID. Defaults to `"(default)"`.
+    url_param_only: true
+    immutable: true
+    default_value: (default)
+properties:
+  - name: name
+    type: String
+    description: |
+      The ID to use for the change stream, which will become the final component
+      of the change stream's resource name.
+    required: true
+    immutable: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: retentionPeriod
+    type: String
+    description: |
+      The duration for which change stream data is retained.
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "86400s".
+    required: true
+  - name: databaseScope
+    type: NestedObject
+    description: |
+      Tracks changes across all collections in the database.
+    send_empty_value: true
+    allow_empty_object: true
+    exactly_one_of:
+      - database_scope
+      - collection_group_scope
+    properties: []
+  - name: collectionGroupScope
+    type: NestedObject
+    description: |
+      Tracks changes for a specific collection group.
+    exactly_one_of:
+      - database_scope
+      - collection_group_scope
+    properties:
+      - name: collectionGroupId
+        type: String
+        description: |
+          The ID of the collection group to track.
+        required: true
+  - name: createTime
+    type: String
+    description: |
+      The creation timestamp of the change stream.
+    output: true
+  - name: updateTime
+    type: String
+    description: |
+      The last update timestamp of the change stream.
+    output: true
+  - name: state
+    type: String
+    description: |
+      The current state of the change stream.
+    output: true
