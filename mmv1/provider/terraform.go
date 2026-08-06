@@ -297,6 +297,7 @@ func (t *Terraform) GenerateIamListResourceQueryTest(object api.Resource, templa
 		return s.ExcludeTest
 	})
 	if len(samples) == 0 {
+		log.Printf("[WARNING] No list resource test generated for %s: no non-exculded samples available", object.Name)
 		return
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s_generated_test.go", t.ResourceGoFilename(object)))
