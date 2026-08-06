@@ -65,6 +65,18 @@ func ResourceApigeeApi() *schema.Resource {
 				ForceNew:    true,
 				Description: `The Apigee Organization name associated with the Apigee instance.`,
 			},
+			"space": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				Description: `The ID of the space associated with this API proxy. Any IAM ` +
+					`policies applied to the space will affect access to this proxy. If ` +
+					`not set, the proxy is created at the organization level. This field ` +
+					`is only respected when creating a new proxy; it has no effect when ` +
+					`creating a new revision for an existing proxy. Changing this field ` +
+					`forces the resource to be recreated.`,
+			},
 			"latest_revision_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -181,6 +193,14 @@ func resourceApigeeApiCreate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+	// The space of a proxy is set via the `space` query parameter at import time
+	// (it is only honored when creating a new proxy, not a new revision).
+	if space, ok := d.GetOk("space"); ok {
+		url, err = transport_tpg.AddQueryParams(url, map[string]string{"space": space.(string)})
+		if err != nil {
+			return err
+		}
+	}
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
@@ -271,6 +291,13 @@ func resourceApigeeApiRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if err := d.Set("latest_revision_id", flattenApigeeApiLatestRevisionId(res["latestRevisionId"], d, config)); err != nil {
 		return fmt.Errorf("Error reading API proxy: %s", err)
+	}
+	// `space` is returned on the ApiProxy object; only set it when present so a
+	// proxy at the organization level (no space) doesn't get a spurious value.
+	if v, ok := res["space"]; ok && v != nil && v != "" {
+		if err := d.Set("space", v); err != nil {
+			return fmt.Errorf("Error reading API proxy: %s", err)
+		}
 	}
 
 	//setting hash to suggest update

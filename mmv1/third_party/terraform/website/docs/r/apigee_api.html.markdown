@@ -63,6 +63,14 @@ The following arguments are supported:
 
 - - -
 
+* `space` -
+  (Optional)
+  The ID of the space associated with this API proxy. Any IAM policies applied
+  to the space will affect access to this proxy. If not set, the proxy is
+  created at the organization level. This field is only respected when creating
+  a new proxy; it has no effect when creating a new revision for an existing
+  proxy. Changing this field forces the resource to be recreated.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:

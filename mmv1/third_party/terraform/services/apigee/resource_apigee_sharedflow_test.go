@@ -244,3 +244,88 @@ resource "google_apigee_sharedflow" "test_apigee_sharedflow" {
 }
 `, context)
 }
+
+// TestAccApigeeSharedFlow_space verifies that a shared flow can be created inside
+// an Apigee Space via the `space` field, and that the value round-trips
+// (hashicorp/terraform-provider-google#26841 / b/504538523).
+func TestAccApigeeSharedFlow_space(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	resourceName := "google_apigee_sharedflow.test_apigee_sharedflow"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeSharedFlowDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApigeeSharedFlow_space(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "space", fmt.Sprintf("tf-test-space%s", context["random_suffix"])),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"config_bundle", "detect_md5hash", "md5hash"},
+			},
+		},
+	})
+}
+
+func testAccApigeeSharedFlow_space(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "apigee" {
+  project = google_project.project.project_id
+  service = "apigee.googleapis.com"
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on      = [google_project_service.apigee]
+}
+
+resource "google_apigee_organization" "apigee_org" {
+  analytics_region    = "us-central1"
+  project_id          = google_project.project.project_id
+  disable_vpc_peering = true
+  depends_on          = [
+    google_project_service.apigee,
+    time_sleep.wait_120_seconds,
+  ]
+}
+
+resource "google_apigee_space" "space" {
+  space_id     = "tf-test-space%{random_suffix}"
+  org_id       = google_apigee_organization.apigee_org.id
+  display_name = "tf-test-space"
+}
+
+resource "google_apigee_sharedflow" "test_apigee_sharedflow" {
+  name          = "tf-test-apigee-sharedflow"
+  org_id        = google_project.project.project_id
+  config_bundle = "./test-fixtures/apigee_sharedflow_bundle.zip"
+  space         = google_apigee_space.space.space_id
+  depends_on    = [google_apigee_organization.apigee_org]
+}
+`, context)
+}
