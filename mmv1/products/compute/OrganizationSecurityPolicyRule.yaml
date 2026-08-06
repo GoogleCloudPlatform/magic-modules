@@ -338,6 +338,7 @@ properties:
                 type: String
   - name: 'preview'
     type: Boolean
+    send_empty_value: true
     description: |
       If set to true, the specified action is not enforced.
   - name: 'redirectOptions'

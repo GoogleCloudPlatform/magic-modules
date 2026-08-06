@@ -1,5 +1,4 @@
 resource "google_compute_rollout_plan" "{{ .PrimaryResourceId }}" {
-  provider       = google-beta
   name           = "tf-test-rollout-plan-%{random_suffix}"
   description    = "A test rollout plan"
   location_scope = "ZONAL"

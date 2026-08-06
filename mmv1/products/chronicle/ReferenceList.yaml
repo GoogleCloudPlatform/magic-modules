@@ -127,7 +127,7 @@ properties:
       type: String
   - name: syntaxType
     type: String
-    description: |2-
+    description: |-
       Possible values:
       REFERENCE_LIST_SYNTAX_TYPE_PLAIN_TEXT_STRING
       REFERENCE_LIST_SYNTAX_TYPE_REGEX

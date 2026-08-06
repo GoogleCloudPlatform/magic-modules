@@ -25,6 +25,7 @@ references:
 base_url: projects/{{project}}/regions/{{region}}/targetTcpProxies
 immutable: true
 has_self_link: true
+generate_list_resource: true
 id_format: projects/{{project}}/regions/{{region}}/targetTcpProxies/{{name}}
 sweeper:
   url_substitutions:
@@ -39,6 +40,8 @@ samples:
     primary_resource_id: default
     steps:
       - name: region_target_tcp_proxy_basic
+        vars:
+          region: us-central1
         resource_id_vars:
           health_check_name: health-check
           region_backend_service_name: backend-service

@@ -213,3 +213,49 @@ func TestConvert_ComputeAddress(t *testing.T) {
 	assert.NotEmpty(t, assets)
 	assert.Equal(t, "https://www.googleapis.com/compute/v1/projects/terraform-dev-haonan/regions/us-east1/subnetworks/subnetwork-test", assets[1].Resource.Data["subnetwork"])
 }
+
+func TestConvert_GkeCustomNodeInit(t *testing.T) {
+	logger, _ := newTestErrorLogger()
+	o := &Options{
+		ErrorLogger:         logger,
+		Offline:             true,
+		DefaultProject:      testProject,
+		DefaultZone:         "us-central1-a",
+		NoOpAncestryManager: true,
+	}
+
+	jsonPlan, err := os.ReadFile("resolvers/gke_custom_node_init.tfplan.json")
+	if err != nil {
+		t.Fatalf("Error reading test file: %v", err)
+	}
+
+	assets, err := Convert(context.Background(), jsonPlan, o)
+	if err != nil {
+		t.Fatalf("Error marshaling assets: %v", err)
+	}
+	assert.Nil(t, err)
+	assert.NotEmpty(t, assets)
+
+	var clusterAsset *caiasset.Asset
+	for _, asset := range assets {
+		if asset.Type == "container.googleapis.com/Cluster" {
+			clusterAsset = &asset
+			break
+		}
+	}
+	assert.NotNil(t, clusterAsset, "Cluster asset not found")
+
+	nodeConfig, ok := clusterAsset.Resource.Data["nodeConfig"].(map[string]interface{})
+	assert.True(t, ok, "nodeConfig should be a map")
+
+	linuxNodeConfig, ok := nodeConfig["linuxNodeConfig"].(map[string]interface{})
+	assert.True(t, ok, "linuxNodeConfig should be a map")
+
+	customNodeInit, ok := linuxNodeConfig["customNodeInit"].(map[string]interface{})
+	assert.True(t, ok, "customNodeInit should be a map")
+
+	initScript, ok := customNodeInit["initScript"].(map[string]interface{})
+	assert.True(t, ok, "initScript should be a map")
+
+	assert.Equal(t, "gs://my-bucket/init.sh", initScript["gcsUri"])
+}

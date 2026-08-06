@@ -58,6 +58,7 @@ samples:
           chronicle_id: 'CHRONICLE_ID'
         exclude_import_test: true
 custom_code:
+  constants: 'templates/terraform/constants/chronicle_rule.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/chronicle_rule.go.tmpl'
 virtual_fields:
   - name: 'deletion_policy'
@@ -110,6 +111,7 @@ properties:
       Rule Id is the ID of the Rule.
   - name: text
     type: String
+    diff_suppress_func: 'chronicleRuleTextDiffSuppress'
     description: |-
       The YARA-L content of the rule.
       Populated in FULL view.
@@ -174,7 +176,7 @@ properties:
   - name: type
     type: String
     output: true
-    description: |2-
+    description: |-
       Possible values:
       RULE_TYPE_UNSPECIFIED
       SINGLE_EVENT

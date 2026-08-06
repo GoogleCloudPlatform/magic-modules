@@ -166,6 +166,17 @@ properties:
                 The project may be in any Google Cloud organization, not just the
                 organization that the perimeter is defined in. `*` is not allowed, the case
                 of allowing all Google Cloud resources only is not supported.
+            - name: 'pscEndpoint'
+              type: NestedObject
+              description: |
+                A Private Service Connect endpoint that is allowed to access the perimeter.
+                The Private Service Connect endpoint may be in any organization, not just the organization that the perimeter is defined in.
+              properties:
+                - name: 'forwardingRule'
+                  type: String
+                  description: |
+                    The full resource name of the global forwarding rule that identifies a Private Service Connect endpoint.
+                    Forwarding rule format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/forwardingRules/{FORWARDING_RULE_ID}`.
   - name: ingressTo
     type: NestedObject
     description: |

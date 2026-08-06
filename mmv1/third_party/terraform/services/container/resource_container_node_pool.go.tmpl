@@ -158,6 +158,19 @@ func (instanceGroupManagerCache *instanceGroupManagerCache) needsRefresh(fullyQu
 	return time.Since(igm.updateTime) > instanceGroupManagerCache.ttl
 }
 
+// invalidateItem removes a specific Instance Group Manager from the cache by its URL.
+// This is called when a node pool is resized or when ignore_node_count_changes is active,
+// ensuring that stale cached target sizes are not served on subsequent lookups.
+func (instanceGroupManagerCache *instanceGroupManagerCache) invalidateItem(igmUrl string) {
+	instanceGroupManagerCache.mutex.Lock()
+	defer instanceGroupManagerCache.mutex.Unlock()
+
+	matches := instanceGroupManagerURL.FindStringSubmatch(igmUrl)
+	if len(matches) >= 4 {
+		delete(instanceGroupManagerCache.instanceGroupManagers, matches[0])
+	}
+}
+
 // We need to set ttl to 0 to disable caching in VCR testing.
 // This ensure all NP/MIG LIST requests are made consistently,
 // preventing non-deterministic behavior that would break VCR.
@@ -188,9 +201,9 @@ func ResourceContainerNodePool() *schema.Resource {
 		Exists: resourceContainerNodePoolExists,
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(60 * time.Minute),
-			Update: schema.DefaultTimeout(60 * time.Minute),
-			Delete: schema.DefaultTimeout(60 * time.Minute),
+			Create: schema.DefaultTimeout(2 * time.Hour),
+			Update: schema.DefaultTimeout(2 * time.Hour),
+			Delete: schema.DefaultTimeout(2 * time.Hour),
 		},
 
 		SchemaVersion: 1,
@@ -705,6 +718,40 @@ var schemaNodePool = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Description: `When true, the provider ignores external changes (drift) to the node count by skipping GCE API queries to the Instance Group Managers. This is a performance optimization for large clusters that saves API quota. Setting this to true will result in missing managed_instance_group_urls in the state.`,
+	},
+
+	"maintenance_policy": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: `Maintenance policy for this NodePool.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"exclusion_until_end_of_support": {
+					Type:        schema.TypeList,
+					Optional:    true,
+					Description: `Maintenance exclusion until the end of support.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"enabled": {
+								Type:         schema.TypeBool,
+								Optional:     true,
+								Description:  `Whether to enable the maintenance exclusion until the end of support for this NodePool.`,
+							},
+							"start_time": {
+								Type:         schema.TypeString,
+								Computed:     true,
+								Description:  `Start time of the maintenance exclusion.`,
+							},
+							"end_time": {
+								Type:         schema.TypeString,
+								Computed:     true,
+								Description:  `End time of the maintenance exclusion.`,
+							},
+						},
+					},
+				},
+			},
+		},
 	},
 }
 
@@ -1349,6 +1396,19 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		}
 	}
 
+	if v, ok := d.GetOk(prefix + "maintenance_policy"); ok {
+		maintenancePolicy := v.([]interface{})[0].(map[string]interface{})
+		if v, ok := maintenancePolicy["exclusion_until_end_of_support"]; ok && len(v.([]interface{})) > 0 {
+			np.MaintenancePolicy = &container.NodePoolMaintenancePolicy{
+				ExclusionUntilEndOfSupport: &container.ExclusionUntilEndOfSupport {},
+			}
+			exclusionUntilEndOfSupport := v.([]interface{})[0].(map[string]interface{})
+			if v, ok := exclusionUntilEndOfSupport["enabled"]; ok {
+				np.MaintenancePolicy.ExclusionUntilEndOfSupport.Enabled = v.(bool)
+			}
+		}
+	}
+
 	return np, nil
 }
 
@@ -1423,6 +1483,30 @@ func flattenNodePoolNodeDrainConfig(ndc *container.NodeDrainConfig) []map[string
 	return []map[string]interface{}{nodeDrainConfig}
 }
 
+func flattenExlusionUntilEndOfSupport(ex *container.ExclusionUntilEndOfSupport) []map[string]interface{} {
+	if ex == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"enabled": ex.Enabled,
+			"start_time": ex.StartTime,
+			"end_time": ex.EndTime,
+		},
+	}
+}
+
+func flattenNodePoolMaintenancePolicy(mp *container.NodePoolMaintenancePolicy) []map[string]interface{} {
+	if mp == nil {
+		return nil
+	}
+
+	maintenancePolicy := make(map[string]interface{})
+
+	maintenancePolicy["exclusion_until_end_of_support"] = flattenExlusionUntilEndOfSupport(mp.ExclusionUntilEndOfSupport)
+	return []map[string]interface{}{maintenancePolicy}
+}
+
 func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *container.NodePool, prefix string) (map[string]interface{}, error) {
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1453,6 +1537,7 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		// or leave them empty. Passing the API URLs to igmUrls at least populates them for basic usage.
 		for _, url := range np.InstanceGroupUrls {
 			igmUrls = append(igmUrls, url)
+			igmCache.invalidateItem(url)
 		}
 	} else {
 		for _, url := range np.InstanceGroupUrls {
@@ -1491,7 +1576,8 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		"instance_group_urls": igmUrls,
 		"managed_instance_group_urls": managedIgmUrls,
 		"version":             np.Version,
-		"network_config":      flattenNodeNetworkConfig(np.NetworkConfig, d, prefix),
+		"network_config":              flattenNodeNetworkConfig(np.NetworkConfig, d, prefix),
+		"ignore_node_count_changes":   d.Get(prefix + "ignore_node_count_changes"),
 	}
 
 	if np.Autoscaling != nil {
@@ -1549,6 +1635,10 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 
 	if np.NodeDrainConfig != nil {
 		nodePool["node_drain_config"] = flattenNodePoolNodeDrainConfig(np.NodeDrainConfig)
+	}
+
+	if np.MaintenancePolicy != nil {
+		nodePool["maintenance_policy"] = flattenNodePoolMaintenancePolicy(np.MaintenancePolicy)
 	}
 
 	return nodePool, nil
@@ -1791,6 +1881,11 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		}
 		if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
 				return err
+		}
+		if urls, ok := d.GetOk(prefix + "instance_group_urls"); ok {
+			for _, u := range urls.([]interface{}) {
+				igmCache.invalidateItem(u.(string))
+			}
 		}
 		log.Printf("[INFO] GKE node pool %s size has been updated to %d", name, newSize)
 	}
