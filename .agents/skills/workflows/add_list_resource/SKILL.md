@@ -295,7 +295,29 @@ go build ./...
 A compile error here that matches an oracle pattern must be fixed in the YAML (or via an oracle-branch
 template fix), not by editing the generated `.go` file directly.
 
-If **any** test fails, do not patch the generator or the YAML to suppress the failure. Report the failing resources to the user. The user decides whether to (a) drop those resources from this PR and re-generate, or (b) abort the PR entirely. Never silently ship a PR that has failing list-query tests. When reporting test results programmatically, return valid JSON only with no surrounding prose or markdown fences.
+#### Quota failures
+
+If a test fails with a GCP quota error (e.g. `Quota 'NETWORKS' exceeded`, `RESOURCE_EXHAUSTED`,
+`rateLimitExceeded`, or `quota exceeded`), **this is a GCP infrastructure constraint, not a code
+bug**. Do not drop the resource from the PR or retry indefinitely.
+
+Respond to the orchestrator with a **`QUOTA_FAIL`** status so the loop can distinguish this from
+a real code failure:
+
+```json
+{"status":"QUOTA_FAIL","feedback":"<ResourceName>: Quota exceeded — <exact quota error message>"}
+```
+
+The resource's YAML and generated code are correct. The PR should still be opened. The GCP
+project quota will be raised on production infrastructure before the full run.
+
+#### Other test failures
+
+If **any** test fails for a non-quota reason, do not patch the generator or the YAML to suppress
+the failure. Report the failing resources to the user. The user decides whether to (a) drop those
+resources from this PR and re-generate, or (b) abort the PR entirely. Never silently ship a PR
+that has failing list-query tests. When reporting test results programmatically, return valid JSON
+only with no surrounding prose or markdown fences.
 
 ### 7. Commit only the YAML changes
 
