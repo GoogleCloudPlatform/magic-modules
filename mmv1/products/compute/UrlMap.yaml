@@ -1031,6 +1031,34 @@ properties:
                           Prior to forwarding the request to the selected service, the request's host
                           header is replaced with contents of hostRewrite. The value must be between 1 and
                           255 characters.
+                      - name: 'regexRewrite'
+                        type: NestedObject
+                        min_version: beta
+                        description: |
+                          The regex rewrite to be applied to the URL. Only one of pathPrefixRewrite, pathTemplateRewrite, or regexRewrite may be specified.
+                        properties:
+                          - name: 'pathPattern'
+                            type: String
+                            description: |
+                              The regular expression used to match against the URL path.
+                              It uses RE2 syntax with the following constraints:
+                               - Any single character operators
+                               - Groups are allowed to have only submatch operator inside
+                               - Groups are allowed only without any char repetition, e.g. .*
+                               - Any char repetition, e.g. .*, is only allowed to be used in a single regex together with:
+                                   - Empty string operators
+                                   - Other repetitions
+                                   - Ranges
+                                   - Repetitions of ranges
+                               - Ranges are only allowed to have:
+                                   - Character range
+                                   - Digits range
+                                   - Symbols listed in characters allowed for ranges
+                          - name: 'pathSubstitution'
+                            type: String
+                            description: |
+                              Required when path pattern is specified. Used to rewrite matching parts of
+                              the path.
                       - name: 'pathPrefixRewrite'
                         type: String
                         description: |
@@ -2093,6 +2121,34 @@ properties:
                           Prior to forwarding the request to the selected service, the request's host
                           header is replaced with contents of hostRewrite. The value must be between 1 and
                           255 characters.
+                      - name: 'regexRewrite'
+                        type: NestedObject
+                        min_version: beta
+                        description: |
+                          The regex rewrite to be applied to the URL. Only one of pathPrefixRewrite, pathTemplateRewrite, or regexRewrite may be specified.
+                        properties:
+                          - name: 'pathPattern'
+                            type: String
+                            description: |
+                              The regular expression used to match against the URL path.
+                              It uses RE2 syntax with the following constraints:
+                               - Any single character operators
+                               - Groups are allowed to have only submatch operator inside
+                               - Groups are allowed only without any char repetition, e.g. .*
+                               - Any char repetition, e.g. .*, is only allowed to be used in a single regex together with:
+                                   - Empty string operators
+                                   - Other repetitions
+                                   - Ranges
+                                   - Repetitions of ranges
+                               - Ranges are only allowed to have:
+                                   - Character range
+                                   - Digits range
+                                   - Symbols listed in characters allowed for ranges
+                          - name: 'pathSubstitution'
+                            type: String
+                            description: |
+                              Required when path pattern is specified. Used to rewrite matching parts of
+                              the path.
                       - name: 'pathPrefixRewrite'
                         type: String
                         description: |
@@ -2885,6 +2941,34 @@ properties:
               description: |
                 The spec to modify the URL of the request, prior to forwarding the request to the matched service.
               properties:
+                - name: 'regexRewrite'
+                  type: NestedObject
+                  min_version: beta
+                  description: |
+                    The regex rewrite to be applied to the URL. Only one of pathPrefixRewrite, pathTemplateRewrite, or regexRewrite may be specified.
+                  properties:
+                    - name: 'pathPattern'
+                      type: String
+                      description: |
+                        The regular expression used to match against the URL path.
+                        It uses RE2 syntax with the following constraints:
+                         - Any single character operators
+                         - Groups are allowed to have only submatch operator inside
+                         - Groups are allowed only without any char repetition, e.g. .*
+                         - Any char repetition, e.g. .*, is only allowed to be used in a single regex together with:
+                             - Empty string operators
+                             - Other repetitions
+                             - Ranges
+                             - Repetitions of ranges
+                         - Ranges are only allowed to have:
+                             - Character range
+                             - Digits range
+                             - Symbols listed in characters allowed for ranges
+                    - name: 'pathSubstitution'
+                      type: String
+                      description: |
+                        Required when path pattern is specified. Used to rewrite matching parts of
+                        the path.
                 - name: 'pathPrefixRewrite'
                   type: String
                   description: |
@@ -3764,6 +3848,34 @@ properties:
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
         properties:
+          - name: 'regexRewrite'
+            type: NestedObject
+            min_version: beta
+            description: |
+              The regex rewrite to be applied to the URL. Only one of pathPrefixRewrite, pathTemplateRewrite, or regexRewrite may be specified.
+            properties:
+              - name: 'pathPattern'
+                type: String
+                description: |
+                  The regular expression used to match against the URL path.
+                  It uses RE2 syntax with the following constraints:
+                   - Any single character operators
+                   - Groups are allowed to have only submatch operator inside
+                   - Groups are allowed only without any char repetition, e.g. .*
+                   - Any char repetition, e.g. .*, is only allowed to be used in a single regex together with:
+                       - Empty string operators
+                       - Other repetitions
+                       - Ranges
+                       - Repetitions of ranges
+                   - Ranges are only allowed to have:
+                       - Character range
+                       - Digits range
+                       - Symbols listed in characters allowed for ranges
+              - name: 'pathSubstitution'
+                type: String
+                description: |
+                  Required when path pattern is specified. Used to rewrite matching parts of
+                  the path.
           - name: 'pathPrefixRewrite'
             type: String
             description: |
