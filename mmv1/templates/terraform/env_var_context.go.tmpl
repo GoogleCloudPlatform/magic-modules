@@ -30,6 +30,8 @@
 		"{{$varKey}}": envvar.GetTestChronicleInstanceIdFromEnv(t),
 		{{- else if eq $varVal "VMWAREENGINE_PROJECT" }}
 		"{{$varKey}}": envvar.GetTestVmwareengineProjectFromEnv(t),
+		{{- else if eq $varVal "TENANT_GCP_PROJECT" }}
+		"{{$varKey}}": envvar.GetTestTenantGcpProjectFromEnv(t),
 		{{- else if eq $varVal "ZONE" }}
 		"{{$varKey}}": envvar.GetTestZoneFromEnv(),
 		{{- end }}

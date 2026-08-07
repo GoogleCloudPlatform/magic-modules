@@ -128,6 +128,7 @@ type Examples struct {
 	//  - IDENTITY_USER
 	//  - CHRONICLE_ID
 	//  - VMWAREENGINE_PROJECT
+	//  - TENANT_GCP_PROJECT
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
 	TestEnvVars map[string]string `yaml:"test_env_vars,omitempty"`
 
@@ -281,6 +282,7 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 		"PAP_DESCRIPTION":      "description",
 		"CHRONICLE_ID":         "00000000-0000-0000-0000-000000000000",
 		"VMWAREENGINE_PROJECT": "my-vmwareengine-project",
+		"TENANT_GCP_PROJECT":   "my-tenant-gcp-project",
 	}
 
 	// Apply doc defaults to test_env_vars from YAML
