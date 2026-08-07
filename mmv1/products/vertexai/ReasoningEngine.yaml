@@ -25,6 +25,7 @@ self_link: 'projects/{{project}}/locations/{{region}}/reasoningEngines/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
 update_verb: 'PATCH'
 update_mask: true
+generate_list_resource: true
 deletion_policy_custom_docs: true
 timeouts:
   insert_minutes: 20

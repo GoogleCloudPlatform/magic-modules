@@ -23,6 +23,7 @@ self_link: projects/{{project}}/locations/{{region}}/indexes/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/indexes
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 timeouts:
   insert_minutes: 180
   update_minutes: 180
