@@ -29,6 +29,9 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
+{{- range $pkg, $alias := $.FirstTestConfig.Step.TestDependencies $.Runtime.ResourcePrefixPkgMap }}
+	{{ $alias }} "{{ $.ImportPath }}/{{ $pkg }}"
+{{- end }}
 )
 
 var (
