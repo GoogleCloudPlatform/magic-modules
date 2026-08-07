@@ -58,33 +58,108 @@ def has_actionable_error_context(msg_lower, raw_msg):
     Returns True if an error message contains specific, actionable Terraform/provider/test error details
     that should prevent it from being dismissed as a generic non-actionable Internal Error.
     """
-    actionable_indicators = [
-        "panic:", "runtime error:", "sigsegv",
-        "has not been used in project",
-        "plan was not empty", "inconsistent result", "inconsistent final plan",
-        "root object was present, but now absent",
-        "importstateverify", "cannot import non-existent",
-        "check failed", "expected to be set", "expected state",
-        "conflicting configuration arguments", "invalid resource type",
-        "blocks of type", "inconsistent dependency lock file",
-        "error 400", "error 404", "error 409",
-        "invalid_argument", "failed_precondition", "permission_denied",
-        "missing required argument", "unsupported argument"
+    actionable_patterns = [
+        r'\b(?:panic:|runtime\s+error:|sigsegv|nil\s+pointer\s+dereference)\b',
+        r'\b(?:plan\s+was\s+not\s+empty|inconsistent\s+(?:result|final\s+plan)|root\s+object\s+was\s+present,\s+but\s+now\s+absent)\b',
+        r'\b(?:importstateverify|cannot\s+import\s+non-existent|check\s+failed|expected\s+to\s+be\s+set|expected\s+state)\b',
+        r'\b(?:conflicting\s+configuration\s+arguments|invalid\s+resource\s+type|blocks\s+of\s+type|inconsistent\s+dependency\s+lock\s+file)\b',
+        r'\b(?:error\s+40[049]|invalid_argument|failed_precondition|permission_denied|missing\s+required\s+argument|unsupported\s+argument)\b',
     ]
-    return any(indicator in msg_lower for indicator in actionable_indicators)
+    return any(re.search(pat, msg_lower) for pat in actionable_patterns)
+
+def is_quota_or_stockout_error(msg_lower, raw_msg):
+    # 1. Structured GCP error codes and protobuf types
+    structured_markers = [
+        "google.rpc.quotafailure",
+        "rate_limit_exceeded",
+        "zone_resource_pool_exhausted",
+        "resource_exhausted",
+        "stockout",
+        "error 429",
+        "429 too many requests",
+        "the folder operation violates fanout constraints",
+    ]
+    if any(k in msg_lower for k in structured_markers):
+        return True
+
+    # 2. Semantic regex / concept matching (grammar-agnostic)
+    # Quota & Rate-Limit concept (e.g. "quota exceeded", "quotas are exceeded", "rate limit exceeded", "you do not have quota")
+    if re.search(r'\b(quota|rate\s*limit)s?\b.*\b(exceed|exhaust|limit|violate)e?d?\b', msg_lower):
+        return True
+    if "you do not have quota" in msg_lower or "quota limit" in msg_lower or "has been exceeded" in msg_lower:
+        return True
+
+    # Stockout & Capacity concept (e.g. "no resource available", "not enough resources available", "insufficient capacity")
+    if re.search(r'\b(insufficient|not\s+enough|no|lack\s+of)\b.*\b(capacity|resource|stock)s?\b', msg_lower):
+        return True
+
+    # Location / Zone / Region retry advice concept (e.g. "try a different zone, or try again later", "try again in a different zone")
+    if re.search(r'\btry\s+(again\s+in\s+|a\s+different\s+)?(later|zone|region|location)\b', msg_lower) and ("resource" in msg_lower or "capacity" in msg_lower or "available" in msg_lower):
+        return True
+
+    return False
+
+def is_internal_error_13(msg_lower, raw_msg):
+    if has_actionable_error_context(msg_lower, raw_msg):
+        return False
+
+    structured_markers = [
+        "grpc.status\": 13",
+        "error code 13",
+        "error 13",
+        "code: 'internal'",
+        "error 500",
+        "error 503",
+        "error 502",
+        "backenderror",
+    ]
+    if any(k in msg_lower for k in structured_markers):
+        return True
+
+    if re.search(r'\b(?:internal\s+(?:server\s+)?error|an?\s+internal\s+error\s+has\s+occurred|internal\s+error\s+during\s+operation)\b', msg_lower):
+        return True
+
+    return False
+
+def is_tenant_project_creation_error(msg_lower, raw_msg):
+    return bool(re.search(r'\b(?:fail(?:ed|ure)?|error|unable|could\s+not)\b.*\btenant\s+project\b|\btenant\s+project\b.*\b(?:fail(?:ed|ure)?|error|unable|creation)\b', msg_lower))
+
+TEST_ENV_PROJECTS = [
+    "ci-test-project",
+    "ci-test-project-188019", "1067888929963",
+    "ci-test-project-nightly-ga", "594424405950",
+    "ci-test-project-nightly-beta", "653407317329",
+    "tf-vcr-private", "808590572184"
+]
+
+def is_project_allowlist_or_permission_error(msg_lower, raw_msg):
+    # Do NOT classify as a non-actionable allowlist error if it is simply an API enablement error in a test environment project!
+    # (An agent can automatically run 'gcloud services enable <api>' to fix those!)
+    is_api_disabled = bool(re.search(r'\b(?:has\s+not\s+been\s+used\s+in\s+project|before\s+or\s+it\s+is\s+disabled|reason:\s*"?service_disabled"?|api_not_enabled|enable\s+it\s+by\s+visiting)\b', msg_lower))
+    if is_api_disabled and any(p in msg_lower for p in TEST_ENV_PROJECTS):
+        return False
+
+    structured_markers = [
+        "reason: \"project_not_allowlisted\"",
+        "reason: \"consumer_invalid\"",
+    ]
+    if any(k in msg_lower for k in structured_markers):
+        return True
+
+    if re.search(r'\b(?:not\s+allowlisted|not\s+in\s+allowlist|require(?:s|d)?\s+allowlist(?:ing)?|unallowlisted|allowlisted\s+for)\b', msg_lower):
+        return True
+
+    if re.search(r'\b(?:not\s+allowed|prohibited|unauthorized|access\s+denied)\b.*\bproject\b|\bproject\b.*\b(?:not\s+allowed|not\s+allowlisted|allowlist|unauthorized)\b', msg_lower):
+        if any(w in msg_lower for w in ["api", "engine", "service", "allowlist", "terraform"]):
+            return True
+
+    return False
 
 HUMAN_ACTION_RULES = [
-    ("Quota / Resource Availability", lambda msg_lower, raw_msg: any(k in msg_lower for k in [
-        "quota exhausted", "quota exceeded", "quota_exceeded", "you do not have quota",
-        "quota limit", "has been exceeded", "the folder operation violates fanout constraints",
-        "does not have enough resources available", "zone_resource_pool_exhausted",
-        "ratelimitexceeded", "rate limit exceeded", "error 429", "429 too many requests"
-    ])),
-    ("Internal Error (Error Code 13)", lambda msg_lower, raw_msg: (
-        any(k in msg_lower for k in ["error code 13", "error 13", "internal error"])
-        and not has_actionable_error_context(msg_lower, raw_msg)
-    )),
-    ("Tenant Project Creation Failure", lambda msg_lower, raw_msg: "failed to perform tenant project creation" in msg_lower),
+    ("Quota / Resource Availability", is_quota_or_stockout_error),
+    ("Internal Error (Error Code 13)", is_internal_error_13),
+    ("Tenant Project Creation Failure", is_tenant_project_creation_error),
+    ("Project Allowlist / API Permission Required", is_project_allowlist_or_permission_error),
 ]
 
 def classify_human_action(error_msg):
@@ -103,19 +178,11 @@ def classify_human_action(error_msg):
 def is_generic_error(error_msg):
     return classify_human_action(error_msg) is not None
 
-TEST_ENV_PROJECTS = [
-    "ci-test-project-188019", "1067888929963",
-    "ci-test-project-nightly-ga", "594424405950",
-    "ci-test-project-nightly-beta", "653407317329",
-    "tf-vcr-private", "808590572184"
-]
-
 SEVERITY_RULES = [
     # (Priority, Category ID, Display Badge, Matcher Function)
-    (100, "PANIC", "🚨 **CRITICAL (Panic/Crash)**", lambda msg_lower, raw_msg: "panic: " in raw_msg or "runtime error:" in msg_lower or "sigsegv" in msg_lower),
+    (100, "PANIC", "🚨 **CRITICAL (Panic/Crash)**", lambda msg_lower, raw_msg: bool(re.search(r'\b(?:panic:|runtime\s+error:|sigsegv|nil\s+pointer\s+dereference)\b', raw_msg, re.IGNORECASE))),
     (90,  "API_ENV", "🚨 **CRITICAL (API Not Enabled in Test Env)**", lambda msg_lower, raw_msg: (
-        "has not been used in project" in msg_lower
-        and "before or it is disabled" in msg_lower
+        bool(re.search(r'\b(?:has\s+not\s+been\s+used\s+in\s+project|before\s+or\s+it\s+is\s+disabled|reason:\s*"?service_disabled"?|api_not_enabled|enable\s+it\s+by\s+visiting)\b', msg_lower))
         and any(p in msg_lower for p in TEST_ENV_PROJECTS)
     )),
 ]
@@ -143,6 +210,7 @@ def get_failures(provider_type, base_date=None):
     failure_counts = defaultdict(int)
     latest_failures = {} # Store name -> {error: msg, log: link}
     latest_available_date = None
+    latest_sha = ""
     service_stats = defaultdict(lambda: {"total": 0, "failed": 0})
 
     # Check past 7 days (including today)
@@ -153,6 +221,8 @@ def get_failures(provider_type, base_date=None):
             if latest_available_date is None:
                 latest_available_date = date_str
                 for item in data:
+                    if not latest_sha and item.get("commit_sha"):
+                        latest_sha = item.get("commit_sha")
                     service = item.get("service") or item.get("Service") or "unknown"
                     service_stats[service]["total"] += 1
                     if item.get("status") == "FAILURE":
@@ -170,7 +240,7 @@ def get_failures(provider_type, base_date=None):
                 if item.get("status") == "FAILURE":
                     failure_counts[item.get("name")] += 1
                     
-    return latest_failures, failure_counts, latest_available_date, service_stats
+    return latest_failures, failure_counts, latest_available_date, service_stats, latest_sha
 
 def get_actual_error(error_str):
     lines = [line.strip() for line in error_str.split('\n') if not (line.startswith("=== RUN") or line.startswith("=== PAUSE") or line.startswith("=== CONT") or line.startswith("--- FAIL:") or line.strip() == "FAIL")]
@@ -296,7 +366,7 @@ def format_human_action_cell(error_str):
     cat = classify_human_action(error_str)
     if cat is not None:
         return f"👤 **Yes ({cat})**"
-    return "No (Actionable)"
+    return "🤖 **No (Agent-Actionable)**"
 
 def main():
     parser = argparse.ArgumentParser(description="Automate test triage and reporting.")
@@ -307,8 +377,8 @@ def main():
     if args.date:
         base_date = datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
 
-    beta_failures, beta_counts, beta_date, beta_stats = get_failures("beta", base_date=base_date)
-    ga_failures, ga_counts, ga_date, ga_stats = get_failures("ga", base_date=base_date)
+    beta_failures, beta_counts, beta_date, beta_stats, beta_sha = get_failures("beta", base_date=base_date)
+    ga_failures, ga_counts, ga_date, ga_stats, ga_sha = get_failures("ga", base_date=base_date)
 
     # Combine failures for 7-day persistent window
     all_failures = defaultdict(dict)
@@ -412,22 +482,25 @@ def main():
         
         if beta_date:
             b_pct_str = f" — {(len(beta_failures)/beta_total_tests)*100.0:.1f}% failure rate" if beta_total_tests > 0 else ""
-            f.write(f"**Latest Beta run**: {beta_date} ({len(beta_failures)} / {beta_total_tests} failing tests{b_pct_str})\n")
+            b_sha_str = f" ([{beta_sha}](https://github.com/hashicorp/terraform-provider-google-beta/commit/{beta_sha}))" if beta_sha else ""
+            f.write(f"**Latest Beta run**: {beta_date}{b_sha_str} ({len(beta_failures)} / {beta_total_tests} failing tests{b_pct_str})\n\n")
         if ga_date:
             g_pct_str = f" — {(len(ga_failures)/ga_total_tests)*100.0:.1f}% failure rate" if ga_total_tests > 0 else ""
-            f.write(f"**Latest GA run**: {ga_date} ({len(ga_failures)} / {ga_total_tests} failing tests{g_pct_str})\n")
+            g_sha_str = f" ([{ga_sha}](https://github.com/hashicorp/terraform-provider-google/commit/{ga_sha}))" if ga_sha else ""
+            f.write(f"**Latest GA run**: {ga_date}{g_sha_str} ({len(ga_failures)} / {ga_total_tests} failing tests{g_pct_str})\n")
         latest_run_date = beta_date or ga_date or ""
         date_str = f" ({latest_run_date})" if latest_run_date else ""
         f.write("\n### 📑 Table of Contents\n")
-        f.write("* [1. High-Impact Actionable Errors in Latest Run](#section-1)\n")
+        f.write("* [1. High-Impact Agent-Actionable Errors in Latest Run](#section-1)\n")
         f.write("* [2. Test Failures Requiring Human Action (Non-Actionable by Agents)](#section-2)\n")
-        f.write("* [3. Persistent Actionable Failures Grouped by Error Signature (Past 7 Days)](#section-3)\n")
+        f.write("* [3. Persistent Agent-Actionable Failures Grouped by Error Signature (Past 7 Days)](#section-3)\n")
         f.write(f"* [4. Detailed Test Failures Grouped by Service Package{date_str}](#section-4)\n")
         f.write("\n---\n\n")
         
-        # Section 1: High-Impact Actionable Errors in Latest Run (Critical Severity OR High Volume >= 3 tests)
-        f.write("<details open>\n<summary><h2 id=\"section-1\">1. High-Impact Actionable Errors in Latest Run</h2></summary>\n<br>\n\n")
-        f.write("High-impact actionable errors are flagged based on **Critical Severity** (e.g., provider panic/crash, API enablement error in test environment) or **High Volume** (affecting $\\ge 3$ tests).\n")
+        # Section 1: High-Impact Agent-Actionable Errors in Latest Run (Critical Severity OR High Volume >= 3 tests)
+        f.write("<details open>\n<summary><h2 id=\"section-1\">1. High-Impact Agent-Actionable Errors in Latest Run</h2></summary>\n<br>\n\n")
+        f.write("High-impact agent-actionable errors are flagged based on **Critical Severity** (e.g., provider panic/crash, API enablement error in test environment) or **High Volume** (affecting $\\ge 3$ tests).\n")
+        f.write("> 🤖 **What does \"Agent-Actionable\" mean?** An error is **agent-actionable** if it represents a provider code defect, schema regression, or permadiff that an autonomous AI agent can automatically detect, triage, and repair through a sequence of automated code remediation actions—enabling headless automated remediation without requiring human intervention.\n")
         f.write("> ℹ️ **Note:** Error messages in this table are truncated to 500 characters for readability. For complete, untruncated error messages and per-test details, see **[Section 4: Detailed Test Failures Grouped by Service Package](#section-4)**.\n\n")
         f.write("| # | Impact Category | Affected Tests | Provider | GCP Service(s) | GitHub Issue(s) | Log Link | Error Signature / Sample Message | Sample Affected Tests |\n")
         f.write("| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
@@ -535,9 +608,9 @@ def main():
                 
         f.write("\n</details>\n<br>\n\n---\n\n")
         
-        # Section 3: Persistent Actionable Failures Grouped by Error Signature (Past 7 Days)
-        f.write("<details open>\n<summary><h2 id=\"section-3\">3. Persistent Actionable Failures Grouped by Error Signature (Past 7 Days)</h2></summary>\n<br>\n\n")
-        f.write("Criteria: Failed in latest run and at least 4 days in past 7 days, excluding non-actionable errors requiring human action.\n")
+        # Section 3: Persistent Agent-Actionable Failures Grouped by Error Signature (Past 7 Days)
+        f.write("<details open>\n<summary><h2 id=\"section-3\">3. Persistent Agent-Actionable Failures Grouped by Error Signature (Past 7 Days)</h2></summary>\n<br>\n\n")
+        f.write("Criteria: Persistent **agent-actionable** failures (failing in latest run and at least 4 days in past 7 days) that can be automatically detected and remediated by autonomous agents without human intervention.\n")
         f.write("> ℹ️ **Note:** Error messages in this table are truncated to 500 characters for readability. For complete, untruncated error messages and per-test details, see **[Section 4: Detailed Test Failures Grouped by Service Package](#section-4)**.\n\n")
         f.write("| # | Affected Tests Count | GCP Service(s) | Failure Category / Error Signature | GitHub Issue(s) | Log Link | Affected Test Names |\n")
         f.write("| --- | --- | --- | --- | --- | --- | --- |\n")
@@ -572,7 +645,7 @@ def main():
         latest_run_date = beta_date or ga_date or ""
         date_str = f" ({latest_run_date})" if latest_run_date else ""
         f.write(f"<details open>\n<summary><h2 id=\"section-4\">4. Detailed Test Failures Grouped by Service Package{date_str}</h2></summary>\n<br>\n\n")
-        f.write("All test failures from the latest run are grouped by GCP Service package. Each collapsible section displays how many tests failed out of total tests run in that package, with a column indicating whether human intervention is required.\n")
+        f.write("All test failures from the latest run are grouped by GCP Service package. Each collapsible section displays how many tests failed out of total tests run in that package, with a column indicating whether human intervention is required (`👤 **Yes**` for infrastructure/quota issues vs. `🤖 **No (Agent-Actionable)**` for provider code defects fixable by agents).\n")
         f.write("> ℹ️ **Note:** Unlike Sections 1–3, error messages in this section are displayed in **full without truncation** for comprehensive debugging.\n\n")
         
         combined_latest_tests = defaultdict(dict)
