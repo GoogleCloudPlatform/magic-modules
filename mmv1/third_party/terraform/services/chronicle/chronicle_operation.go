@@ -23,14 +23,11 @@ func (w *ChronicleOperationWaiter) QueryOp() (interface{}, error) {
 	}
 
 	baseUrl := transport_tpg.BaseUrl(Product, w.Config)
-	var url string
-	if strings.Contains(baseUrl, "v1alpha") {
-		url = fmt.Sprintf("%s%s", baseUrl, w.CommonOperationWaiter.Op.Name)
-	} else {
+	if strings.Contains(baseUrl, "{{location}}") {
 		region := tpgresource.GetRegionFromRegionalSelfLink(w.CommonOperationWaiter.Op.Name)
 		baseUrl = strings.ReplaceAll(baseUrl, "{{location}}", region)
-		url = fmt.Sprintf("%s%s", baseUrl, w.CommonOperationWaiter.Op.Name)
 	}
+	url := fmt.Sprintf("%s%s", baseUrl, w.CommonOperationWaiter.Op.Name)
 
 	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    w.Config,
