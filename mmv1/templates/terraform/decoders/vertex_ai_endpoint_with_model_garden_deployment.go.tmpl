@@ -1,0 +1,101 @@
+{{/*
+	The license inside this block applies to this file.
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+// Read returns an Endpoint, but this resource's schema is shaped around the
+// DeployedModel nested in endpoint.deployedModels[]. Reshape the response so
+// the generated flatteners find deployConfig, modelConfig, and endpointConfig
+// at the top level. Fields the API does not return are carried over from state.
+
+deployedModelId, _ := d.Get("deployed_model_id").(string)
+
+deployedModels, _ := res["deployedModels"].([]interface{})
+var deployedModel map[string]interface{}
+for _, raw := range deployedModels {
+	m, ok := raw.(map[string]interface{})
+	if !ok {
+		continue
+	}
+	if id, _ := m["id"].(string); id == deployedModelId {
+		deployedModel = m
+		break
+	}
+}
+if deployedModel == nil {
+	d.SetId("")
+	return nil, nil
+}
+
+dedicatedResources, _ := deployedModel["dedicatedResources"].(map[string]interface{})
+if dedicatedResources == nil {
+	dedicatedResources = map[string]interface{}{}
+}
+
+// The API omits these when they hold their zero value, which would otherwise
+// surface as a spurious 0 -> null diff on the next plan.
+if _, ok := dedicatedResources["requiredReplicaCount"]; !ok {
+	dedicatedResources["requiredReplicaCount"] = d.Get("deploy_config.0.dedicated_resources.0.required_replica_count")
+}
+if _, ok := dedicatedResources["spot"]; !ok {
+	dedicatedResources["spot"] = d.Get("deploy_config.0.dedicated_resources.0.spot")
+}
+if machineSpec, ok := dedicatedResources["machineSpec"].(map[string]interface{}); ok {
+	if _, ok := machineSpec["multihostGpuNodeCount"]; !ok {
+		machineSpec["multihostGpuNodeCount"] = d.Get("deploy_config.0.dedicated_resources.0.machine_spec.0.multihost_gpu_node_count")
+	}
+}
+
+deployConfig := map[string]interface{}{
+	"dedicatedResources": dedicatedResources,
+	"systemLabels":       d.Get("deploy_config.0.system_labels"),
+}
+if v, ok := deployedModel["fastTryoutEnabled"]; ok {
+	deployConfig["fastTryoutEnabled"] = v
+} else {
+	deployConfig["fastTryoutEnabled"] = d.Get("deploy_config.0.fast_tryout_enabled")
+}
+res["deployConfig"] = deployConfig
+
+// accept_eula, hugging_face_access_token, and hugging_face_cache_enabled are
+// write-only deploy inputs that the Endpoint resource never echoes back.
+modelConfig := map[string]interface{}{
+	"acceptEula":              d.Get("model_config.0.accept_eula"),
+	"huggingFaceAccessToken":  d.Get("model_config.0.hugging_face_access_token"),
+	"huggingFaceCacheEnabled": d.Get("model_config.0.hugging_face_cache_enabled"),
+}
+if v, ok := deployedModel["displayName"]; ok {
+	modelConfig["modelDisplayName"] = v
+}
+res["modelConfig"] = modelConfig
+
+endpointConfig := map[string]interface{}{}
+if v, ok := res["dedicatedEndpointEnabled"]; ok {
+	endpointConfig["dedicatedEndpointEnabled"] = v
+}
+if v, ok := res["dedicatedEndpointDns"]; ok {
+	endpointConfig["dedicatedEndpointDns"] = v
+}
+if v, ok := res["displayName"]; ok {
+	endpointConfig["endpointDisplayName"] = v
+}
+if v, ok := res["privateServiceConnectConfig"]; ok {
+	endpointConfig["privateServiceConnectConfig"] = v
+}
+res["endpointConfig"] = endpointConfig
+
+res["publisherModelName"] = d.Get("publisher_model_name")
+res["huggingFaceModelId"] = d.Get("hugging_face_model_id")
+res["deployedModelId"] = deployedModelId
+if v, ok := deployedModel["displayName"]; ok {
+	res["deployedModelDisplayName"] = v
+}
+
+return res, nil
