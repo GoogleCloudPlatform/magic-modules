@@ -290,7 +290,7 @@ func TestAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_update(t *testi
 				ResourceName:            "google_ces_tool.ces_tool_data_store_tool_engine_source_basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
+				ImportStateVerifyIgnore: []string{"app", "location", "tool_id", "data_store_tool.0.modality_configs.0.snippets_config", "data_store_tool.0.modality_configs.1.snippets_config"},
 			},
 			{
 				Config: testAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_update(context),
@@ -304,7 +304,7 @@ func TestAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_update(t *testi
 				ResourceName:            "google_ces_tool.ces_tool_data_store_tool_engine_source_basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
+				ImportStateVerifyIgnore: []string{"app", "location", "tool_id", "data_store_tool.0.modality_configs.0.snippets_config", "data_store_tool.0.modality_configs.1.snippets_config"},
 			},
 		},
 	})
@@ -387,6 +387,35 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
             grounding_config {
                 grounding_level = 3
                 disabled = false
+            }
+            snippets_config {
+                enable_snippets = true
+            }
+        }
+        modality_configs {
+            modality_type = "AUDIO"
+            rewriter_config {
+                model_settings {
+                    model = "gemini-3.0-flash-001"
+                    temperature = 1
+                }
+                prompt = "example-prompt"
+                disabled = false
+            }
+            summarization_config {
+                model_settings {
+                    model = "gemini-3.0-flash-001"
+                    temperature = 1
+                }
+                prompt = "example-prompt"
+                disabled = false
+            }
+            grounding_config {
+                grounding_level = 3
+                disabled = false
+            }
+            snippets_config {
+                enable_snippets = false
             }
         }
 
@@ -482,6 +511,35 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
             grounding_config {
                 grounding_level = 3
                 disabled = false
+            }
+            snippets_config {
+                enable_snippets = false
+            }
+        }
+        modality_configs {
+            modality_type = "AUDIO"
+            rewriter_config {
+                model_settings {
+                    model = "gemini-3.0-flash-001"
+                    temperature = 1
+                }
+                prompt = "example-prompt"
+                disabled = false
+            }
+            summarization_config {
+                model_settings {
+                    model = "gemini-3.0-flash-001"
+                    temperature = 1
+                }
+                prompt = "example-prompt"
+                disabled = false
+            }
+            grounding_config {
+                grounding_level = 3
+                disabled = false
+            }
+            snippets_config {
+                enable_snippets = true
             }
         }
 

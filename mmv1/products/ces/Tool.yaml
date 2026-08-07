@@ -844,6 +844,15 @@ properties:
                 - name: prompt
                   type: String
                   description: The prompt definition. If not set, default prompt will be used.
+            - name: snippetsConfig
+              type: NestedObject
+              # ignore_read is set because the ces.googleapis.com API does not return snippetsConfig in GET responses.
+              ignore_read: true
+              description: Snippets configuration.
+              properties:
+                - name: enableSnippets
+                  type: Boolean
+                  description: Whether to enable snippets.
             - name: summarizationConfig
               type: NestedObject
               description: Summarization configuration.

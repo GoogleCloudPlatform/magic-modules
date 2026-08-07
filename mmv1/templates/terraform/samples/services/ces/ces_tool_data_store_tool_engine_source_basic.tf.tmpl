@@ -74,6 +74,9 @@ resource "google_ces_tool" "{{$.PrimaryResourceId}}" {
                 grounding_level = 3
                 disabled = false
             }
+            snippets_config {
+                enable_snippets = true
+            }
         }
 
         engine_source {

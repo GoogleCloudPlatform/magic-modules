@@ -76,8 +76,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   {{- end }}
 
   {{- range $prop := $.ItemType.UserProperties }}
-    {{- if not (or $prop.IgnoreRead $prop.WriteOnlyLegacy $prop.WriteOnly) }}
+    {{- if not (or $prop.WriteOnlyLegacy $prop.WriteOnly) }}
+      {{- if or $prop.IgnoreRead $prop.ClientSide }}
+      "{{ underscore $prop.Name }}": d.Get(fmt.Sprintf("%s.%d.%s", "{{ join $.Lineage ".0." }}", i, "{{ underscore $prop.Name }}")),
+      {{- else }}
       "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
+      {{- end }}
     {{- end }}
   {{- end }}
     })

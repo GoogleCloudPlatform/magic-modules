@@ -1567,6 +1567,10 @@ func ignoreReadFields(props []*Type) []string {
 			fields = append(fields, strings.Join(tp.Lineage(), ".0."))
 		} else if tp.IsA("NestedObject") && tp.AllProperties() != nil {
 			fields = append(fields, ignoreReadFields(tp.AllProperties())...)
+		} else if tp.IsA("Array") && tp.ItemType != nil && tp.ItemType.AllProperties() != nil {
+			fields = append(fields, ignoreReadFields(tp.ItemType.AllProperties())...)
+		} else if tp.IsA("Map") && tp.ValueType != nil && tp.ValueType.AllProperties() != nil {
+			fields = append(fields, ignoreReadFields(tp.ValueType.AllProperties())...)
 		}
 	}
 	return fields
