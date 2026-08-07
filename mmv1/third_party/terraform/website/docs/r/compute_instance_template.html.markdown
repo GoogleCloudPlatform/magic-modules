@@ -850,6 +850,8 @@ Referencing an instance template via this attribute prevents Time of Check to Ti
 
 * `tags_fingerprint` - The unique fingerprint of the tags.
 
+* `network_interface.0.service_class_id` - Producer Service's Service class Id for the region of this network interface. Can only be used with network_attachment. It is not possible to use on its own; however, network_attachment can be used without service_class_id.
+
 * `network_interface.0.parent_nic_name` - Name of the parent network interface of a dynamic network interface.
 
 [1]: /docs/providers/google/r/compute_instance_group_manager.html

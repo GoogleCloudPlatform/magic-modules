@@ -767,6 +767,8 @@ This field is always inherited from its subnetwork.
 
 * `network_interface.0.network_ip` - The internal ip address of the instance, either manually or dynamically assigned.
 
+* `network_interface.0.service_class_id` - Producer Service's Service class Id for the region of this network interface. Can only be used with network_attachment. It is not possible to use on its own; however, network_attachment can be used without service_class_id.
+
 * `network_interface.0.parent_nic_name` - Name of the parent network interface of a dynamic network interface.
 
 * `network_interface.0.access_config.0.nat_ip` - If the instance has an access config, either the given external ip (in the `nat_ip` field) or the ephemeral (generated) ip (if you didn't provide one).
