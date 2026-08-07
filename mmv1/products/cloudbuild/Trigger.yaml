@@ -29,6 +29,7 @@ docs:
 id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/triggers'
 self_link: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
+collection_url_key: 'triggers'
 update_verb: 'PATCH'
 # import by default only works with old-style self links ending in a name
 import_format:
@@ -184,10 +185,9 @@ parameters:
     type: String
     description: |
       The [Cloud Build location](https://cloud.google.com/build/docs/locations) for the trigger.
-      If not specified, "global" is used.
     url_param_only: true
     immutable: true
-    default_value: "global"
+    required: true
 properties:
   - name: 'trigger_id'
     type: String
