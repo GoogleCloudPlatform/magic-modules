@@ -28,6 +28,8 @@ Before creating a branch or opening a PR, verify all of the following rules:
    - Fixing a bug and adding new fields? Split into **two separate PRs**.
 2. **No Downstream Artifacts in Magic Modules:**
    - Do NOT commit generated downstream provider code (e.g. `$GOPATH/src/github.com/hashicorp/terraform-provider-google`) into `magic-modules`.
+3. **Plan Completeness:** Verify that every file listed in the implementation plan (including any necessary documentation) has been generated and staged.
+4. **Workspace Cleanup:** Run `git status --porcelain` and remove any untracked `.log`, `.test`, or temporary test artifacts across both `magic-modules` and downstream repositories before opening the PR.
 
 ---
 
@@ -79,7 +81,10 @@ git push -u "$FORK_REMOTE" "$BRANCH"
 Every PR must contain at least one release note block in the PR body.
 
 Refer to the official guide for detailed release note rules, categories, and examples:
-* [docs/content/code-review/release-notes.md](../../../docs/content/code-review/release-notes.md)
+* [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md)
+
+> [!IMPORTANT]
+> **Note to AI Agents:** View `docs/content/code-review/release-notes.md` from the repository root to determine the correct release note type (e.g., `enhancement`, `bug`, `none`, `new-resource`, `deprecation`, etc.) and follow the end-user impact guidelines.
 
 #### Release Note Block Format
 ```markdown
@@ -87,8 +92,6 @@ Refer to the official guide for detailed release note rules, categories, and exa
 CONTENT
 ```
 ```
-
-Common types include `new-resource`, `new-datasource`, `new-list-resource`, `enhancement`, `bug`, `deprecation`, `breaking-change`, `note`, and `none`.
 
 #### Sample PR Body Content
 ```markdown
@@ -108,6 +111,8 @@ compute: added `foo` field to `google_compute_instance` resource
 > [!CAUTION]
 > **DO NOT pass inline double-quoted `--body "..."` strings containing backticks.**
 > Enclosing triple backticks (` ```release-note:type ``` `) in double quotes causes `zsh`/`bash` to execute `` `release-note:type` `` as a live shell command substitution. The command fails, silently stripping the release note block from the published PR body!
+
+*   **Upstream Target:** Most likely target `--repo GoogleCloudPlatform/magic-modules` (upstream magic modules), and when in doubt ask the user.
 
 Always write the body to a temporary file via a single-quoted HEREDOC (`cat <<'EOF'`) and invoke `gh pr create` with `--body-file`:
 

@@ -224,6 +224,7 @@ properties:
     output: true
     item_type:
       type: String
+    is_set: true
   - name: supportedTargetResourceTypes
     type: Array
     description: target resource types supported by the Framework.

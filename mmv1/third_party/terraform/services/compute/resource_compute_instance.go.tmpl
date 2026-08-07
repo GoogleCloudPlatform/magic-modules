@@ -119,9 +119,9 @@ var (
 		"scheduling.0.availability_domain",
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
+		"scheduling.0.host_error_timeout_seconds",
 {{- if ne $.TargetVersionName "ga" }}
 		"scheduling.0.maintenance_interval",
-		"scheduling.0.host_error_timeout_seconds",
 		"scheduling.0.graceful_shutdown",
 		"scheduling.0.skip_guest_os_shutdown",
 		"scheduling.0.preemption_notice_duration",
@@ -243,6 +243,26 @@ func ResourceComputeInstance() *schema.Resource {
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"zone": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
 		},
 
 		// A compute instance is more or less a superset of a compute instance
@@ -1244,12 +1264,12 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
-{{- if ne $.TargetVersionName "ga" }}
 						"host_error_timeout_seconds": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: `Specify the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.`,
 						},
+{{- if ne $.TargetVersionName "ga" }}
 
 						"maintenance_interval": {
 							Type:          schema.TypeString,
@@ -2213,6 +2233,14 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": project,
+		"zone":    z,
+		"name":    instance.Name,
+	}); err != nil {
+		return err
+	}
+
 	return resourceComputeInstanceRead(d, meta)
 }
 
@@ -2298,6 +2326,14 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
 
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": project,
+		"zone":    zone,
+		"name":    instance.Name,
+	}); err != nil {
 		return err
 	}
 
@@ -4164,6 +4200,14 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 	// We made it, disable partial mode
 	d.Partial(false)
+
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project": project,
+		"zone":    zone,
+		"name":    instance.Name,
+	}); err != nil {
+		return err
+	}
 
 	return resourceComputeInstanceRead(d, meta)
 }
