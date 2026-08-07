@@ -1,0 +1,175 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Key'
+description: |
+  The Apikeys Key resource.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/docs/authentication/api-keys'
+  api: 'https://cloud.google.com/api-keys/docs/reference/rest/v2/projects.locations.keys'
+base_url: 'projects/{{project}}/locations/global/keys'
+self_link: 'projects/{{project}}/locations/global/keys/{{name}}'
+create_url: 'projects/{{project}}/locations/global/keys?keyId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+id_format: 'projects/{{project}}/locations/global/keys/{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/global/keys/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+legacy_long_form_project: true
+custom_code:
+  decoder: 'templates/terraform/decoders/apikeys_key.go.tmpl'
+  post_read: 'templates/terraform/post_read/apikeys_key.go.tmpl'
+examples:
+  - name: 'apikeys_key_basic'
+    primary_resource_id: 'primary'
+    vars:
+      key_name: 'key'
+    # A deleted API key is soft-deleted and keeps being returned by GET (with a deleteTime)
+    # until it is purged, so the generated plain-GET CheckDestroy would report it as still
+    # existing. A soft-delete-aware acceptance test is provided by hand instead.
+    exclude_test: true
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the key. The name must be unique within the project, must conform
+      with RFC-1034, is restricted to lower-cased letters, and has a maximum length of 63
+      characters. In another word, the name must match the regular expression:
+      `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'displayName'
+    type: String
+    description: 'Human-readable display name of this API key. Modifiable by user.'
+  - name: 'keyString'
+    type: String
+    description: |
+      Output only. An encrypted and signed value held by this key. This field can be accessed
+      only through the `GetKeyString` method.
+    output: true
+    sensitive: true
+    ignore_read: true
+  - name: 'uid'
+    type: String
+    description: 'Output only. Unique id in UUID4 format.'
+    output: true
+  - name: 'serviceAccountEmail'
+    type: String
+    description: |
+      The email of the service account the key is bound to. If this field is specified, the key
+      is a service account bound key and auth enabled.
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: 'Annotations is an unstructured key-value map stored with a policy that may be set by external tools to store and retrieve arbitrary metadata.'
+  - name: 'restrictions'
+    type: NestedObject
+    description: 'Key restrictions.'
+    properties:
+      - name: 'browserKeyRestrictions'
+        type: NestedObject
+        description: 'The HTTP referrers (websites) that are allowed to use the key.'
+        properties:
+          - name: 'allowedReferrers'
+            type: Array
+            description: |
+              A list of regular expressions for the referrer URLs that are allowed to make API
+              calls with this key.
+            required: true
+            item_type:
+              type: String
+      - name: 'serverKeyRestrictions'
+        type: NestedObject
+        description: 'The IP addresses of callers that are allowed to use the key.'
+        properties:
+          - name: 'allowedIps'
+            type: Array
+            description: |
+              A list of the caller IP addresses that are allowed to make API calls with this key.
+            required: true
+            item_type:
+              type: String
+      - name: 'androidKeyRestrictions'
+        type: NestedObject
+        description: 'The Android apps that are allowed to use the key.'
+        properties:
+          - name: 'allowedApplications'
+            type: Array
+            description: |
+              A list of Android applications that are allowed to make API calls with this key.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'sha1Fingerprint'
+                  type: String
+                  description: |
+                    The SHA1 fingerprint of the application. For example, both sha1 formats are
+                    acceptable: DA:39:A3:EE:5E:6B:4B:0D:32:55:BF:EF:95:60:18:90:AF:D8:07:09 or
+                    DA39A3EE5E6B4B0D3255BFEF95601890AFD80709. Output format is the latter.
+                  required: true
+                - name: 'packageName'
+                  type: String
+                  description: 'The package name of the application.'
+                  required: true
+      - name: 'iosKeyRestrictions'
+        type: NestedObject
+        description: 'The iOS apps that are allowed to use the key.'
+        properties:
+          - name: 'allowedBundleIds'
+            type: Array
+            description: |
+              A list of bundle IDs that are allowed when making API calls with this key.
+            required: true
+            item_type:
+              type: String
+      - name: 'apiTargets'
+        type: Array
+        description: |
+          A restriction for a specific service and optionally one or more specific methods.
+          Requests are allowed if they match any of these restrictions. If no restrictions are
+          specified, all targets are allowed.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'service'
+              type: String
+              description: |
+                The service for this restriction. It should be the canonical service name, for
+                example: `translate.googleapis.com`. You can use `gcloud services list` to get a
+                list of services that are enabled in the project.
+              required: true
+            - name: 'methods'
+              type: Array
+              description: |
+                Optional. List of one or more methods that can be called. If empty, all methods for
+                the service are allowed. A wildcard (*) can be used as the last symbol. Valid
+                examples: `google.cloud.translate.v2.TranslateService.GetSupportedLanguage`
+                `TranslateText` `Get*` `translate.googleapis.com.Get*`
+              item_type:
+                type: String
