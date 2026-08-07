@@ -57,6 +57,28 @@ samples:
           service_account: 'SERVICE_ACCT'
         ignore_read_extra:
           - direct_notebook_source.0.content
+  - name: 'colab_notebook_execution_workbench_runtime_vm'
+    primary_resource_id: 'notebook-execution'
+    steps:
+      - name: 'colab_notebook_execution_workbench_runtime_vm'
+        resource_id_vars:
+          bucket: 'my_bucket'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+          service_account: 'SERVICE_ACCT'
+        ignore_read_extra:
+          - direct_notebook_source.0.content
+  - name: 'colab_notebook_execution_workbench_runtime_vm_name'
+    primary_resource_id: 'notebook-execution'
+    steps:
+      - name: 'colab_notebook_execution_workbench_runtime_vm_name'
+        resource_id_vars:
+          bucket: 'my_bucket'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+          service_account: 'SERVICE_ACCT'
+        ignore_read_extra:
+          - direct_notebook_source.0.content
   - name: 'colab_notebook_execution_full'
     min_version: beta
     primary_resource_id: 'notebook-execution'
@@ -213,6 +235,47 @@ properties:
             type: String
             description: 'The name of the subnetwork that this runtime is in.'
             diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+      - name: shieldedInstanceConfig
+        type: NestedObject
+        # GCP API does not return shieldedInstanceConfig in GET responses for NotebookExecutionJob.
+        ignore_read: true
+        description: 'Shielded VM configuration.'
+        properties:
+          - name: enableIntegrityMonitoring
+            type: Boolean
+            description: 'Defines whether the instance has integrity monitoring enabled. Enables monitoring and attestation of the boot integrity of the instance. The attestation is performed against the integrity policy baseline. This baseline is initially derived from the implicitly trusted boot image when the instance is created. Enabled by default.'
+          - name: enableSecureBoot
+            type: Boolean
+            description: 'Defines whether the instance has Secure Boot enabled. Secure Boot helps ensure that the system only runs authentic software by verifying the digital signature of all boot components, and halting the boot process if signature verification fails. Disabled by default.'
+          - name: enableVtpm
+            type: Boolean
+            description: 'Defines whether the instance has the vTPM enabled. Enabled by default.'
+  - name: workbenchRuntime
+    type: NestedObject
+    # GCP API does not return workbenchRuntime in GET responses for NotebookExecutionJob.
+    ignore_read: true
+    description: 'Configuration for a Workbench Instances-based environment.'
+    properties:
+      - name: vmImage
+        type: NestedObject
+        required: true
+        description: 'Custom Compute Engine VM image for the Workbench instance.'
+        properties:
+          - name: family
+            type: String
+            exactly_one_of:
+              - workbench_runtime.0.vm_image.0.family
+              - workbench_runtime.0.vm_image.0.name
+            description: 'Use this VM image family to find the image; the newest image in this family will be used.'
+          - name: name
+            type: String
+            exactly_one_of:
+              - workbench_runtime.0.vm_image.0.family
+              - workbench_runtime.0.vm_image.0.name
+            description: 'Use VM image name to find the image.'
+          - name: project
+            type: String
+            description: 'The name of the Google Cloud project that this VM image belongs to. Format: {project_id}'
   - name: 'gcsOutputUri'
     required: true
     type: String
