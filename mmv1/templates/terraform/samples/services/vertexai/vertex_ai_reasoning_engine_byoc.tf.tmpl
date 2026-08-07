@@ -5,7 +5,8 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
 
   spec {
     container_spec {
-      image_uri = "us-central1-docker.pkg.dev/${data.google_project.project.project_id}/vertex-byoc/byoc-agent:latest" # image path
+      image_uri = "us-docker.pkg.dev/cloudrun/container/hello"
+      port      = 8000
     }
   }
 
