@@ -164,6 +164,7 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 		PAP_DESCRIPTION:      "description",
 		CHRONICLE_ID:         "00000000-0000-0000-0000-000000000000",
 		VMWAREENGINE_PROJECT: "my-vmwareengine-project",
+		TENANT_GCP_PROJECT:   "my-tenant-gcp-project",
 	}
 
 	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
@@ -193,6 +194,7 @@ func (td *TemplateData) GenerateDataSourceTestFile(filePath string, resource api
 		PAP_DESCRIPTION:      "description",
 		CHRONICLE_ID:         "00000000-0000-0000-0000-000000000000",
 		VMWAREENGINE_PROJECT: "my-vmwareengine-project",
+		TENANT_GCP_PROJECT:   "my-tenant-gcp-project",
 	}
 
 	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
@@ -342,4 +344,5 @@ type TestInput struct {
 	PAP_DESCRIPTION      string
 	CHRONICLE_ID         string
 	VMWAREENGINE_PROJECT string
+	TENANT_GCP_PROJECT   string
 }

@@ -183,6 +183,8 @@ func (s Sweeper) EnvVarInterpolate(value string) string {
 		return "envvar.GetTestChronicleInstanceIdFromEnv(t)"
 	case "VMWAREENGINE_PROJECT":
 		return "envvar.GetTestVmwareengineProjectFromEnv(t)"
+	case "TENANT_GCP_PROJECT":
+		return "envvar.GetTestTenantGcpProjectFromEnv(t)"
 	case "ZONE":
 		return "envvar.GetTestZoneFromEnv()"
 	}
@@ -194,7 +196,7 @@ func (s Sweeper) EnvVarInterpolate(value string) string {
 		"${ORG_TARGET}", "${BILLING_ACCT}", "${MASTER_BILLING_ACCT}",
 		"${SERVICE_ACCT}", "${PROJECT_NAME}", "${PROJECT_NUMBER}",
 		"${CUST_ID}", "${IDENTITY_USER}", "${PAP_DESCRIPTION}",
-		"${CHRONICLE_ID}", "${VMWAREENGINE_PROJECT}", "${ZONE}",
+		"${CHRONICLE_ID}", "${VMWAREENGINE_PROJECT}", "${TENANT_GCP_PROJECT}", "${ZONE}",
 	} {
 		if strings.Contains(value, pattern) {
 			hasPattern = true
@@ -227,6 +229,7 @@ func (s Sweeper) EnvVarInterpolate(value string) string {
 		"${PAP_DESCRIPTION}":      "\" + envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t) + \"",
 		"${CHRONICLE_ID}":         "\" + envvar.GetTestChronicleInstanceIdFromEnv(t) + \"",
 		"${VMWAREENGINE_PROJECT}": "\" + envvar.GetTestVmwareengineProjectFromEnv(t) + \"",
+		"${TENANT_GCP_PROJECT}":   "\" + envvar.GetTestTenantGcpProjectFromEnv(t) + \"",
 		"${ZONE}":                 "\" + envvar.GetTestZoneFromEnv() + \"",
 	}
 
