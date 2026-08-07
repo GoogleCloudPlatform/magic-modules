@@ -1,0 +1,172 @@
+---
+name: AgentConnectivityTemplate
+description: |
+  AgentConnectivityTemplate represents a reusable network configuration.
+references:
+  guides:
+  api: https://cloud.google.com/network-services/docs/reference/network-services/rest/v1/projects.locations.agentConnectivityTemplates
+docs:
+base_url: projects/{{project}}/locations/{{location}}/agentConnectivityTemplates
+self_link: projects/{{project}}/locations/{{location}}/agentConnectivityTemplates/{{agent_connectivity_template_id}}
+create_url: projects/{{project}}/locations/{{location}}/agentConnectivityTemplates?agentConnectivityTemplateId={{agent_connectivity_template_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/agentConnectivityTemplates/{{agent_connectivity_template_id}}
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: true
+autogen_async: true
+samples:
+  - name: network_services_agent_connectivity_template_basic
+    primary_resource_id: default
+    steps:
+      - name: network_services_agent_connectivity_template_basic
+        resource_id_vars:
+          agent_connectivity_template_id: my-connectivity-template
+        test_env_vars:
+          project: PROJECT_NAME
+      - name: network_services_agent_connectivity_template_basic_update
+        resource_id_vars:
+          agent_connectivity_template_id: my-connectivity-template
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: network_services_agent_connectivity_template_advanced
+    primary_resource_id: default
+    steps:
+      - name: network_services_agent_connectivity_template_advanced
+        resource_id_vars:
+          agent_connectivity_template_id: my-connectivity-template
+          network_name: my-network
+          subnetwork_name: my-subnetwork
+          network_attachment_name: my-attachment
+        test_env_vars:
+          project: PROJECT_NAME
+      - name: network_services_agent_connectivity_template_advanced_update
+        resource_id_vars:
+          agent_connectivity_template_id: my-connectivity-template
+          network_name: my-network
+          subnetwork_name: my-subnetwork
+          network_attachment_name: my-attachment
+        test_env_vars:
+          project: PROJECT_NAME
+parameters:
+  - name: agentConnectivityTemplateId
+    type: String
+    description: |
+      Short name of the AgentConnectivityTemplate resource.
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: location
+    type: String
+    description: |
+      The location of the AgentConnectivityTemplate.
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |
+      Identifier. Name of the resource.
+    output: true
+  - name: createTime
+    type: Time
+    description: |
+      The timestamp when the resource was created.
+    output: true
+  - name: updateTime
+    type: Time
+    description: |
+      The timestamp when the resource was updated.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      Set of label tags associated with the AgentConnectivityTemplate resource.
+  - name: description
+    type: String
+    description: |
+      A free-text description of the resource. Max length 1024 characters.
+  - name: etag
+    type: Fingerprint
+    description: |
+      Etag of the resource.
+      If this is provided, it must match the server's etag. If the provided etag
+      does not match the server's etag, the request will fail with a 409 ABORTED
+      error.
+  - name: accessTypes
+    type: Array
+    description: |
+      The types of network access provided to the gateway.
+      Both PUBLIC and PRIVATE can be configured.
+    item_type:
+      type: Enum
+      enum_values:
+        - PUBLIC
+        - PRIVATE
+  - name: accessPath
+    type: Enum
+    required: true
+    immutable: true
+    description: |
+      The path of the access.
+      The path is immutable once set. Exactly one path can be set.
+    enum_values:
+      - CLIENT_TO_AGENT
+      - AGENT_TO_ANYWHERE
+  - name: egressNetworkConfig
+    type: NestedObject
+    description: |
+      Configuration for egress network traffic.
+    properties:
+      - name: networkAttachment
+        type: String
+        description: |
+          The network attachment resource name.
+          Format: projects/{project}/regions/{region}/networkAttachments/{network_attachment_id}
+        diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+      - name: dnsPeeringConfig
+        type: NestedObject
+        description: |
+          DNS peering configuration for the AgentConnectivityTemplate.
+          When set, the gateway will resolve queries for the configured
+          `domains` via Cloud DNS in the specified `targetNetwork`.
+        properties:
+          - name: domains
+            type: Array
+            required: true
+            description: |
+              The list of domain names to peer for DNS resolution. Each entry
+              must be a fully qualified domain name ending with a dot
+              (for example, `example.com.`).
+            item_type:
+              type: String
+          - name: targetProject
+            type: String
+            required: true
+            description: |
+              The ID of the project that hosts the target VPC network for DNS
+              peering.
+          - name: targetNetwork
+            type: String
+            required: true
+            diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+            description: |
+              The URI of the target VPC network for DNS peering. Must be of the
+              form `projects/{project}/global/networks/{network}`.
+      - name: vpcEgress
+        type: Enum
+        description: |
+          The VPC egress setting.
+        enum_values:
+          - ALL_TRAFFIC
+          - PRIVATE_RANGES_ONLY

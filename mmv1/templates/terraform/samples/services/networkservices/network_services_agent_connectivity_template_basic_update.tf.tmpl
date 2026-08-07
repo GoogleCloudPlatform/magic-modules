@@ -1,0 +1,15 @@
+data "google_project" "project" {}
+
+resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResourceId}}" {
+  agent_connectivity_template_id = "{{index $.ResourceIdVars "agent_connectivity_template_id"}}"
+  location                       = "us-central1"
+  description                    = "An updated configuration for Agent Connectivity Template"
+  labels = {
+    env  = "prod"
+    tier = "platinum"
+    new_label = "added"
+  }
+
+  access_types = ["PUBLIC"]
+  access_path = "AGENT_TO_ANYWHERE"
+}

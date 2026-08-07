@@ -14,6 +14,8 @@ resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
     governed_access_path = "AGENT_TO_ANYWHERE"
   }
 
+  agent_connectivity_template = google_network_services_agent_connectivity_template.default.id
+
   registries = [
     "//agentregistry.googleapis.com/projects/{{index $.TestEnvVars "project"}}/locations/us-central1"
   ]
@@ -36,6 +38,19 @@ resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
 resource "google_project_service" "agent_registry" {
   service            = "agentregistry.googleapis.com"
   disable_on_destroy = false
+}
+
+resource "google_network_services_agent_connectivity_template" "default" {
+  agent_connectivity_template_id = "{{index $.ResourceIdVars "name"}}-template"
+  location = "us-central1"
+  description = "A basic configuration for Agent Connectivity Template"
+  labels = {
+    env  = "test"
+    tier = "gold"
+  }
+
+  access_types = ["PUBLIC"]
+  access_path = "AGENT_TO_ANYWHERE"
 }
 
 resource "google_compute_network" "default" {
