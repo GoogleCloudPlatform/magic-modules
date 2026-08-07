@@ -844,6 +844,13 @@ properties:
                 - name: prompt
                   type: String
                   description: The prompt definition. If not set, default prompt will be used.
+            - name: snippetsConfig
+              type: NestedObject
+              description: Snippets configuration.
+              properties:
+                - name: enableSnippets
+                  type: Boolean
+                  description: Whether snippets are enabled.
             - name: summarizationConfig
               type: NestedObject
               description: Summarization configuration.
