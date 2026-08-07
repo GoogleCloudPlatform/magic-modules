@@ -1,0 +1,79 @@
+package agenticapplications_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccAgenticApplicationsAnalystAgentPersona_update(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"analyst_agent_persona_id": "tf-test-persona-" + randomSuffix,
+		"random_suffix":            randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckAgenticApplicationsAnalystAgentPersonaDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAgenticApplicationsAnalystAgentPersona_basic(context),
+			},
+			{
+				ResourceName:            "google_agentic_applications_analyst_agent_persona.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "analyst_agent_persona_id"},
+			},
+			{
+				Config: testAccAgenticApplicationsAnalystAgentPersona_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_agentic_applications_analyst_agent_persona.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_agentic_applications_analyst_agent_persona.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "analyst_agent_persona_id"},
+			},
+		},
+	})
+}
+
+func testAccAgenticApplicationsAnalystAgentPersona_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_agentic_applications_analyst_agent_persona" "primary" {
+  provider = google-beta
+  analyst_agent_persona_id = "%{analyst_agent_persona_id}"
+  location                 = "us"
+  display_name             = "My Analyst Agent Persona"
+  display_description      = "Sample persona description"
+  model_description        = "Persona model description"
+  role                     = "ANALYST_ROLE_GENERIC_FINANCE_ANALYST"
+}
+`, context)
+}
+
+func testAccAgenticApplicationsAnalystAgentPersona_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_agentic_applications_analyst_agent_persona" "primary" {
+  provider = google-beta
+  analyst_agent_persona_id = "%{analyst_agent_persona_id}"
+  location                 = "us"
+  display_name             = "Updated Analyst Agent Persona"
+  display_description      = "Updated persona description"
+  model_description        = "Updated model description"
+  role                     = "ANALYST_ROLE_CORPORATE_FINANCE_ANALYST"
+}
+`, context)
+}

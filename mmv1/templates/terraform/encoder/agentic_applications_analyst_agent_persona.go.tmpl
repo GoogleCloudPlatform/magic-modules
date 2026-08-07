@@ -1,0 +1,14 @@
+config := meta.(*transport_tpg.Config)
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return nil, err
+}
+location, err := tpgresource.GetLocation(d, config)
+if err != nil {
+	return nil, err
+}
+personaId := d.Get("analyst_agent_persona_id").(string)
+
+name := fmt.Sprintf("projects/%s/locations/%s/analystAgentPersonas/%s", project, location, personaId)
+obj["name"] = name
+return obj, nil
