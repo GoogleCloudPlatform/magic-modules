@@ -12,7 +12,6 @@ import (
 
 func TestAccEphemeralApikeysKey_basic(t *testing.T) {
 	t.Parallel()
-	acctest.SkipIfVcr(t)
 
 	key := "tf-test-key-" + acctest.RandString(t, 10)
 
