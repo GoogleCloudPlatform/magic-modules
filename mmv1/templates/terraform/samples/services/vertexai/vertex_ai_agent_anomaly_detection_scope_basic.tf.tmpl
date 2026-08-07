@@ -1,0 +1,11 @@
+resource "google_vertex_ai_agent_anomaly_detection_scope" "{{$.PrimaryResourceId}}" {
+  agent_anomaly_detection_scope_id = "{{index $.ResourceIdVars "scope_id"}}"
+  region                           = "us-central1"
+  display_name                     = "sample-scope"
+  log_buckets                      = [
+    "projects/{{index $.TestEnvVars "project"}}/locations/us-central1/buckets/_Default"
+  ]
+  observability_buckets            = [
+    "projects/{{index $.TestEnvVars "project"}}/locations/us-central1/buckets/_Default"
+  ]
+}
