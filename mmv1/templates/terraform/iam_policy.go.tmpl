@@ -58,6 +58,13 @@ func init() {
         Type: registry.SchemaTypeIAMResource,
         Schema: tpgiamresource.ResourceIamMember({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc, tpgiamresource.IamWithParentResourceIdentity({{ $.ResourceName }}IamParentParentResourceIdentityParser){{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
     }.Register()
+{{- if and $.IamPolicy $.IamPolicy.GenerateListResource }}
+    registry.FrameworkListResource{
+        Name:        "{{ $.TerraformName }}_iam_member",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Func:        New{{ $.ResourceName -}}IamMemberListResource,
+    }.Register()
+{{- end}}
     registry.Schema{
         Name: "{{ $.TerraformName }}_iam_policy",
         ProductName: "{{ $.ProductMetadata.Name }}",
