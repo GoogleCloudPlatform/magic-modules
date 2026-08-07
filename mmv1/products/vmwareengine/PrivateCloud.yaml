@@ -425,6 +425,31 @@ properties:
       - name: fqdn
         type: String
         description: Fully qualified domain name of the appliance.
+  - name: encryptionConfig
+    type: NestedObject
+    default_from_api: true
+    custom_expand: templates/terraform/custom_expand/vmwareengine_private_cloud_encryption_config.go.tmpl
+    custom_flatten: templates/terraform/custom_flatten/vmwareengine_private_cloud_encryption_config.go.tmpl
+    description: |
+      Encryption configuration for the private cloud.
+    properties:
+      - name: type
+        type: Enum
+        required: true
+        description: |
+          The encryption type of the private cloud.
+          Possible values:
+          * CMEK: Customer-managed encryption keys.
+          * GMEK: Google-managed encryption keys.
+        enum_values:
+          - CMEK
+          - GMEK
+      - name: kmsKeyName
+        type: String
+        api_name: cryptoKeyName
+        description: |
+          The resource name of the Customer Managed Encryption Key (CMEK) for the private cloud.
+          Format: projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}
   - name: type
     type: Enum
     description: |

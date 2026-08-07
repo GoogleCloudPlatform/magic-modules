@@ -15,7 +15,7 @@ func TestAccVmwareengineNetworkPolicy_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"region":               "me-west1", // region with allocated quota
+		"region":               getTestRegion(), // region with allocated quota
 		"random_suffix":        acctest.RandString(t, 10),
 		"org_id":               envvar.GetTestOrgFromEnv(t),
 		"billing_account":      envvar.GetTestBillingAccountFromEnv(t),

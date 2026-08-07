@@ -24,6 +24,7 @@ import (
 func TestAccVmwareengineCluster_vmwareEngineClusterUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
+	skipIfLimitedNodes(t)
 
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
@@ -32,7 +33,7 @@ func TestAccVmwareengineCluster_vmwareEngineClusterUpdate(t *testing.T) {
 		},
 	})
 	random_suffix := acctest.RandString(t, 10)
-	region_id := "me-west1" // region with allocated quota
+	region_id := getTestRegion()
 	context := map[string]interface{}{
 		"region":               region_id,
 		"random_suffix":        random_suffix,
@@ -46,7 +47,7 @@ func TestAccVmwareengineCluster_vmwareEngineClusterUpdate(t *testing.T) {
 		"service_subnet_name":  "service-1",
 		"pc_type":              "STANDARD",
 		"mgmt_cluster_node":    3,
-		"node_type":            "standard-72",
+		"node_type":            getTestNodeType(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
