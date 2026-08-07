@@ -1,0 +1,98 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DataSourceEnrollment'
+api_resource_type_kind: DataSource
+description: |
+  Enrolls a BigQuery Data Transfer Service data source in a project, making it available
+  for use by `google_bigquery_data_transfer_config`. Some data sources, notably Google Cloud
+  Carbon Footprint exports, must be enrolled before a transfer config can be created against
+  them.
+
+  Enrollment is project-wide: a data source enrolled in a project is available in every
+  location that offers it.
+
+  Enrollment is eventually consistent, so a newly created or recreated enrollment may briefly
+  read as absent before it settles.
+references:
+  guides:
+    'Working with transfers': 'https://cloud.google.com/bigquery/docs/working-with-transfers'
+    'Export your carbon footprint': 'https://cloud.google.com/carbon-footprint/docs/export'
+  api: 'https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects/enrollDataSources'
+docs:
+id_format: 'projects/{{project}}/dataSources/{{data_source_id}}'
+base_url: 'projects/{{project}}/dataSources'
+self_link: 'projects/{{project}}/dataSources/{{data_source_id}}'
+create_url: 'projects/{{project}}:enrollDataSources'
+# There is no project-level unenroll method; only projects.locations.unenrollDataSources exists.
+# Unenrolling through any single location removes the enrollment project-wide, so unenroll_location
+# selects an endpoint only - it is not part of this resource's identity. Do not move it into id_format.
+delete_url: 'projects/{{project}}/locations/{{unenroll_location}}:unenrollDataSources'
+delete_verb: 'POST'
+immutable: true
+import_format:
+  - 'projects/{{project}}/dataSources/{{data_source_id}}'
+  - '{{data_source_id}}'
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+# An un-enrolled data source returns 400 FAILED_PRECONDITION rather than 404, so the generated
+# read cannot detect deletion without remapping the code.
+read_error_transform: 'transformBigqueryDataTransferDataSourceEnrollmentReadError'
+exclude_sweeper: true
+custom_code:
+  encoder: 'templates/terraform/encoders/bigquery_data_transfer_data_source_enrollment.go.tmpl'
+  post_create: 'templates/terraform/post_create/bigquery_data_transfer_data_source_enrollment.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/bigquery_data_transfer_data_source_enrollment.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/bigquery_data_transfer_data_source_enrollment.go.tmpl'
+samples:
+  - name: 'bigquerydatatransfer_data_source_enrollment_carbon'
+    primary_resource_id: 'carbon'
+    steps:
+      - name: 'bigquerydatatransfer_data_source_enrollment_carbon'
+        # Enrollment is eventually consistent: for a short window after enrollDataSources
+        # returns, reads of the data source alternate between success and FAILED_PRECONDITION
+        # depending on which replica serves them. Importing a settled enrollment is reliable,
+        # but importing one created seconds earlier is not, so the generated import step is
+        # excluded. Create, read and destroy coverage is retained.
+        exclude_import_test: true
+        test_env_vars:
+          project: 'PROJECT_NAME'
+parameters:
+  - name: 'dataSourceId'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The ID of the data source to enroll. For Google Cloud Carbon Footprint exports this is
+      `61cede5a-0000-2440-ad42-883d24f8f7b8`. Call `projects.dataSources.list` to see the data
+      sources currently enrolled in a project.
+  - name: 'unenrollLocation'
+    type: String
+    default_value: 'us'
+    immutable: true
+    url_param_only: true
+    description: |
+      The location whose `unenrollDataSources` endpoint is called when this resource is destroyed.
+      Enrollment itself is project-wide and unenrolling through any location removes it everywhere;
+      this only exists because the API offers no project-level unenroll method. Override it only if
+      `us` is not routable for the project, for example under a data-residency organization policy.
+properties:
+  - name: 'displayName'
+    type: String
+    output: true
+    description: |
+      User friendly name of the enrolled data source, for example
+      `Google Cloud Carbon Footprint Exports`.
