@@ -18,6 +18,7 @@ description: "The Compute NetworkFirewallPolicy resource"
 docs:
 min_version: beta
 base_url: 'projects/{{project}}/regions/{{region}}/networkPolicies'
+generate_list_resource: true
 self_link: 'projects/{{project}}/regions/{{region}}/networkPolicies/{{name}}'
 create_url: 'projects/{{project}}/regions/{{region}}/networkPolicies'
 update_verb: 'PATCH'

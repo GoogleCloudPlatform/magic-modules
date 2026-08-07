@@ -20,6 +20,7 @@ references:
   api: https://cloud.google.com/compute/docs/reference/rest/v1/resourcePolicies
 base_url: projects/{{project}}/regions/{{region}}/resourcePolicies
 has_self_link: true
+generate_list_resource: true
 update_url: projects/{{project}}/regions/{{region}}/resourcePolicies/{{name}}
 update_verb: PATCH
 collection_url_key: items

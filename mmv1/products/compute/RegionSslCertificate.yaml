@@ -35,6 +35,7 @@ docs:
      `name_prefix` + YYmmdd + 3 digit incremental counter
 base_url: 'projects/{{project}}/regions/{{region}}/sslCertificates'
 has_self_link: true
+generate_list_resource: true
 immutable: true
 timeouts:
   insert_minutes: 20

@@ -17,6 +17,7 @@ api_resource_type_kind: FirewallPolicy
 description: "The Compute NetworkFirewallPolicy with rules resource"
 docs:
 base_url: 'projects/{{project}}/global/firewallPolicies'
+generate_list_resource: true
 self_link: 'projects/{{project}}/global/firewallPolicies/{{name}}'
 create_url: 'projects/{{project}}/global/firewallPolicies'
 update_verb: 'PATCH'

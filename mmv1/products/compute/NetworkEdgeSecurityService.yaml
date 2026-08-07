@@ -23,6 +23,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networkEdgeSecurityServices'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices'
+generate_list_resource: true
 self_link: 'projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices/{{name}}'
 create_url: 'projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices?networkEdgeSecurityService={{name}}'
 update_verb: 'PATCH'
