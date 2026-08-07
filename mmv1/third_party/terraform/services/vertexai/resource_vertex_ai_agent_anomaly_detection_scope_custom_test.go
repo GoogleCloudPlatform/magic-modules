@@ -110,4 +110,3 @@ func testAccCheckVertexAIAgentAnomalyDetectionScopeDestroyProducer(t *testing.T)
 		return nil
 	}
 }
-
