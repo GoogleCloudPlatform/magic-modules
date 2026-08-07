@@ -1562,3 +1562,14 @@ func (t Type) HasRequiredProperty() bool {
 	}
 	return false
 }
+
+func (t *Type) HasAncestorCustomSet() bool {
+	p := t.ParentMetadata
+	for p != nil {
+		if p.IsSet && p.SetHashFunc != "" {
+			return true
+		}
+		p = p.ParentMetadata
+	}
+	return false
+}

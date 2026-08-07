@@ -140,6 +140,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+			{{- if and (ne $.DefaultValue nil) (not $.Required) (not $.HasAncestorCustomSet) }}
+			if intVal == {{ $.GoLiteral $.DefaultValue }} {
+				return nil
+			}
+			{{- end }}
 			return intVal
 		}
 	}
@@ -147,12 +152,26 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	// number values are represented as float64
 	if floatVal, ok := v.(float64); ok {
 		intVal := int(floatVal)
+		{{- if and (ne $.DefaultValue nil) (not $.Required) (not $.HasAncestorCustomSet) }}
+		if intVal == {{ $.GoLiteral $.DefaultValue }} {
+			return nil
+		}
+		{{- end }}
 		return intVal
 	}
 
   {{- if $.Required }}
 	if v == nil {
 		return 0
+	}
+  {{- end }}
+
+  {{- if and (ne $.DefaultValue nil) (not $.Required) (not $.HasAncestorCustomSet) }}
+	if intVal, ok := v.(int); ok && intVal == {{ $.GoLiteral $.DefaultValue }} {
+		return nil
+	}
+	if floatVal, ok := v.(float64); ok && floatVal == {{ $.GoLiteral $.DefaultValue }} {
+		return nil
 	}
   {{- end }}
 
@@ -196,6 +215,21 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	}
 	return v
   {{- else }}
+    {{- if and (ne $.DefaultValue nil) (not $.Required) (not $.HasAncestorCustomSet) }}
+      {{- if or ($.IsA "String") (or ($.IsA "Enum") ($.IsA "ResourceRef")) }}
+	if strVal, ok := v.(string); ok && strVal == {{ $.GoLiteral $.DefaultValue }} {
+		return nil
+	}
+      {{- else if $.IsA "Boolean" }}
+	if boolVal, ok := v.(bool); ok && boolVal == {{ $.GoLiteral $.DefaultValue }} {
+		return nil
+	}
+      {{- else if $.IsA "Double" }}
+	if floatVal, ok := v.(float64); ok && floatVal == {{ $.GoLiteral $.DefaultValue }} {
+		return nil
+	}
+      {{- end }}
+    {{- end }}
   return v
 {{- end }}
 }
