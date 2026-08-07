@@ -29,7 +29,10 @@ Before creating a branch or opening a PR, verify all of the following rules:
 2. **No Downstream Artifacts in Magic Modules:**
    - Do NOT commit generated downstream provider code (e.g. `$GOPATH/src/github.com/hashicorp/terraform-provider-google`) into `magic-modules`.
 3. **Plan Completeness:** Verify that every file listed in the implementation plan (including any necessary documentation) has been generated and staged.
-4. **Workspace Cleanup:** Run `git status --porcelain` and remove any untracked `.log`, `.test`, or temporary test artifacts across both `magic-modules` and downstream repositories before opening the PR.
+4. **Formatting & Static Checks:**
+   - Run `gofmt -s -w` on all modified or new `.go` files in `mmv1/third_party/terraform/`.
+   - Run `./.agents/skills/utils/run-pre-gen-checks/scripts/run_pre_gen_checks.sh` to ensure YAML linting, Go formatting, template validation, and unit tests pass.
+5. **Workspace Cleanup:** Run `git status --porcelain` and remove any untracked `.log`, `.test`, or temporary test artifacts across both `magic-modules` and downstream repositories before opening the PR.
 
 ---
 
@@ -97,6 +100,7 @@ CONTENT
 ```markdown
 Summary of what changed and why in a few concise sentences.
 
+Modeled after: https://github.com/GoogleCloudPlatform/magic-modules/pull/12344
 Fixes https://github.com/hashicorp/terraform-provider-google/issues/12345
 
 ```release-note:enhancement
@@ -113,11 +117,12 @@ compute: added `foo` field to `google_compute_instance` resource
 > Enclosing triple backticks (` ```release-note:type ``` `) in double quotes causes `zsh`/`bash` to execute `` `release-note:type` `` as a live shell command substitution. The command fails, silently stripping the release note block from the published PR body!
 
 *   **Upstream Target:** Most likely target `--repo GoogleCloudPlatform/magic-modules` (upstream magic modules), and when in doubt ask the user.
+*   **PR Title Length:** Keep the PR title strictly under 60 characters, ideally < 50 characters (format: `<product>: <concise description>`).
 
 Always write the body to a temporary file via a single-quoted HEREDOC (`cat <<'EOF'`) and invoke `gh pr create` with `--body-file`:
 
 ```bash
-PR_TITLE="<product>: <short description>" # e.g. compute: add foo field to google_compute_instance
+PR_TITLE="<product>: <short description>" # e.g. compute: add foo field to google_compute_instance (under 60 chars)
 
 cat <<'EOF' > /tmp/pr_body.txt
 <summary of what changed and why>
