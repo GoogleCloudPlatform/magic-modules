@@ -1,0 +1,9 @@
+resource "google_agentic_applications_analyst_agent_persona" "{{.PrimaryResourceId}}" {
+  provider            = google-beta
+  name                = "{{index $.ResourceIdVars "name"}}"
+  location            = "us"
+  display_name        = "Test Analyst Persona"
+  display_description = "A test analyst agent persona"
+  model_description   = "Model description for test persona"
+  role                = "ANALYST_ROLE_GENERIC_FINANCE_ANALYST"
+}

@@ -1,0 +1,51 @@
+resource "google_agentic_applications_analyst_agent_persona" "{{.PrimaryResourceId}}" {
+  provider            = google-beta
+  name                = "{{index $.ResourceIdVars "name"}}"
+  location            = "us"
+  display_name        = "{{index $.Vars "display_name"}}"
+  display_description = "{{index $.Vars "display_description"}}"
+  model_description   = "Model description for test persona"
+  role                = "ANALYST_ROLE_GENERIC_FINANCE_ANALYST"
+
+  skills {
+    skill_id    = "test-skill-1"
+    description = "Test skill description"
+    content     = "# Test Skill Content"
+    references {
+      reference_id = "ref-1"
+      content      = "Reference content"
+    }
+  }
+
+  resources {
+    display_label     = "GCS Data Source"
+    model_description = "Google Cloud Storage bucket data source"
+    use_rag           = true
+    google_cloud_storage_resource {
+      google_cloud_storage_object  = "gs://test-bucket/data/*.csv"
+      file_extension_restrictions = ["csv", "txt"]
+    }
+  }
+
+  mcp_data_sources {
+    enabled      = true
+    server_url   = "https://mcp.example.com"
+    display_name = "Example MCP Server"
+    description  = "MCP server description"
+    prompt       = "Use this server for test queries"
+  }
+
+  artifacts_config {
+    slide_generation_options {
+      export_format = "PDF"
+    }
+    document_generation_options {
+      export_format = "GOOGLE_DOCS"
+    }
+    visualization_options {
+      visualization_examples {
+        visualization_type = "BAR_CHART"
+      }
+    }
+  }
+}

@@ -1,0 +1,341 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'AnalystAgentPersona'
+description: |
+  An Analyst Agent Persona resource in Agentic Applications.
+references:
+  guides:
+    'Overview Guide': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest'
+min_version: beta
+base_url: 'projects/{{project}}/locations/{{location}}/analystAgentPersonas'
+self_link: 'projects/{{project}}/locations/{{location}}/analystAgentPersonas/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/analystAgentPersonas?analystAgentPersonaId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  result:
+    resource_inside_response: false
+autogen_async: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/analystAgentPersonas/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: templates/terraform/encoders/agentic_applications_analyst_agent_persona.go.tmpl
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The location of the resource.
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The resource name of the analyst agent persona.
+properties:
+  - name: 'displayName'
+    type: String
+    required: true
+    description: |
+      The display name of the persona, shown to users.
+  - name: 'displayDescription'
+    type: String
+    description: |
+      The description of the persona, shown to users.
+  - name: 'modelDescription'
+    type: String
+    description: |
+      The description of the persona review, used by the model.
+  - name: 'role'
+    type: Enum
+    description: |
+      The role selected for this persona.
+    enum_values:
+      - 'ANALYST_ROLE_GENERIC_FINANCE_ANALYST'
+      - 'ANALYST_ROLE_CORPORATE_FINANCE_ANALYST'
+      - 'ANALYST_ROLE_CROSS_ASSET_DERIVATIVES_STRATEGIST'
+      - 'ANALYST_ROLE_KYC_ANALYST'
+      - 'ANALYST_ROLE_SALES_TRADER'
+      - 'ANALYST_ROLE_QUANT_ANALYST'
+      - 'ANALYST_ROLE_EXCHANGE_MANAGER'
+      - 'ANALYST_ROLE_PORTFOLIO_MANAGER'
+      - 'ANALYST_ROLE_WEALTH_MANAGER'
+      - 'ANALYST_ROLE_INSTITUTIONAL_PORTFOLIO_STRATEGIST'
+      - 'ANALYST_ROLE_MNA_EXECUTION_ANALYST'
+      - 'ANALYST_ROLE_ECM_ORIGINATION_STRATEGIST'
+      - 'ANALYST_ROLE_LEVERAGED_FINANCE_SPECIALIST'
+      - 'ANALYST_ROLE_INVESTMENT_RESEARCH_ANALYST'
+      - 'ANALYST_ROLE_CORPORATE_BANKING_ANALYST'
+      - 'ANALYST_ROLE_CREDIT_RISK_STRATEGIST'
+      - 'ANALYST_ROLE_BEHAVIORAL_FINANCIAL_STRATEGIST'
+      - 'ANALYST_ROLE_FUND_ACCOUNTANT'
+      - 'ANALYST_ROLE_MODEL_VALIDATION_AUDITOR'
+      - 'ANALYST_ROLE_PRIVATE_EQUITY_SPECIALIST'
+      - 'ANALYST_ROLE_TREASURY_ANALYST'
+      - 'ANALYST_ROLE_VENTURE_CAPITAL_ANALYST'
+      - 'ANALYST_ROLE_AML_INVESTIGATOR'
+      - 'ANALYST_ROLE_DUE_DILIGENCE_ANALYST'
+      - 'ANALYST_ROLE_INSURANCE_CLAIMS_ANALYST'
+      - 'ANALYST_ROLE_SPECIALTY_LIABILITY_UNDERWRITER'
+      - 'ANALYST_ROLE_CATASTROPHE_EXPOSURE_MODELER'
+  - name: 'skills'
+    type: Array
+    description: |
+      Skills for the agent.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'skillId'
+          type: String
+          required: true
+          description: |
+            The identifier of the skill.
+        - name: 'description'
+          type: String
+          description: |
+            The description of the skill.
+        - name: 'content'
+          type: String
+          required: true
+          description: |
+            The markdown text content of the skill.
+        - name: 'references'
+          type: Array
+          description: |
+            References for the skill.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'referenceId'
+                type: String
+                required: true
+                description: |
+                  The identifier of the reference within the skill.
+              - name: 'content'
+                type: String
+                required: true
+                description: |
+                  The content of the reference.
+  - name: 'resources'
+    type: Array
+    description: |
+      The resources to be used by the agent.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'displayLabel'
+          type: String
+          description: |
+            A user-friendly name for this resource. This can be shown to the user and used by the model.
+        - name: 'modelDescription'
+          type: String
+          description: |
+            A description of the resource. The model may use this, it will not be shown to users.
+        - name: 'useRag'
+          type: Boolean
+          description: |
+            If true, use RAG to retrieve relevant information from the resources.
+        - name: 'bigqueryResource'
+          type: NestedObject
+          description: |
+            BigQuery resource.
+          properties:
+            - name: 'bigqueryTable'
+              type: String
+              description: |
+                Points to a bigquery table to use.
+            - name: 'bigqueryDataset'
+              type: String
+              description: |
+                Points to a bigquery dataset to use.
+            - name: 'columnDescriptions'
+              type: KeyValuePairs
+              description: |
+                A map of column names to column descriptions for the bigquery table.
+        - name: 'googleCloudStorageResource'
+          type: NestedObject
+          description: |
+            Google Cloud Storage resource.
+          properties:
+            - name: 'googleCloudStorageObject'
+              type: String
+              required: true
+              description: |
+                The Google Cloud Storage object or folder.
+            - name: 'fileExtensionRestrictions'
+              type: Array
+              description: |
+                If non-empty, only files with these extensions are included when expanding the resource.
+              item_type:
+                type: String
+        - name: 'rawFileResource'
+          type: NestedObject
+          description: |
+            Raw file resource.
+          properties:
+            - name: 'fileContent'
+              type: String
+              required: true
+              description: |
+                The raw file content.
+            - name: 'fileTitle'
+              type: String
+              required: true
+              description: |
+                The title of the file.
+            - name: 'mimeType'
+              type: String
+              required: true
+              description: |
+                The mime type of the file.
+  - name: 'mcpDataSources'
+    type: Array
+    description: |
+      The MCP data source selections to be used by the agent.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'enabled'
+          type: Boolean
+          required: true
+          description: |
+            Whether this external data source is enabled for the current analysis.
+        - name: 'serverUrl'
+          type: String
+          required: true
+          description: |
+            The URL of the MCP server.
+        - name: 'displayName'
+          type: String
+          required: true
+          description: |
+            The display name of the MCP server.
+        - name: 'description'
+          type: String
+          required: true
+          description: |
+            The description of the MCP agent.
+        - name: 'apiKey'
+          type: String
+          sensitive: true
+          description: |
+            The API key of the MCP server.
+        - name: 'apiKeyName'
+          type: String
+          description: |
+            The API key parameter name.
+        - name: 'clientId'
+          type: String
+          description: |
+            The client ID for authentication.
+        - name: 'clientSecret'
+          type: String
+          sensitive: true
+          description: |
+            The client secret for authentication.
+        - name: 'oauthTokenUrl'
+          type: String
+          description: |
+            The URL to use for retrieving the OAuth token.
+        - name: 'prompt'
+          type: String
+          description: |
+            The custom prompt for the MCP agent.
+  - name: 'artifactsConfig'
+    type: NestedObject
+    description: |
+      The configuration for artifacts generated by the analyst agent.
+    properties:
+      - name: 'slideGenerationOptions'
+        type: NestedObject
+        description: |
+          Options for slide generation.
+        properties:
+          - name: 'exportFormat'
+            type: Enum
+            description: |
+              Format for slide export.
+            enum_values:
+              - 'PDF'
+              - 'PNG'
+              - 'PPTX'
+              - 'GOOGLE_SLIDES'
+      - name: 'documentGenerationOptions'
+        type: NestedObject
+        description: |
+          Options for document generation.
+        properties:
+          - name: 'exportFormat'
+            type: Enum
+            description: |
+              Format for document export.
+            enum_values:
+              - 'PDF'
+              - 'DOCX'
+              - 'GOOGLE_DOCS'
+      - name: 'visualizationOptions'
+        type: NestedObject
+        description: |
+          Options for visualizations.
+        properties:
+          - name: 'visualizationExamples'
+            type: Array
+            description: |
+              Examples for visualizations.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'visualizationType'
+                  type: String
+                  required: true
+                  description: |
+                    The type of the visualization.
+samples:
+  - name: 'agentic_applications_analyst_agent_persona_basic'
+    primary_resource_id: 'basic_persona'
+    steps:
+      - name: 'agentic_applications_analyst_agent_persona_basic'
+        resource_id_vars:
+          name: 'test-persona'
+  - name: 'agentic_applications_analyst_agent_persona_full'
+    primary_resource_id: 'full_persona'
+    steps:
+      - name: 'agentic_applications_analyst_agent_persona_full'
+        resource_id_vars:
+          name: 'test-persona-full'
+        vars:
+          display_name: 'Test Analyst Persona'
+          display_description: 'A test analyst agent persona'
+      - name: 'agentic_applications_analyst_agent_persona_full'
+        resource_id_vars:
+          name: 'test-persona-full'
+        vars:
+          display_name: 'Updated Analyst Persona'
+          display_description: 'An updated test analyst agent persona'
