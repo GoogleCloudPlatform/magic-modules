@@ -24,6 +24,8 @@ base_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs'
 self_link: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
 immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs?notebook_execution_job_id={{notebook_execution_job_id}}'
+timeouts:
+  insert_minutes: 60
 async:
   type: 'OpAsync'
   operation:
@@ -70,6 +72,29 @@ samples:
         test_env_vars:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
+        # Vertex AI GetNotebookExecutionJob API does not return workbenchRuntime in read responses.
+        ignore_read_extra:
+          - workbench_runtime.0.vm_image.0.project
+          - workbench_runtime.0.vm_image.0.family
+          - workbench_runtime.0.vm_image.0.name
+  - name: 'colab_notebook_execution_vm_image_name'
+    min_version: beta
+    primary_resource_id: 'notebook-execution'
+    steps:
+      - name: 'colab_notebook_execution_vm_image_name'
+        min_version: beta
+        resource_id_vars:
+          notebook_execution_job_id: 'colab-notebook-execution'
+          runtime_template_name: 'runtime-template-name'
+          bucket: 'my_bucket'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+          service_account: 'SERVICE_ACCT'
+        # Vertex AI GetNotebookExecutionJob API does not return workbenchRuntime in read responses.
+        ignore_read_extra:
+          - workbench_runtime.0.vm_image.0.project
+          - workbench_runtime.0.vm_image.0.family
+          - workbench_runtime.0.vm_image.0.name
   - name: 'colab_notebook_execution_dataform'
     min_version: beta
     primary_resource_id: 'notebook-execution'
@@ -229,3 +254,33 @@ properties:
       - execution_user
       - service_account
     description: 'The service account to run the execution as.'
+  - name: 'workbenchRuntime'
+    type: NestedObject
+    # Vertex AI GetNotebookExecutionJob API does not return workbenchRuntime in read responses.
+    ignore_read: true
+    description: 'Configuration for a Workbench Instances-based environment.'
+    properties:
+      - name: 'vmImage'
+        type: NestedObject
+        description: |
+          Definition of a custom Compute Engine virtual machine image for starting
+          a notebook execution with the environment installed directly on the VM.
+        properties:
+          - name: 'project'
+            type: String
+            required: true
+            description: |
+              The name of the Google Cloud project that this VM image belongs to.
+              Format: `{project_id}`
+          - name: 'name'
+            type: String
+            description: 'Use this VM image name to find the image.'
+            exactly_one_of:
+              - workbench_runtime.0.vm_image.0.name
+              - workbench_runtime.0.vm_image.0.family
+          - name: 'family'
+            type: String
+            description: 'Use this VM image family to find the image; the newest image in this family will be used.'
+            exactly_one_of:
+              - workbench_runtime.0.vm_image.0.name
+              - workbench_runtime.0.vm_image.0.family
