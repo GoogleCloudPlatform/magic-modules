@@ -21,6 +21,7 @@ references:
   api: https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.cloudVmClusters
 docs:
 base_url: projects/{{project}}/locations/{{location}}/cloudVmClusters
+generate_list_resource: true
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster_id}}
 create_url: projects/{{project}}/locations/{{location}}/cloudVmClusters?cloudVmClusterId={{cloud_vm_cluster_id}}
