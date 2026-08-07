@@ -1526,6 +1526,61 @@ func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 		},
 	})
 }
+
+func TestAccContainerCluster_withNodePoolUpgradeConcurrencyConfig(t *testing.T) {
+	t.Parallel()
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withNodePoolUpgradeConcurrencyConfig(clusterName, 2, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_upgrade_concurrency_config", "node_pool_upgrade_concurrency_config.0.max_count", "2"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_node_pool_upgrade_concurrency_config",
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withNodePoolUpgradeConcurrencyConfig(clusterName, 5, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_upgrade_concurrency_config", "node_pool_upgrade_concurrency_config.0.max_count", "5"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_node_pool_upgrade_concurrency_config",
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			{
+				// Removing the block sends an explicit zero max_count to clear the field.
+				Config: testAccContainerCluster_withoutNodePoolUpgradeConcurrencyConfig(clusterName, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_upgrade_concurrency_config", "node_pool_upgrade_concurrency_config.#", "0"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_node_pool_upgrade_concurrency_config",
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+		},
+	})
+}
 {{- end }}
 
 {{- if ne $.TargetVersionName "ga" }}
@@ -9177,6 +9232,39 @@ resource "google_container_cluster" "with_cluster_telemetry" {
   deletion_protection = false
 }
 `, clusterName, telemetryType, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withNodePoolUpgradeConcurrencyConfig(clusterName string, maxCount int, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_node_pool_upgrade_concurrency_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  node_pool_upgrade_concurrency_config {
+    max_count = %d
+  }
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
+}
+`, clusterName, maxCount, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withoutNodePoolUpgradeConcurrencyConfig(clusterName, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_node_pool_upgrade_concurrency_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
+}
+`, clusterName, networkName, subnetworkName)
 }
 {{- end }}
 

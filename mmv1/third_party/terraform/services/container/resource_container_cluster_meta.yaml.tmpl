@@ -872,6 +872,9 @@ fields:
     api_field: 'nodePoolDefaults.nodeConfigDefaults.nodeKubeletConfig.insecureKubeletReadonlyPortEnabled'
   - field: 'node_pool_defaults.node_config_defaults.logging_variant'
     api_field: 'nodePoolDefaults.nodeConfigDefaults.loggingConfig.variantConfig.variant'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'nodePoolUpgradeConcurrencyConfig.maxCount'
+{{- end }}
   - field: 'node_version'
     api_field: 'currentNodeVersion'
   - api_field: 'notificationConfig.pubsub.enabled'

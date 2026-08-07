@@ -380,6 +380,10 @@ clusters with private nodes. Structure is [documented below](#nested_private_clu
    [ClusterTelemetry](https://cloud.google.com/monitoring/kubernetes-engine/installing#controlling_the_collection_of_application_logs) feature,
    Structure is [documented below](#nested_cluster_telemetry).
 
+* `node_pool_upgrade_concurrency_config` - (Optional, [Beta](../guides/provider_versions.html.markdown))
+   Node pool upgrade concurrency config of the cluster, used by node auto upgrade.
+   Structure is [documented below](#nested_node_pool_upgrade_concurrency_config).
+
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
@@ -513,6 +517,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 <a name="nested_cluster_telemetry"></a>The `cluster_telemetry` block supports
 * `type` - Telemetry integration for the cluster. Supported values (`ENABLED, DISABLED, SYSTEM_ONLY`);
    `SYSTEM_ONLY` (Only system components are monitored and logged) is only available in GKE versions 1.15 and later.
+
+<a name="nested_node_pool_upgrade_concurrency_config"></a>The `node_pool_upgrade_concurrency_config` block supports
+* `max_count` - (Required) No more than `max_count` node pools are upgraded concurrently by node auto upgrade.
 
 <a name="nested_addons_config"></a>The `addons_config` block supports:
 
