@@ -20,12 +20,14 @@ specific one.
 | `test-failure`, `test-failure-*` (e.g. `test-failure-0`, `test-failure-10`, `test-failure-50`, `test-failure-100`) | Acceptance Test Failure | `.agents/skills/workflows/test_fix/SKILL.md` |
 | `new-resource` | New Resource Creation | `.agents/skills/workflows/new_resource/SKILL.md` |
 | `list-resource` | List Resource Addition | `.agents/skills/workflows/add_list_resource/SKILL.md` |
+| `enhancement` (field additions) | New Field / Property Addition | `.agents/skills/workflows/add_fields/SKILL.md` |
 | *No matching label / un-labeled* | General Modification / Bug Fix | Fallback to `.agents/skills/workflows/default/SKILL.md` (or inspect issue body) |
 
 ## Available Workflows:
 
 *   **Default Workflow** (`.agents/skills/workflows/default/SKILL.md`): For tasks that do not involve creating a new resource (fallback for general tasks).
 *   **New Resource Workflow** (`.agents/skills/workflows/new_resource/SKILL.md`): Specifically for creating a new resource, supporting both autogen and manual generation.
+*   **Add Fields Workflow** (`.agents/skills/workflows/add_fields/SKILL.md`): Specifically for adding new fields to existing MMv1 or handwritten resources.
 *   **Test Fix Workflow** (`.agents/skills/workflows/test_fix/SKILL.md`): Specifically for resolving failing acceptance tests from GitHub issues, direct prompts, or debug logs.
 *   **Add List Resource Workflow** (`.agents/skills/workflows/add_list_resource/SKILL.md`): Opts one product's eligible MMv1 resources into list-resource generation by setting `generate_list_resource: true`, validates locally, and opens a PR.
 *   **Prepare Release Workflow** (`.agents/skills/workflows/prepare_release/SKILL.md`): Prepares and cuts weekly releases for both `terraform-provider-google` (TPG) and `terraform-provider-google-beta` (TPGB) providers.
