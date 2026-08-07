@@ -1,0 +1,48 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Project
+description: A Google Cloud Project.
+exclude_resource: true
+legacy_name: google_project
+include_in_tgc_next: true
+properties:
+  - name: projectId
+    type: String
+    description: The project ID.
+  - name: name
+    type: String
+    description: The display name of the project.
+  - name: labels
+    type: KeyValueLabels
+    description: A set of key/value label pairs to assign to the project.
+  - name: orgId
+    type: String
+    description: The numeric ID of the organization this project belongs to.
+  - name: folderId
+    type: String
+    description: The numeric ID of the folder this project should be created under.
+  - name: billingAccount
+    type: String
+    # billingAccount is from billingAccount asset, not project CAI asset
+    ignore_read: true
+    description: The alphanumeric ID of the billing account this project belongs to.
+  - name: deletionPolicy
+    type: String
+    description: The deletion policy for the project.
+    is_missing_in_cai: true
+  - name: number
+    type: String
+    description: The numeric identifier of the project.
+    output: true
