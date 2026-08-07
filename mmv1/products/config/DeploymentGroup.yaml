@@ -1,0 +1,139 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DeploymentGroup'
+description: 'A collection of DeploymentUnits that in a DAG-like structure.'
+references:
+  api: 'https://cloud.google.com/infrastructure-manager/docs/reference/rest/v1/projects.locations.deploymentGroups'
+base_url: 'projects/{{project}}/locations/{{location}}/deploymentGroups'
+self_link: 'projects/{{project}}/locations/{{location}}/deploymentGroups/{{name}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/deploymentGroups/{{name}}?deploymentReferencePolicy={{deployment_reference_policy}}&force={{force_destroy}}'
+create_url: 'projects/{{project}}/locations/{{location}}/deploymentGroups?deploymentGroupId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/deploymentGroups/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+
+examples:
+  - name: 'config_deployment_group_basic'
+    primary_resource_id: 'default'
+    exclude_test: true # Acceptance tests are handwritten due to complex prerequisites (IAM, deployments).
+    vars:
+      deployment_group_name: 'my-deployment-group'
+      deployment_name: 'my-deployment'
+      service_account_email: 'my-service-account@my-project.iam.gserviceaccount.com'
+
+virtual_fields:
+  - name: 'deployment_reference_policy'
+    type: Enum
+    description: |
+      Policy on how to handle referenced deployments when deleting the DeploymentGroup.
+    enum_values:
+      - 'DEPLOYMENT_REFERENCE_POLICY_UNSPECIFIED'
+      - 'FAIL_IF_ANY_REFERENCES_EXIST'
+      - 'FAIL_IF_METADATA_REFERENCES_EXIST'
+      - 'IGNORE_DEPLOYMENT_REFERENCES'
+    default_value: 'IGNORE_DEPLOYMENT_REFERENCES'
+  - name: 'force_destroy'
+    type: Boolean
+    description: |
+      If set to true, any revisions for this deployment group will also be deleted.
+      (Otherwise, the request will only work if the deployment group has no revisions.)
+    default_value: false
+
+parameters:
+  - name: 'location'
+    type: String
+    description: 'The location for the resource'
+    url_param_only: true
+    required: true
+    immutable: true
+
+properties:
+  - name: 'name'
+    type: String
+    description: 'The user-specified ID of the deployment group.'
+    url_param_only: true
+    required: true
+    immutable: true
+
+  - name: 'deploymentUnits'
+    type: Array
+    description: |-
+      The deployment units of the deployment group in a DAG like structure.
+      When a deployment group is being provisioned, the deployment units are
+      deployed in a DAG order.
+      The provided units must be in a DAG order, otherwise an error will be
+      returned.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'dependencies'
+          type: Array
+          required: true
+          description: |-
+            The IDs of the deployment units within the deployment group that this
+            unit depends on.
+          item_type:
+            type: String
+        - name: 'deployment'
+          type: String
+          description: |-
+            The name of the deployment to be provisioned.
+            Format:
+            'projects/{project_id}/locations/{location}/deployments/{deployment}'.
+        - name: 'id'
+          type: String
+          description: 'The id of the deployment unit. Must be unique within the deployment group.'
+
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'User-defined metadata for the deployment group.'
+
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: 'Arbitrary key-value metadata storage.'
+
+  # Output-only fields
+  - name: 'state'
+    type: String
+    description: 'Current state of the deployment group.'
+    output: true
+
+  - name: 'stateDescription'
+    type: String
+    description: 'Additional information regarding the current state.'
+    output: true
+
+  - name: 'provisioningState'
+    type: String
+    description: 'The provisioning state of the deployment group.'
+    output: true
+
+  - name: 'provisioningStateDescription'
+    type: String
+    description: 'Additional information regarding the current provisioning state.'
+    output: true
