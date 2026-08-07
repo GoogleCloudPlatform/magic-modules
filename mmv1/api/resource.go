@@ -253,6 +253,11 @@ type Resource struct {
 
 	GenerateListResource bool `yaml:"generate_list_resource,omitempty"`
 
+	// [Optional] A static filter string appended as a ?filter= query parameter when
+	// listing this resource. Useful when the list endpoint returns multiple resource
+	// types that share the same API URL (e.g. engines filtered by solutionType).
+	ListFilter string `yaml:"list_filter,omitempty"`
+
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
@@ -1387,7 +1392,7 @@ func (r Resource) Updatable() bool {
 	if !r.Immutable {
 		return true
 	}
-	for _, p := range r.AllPropertiesInVersion() {
+	for _, p := range r.AllNestedProperties(r.RootProperties()) {
 		if p.UpdateUrl != "" {
 			return true
 		}

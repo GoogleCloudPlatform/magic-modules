@@ -19,11 +19,21 @@
 
 package {{ lower $.ProductMetadata.Name }}
 
+{{ $hasIntegerIdentity := false -}}
+{{- range $id := $.IdentityProperties -}}
+  {{- if eq $id.Type "Integer" -}}
+    {{- $hasIntegerIdentity = true -}}
+  {{- end -}}
+{{- end -}}
+
 import (
 	"context"
 	"errors"
 	"fmt"
 	"net/http"
+	{{- if $hasIntegerIdentity }}
+	"strconv"
+	{{- end }}
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
