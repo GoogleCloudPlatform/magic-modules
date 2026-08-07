@@ -94,8 +94,8 @@ func datasourceGoogleComputeServiceAttachmentsRead(d *schema.ResourceData, meta 
 			if sa.PscServiceAttachmentId != nil {
 				pscId = []map[string]interface{}{
 					{
-						"high": sa.PscServiceAttachmentId.High,
-						"low":  sa.PscServiceAttachmentId.Low,
+						"high": fmt.Sprintf("%d", sa.PscServiceAttachmentId.High),
+						"low":  fmt.Sprintf("%d", sa.PscServiceAttachmentId.Low),
 					},
 				}
 			}
