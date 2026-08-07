@@ -967,6 +967,7 @@ func TestAccComputeSecurityPolicy_securityPolicyWithBodyExclude(t *testing.T) {
 	context := map[string]interface{}{
 		"backend_name":    "backendpolicy" + randomSuffix,
 		"network_name":    "tf-test-test-network" + randomSuffix,
+    "health_check_name":    "tf-test-health-check" + randomSuffix,
 		"sec_policy_name": "policyruletest" + randomSuffix,
 		"random_suffix":   randomSuffix,
 	}
@@ -1007,7 +1008,7 @@ resource "google_compute_subnetwork" "default" {
 
 resource "google_compute_health_check" "default" {
   provider = google-beta
-  name     = "test-health-check"
+  name     = "%{health_check_name}"
 
   http_health_check {
     port = 80

@@ -15,7 +15,7 @@ resource "google_compute_subnetwork" "default" {
 
 resource "google_compute_region_health_check" "default" {
   provider = google-beta
-  name     = "test-health-check"
+  name     = "{{index $.ResourceIdVars "health_check_name"}}"
 	region   = "us-west2"
 
   http_health_check {

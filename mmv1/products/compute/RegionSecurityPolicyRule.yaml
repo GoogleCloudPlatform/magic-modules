@@ -107,6 +107,7 @@ samples:
           sec_policy_name: "policyruletest"
           backend_name: "backendpolicy"
           network_name: "test-network"
+          health_check_name: "test-health-check"
   - name: "region_security_policy_rule_request_body_expression"
     primary_resource_id: "policy_rule"
     min_version: beta
