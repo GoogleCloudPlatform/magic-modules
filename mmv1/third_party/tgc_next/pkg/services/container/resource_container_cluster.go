@@ -2435,6 +2435,22 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
+			"node_pool_upgrade_concurrency_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `Node pool upgrade concurrency config of the cluster, used by node auto upgrade.`,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"max_count": {
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: `No more than max_count node pools are upgraded concurrently.`,
+						},
+					},
+				},
+			},
+
 			"default_snat_status": {
 				Type:        schema.TypeList,
 				MaxItems:    1,

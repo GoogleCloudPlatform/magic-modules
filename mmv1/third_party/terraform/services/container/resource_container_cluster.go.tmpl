@@ -2618,6 +2618,22 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+
+			"node_pool_upgrade_concurrency_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Description: `Node pool upgrade concurrency config of the cluster, used by node auto upgrade.`,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"max_count": {
+							Type:             schema.TypeInt,
+							Required:         true,
+							Description:      `No more than max_count node pools are upgraded concurrently.`,
+						},
+					},
+				},
+			},
 {{- end }}
 
 			"default_snat_status": {
@@ -3254,6 +3270,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		GkeAutoUpgradeConfig: expandGkeAutoUpgradeConfig(d.Get("gke_auto_upgrade_config")),
 {{- if ne $.TargetVersionName "ga" }}
 		ClusterTelemetry: expandClusterTelemetry(d.Get("cluster_telemetry")),
+		NodePoolUpgradeConcurrencyConfig: expandNodePoolUpgradeConcurrencyConfig(d.Get("node_pool_upgrade_concurrency_config")),
 {{- end }}
 		EnableTpu:               d.Get("enable_tpu").(bool),
 		NetworkConfig: &container.NetworkConfig{
@@ -3977,6 +3994,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("cluster_telemetry", flattenClusterTelemetry(cluster.ClusterTelemetry)); err != nil {
+		return err
+	}
+
+	if err := d.Set("node_pool_upgrade_concurrency_config", flattenNodePoolUpgradeConcurrencyConfig(cluster.NodePoolUpgradeConcurrencyConfig)); err != nil {
 		return err
 	}
 {{- end }}
@@ -5876,6 +5897,49 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s Cluster Telemetry has been updated to %#v", d.Id(), req.Update.DesiredClusterTelemetry)
 	}
+
+	if d.HasChange("node_pool_upgrade_concurrency_config") {
+		// Because GKE uses a non-RESTful update function, when removing the
+		// feature you need to specify a fairly full request body or it fails:
+		// "update": {"desiredNodePoolUpgradeConcurrencyConfig": {"maxCount": 0}}
+		req := &container.UpdateClusterRequest{}
+		if v, ok := d.GetOk("node_pool_upgrade_concurrency_config"); !ok {
+			req.Update = &container.ClusterUpdate{
+				DesiredNodePoolUpgradeConcurrencyConfig: &container.NodePoolUpgradeConcurrencyConfig{
+					MaxCount:        0,
+					ForceSendFields: []string{"MaxCount"},
+				},
+			}
+		} else {
+			req.Update = &container.ClusterUpdate{
+				DesiredNodePoolUpgradeConcurrencyConfig: expandNodePoolUpgradeConcurrencyConfig(v),
+			}
+		}
+		updateF := func() error {
+			log.Println("[DEBUG] updating node_pool_upgrade_concurrency_config")
+			name := containerClusterFullName(project, location, clusterName)
+			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
+			if err != nil {
+				return err
+			}
+
+			// Wait until it's updated
+			err = ContainerOperationWait(config, op, project, location, "updating Node Pool Upgrade Concurrency Config", userAgent, d.Timeout(schema.TimeoutUpdate))
+			log.Println("[DEBUG] done updating node_pool_upgrade_concurrency_config")
+			return err
+		}
+
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s node pool upgrade concurrency config has been updated to %#v", d.Id(), req.Update.DesiredNodePoolUpgradeConcurrencyConfig)
+	}
 {{- end }}
 
 	if _, err := containerClusterAwaitRestingState(config, project, location, clusterName, userAgent, d.Timeout(schema.TimeoutUpdate)); err != nil {
@@ -7289,6 +7353,17 @@ func expandClusterTelemetry(configured interface{}) *container.ClusterTelemetry 
 	}
 }
 
+func expandNodePoolUpgradeConcurrencyConfig(configured interface{}) *container.NodePoolUpgradeConcurrencyConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.NodePoolUpgradeConcurrencyConfig{
+		MaxCount: int64(config["max_count"].(int)),
+	}
+}
+
 {{ end }}
 func expandDefaultSnatStatus(configured interface{}) *container.DefaultSnatStatus {
 	l := configured.([]interface{})
@@ -8223,6 +8298,16 @@ func flattenClusterTelemetry(c *container.ClusterTelemetry) []map[string]interfa
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"type": c.Type,
+		})
+	}
+	return result
+}
+
+func flattenNodePoolUpgradeConcurrencyConfig(c *container.NodePoolUpgradeConcurrencyConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"max_count": c.MaxCount,
 		})
 	}
 	return result
