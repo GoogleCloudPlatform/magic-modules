@@ -57,7 +57,6 @@ Please refer to the field 'effective_labels' for all of the labels present on th
 			"effective_labels": {
 				Type:        schema.TypeMap,
 				Computed:    true,
-				ForceNew:    true,
 				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
