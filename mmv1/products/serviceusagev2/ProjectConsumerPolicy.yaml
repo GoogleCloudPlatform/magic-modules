@@ -1,0 +1,106 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ProjectConsumerPolicy'
+description: |
+  Consumer Policy is a set of rules that define what services or service groups
+  can be used for a cloud resource hierarchy. This resource manages the consumer
+  policy for a project as part of Hierarchical Service Activation.
+min_version: 'beta'
+references:
+  guides:
+    'Hierarchical Service Activation Overview': 'https://cloud.google.com/service-usage/docs/hierarchical-service-activation/overview'
+    'Manage service enablement': 'https://cloud.google.com/service-usage/docs/hierarchical-service-activation/manage-enablement'
+  api: 'https://cloud.google.com/service-usage/docs/reference/rest/v2beta/consumerPolicies'
+base_url: 'projects/{{project}}/consumerPolicies'
+self_link: 'projects/{{project}}/consumerPolicies/default'
+create_url: 'projects/{{project}}/consumerPolicies/default'
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/consumerPolicies/default'
+update_verb: 'PATCH'
+delete_verb: 'PATCH'
+id_format: 'projects/{{project}}/consumerPolicies/default'
+import_format:
+  - 'projects/{{project}}/consumerPolicies/default'
+  - '{{project}}'
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+exclude_sweeper: true
+custom_code:
+  pre_update: 'templates/terraform/pre_update/project_consumer_policy.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/project_consumer_policy.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/project_consumer_policy.go.tmpl'
+examples:
+  - name: 'service_usage_project_consumer_policy_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      # No vars needed, uses default project
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'enable_rules.0.services'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      The deletion policy for the consumer policy. Setting the policy to "FORCE" will
+      pass the force parameter to the API, which allows updates and deletions that may
+      result in the deletion of resources from affected services or loss of API access
+      for clients.
+      Possible values: DELETE, FORCE
+    type: String
+    default_value: "DELETE"
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Output only. The resource name of the policy.
+      Format: `projects/{project}/consumerPolicies/default`
+    output: true
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      An opaque tag indicating the current version of the policy, used for concurrency control.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Output only. The time the policy was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Output only. The time the policy was last updated.
+    output: true
+  - name: 'enableRules'
+    type: Array
+    description: |
+      Enable rules define usable services and service groups.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'services'
+          type: Array
+          description: |
+            The names of the services that are enabled.
+            Example: `services/storage.googleapis.com`
+          custom_flatten: 'templates/terraform/custom_flatten/consumer_policy_enable_rules_services.go.tmpl'
+          item_type:
+            type: String
