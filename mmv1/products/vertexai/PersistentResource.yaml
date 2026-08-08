@@ -26,6 +26,7 @@ self_link: projects/{{project}}/locations/{{location}}/persistentResources/{{nam
 create_url: projects/{{project}}/locations/{{location}}/persistentResources?persistentResourceId={{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/persistentResources/{{name}}
+generate_list_resource: true
 async:
   operation:
     base_url: '{{op_id}}'

@@ -19,6 +19,7 @@ base_url: projects/{{project}}/locations/{{location}}/schedules
 self_link: projects/{{project}}/locations/{{location}}/schedules/{{name}}
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 import_format:
   - projects/{{project}}/locations/{{location}}/schedules/{{name}}
 async:
