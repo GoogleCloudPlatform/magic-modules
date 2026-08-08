@@ -8809,6 +8809,14 @@ resource "google_sql_database_instance" "instance" {
       running_threads_threshold         = 100
       seconds_behind_source_threshold   = 3600
       transaction_duration_threshold    = 300
+      cpu_utilization_threshold_percent     = 80
+      memory_usage_threshold_percent        = 80
+      history_list_length_threshold_count   = 100000
+      semaphore_wait_threshold_count        = 100
+      transaction_lock_wait_threshold_count = 100
+      transaction_kill_threshold_seconds    = 600
+      transaction_kill_type                 = "READ_ONLY_TRANSACTIONS"
+      transaction_kill_excluded_user_hosts  = ["app_user", "admin@10.1.2.3"]
     }
   }
 }
@@ -8836,6 +8844,14 @@ resource "google_sql_database_instance" "instance" {
       running_threads_threshold         = 200
       seconds_behind_source_threshold   = 3700
       transaction_duration_threshold    = 300
+      cpu_utilization_threshold_percent     = 90
+      memory_usage_threshold_percent        = 90
+      history_list_length_threshold_count   = 200000
+      semaphore_wait_threshold_count        = 200
+      transaction_lock_wait_threshold_count = 200
+      transaction_kill_threshold_seconds    = 700
+      transaction_kill_type                 = "ALL_TRANSACTIONS"
+      transaction_kill_excluded_user_hosts  = ["app_user"]
     }
   }
 }
