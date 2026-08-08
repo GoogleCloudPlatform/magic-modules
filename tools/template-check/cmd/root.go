@@ -23,6 +23,7 @@ func newRootCmd() (*cobra.Command, *rootOptions, error) {
 	}
 	cmd.AddCommand(newversionGuardCmd(o))
 	cmd.AddCommand(newUnusedTmplCmd(o))
+	cmd.AddCommand(newFuncCheckCmd(o))
 	return cmd, o, nil
 }
 
