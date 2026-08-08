@@ -10,17 +10,40 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// Handwritten lifecycle test (Create + Import; deprovision via CheckDestroy).
-// The generated example is exclude_test — see the singleton-aware
-// CheckDestroy below for why.
+// Handwritten lifecycle test: SGPE create + import, then gateway_config
+// create/update/rename/remove, then destroy-and-deprovision. SGPE is
+// an AIP-156 project-regional singleton, so do NOT add a second
+// parallel test in the same (project, region) — the two would race on
+// the singleton.
 func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{}
+	// SGPE gateway_config provisioning needs the AI Platform service agent to
+	// create/mutate DNS records and PSC forwarding rules in the customer
+	// project. Those permissions are NOT in the default
+	// `roles/aiplatform.serviceAgent` (defaults include only get/list/use on
+	// compute.addresses and no dns.* at all), so we grant them explicitly on
+	// the CI project via bootstrap_iam (additive, retry-safe). Matches the
+	// google_vertex_ai_reasoning_engine PSC-interface test precedent.
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+			Role:   "roles/dns.admin",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+			Role:   "roles/compute.networkAdmin",
+		},
+	})
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -52,6 +75,100 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccVertexAISemanticGovernancePolicyEngine_addGateway(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.*",
+						map[string]string{"name": "alpha", "state": "ACTIVE"}),
+				),
+			},
+			// ImportStateVerify — round-trip stability of the Map ->
+			// TypeSet flatten path.
+			{
+				ResourceName:      "google_vertex_ai_semantic_governance_policy_engine.sgpe",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccVertexAISemanticGovernancePolicyEngine_updateGatewayAndAddSecondary(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.#", "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.*",
+						map[string]string{"name": "alpha", "state": "ACTIVE"}),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.*",
+						map[string]string{"name": "beta", "state": "ACTIVE"}),
+				),
+			},
+			{
+				ResourceName:      "google_vertex_ai_semantic_governance_policy_engine.sgpe",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Rename "alpha" -> "gamma"; "beta" stays ACTIVE.
+			// The provider sends one PATCH; sibling invariance is a
+			// backend contract.
+			{
+				Config: testAccVertexAISemanticGovernancePolicyEngine_renamePrimaryToMain(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.#", "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.*",
+						map[string]string{"name": "gamma", "state": "ACTIVE"}),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.*",
+						map[string]string{"name": "beta", "state": "ACTIVE"}),
+					// Explicitly assert "alpha" is gone (drop-add rename
+					// semantics: the old key must not resurface).
+					testAccCheckSGPEGatewayConfigNamesExact(t,
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						[]string{"gamma", "beta"}),
+				),
+			},
+			{
+				ResourceName:      "google_vertex_ai_semantic_governance_policy_engine.sgpe",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Remove all gateway_config blocks while keeping the DNS
+			// zone declared. Split from a single-step "empty + destroy
+			// zone" because Terraform ran the zone destroy in parallel
+			// with the SGPE Update, which failed with containerNotEmpty
+			// before the backend teardown had run. The live-Get check
+			// below catches the class of failure where the backend
+			// silently acks a remove without running its teardown.
+			{
+				Config: testAccVertexAISemanticGovernancePolicyEngine_removeAllGatewaysKeepZone(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						"gateway_config.#", "0"),
+					testAccCheckSGPEGatewayConfigNamesExact(t,
+						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
+						[]string{}),
+				),
+			},
+			// Revert to _basic so Terraform destroys the DNS zone. The
+			// zone is empty because the previous step's backend teardown
+			// already removed the A-record. No Check block — this step
+			// only exercises the clean destroy path.
+			{
+				Config: testAccVertexAISemanticGovernancePolicyEngine_basic(context),
+			},
 		},
 	})
 }
@@ -62,6 +179,217 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
   region = "us-central1"
 }
 `, context)
+}
+
+// gateway_config fixtures inline the customer-side infrastructure the
+// SGPE backend requires: a custom-mode VPC, a subnet, and a private
+// DNS managed zone attached to that VPC (example.com. per RFC 2606).
+// SGPE gateway provisioning fails against the project default VPC —
+// the backend expects a custom VPC with an attached private zone
+// (mirrors google_vertex_ai_index_endpoint's PSC test pattern).
+// The gateway_config removal step splits the SGPE Update from the
+// zone/subnet/network destroy to avoid a parallel containerNotEmpty.
+//
+// Gateway names are the fixed set alpha/beta/gamma rather than the more
+// obvious primary/secondary/main. The backend derives deterministic
+// customer-project resource names from the gateway name (sgpe-ip-<name>,
+// sgpe-psce-<name>); a partially-failed earlier run in the shared CI
+// project left sgpe-ip-primary bound to a now-deleted VPC, and the
+// backend silently reuses that stale address on the next run, so any
+// fixture reusing the name "primary" collides. alpha/beta/gamma sidestep
+// the known residue. The underlying backend cleanup/resilience gaps are
+// tracked separately (see EXTERNAL_TODOS T-1); this is not a substitute
+// for that fix.
+
+const testAccSGPESharedNetworking = `
+resource "google_compute_network" "sgpe_network" {
+  name                    = "tf-sgpe-net-%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "sgpe_subnet" {
+  name          = "tf-sgpe-subnet-%{random_suffix}"
+  ip_cidr_range = "192.168.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.sgpe_network.id
+}
+
+resource "google_dns_managed_zone" "sgpe_zone" {
+  name        = "tf-sgpe-zone-%{random_suffix}"
+  dns_name    = "sgpe-lifecycle.example.com."
+  description = "Private DNS zone for SGPE lifecycle acceptance test."
+  visibility  = "private"
+
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.sgpe_network.id
+    }
+  }
+}
+`
+
+// testAccSGPEPreamble is the shared preamble for every fixture that
+// references gateway_config: the project data source and the customer-
+// side networking (custom VPC + subnet + attached private DNS zone).
+const testAccSGPEPreamble = `
+data "google_project" "project" {
+}
+` + testAccSGPESharedNetworking
+
+func testAccVertexAISemanticGovernancePolicyEngine_addGateway(context map[string]interface{}) string {
+	return acctest.Nprintf(testAccSGPEPreamble+`
+resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
+  region = "us-central1"
+
+  gateway_config {
+    name          = "alpha"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  depends_on = [
+    google_compute_subnetwork.sgpe_subnet,
+    google_dns_managed_zone.sgpe_zone,
+  ]
+}
+`, context)
+}
+
+func testAccVertexAISemanticGovernancePolicyEngine_updateGatewayAndAddSecondary(context map[string]interface{}) string {
+	return acctest.Nprintf(testAccSGPEPreamble+`
+resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
+  region = "us-central1"
+
+  gateway_config {
+    name          = "alpha"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  gateway_config {
+    name          = "beta"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  depends_on = [
+    google_compute_subnetwork.sgpe_subnet,
+    google_dns_managed_zone.sgpe_zone,
+  ]
+}
+`, context)
+}
+
+func testAccVertexAISemanticGovernancePolicyEngine_renamePrimaryToMain(context map[string]interface{}) string {
+	return acctest.Nprintf(testAccSGPEPreamble+`
+resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
+  region = "us-central1"
+
+  gateway_config {
+    name          = "gamma"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  gateway_config {
+    name          = "beta"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  depends_on = [
+    google_compute_subnetwork.sgpe_subnet,
+    google_dns_managed_zone.sgpe_zone,
+  ]
+}
+`, context)
+}
+
+// Engine with no gateway_config blocks + customer networking still declared.
+// Isolates the SGPE Update (remove all gateways) from the VPC/subnet/zone
+// destroy; those are destroyed in the follow-up step's revert to _basic.
+func testAccVertexAISemanticGovernancePolicyEngine_removeAllGatewaysKeepZone(context map[string]interface{}) string {
+	return acctest.Nprintf(testAccSGPEPreamble+`
+resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
+  region = "us-central1"
+}
+`, context)
+}
+
+// testAccCheckSGPEGatewayConfigNamesExact issues a live Get against
+// the SGPE resource and asserts the set of gateway_config `name`
+// values in the response exactly matches `want` (order-insensitive).
+// Complements Terraform-local state assertions — catches the failure
+// mode where the backend acks a remove/rename without running
+// server-side teardown.
+func testAccCheckSGPEGatewayConfigNamesExact(t *testing.T, resourceName string, want []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource %q not in state", resourceName)
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(registry.GetProduct("vertexai"), config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/semanticGovernancePolicyEngine")
+		if err != nil {
+			return err
+		}
+
+		billingProject := ""
+		if config.BillingProject != "" {
+			billingProject = config.BillingProject
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("live Get against %s failed: %s", url, err)
+		}
+
+		// The API returns gatewayConfigs as a map<string, GatewayConfig>.
+		// A missing / nil map (backend never populated any) reads as an
+		// empty set on the wire; the "want == empty" case is legal.
+		got := map[string]struct{}{}
+		if raw, ok := res["gatewayConfigs"]; ok && raw != nil {
+			m, ok := raw.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("gatewayConfigs at %s is %T, expected map[string]interface{}", url, raw)
+			}
+			for k := range m {
+				got[k] = struct{}{}
+			}
+		}
+
+		if len(got) != len(want) {
+			return fmt.Errorf("gatewayConfigs at %s: got %d keys %v, want %d keys %v",
+				url, len(got), keysOf(got), len(want), want)
+		}
+		for _, name := range want {
+			if _, ok := got[name]; !ok {
+				return fmt.Errorf("gatewayConfigs at %s: missing expected key %q (got %v, want %v)",
+					url, name, keysOf(got), want)
+			}
+		}
+		return nil
+	}
+}
+
+func keysOf(m map[string]struct{}) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	return out
 }
 
 // testAccCheckVertexAISemanticGovernancePolicyEngineDestroyProducer

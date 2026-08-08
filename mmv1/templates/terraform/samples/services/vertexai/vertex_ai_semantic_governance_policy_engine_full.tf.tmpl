@@ -1,0 +1,39 @@
+resource "google_compute_network" "sgpe_network" {
+  name                    = "sgpe-network"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "sgpe_subnet" {
+  name          = "sgpe-subnet"
+  ip_cidr_range = "192.168.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.sgpe_network.id
+}
+
+resource "google_dns_managed_zone" "sgpe_zone" {
+  name        = "sgpe-zone"
+  dns_name    = "sgpe.example.com."
+  visibility  = "private"
+
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.sgpe_network.id
+    }
+  }
+}
+
+resource "google_vertex_ai_semantic_governance_policy_engine" "{{$.PrimaryResourceId}}" {
+  region = "us-central1"
+
+  gateway_config {
+    name          = "primary"
+    network       = google_compute_network.sgpe_network.id
+    subnetwork    = google_compute_subnetwork.sgpe_subnet.id
+    dns_zone_name = google_dns_managed_zone.sgpe_zone.name
+  }
+
+  depends_on = [
+    google_compute_subnetwork.sgpe_subnet,
+    google_dns_managed_zone.sgpe_zone,
+  ]
+}

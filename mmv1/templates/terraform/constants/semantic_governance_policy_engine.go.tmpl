@@ -35,3 +35,58 @@ func sgpePostReadDispatch(d sgpeResourceID, res map[string]interface{}) error {
 	}
 	return nil
 }
+
+// extractGatewayConfigBlocks normalizes the diff's gateway_config value
+// across production *schema.ResourceDiff (returns *schema.Set) and
+// tpgresource.ResourceDiffMock (returns the raw slice) into a canonical
+// []map[string]interface{}.
+func extractGatewayConfigBlocks(raw interface{}) []map[string]interface{} {
+	if raw == nil {
+		return nil
+	}
+	switch v := raw.(type) {
+	case *schema.Set:
+		out := make([]map[string]interface{}, 0, v.Len())
+		for _, item := range v.List() {
+			if m, ok := item.(map[string]interface{}); ok {
+				out = append(out, m)
+			}
+		}
+		return out
+	case []map[string]interface{}:
+		return v
+	default:
+		return nil
+	}
+}
+
+// sgpeGatewayConfigDuplicateNameCheck is the CustomizeDiff entry point
+// for Check 2. Delegates to the testable inner func.
+func sgpeGatewayConfigDuplicateNameCheck(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	return sgpeGatewayConfigDuplicateNameCheckFunc(diff)
+}
+
+// sgpeGatewayConfigDuplicateNameCheckFunc errors on the first duplicate
+// `name` across planned gateway_config blocks; blocks the plan before
+// the RPC fires (proto3 maps would otherwise silently overwrite server-
+// side). Does not detect renames — rename is treated as a normal
+// drop-then-add map delta.
+func sgpeGatewayConfigDuplicateNameCheckFunc(diff tpgresource.TerraformResourceDiff) error {
+	plannedRaw := diff.Get("gateway_config")
+	planned := extractGatewayConfigBlocks(plannedRaw)
+
+	seen := make(map[string]bool, len(planned))
+	for _, block := range planned {
+		name, _ := block["name"].(string)
+		// Empty names are skipped here; the schema's Required:true on
+		// the key field surfaces those during standard validation.
+		if name == "" {
+			continue
+		}
+		if seen[name] {
+			return fmt.Errorf("gateway_config.name %q is duplicated; each block must have a unique name.", name)
+		}
+		seen[name] = true
+	}
+	return nil
+}
