@@ -1,0 +1,24 @@
+resource "google_storage_ftp_server" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+  location     = "us-west1"
+  server_id    = "{{index $.ResourceIdVars "server_id"}}"
+  display_name = "My SFTP Server"
+  access_type  = "INTERNAL"
+
+  internal_config {
+    consumer_accept_list {
+      project          = "projects/${data.google_project.project.project_id}"
+      connection_limit = 10
+    }
+    consumer_reject_list {
+      project = "projects/${data.google_project.project.number}"
+    }
+    consumer_reject_list {
+      project = "projects/920946329098"
+    }
+  }
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
