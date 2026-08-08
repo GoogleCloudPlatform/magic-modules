@@ -1,0 +1,255 @@
+package tpgresource
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"log"
+	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+// StandardOperationWaiter polls a long-running operation resource shaped like
+// Compute Engine's Operation (a "status" field of PENDING/RUNNING/DONE, plus
+// an "error.errors[]" list on failure), as opposed to the "done" boolean shape
+// handled by CommonOperationWaiter. Several APIs mirror this shape.
+//
+// It is product-agnostic so that services which only touch another product's
+// API incidentally (e.g. resourcemanager deleting a compute network) don't
+// need to import that product's generated package just to poll its
+// operations.
+type StandardOperationWaiter struct {
+	Config    *transport_tpg.Config
+	UserAgent string
+	// BasePath is the resolved (custom-endpoint- and mTLS-aware) base URL of
+	// the product that owns the operation being polled, e.g. the result of
+	// transport_tpg.BaseUrl(registry.GetProduct("compute"), config).
+	BasePath string
+	Op       map[string]interface{}
+	Context  context.Context
+	Project  string
+	Parent   string
+}
+
+func (w *StandardOperationWaiter) State() string {
+	if w == nil || w.Op == nil {
+		return "<nil>"
+	}
+
+	status, _ := w.Op["status"].(string)
+	return status
+}
+
+func (w *StandardOperationWaiter) Error() error {
+	if w != nil && w.Op != nil {
+		if opErr, ok := w.Op["error"]; ok && opErr != nil {
+			errMap, ok := opErr.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("operation error: %v", opErr)
+			}
+			return StandardOperationError(errMap)
+		}
+	}
+	return nil
+}
+
+func (w *StandardOperationWaiter) IsRetryable(err error) bool {
+	if oe, ok := err.(StandardOperationError); ok {
+		if rawErrors, ok := oe["errors"].([]interface{}); ok {
+			for _, rawErr := range rawErrors {
+				if errMap, ok := rawErr.(map[string]interface{}); ok {
+					if code, _ := errMap["code"].(string); code == "RESOURCE_NOT_READY" {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
+func (w *StandardOperationWaiter) SetOp(op interface{}) error {
+	var ok bool
+	w.Op, ok = op.(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("Unable to set operation. Bad type!")
+	}
+	return nil
+}
+
+func (w *StandardOperationWaiter) QueryOp() (interface{}, error) {
+	if w == nil || w.Op == nil {
+		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
+	}
+	if w.Context != nil {
+		select {
+		case <-w.Context.Done():
+			log.Println("[WARN] request has been cancelled early")
+			return w.Op, errors.New("unable to finish polling, context has been cancelled")
+		default:
+			// default must be here to keep the previous case from blocking
+		}
+	}
+	opName, _ := w.Op["name"].(string)
+	var url string
+	if zone, ok := w.Op["zone"].(string); ok && zone != "" {
+		zoneName := GetResourceNameFromSelfLink(zone)
+		url = fmt.Sprintf("%sprojects/%s/zones/%s/operations/%s", w.BasePath, w.Project, zoneName, opName)
+	} else if region, ok := w.Op["region"].(string); ok && region != "" {
+		regionName := GetResourceNameFromSelfLink(region)
+		url = fmt.Sprintf("%sprojects/%s/regions/%s/operations/%s", w.BasePath, w.Project, regionName, opName)
+	} else if w.Parent != "" {
+		url = fmt.Sprintf("%slocations/global/operations/%s?parentId=%s", w.BasePath, opName, w.Parent)
+	} else {
+		url = fmt.Sprintf("%sprojects/%s/global/operations/%s", w.BasePath, w.Project, opName)
+	}
+	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    w.Config,
+		Method:    "GET",
+		Project:   w.Project,
+		RawURL:    url,
+		UserAgent: w.UserAgent,
+	})
+}
+
+func (w *StandardOperationWaiter) OpName() string {
+	if w == nil || w.Op == nil {
+		return "<nil> Operation"
+	}
+
+	name, _ := w.Op["name"].(string)
+	return name
+}
+
+func (w *StandardOperationWaiter) PendingStates() []string {
+	return []string{"PENDING", "RUNNING"}
+}
+
+func (w *StandardOperationWaiter) TargetStates() []string {
+	return []string{"DONE"}
+}
+
+// StandardOperationWaitTime waits for a long-running operation shaped like
+// StandardOperationWaiter expects (see above) to complete. basePath is the
+// resolved base URL of the product that owns the operation, e.g.
+// transport_tpg.BaseUrl(registry.GetProduct("compute"), config).
+func StandardOperationWaitTime(config *transport_tpg.Config, res interface{}, project, basePath, activity, userAgent string, timeout time.Duration) error {
+	op, err := ConvertToMap(res)
+	if err != nil {
+		return err
+	}
+
+	w := &StandardOperationWaiter{
+		Config:    config,
+		UserAgent: userAgent,
+		Context:   config.Context,
+		BasePath:  basePath,
+		Op:        op,
+		Project:   project,
+	}
+
+	if err := w.SetOp(op); err != nil {
+		return err
+	}
+	return OperationWait(w, activity, timeout, config.PollInterval)
+}
+
+// StandardOperationError wraps the error part of a StandardOperationWaiter
+// response and implements the error interface so it can be returned.
+type StandardOperationError map[string]interface{}
+
+func (e StandardOperationError) Error() string {
+	buf := bytes.NewBuffer(nil)
+	if rawErrors, ok := e["errors"].([]interface{}); ok {
+		for _, rawErr := range rawErrors {
+			if errMap, ok := rawErr.(map[string]interface{}); ok {
+				writeStandardOperationError(buf, errMap)
+			}
+		}
+	}
+
+	return buf.String()
+}
+
+const standardOperationErrMsgSep = "\n\n"
+
+func writeStandardOperationError(w io.StringWriter, opError map[string]interface{}) {
+	if msg, ok := opError["message"].(string); ok {
+		w.WriteString(msg + "\n")
+	}
+
+	code, _ := opError["code"].(string)
+
+	var lmMessage string
+	var linkDescription, linkURL string
+
+	if rawDetails, ok := opError["errorDetails"].([]interface{}); ok {
+		for _, rawDetail := range rawDetails {
+			detail, ok := rawDetail.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			if code == "QUOTA_EXCEEDED" {
+				if quotaInfo, ok := detail["quotaInfo"].(map[string]interface{}); ok {
+					if v, ok := quotaInfo["metricName"].(string); ok {
+						w.WriteString("\tmetric name = " + v + "\n")
+					}
+					if v, ok := quotaInfo["limitName"].(string); ok {
+						w.WriteString("\tlimit name = " + v + "\n")
+					}
+					if v, ok := quotaInfo["limit"].(float64); ok && v != 0 {
+						w.WriteString("\tlimit = " + fmt.Sprint(v) + "\n")
+					}
+					if v, ok := quotaInfo["futureLimit"].(float64); ok && v != 0 {
+						w.WriteString("\tfuture limit = " + fmt.Sprint(v) + "\n")
+						w.WriteString("\trollout status = in progress\n")
+					}
+					if dims, ok := quotaInfo["dimensions"]; ok && dims != nil {
+						w.WriteString("\tdimensions = " + fmt.Sprint(dims) + "\n")
+					}
+					break
+				}
+			}
+			if lmMessage == "" {
+				if lm, ok := detail["localizedMessage"].(map[string]interface{}); ok {
+					if msg, ok := lm["message"].(string); ok {
+						lmMessage = msg
+					}
+				}
+			}
+
+			if linkURL == "" {
+				if help, ok := detail["help"].(map[string]interface{}); ok {
+					if links, ok := help["links"].([]interface{}); ok && len(links) > 0 {
+						if link, ok := links[0].(map[string]interface{}); ok {
+							linkDescription, _ = link["description"].(string)
+							linkURL, _ = link["url"].(string)
+						}
+					}
+				}
+			}
+
+			if lmMessage != "" && linkURL != "" {
+				break
+			}
+		}
+	}
+
+	if lmMessage != "" {
+		w.WriteString(standardOperationErrMsgSep)
+		w.WriteString(lmMessage + "\n")
+	}
+
+	if linkURL != "" {
+		w.WriteString(standardOperationErrMsgSep)
+
+		if linkDescription != "" {
+			w.WriteString(linkDescription + "\n")
+		}
+
+		w.WriteString(linkURL + "\n")
+	}
+}

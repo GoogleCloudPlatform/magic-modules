@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,7 +18,6 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	tpgcloudbilling "github.com/hashicorp/terraform-provider-google/google/services/cloudbilling"
-	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -623,6 +623,13 @@ func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*sc
 	return []*schema.ResourceData{d}, nil
 }
 
+// computeBasePath resolves the Compute Engine API's base URL (honoring
+// custom endpoints and mTLS) without depending on the generated compute
+// service package, so that changes to that package can't break resourcemanager.
+func computeBasePath(config *transport_tpg.Config) string {
+	return transport_tpg.BaseUrl(registry.GetProduct("compute"), config)
+}
+
 // Delete a compute network along with the firewall rules inside it.
 func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Config, projectId, networkName string) error {
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -632,33 +639,70 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 
 	// Read the network from the API so we can get the correct self link format. We can't construct it from the
 	// base path because it might not line up exactly (compute.googleapis.com vs www.googleapis.com)
-	net, err := tpgcompute.NewClient(config, userAgent).Networks.Get(projectId, networkName).Do()
+	networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", computeBasePath(config), projectId, networkName)
+	net, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   projectId,
+		RawURL:    networkUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return err
 	}
+	netSelfLink, _ := net["selfLink"].(string)
 
 	token := ""
 	for paginate := true; paginate; {
-		filter := fmt.Sprintf("network eq %s", net.SelfLink)
-		resp, err := tpgcompute.NewClient(config, userAgent).Firewalls.List(projectId).Filter(filter).Do()
+		filter := fmt.Sprintf("network eq %s", netSelfLink)
+
+		firewallsUrl, err := url.Parse(fmt.Sprintf("%sprojects/%s/global/firewalls", computeBasePath(config), projectId))
+		if err != nil {
+			return fmt.Errorf("Error parsing URL: %s", err)
+		}
+		q := firewallsUrl.Query()
+		q.Set("filter", filter)
+		if token != "" {
+			q.Set("pageToken", token)
+		}
+		firewallsUrl.RawQuery = q.Encode()
+
+		resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   projectId,
+			RawURL:    firewallsUrl.String(),
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return errwrap.Wrapf("Error listing firewall rules in proj: {{err}}", err)
 		}
 
-		log.Printf("[DEBUG] Found %d firewall rules in %q network", len(resp.Items), networkName)
+		items, _ := resp["items"].([]interface{})
+		log.Printf("[DEBUG] Found %d firewall rules in %q network", len(items), networkName)
 
-		for _, firewall := range resp.Items {
-			op, err := tpgcompute.NewClient(config, userAgent).Firewalls.Delete(projectId, firewall.Name).Do()
+		for _, item := range items {
+			firewall := item.(map[string]interface{})
+			firewallName, _ := firewall["name"].(string)
+
+			deleteUrl := fmt.Sprintf("%sprojects/%s/global/firewalls/%s", computeBasePath(config), projectId, firewallName)
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "DELETE",
+				Project:   projectId,
+				RawURL:    deleteUrl,
+				UserAgent: userAgent,
+			})
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
-			err = tpgcompute.ComputeOperationWaitTime(config, op, projectId, "Deleting Firewall", userAgent, d.Timeout(schema.TimeoutCreate))
+			err = tpgresource.StandardOperationWaitTime(config, op, projectId, computeBasePath(config), "Deleting Firewall", userAgent, d.Timeout(schema.TimeoutCreate))
 			if err != nil {
 				return err
 			}
 		}
 
-		token = resp.NextPageToken
+		token, _ = resp["nextPageToken"].(string)
 		paginate = token != ""
 	}
 
@@ -714,13 +758,19 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 }
 
 func deleteComputeNetwork(project, network, userAgent string, config *transport_tpg.Config) error {
-	op, err := tpgcompute.NewClient(config, userAgent).Networks.Delete(
-		project, network).Do()
+	networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", computeBasePath(config), project, network)
+	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   project,
+		RawURL:    networkUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return errwrap.Wrapf("Error deleting network: {{err}}", err)
 	}
 
-	err = tpgcompute.ComputeOperationWaitTime(config, op, project, "Deleting Network", userAgent, 10*time.Minute)
+	err = tpgresource.StandardOperationWaitTime(config, op, project, computeBasePath(config), "Deleting Network", userAgent, 10*time.Minute)
 	if err != nil {
 		return err
 	}
