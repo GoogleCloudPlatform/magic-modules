@@ -41,7 +41,7 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west1"
-generate_list_resource: true
+
 samples:
   - name: 'network_services_lb_traffic_extension_basic'
     primary_resource_id: 'default'

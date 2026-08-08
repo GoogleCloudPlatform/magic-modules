@@ -57,7 +57,6 @@ custom_code:
   update_encoder: templates/terraform/update_encoder/network_services_gateway.go.tmpl
   constants: templates/terraform/constants/network_services_gateway.go.tmpl
   post_delete: templates/terraform/post_delete/network_services_gateway.go.tmpl
-generate_list_resource: true
 samples:
   - name: network_services_gateway_basic
     primary_resource_id: default

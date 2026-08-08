@@ -49,7 +49,7 @@ async:
     resource_inside_response: false
 autogen_async: true
 custom_code:
-generate_list_resource: true
+
 samples:
   - name: network_services_service_lb_policies_basic
     primary_resource_id: default

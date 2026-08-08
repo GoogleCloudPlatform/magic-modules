@@ -45,7 +45,7 @@ async:
 error_abort_predicates:
   - transport_tpg.Is429QuotaError
 custom_code:
-generate_list_resource: true
+
 samples:
   - name: network_services_edge_cache_keyset_basic
     primary_resource_id: default
