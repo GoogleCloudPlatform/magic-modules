@@ -29,9 +29,6 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
-{{- range $pkg, $alias := $.FirstTestConfig.Step.TestDependencies $.Runtime.ResourcePrefixPkgMap }}
-	{{ $alias }} "{{ $.ImportPath }}/{{ $pkg }}"
-{{- end }}
 )
 
 var (
@@ -42,9 +39,6 @@ var (
 {{ $step := $.FirstTestConfig.Step }}
 func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	t.Parallel()
-
-	// List-query tests always skip VCR mode as they don't have cassettes
-	acctest.SkipIfVcr(t)
 
 	{{- if $sample.SkipVcr }}
 	acctest.SkipIfVcr(t)
@@ -86,7 +80,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 
 	var listDisplayName acctest.ListDisplayName
 	var listScope acctest.ListScopeCapture
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
