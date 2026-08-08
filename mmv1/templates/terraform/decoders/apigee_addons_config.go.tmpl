@@ -1,0 +1,9 @@
+// For list responses, each item from the organizations endpoint has an
+// "organization" field. Map it to "org" so the flattener can set the
+// identity field and the id can be constructed.
+if org, ok := res["organization"]; ok && org != nil {
+	if err := d.Set("org", org); err != nil {
+		return nil, fmt.Errorf("error setting org: %w", err)
+	}
+}
+return res, nil
