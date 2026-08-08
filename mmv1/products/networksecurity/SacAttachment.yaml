@@ -24,6 +24,8 @@ min_version: beta
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/sacAttachments/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/sacAttachments?sacAttachmentId={{name}}
+generate_list_resource: true
+
 async:
   operation:
     base_url: '{{op_id}}'

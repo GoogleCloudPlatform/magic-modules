@@ -24,6 +24,8 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector_id}}
+generate_list_resource: true
+
 async:
   operation:
     base_url: '{{op_id}}'
