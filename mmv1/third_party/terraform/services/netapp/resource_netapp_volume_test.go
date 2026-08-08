@@ -1,4 +1,3 @@
-
 package netapp_test
 
 import (
@@ -13,8 +12,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
-    "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
-    "github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -599,7 +598,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 		if !ok {
 			return fmt.Errorf("Not found: %v", vault)
 		}
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}NetappBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/backupVaults/{{"{{"}}name{{"}}"}}/backups")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{name}}/backups")
 		if err != nil {
 			return fmt.Errorf("Error : %v", err)
 		}
@@ -636,7 +635,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 			return backupDataList[i].createTime.After(backupDataList[j].createTime)
 		})
 		for i := range backupDataList {
-			baseUrl, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}NetappBasePath{{"}}"}}")
+			baseUrl, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetappBasePath}}")
 			if err != nil {
 				return fmt.Errorf("Error : %v", err)
 			}
@@ -995,7 +994,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 			"time": {},
 		},
 		Steps: []resource.TestStep{
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithoutSquashMode(context),
 			},
 			{
@@ -1004,7 +1003,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithoutSquashModeUpdate(context),
 			},
 			{
@@ -1013,7 +1012,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithRootSquashModeUpdate(context),
 			},
 			{
@@ -1022,7 +1021,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithNoRootSquashModeUpdate(context),
 			},
 			{
@@ -1040,7 +1039,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithSquashMode_mutipleExportRules(context),
 			},
 			{
@@ -1049,7 +1048,7 @@ func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-            {
+			{
 				Config: testAccNetappVolume_volumeExportPolicyWithSquashMode_switchMutipleExportRules(context),
 			},
 			{
@@ -1434,15 +1433,15 @@ func TestSuppressSquashModeDiff(t *testing.T) {
 		New      string
 		Expected bool
 	}{
-        "Old is NO_ROOT_SQUASH, New is empty": {
-            Old: "NO_ROOT_SQUASH", New: "", Expected: true,
-        },
-        "Old is ROOT_SQUASH, New is empty": {
-            Old: "ROOT_SQUASH", New: "", Expected: true,
-        },
-        "user explicitly sets a value": {
-            Old: "NO_ROOT_SQUASH", New: "SOME_OTHER_MODE", Expected: false,
-        },
+		"Old is NO_ROOT_SQUASH, New is empty": {
+			Old: "NO_ROOT_SQUASH", New: "", Expected: true,
+		},
+		"Old is ROOT_SQUASH, New is empty": {
+			Old: "ROOT_SQUASH", New: "", Expected: true,
+		},
+		"user explicitly sets a value": {
+			Old: "NO_ROOT_SQUASH", New: "SOME_OTHER_MODE", Expected: false,
+		},
 	}
 
 	for name, tc := range cases {
@@ -1460,7 +1459,7 @@ func TestSuppressHasRootAccessDiff(t *testing.T) {
 		New      string
 		Expected bool
 	}{
-		"new is empty": {Old: "true", New: "", Expected: true},
+		"new is empty":                 {Old: "true", New: "", Expected: true},
 		"user explicitly sets a value": {Old: "true", New: "false", Expected: false},
 	}
 	for name, tc := range cases {
@@ -1571,110 +1570,3 @@ func testAccNetappVolume_LargeCapacityScaleTypeConfig_updated(context map[string
     }
     `, context)
 }
-
-
-{{- if ne $.TargetVersionName "ga" }}
-func TestAccNetappVolume_LargeCapacityScaleTierConfig(t *testing.T) {
-	context := map[string]interface{}{
-		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckNetappVolumeDestroyProducer(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: testAccNetappVolume_LargeCapacityScaleTierConfig_basic(context),
-			},
-			{
-				ResourceName:            "google_netapp_volume.test_volume",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccNetappVolume_LargeCapacityScaleTierConfig_updated(context),
-			},
-			{
-				ResourceName:            "google_netapp_volume.test_volume",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
-			},
-		},
-	})
-}
-
-func testAccNetappVolume_LargeCapacityScaleTierConfig_basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-    resource "google_netapp_storage_pool" "default" {
-        provider = google-beta
-        name = "tf-test-test-pool%{random_suffix}"
-        location = "us-central1-a"
-        service_level = "FLEX"
-        capacity_gib = "12288"
-        type = "UNIFIED"
-        scale_tier = "SCALE_TIER_ENTERPRISE"
-        network = data.google_compute_network.default.id
-    }
-
-    resource "google_netapp_volume" "test_volume" {
-        provider = google-beta
-        location = "us-central1-a"
-        name = "tf_test_test_volume%{random_suffix}"
-        capacity_gib = "12288"
-        storage_pool = google_netapp_storage_pool.default.name
-        protocols = ["NFSV3"]
-        share_name = "tf-test-volume-%{random_suffix}"
-        security_style = "UNIX"
-        large_capacity_config {
-            constituent_count = 6
-        }
-    }
-
-    data "google_compute_network" "default" {
-        provider = google-beta
-        name = "%{network_name}"
-    }
-    `, context)
-}
-
-func testAccNetappVolume_LargeCapacityScaleTierConfig_updated(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-    resource "google_netapp_storage_pool" "default" {
-        provider = google-beta
-        name = "tf-test-test-pool%{random_suffix}"
-        location = "us-central1-a"
-        service_level = "FLEX"
-        capacity_gib = "12288"
-        type = "UNIFIED"
-        scale_tier = "SCALE_TIER_ENTERPRISE"
-        network = data.google_compute_network.default.id
-    }
-
-    resource "google_netapp_volume" "test_volume" {
-        provider = google-beta
-        location = "us-central1-a"
-        name = "tf_test_test_volume%{random_suffix}"
-        capacity_gib = "12287"
-        storage_pool = google_netapp_storage_pool.default.name
-        protocols = ["NFSV3"]
-        share_name = "tf-test-volume-%{random_suffix}"
-        security_style = "UNIX"
-        large_capacity_config {
-            constituent_count = 6
-        }
-    }
-
-    data "google_compute_network" "default" {
-        provider = google-beta
-        name = "%{network_name}"
-    }
-    `, context)
-}
-{{- end }}
