@@ -67,7 +67,7 @@ samples:
       - name: 'backend_service_basic'
         resource_id_vars:
           backend_service_name: 'backend-service'
-          http_health_check_name: 'health-check'
+          health_check_name: 'health-check'
   - name: 'backend_service_external_iap'
     primary_resource_id: 'default'
     steps:
@@ -80,7 +80,7 @@ samples:
       - name: 'backend_service_cache_simple'
         resource_id_vars:
           backend_service_name: 'backend-service'
-          http_health_check_name: 'health-check'
+          health_check_name: 'health-check'
   - name: 'backend_service_cache_include_http_headers'
     primary_resource_id: 'default'
     steps:
@@ -99,14 +99,14 @@ samples:
       - name: 'backend_service_cache'
         resource_id_vars:
           backend_service_name: 'backend-service'
-          http_health_check_name: 'health-check'
+          health_check_name: 'health-check'
   - name: 'backend_service_cache_bypass_cache_on_request_headers'
     primary_resource_id: 'default'
     steps:
       - name: 'backend_service_cache_bypass_cache_on_request_headers'
         resource_id_vars:
           backend_service_name: 'backend-service'
-          http_health_check_name: 'health-check'
+          health_check_name: 'health-check'
   - name: 'backend_service_traffic_director_round_robin'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -961,7 +961,7 @@ properties:
       external load balancing. A backend service created for one type of
       load balancing cannot be used with the other. For more information, refer to
       [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
-    default_value: "EXTERNAL"
+    default_value: "EXTERNAL_MANAGED"
     # If you're modifying this value, it probably means Global ILB is now
     # an option. If that's the case, all of the documentation is based on
     # this resource supporting external load balancing only.
