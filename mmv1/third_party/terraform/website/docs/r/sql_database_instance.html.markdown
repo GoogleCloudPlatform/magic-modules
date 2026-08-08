@@ -496,6 +496,8 @@ The `settings` block supports:
 
 * `data_disk_provisioned_throughput` - (Optional) Provisioned throughput measured in MiB per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
 
+* `replication_lag_max_seconds` - (Optional) The number of seconds between two consecutive instance recreations after which replication is considered stuck and the replica is recreated. `0` disables the check.
+
 * `node_count` - For a read pool instance, the number of nodes in the read pool. For read pools with auto scaling enabled, this field is read only.
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
