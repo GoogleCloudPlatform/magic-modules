@@ -399,6 +399,14 @@ properties:
           The DNS name of the instance for PSC connectivity.
           Name convention: <uid>.<uid>.<region>.alloydb-psc.goog
         output: true
+      - name: pscAutoConnectionPolicyState
+        type: Enum
+        description: |
+          The state of the PSC auto connection policy for the instance.
+        enum_values:
+          - PSC_AUTO_CONNECTION_POLICY_STATE_UNSPECIFIED
+          - ENABLED
+          - DISABLED
       - name: pscInterfaceConfigs
         type: Array
         description: |
@@ -449,6 +457,80 @@ properties:
               description: |
                 The status of the service connection policy.
               output: true
+            - name: serviceConnectionPolicy
+              type: String
+              description: |
+                The PSC service connection policy name for the auto connection.
+              output: true
+            - name: serviceConnectionPolicyCreationState
+              type: String
+              description: |
+                The state of the PSC service connection policy creation for the auto connection.
+              output: true
+            - name: dnsAutomationInfos
+              type: Array
+              description: |
+                Information about the DNS automation for the PSC auto connection.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: state
+                    type: Enum
+                    description: |
+                      The state of the DNS automation for the PSC auto connection.
+                    enum_values:
+                      - STATE_UNSPECIFIED
+                      - PENDING_CREATE
+                      - ACTIVE
+                      - PENDING_DELETE
+                      - CREATE_FAILED
+                      - DELETE_FAILED
+                  - name: fullyQualifiedDomainName
+                    type: String
+                    description: |
+                      The fully qualified domain name of the instance for DNS automation.
+                      Example: "<cluster-uid>.<instance-uid>.<region>.alloydb-psc-auto.goog.".
+      - name: pscAutoDnsState
+        type: Enum
+        description: |
+          The state of the PSC auto DNS.
+          For new instances, the PSC auto DNS is enabled
+          by default. Use `effective_psc_auto_dns_enabled` to check the
+          effective state of the PSC auto DNS.
+        default_from_api: true
+        enum_values:
+          - PSC_AUTO_DNS_STATE_UNSPECIFIED
+          - PSC_AUTO_DNS_STATE_ENABLED
+          - PSC_AUTO_DNS_STATE_DISABLED
+  - name: pscInstanceInfo
+    type: NestedObject
+    description: |
+      Instance-level PSC information.
+    output: true
+    properties:
+      - name: effectivePscAutoDnsEnabled
+        type: Boolean
+        description: The effective state of the PSC auto DNS for the instance.
+        output: true
+      - name: effectivePscAutoConnectionPolicy
+        type: Boolean
+        description: |
+          Indicates if the PSC auto connection policy is enabled for the instance.
+          For older instances, this will be off by default, but for newer instances,
+          this will be auto-enabled.
+        output: true
+      - name: serviceConnectionPolicy
+        type: String
+        description: |
+          The PSC service connection policy name for the instance.
+          The format is "projects/<PROJECT_ID>/regions/<REGION_ID>/serviceConnectionPolicies/<alloydb-$NETWORK-$RANDOM-scp>".
+        output: true
+      - name: pscAutoDnsNames
+        type: Array
+        description: Specifies the auto DNS names for the instance.
+        item_type:
+          type: String
+        output: true
   - name: networkConfig
     type: NestedObject
     default_from_api: true
