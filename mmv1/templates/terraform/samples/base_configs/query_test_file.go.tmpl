@@ -43,6 +43,9 @@ var (
 func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	t.Parallel()
 
+	// List-query tests always skip VCR mode as they don't have cassettes
+	acctest.SkipIfVcr(t)
+
 	{{- if $sample.SkipVcr }}
 	acctest.SkipIfVcr(t)
 	{{- end }}
