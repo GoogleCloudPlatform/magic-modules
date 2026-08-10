@@ -17,7 +17,7 @@ description: A Distributed Cloud Edge API Key resource.
 references:
   guides:
     Google Distributed Cloud Edge: https://cloud.google.com/distributed-cloud/edge/latest/docs
-  api: https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1alpha/projects.locations.apiKeys
+  api: https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1/projects.locations.apiKeys
 min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/apiKeys
 immutable: true
