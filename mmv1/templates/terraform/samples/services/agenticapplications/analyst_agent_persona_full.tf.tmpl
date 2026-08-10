@@ -21,6 +21,54 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
     }
   }
 
+  artifact_examples {
+    resource {
+      display_label     = "sample_bq"
+      model_description = "Sample BQ model description"
+      use_rag           = false
+      bigquery_resource {
+        bigquery_dataset    = "my_dataset"
+        bigquery_table      = "my_table"
+        column_descriptions = { "col1" = "desc1" }
+      }
+    }
+  }
+
+  artifact_examples {
+    resource {
+      display_label     = "sample_f1"
+      model_description = "Sample F1 model description"
+      use_rag           = false
+      f1_resource {
+        f1_table = "projects/scottspin/locations/global/instances/my_inst/databases/my_db/tables/my_table"
+      }
+    }
+  }
+
+  artifact_examples {
+    resource {
+      display_label     = "sample_gcs"
+      model_description = "Sample GCS model description"
+      use_rag           = false
+      google_cloud_storage_resource {
+        google_cloud_storage_object = "gs://my-bucket/my-file.txt"
+        file_extension_restrictions = ["txt"]
+      }
+    }
+  }
+
+  artifact_examples {
+    resource {
+      display_label     = "sample_gdrive"
+      model_description = "Sample GDrive model description"
+      use_rag           = false
+      google_drive_resource {
+        file_reference              = "https://drive.google.com/file/d/12345"
+        file_extension_restrictions = ["txt"]
+      }
+    }
+  }
+
   artifacts_config {
     document_generation_options {
       export_format = "EXPORT_FORMAT_UNSPECIFIED"
@@ -33,6 +81,22 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
             file_title   = "doc.txt"
             file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
             mime_type    = "text/plain"
+          }
+          bigquery_resource {
+            bigquery_dataset    = "my_dataset"
+            bigquery_table      = "my_table"
+            column_descriptions = { "col1" = "desc1" }
+          }
+          f1_resource {
+            f1_table = "projects/scottspin/locations/global/instances/my_inst/databases/my_db/tables/my_table"
+          }
+          google_cloud_storage_resource {
+            google_cloud_storage_object = "gs://my-bucket/my-file.txt"
+            file_extension_restrictions = ["txt"]
+          }
+          google_drive_resource {
+            file_reference              = "https://drive.google.com/file/d/12345"
+            file_extension_restrictions = ["txt"]
           }
         }
       }
@@ -49,6 +113,22 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
             file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
             mime_type    = "text/plain"
           }
+          bigquery_resource {
+            bigquery_dataset    = "my_dataset"
+            bigquery_table      = "my_table"
+            column_descriptions = { "col1" = "desc1" }
+          }
+          f1_resource {
+            f1_table = "projects/scottspin/locations/global/instances/my_inst/databases/my_db/tables/my_table"
+          }
+          google_cloud_storage_resource {
+            google_cloud_storage_object = "gs://my-bucket/my-file.txt"
+            file_extension_restrictions = ["txt"]
+          }
+          google_drive_resource {
+            file_reference              = "https://drive.google.com/file/d/12345"
+            file_extension_restrictions = ["txt"]
+          }
         }
       }
     }
@@ -64,6 +144,22 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
             file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
             mime_type    = "text/plain"
           }
+          bigquery_resource {
+            bigquery_dataset    = "my_dataset"
+            bigquery_table      = "my_table"
+            column_descriptions = { "col1" = "desc1" }
+          }
+          f1_resource {
+            f1_table = "projects/scottspin/locations/global/instances/my_inst/databases/my_db/tables/my_table"
+          }
+          google_cloud_storage_resource {
+            google_cloud_storage_object = "gs://my-bucket/my-file.txt"
+            file_extension_restrictions = ["txt"]
+          }
+          google_drive_resource {
+            file_reference              = "https://drive.google.com/file/d/12345"
+            file_extension_restrictions = ["txt"]
+          }
         }
       }
     }
@@ -75,11 +171,16 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
   }
 
   mcp_data_sources {
-    server_url   = "https://mcp.example.com"
-    display_name = "Sample MCP Source"
-    description  = "Sample MCP data source description"
-    enabled      = true
-    prompt       = "Use this server for queries"
+    server_url      = "https://mcp.example.com"
+    display_name    = "Sample MCP Source"
+    description     = "Sample MCP data source description"
+    enabled         = true
+    prompt          = "Use this server for queries"
+    api_key         = "sample-api-key"
+    api_key_name    = "x-api-key"
+    client_id       = "sample-client-id"
+    client_secret   = "sample-client-secret"
+    oauth_token_url = "https://example.com/oauth/token"
   }
 
   resources {
@@ -90,6 +191,46 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
       file_title   = "financial_summary.txt"
       file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
       mime_type    = "text/plain"
+    }
+  }
+
+  resources {
+    display_label     = "sample_bq_resource"
+    model_description = "BigQuery resource description"
+    use_rag           = false
+    bigquery_resource {
+      bigquery_dataset    = "my_dataset"
+      bigquery_table      = "my_table"
+      column_descriptions = { "col1" = "desc1" }
+    }
+  }
+
+  resources {
+    display_label     = "sample_f1_resource"
+    model_description = "F1 resource description"
+    use_rag           = false
+    f1_resource {
+      f1_table = "projects/scottspin/locations/global/instances/my_inst/databases/my_db/tables/my_table"
+    }
+  }
+
+  resources {
+    display_label     = "sample_gcs_resource"
+    model_description = "GCS resource description"
+    use_rag           = false
+    google_cloud_storage_resource {
+      google_cloud_storage_object = "gs://my-bucket/my-file.txt"
+      file_extension_restrictions = ["txt"]
+    }
+  }
+
+  resources {
+    display_label     = "sample_gdrive_resource"
+    model_description = "GDrive resource description"
+    use_rag           = false
+    google_drive_resource {
+      file_reference              = "https://drive.google.com/file/d/12345"
+      file_extension_restrictions = ["txt"]
     }
   }
 
