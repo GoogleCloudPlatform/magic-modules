@@ -1520,8 +1520,18 @@ resource "google_ces_toolset" "ces_toolset_connector" {
 
   connector_toolset {
     connection = "projects/example/locations/us/connections/test-connection"
+    auth_config {
+      oauth2_auth_code_config {
+        oauth_token = "$context.variables.my_token"
+      }
+    }
     connector_actions {
-      connection_action_id = "action1"
+      entity_operation {
+        entity_id = "my-entity"
+        operation = "GET"
+      }
+      input_fields  = ["field1", "field2"]
+      output_fields = ["field3"]
     }
   }
 }
@@ -1555,8 +1565,17 @@ resource "google_ces_toolset" "ces_toolset_connector" {
 
   connector_toolset {
     connection = "projects/example/locations/us/connections/test-connection-updated"
+    auth_config {
+      oauth2_jwt_bearer_config {
+        client_key = "$context.variables.my_client_key"
+        issuer     = "$context.variables.my_issuer"
+        subject    = "$context.variables.my_subject"
+      }
+    }
     connector_actions {
-      connection_action_id = "action2"
+      connection_action_id = "action-updated"
+      input_fields  = ["field1-updated"]
+      output_fields = ["field3-updated"]
     }
   }
 }
