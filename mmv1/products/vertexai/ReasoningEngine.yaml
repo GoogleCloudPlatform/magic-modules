@@ -1102,6 +1102,87 @@ properties:
                   type: Boolean
                   description: |-
                     Optional. Generate memories in the third person if set to true.
+                - name: 'disableNaturalLanguageMemories'
+                  type: Boolean
+                  description: |-
+                    Optional. If true, natural language memory generation is disabled for the
+                    scopes that this customization config applies to. Set this to true when you
+                    only want to generate structured memories.
+                - name: 'generateMemoriesExamples'
+                  type: Array
+                  description: |-
+                    Optional. Few-shot examples of how to generate memories for the scopes that
+                    this customization config applies to. Each example pairs an input conversation
+                    with the memories that are expected to be generated from it.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'conversationSource'
+                        type: NestedObject
+                        description: |-
+                          Optional. The input conversation that the example memories are generated from.
+                        properties:
+                          - name: 'events'
+                            type: Array
+                            description: |-
+                              Optional. The conversation events of the example.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: 'content'
+                                  type: NestedObject
+                                  required: true
+                                  description: |-
+                                    Required. The content of the event. Only textual content is
+                                    supported in Terraform.
+                                  properties:
+                                    - name: 'role'
+                                      type: String
+                                      description: |-
+                                        Optional. The producer of the content, such as "user" or "model".
+                                    - name: 'parts'
+                                      type: Array
+                                      description: |-
+                                        Optional. The ordered parts that make up the content.
+                                      item_type:
+                                        type: NestedObject
+                                        properties:
+                                          - name: 'text'
+                                            type: String
+                                            description: |-
+                                              Optional. The text content of the part.
+                      - name: 'generatedMemories'
+                        type: Array
+                        description: |-
+                          Optional. The memories that are expected to be generated from the input
+                          conversation. An empty list indicates that no memories are expected to be
+                          generated for the input conversation.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: 'fact'
+                              type: String
+                              required: true
+                              description: |-
+                                Required. The fact to generate a memory from.
+                            - name: 'topics'
+                              type: Array
+                              description: |-
+                                Optional. The topics that the expected memory should be associated with.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'managedMemoryTopic'
+                                    type: String
+                                    description: |-
+                                      Optional. The managed memory topic that the memory should be
+                                      associated with (e.g. USER_PERSONAL_INFO, USER_PREFERENCES,
+                                      KEY_CONVERSATION_DETAILS, EXPLICIT_INSTRUCTIONS).
+                                  - name: 'customMemoryTopicLabel'
+                                    type: String
+                                    description: |-
+                                      Optional. The label of the custom memory topic that the memory
+                                      should be associated with.
           - name: 'structuredMemoryConfigs'
             type: Array
             description: |-

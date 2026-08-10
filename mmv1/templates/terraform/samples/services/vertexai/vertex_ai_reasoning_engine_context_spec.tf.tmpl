@@ -36,6 +36,32 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
             managed_topic_enum = "USER_PREFERENCES"
           }
         }
+        generate_memories_examples {
+          conversation_source {
+            events {
+              content {
+                role = "user"
+                parts {
+                  text = "Keep your answers short, I don't have much time."
+                }
+              }
+            }
+            events {
+              content {
+                role = "model"
+                parts {
+                  text = "Understood, I'll keep it brief."
+                }
+              }
+            }
+          }
+          generated_memories {
+            fact = "Prefers short answers."
+            topics {
+              managed_memory_topic = "USER_PREFERENCES"
+            }
+          }
+        }
       }
 
       # 2. Session-level Customization Config (Transient scratchpad)
