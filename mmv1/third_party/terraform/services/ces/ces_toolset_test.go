@@ -1519,7 +1519,7 @@ resource "google_ces_toolset" "ces_toolset_connector" {
   timeout      = "30s"
 
   connector_toolset {
-    connection = "projects/example/locations/us/connections/test-connection"
+    connection = "projects/gbot-experimentation/locations/us-central1/connections/test-connection"
     auth_config {
       oauth2_auth_code_config {
         oauth_token = "$context.variables.my_token"
@@ -1564,7 +1564,7 @@ resource "google_ces_toolset" "ces_toolset_connector" {
   timeout      = "60s"
 
   connector_toolset {
-    connection = "projects/example/locations/us/connections/test-connection-updated"
+    connection = "projects/gbot-experimentation/locations/us-central1/connections/test-connection-updated"
     auth_config {
       oauth2_jwt_bearer_config {
         client_key = "$context.variables.my_client_key"
