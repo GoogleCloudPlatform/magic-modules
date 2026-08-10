@@ -47,9 +47,11 @@ jobs:
         if: steps.read-comment.outputs.match != ''
         env:
           COMMENT_BODY: ${{ github.event.comment.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          USER_LOGIN: ${{ github.event.comment.user.login }}
         run: |
           # Execute the parse-comment subcommand
           # The comment body is passed via the COMMENT_BODY environment variable
           .ci/magician/magician parse-comment \
-            ${{ github.event.issue.number }} \
-            ${{ github.event.comment.user.login }}
+            "$ISSUE_NUMBER" \
+            "$USER_LOGIN"
