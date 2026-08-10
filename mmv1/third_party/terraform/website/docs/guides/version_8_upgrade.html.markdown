@@ -92,6 +92,12 @@ terraform {
 
 ## Resources
 
+## Resource: `google_bigquery_dataset`
+
+### `default_collation` is no longer computed
+
+`default_collation` is no longer treated as having any default value from the API when unspecified. Setting `default_collation = ""` in your configuration will now explicitly clear the current collation.
+
 ## Resource: `google_cloud_run_v2_worker_pool`
 
 ### `custom_audiences` is now removed
