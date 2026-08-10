@@ -1,0 +1,141 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ApiKey
+description: A Distributed Cloud Edge API Key resource.
+references:
+  guides:
+    Google Distributed Cloud Edge: https://cloud.google.com/distributed-cloud/edge/latest/docs
+  api: https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1alpha/projects.locations.apiKeys
+min_version: beta
+base_url: projects/{{project}}/locations/{{location}}/apiKeys
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/apiKeys/{{api_key_id}}
+create_url: projects/{{project}}/locations/{{location}}/apiKeys?apiKeyId={{api_key_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/apiKeys/{{api_key_id}}
+timeouts:
+  insert_minutes: 30
+  delete_minutes: 30
+async:
+  type: OpAsync
+  operation:
+    timeouts:
+      insert_minutes: 30
+      delete_minutes: 30
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: false
+autogen_status: QXBpS2V5QXV0b2dlblYyQWdlbnQ=
+autogen_async: true
+samples:
+  # Skip the api_key test as Edge Container requires physical hardware rack/edge zones enabled for the project.
+  - name: edgecontainer_api_key
+    primary_resource_id: default
+    exclude_test: true
+    min_version: beta
+    steps:
+      - name: edgecontainer_api_key
+        # Justification: validity is an input-only field not returned by the API during read/import.
+        ignore_read_extra:
+          - validity
+parameters:
+  - name: location
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The location of the API key.
+  - name: api_key_id
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      A client-specified ID for the API key.
+properties:
+  - name: key
+    type: String
+    output: true
+    description: |
+      The API key value string from the status.
+  - name: serviceAccountName
+    type: String
+    required: true
+    description: |
+      The relative resource name of the service account to which the API key is bound.
+  - name: zone
+    type: String
+    required: true
+    description: |
+      The zone to which the API key belongs.
+  - name: validity
+    type: String
+    # Justification: validity is write-only and not returned on read/GET from the API.
+    ignore_read: true
+    description: |
+      The lifetime of the API key. A duration in seconds with up to nine fractional digits, ending with 's'.
+  - name: apiTargets
+    type: Array
+    description: |
+      API targets that the key can access.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: service
+          type: String
+          required: true
+          description: |
+            The name of the service (e.g., compute.googleapis.com).
+        - name: methods
+          type: Array
+          description: |
+            The list of methods allowed on the service.
+          item_type:
+            type: String
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      Labels associated with the API key.
+  - name: state
+    type: Enum
+    output: true
+    description: |
+      The current state of the API key.
+    enum_values:
+      - STATE_UNSPECIFIED
+      - ACTIVE
+      - NOT_ACTIVE
+  - name: reason
+    type: String
+    output: true
+    description: |
+      The reason for the current state.
+  - name: createTime
+    type: Time
+    output: true
+    description: |
+      The timestamp when the API key was created.
+  - name: updateTime
+    type: Time
+    output: true
+    description: |
+      The timestamp when the API key was updated.
+  - name: expireTime
+    type: Time
+    output: true
+    description: |
+      The timestamp when the API key expires.
