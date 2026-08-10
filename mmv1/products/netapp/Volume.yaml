@@ -555,29 +555,39 @@ properties:
       [Volume migration](https://docs.cloud.google.com/netapp/volumes/docs/migrate/ontap/overview) and
       [external replication](https://docs.cloud.google.com/netapp/volumes/docs/protect-data/replicate-ontap/overview)
       are two types of Hybrid Replication. This parameter block specifies the parameters for a hybrid replication.
+      This field will suppress diffs that change the value from empty to non-empty. To force changing this field
+      from empty to non-empty, change another field at the same time.
     # This parameter is only used at CREATE. READs will omit it.
     ignore_read: true
+    immutable: true
+    # Diff suppress function prevents forced recreations for existing resources when upgrading from older provider versions
+    diff_suppress_func: 'netappVolumeHybridReplicationParametersDiffSuppress'
     properties:
       - name: replication
         type: String
         description: |
           Required. Desired name for the replication of this volume.
+        immutable: true
       - name: peerVolumeName
         type: String
         description: |
           Required. Name of the ONTAP source volume to be replicated to NetApp Volumes destination volume.
+        immutable: true
       - name: peerClusterName
         type: String
         description: |
           Required. Name of the ONTAP source cluster to be peered with NetApp Volumes.
+        immutable: true
       - name: peerSvmName
         type: String
         description: |
           Required. Name of the ONTAP source vserver SVM to be peered with NetApp Volumes.
+        immutable: true
       - name: peerIpAddresses
         type: Array
         description: |
           Required. List of all intercluster LIF IP addresses of the ONTAP source cluster.
+        immutable: true
         item_type:
           type: String
       - name: clusterLocation
@@ -585,19 +595,23 @@ properties:
         description: |
           Optional. Name of source cluster location associated with the replication. This is a free-form field
           for display purposes only.
+        immutable: true
       - name: description
         type: String
         description: |
           Optional. Description of the replication.
+        immutable: true
       - name: labels
         type: KeyValuePairs
         description: |
           Optional. Labels to be added to the replication as the key value pairs.
           An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+        immutable: true
       - name: replicationSchedule
         type: Enum
         description: |
           Optional. Replication Schedule for the replication created.
+        immutable: true
         enum_values:
           - EVERY_10_MINUTES
           - HOURLY
@@ -609,6 +623,7 @@ properties:
           and `ONPREM_REPLICATION` to create an external replication.
           Other values are read-only. `REVERSE_ONPREM_REPLICATION` is used to represent an external
           replication which got reversed. Default is `MIGRATION`.
+        immutable: true
         enum_values:
           - MIGRATION
           - CONTINUOUS_REPLICATION
@@ -618,6 +633,7 @@ properties:
         type: Integer
         description: |
           Optional. If the source is a FlexGroup volume, this field needs to match the number of constituents in the FlexGroup.
+        immutable: true
   - name: throughputMibps
     type: Double
     description: |
