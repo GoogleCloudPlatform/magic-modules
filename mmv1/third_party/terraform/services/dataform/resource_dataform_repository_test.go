@@ -1,5 +1,4 @@
 package dataform_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -7,9 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/sourcerepo"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/dataform"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/sourcerepo"
 )
 
 func TestAccDataformRepository_updated(t *testing.T) {
@@ -21,7 +20,7 @@ func TestAccDataformRepository_updated(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataformRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -49,12 +48,10 @@ func TestAccDataformRepository_updated(t *testing.T) {
 func testAccDataformRepository_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_sourcerepo_repository" "git_repository" {
-  provider = google-beta
   name = "my/repository%{random_suffix}"
 }
 
 resource "google_secret_manager_secret" "secret" {
-  provider = google-beta
   secret_id = "secret"
 
   replication {
@@ -63,14 +60,12 @@ resource "google_secret_manager_secret" "secret" {
 }
 
 resource "google_secret_manager_secret_version" "secret_version" {
-  provider = google-beta
   secret = google_secret_manager_secret.secret.id
 
   secret_data = "tf-test-secret-data%{random_suffix}"
 }
 
 resource "google_dataform_repository" "dataform_repository" {
-  provider = google-beta
   name = "tf_test_dataform_repository%{random_suffix}"
 
   git_remote_settings {
@@ -91,12 +86,10 @@ resource "google_dataform_repository" "dataform_repository" {
 func testAccDataformRepository_updated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_sourcerepo_repository" "git_repository" {
-  provider = google-beta
   name = "my/repository%{random_suffix}"
 }
 
 resource "google_secret_manager_secret" "secret" {
-  provider = google-beta
   secret_id = "tf-test-secret%{random_suffix}"
 
   replication {
@@ -105,14 +98,12 @@ resource "google_secret_manager_secret" "secret" {
 }
 
 resource "google_secret_manager_secret_version" "secret_version" {
-  provider = google-beta
   secret = google_secret_manager_secret.secret.id
 
   secret_data = "tf-test-secret-data%{random_suffix}"
 }
 
 resource "google_dataform_repository" "dataform_repository" {
-  provider = google-beta
   name = "tf_test_dataform_repository%{random_suffix}"
 
   git_remote_settings {
@@ -128,4 +119,3 @@ resource "google_dataform_repository" "dataform_repository" {
 }
 `, context)
 }
-{{- end }}

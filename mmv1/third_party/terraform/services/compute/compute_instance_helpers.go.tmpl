@@ -219,7 +219,6 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 			result["onInstanceStopAction"] = transformedOnInstanceStopAction
 		}
 	}
-{{- if ne $.TargetVersionName "ga" }}
 	if v, ok := original["host_error_timeout_seconds"]; ok {
 		//host_error_timeout_seconds doesn't get removed correctly due to an API bug on instances.SetScheduling.
 		//We need to send null as a workaround because nil is rounded to 0
@@ -229,6 +228,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 			result["hostErrorTimeoutSeconds"] = int64(v.(int))
 		}
 	}
+{{- if ne $.TargetVersionName "ga" }}
 
 	if v, ok := original["maintenance_interval"]; ok && v.(string) != "" {
 		result["maintenanceInterval"] = v.(string)
@@ -423,12 +423,12 @@ func flattenScheduling(resp map[string]interface{}) []map[string]interface{} {
 		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(ois)
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
-	schedulingMap["skip_guest_os_shutdown"] = resp["skipGuestOsShutdown"]
-
 	if h := getInt(resp["hostErrorTimeoutSeconds"]); h != 0 {
 		schedulingMap["host_error_timeout_seconds"] = h
 	}
+
+{{ if ne $.TargetVersionName `ga` -}}
+	schedulingMap["skip_guest_os_shutdown"] = resp["skipGuestOsShutdown"]
 
 	if mi, ok := resp["maintenanceInterval"].(string); ok && mi != "" {
 		schedulingMap["maintenance_interval"] = mi
@@ -1224,10 +1224,10 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	if oScheduling["availability_domain"] != newScheduling["availability_domain"] {
 			return true
 	}
-{{- if ne $.TargetVersionName "ga" }}
 	if oScheduling["host_error_timeout_seconds"] != newScheduling["host_error_timeout_seconds"] {
 		return true
 	}
+{{- if ne $.TargetVersionName "ga" }}
 
 	if oScheduling["skip_guest_os_shutdown"] != newScheduling["skip_guest_os_shutdown"] {
 		return true
