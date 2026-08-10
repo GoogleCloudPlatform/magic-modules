@@ -12,7 +12,7 @@ Get the OpenID provider configuration (`/.well-known/openid-configuration`) for 
 
 ```tf
 data "google_iam_workload_identity_pool_openid_config" "example" {
-  workload_identity_pool_id = "organizations/433637338589/locations/global/workloadIdentityPools/agents.global.org-433637338589.system.id.goog"
+  resource_name = "https://sts.googleapis.com/v1/organizations/433637338589/locations/global/workloadIdentityPools/agents.global.org-433637338589.system.id.goog/.well-known/openid-configuration"
 }
 ```
 
@@ -20,7 +20,7 @@ data "google_iam_workload_identity_pool_openid_config" "example" {
 
 The following arguments are supported:
 
-* `workload_identity_pool_id` - (Required) The name of the pool whose OpenID provider configuration to retrieve.
+* `resource_name` - (Required) The OIDC discovery URI.
 
 - - -
 

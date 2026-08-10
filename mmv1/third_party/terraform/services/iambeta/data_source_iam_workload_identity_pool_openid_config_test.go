@@ -44,7 +44,7 @@ func TestAccDataSourceIAMBetaWorkloadIdentityPoolOpenIdConfig_basic(t *testing.T
 func testAccDataSourceIAMBetaWorkloadIdentityPoolOpenIdConfigBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_iam_workload_identity_pool_openid_config" "example" {
-	workload_identity_pool_id = "organizations/%{org_id}/locations/global/workloadIdentityPools/agents.global.org-%{org_id}.system.id.goog"
+	resource_name = "https://sts.googleapis.com/v1/organizations/%{org_id}/locations/global/workloadIdentityPools/agents.global.org-%{org_id}.system.id.goog/.well-known/openid-configuration"
 }
 `, context)
 }

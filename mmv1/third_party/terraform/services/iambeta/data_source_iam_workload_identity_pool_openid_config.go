@@ -16,10 +16,10 @@ func DataSourceIAMBetaWorkloadIdentityPoolOpenIdConfig() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceIAMBetaWorkloadIdentityPoolOpenIdConfigRead,
 		Schema: map[string]*schema.Schema{
-			"workload_identity_pool_id": {
+			"resource_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The name of the pool whose OpenID provider configuration to retrieve.",
+				Description: "The OIDC discovery URI.",
 			},
 			"issuer": {
 				Type:        schema.TypeString,
@@ -70,8 +70,8 @@ func dataSourceIAMBetaWorkloadIdentityPoolOpenIdConfigRead(d *schema.ResourceDat
 		return err
 	}
 
-	poolName := d.Get("workload_identity_pool_id").(string)
-	url := fmt.Sprintf("https://sts.googleapis.com/v1/%s/.well-known/openid-configuration?alt=json", poolName)
+	poolName := d.Get("resource_name").(string)
+	url := poolName
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
