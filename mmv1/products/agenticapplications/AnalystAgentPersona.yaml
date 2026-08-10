@@ -48,8 +48,6 @@ samples:
           display_name: "Updated Test Analyst Persona"
           customer_context: "Updated customer context for testing"
 
-
-
 parameters:
   - name: location
     type: String
