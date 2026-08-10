@@ -136,7 +136,7 @@ properties:
     type: Boolean
     description: |
       Allows App Engine second generation runtimes to access the legacy bundled services.
-      Cannot specify both `app_engine_apis` and 'app_engine_bundled_services` together.
+      Cannot specify both `app_engine_apis` and `app_engine_bundled_services` together.
     immutable: true
     conflicts:
       - app_engine_bundled_services
@@ -460,8 +460,6 @@ properties:
         required: true
   - name: 'appEngineBundledServices'
     type: Array
-    # Developer Note: This field is write-only because the App Engine GET Admin API
-    # does not return it in the response (we use ignore_read: true to prevent state drift to null).
     # It is marked is_set: true to represent the list as a set in Terraform so configuration
     # ordering differences do not trigger spurious plans.
     description: |
