@@ -1453,3 +1453,112 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
 }
 `, context)
 }
+
+func TestAccCESToolset_cesToolsetConnectorExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESToolsetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESToolset_cesToolsetConnectorExample_full(context),
+			},
+			{
+				ResourceName:            "google_ces_toolset.ces_toolset_connector",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+			{
+				Config: testAccCESToolset_cesToolsetConnectorExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_toolset.ces_toolset_connector", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_toolset.ces_toolset_connector",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+		},
+	})
+}
+
+func testAccCESToolset_cesToolsetConnectorExample_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "ces_app_for_toolset" {
+  app_id = "tf-test-app-id%{random_suffix}"
+  location = "us"
+  description = "App used as parent for CES Toolset example"
+  display_name = "tf-test-my-app%{random_suffix}"
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_toolset" "ces_toolset_connector" {
+  toolset_id = "toolset1%{random_suffix}"
+  location = "us"
+  app      = google_ces_app.ces_app_for_toolset.app_id
+  display_name = "Basic toolset display name"
+  timeout      = "30s"
+
+  connector_toolset {
+    connection = "projects/example/locations/us/connections/test-connection"
+    connector_actions {
+      connection_action_id = "action1"
+    }
+  }
+}
+`, context)
+}
+
+func testAccCESToolset_cesToolsetConnectorExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "ces_app_for_toolset" {
+  app_id = "tf-test-app-id%{random_suffix}"
+  location = "us"
+  description = "App used as parent for CES Toolset example"
+  display_name = "tf-test-my-app%{random_suffix}"
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_toolset" "ces_toolset_connector" {
+  toolset_id = "toolset1%{random_suffix}"
+  location = "us"
+  app      = google_ces_app.ces_app_for_toolset.app_id
+  display_name = "Updated toolset display name"
+  timeout      = "60s"
+
+  connector_toolset {
+    connection = "projects/example/locations/us/connections/test-connection-updated"
+    connector_actions {
+      connection_action_id = "action2"
+    }
+  }
+}
+`, context)
+}
