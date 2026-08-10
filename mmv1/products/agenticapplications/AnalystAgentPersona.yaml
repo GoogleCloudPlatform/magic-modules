@@ -47,6 +47,8 @@ samples:
         vars:
           display_name: "Updated Test Analyst Persona"
           customer_context: "Updated customer context for testing"
+  - name: analyst_agent_persona_full
+    primary_resource_id: example
 
 parameters:
   - name: location

@@ -1,0 +1,115 @@
+resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourceId}}" {
+  location                 = "us"
+  analyst_agent_persona_id = "tf-acc-test-{{index .Vars "random_suffix"}}"
+  display_name             = "Full Test Analyst Persona"
+  display_description      = "Sample full analyst agent persona description"
+  customer_context         = ["Sample customer context for testing"]
+  model_description        = "Sample model description"
+  role                     = "ANALYST_ROLE_GENERIC_FINANCE_ANALYST"
+  gemini_enterprise_engine = "projects/scottspin/locations/global/collections/default_collection/engines/my_engine"
+
+  artifact_examples {
+    resource {
+      display_label     = "sample_raw_file"
+      model_description = "Sample artifact resource model description"
+      use_rag           = false
+      raw_file_resource {
+        file_title   = "example_doc.txt"
+        file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
+        mime_type    = "text/plain"
+      }
+    }
+  }
+
+  artifacts_config {
+    document_generation_options {
+      export_format = "EXPORT_FORMAT_UNSPECIFIED"
+      document_examples {
+        resource {
+          display_label     = "doc_example"
+          model_description = "Sample doc description"
+          use_rag           = false
+          raw_file_resource {
+            file_title   = "doc.txt"
+            file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
+            mime_type    = "text/plain"
+          }
+        }
+      }
+    }
+    slide_generation_options {
+      export_format = "EXPORT_FORMAT_UNSPECIFIED"
+      slide_examples {
+        resource {
+          display_label     = "slide_example"
+          model_description = "Sample slide description"
+          use_rag           = false
+          raw_file_resource {
+            file_title   = "slide.txt"
+            file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
+            mime_type    = "text/plain"
+          }
+        }
+      }
+    }
+    visualization_options {
+      visualization_examples {
+        visualization_type = "VISUALIZATION_TYPE_UNSPECIFIED"
+        resource {
+          display_label     = "viz_example"
+          model_description = "Sample viz description"
+          use_rag           = false
+          raw_file_resource {
+            file_title   = "viz.txt"
+            file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
+            mime_type    = "text/plain"
+          }
+        }
+      }
+    }
+  }
+
+  external_data_sources {
+    data_source = "projects/scottspin/datasets/my_dataset/tables/my_table"
+    enabled     = true
+  }
+
+  mcp_data_sources {
+    server_url   = "https://mcp.example.com"
+    display_name = "Sample MCP Source"
+    description  = "Sample MCP data source description"
+    enabled      = true
+    prompt       = "Use this server for queries"
+  }
+
+  resources {
+    display_label     = "sample_raw_file_full"
+    model_description = "Resource model description"
+    use_rag           = false
+    raw_file_resource {
+      file_title   = "financial_summary.txt"
+      file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
+      mime_type    = "text/plain"
+    }
+  }
+
+  skills {
+    skill_id    = "finance_analysis_skill"
+    description = "Skill for finance analysis"
+    content     = "# Finance Analysis\nAnalyze financial data."
+    references {
+      reference_id = "ref_1"
+      content      = "Reference content for skill"
+    }
+  }
+
+  tables {
+    name        = "sample_table"
+    description = "Sample table description"
+    columns {
+      name        = "column_1"
+      description = "First column description"
+      data_type   = "STRING"
+    }
+  }
+}
