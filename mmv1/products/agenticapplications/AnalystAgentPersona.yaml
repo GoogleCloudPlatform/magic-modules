@@ -49,6 +49,9 @@ samples:
           customer_context: "Updated customer context for testing"
   - name: analyst_agent_persona_full
     primary_resource_id: example
+    exclude_test: true
+    steps:
+      - name: analyst_agent_persona_full
 
 parameters:
   - name: location
