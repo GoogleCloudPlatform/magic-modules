@@ -13,7 +13,7 @@
 
 ---
 name: AnalystAgentPersona
-description: Description
+description: Represents a persona configuration for an analyst agent in Agentic Applications.
 base_url: projects/{{project}}/locations/{{location}}/analystAgentPersonas
 self_link: projects/{{project}}/locations/{{location}}/analystAgentPersonas/{{analyst_agent_persona_id}}
 create_url: projects/{{project}}/locations/{{location}}/analystAgentPersonas?analystAgentPersonaId={{analyst_agent_persona_id}}
@@ -43,10 +43,16 @@ samples:
         vars:
           display_name: "Test Analyst Persona"
           customer_context: "Sample customer context for testing"
+          additional_context: "Initial additional context"
+          file_title: "financial_summary.txt"
+          skill_description: "Skill for finance analysis"
       - name: analyst_agent_persona_basic
         vars:
           display_name: "Updated Test Analyst Persona"
           customer_context: "Updated customer context for testing"
+          additional_context: "Updated additional context"
+          file_title: "financial_summary_updated.txt"
+          skill_description: "Updated skill description for finance analysis"
   - name: analyst_agent_persona_full
     primary_resource_id: example
     exclude_test: true
@@ -595,52 +601,31 @@ properties:
       properties:
         - name: airQuality
           type: NestedObject
-          description: |-
-            Configurations for the AirQuality external data source.
-            google3/cloud/ai/agentis/shared/tools/openapi/specs/golden/environment.yaml.textproto
+          description: Configurations for the AirQuality external data source.
           properties: []
         - name: bureauLaborStatistics
           type: NestedObject
-          description: |-
-            Configurations for the BureauLaborStatistics external data source.
-            google3/cloud/ai/agentis/shared/tools/openapi/specs/golden/bureau_labor_statistics.yaml.textproto
+          description: Configurations for the BureauLaborStatistics external data source.
           properties: []
         - name: coindesk
           type: NestedObject
-          description: |-
-            Configurations for the Coindesk external data source.
-            google3/cloud/ai/agentis/shared/tools/openapi/specs/golden/coindesk.yaml.textproto
+          description: Configurations for the Coindesk external data source.
           properties: []
-        - name: dataSource
-          type: String
-          description: |-
-            Deprecated. Use oneof data_source instead.
-            The name of the external data source.
-
-            The name corresponds to internal names of data sources the agent supports.
-            Note that some data sources, even if enabled, will require an API key
-            to have been configured.
         - name: enabled
           type: Boolean
           required: true
           description: Whether this external data source is enabled for the current analysis.
         - name: finnhub
           type: NestedObject
-          description: |-
-            Configurations for the Finnhub external data source.
-            google3/cloud/ai/agentis/shared/tools/openapi/specs/golden/finnhub.yaml.textproto
+          description: Configurations for the Finnhub external data source.
           properties: []
         - name: fred
           type: NestedObject
-          description: |-
-            Configurations for the Fred external data source.
-            google3/cloud/ai/agentis/shared/tools/openapi/specs/golden/fred.yaml.textproto
+          description: Configurations for the Fred external data source.
           properties: []
         - name: secEdgar
           type: NestedObject
-          description: |-
-            Configurations for the SecEdgar external data source.
-            google3/cloud/ai/agentis/shared/tools/openapi/specs/golden/sec_full_text_search.yaml.textproto
+          description: Configurations for the SecEdgar external data source.
           properties: []
         - name: selectionName
           type: String
@@ -651,15 +636,11 @@ properties:
           output: true
         - name: treasurySecuritiesAuctions
           type: NestedObject
-          description: |-
-            Configurations for the TreasurySecuritiesAuctions external data source.
-            google3/cloud/ai/agentis/shared/tools/openapi/specs/golden/treasury_securities_auctions.yaml.textproto
+          description: Configurations for the TreasurySecuritiesAuctions external data source.
           properties: []
         - name: usda
           type: NestedObject
-          description: |-
-            Configurations for the USDA external data source.
-            google3/cloud/ai/agentis/shared/tools/openapi/specs/golden/us_department_agriculture.yaml.textproto
+          description: Configurations for the USDA external data source.
           properties: []
   - name: geminiEnterpriseEngine
     type: String

@@ -19,5 +19,4 @@ scopes:
 versions:
   - name: ga
     base_url: https://agenticapplications.googleapis.com/v1/
-  - name: beta
-    base_url: https://agenticapplications.googleapis.com/v1/
+
