@@ -59,23 +59,27 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 http_archive(
     name = "terraform_1_14_linux_amd64",
     build_file_content = "exports_files(['terraform'])",
+    integrity = "sha256-M6whdFi6i0TOKBNVMIO8EyyaB+QaecLjYnl3aC0oMJM=",
     urls = ["https://releases.hashicorp.com/terraform/1.14.0/terraform_1.14.0_linux_amd64.zip"],
 )
 
 http_archive(
     name = "terraform_1_9_linux_amd64",
     build_file_content = "exports_files(['terraform'])",
+    integrity = "sha256-GG4BRfXl8uuXy9eFvHjyG65O8VEZNJ9q1PpTW4OxDfg=",
     urls = ["https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_linux_amd64.zip"],
 )
 
 http_archive(
     name = "terraform_1_14_darwin_arm64",
     build_file_content = "exports_files(['terraform'])",
+    integrity = "sha256-V/3hzCU0p+jEiqrirSlUCEUChSwl1zH8lX5Lgx914W4=",
     urls = ["https://releases.hashicorp.com/terraform/1.14.0/terraform_1.14.0_darwin_arm64.zip"],
 )
 
 http_archive(
     name = "terraform_1_9_darwin_arm64",
     build_file_content = "exports_files(['terraform'])",
+    integrity = "sha256-hz17kl0IV4+2u5wSx82SrnPiieB8Ng8v3Wn5A2t7qqs=",
     urls = ["https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_darwin_arm64.zip"],
 )
