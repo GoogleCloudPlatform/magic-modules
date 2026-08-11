@@ -1,6 +1,6 @@
 resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourceId}}" {
   location                 = "us"
-  analyst_agent_persona_id = "tf-acc-test-{{index .Vars "random_suffix"}}"
+  analyst_agent_persona_id = "tf-acc-basic-{{index .Vars "random_suffix"}}"
   display_name             = "{{index .Vars "display_name"}}"
   display_description      = "Sample analyst agent persona description"
   customer_context         = ["{{index .Vars "customer_context"}}", "{{index .Vars "additional_context"}}"]

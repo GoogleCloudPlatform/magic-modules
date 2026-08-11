@@ -55,7 +55,6 @@ samples:
           skill_description: "Updated skill description for finance analysis"
   - name: analyst_agent_persona_full
     primary_resource_id: example
-    exclude_test: true
     steps:
       - name: analyst_agent_persona_full
       - name: analyst_agent_persona_full_update
