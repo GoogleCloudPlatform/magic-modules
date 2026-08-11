@@ -1,19 +1,19 @@
 resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourceId}}" {
   location                 = "us"
   analyst_agent_persona_id = "tf-acc-test-{{index .Vars "random_suffix"}}"
-  display_name             = "Full Test Analyst Persona"
-  display_description      = "Sample full analyst agent persona description"
-  customer_context         = ["Sample customer context for testing"]
-  model_description        = "Sample model description"
+  display_name             = "Full Test Analyst Persona Updated"
+  display_description      = "Updated full analyst agent persona description"
+  customer_context         = ["Sample customer context for testing", "Updated customer context"]
+  model_description        = "Updated model description"
   role                     = "ANALYST_ROLE_GENERIC_FINANCE_ANALYST"
 
   artifact_examples {
     resource {
       display_label     = "sample_raw_file"
-      model_description = "Sample artifact resource model description"
+      model_description = "Updated artifact resource model description"
       use_rag           = false
       raw_file_resource {
-        file_title   = "example_doc.txt"
+        file_title   = "example_doc_updated.txt"
         file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
         mime_type    = "text/plain"
       }
@@ -83,10 +83,10 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
       document_examples {
         resource {
           display_label     = "doc_example_raw"
-          model_description = "Sample doc raw description"
+          model_description = "Updated doc raw description"
           use_rag           = false
           raw_file_resource {
-            file_title   = "doc.txt"
+            file_title   = "doc_updated.txt"
             file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
             mime_type    = "text/plain"
           }
@@ -151,10 +151,10 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
       slide_examples {
         resource {
           display_label     = "slide_example_raw"
-          model_description = "Sample slide raw description"
+          model_description = "Updated slide raw description"
           use_rag           = false
           raw_file_resource {
-            file_title   = "slide.txt"
+            file_title   = "slide_updated.txt"
             file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
             mime_type    = "text/plain"
           }
@@ -219,10 +219,10 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
         visualization_type = "VISUALIZATION_TYPE_UNSPECIFIED"
         resource {
           display_label     = "viz_example_raw"
-          model_description = "Sample viz raw description"
+          model_description = "Updated viz raw description"
           use_rag           = false
           raw_file_resource {
-            file_title   = "viz.txt"
+            file_title   = "viz_updated.txt"
             file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
             mime_type    = "text/plain"
           }
@@ -295,10 +295,10 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
 
   mcp_data_sources {
     server_url      = "https://mcp.example.com"
-    display_name    = "Sample MCP Source"
-    description     = "Sample MCP data source description"
+    display_name    = "Updated MCP Source"
+    description     = "Updated MCP data source description"
     enabled         = true
-    prompt          = "Use this server for queries"
+    prompt          = "Use this server for updated queries"
     api_key         = "sample-api-key"
     api_key_name    = "x-api-key"
     client_id       = "sample-client-id"
@@ -308,10 +308,10 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
 
   resources {
     display_label     = "sample_raw_file_full"
-    model_description = "Resource model description"
+    model_description = "Updated Resource model description"
     use_rag           = false
     raw_file_resource {
-      file_title   = "financial_summary.txt"
+      file_title   = "financial_summary_updated.txt"
       file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
       mime_type    = "text/plain"
     }
@@ -367,20 +367,20 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
 
   skills {
     skill_id    = "finance_analysis_skill"
-    description = "Skill for finance analysis"
-    content     = "# Finance Analysis\nAnalyze financial data."
+    description = "Updated skill description for finance analysis"
+    content     = "# Finance Analysis\nAnalyze financial data updated."
     references {
       reference_id = "ref_1"
-      content      = "Reference content for skill"
+      content      = "Updated Reference content for skill"
     }
   }
 
   tables {
     name        = "sample_table"
-    description = "Sample table description"
+    description = "Updated table description"
     columns {
       name        = "column_1"
-      description = "First column description"
+      description = "First column description updated"
       data_type   = "STRING"
     }
   }

@@ -58,6 +58,7 @@ samples:
     exclude_test: true
     steps:
       - name: analyst_agent_persona_full
+      - name: analyst_agent_persona_full_update
 
 parameters:
   - name: location
@@ -659,6 +660,8 @@ properties:
         - name: apiKey
           type: String
           description: Input only. The API key of the MCP server.
+          ignore_read: true
+          sensitive: true
         - name: apiKeyName
           type: String
           description: The API key parameter name.
@@ -668,6 +671,8 @@ properties:
         - name: clientSecret
           type: String
           description: Input only. The client secret for authentication.
+          ignore_read: true
+          sensitive: true
         - name: description
           type: String
           required: true
