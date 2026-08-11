@@ -898,8 +898,7 @@ properties:
                 type: String
                 required: true
                 description: |-
-                  The data type of the column. This should be a GoogleSQL data type, see
-                  https://g3doc.corp.google.com/company/teams/googlesql/reference/data-types.md?cl=head.
+                  The data type of the column. This should be a GoogleSQL data type.
                   Parameterized types such as PROTO, ENUM, ARRAY, STRUCT<...>, and
                   RANGE are not supported.
               - name: description
