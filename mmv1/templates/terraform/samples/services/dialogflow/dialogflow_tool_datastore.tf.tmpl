@@ -1,5 +1,6 @@
 resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
   location = "{{index $.ResourceIdVars "location"}}"
+  tool_key = "{{index $.ResourceIdVars "tool_key"}}"
   display_name = "datastore-tool"
   description = "A tool with Data Store spec"
   data_store_spec {
