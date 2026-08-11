@@ -53,4 +53,10 @@ Read this index at decision points; open only the source the task needs. Format 
 
 ## Agent-only entries
 
+### Field (`field/`)
+
 - **enums-vs-strings** — Model an API enum as Enum (strict, plan-time) or String (forward-compatible): the deliberate trade-off. — [field/enums-vs-strings.md](field/enums-vs-strings.md)
+
+### Bugs (`bug/`)
+
+*(No entries yet)*
