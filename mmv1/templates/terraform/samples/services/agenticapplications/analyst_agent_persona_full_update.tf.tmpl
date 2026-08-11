@@ -1,3 +1,27 @@
+resource "google_bigquery_dataset" "bq_ds" {
+  dataset_id  = "tf_acc_ds_{{index .Vars "random_suffix"}}"
+  location    = "US"
+}
+
+resource "google_bigquery_table" "bq_tbl" {
+  dataset_id          = google_bigquery_dataset.bq_ds.dataset_id
+  table_id            = "tf_acc_tbl_{{index .Vars "random_suffix"}}"
+  deletion_protection = false
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "tfaccbucket{{index .Vars "random_suffix"}}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name    = "example_object.txt"
+  content = "Hello World Updated"
+  bucket  = google_storage_bucket.bucket.name
+}
+
 resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourceId}}" {
   location                 = "us"
   analyst_agent_persona_id = "tf-acc-full-{{index .Vars "random_suffix"}}"
@@ -20,6 +44,29 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
     }
   }
 
+  artifact_examples {
+    resource {
+      display_label     = "sample_bq_tbl"
+      model_description = "Updated BQ table model description"
+      use_rag           = false
+      bigquery_resource {
+        bigquery_table = "projects/${google_bigquery_dataset.bq_ds.project}/datasets/${google_bigquery_dataset.bq_ds.dataset_id}/tables/${google_bigquery_table.bq_tbl.table_id}"
+      }
+    }
+  }
+
+  artifact_examples {
+    resource {
+      display_label     = "sample_gcs"
+      model_description = "Updated GCS model description"
+      use_rag           = false
+      google_cloud_storage_resource {
+        google_cloud_storage_object = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
+        file_extension_restrictions = ["txt", "csv"]
+      }
+    }
+  }
+
   artifacts_config {
     document_generation_options {
       export_format = "EXPORT_FORMAT_UNSPECIFIED"
@@ -32,6 +79,16 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
             file_title   = "doc_updated.txt"
             file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
             mime_type    = "text/plain"
+          }
+        }
+      }
+      document_examples {
+        resource {
+          display_label     = "doc_example_bq_tbl"
+          model_description = "Updated doc BQ table description"
+          use_rag           = false
+          bigquery_resource {
+            bigquery_table = "projects/${google_bigquery_dataset.bq_ds.project}/datasets/${google_bigquery_dataset.bq_ds.dataset_id}/tables/${google_bigquery_table.bq_tbl.table_id}"
           }
         }
       }
@@ -91,6 +148,25 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
       file_title   = "financial_summary_updated.txt"
       file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
       mime_type    = "text/plain"
+    }
+  }
+
+  resources {
+    display_label     = "sample_bq_dataset_resource"
+    model_description = "Updated BigQuery dataset resource description"
+    use_rag           = false
+    bigquery_resource {
+      bigquery_dataset = "projects/${google_bigquery_dataset.bq_ds.project}/datasets/${google_bigquery_dataset.bq_ds.dataset_id}"
+    }
+  }
+
+  resources {
+    display_label     = "sample_gcs_resource"
+    model_description = "Updated GCS resource description"
+    use_rag           = false
+    google_cloud_storage_resource {
+      google_cloud_storage_object = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
+      file_extension_restrictions = ["txt", "csv"]
     }
   }
 
