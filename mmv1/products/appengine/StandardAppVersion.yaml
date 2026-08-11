@@ -374,6 +374,7 @@ properties:
       - manual_scaling
     # This flattener is entirely handwritten and must be updated with **any** new field or subfield
     custom_flatten: templates/terraform/custom_flatten/appengine_standardappversion_automatic_scaling_handlenil.go.tmpl
+    default_from_api: true
     properties:
       - name: maxConcurrentRequests
         type: Integer
