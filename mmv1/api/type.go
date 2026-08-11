@@ -1480,8 +1480,9 @@ func (t *Type) ProviderOnly() bool {
 func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	nestedProps := t.ResourceMetadata.UserProperites()
 
+	pathSegments := strings.Split(schemaPath, ".0.")
 	var pathTkns []string
-	for _, pname := range strings.Split(schemaPath, ".0.") {
+	for i, pname := range pathSegments {
 		camelPname := google.Camelize(pname, "lower")
 		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
 
@@ -1494,11 +1495,12 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 			return ""
 		}
 
-		// Terraform SDK only allows ExactlyOneOf/ConflictsWith/etc. paths to go
-		// through TypeList blocks with MaxItems:1. A TypeArray with no MaxSize (or
-		// MaxSize > 1) maps to an unbounded TypeList in the schema, which the SDK
-		// rejects in constraint paths. Return "" so the path is silently dropped.
-		if prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
+		// Terraform SDK rejects ExactlyOneOf/ConflictsWith/etc. paths that
+		// traverse an unbounded TypeList (TypeArray without MaxSize:1) as an
+		// intermediate segment. The terminal segment itself may be any type, so
+		// only apply this guard to non-final path tokens.
+		isIntermediate := i < len(pathSegments)-1
+		if isIntermediate && prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
 			return ""
 		}
 
