@@ -682,7 +682,10 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 		log.Printf("[DEBUG] Found %d firewall rules in %q network", len(items), networkName)
 
 		for _, item := range items {
-			firewall := item.(map[string]interface{})
+			firewall, ok := item.(map[string]interface{})
+			if !ok {
+				continue
+			}
 			firewallName, _ := firewall["name"].(string)
 
 			deleteUrl := fmt.Sprintf("%sprojects/%s/global/firewalls/%s", computeBasePath(config), projectId, firewallName)
