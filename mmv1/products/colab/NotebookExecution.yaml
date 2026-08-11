@@ -228,6 +228,8 @@ properties:
             diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - name: shieldedInstanceConfig
         type: NestedObject
+        # GCP API does not return shieldedInstanceConfig in GET responses for NotebookExecutionJob.
+        ignore_read: true
         description: 'Shielded VM configuration.'
         properties:
           - name: enableIntegrityMonitoring
@@ -241,6 +243,8 @@ properties:
             description: 'Defines whether the instance has the vTPM enabled. Enabled by default.'
   - name: workbenchRuntime
     type: NestedObject
+    # GCP API does not return workbenchRuntime in GET responses for NotebookExecutionJob.
+    ignore_read: true
     description: 'Configuration for a Workbench Instances-based environment.'
     properties:
       - name: vmImage
