@@ -51,11 +51,12 @@ resource "google_compute_url_map" "default" {
 }
 
 resource "google_compute_backend_service" "default" {
-  name          = "backend-service"
-  port_name     = "http"
-  protocol      = "HTTP"
-  timeout_sec   = 10
-  health_checks = [google_compute_http_health_check.default.id]
+  name                  = "backend-service"
+  port_name             = "http"
+  protocol              = "HTTP"
+  timeout_sec           = 10
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_http_health_check.default.id]
 }
 
 resource "google_compute_http_health_check" "default" {
