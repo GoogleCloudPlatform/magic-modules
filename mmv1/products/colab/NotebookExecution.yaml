@@ -168,8 +168,6 @@ properties:
         type: String
         required: true
         description: 'The base64-encoded contents of the input notebook file.'
-        custom_flatten: 'templates/terraform/custom_flatten/colab_notebook_execution_direct_content.go.tmpl'
-        tgc_ignore_terraform_custom_flatten: true
   - name: executionTimeout
     type: String
     description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'
