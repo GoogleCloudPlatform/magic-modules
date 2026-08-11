@@ -1494,6 +1494,14 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 			return ""
 		}
 
+		// Terraform SDK only allows ExactlyOneOf/ConflictsWith/etc. paths to go
+		// through TypeList blocks with MaxItems:1. A TypeArray with no MaxSize (or
+		// MaxSize > 1) maps to an unbounded TypeList in the schema, which the SDK
+		// rejects in constraint paths. Return "" so the path is silently dropped.
+		if prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
+			return ""
+		}
+
 		nestedProps = prop.NestedProperties()
 		if !prop.FlattenObject {
 			pathTkns = append(pathTkns, google.Underscore(pname))
@@ -1507,9 +1515,9 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	return strings.Join(pathTkns[:], ".0.")
 }
 
-// findPropByNameInFlattenedList searches for a property by camelCase name in a list of
-// properties. It also searches recursively inside any FlattenObject nested objects, since
-// those appear as top-level fields in the Terraform schema.
+// findPropByNameInFlattenedList searches for a property by camelCase name in a
+// list of properties. It also searches recursively inside any FlattenObject
+// nested objects, since those appear as top-level fields in the Terraform schema.
 func findPropByNameInFlattenedList(props []*Type, name string) *Type {
 	for _, p := range props {
 		if p.Name == name {
