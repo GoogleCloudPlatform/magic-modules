@@ -28,6 +28,11 @@ func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 		"cust_id":       envvar.GetTestCustIdFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
+	bindingResourceName := "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding"
+	accessLevelResourceName := fmt.Sprintf(
+		"google_access_context_manager_access_level.tf_test_access_level_id_for_user_access_binding%s",
+		context["random_suffix"],
+	)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -35,25 +40,75 @@ func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 		CheckDestroy:             testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerGcpUserAccessBinding_accessContextManagerGcpUserAccessBindingBasicExample(context),
+				Config: testAccAccessContextManagerGcpUserAccessBinding_accessContextManagerGcpUserAccessBindingDryRunOnlyExample(t, context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(bindingResourceName, "dry_run_access_levels.#", "1"),
+					resource.TestCheckResourceAttrPair(bindingResourceName, "dry_run_access_levels.0", accessLevelResourceName, "name"),
+					resource.TestCheckNoResourceAttr(bindingResourceName, "access_levels.0"),
+					resource.TestCheckNoResourceAttr(bindingResourceName, "session_settings.#"),
+					resource.TestCheckNoResourceAttr(bindingResourceName, "scoped_access_settings.#"),
+				),
 			},
 			{
-				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding",
+				ResourceName:      bindingResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// organization_id is URL-only and is not returned by the API.
+				ImportStateVerifyIgnore: []string{"organization_id"},
+			},
+			{
+				Config: testAccAccessContextManagerGcpUserAccessBinding_accessContextManagerGcpUserAccessBindingBasicExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(bindingResourceName, "access_levels.#", "1"),
+					resource.TestCheckResourceAttrPair(bindingResourceName, "access_levels.0", accessLevelResourceName, "name"),
+					resource.TestCheckNoResourceAttr(bindingResourceName, "dry_run_access_levels.0"),
+				),
+			},
+			{
+				ResourceName:            bindingResourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization_id"},
 			},
 			{
 				Config: testAccAccessContextManagerGcpUserAccessBinding_accessContextManagerGcpUserAccessBindingNamedExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(bindingResourceName, "access_levels.#", "1"),
+					resource.TestCheckResourceAttrPair(bindingResourceName, "access_levels.0", accessLevelResourceName, "name"),
+					resource.TestCheckResourceAttr(bindingResourceName, "dry_run_access_levels.#", "1"),
+					resource.TestCheckResourceAttrPair(bindingResourceName, "dry_run_access_levels.0", accessLevelResourceName, "name"),
+				),
 			},
 			{
-				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding",
+				ResourceName:            bindingResourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization_id"},
 			},
 		},
 	})
+}
+
+func testAccAccessContextManagerGcpUserAccessBinding_accessContextManagerGcpUserAccessBindingDryRunOnlyExample(t *testing.T, context map[string]interface{}) string {
+	t.Helper()
+
+	dependencies, _, found := strings.Cut(
+		testAccAccessContextManagerGcpUserAccessBinding_accessContextManagerGcpUserAccessBindingBasicExample(context),
+		"\nresource \"google_access_context_manager_gcp_user_access_binding\" \"gcp_user_access_binding\" {\n",
+	)
+	if !found {
+		t.Fatal("basic fixture does not contain the GCP user access binding")
+	}
+
+	return dependencies + acctest.Nprintf(`
+resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding" {
+  organization_id = "%{org_id}"
+  group_key       = trimprefix(google_cloud_identity_group.group.id, "groups/")
+  dry_run_access_levels = [
+    google_access_context_manager_access_level.tf_test_access_level_id_for_user_access_binding%{random_suffix}.name,
+  ]
+}
+`, context)
 }
 
 func testAccAccessContextManagerGcpUserAccessBinding_accessContextManagerGcpUserAccessBindingBasicExample(context map[string]interface{}) string {
@@ -181,6 +236,9 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
   organization_id = "%{org_id}"
   group_key       = trimprefix(google_cloud_identity_group.group.id, "groups/")
   access_levels   = [
+    google_access_context_manager_access_level.tf_test_access_level_id_for_user_access_binding%{random_suffix}.name,
+  ]
+  dry_run_access_levels = [
     google_access_context_manager_access_level.tf_test_access_level_id_for_user_access_binding%{random_suffix}.name,
   ]
   session_settings {

@@ -86,6 +86,14 @@ properties:
       type: String
     min_size: 1
     max_size: 1
+  - name: dryRunAccessLevels
+    type: Array
+    description: |
+      Optional. Dry run access level that will be evaluated but will not be enforced. The access denial based on dry run policy will be logged. Only one access level is supported, not multiple. This list must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+    item_type:
+      type: String
+    min_size: 1
+    max_size: 1
   - name: sessionSettings
     type: NestedObject
     description: |
