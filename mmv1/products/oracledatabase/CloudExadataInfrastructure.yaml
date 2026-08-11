@@ -19,6 +19,7 @@ references:
   api: https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.cloudExadataInfrastructures
 docs:
 base_url: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures
+generate_list_resource: true
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}
 create_url: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures?cloudExadataInfrastructureId={{cloud_exadata_infrastructure_id}}
