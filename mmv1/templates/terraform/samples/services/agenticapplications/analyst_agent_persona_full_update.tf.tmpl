@@ -1,16 +1,16 @@
 resource "google_bigquery_dataset" "bq_ds" {
-  dataset_id  = "tf_acc_ds_{{index .Vars "random_suffix"}}"
+  dataset_id  = "{{index $.ResourceIdVars "dataset_id"}}"
   location    = "US"
 }
 
 resource "google_bigquery_table" "bq_tbl" {
   dataset_id          = google_bigquery_dataset.bq_ds.dataset_id
-  table_id            = "tf_acc_tbl_{{index .Vars "random_suffix"}}"
+  table_id            = "{{index $.ResourceIdVars "table_id"}}"
   deletion_protection = false
 }
 
 resource "google_storage_bucket" "bucket" {
-  name                        = "tfaccbucket{{index .Vars "random_suffix"}}"
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
   location                    = "US"
   uniform_bucket_level_access = true
   force_destroy               = true
@@ -24,7 +24,7 @@ resource "google_storage_bucket_object" "object" {
 
 resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourceId}}" {
   location                 = "us"
-  analyst_agent_persona_id = "tf-acc-full-{{index .Vars "random_suffix"}}"
+  analyst_agent_persona_id = "{{index $.ResourceIdVars "persona_id"}}"
   display_name             = "Full Test Analyst Persona Updated"
   display_description      = "Updated full analyst agent persona description"
   customer_context         = ["Sample customer context for testing", "Updated customer context"]
