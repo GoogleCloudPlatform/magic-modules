@@ -35,11 +35,29 @@ config_setting(
 )
 
 alias(
+    name = "terraform_1_14",
+    actual = select({
+        "@platforms//os:linux": "@terraform_1_14_linux_amd64//:terraform",
+        "@platforms//os:macos": "@terraform_1_14_darwin_arm64//:terraform",
+        "//conditions:default": "@terraform_1_14_linux_amd64//:terraform",
+    }),
+)
+
+alias(
+    name = "terraform_1_9",
+    actual = select({
+        "@platforms//os:linux": "@terraform_1_9_linux_amd64//:terraform",
+        "@platforms//os:macos": "@terraform_1_9_darwin_arm64//:terraform",
+        "//conditions:default": "@terraform_1_9_linux_amd64//:terraform",
+    }),
+)
+
+alias(
     name = "terraform_bin",
     actual = select({
-        ":is_tf_1_14": "@terraform_1_14_linux_amd64//:terraform",
-        ":is_tf_1_9": "@terraform_1_9_linux_amd64//:terraform",
-        "//conditions:default": "@terraform_1_14_linux_amd64//:terraform",
+        ":is_tf_1_14": ":terraform_1_14",
+        ":is_tf_1_9": ":terraform_1_9",
+        "//conditions:default": ":terraform_1_14",
     }),
     visibility = ["//visibility:public"],
 )

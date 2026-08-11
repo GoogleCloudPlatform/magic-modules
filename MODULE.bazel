@@ -1,7 +1,7 @@
 bazel_dep(name = "rules_go", version = "0.60.0")
 bazel_dep(name = "gazelle", version = "0.47.0")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
-
+bazel_dep(name = "platforms", version = "1.0.0")
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
 go_sdk.download(version = "1.26.0")
 
@@ -66,4 +66,16 @@ http_archive(
     name = "terraform_1_9_linux_amd64",
     build_file_content = "exports_files(['terraform'])",
     urls = ["https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_linux_amd64.zip"],
+)
+
+http_archive(
+    name = "terraform_1_14_darwin_arm64",
+    build_file_content = "exports_files(['terraform'])",
+    urls = ["https://releases.hashicorp.com/terraform/1.14.0/terraform_1.14.0_darwin_arm64.zip"],
+)
+
+http_archive(
+    name = "terraform_1_9_darwin_arm64",
+    build_file_content = "exports_files(['terraform'])",
+    urls = ["https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_darwin_arm64.zip"],
 )
