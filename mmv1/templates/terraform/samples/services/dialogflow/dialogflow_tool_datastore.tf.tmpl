@@ -6,7 +6,8 @@ resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
   data_store_spec {
     data_store_connections {
       data_store = "projects/test-project/locations/{{index $.ResourceIdVars "location"}}/dataStores/test-datastore"
-      data_store_type = "PUBLIC_WEB"
+      data_store_type          = "PUBLIC_WEB"
+      document_processing_mode = "DOCUMENTS"
     }
     fallback_prompt {}
   }

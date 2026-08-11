@@ -7,6 +7,14 @@ resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
     name = "projects/test-project/locations/{{index $.ResourceIdVars "location"}}/connections/test-connection"
     actions {
       connection_action_id = "test-action"
+      input_fields        = ["field1", "field2"]
+      output_fields       = ["field3"]
+    }
+    actions {
+      entity_operation {
+        entity_id = "test-entity"
+        operation = "CREATE"
+      }
     }
   }
 }

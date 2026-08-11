@@ -37,6 +37,62 @@ samples:
         resource_id_vars:
           location: "global"
           tool_key: "basic_tool_key"
+  - name: dialogflow_tool_connector
+    primary_resource_id: connector_tool
+    min_version: "beta"
+    steps:
+      - name: dialogflow_tool_connector
+        resource_id_vars:
+          location: "global"
+          tool_key: "connector_tool_key"
+  - name: dialogflow_tool_datastore
+    primary_resource_id: datastore_tool
+    min_version: "beta"
+    steps:
+      - name: dialogflow_tool_datastore
+        resource_id_vars:
+          location: "global"
+          tool_key: "datastore_tool_key"
+  - name: dialogflow_tool_function
+    primary_resource_id: function_tool
+    min_version: "beta"
+    steps:
+      - name: dialogflow_tool_function
+        resource_id_vars:
+          location: "global"
+          tool_key: "function_tool_key"
+  - name: dialogflow_tool_auth
+    primary_resource_id: auth_tool
+    min_version: "beta"
+    steps:
+      - name: dialogflow_tool_auth
+        resource_id_vars:
+          location: "global"
+          tool_key: "auth_tool_key"
+  - name: dialogflow_tool_bearer
+    primary_resource_id: bearer_tool
+    min_version: "beta"
+    steps:
+      - name: dialogflow_tool_bearer
+        resource_id_vars:
+          location: "global"
+          tool_key: "bearer_token_tool_key"
+  - name: dialogflow_tool_oauth
+    primary_resource_id: oauth_tool
+    min_version: "beta"
+    steps:
+      - name: dialogflow_tool_oauth
+        resource_id_vars:
+          location: "global"
+          tool_key: "oauth_tool_key"
+  - name: dialogflow_tool_service_agent
+    primary_resource_id: service_agent_tool
+    min_version: "beta"
+    steps:
+      - name: dialogflow_tool_service_agent
+        resource_id_vars:
+          location: "global"
+          tool_key: "service_agent_tool_key"
 
 parameters:
   - name: location
