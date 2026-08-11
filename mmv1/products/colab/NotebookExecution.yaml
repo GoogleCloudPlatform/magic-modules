@@ -21,7 +21,9 @@ references:
     'Schedule a notebook run': 'https://cloud.google.com/colab/docs/schedule-notebook-run'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.notebookExecutionJobs'
 base_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs'
-self_link: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}?view=NOTEBOOK_EXECUTION_JOB_VIEW_FULL'
+delete_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
+id_format: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
 immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs?notebook_execution_job_id={{notebook_execution_job_id}}'
 async:
@@ -43,8 +45,6 @@ samples:
         test_env_vars:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
-        ignore_read_extra:
-          - direct_notebook_source.0.content
   - name: 'colab_notebook_execution_custom_env'
     primary_resource_id: 'notebook-execution'
     steps:
@@ -55,8 +55,6 @@ samples:
         test_env_vars:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
-        ignore_read_extra:
-          - direct_notebook_source.0.content
   - name: 'colab_notebook_execution_workbench_runtime_vm'
     primary_resource_id: 'notebook-execution'
     steps:
@@ -66,8 +64,6 @@ samples:
         test_env_vars:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
-        ignore_read_extra:
-          - direct_notebook_source.0.content
   - name: 'colab_notebook_execution_workbench_runtime_vm_name'
     primary_resource_id: 'notebook-execution'
     steps:
@@ -77,8 +73,6 @@ samples:
         test_env_vars:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
-        ignore_read_extra:
-          - direct_notebook_source.0.content
   - name: 'colab_notebook_execution_full'
     min_version: beta
     primary_resource_id: 'notebook-execution'
@@ -165,7 +159,6 @@ properties:
   - name: 'directNotebookSource'
     type: NestedObject
     description: 'The content of the input notebook in ipynb format.'
-    ignore_read: true
     exactly_one_of:
       - dataform_repository_source
       - gcs_notebook_source
@@ -237,8 +230,6 @@ properties:
             diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - name: shieldedInstanceConfig
         type: NestedObject
-        # GCP API does not return shieldedInstanceConfig in GET responses for NotebookExecutionJob.
-        ignore_read: true
         description: 'Shielded VM configuration.'
         properties:
           - name: enableIntegrityMonitoring
@@ -252,8 +243,6 @@ properties:
             description: 'Defines whether the instance has the vTPM enabled. Enabled by default.'
   - name: workbenchRuntime
     type: NestedObject
-    # GCP API does not return workbenchRuntime in GET responses for NotebookExecutionJob.
-    ignore_read: true
     description: 'Configuration for a Workbench Instances-based environment.'
     properties:
       - name: vmImage
