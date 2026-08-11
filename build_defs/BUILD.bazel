@@ -15,3 +15,31 @@ bzl_library(
     ],
     visibility = ["//visibility:public"],
 )
+
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+
+string_flag(
+    name = "terraform_version",
+    build_setting_default = "1.14.0",
+    values = ["1.14.0", "1.9.8"],
+)
+
+config_setting(
+    name = "is_tf_1_14",
+    flag_values = {":terraform_version": "1.14.0"},
+)
+
+config_setting(
+    name = "is_tf_1_9",
+    flag_values = {":terraform_version": "1.9.8"},
+)
+
+alias(
+    name = "terraform_bin",
+    actual = select({
+        ":is_tf_1_14": "@terraform_1_14_linux_amd64//:terraform",
+        ":is_tf_1_9": "@terraform_1_9_linux_amd64//:terraform",
+        "//conditions:default": "@terraform_1_14_linux_amd64//:terraform",
+    }),
+    visibility = ["//visibility:public"],
+)
