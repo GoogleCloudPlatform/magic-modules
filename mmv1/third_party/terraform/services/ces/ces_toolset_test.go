@@ -1495,6 +1495,16 @@ func TestAccCESToolset_cesToolsetConnectorExample_update(t *testing.T) {
 
 func testAccCESToolset_cesToolsetConnectorExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "test_project" {
+}
+
+resource "google_integration_connectors_connection" "bq_conn" {
+  name              = "tf-test-conn-%{random_suffix}"
+  location          = "us-central1"
+  service_account   = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+  connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/gcp/connectors/bigquery/versions/1"
+}
+
 resource "google_ces_app" "ces_app_for_toolset" {
   app_id = "tf-test-app-id%{random_suffix}"
   location = "us"
@@ -1519,19 +1529,14 @@ resource "google_ces_toolset" "ces_toolset_connector" {
   timeout      = "30s"
 
   connector_toolset {
-    connection = "projects/gbot-experimentation/locations/us-central1/connections/test-connection"
+    connection = google_integration_connectors_connection.bq_conn.id
     auth_config {
       oauth2_auth_code_config {
         oauth_token = "$context.variables.my_token"
       }
     }
     connector_actions {
-      entity_operation {
-        entity_id = "my-entity"
-        operation = "GET"
-      }
-      input_fields  = ["field1", "field2"]
-      output_fields = ["field3"]
+      connection_action_id = "executeCustomQuery"
     }
   }
 }
@@ -1540,6 +1545,16 @@ resource "google_ces_toolset" "ces_toolset_connector" {
 
 func testAccCESToolset_cesToolsetConnectorExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "test_project" {
+}
+
+resource "google_integration_connectors_connection" "bq_conn" {
+  name              = "tf-test-conn-%{random_suffix}"
+  location          = "us-central1"
+  service_account   = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+  connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/gcp/connectors/bigquery/versions/1"
+}
+
 resource "google_ces_app" "ces_app_for_toolset" {
   app_id = "tf-test-app-id%{random_suffix}"
   location = "us"
@@ -1564,7 +1579,7 @@ resource "google_ces_toolset" "ces_toolset_connector" {
   timeout      = "60s"
 
   connector_toolset {
-    connection = "projects/gbot-experimentation/locations/us-central1/connections/test-connection-updated"
+    connection = google_integration_connectors_connection.bq_conn.id
     auth_config {
       oauth2_jwt_bearer_config {
         client_key = "$context.variables.my_client_key"
@@ -1573,9 +1588,7 @@ resource "google_ces_toolset" "ces_toolset_connector" {
       }
     }
     connector_actions {
-      connection_action_id = "action-updated"
-      input_fields  = ["field1-updated"]
-      output_fields = ["field3-updated"]
+      connection_action_id = "executeCustomQuery"
     }
   }
 }
