@@ -239,9 +239,7 @@ fields:
   - api_field: 'scheduling.gracefulShutdown.maxDuration.nanos'
   - api_field: 'scheduling.gracefulShutdown.maxDuration.seconds'
 {{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'scheduling.hostErrorTimeoutSeconds'
-{{- end }}
   - api_field: 'scheduling.instanceTerminationAction'
   - api_field: 'scheduling.localSsdRecoveryTimeout.nanos'
   - api_field: 'scheduling.localSsdRecoveryTimeout.seconds'
