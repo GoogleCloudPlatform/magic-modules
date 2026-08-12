@@ -253,6 +253,7 @@ properties:
     properties:
       - name: serviceAccountProjectNumber
         type: String
+        immutable: true
         description: |
           Immutable. Cloud project number used to assign policies to all service accounts owned by the project.
       - name: serviceAccount
