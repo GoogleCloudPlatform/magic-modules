@@ -50,9 +50,6 @@ custom_code:
 samples:
   - name: oracledatabase_odbsubnet
     primary_resource_id: my-odbsubnet
-    # Skip in VCR until the test issue is resolved
-    # TODO(shuyama): Add GH issue link
-    skip_vcr: true
     steps:
       - name: oracledatabase_odbsubnet
         resource_id_vars:

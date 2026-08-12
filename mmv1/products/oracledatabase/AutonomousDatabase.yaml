@@ -63,9 +63,6 @@ samples:
           database_name: fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))
   - name: oracledatabase_autonomous_database_full
     primary_resource_id: myADB
-    # Skip in VCR until the test issue is resolved
-    # TODO(shuyama): Add GH issue link
-    skip_vcr: true
     steps:
       - name: oracledatabase_autonomous_database_full
         resource_id_vars:
