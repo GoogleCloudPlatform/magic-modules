@@ -81,7 +81,6 @@ parameters:
     description: |
       The location of the agent gateway.
     url_param_only: true
-    required: true
 properties:
   - name: createTime
     type: Time

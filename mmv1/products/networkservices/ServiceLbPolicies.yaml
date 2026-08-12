@@ -86,7 +86,6 @@ parameters:
       The location of the service lb policy.
     min_version: beta
     url_param_only: true
-    required: true
 properties:
   - name: createTime
     type: Time
