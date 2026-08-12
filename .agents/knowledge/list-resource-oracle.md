@@ -629,3 +629,100 @@ an accidental regression in another product being silently merged.
 **Do NOT:**
 Include both YAML batch changes and generator template changes in the same PR. The template PR
 must merge and its CI must pass before the YAML batch PR that depends on it is considered ready.
+
+---
+
+### P-17 — Scope mismatch: list query filter does not match where the resource was created
+
+**Symptom:**
+Recording log contains `no query results found after filtering` or the test's
+`ExpectLengthAtLeast(..., 1)` assertion fails because the list returns 0 items.
+
+**Root cause:**
+The `base_url` (used as the list collection URL) resolves a scope parameter (e.g. `{{location}}`,
+`{{region}}`) to a different value than the one used when the resource was created in Step 1 of the
+test. The list query searches a scope that doesn't contain the resource it just created.
+
+**Real example:**
+Any resource where `test_context_vars.location` or `vars.region` is set to a hardcoded value that
+differs from the `envvar.GetTestRegionFromEnv()` value injected by the auto-scope logic.
+
+**Fix:**
+Verify `base_url` and `id_format` use the same scope tokens. If the resource is scoped to a
+non-standard location (e.g. a hardcoded project or region in `test_vars_overrides`), ensure the list
+query scope variables are captured from the created resource state (via `listScope.Capture`), not
+from environment variables. See also P-04 and P-05 for the YAML-level fix.
+
+**Do NOT:**
+Add `skip_vcr: true` or `t.Skip(...)` to work around this. See P-19.
+
+---
+
+### P-18 — Resource has no list endpoint: 501, 404, or generator `has no list endpoint` error
+
+**Symptom:**
+The generator fails with `has no list endpoint`, OR the recording log contains HTTP 404 or 501
+when the list URL is called.
+
+**Root cause:**
+The API does not support listing this resource type at the collection URL implied by `base_url`.
+
+**Fix:**
+Remove `generate_list_resource: true` from the YAML **only when** the API has confirmed no list
+endpoint (verified by reading the API reference or observing a 501/404 on the collection URL).
+This is the **sole** legitimate reason to remove the flag after it has been set.
+
+**Do NOT:**
+Remove the flag for compile errors, scope mismatches, or VCR cassette issues. See P-19.
+
+---
+
+### P-19 — `skip_vcr: true` or `t.Skip` is never a fix for list-resource tests
+
+**Symptom:**
+A fix attempt added `skip_vcr: true` to a sample in a resource YAML, or added `acctest.SkipIfVcr(t)`
+or `t.Skip(...)` to a generated test file or the `query_test_file.go.tmpl` template.
+
+**Root cause:**
+This is the bug itself, not a fix. `skip_vcr: true` permanently opts the resource out of VCR CI.
+It hides the real failure without resolving it.
+
+**Fix:**
+Revert the `skip_vcr: true` addition immediately. Diagnose the actual recording failure using P-17
+or P-18. If the recording passed and only the replaying section shows failures, see P-20.
+
+**Do NOT:**
+Use `skip_vcr: true`, `acctest.SkipIfVcr(t)`, or any test-skip mechanism as a "fix" for a
+CI failure. These are forbidden by the ABSOLUTE PROHIBITIONS in the CI-fix prompt.
+
+---
+
+### P-20 — Replaying "no cassette found" when recording passed
+
+**Symptom:**
+The orchestrator prints `replaying failures detected (recording passed — not a cassette issue)`.
+The replaying section of the CI log contains `no cassette found on disk for TestAcc...ListQuery_generated`.
+
+**Root cause:**
+The recording run **succeeded** and wrote cassettes. The replaying run could not find them. This is
+almost always caused by a non-deterministic component in the test context map that produces a different
+cassette filename in replay than in recording. Common culprits: `acctest.RandString(t, N)` used in a
+value that feeds into the VCR cassette path, or a test name that includes a random suffix.
+
+**Real example (oracledatabase, 2026-08-12):**
+All 10 oracledatabase `*ListQuery_generated` tests failed with `no cassette found` in the replaying
+phase. The recording had passed. Prior fix attempts incorrectly diagnosed this as P-17 and applied
+`skip_vcr: true` to 13 YAML samples — a direct P-19 violation. The `skip_vcr` additions must be
+reverted. The real fix is to identify which context map value produces a non-deterministic cassette
+path and make it deterministic (or seed it from the VCR cassette name).
+
+**Fix:**
+1. Confirm the orchestrator log says `recording passed`. Do NOT treat this as a recording failure.
+2. Check the generated test's context map for values derived from `acctest.RandString`. Any such
+   value that appears in the cassette filename must be either: (a) replaced with a deterministic
+   value, or (b) anchored to the test name via `acctest.VcrRecorderPath(t)`.
+3. Do NOT add `skip_vcr: true` or any skip mechanism.
+
+**Do NOT:**
+Treat P-20 as P-17 (scope mismatch). The recording passed — the resource was found. The problem is
+cassette path resolution in replay, not a filter or scope issue.
