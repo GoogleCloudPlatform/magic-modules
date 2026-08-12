@@ -494,16 +494,10 @@ properties:
       - TOOL_CALL_COMPLETION
   - name: publishedModel
     type: String
-    exactly_one_of:
-      - published_model
-      - tuned_model
     description: |
       Optional. The published Large Language Model name. * To use the latest model version, specify the model name without version number. Example: text-bison * To use a stable model version, specify the version number as well. Example: text-bison@002.
   - name: tunedModel
     type: String
-    exactly_one_of:
-      - published_model
-      - tuned_model
     description: |
       Optional. Tuned Large Language Model endpoint from Vertex. Format: `projects/<Project Id>/locations/<Location Id>/endpoints/<Endpoint Id>`.
   - name: tools
