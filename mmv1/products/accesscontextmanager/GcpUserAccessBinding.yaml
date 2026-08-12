@@ -258,6 +258,7 @@ properties:
           Immutable. Cloud project number used to assign policies to all service accounts owned by the project.
       - name: serviceAccount
         type: String
+        immutable: true
         description: |
           Immutable. Service account email used to assign policies to a single service account.
           If a service account is subject to multiple policies (e.g., if there is a policy for all
