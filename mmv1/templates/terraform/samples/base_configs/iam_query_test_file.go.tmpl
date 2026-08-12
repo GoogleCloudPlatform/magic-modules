@@ -25,7 +25,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
-
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
 )
@@ -93,7 +93,17 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 				Config: testAcc{{ $.ResourceName }}IamMemberListQuery_list(context),
 				ConfigVariables: listScope.AsConfigVariables(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLengthAtLeast("{{ $.TerraformName }}_iam_member.members", 1),
+					querycheck.ExpectLength("{{ $.TerraformName }}_iam_member.members", 1),
+					querycheck.ExpectIdentity("{{ $.TerraformName }}_iam_member.members", map[string]knownvalue.Check{
+				{{- range $attribute := $.IamAttributes }}
+						"{{attribute }}": knownvalue.NotNull(),
+				{{- end}}
+						"role": knownvalue.StringExact("{{ $.IamPolicy.AllowedIamRole }}"),
+						"member": knownvalue.StringExact("user:admin@hashicorptest.com"),
+				{{- if $.IamPolicy.IamConditionsRequestType }}
+						"condition_title": knownvalue.Null(),]}
+				{{- end}}
+					}),
 				},
 			},
 		},
@@ -104,6 +114,7 @@ func testAcc{{ $.ResourceName }}IamMemberListQuery_create(context map[string]int
 	return acctest.Nprintf(`
 {{ $step.TestHCLText }}
 
+{{- $ids := $.IamSelfLinkIdentifiers }}
 resource "{{ $.TerraformName }}_iam_member" "member" {
 	{{- range $i, $attribute := $.IamAttributes }}
 	  {{ $attribute }} = {{ $.IamParentSourceType }}.{{ $sample.PrimaryResourceId }}.{{ underscore (index $ids $i) }}
@@ -125,6 +136,12 @@ list "{{ $.TerraformName }}_iam_member" "members" {
 	limit = 1000
     config {
         {{ underscore $.IamParentResourceName }} =  var.{{ underscore $.IamParentResourceName }}
+	{{- if $.IamPolicy.RoleFilterEnabled }}
+		role = "{{ $.IamPolicy.AllowedIamRole }}"
+	{{- end }}	
+	{{if $.IamPolicy.MemberFilterEnabled }}
+		member = "%{iam_member}"
+	{{- end }}
     }
 }
 `, context)
