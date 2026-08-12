@@ -3,7 +3,7 @@ resource "google_vertex_ai_feature_online_store" "{{$.PrimaryResourceId}}" {
   labels = {
     foo = "bar"
   }
-  region = "us-central1"
+  region = "{{index $.Vars "region"}}"
   bigtable {
     auto_scaling {
       min_node_count         = 1

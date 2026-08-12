@@ -29,10 +29,12 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
+	"{{ $.ImportPath }}/services/kms"
 )
 
 var (
 	_ = envvar.TestEnvVar
+	_ = kms.BootstrapKMSKeyInLocation
 )
 
 {{ $sample := $.FirstTestConfig.Sample }}

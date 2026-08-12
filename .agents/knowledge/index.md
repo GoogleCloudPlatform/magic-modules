@@ -57,10 +57,11 @@ Read this index at decision points; open only the source the task needs. Format 
 
 - **enums-vs-strings** — Model an API enum as Enum (strict, plan-time) or String (forward-compatible): the deliberate trade-off. — [field/enums-vs-strings.md](field/enums-vs-strings.md)
 
-### Template (`template/`)
-
-- **template-modifications** — Safety rules and blast radius precautions for modifying Magic Modules engine templates (mmv1/templates/). — [template/template-modifications.md](template/template-modifications.md)
-
 ### Bugs (`bug/`)
 
 *(No entries yet)*
+
+### List resources (`list-resource/`)
+
+- **list-resource-oracle** — Living catalog of every failure pattern, gotcha, and fix encountered during list-resource generation. Read before starting any list-resource task. — [knowledge/list-resource-oracle.md](list-resource-oracle.md)
+- **list-resource-patterns** *(agent-generated, append-only)* — Permanent log of every add-list-resource run: passing resources, dropped resources with reasons, and per-run observations. Read before starting a new batch for any product. — [list-resource/list-resource-patterns.md](list-resource/list-resource-patterns.md)

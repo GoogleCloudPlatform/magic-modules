@@ -37,6 +37,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+generate_list_resource: true
 samples:
   - name: 'vertex_ai_reasoning_engine_deletion_policy'
     primary_resource_id: 'reasoning_engine'

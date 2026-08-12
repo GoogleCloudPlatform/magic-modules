@@ -36,6 +36,7 @@ async:
     resource_inside_response: true
 custom_code:
   custom_import: templates/terraform/custom_import/vertex_ai_tensorboard_import.go.tmpl
+generate_list_resource: true
 samples:
   - name: vertex_ai_tensorboard
     primary_resource_id: tensorboard

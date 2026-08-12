@@ -30,6 +30,7 @@ async:
     resource_inside_response: true
 autogen_status: U2NoZWR1bGVBdXRvZ2VuVjJBZ2VudA==
 autogen_async: false
+generate_list_resource: true
 samples:
   - name: vertex_ai_schedule
     primary_resource_id: schedule

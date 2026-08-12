@@ -34,7 +34,7 @@ resource "google_vertex_ai_index" "index" {
   labels = {
     foo = "bar"
   }
-  region   = "us-central1"
+  region   = "{{index $.Vars "region"}}"
   display_name = "{{index $.ResourceIdVars "display_name"}}"
   description = "index for test"
   metadata {
