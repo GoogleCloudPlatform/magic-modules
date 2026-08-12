@@ -48,6 +48,7 @@ custom_code:
 samples:
   - name: oracledatabase_exascale_db_storage_vault_basic
     primary_resource_id: my_storage_vault
+    skip_vcr: true
     steps:
       - name: oracledatabase_exascale_db_storage_vault_basic
         resource_id_vars:
@@ -66,6 +67,7 @@ samples:
           exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", acctest.RandString(t, 10))
   - name: oracledatabase_exascale_db_storage_vault_full
     primary_resource_id: my_storage_vault
+    skip_vcr: true
     steps:
       - name: oracledatabase_exascale_db_storage_vault_full
         resource_id_vars:
@@ -84,6 +86,7 @@ samples:
           exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-full-%s", acctest.RandString(t, 10))
   - name: oracledatabase_exascale_db_storage_vault_dedicated_exadata_infrastructure
     primary_resource_id: my_storage_vault
+    skip_vcr: true
     steps:
       - name: oracledatabase_exascale_db_storage_vault_dedicated_exadata_infrastructure
         resource_id_vars:
