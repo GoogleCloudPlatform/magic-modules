@@ -41,7 +41,6 @@ custom_code:
 samples:
   - name: oracledatabase_cloud_exadata_infrastructure_exascale_config_basic
     primary_resource_id: my_exascale_config
-    skip_vcr: true
     steps:
       - name: oracledatabase_cloud_exadata_infrastructure_exascale_config_basic
         resource_id_vars:

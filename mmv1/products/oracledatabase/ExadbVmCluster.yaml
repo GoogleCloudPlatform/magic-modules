@@ -49,7 +49,6 @@ custom_code:
 samples:
   - name: oracledatabase_exadb_vm_cluster_basic
     primary_resource_id: my_exadb_vm_cluster
-    skip_vcr: true
     steps:
       - name: oracledatabase_exadb_vm_cluster_basic
         resource_id_vars:
@@ -76,7 +75,6 @@ samples:
           backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
   - name: oracledatabase_exadb_vm_cluster_full
     primary_resource_id: my_exadb_vm_cluster
-    skip_vcr: true
     steps:
       - name: oracledatabase_exadb_vm_cluster_full
         resource_id_vars:

@@ -48,7 +48,6 @@ custom_code:
 samples:
   - name: oracledatabase_cloud_exadata_infrastructure_basic
     primary_resource_id: my-cloud-exadata
-    skip_vcr: true
     steps:
       - name: oracledatabase_cloud_exadata_infrastructure_basic
         resource_id_vars:
@@ -67,7 +66,6 @@ samples:
           cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-basic-%s", acctest.RandString(t, 10))
   - name: oracledatabase_cloud_exadata_infrastructure_full
     primary_resource_id: my-cloud-exadata
-    skip_vcr: true
     steps:
       - name: oracledatabase_cloud_exadata_infrastructure_full
         resource_id_vars:

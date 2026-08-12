@@ -50,7 +50,6 @@ custom_code:
 samples:
   - name: oracledatabase_cloud_vmcluster_basic
     primary_resource_id: my_vmcluster
-    skip_vcr: true
     steps:
       - name: oracledatabase_cloud_vmcluster_basic
         resource_id_vars:
@@ -71,7 +70,6 @@ samples:
           cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-basic-%s", acctest.RandString(t, 10))
   - name: oracledatabase_cloud_vmcluster_odbnetwork
     primary_resource_id: my_vmcluster
-    skip_vcr: true
     steps:
       - name: oracledatabase_cloud_vmcluster_odbnetwork
         resource_id_vars:
@@ -98,7 +96,6 @@ samples:
           backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
   - name: oracledatabase_cloud_vmcluster_full
     primary_resource_id: my_vmcluster
-    skip_vcr: true
     steps:
       - name: oracledatabase_cloud_vmcluster_full
         resource_id_vars:
@@ -119,7 +116,6 @@ samples:
           cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-full-%s", acctest.RandString(t, 10))
   - name: oracledatabase_cloud_vmcluster_exascale
     primary_resource_id: my_vmcluster
-    skip_vcr: true
     steps:
       - name: oracledatabase_cloud_vmcluster_exascale
         resource_id_vars:

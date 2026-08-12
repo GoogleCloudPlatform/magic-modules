@@ -47,7 +47,6 @@ custom_code:
 samples:
   - name: oracledatabase_db_system_basic
     primary_resource_id: my_db_system
-    skip_vcr: true
     steps:
       - name: oracledatabase_db_system_basic
         resource_id_vars:
@@ -74,7 +73,6 @@ samples:
           odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
   - name: oracledatabase_db_system_full
     primary_resource_id: my_db_system
-    skip_vcr: true
     steps:
       - name: oracledatabase_db_system_full
         resource_id_vars:
