@@ -62,6 +62,13 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - name: location
+    type: String
+    description: |
+      Location (region) of the EndpointPolicy resource. Only the value 'global' is currently allowed.
+    url_param_only: true
+    immutable: true
+    default_value: global
 properties:
   - name: createTime
     type: Time
