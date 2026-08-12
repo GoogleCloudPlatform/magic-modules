@@ -52,8 +52,7 @@ samples:
     min_version: 'beta'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-         role: "roles/logging.configWriter"
-
+        role: "roles/logging.configWriter"
     steps:
       - name: 'vertex_ai_agent_anomaly_detection_scope_basic'
         resource_id_vars:
