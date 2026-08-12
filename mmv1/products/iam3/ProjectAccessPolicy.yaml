@@ -18,9 +18,8 @@ description: |
   that allow or deny access to resources within the specified project based on principals and conditions.
   See the Cloud IAM documentation for more details on Access Policies.
 references:
-  api: https://cloud.google.com/iam/docs/reference/rest/v3beta/projects.locations.accessPolicies
+  api: https://cloud.google.com/iam/docs/reference/rest/v3/projects.locations.accessPolicies
 base_url: projects/{{project}}/locations/{{location}}/accessPolicies
-min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/accessPolicies/{{access_policy_id}}
 create_url: projects/{{project}}/locations/{{location}}/accessPolicies?accessPolicyId={{access_policy_id}}
 update_verb: PATCH

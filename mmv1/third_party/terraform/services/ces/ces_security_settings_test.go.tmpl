@@ -1,5 +1,6 @@
 package ces_test
 
+{{ if ne $.TargetVersionName "ga" }}
 import (
 	"testing"
 
@@ -129,3 +130,4 @@ resource "google_ces_security_settings" "security_settings" {
 }
 `, context)
 }
+{{ end }}
