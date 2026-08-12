@@ -90,14 +90,20 @@ resource "google_ces_app" "ces_app_basic" {
 
   audio_processing_config {
     synthesize_speech_configs {
-      language_code = "en-US"
-      voice         = "en-US-Standard-A"
-      speaking_rate = 1.0
+      language_code         = "en-US"
+      voice                 = "en-US-Standard-A"
+      speaking_rate         = 1.0
+      model                 = "gemini-3.1-flash-tts-preview"
+      instruction           = "Speak clearly in a professional tone."
+      voice_sample_gcs_uri  = "gs://fake-app-audio-recordings/voice-sample.wav"
+      consent_audio_gcs_uri = "gs://fake-app-audio-recordings/consent.wav"
     }
     synthesize_speech_configs {
       language_code = "es-ES"
       voice         = "es-ES-Standard-A"
       speaking_rate = 0.95
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Habla claramente."
     }
 
     barge_in_config {
@@ -282,14 +288,20 @@ resource "google_ces_app" "ces_app_basic" {
 
   audio_processing_config {
     synthesize_speech_configs {
-      language_code = "en-US"
-      voice         = "en-US-Standard-A"
-      speaking_rate = 1.0
+      language_code         = "en-US"
+      voice                 = "en-US-Standard-A"
+      speaking_rate         = 1.05
+      model                 = "gemini-3.1-flash-tts-preview"
+      instruction           = "Speak in an updated friendly tone."
+      voice_sample_gcs_uri  = "gs://fake-app-audio-recordings/voice-sample-updated.wav"
+      consent_audio_gcs_uri = "gs://fake-app-audio-recordings/consent-updated.wav"
     }
     synthesize_speech_configs {
       language_code = "es-ES"
       voice         = "es-ES-Standard-A"
-      speaking_rate = 0.95
+      speaking_rate = 1.0
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Habla con tono amigable."
     }
 
     barge_in_config {
