@@ -1,0 +1,5 @@
+conf := d.GetRawConfig()
+if conf.IsNull() || !conf.Type().HasAttribute("access") || !conf.GetAttr("access").IsKnown() || conf.GetAttr("access").IsNull() || (conf.GetAttr("access").LengthInt() == 0 && !d.HasChange("access")) {
+	delete(obj, "access")
+}
+return obj, nil
