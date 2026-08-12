@@ -25,5 +25,7 @@ scopes:
 versions:
   - name: ga
     base_url: https://file.googleapis.com/v1/
+    rep_url: https://file.{{location}}.rep.googleapis.com/v1/
   - name: beta
     base_url: https://file.googleapis.com/v1beta1/
+    rep_url: https://file.{{location}}.rep.googleapis.com/v1beta1/
