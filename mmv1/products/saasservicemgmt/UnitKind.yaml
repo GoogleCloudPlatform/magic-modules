@@ -25,6 +25,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
 autogen_status: VW5pdEtpbmQ=
 autogen_async: false
+generate_list_resource: true
 samples:
   - name: saas_runtime_unit_kind_basic
     primary_resource_id: example

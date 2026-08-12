@@ -24,6 +24,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/units/{{unit_id}}
 autogen_status: VW5pdA==
 autogen_async: false
+generate_list_resource: true
 samples:
   - name: saas_runtime_unit_basic
     primary_resource_id: example
