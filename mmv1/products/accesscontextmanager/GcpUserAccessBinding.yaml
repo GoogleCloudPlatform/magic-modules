@@ -126,9 +126,6 @@ properties:
     type: Array
     description: |
       Optional. A list of scoped access settings that set this binding's restrictions on a subset of applications.
-      This field cannot be set if `restricted_client_applications` is set.
-    conflicts:
-      - restricted_client_applications
     item_type:
       type: NestedObject
       properties:
@@ -222,27 +219,6 @@ properties:
       type: String
     min_size: 1
     max_size: 1
-
-  - name: restrictedClientApplications
-    type: Array
-    description: |
-      Optional. Deprecated: Use `scoped_access_settings` instead. A list of applications that are
-      subject to this binding's restrictions. If the list is empty, the binding restrictions
-      will universally apply to all applications.
-    deprecation_message: "Use `scoped_access_settings` instead."
-    conflicts:
-      - scoped_access_settings
-    item_type:
-      type: NestedObject
-      properties:
-        - name: clientId
-          type: String
-          description: |
-            The OAuth client ID of the application.
-        - name: name
-          type: String
-          description: |
-            The name of the application. Example: "Cloud Console"
 
   - name: principal
     type: NestedObject
