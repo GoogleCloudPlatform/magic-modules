@@ -25,7 +25,6 @@ base_url: 'organizations'
 self_link: 'organizations/{{name}}'
 create_url: 'organizations?parent=projects/{{project_id}}'
 delete_url: 'organizations/{{name}}?retention={{retention}}'
-generate_list_resource: true
 
 timeouts:
   insert_minutes: 45
