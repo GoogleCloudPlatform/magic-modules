@@ -23,8 +23,8 @@ create_url: '{{parent}}/locations/{{location}}/frameworks?frameworkId={{framewor
 update_verb: PATCH
 id_format: '{{parent}}/locations/{{location}}/frameworks/{{framework_id}}'
 import_format:
-- 'organizations/{{%organization}}/locations/{{location}}/frameworks/{{framework_id}}'
-- "{{%parent}}/locations/{{location}}/frameworks/{{framework_id}}"
+  - 'organizations/{{%organization}}/locations/{{location}}/frameworks/{{framework_id}}'
+  - "{{%parent}}/locations/{{location}}/frameworks/{{framework_id}}"
 samples:
 - name: "cloudsecuritycompliance_framework_org_basic"
   primary_resource_id: "example"
@@ -55,7 +55,7 @@ identity_upgraders: true
 autogen_status: RnJhbWV3b3Jr
 custom_code:
   custom_identity:
-  - parent
+    - parent
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl"
   pre_create: "templates/terraform/pre_create/cloudsecuritycompliance_pre_create.go.tmpl"
   pre_read: "templates/terraform/pre_read/cloudsecuritycompliance_pre_read.go.tmpl"
@@ -64,45 +64,45 @@ custom_code:
   post_import: "templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl"
   custom_import: "templates/terraform/custom_import/cloudsecuritycompliance_framework.go.tmpl"
 parameters:
-- name: parent
-  type: String
-  description: |
-    The parent resource in which to create the resource.
-    Must be in one of the following formats:
-    * `projects/{{project}}`
-    * `organizations/{{organization}}`
-  immutable: true
-  default_from_api: true
-  url_param_only: true
-  exactly_one_of:
-  - parent
-  - organization
-- name: organization
-  type: String
-  description: |
-    Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-  immutable: true
-  url_param_only: true
-  default_from_api: true
-  deprecation_message: "Use `parent` instead."
-  exactly_one_of:
-  - parent
-  - organization
-- name: location
-  type: String
-  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-  immutable: true
-  url_param_only: true
-  required: true
-- name: frameworkId
-  type: String
-  description: |-
-    ID of the framework.
-    This is not the full name of the framework.
-    This is the last part of the full name of the framework.
-  immutable: true
-  url_param_only: true
-  required: true
+  - name: parent
+    type: String
+    description: |
+      The parent resource in which to create the resource.
+      Must be in one of the following formats:
+      * `projects/{{project}}`
+      * `organizations/{{organization}}`
+    immutable: true
+    default_from_api: true
+    url_param_only: true
+    exactly_one_of:
+      - parent
+      - organization
+  - name: organization
+    type: String
+    description: |
+      Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    default_from_api: true
+    deprecation_message: "Use `parent` instead."
+    exactly_one_of:
+      - parent
+      - organization
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: frameworkId
+    type: String
+    description: |-
+      ID of the framework.
+      This is not the full name of the framework.
+      This is the last part of the full name of the framework.
+    immutable: true
+    url_param_only: true
+    required: true
 properties:
 - name: category
   type: Array
@@ -216,12 +216,12 @@ properties:
                     type: NestedObject
                     description: A list of strings.
                     properties:
-                    - name: values
-                      type: Array
-                      description: The strings in the list.
-                      required: true
-                      item_type:
-                        type: String
+                      - name: values
+                        type: Array
+                        description: The strings in the list.
+                        required: true
+                        item_type:
+                          type: String
                   - name: stringValue
                     type: String
                     description: Represents a string value.
