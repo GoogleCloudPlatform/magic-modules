@@ -17,14 +17,14 @@ resource "google_cloud_security_compliance_framework" "example" {
   parent       = "organizations/%{org_id}"
   location     = "global"
   framework_id = "tf-test-example-framework%{random_suffix}"
-
+  
   display_name = "Terraform Framework Name"
   description  = "An Terraform description for the framework"
-
+  
   cloud_control_details {
 		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
 		major_revision_id = "2"
-
+    
     parameters {
       name = "location"
       parameter_value {
@@ -143,14 +143,14 @@ resource "google_cloud_security_compliance_framework" "example" {
   parent       = "organizations/%{org_id}"
   location     = "global"
   framework_id = "tf-test-example-framework%{random_suffix}"
-
+  
   display_name = "Updated Terraform Framework Name"
   description  = "An updated description for the framework with additional details"
-
+  
   cloud_control_details {
     name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-data-access-governance"
     major_revision_id = "1"
-
+    
     parameters {
       name = "region"
       parameter_value {
@@ -239,14 +239,14 @@ resource "google_cloud_security_compliance_framework" "example" {
   organization = "%{org_id}"
   location     = "global"
   framework_id = "tf-test-example-framework%{random_suffix}"
-
+  
   display_name = "Terraform Framework Name Org Compat"
   description  = "A Terraform description for the framework using organization for backward compatibility"
-
+  
   cloud_control_details {
 		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
 		major_revision_id = "2"
-
+    
     parameters {
       name = "location"
       parameter_value {
