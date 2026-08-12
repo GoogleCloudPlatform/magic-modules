@@ -32,7 +32,6 @@ update_verb: PATCH
 import_format:
   - '{{org_id}}/datacollectors/{{data_collector_id}}'
   - '{{org_id}}/{{data_collector_id}}'
-generate_list_resource: true
 
 timeouts:
   insert_minutes: 1

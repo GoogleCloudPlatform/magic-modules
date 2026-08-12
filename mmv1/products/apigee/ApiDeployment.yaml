@@ -68,7 +68,6 @@ samples:
         ignore_read_extra:
           # service_account is a url_param_only field used during deployment creation and is not returned by the Apigee GET API.
           - 'service_account'
-generate_list_resource: true
 parameters:
   - name: org_id
     type: String

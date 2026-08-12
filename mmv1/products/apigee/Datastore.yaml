@@ -31,7 +31,6 @@ update_verb: PUT
 import_format:
   - '{{org_id}}/analytics/datastores/{{name}}'
   - '{{org_id}}/{{name}}'
-generate_list_resource: true
 
 timeouts:
   insert_minutes: 1
