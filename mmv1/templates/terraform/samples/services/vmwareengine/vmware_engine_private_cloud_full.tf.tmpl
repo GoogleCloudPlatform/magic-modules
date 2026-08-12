@@ -6,6 +6,11 @@ resource "google_vmwareengine_private_cloud" "{{$.PrimaryResourceId}}" {
   network_config {
     management_cidr       = "192.168.30.0/24"
     vmware_engine_network = google_vmwareengine_network.pc-nw.id
+    nsx_edge_config {
+      count   = 2
+      ha_mode = "ACTIVE_STANDBY"
+      size    = "LARGE"
+    }
   }
   management_cluster {
     cluster_id = "{{index $.ResourceIdVars "management_cluster_id"}}"

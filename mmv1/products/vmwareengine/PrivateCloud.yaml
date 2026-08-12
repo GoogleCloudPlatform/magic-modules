@@ -165,19 +165,20 @@ properties:
     description: |
       Network configuration in the consumer project with which the peering has to be done.
     required: true
-    immutable: true
     properties:
       - name: managementCidr
         type: String
         description: |
           Management CIDR used by VMware management appliances.
         required: true
+        immutable: true
       - name: vmwareEngineNetwork
         type: String
         description: |
           The relative resource name of the VMware Engine network attached to the private cloud.
           Specify the name in the following form: projects/{project}/locations/{location}/vmwareEngineNetworks/{vmwareEngineNetworkId}
           where {project} can either be a project number or a project ID.
+        immutable: true
       - name: vmwareEngineNetworkCanonical
         type: String
         description: |
@@ -199,6 +200,31 @@ properties:
         description: |
           DNS Server IP of the Private Cloud.
         output: true
+      - name: nsxEdgeConfig
+        type: NestedObject
+        description: |
+          The NSX Edge Cluster configuration.
+        properties:
+          - name: count
+            type: Integer
+            description: |
+              The number of NSX Edge nodes in the Edge Cluster.
+              Possible values are 2, 4, 6, 8.
+          - name: haMode
+            type: Enum
+            description: |
+              HA mode of the NSX Edge Cluster.
+            enum_values:
+              - ACTIVE_ACTIVE
+              - ACTIVE_STANDBY
+          - name: size
+            type: Enum
+            description: |
+              Form factor of the NSX Edge Cluster.
+            enum_values:
+              - SMALL
+              - LARGE
+              - XLARGE
   - name: managementCluster
     type: NestedObject
     description: |

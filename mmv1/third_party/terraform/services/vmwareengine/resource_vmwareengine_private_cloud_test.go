@@ -207,6 +207,11 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
   network_config {
     management_cidr = "192.168.0.0/24"
     vmware_engine_network = google_vmwareengine_network.vmw-engine-nw.id
+    nsx_edge_config {
+      count = 2
+      ha_mode = "ACTIVE_STANDBY"
+      size = "LARGE"
+    }
   }
   management_cluster {
     cluster_id = "tf-test-sample-mgmt-cluster-custom-core-count%{random_suffix}"
@@ -254,6 +259,11 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
   network_config {
     management_cidr = "192.168.0.0/24"
     vmware_engine_network = google_vmwareengine_network.vmw-engine-nw.id
+    nsx_edge_config {
+      count = 4
+      ha_mode = "ACTIVE_ACTIVE"
+      size = "XLARGE"
+    }
   }
   management_cluster {
     cluster_id = "tf-test-sample-mgmt-cluster-custom-core-count%{random_suffix}"
