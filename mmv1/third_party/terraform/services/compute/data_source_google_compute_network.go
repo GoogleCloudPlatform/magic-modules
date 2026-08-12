@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -156,18 +155,16 @@ func dataSourceGoogleComputeNetworkRead(d *schema.ResourceData, meta interface{}
 	if err := d.Set("description", network["description"]); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
-	// REST API returns uint64 id as a JSON string to avoid float64 precision loss.
+	// The API returns the uint64 id as a JSON string.
 	idStr, _ := network["id"].(string)
-	var networkId uint64
-	if idStr != "" {
-		networkId, err = strconv.ParseUint(idStr, 10, 64)
-		if err != nil {
-			return fmt.Errorf("Error parsing network_id %q: %s", idStr, err)
-		}
-	} else {
+	if idStr == "" {
 		idStr = "0"
 	}
-	if err := d.Set("network_id", int64(networkId)); err != nil {
+	networkId, err := tpgresource.StringToFixed64(idStr)
+	if err != nil {
+		return fmt.Errorf("Error parsing network_id %q: %s", idStr, err)
+	}
+	if err := d.Set("network_id", networkId); err != nil {
 		return fmt.Errorf("Error setting network_id: %s", err)
 	}
 	// numeric_id keeps the raw API value, matching the google_compute_network resource.
