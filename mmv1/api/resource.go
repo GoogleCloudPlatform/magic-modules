@@ -718,7 +718,7 @@ func (r Resource) appendSynthesizedProviderDefaultFields(props []*Type, scope []
 	hasField := map[string]bool{"project": r.HasProject(), "zone": r.HasZone(), "region": r.HasRegion()}
 	for _, field := range []string{"project", "zone", "region"} {
 		if slices.Contains(scope, field) && !found[field] && hasField[field] {
-			props = append(props, &Type{Name: field, Type: "string"})
+			props = append(props, &Type{Name: field, Type: "string", Required: true})
 		}
 	}
 	return props
