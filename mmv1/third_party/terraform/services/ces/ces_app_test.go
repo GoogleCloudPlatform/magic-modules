@@ -201,6 +201,25 @@ resource "google_ces_app" "ces_app_basic" {
     }
   }
 
+  locked = false
+
+  vpc_sc_settings {
+    allowed_origins = ["https://example.com"]
+  }
+
+  error_handling_settings {
+    error_handling_strategy = "FALLBACK_RESPONSE"
+    fallback_response_config {
+      custom_fallback_messages = {
+        "en-US" = "Sorry, something went wrong."
+      }
+      max_fallback_attempts = 3
+    }
+    end_session_config {
+      escalate_session = true
+    }
+  }
+
   global_instruction = "You are a virtual assistant for an e-commerce platform. Be friendly and helpful."
 
   guardrails = [
@@ -392,6 +411,19 @@ resource "google_ces_app" "ces_app_basic" {
         })
       }
     }
+
+  locked = false
+
+  vpc_sc_settings {
+    allowed_origins = ["https://example.com", "https://updated.example.com"]
+  }
+
+  error_handling_settings {
+    error_handling_strategy = "END_SESSION"
+    end_session_config {
+      escalate_session = false
+    }
+  }
 
   global_instruction = "You are a virtual assistant for an e-commerce platform. Be friendly and helpful updated."
 

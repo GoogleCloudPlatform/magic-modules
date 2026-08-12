@@ -261,6 +261,38 @@ properties:
     type: String
     required: true
     description: Display name of the app.
+  - name: errorHandlingSettings
+    type: NestedObject
+    description: Error handling settings of the app.
+    properties:
+      - name: endSessionConfig
+        type: NestedObject
+        description: Configuration for ending the session in case of system errors.
+        properties:
+          - name: escalateSession
+            type: Boolean
+            send_empty_value: true
+            description: Whether to escalate the session in EndSession.
+      - name: errorHandlingStrategy
+        type: String
+        description: |-
+          The strategy to use for error handling.
+          Possible values:
+          ERROR_HANDLING_STRATEGY_UNSPECIFIED
+          NONE
+          FALLBACK_RESPONSE
+          END_SESSION
+      - name: fallbackResponseConfig
+        type: NestedObject
+        description: Configuration for handling fallback responses.
+        properties:
+          - name: customFallbackMessages
+            type: KeyValuePairs
+            description: |-
+              The fallback messages in case of system errors, mapped by supported language code.
+          - name: maxFallbackAttempts
+            type: Integer
+            description: The maximum number of fallback attempts to make before the agent emitting EndSession Signal.
   - name: etag
     type: String
     description: |-
@@ -343,6 +375,12 @@ properties:
           `default_language_code`.
         item_type:
           type: String
+  - name: locked
+    type: Boolean
+    send_empty_value: true
+    description: |-
+      Indicates whether the app is locked for changes. If the app is locked,
+      modifications to the app resources will be rejected.
   - name: loggingSettings
     type: NestedObject
     default_from_api: true
@@ -476,6 +514,12 @@ properties:
     type: String
     description: Timestamp when the app was last updated.
     output: true
+  - name: validationErrors
+    type: Array
+    description: Misconfigurations or warnings in the app.
+    output: true
+    item_type:
+      type: String
   - name: variableDeclarations
     type: Array
     description: The declarations of the variables.
@@ -622,6 +666,17 @@ properties:
                 function: validation.StringIsJSON
               custom_expand: templates/terraform/custom_expand/json_value.tmpl
               custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+  - name: vpcScSettings
+    type: NestedObject
+    description: VPC-SC settings for the app.
+    properties:
+      - name: allowedOrigins
+        type: Array
+        description: |-
+          The allowed HTTP(s) origins that OpenAPI tools in the App are able to
+          directly call when VPC Service Controls are enabled.
+        item_type:
+          type: String
   - name: clientCertificateSettings
     type: NestedObject
     description: The default client certificate settings for the app.
