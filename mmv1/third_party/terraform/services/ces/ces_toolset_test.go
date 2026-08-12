@@ -1498,11 +1498,16 @@ func testAccCESToolset_cesToolsetConnectorExample_full(context map[string]interf
 data "google_project" "test_project" {
 }
 
-resource "google_integration_connectors_connection" "bq_conn" {
-  name              = "tf-test-conn-%{random_suffix}"
-  location          = "us-central1"
-  service_account   = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
-  connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/gcp/connectors/bigquery/versions/1"
+resource "google_project_iam_member" "ces_p4sa_connectors_admin" {
+  project = data.google_project.test_project.project_id
+  role    = "roles/connectors.admin"
+  member  = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-ces.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "ces_p4sa_sa_user" {
+  project = data.google_project.test_project.project_id
+  role    = "roles/iam.serviceAccountUser"
+  member  = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-ces.iam.gserviceaccount.com"
 }
 
 resource "google_ces_app" "ces_app_for_toolset" {
@@ -1528,17 +1533,27 @@ resource "google_ces_toolset" "ces_toolset_connector" {
   display_name = "Basic toolset display name"
   timeout      = "30s"
 
-  connector_toolset {
-    connection = google_integration_connectors_connection.bq_conn.id
-    auth_config {
-      oauth2_auth_code_config {
-        oauth_token = "$context.variables.my_token"
-      }
-    }
-    connector_actions {
-      connection_action_id = "executeCustomQuery"
+  tool_fake_config {
+    enable_fake_mode = true
+    code_block {
+      python_code = "def fake_tool_call(tool, input, callback_context): return {'result': 'fake'}"
     }
   }
+
+  connector_toolset {
+    connection = "projects/${data.google_project.test_project.project_id}/locations/us-central1/connections/new-bg-connection"
+    connector_actions {
+      entity_operation {
+        entity_id = "Movies.credits"
+        operation = "LIST"
+      }
+    }
+  }
+
+  depends_on = [
+    google_project_iam_member.ces_p4sa_connectors_admin,
+    google_project_iam_member.ces_p4sa_sa_user,
+  ]
 }
 `, context)
 }
@@ -1548,11 +1563,16 @@ func testAccCESToolset_cesToolsetConnectorExample_update(context map[string]inte
 data "google_project" "test_project" {
 }
 
-resource "google_integration_connectors_connection" "bq_conn" {
-  name              = "tf-test-conn-%{random_suffix}"
-  location          = "us-central1"
-  service_account   = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
-  connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/gcp/connectors/bigquery/versions/1"
+resource "google_project_iam_member" "ces_p4sa_connectors_admin" {
+  project = data.google_project.test_project.project_id
+  role    = "roles/connectors.admin"
+  member  = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-ces.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "ces_p4sa_sa_user" {
+  project = data.google_project.test_project.project_id
+  role    = "roles/iam.serviceAccountUser"
+  member  = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-ces.iam.gserviceaccount.com"
 }
 
 resource "google_ces_app" "ces_app_for_toolset" {
@@ -1578,19 +1598,27 @@ resource "google_ces_toolset" "ces_toolset_connector" {
   display_name = "Updated toolset display name"
   timeout      = "60s"
 
-  connector_toolset {
-    connection = google_integration_connectors_connection.bq_conn.id
-    auth_config {
-      oauth2_jwt_bearer_config {
-        client_key = "$context.variables.my_client_key"
-        issuer     = "$context.variables.my_issuer"
-        subject    = "$context.variables.my_subject"
-      }
-    }
-    connector_actions {
-      connection_action_id = "executeCustomQuery"
+  tool_fake_config {
+    enable_fake_mode = true
+    code_block {
+      python_code = "def fake_tool_call(tool, input, callback_context): return {'result': 'fake_updated'}"
     }
   }
+
+  connector_toolset {
+    connection = "projects/${data.google_project.test_project.project_id}/locations/us-central1/connections/new-bg-connection"
+    connector_actions {
+      entity_operation {
+        entity_id = "Movies.credits"
+        operation = "LIST"
+      }
+    }
+  }
+
+  depends_on = [
+    google_project_iam_member.ces_p4sa_connectors_admin,
+    google_project_iam_member.ces_p4sa_sa_user,
+  ]
 }
 `, context)
 }
