@@ -1792,26 +1792,53 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 	if v, ok := nodeConfig["kubelet_config"]; ok {
 		nc.KubeletConfig = expandKubeletConfig(v)
 
+		skipRawConfigSubFixes := false
 		rawConfigNPRoot := d.GetRawConfig()
-		if !rawConfigNPRoot.IsNull() && rawConfigNPRoot.Type().IsObjectType() {
-			if prefix != "" {
-				parts := strings.Split(prefix, ".")
+		if rawConfigNPRoot.IsNull() || !rawConfigNPRoot.IsKnown() {
+			skipRawConfigSubFixes = true
+		} else if prefix != "" {
+			parts := strings.Split(prefix, ".")
+			if len(parts) < 2 {
+				skipRawConfigSubFixes = true
+			} else {
 				npIndex, err := strconv.Atoi(parts[1])
 				if err != nil {
-					panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
-				}
-				rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
-			}
-
-			if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
-				if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
-					vSGP := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_seconds")
-					if vSGP != cty.NullVal(cty.Number) && !vSGP.IsNull() {
-						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+					skipRawConfigSubFixes = true
+				} else {
+					if rawConfigNPRoot.Type().HasAttribute("node_pool") {
+						nodePoolAttr := rawConfigNPRoot.GetAttr("node_pool")
+						if nodePoolAttr.IsNull() || !nodePoolAttr.IsKnown() || !nodePoolAttr.Type().IsCollectionType() || nodePoolAttr.LengthInt() <= int64(npIndex) {
+							skipRawConfigSubFixes = true
+						} else {
+							rawConfigNPRoot = nodePoolAttr.Index(cty.NumberIntVal(int64(npIndex)))
+						}
+					} else {
+						skipRawConfigSubFixes = true
 					}
-					vSGPC := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_critical_pods_seconds")
-					if vSGPC != cty.NullVal(cty.Number) && !vSGPC.IsNull() {
-						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
+				}
+			}
+		}
+
+		if !skipRawConfigSubFixes && !rawConfigNPRoot.IsNull() && rawConfigNPRoot.Type().HasAttribute("node_config") {
+			vNC := rawConfigNPRoot.GetAttr("node_config")
+			if !vNC.IsNull() && vNC.Type().IsCollectionType() && vNC.LengthInt() > 0 {
+				firstNC := vNC.Index(cty.NumberIntVal(0))
+				if firstNC.Type().HasAttribute("kubelet_config") {
+					vKC := firstNC.GetAttr("kubelet_config")
+					if !vKC.IsNull() && vKC.Type().IsCollectionType() && vKC.LengthInt() > 0 {
+						firstKC := vKC.Index(cty.NumberIntVal(0))
+						if firstKC.Type().HasAttribute("shutdown_grace_period_seconds") {
+							vSGP := firstKC.GetAttr("shutdown_grace_period_seconds")
+							if vSGP != cty.NullVal(cty.Number) && !vSGP.IsNull() {
+								nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+							}
+						}
+						if firstKC.Type().HasAttribute("shutdown_grace_period_critical_pods_seconds") {
+							vSGPC := firstKC.GetAttr("shutdown_grace_period_critical_pods_seconds")
+							if vSGPC != cty.NullVal(cty.Number) && !vSGPC.IsNull() {
+								nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
+							}
+						}
 					}
 				}
 			}

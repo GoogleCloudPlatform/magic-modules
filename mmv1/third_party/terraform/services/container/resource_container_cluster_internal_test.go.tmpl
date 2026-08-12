@@ -779,3 +779,60 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 		})
 	}
 }
+
+func TestUnitExpandNodeConfig_nilNodePoolRawConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterSchema := map[string]*schema.Schema{
+		"node_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"kubelet_config": {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"cpu_cfs_quota": {
+									Type:     schema.TypeBool,
+									Optional: true,
+								},
+								"shutdown_grace_period_seconds": {
+									Type:     schema.TypeInt,
+									Optional: true,
+								},
+								"shutdown_grace_period_critical_pods_seconds": {
+									Type:     schema.TypeInt,
+									Optional: true,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	d := schema.TestResourceDataRaw(t, clusterSchema, map[string]interface{}{
+		"node_config": []interface{}{
+			map[string]interface{}{
+				"kubelet_config": []interface{}{
+					map[string]interface{}{
+						"cpu_cfs_quota": true,
+					},
+				},
+			},
+		},
+	})
+
+	v := d.Get("node_config")
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("expandNodeConfig panicked: %v", r)
+		}
+	}()
+	_ = expandNodeConfig(d, "node_pool.0.", v)
+}
