@@ -84,7 +84,7 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 				Config: testAcc{{ $.ResourceName }}IamMemberListQuery_create(context),
 				Check: resource.ComposeTestCheckFunc(
 					listScope.Capture(map[string]string{
-                        "{{ underscore $.IamPolicy.ParentResourceAttribute}}": "{{ $.TerraformName }}.{{$sample.PrimaryResourceId }}",
+                        "{{ underscore $.IamParentResourceName}}": "{{ $.TerraformName }}.{{$sample.PrimaryResourceId }}",
 					}),
 				),
 			},
@@ -105,7 +105,9 @@ func testAcc{{ $.ResourceName }}IamMemberListQuery_create(context map[string]int
 {{ $step.TestHCLText }}
 
 resource "{{ $.TerraformName }}_iam_member" "member" {
-    {{ $.IamPolicy.ParentResourceAttribute}} = {{ $.TerraformName }}.{{$sample.PrimaryResourceId }}.{{ $.IamPolicy.ParentResourceAttribute}}
+	{{- range $i, $attribute := $.IamAttributes }}
+	  {{ $attribute }} = {{ $.IamParentSourceType }}.{{ $sample.PrimaryResourceId }}.{{ underscore (index $ids $i) }}
+	{{- end }}
     role = "{{ $.IamPolicy.AllowedIamRole }}"
     member = "%{iam_member}"
 } 
@@ -115,14 +117,14 @@ resource "{{ $.TerraformName }}_iam_member" "member" {
 func testAcc{{ $.ResourceName }}IamMemberListQuery_list(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
-variable "{{ underscore $.IamPolicy.ParentResourceAttribute }}" { type = string }
+variable "{{ underscore $.IamParentResourceName}}" { type = string }
 
 
 list "{{ $.TerraformName }}_iam_member" "members" {
     provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
 	limit = 1000
     config {
-        {{ underscore $.IamPolicy.ParentResourceAttribute }} =  var.{{ underscore $.IamPolicy.ParentResourceAttribute }}
+        {{ underscore $.IamParentResourceName }} =  var.{{ underscore $.IamParentResourceName }}
     }
 }
 `, context)

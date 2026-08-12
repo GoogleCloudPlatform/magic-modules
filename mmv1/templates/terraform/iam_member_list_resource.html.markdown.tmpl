@@ -39,7 +39,7 @@ list "{{$.TerraformName}}_iam_member" "all" {
   provider = {{ if eq $.MinVersion "beta" }}google-beta{{ else }}google{{ end }}
 
   config {
-    {{ underscore $.IamPolicy.ParentResourceAttribute }} = "my-{{ underscore $.IamPolicy.ParentResourceAttribute }}"
+    {{ underscore $.IamParentResourceName }} = "my-{{ underscore $.IamParentResourceName }}"
   }
 }
 ```
@@ -48,7 +48,7 @@ Run `terraform query` from the directory that contains the `.tfquery.hcl` file.
 
 ## Configuration (`config` block)
 
-* {{ underscore $.IamPolicy.ParentResourceAttribute }} - The parent {{ $.Name }} identifier used to scope IAM member bindings.
+* {{ underscore $.IamParentResourceName }} - The parent {{ $.Name }} identifier used to scope IAM member bindings.
 * role - Optional IAM role filter
 * member - Optional IAM member filter
 
