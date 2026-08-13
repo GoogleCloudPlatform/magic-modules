@@ -101,10 +101,12 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 			}
 {{- end }}
 {{- end }}
+{{- if $.HasProject }}
 			project := ""
 			if p, err := tpgresource.GetProject(d, config); err == nil {
 				project = p
 			}
+{{- end }}
 			if err = Resource{{ $.ResourceName }}Flatten(d, config, res, {{- if $.HasProject }}config, project, {{ else }}config, {{ end -}}userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
