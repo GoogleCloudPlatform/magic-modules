@@ -116,6 +116,7 @@ parameters:
       Name of the Gateway resource.
     url_param_only: true
     required: true
+    immutable: true
   - name: location
     type: String
     description: |
@@ -123,6 +124,7 @@ parameters:
       The default value is `global`.
     url_param_only: true
     default_value: global
+    immutable: true
 properties:
   - name: selfLink
     type: String
