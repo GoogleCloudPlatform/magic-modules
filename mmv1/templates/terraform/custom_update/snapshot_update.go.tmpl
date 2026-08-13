@@ -1,0 +1,94 @@
+{{/*
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+*/}}
+
+// 'config' is provided by the boilerplate.
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil { return err }
+
+billingProject := ""
+project, err := tpgresource.GetProject(d, config)
+if err != nil { return fmt.Errorf("Error fetching project for Snapshot: %s", err) }
+billingProject = project
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil { billingProject = bp }
+
+d.Partial(true)
+
+// 1. Labels (POST)
+if d.HasChange("label_fingerprint") || d.HasChange("effective_labels") {
+	obj := make(map[string]interface{})
+	if v, ok := d.GetOk("label_fingerprint"); ok { obj["labelFingerprint"] = v }
+
+	obj["labels"] = tpgresource.ExpandEffectiveLabels(d)
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/global/snapshots/{{ "{{" }}name{{ "}}" }}/setLabels")
+	if err != nil { return err }
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config, Method: "POST", Project: billingProject, RawURL: url, UserAgent: userAgent, Body: obj, Timeout: d.Timeout(schema.TimeoutUpdate),
+	})
+	if err != nil { return fmt.Errorf("Error updating Snapshot %q labels: %s", d.Id(), err) }
+	err = ComputeOperationWaitTime(config, res, project, "Updating Snapshot Labels", userAgent, d.Timeout(schema.TimeoutUpdate))
+	if err != nil { return err }
+}
+
+// 2. KMS Key Update (POST)
+if d.HasChange("snapshot_encryption_key") {
+	oldKey, newKey := d.GetChange("snapshot_encryption_key")
+	oldList := oldKey.([]interface{})
+	newList := newKey.([]interface{})
+
+	var oldKmsKey, newKmsKey string
+	if len(oldList) > 0 && oldList[0] != nil {
+		oldKmsKey = oldList[0].(map[string]interface{})["kms_key_self_link"].(string)
+	}
+	if len(newList) > 0 && newList[0] != nil {
+		newKmsKey = newList[0].(map[string]interface{})["kms_key_self_link"].(string)
+	}
+
+	// Converting a snapshot from CMEK to GMEK is not supported
+	if oldKmsKey != "" && newKmsKey == "" {
+		return fmt.Errorf("Removing 'snapshot_encryption_key' is not supported in-place. To remove the KMS key, please destroy and recreate the snapshot without a KMS key.")
+	}
+
+	if newKmsKey != "" {
+		obj := map[string]interface{}{
+			"kmsKeyName": newKmsKey,
+		}
+
+		// Global URL pattern for Snapshots
+		url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}" + d.Id() + "/updateKmsKey")
+		if err != nil { return err }
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body:      obj,
+			Timeout:   d.Timeout(schema.TimeoutUpdate),
+		})
+		if err != nil { return fmt.Errorf("Error updating Snapshot %q KMS key: %s", d.Id(), err) }
+
+		err = ComputeOperationWaitTime(
+			config, res, project, "Updating Snapshot KMS key", userAgent,
+			d.Timeout(schema.TimeoutUpdate))
+		if err != nil { return err }
+	}
+}
+
+d.Partial(false)
+return resourceComputeSnapshotRead(d, meta)
+

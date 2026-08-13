@@ -27,6 +27,23 @@ func AlwaysDiffSuppress(_, _, _ string, _ *schema.ResourceData) bool {
 }
 {{- end }}
 
+// DiskKmsKeyDiffSuppress suppresses diffs between base KMS keys, self-links, and versioned keys
+func DiskKmsKeyDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	oldStripped, err := tpgresource.GetRelativePath(old)
+	if err != nil {
+		oldStripped = old
+	}
+	newStripped, err := tpgresource.GetRelativePath(new)
+	if err != nil {
+		newStripped = new
+	}
+
+	oldKey := strings.Split(oldStripped, "/cryptoKeyVersions")[0]
+	newKey := strings.Split(newStripped, "/cryptoKeyVersions")[0]
+
+	return oldKey == newKey
+}
+
 // diffsuppress for beta and to check change in source_disk attribute
 func sourceDiskDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	s1 := strings.TrimPrefix(old, "https://www.googleapis.com/compute/beta")
