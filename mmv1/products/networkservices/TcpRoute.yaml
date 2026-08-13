@@ -92,7 +92,6 @@ parameters:
     url_param_only: true
     immutable: true
     default_value: global
-    ignore_read: true
 properties:
   - name: selfLink
     type: String
