@@ -1268,7 +1268,6 @@ func testAccCheckSpannerInstanceHasTagBindings(t *testing.T) func(s *terraform.S
 				return fmt.Errorf("tag binding not found via API for parent %s with tag value %s", parentURL, fullTagValueName)
 			}
 		}
-
 		return nil
 	}
 }
