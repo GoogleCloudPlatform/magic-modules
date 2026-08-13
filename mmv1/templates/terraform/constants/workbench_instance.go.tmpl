@@ -299,6 +299,44 @@ func mergeMaps(oldMap, newMap map[string]interface{}) map[string]string {
 
 
 func workbenchMetadataCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// Reject any server-managed metadata keys that the user has explicitly set in
+	// their configuration. Only the raw config is inspected (never the merged
+	// value from diff.Get), because after creation the state contains the
+	// server-managed keys the API returns, which would otherwise fail validation
+	// on every subsequent plan.
+	rawConfig := diff.GetRawConfig()
+	if !rawConfig.IsNull() && rawConfig.IsKnown() {
+		gceSetup := rawConfig.GetAttr("gce_setup")
+		if !gceSetup.IsNull() && gceSetup.IsKnown() && gceSetup.LengthInt() > 0 {
+			metadataVal := gceSetup.AsValueSlice()[0].GetAttr("metadata")
+			if !metadataVal.IsNull() && metadataVal.IsKnown() {
+				// Build the set of protected keys the user is not allowed to set.
+				protectedKeys := make(map[string]struct{})
+				for _, key := range WorkbenchInstanceProvidedMetadata {
+					protectedKeys[key] = struct{}{}
+				}
+				if v, ok := diff.GetOk("enable_managed_euc"); ok && v.(bool) {
+					for _, key := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
+						protectedKeys[key] = struct{}{}
+					}
+				}
+
+				var invalidKeys []string
+				for key := range metadataVal.AsValueMap() {
+					if _, isProtected := protectedKeys[key]; isProtected {
+						invalidKeys = append(invalidKeys, key)
+					}
+				}
+
+				if len(invalidKeys) > 0 {
+					// Sort the keys for a deterministic error message.
+					sort.Strings(invalidKeys)
+					return fmt.Errorf("the following metadata keys are protected and cannot be set: %v", invalidKeys)
+				}
+			}
+		}
+	}
+
 	if diff.HasChange("gce_setup.0.metadata") {
 		o, n := diff.GetChange("gce_setup.0.metadata")
 		oldMetadata := o.(map[string]interface{})

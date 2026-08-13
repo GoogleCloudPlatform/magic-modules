@@ -172,3 +172,25 @@ The `source_contents` argument is now Required. Previously, this field was marke
 ## Resource: `google_notebooks_environment` is now removed
 
 `google_notebooks_environment` has been removed along with the User-Managed and Google-Managed Notebooks products, which have reached End of Life. Remove it from your configuration; environment settings such as the VM/container image and post-startup script are now specified directly on `google_workbench_instance`.
+
+## Resource: `google_workbench_instance`
+
+### Setting server-managed `gce_setup.metadata` keys is now an error
+
+`google_workbench_instance` now returns a plan-time error when `gce_setup.metadata`
+contains a metadata key that is managed by the service. Previously these keys were
+silently accepted and then overwritten by the API, which produced a persistent diff
+on every `plan` after the instance was created.
+
+When upgrading to `8.0.0`, remove any service-managed keys from the `metadata` map
+in your `google_workbench_instance` configurations. These include keys such as
+`proxy-url`, `resource-url`, `image-url`, `version`, `enable-oslogin`,
+`instance-region`, and the other keys the service populates. When `enable_managed_euc`
+is set, the End-User-Credentials keys (for example `gce-software-declaration`,
+`startup-script`, and `ssh-keys`) are protected as well.
+
+Attempting to set a protected key now fails with an error listing the offending keys, for example:
+
+```
+Error: the following metadata keys are protected and cannot be set: [image-url proxy-url]
+```
