@@ -39,6 +39,19 @@ samples:
           # anchored to a fixed day-of-year in UTC so recorded VCR fixtures stay valid for months, not one day
           snooze_start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.UTC).AddDate(0, 0, 1).Format(time.RFC3339)'
           snooze_end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.UTC).AddDate(0, 0, 2).Format(time.RFC3339)'
+  - name: 'monitoring_snooze_filter'
+    primary_resource_id: 'snooze'
+    steps:
+      - name: 'monitoring_snooze_filter'
+        resource_id_vars:
+          alert_policy_display_name: 'My Alert Policy'
+          snooze_display_name: 'My Snooze'
+          snooze_start_time: '2024-02-03T07:44:12Z'
+          snooze_end_time: '2024-02-05T07:44:12Z'
+        test_vars_overrides:
+          # anchored to a fixed day-of-year in UTC so recorded VCR fixtures stay valid for months, not one day
+          snooze_start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.UTC).AddDate(0, 0, 1).Format(time.RFC3339)'
+          snooze_end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.UTC).AddDate(0, 0, 2).Format(time.RFC3339)'
 properties:
   - name: 'name'
     type: String
