@@ -1,3 +1,5 @@
+package gkebackup_test
+
 import (
 	"fmt"
 	"net/url"
