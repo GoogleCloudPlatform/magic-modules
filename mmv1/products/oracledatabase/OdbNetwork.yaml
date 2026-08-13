@@ -19,6 +19,7 @@ references:
     OracleDatabase@Google Cloud: https://cloud.google.com/oracle/database/docs/overview'
 base_url: projects/{{project}}/locations/{{location}}/odbNetworks
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}
 create_url: projects/{{project}}/locations/{{location}}/odbNetworks?odbNetworkId={{odb_network_id}}
 id_format: projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}

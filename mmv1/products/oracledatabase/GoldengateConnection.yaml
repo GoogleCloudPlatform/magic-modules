@@ -16,6 +16,7 @@ name: GoldengateConnection
 description: GoldengateConnection is a resource that represents metadata to establish a connection to a source or target data.
 base_url: projects/{{project}}/locations/{{location}}/goldengateConnections
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/goldengateConnections/{{goldengate_connection_id}}
 create_url: projects/{{project}}/locations/{{location}}/goldengateConnections?goldengateConnectionId={{goldengate_connection_id}}
 id_format: projects/{{project}}/locations/{{location}}/goldengateConnections/{{goldengate_connection_id}}

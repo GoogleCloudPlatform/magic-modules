@@ -22,6 +22,7 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/cloudVmClusters
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster_id}}
 create_url: projects/{{project}}/locations/{{location}}/cloudVmClusters?cloudVmClusterId={{cloud_vm_cluster_id}}
 id_format: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster_id}}

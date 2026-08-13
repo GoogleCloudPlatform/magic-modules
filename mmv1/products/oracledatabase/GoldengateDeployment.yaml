@@ -16,6 +16,7 @@ name: GoldengateDeployment
 description: This resource helps to create a GoldengateDeployment which enables running Oracle GoldenGate in Google Cloud.
 base_url: projects/{{project}}/locations/{{location}}/goldengateDeployments
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/goldengateDeployments/{{goldengate_deployment_id}}
 create_url: projects/{{project}}/locations/{{location}}/goldengateDeployments?goldengateDeploymentId={{goldengate_deployment_id}}
 id_format: projects/{{project}}/locations/{{location}}/goldengateDeployments/{{goldengate_deployment_id}}

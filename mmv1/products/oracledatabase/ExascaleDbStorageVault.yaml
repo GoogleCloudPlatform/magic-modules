@@ -16,6 +16,7 @@ name: ExascaleDbStorageVault
 description: An Exascale Storage Vault Resource
 base_url: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults/{{exascale_db_storage_vault_id}}
 create_url: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults?exascaleDbStorageVaultId={{exascale_db_storage_vault_id}}
 id_format: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults/{{exascale_db_storage_vault_id}}

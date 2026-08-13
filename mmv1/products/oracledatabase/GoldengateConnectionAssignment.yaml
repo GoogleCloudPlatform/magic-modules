@@ -16,6 +16,7 @@ name: GoldengateConnectionAssignment
 description: This resource helps to assign a GoldengateConnection to a GoldengateDeployment used for actual data replication and transformations.
 base_url: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments/{{goldengate_connection_assignment_id}}
 create_url: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments?goldengateConnectionAssignmentId={{goldengate_connection_assignment_id}}
 id_format: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments/{{goldengate_connection_assignment_id}}

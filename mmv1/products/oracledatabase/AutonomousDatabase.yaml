@@ -20,6 +20,7 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/autonomousDatabases
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}
 create_url: projects/{{project}}/locations/{{location}}/autonomousDatabases?autonomousDatabaseId={{autonomous_database_id}}
 id_format: projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}

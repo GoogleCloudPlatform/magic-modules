@@ -20,6 +20,7 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}
 create_url: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures?cloudExadataInfrastructureId={{cloud_exadata_infrastructure_id}}
 id_format: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}
