@@ -3,6 +3,6 @@ obj["scope"] = d.Get("scope")
 if d.Get("type") == "SECURE_WEB_GATEWAY" {
     obj["name"] = d.Get("name")
     obj["type"] = d.Get("type")
-    obj["routingMode"] = d.Get("routingMode")
+    obj["routingMode"] = d.Get("routing_mode")
 }
 return obj, nil
