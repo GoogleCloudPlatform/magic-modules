@@ -31,7 +31,7 @@ resource "google_network_security_gateway_security_policy" "default" {
 }
 
 resource "google_compute_address" "swp_ip" {
-  name         = "{{index $.ResourceIdVars "gateway_name"}}" # Alterado para amarrar com a regra de nomenclatura do GCP
+  name         = "{{index $.ResourceIdVars "gateway_name"}}"
   project      = "{{index $.TestEnvVars "project"}}"
   region       = "us-east4"
 
