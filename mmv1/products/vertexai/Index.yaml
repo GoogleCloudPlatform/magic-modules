@@ -21,6 +21,7 @@ docs:
 base_url: projects/{{project}}/locations/{{region}}/indexes
 self_link: projects/{{project}}/locations/{{region}}/indexes/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/indexes
+generate_list_resource: true
 update_mask: true
 update_verb: PATCH
 timeouts:
@@ -66,6 +67,8 @@ samples:
           display_name: test-index
           bucket_name: vertex-ai-index-test
           kms_key_name: kms-name
+        vars:
+          region: 'us-central1'
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:

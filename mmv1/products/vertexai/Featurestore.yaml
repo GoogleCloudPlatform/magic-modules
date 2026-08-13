@@ -24,6 +24,7 @@ self_link: projects/{{project}}/locations/{{region}}/featurestores/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/featurestores?featurestoreId={{name}}
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: POST
@@ -76,6 +77,8 @@ samples:
           name: terraform2
           project: appeng-flex
           kms_key_name: kms-name
+        vars:
+          region: 'us-central1'
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
@@ -93,6 +96,8 @@ samples:
           name: terraform3
           project: appeng-flex
           kms_key_name: kms-name
+        vars:
+          region: 'us-central1'
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
