@@ -1,5 +1,3 @@
-package gkebackup_test
-
 import (
 	"fmt"
 	"net/url"
@@ -584,4 +582,3 @@ func testAccCheckGKEBackupBackupPlanHasTagBindings(t *testing.T) func(s *terrafo
 		return nil
 	}
 }
-
