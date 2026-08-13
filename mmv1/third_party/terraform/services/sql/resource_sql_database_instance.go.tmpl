@@ -601,8 +601,8 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Type:         schema.TypeInt,
 							Optional:     true,
 							Computed:     true,
-							ValidateFunc: validation.IntAtLeast(0),
-							Description:  `The number of seconds between two consecutive instance recreations after which replication is considered stuck and the replica is recreated. 0 disables the check.`,
+							ValidateFunc: validation.IntBetween(300, 31536000),
+							Description:  `The acceptable replication lag, in seconds, after which a read replica recreates itself. The lag must persist for at least five minutes before recreation is triggered. This is a replica level field, and must be between 300 seconds (five minutes) and 31536000 seconds (one year).`,
 						},
 						"connection_pool_config": {
 							Type:     schema.TypeSet,
