@@ -20,18 +20,6 @@ resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
     "//agentregistry.googleapis.com/projects/{{index $.TestEnvVars "project"}}/locations/us-central1"
   ]
 
-  network_config {
-    egress {
-      network_attachment = google_compute_network_attachment.default.id
-    }
-
-    dns_peering_config {
-      domains        = [google_dns_managed_zone.default.dns_name]
-      target_project = data.google_project.project.project_id
-      target_network = google_compute_network.default.id
-    }
-  }
-
   depends_on = [google_project_service.agent_registry]
 }
 
@@ -51,6 +39,14 @@ resource "google_network_services_agent_connectivity_template" "default" {
 
   access_types = ["PUBLIC"]
   access_path = "AGENT_TO_ANYWHERE"
+
+  egress_network_config {
+    network_attachment = google_compute_network_attachment.default.id
+    dns_peering_config {
+      domain         = google_dns_managed_zone.default.dns_name
+      target_network = google_compute_network.default.id
+    }
+  }
 }
 
 resource "google_compute_network" "default" {

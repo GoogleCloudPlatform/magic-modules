@@ -31,9 +31,8 @@ resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResou
     vpc_egress = "ALL_TRAFFIC"
     network_attachment = google_compute_network_attachment.default.id
     dns_peering_config {
-      domains        = ["example.com."]
+      domain         = "example.com."
       target_network = google_compute_network.default.id
-      target_project = data.google_project.project.project_id
     }
   }
 }

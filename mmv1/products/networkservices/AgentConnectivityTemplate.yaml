@@ -105,6 +105,7 @@ properties:
       error.
   - name: accessTypes
     type: Array
+    default_from_api: true
     description: |
       The types of network access provided to the gateway.
       Both PUBLIC and PRIVATE can be configured.
@@ -139,23 +140,14 @@ properties:
         description: |
           DNS peering configuration for the AgentConnectivityTemplate.
           When set, the gateway will resolve queries for the configured
-          `domains` via Cloud DNS in the specified `targetNetwork`.
+          `domain` via Cloud DNS in the specified `targetNetwork`.
         properties:
-          - name: domains
-            type: Array
-            required: true
-            description: |
-              The list of domain names to peer for DNS resolution. Each entry
-              must be a fully qualified domain name ending with a dot
-              (for example, `example.com.`).
-            item_type:
-              type: String
-          - name: targetProject
+          - name: domain
             type: String
             required: true
             description: |
-              The ID of the project that hosts the target VPC network for DNS
-              peering.
+              The domain name to peer for DNS resolution. Must be a fully
+              qualified domain name ending with a dot (for example, `example.com.`).
           - name: targetNetwork
             type: String
             required: true
