@@ -3,14 +3,16 @@ package storage
 import (
 	"crypto/sha512"
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"hash/crc32"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/hashicorp/terraform-provider-google/google/registry"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/registry"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/storage/v1"
@@ -67,6 +69,10 @@ func dataSourceGoogleStorageBucketObjectContentRead(d *schema.ResourceData, meta
 
 	objectsService := storage.NewObjectsService(NewClient(config, userAgent))
 	getCall := objectsService.Get(bucket, name)
+	objectMeta, err := getCall.Do()
+	if err != nil {
+		return fmt.Errorf("Error reading storage bucket object metadata: %s", err)
+	}
 
 	res, err := getCall.Download()
 	if err != nil {
@@ -82,6 +88,20 @@ func dataSourceGoogleStorageBucketObjectContentRead(d *schema.ResourceData, meta
 			return fmt.Errorf("Error reading all  from res.Body: %s", err)
 		}
 		objectBytes = bodyBytes
+	}
+
+	crc32cTable := crc32.MakeTable(crc32.Castagnoli)
+	checksum := crc32.Checksum(objectBytes, crc32cTable)
+	crc32cBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(crc32cBytes, checksum)
+	calculatedCrc32c := base64.StdEncoding.EncodeToString(crc32cBytes)
+
+	if objectMeta.Crc32c != "" && calculatedCrc32c != objectMeta.Crc32c {
+		return fmt.Errorf("CRC32C checksum mismatch for storage bucket object %s: computed %s, expected %s from metadata", name, calculatedCrc32c, objectMeta.Crc32c)
+	}
+
+	if err := d.Set("crc32c", calculatedCrc32c); err != nil {
+		return fmt.Errorf("Error setting crc32c: %s", err)
 	}
 
 	if err := d.Set("content", string(objectBytes)); err != nil {

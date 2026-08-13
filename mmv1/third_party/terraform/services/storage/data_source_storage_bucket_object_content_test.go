@@ -2,17 +2,115 @@ package storage_test
 
 import (
 	"archive/zip"
+	"bytes"
+	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/provider"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+type crc32cMismatchRoundTripper struct {
+	http.RoundTripper
+	bucketName string
+	objectName string
+}
+
+func (t *crc32cMismatchRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
+	response, err := t.RoundTripper.RoundTrip(r)
+	if err != nil || response.StatusCode != http.StatusOK {
+		return response, err
+	}
+
+	// Intercept object metadata GET requests and mutate the returned CRC32c checksum.
+	// We distinguish metadata GET requests from payload download requests by ensuring
+	// the `alt=media` query parameter is NOT present.
+	if r.Method == http.MethodGet &&
+		strings.Contains(r.URL.Path, fmt.Sprintf("/b/%s/o/%s", t.bucketName, t.objectName)) &&
+		r.URL.Query().Get("alt") != "media" {
+
+		responseBytes, readErr := io.ReadAll(response.Body)
+		response.Body.Close()
+		if readErr != nil {
+			return nil, readErr
+		}
+
+		var responseMap map[string]interface{}
+		if jsonErr := json.Unmarshal(responseBytes, &responseMap); jsonErr != nil {
+			return nil, jsonErr
+		}
+
+		// Inject a mismatched base64-encoded CRC32c checksum.
+		// Standard valid GCS CRC32c hashes are 4 bytes, base64-encoded.
+		responseMap["crc32c"] = "MismatchedCrc32cForTesting=="
+
+		newBytes, marshalErr := json.Marshal(responseMap)
+		if marshalErr != nil {
+			return nil, marshalErr
+		}
+
+		response.Body = io.NopCloser(bytes.NewReader(newBytes))
+		response.ContentLength = int64(len(newBytes))
+		response.Header.Set("Content-Length", strconv.Itoa(len(newBytes)))
+	}
+
+	return response, err
+}
+
+func TestAccDataSourceStorageBucketObjectContent_Crc32cMismatch(t *testing.T) {
+	acctest.SkipIfVcr(t)
+
+	bucket := "tf-bucket-object-content-" + acctest.RandString(t, 10)
+	content := "qwertyuioasdfghjk1234567!!@#$*"
+	objectName := "butterfly01"
+
+	providerInstance := provider.Provider()
+	oldConfigureFunc := providerInstance.ConfigureContextFunc
+	providerInstance.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		c, diagnostics := oldConfigureFunc(ctx, d)
+		if diagnostics.HasError() {
+			return c, diagnostics
+		}
+		config := c.(*transport_tpg.Config)
+		config.Client.Transport = &crc32cMismatchRoundTripper{
+			RoundTripper: config.Client.Transport,
+			bucketName:   bucket,
+			objectName:   objectName,
+		}
+		return c, diagnostics
+	}
+
+	providers := map[string]*schema.Provider{
+		"google": providerInstance,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.AccTestPreCheck(t) },
+		Providers: providers,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccDataSourceStorageBucketObjectContent_Basic(content, bucket),
+				ExpectError: regexp.MustCompile("CRC32C checksum mismatch for storage bucket object"),
+			},
+		},
+	})
+}
 
 func TestAccDataSourceStorageBucketObjectContent_Basic(t *testing.T) {
 
