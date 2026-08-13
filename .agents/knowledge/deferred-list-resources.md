@@ -14,3 +14,17 @@ Each row: **product**, **resource** (PascalCase YAML stem), **pattern** (oracle 
 | apigee | TargetServer | P-08 | Bare-array list response — generator needs `list_response_is_array: true` support | add-apigee-list-resources-followup |
 | apigee | EnvironmentKeyvaluemaps | P-08 | Bare-array list response — generator needs `list_response_is_array: true` support | add-apigee-list-resources-followup |
 | apigee | Organization | P-09 | List items use `"organization"` identity key but resource uses `"name"` — needs custom list decoder | add-apigee-list-resources-followup |
+| networkservices | AgentGateway | P-17 | `base_url` defaults to `global` location; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | EdgeCacheKeyset | P-17 | `base_url` hardcodes `/locations/global/`; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | EdgeCacheOrigin | P-17 | `base_url` hardcodes `/locations/global/`; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | EdgeCacheService | P-17 | `base_url` hardcodes `/locations/global/`; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | EndpointPolicy | P-17 | `base_url` hardcodes `/locations/global/`; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | Gateway | P-17 | `base_url` defaults to `global` location; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | GrpcRoute | P-17 | `base_url` defaults to `global` location; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | HttpRoute | P-17 | `base_url` hardcodes `/locations/global/`; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | LbRouteExtension | P-17 | `base_url` uses `{{location}}` but resource creation scope mismatches list scope | add-networkservices-list-resources-followup |
+| networkservices | LbTrafficExtension | P-17 | `base_url` uses `{{location}}` but resource creation scope mismatches list scope | add-networkservices-list-resources-followup |
+| networkservices | Mesh | P-17 | `base_url` defaults to `global` location; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | ServiceLbPolicies | P-17 | `base_url` defaults to `global` location; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | TcpRoute | P-17 | `base_url` hardcodes `/locations/global/`; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| networkservices | TlsRoute | P-17 | `base_url` defaults to `global` location; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
