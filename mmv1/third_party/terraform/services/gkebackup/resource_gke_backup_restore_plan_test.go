@@ -435,4 +435,3 @@ func testAccCheckGKEBackupRestorePlanHasTagBindings(t *testing.T) func(s *terraf
 		return nil
 	}
 }
-
