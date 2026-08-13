@@ -1271,4 +1271,3 @@ func testAccCheckSpannerInstanceHasTagBindings(t *testing.T) func(s *terraform.S
 		return nil
 	}
 }
-
