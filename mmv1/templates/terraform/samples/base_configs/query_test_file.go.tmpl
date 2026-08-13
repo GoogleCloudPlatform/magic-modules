@@ -20,7 +20,6 @@
 package {{ lower $.ProductMetadata.Name }}_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -31,7 +30,11 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
 {{- range $pkg, $alias := $.TestDependencies }}
+	{{- if $alias }}
 	{{ $alias }} "{{ $.ImportPath }}/{{ $pkg }}"
+	{{- else }}
+	"{{ $.ImportPath }}/{{ $pkg }}"
+	{{- end }}
 {{- end }}
 )
 
