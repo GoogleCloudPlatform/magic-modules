@@ -17,8 +17,8 @@ resource "google_dataproc_batch" "{{$.PrimaryResourceId}}" {
     }
 
     spark_r_batch {
-      main_r_file_uri  = "https://storage.googleapis.com/terraform-batches/spark-r-flights.r"
-      args             = ["https://storage.googleapis.com/terraform-batches/flights.csv"]
+      main_r_file_uri  = "https://storage.googleapis.com/terraform-serverless/spark-r-flights.r"
+      args             = ["https://storage.googleapis.com/terraform-serverless/flights.csv"]
     }
 }
 
