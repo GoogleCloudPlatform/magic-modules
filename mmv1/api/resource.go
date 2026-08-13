@@ -2157,6 +2157,16 @@ func (r Resource) TestDependencies() map[string]string {
 					deps[pkg] = ""
 					continue
 				}
+				// If one is a named alias and the other is "_", prefer the named alias
+				if alias == "_" && depsAlias != "" && depsAlias != "_" {
+					// Keep existing named alias
+					continue
+				}
+				if depsAlias == "_" && alias != "" && alias != "_" {
+					// Replace "_" with named alias
+					deps[pkg] = alias
+					continue
+				}
 				log.Fatalf("Conflicting aliases (%s vs %s) for pkg dependency %s for resource %s", depsAlias, alias, pkg, r.ApiName)
 			}
 			deps[pkg] = alias

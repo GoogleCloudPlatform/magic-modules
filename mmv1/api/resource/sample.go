@@ -124,6 +124,16 @@ func (s *Sample) TestDependencies(resourcePrefixPkgMap map[string]string) map[st
 					deps[pkg] = ""
 					continue
 				}
+				// If one is a named alias and the other is "_", prefer the named alias
+				if alias == "_" && depsAlias != "" && depsAlias != "_" {
+					// Keep existing named alias
+					continue
+				}
+				if depsAlias == "_" && alias != "" && alias != "_" {
+					// Replace "_" with named alias
+					deps[pkg] = alias
+					continue
+				}
 				log.Fatalf("Conflicting aliases (%s vs %s) for pkg dependency %s for sample %s", depsAlias, alias, pkg, s.Name)
 			}
 			deps[pkg] = alias

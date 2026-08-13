@@ -130,13 +130,13 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 	deps := map[string]string{}
 	for _, val := range s.TestContextVars {
 		if strings.HasPrefix(val, "compute.") {
-			deps["services/compute"] = ""
+			deps["services/compute"] = "compute"
 		}
 		if strings.HasPrefix(val, "kms.") {
-			deps["services/kms"] = ""
+			deps["services/kms"] = "kms"
 		}
 		if strings.HasPrefix(val, "servicenetworking.") {
-			deps["services/servicenetworking"] = ""
+			deps["services/servicenetworking"] = "servicenetworking"
 		}
 	}
 	matches := hclResourceRegexp.FindAllStringSubmatch(s.TestHCLText, -1)
@@ -154,9 +154,11 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 		}
 		if longestPrefix != "" {
 			pkg := resourcePrefixPkgMap[longestPrefix]
+			// Only add if not already present (regardless of alias)
 			if _, ok := deps[pkg]; !ok {
 				deps[pkg] = "_"
 			}
+			// If already present with any alias, leave it as-is
 		}
 	}
 	return deps
