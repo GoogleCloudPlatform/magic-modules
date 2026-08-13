@@ -3894,13 +3894,16 @@ func TestAccDataprocCluster_AttachedDiskConfigWorker(t *testing.T) {
 
 	var cluster dataproc.Cluster
 	rnd := acctest.RandString(t, 10)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_attachedDiskConfigWorker(rnd),
+				Config: testAccDataprocCluster_attachedDiskConfigWorker(rnd, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.attached_disk_config_worker", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config_worker", "cluster_config.0.worker_config.0.disk_config.0.attached_disk_config.0.disk_size_gb", "30"),
@@ -3962,22 +3965,26 @@ resource "google_dataproc_cluster" "attached_disk_config_master" {
 `, rnd)
 }
 
-func testAccDataprocCluster_attachedDiskConfigWorker(rnd string) string {
+func testAccDataprocCluster_attachedDiskConfigWorker(rnd, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "attached_disk_config_worker" {
-  name   = "tf-test-dproc-%s"
-  region = "asia-east1"
+	name   = "tf-test-dproc-%s"
+	region = "us-central1"
 
-  cluster_config {
+	cluster_config {
+		gce_cluster_config {
+			zone       = "us-central1-a"
+			subnetwork = "%s"
+		}
 
 		master_config {
 			num_instances = 1
-			machine_type  = "n1-standard-2"
+			machine_type  = "c4-standard-2"
 		}
 
-    worker_config {
-      num_instances = "2"
-			machine_type = "n4-standard-2"
+		worker_config {
+			num_instances = "2"
+			machine_type = "c4-standard-2"
 			disk_config {
 				boot_disk_size_gb = 30
 				boot_disk_type = "hyperdisk-balanced"
@@ -3989,7 +3996,7 @@ resource "google_dataproc_cluster" "attached_disk_config_worker" {
 		}
 	}
 }
-`, rnd)
+`, rnd, subnetworkName)
 }
 
 func testAccDataprocCluster_attachedDiskConfigSecondary(rnd string) string {
