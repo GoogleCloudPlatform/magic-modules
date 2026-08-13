@@ -82,6 +82,9 @@ func TestAccDataSourceStorageBucketObjectContent_Crc32cMismatch(t *testing.T) {
 
 	providerInstance := provider.Provider()
 	oldConfigureFunc := providerInstance.ConfigureContextFunc
+	t.Cleanup(func() {
+		providerInstance.ConfigureContextFunc = oldConfigureFunc
+	})
 	providerInstance.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		c, diagnostics := oldConfigureFunc(ctx, d)
 		if diagnostics.HasError() {
@@ -155,10 +158,10 @@ func TestAccDataSourceStorageBucketObjectContent_FileContentBase64(t *testing.T)
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"local": resource.ExternalProvider{
+			"local": {
 				VersionConstraint: "> 2.5.0",
 			},
-			"archive": resource.ExternalProvider{
+			"archive": {
 				VersionConstraint: "> 2.5.0",
 			},
 		},
@@ -219,7 +222,6 @@ func testAccDataSourceStorageBucketObjectContent_FileContentBase64(bucket, folde
 resource "google_storage_bucket" "this" {
   name                        = "%s"
   location                    = "us-east4"
-  uniform_bucket_level_access = true
 }
 
 data "archive_file" "this" {
@@ -278,13 +280,23 @@ func TestAccDataSourceStorageBucketObjectContent_Issue15717BackwardCompatibility
 	content := "qwertyuioasdfghjk1234567!!@#$*"
 
 	config := fmt.Sprintf(`
-%s
+resource "google_storage_bucket" "contenttest" {
+	name          = "%s"
+	location      = "US"
+	force_destroy = true
+}
+
+resource "google_storage_bucket_object" "object" {
+	name    = "butterfly01"
+	content = "%s"
+	bucket  = google_storage_bucket.contenttest.name
+}
 
 data "google_storage_bucket_object_content" "new" {
 	bucket  = google_storage_bucket.contenttest.name
 	content = "%s"
 	name    = google_storage_bucket_object.object.name
-}`, testAccDataSourceStorageBucketObjectContent_Basic(content, bucket), content)
+}`, bucket, content, content)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
