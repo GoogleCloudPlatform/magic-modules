@@ -2,15 +2,20 @@ package spanner_test
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/spanner"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 // Acceptance Tests
@@ -34,6 +39,41 @@ func TestAccSpannerInstance_basic(t *testing.T) {
 				ResourceName:      "google_spanner_instance.basic",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccSpannerInstance_tags(t *testing.T) {
+	t.Parallel()
+
+	tagKey := tags.BootstrapSharedTestOrganizationTagKey(t, "spanner-instance-tagkey", map[string]interface{}{})
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"tagKey":        tagKey,
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "spanner-instance-tagvalue", tagKey),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstance_tags(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.tags", "tags.%"),
+					testAccCheckSpannerInstanceHasTagBindings(t),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.tags",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "tags"},
 			},
 		},
 	})
@@ -1098,3 +1138,138 @@ resource "google_spanner_instance" "test" {
   edition = "ENTERPRISE_PLUS"
 }`, name, name)
 }
+
+func testAccSpannerInstance_tags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "tags" {
+  name         = "tf-test-%{random_suffix}"
+  config       = "regional-us-central1"
+  display_name = "tf-test-%{random_suffix}"
+  
+  processing_units = 100
+  edition          = "ENTERPRISE"
+  
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
+}
+
+func testAccCheckSpannerInstanceHasTagBindings(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_spanner_instance" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			// 1. Get the configured tag key and value from the state.
+			var configuredTagValueNamespacedName string
+			var tagKeyNamespacedName, tagValueShortName string
+			for key, val := range rs.Primary.Attributes {
+				if strings.HasPrefix(key, "tags.") && key != "tags.%" {
+					tagKeyNamespacedName = strings.TrimPrefix(key, "tags.")
+					tagValueShortName = val
+					if tagValueShortName != "" {
+						configuredTagValueNamespacedName = fmt.Sprintf("%s/%s", tagKeyNamespacedName, tagValueShortName)
+						break
+					}
+				}
+			}
+
+			if configuredTagValueNamespacedName == "" {
+				return fmt.Errorf("could not find a configured tag value in the state for resource %s", rs.Primary.ID)
+			}
+
+			// Check if placeholders are still present.
+			if strings.Contains(configuredTagValueNamespacedName, "%{") {
+				return fmt.Errorf("tag namespaced name contains unsubstituted variables: %q. Ensure the context map in the test step is populated", configuredTagValueNamespacedName)
+			}
+
+			// 2. Describe the tag value using the namespaced name to get its full resource name.
+			safeNamespacedName := url.QueryEscape(configuredTagValueNamespacedName)
+			describeTagValueURL := fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/tagValues/namespaced?name=%s", safeNamespacedName)
+
+			respDescribe, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    describeTagValueURL,
+				UserAgent: config.UserAgent,
+			})
+
+			if err != nil {
+				return fmt.Errorf("error describing tag value using namespaced name %q: %v", configuredTagValueNamespacedName, err)
+			}
+
+			fullTagValueName, ok := respDescribe["name"].(string)
+			if !ok || fullTagValueName == "" {
+				return fmt.Errorf("tag value details (name) not found in response for namespaced name: %q, response: %v", configuredTagValueNamespacedName, respDescribe)
+			}
+
+			// 3. Check if bindings exist via API
+			parts := strings.Split(rs.Primary.ID, "/")
+			if len(parts) != 2 {
+				return fmt.Errorf("invalid resource ID format: %s", rs.Primary.ID)
+			}
+			project := parts[0]
+			instanceName := parts[1]
+
+			// Extract location from instance config (e.g., "regional-us-central1" -> "us-central1")
+			configAttr, ok := rs.Primary.Attributes["config"]
+			if !ok {
+				return fmt.Errorf("could not find config attribute for resource %s", rs.Primary.ID)
+			}
+
+			// configAttr can be "regional-us-central1" or "projects/my-project/instanceConfigs/regional-us-central1"
+			configShortName := configAttr
+			if parts := strings.Split(configAttr, "/"); len(parts) > 1 {
+				configShortName = parts[len(parts)-1]
+			}
+
+			location := strings.TrimPrefix(configShortName, "regional-")
+
+			parentURL := fmt.Sprintf("//spanner.googleapis.com/projects/%s/instances/%s", project, instanceName)
+			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
+
+			respList, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    listBindingsURL,
+				UserAgent: config.UserAgent,
+			})
+
+			if err != nil {
+				return fmt.Errorf("error listing tag bindings for parent %s: %v", parentURL, err)
+			}
+
+			bindings, ok := respList["tagBindings"].([]interface{})
+			if !ok {
+				return fmt.Errorf("unexpected or missing 'tagBindings' in response for parent %s: %v", parentURL, respList)
+			}
+
+			found := false
+			for _, b := range bindings {
+				bindingMap, ok := b.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				if bindingMap["tagValue"] == fullTagValueName {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				return fmt.Errorf("tag binding not found via API for parent %s with tag value %s", parentURL, fullTagValueName)
+			}
+		}
+
+		return nil
+	}
+}
+
