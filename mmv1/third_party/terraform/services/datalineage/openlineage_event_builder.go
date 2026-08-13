@@ -1,6 +1,8 @@
 package datalineage
 
 import (
+	"fmt"
+
 	"github.com/OpenLineage/openlineage/client/go/pkg/facets"
 	"github.com/OpenLineage/openlineage/client/go/pkg/openlineage"
 )
@@ -25,9 +27,10 @@ func buildOutputs(in map[string]interface{}, runEvent *openlineage.RunEvent) {
 				Namespace: m["namespace"].(string),
 			}
 			facets := getCommonDatasetFacets(m)
-			element.WithFacets(facets...)
-			if e, ok := m["columnLineage"].([]interface{}); ok {
-				element.WithFacets(buildColumnLineage(e))
+			element = element.WithFacets(facets...)
+			if e, ok := m["column_lineage"].(map[string]interface{}); ok {
+				facets = append(facets, buildColumnLineage(e))
+				element = element.WithFacets(facets...)
 			}
 
 			outputs = append(outputs, element)
@@ -47,7 +50,7 @@ func buildInputs(in map[string]interface{}, runEvent *openlineage.RunEvent) {
 				Namespace: m["namespace"].(string),
 			}
 			facets := getCommonDatasetFacets(m)
-			element.WithFacets(facets...)
+			element = element.WithFacets(facets...)
 			inputs = append(inputs, element)
 		}
 		runEvent.WithInputs(inputs...)
@@ -77,13 +80,10 @@ func buildJobType(runEvent *openlineage.RunEvent) {
 	)
 }
 
-func buildColumnLineage(v []interface{}) *facets.ColumnLineageDatasetFacet {
-	if len(v) == 0 {
-		return nil
-	}
-	cll := v[0].(map[string]interface{})
+func buildColumnLineage(cll map[string]interface{}) *facets.ColumnLineageDatasetFacet {
+	fieldList, _ := cll["field"].([]interface{})
 	fields := make(map[string]facets.ColumnLineageDatasetFacetFieldsValue)
-	for _, item := range cll["fields"].([]interface{}) {
+	for _, item := range fieldList {
 		m := item.(map[string]interface{})
 		name := m["name"].(string)
 		i := m["input"].([]interface{})
@@ -92,7 +92,7 @@ func buildColumnLineage(v []interface{}) *facets.ColumnLineageDatasetFacet {
 		}
 	}
 
-	di := cll["dataset_input"].([]interface{})
+	di, _ := cll["dataset_input"].([]interface{})
 	facet := facets.NewColumnLineageDatasetFacet("_PRODUCER_", fields).WithDataset(buildCllInputs(di))
 	return facet
 }
@@ -128,12 +128,19 @@ func buildCllInputs(i []interface{}) []facets.InputField {
 func getCommonDatasetFacets(m map[string]interface{}) []facets.DatasetFacet {
 	facets := make([]facets.DatasetFacet, 0)
 	if v, ok := m["catalog"]; ok {
+		fmt.Println("YES CATALOG")
 		facets = append(facets, buildCatalog(v.(map[string]interface{})))
+	} else {
+		fmt.Println("NO CATALOG")
 	}
 
 	if v, ok := m["symlink"]; ok {
+		fmt.Println("YES SYMLINK")
 		facets = append(facets, buildSymlinks(v.([]interface{})))
+	} else {
+		fmt.Println("NO SYMLINK")
 	}
+	fmt.Println("FACETS: ", facets)
 	return facets
 }
 
