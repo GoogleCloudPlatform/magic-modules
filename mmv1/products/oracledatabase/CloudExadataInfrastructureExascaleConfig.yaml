@@ -19,7 +19,6 @@ description: |
   ~> **Note:** Oracle Database @ Google Cloud does not support deconfiguring Exascale storage on an Exadata Infrastructure.
   Deleting this resource from Terraform state will only remove it from Terraform management; it will not delete or reset the Exascale configuration on the actual Exadata Infrastructure.
 immutable: true
-generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}
 create_url: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}:configureExascale
 create_verb: POST
