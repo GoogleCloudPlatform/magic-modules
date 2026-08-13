@@ -61,7 +61,6 @@ Read this index at decision points; open only the source the task needs. Format 
 
 - **template-modifications** — Safety rules and blast radius precautions for modifying Magic Modules engine templates (mmv1/templates/). — [template/template-modifications.md](template/template-modifications.md)
 
-
 ### Bugs (`bug/`)
 
 *(No entries yet)*
