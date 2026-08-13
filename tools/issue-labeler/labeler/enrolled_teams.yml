@@ -592,6 +592,7 @@ service/monitoring-alerting:
   resources:
   - google_monitoring_notification_channel
   - google_monitoring_alert_policy
+  - google_monitoring_snooze
 service/monitoring-metrics:
   resources:
   - google_monitoring_metric_descriptor
