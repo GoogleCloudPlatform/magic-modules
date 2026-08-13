@@ -29,7 +29,6 @@ delete_url: '{{envgroup_id}}/attachments/{{name}}'
 import_format:
   - '{{envgroup_id}}/attachments/{{name}}'
   - '{{envgroup_id}}/{{name}}'
-generate_list_resource: true
 
 timeouts:
   insert_minutes: 30

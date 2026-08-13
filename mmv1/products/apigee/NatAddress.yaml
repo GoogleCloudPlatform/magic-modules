@@ -28,7 +28,6 @@ delete_url: '{{instance_id}}/natAddresses/{{name}}'
 import_format:
   - '{{instance_id}}/natAddresses/{{name}}'
   - '{{instance_id}}/{{name}}'
-generate_list_resource: true
 
 timeouts:
   insert_minutes: 30
