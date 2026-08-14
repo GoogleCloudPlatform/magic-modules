@@ -12,20 +12,38 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 )
 
+var jwksTestContext = map[string]interface{}{
+	// Pre-existing Google-owned organization (google.com) with Agent System Pool
+	"org_id": "433637338589",
+}
+
 func TestAccDataSourceIAMBetaWorkloadIdentityPoolJwks_basic(t *testing.T) {
 	t.Parallel()
-
-	context := map[string]interface{}{
-		// Pre-existing Google-owned organization (google.com) with Agent System Pool
-		"org_id": "433637338589",
-	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceIAMBetaWorkloadIdentityPoolJwksBasic(context),
+				Config: testAccDataSourceIAMBetaWorkloadIdentityPoolJwksBasic(jwksTestContext),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "jwks_json", regexp.MustCompile(`(?s)"keys":\s*\[`)),
+					testAccCheckJWKSKeys("data.google_iam_workload_identity_pool_jwks.example"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceIAMBetaWorkloadIdentityPoolJwks_integration(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceIAMBetaWorkloadIdentityPoolJwksIntegration(jwksTestContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "jwks_json", regexp.MustCompile(`(?s)"keys":\s*\[`)),
 					testAccCheckJWKSKeys("data.google_iam_workload_identity_pool_jwks.example"),
@@ -68,6 +86,14 @@ func testAccCheckJWKSKeys(n string) resource.TestCheckFunc {
 }
 
 func testAccDataSourceIAMBetaWorkloadIdentityPoolJwksBasic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_iam_workload_identity_pool_jwks" "example" {
+	resource_name = "https://sts.googleapis.com/v1/organizations/%{org_id}/locations/global/workloadIdentityPools/agents.global.org-%{org_id}.system.id.goog/openid/jwks"
+}
+`, context)
+}
+
+func testAccDataSourceIAMBetaWorkloadIdentityPoolJwksIntegration(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_iam_workload_identity_pool_openid_config" "oidc" {
 	resource_name = "https://sts.googleapis.com/v1/organizations/%{org_id}/locations/global/workloadIdentityPools/agents.global.org-%{org_id}.system.id.goog/.well-known/openid-configuration"

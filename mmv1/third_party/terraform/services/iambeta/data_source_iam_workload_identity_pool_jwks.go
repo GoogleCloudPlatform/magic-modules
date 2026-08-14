@@ -1,6 +1,7 @@
 package iambeta
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -18,11 +20,15 @@ import (
 func DataSourceIAMBetaWorkloadIdentityPoolJwks() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceIAMBetaWorkloadIdentityPoolJwksRead,
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(transport_tpg.DefaultRequestTimeout),
+		},
 		Schema: map[string]*schema.Schema{
 			"resource_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The JWKS URI to retrieve the public keys from (e.g. from google_iam_workload_identity_pool_openid_config.jwks_uri).",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
+				Description:  "The JWKS URI to retrieve the public keys from (e.g. from google_iam_workload_identity_pool_openid_config.jwks_uri).",
 			},
 			"jwks_json": {
 				Type:        schema.TypeString,
@@ -81,18 +87,21 @@ func dataSourceIAMBetaWorkloadIdentityPoolJwksRead(d *schema.ResourceData, meta 
 
 	url := d.Get("resource_name").(string)
 
+	ctx, cancel := context.WithTimeout(config.Context, d.Timeout(schema.TimeoutRead))
+	defer cancel()
+
 	// We cannot use standard provider transport (transport_tpg.SendRequest) here because
 	// the JWKS endpoint (/openid/jwks) is a public, unauthenticated API.
 	// If the provider transport is used, it attaches an OAuth Bearer token to the request which
 	// causes public STS to reject the request with HTTP 400 Bad Request.
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return fmt.Errorf("Error creating request: %s", err)
 	}
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("Error fetching JWKS: %s", err)
