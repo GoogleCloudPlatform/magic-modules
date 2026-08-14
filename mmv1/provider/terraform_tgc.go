@@ -86,7 +86,7 @@ func (tgc TerraformGoogleConversion) GenerateObjects(outputFolder, resourceToGen
 		object.ExcludeIfNotInVersion(tgc.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
-			log.Printf("Excluding %s per user request", object.Name)
+			google.LogVerbose("Excluding %s per user request", object.Name)
 			continue
 		}
 
@@ -96,13 +96,14 @@ func (tgc TerraformGoogleConversion) GenerateObjects(outputFolder, resourceToGen
 
 func (tgc TerraformGoogleConversion) GenerateObject(object api.Resource, outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	if object.ExcludeTgc {
-		log.Printf("Skipping fine-grained resource %s", object.Name)
+		google.LogVerbose("Skipping fine-grained resource %s", object.Name)
 		return
 	}
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
 	if !object.IsExcluded() {
+		google.IncrementResourceGenerated()
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 
 		if generateCode {
@@ -185,7 +186,7 @@ func (tgc *TerraformGoogleConversion) generateCaiIamResources(products []*api.Pr
 }
 
 func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
-	log.Printf("Compiling common files for tgc.")
+	google.LogVerbose("Compiling common files for tgc.")
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
@@ -373,7 +374,7 @@ func retrieveListOfManuallyDefinedTestsFromFile(fsys fs.FS, file string) []strin
 }
 
 func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
-	log.Printf("Copying common files for tgc.")
+	google.LogVerbose("Copying common files for tgc.")
 
 	if !generateCode {
 		return
