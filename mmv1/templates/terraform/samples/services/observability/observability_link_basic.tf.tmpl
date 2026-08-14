@@ -1,0 +1,17 @@
+resource "google_observability_bucket" "bucket" {
+  provider     = "google-beta"
+  bucket_id    = "_Trace"
+  location     = "us"
+  display_name = "Bucket for Link"
+  description  = "Bucket for Link Test"
+}
+
+resource "google_observability_link" "{{$.PrimaryResourceId}}" {
+  provider     = "google-beta"
+  bucket       = google_observability_bucket.bucket.bucket_id
+  dataset      = "Spans"
+  location     = "us"
+  link_id      = "{{index $.ResourceIdVars "link_id"}}"
+  display_name = "Test Link"
+  description  = "Test link description"
+}
