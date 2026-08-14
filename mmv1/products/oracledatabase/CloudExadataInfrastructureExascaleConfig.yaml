@@ -72,3 +72,9 @@ properties:
     required: true
     immutable: true
     description: The total storage to be allocated to Exascale in GBs.
+  - name: totalVmStorageSizeGb
+    type: Integer
+    required: false
+    immutable: true
+    description: Storage size needed for VM storage on Exascale in GBs.
+
