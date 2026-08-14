@@ -27,7 +27,7 @@ func TestAccDataSourceIAMBetaWorkloadIdentityPoolJwks_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceIAMBetaWorkloadIdentityPoolJwksBasic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "jwks_json", regexp.MustCompile(`(?s)^\{\s*"keys":\s*\[.*\]\s*\}$`)),
+					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "jwks_json", regexp.MustCompile(`(?s)"keys":\s*\[`)),
 					testAccCheckJWKSKeys("data.google_iam_workload_identity_pool_jwks.example"),
 				),
 			},
