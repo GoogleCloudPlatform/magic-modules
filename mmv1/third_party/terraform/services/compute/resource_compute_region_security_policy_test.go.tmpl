@@ -308,7 +308,7 @@ func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig(context map[s
 			type	= "CLOUD_ARMOR"
 
 			rules {
-				action   = "deny"
+				action   = "deny(403)"
 				priority = "1000"
 				match {
 					expr {
@@ -376,7 +376,7 @@ func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig_update(contex
 			type	= "CLOUD_ARMOR"
 
 			rules {
-				action   = "deny"
+				action   = "deny(403)"
 				priority = "1000"
 				match {
 					expr {
