@@ -44,6 +44,7 @@ async:
     resource_inside_response: false
 error_abort_predicates:
   - transport_tpg.Is429QuotaError
+generate_list_resource: true
 custom_code:
 samples:
   - name: network_services_edge_cache_keyset_basic

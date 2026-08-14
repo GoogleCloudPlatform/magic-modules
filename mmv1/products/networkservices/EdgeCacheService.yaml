@@ -41,6 +41,7 @@ async:
   result:
     resource_inside_response: false
 autogen_async: true
+generate_list_resource: true
 custom_code:
   encoder: templates/terraform/encoders/network_services_edge_cache_service.go.tmpl
 samples:

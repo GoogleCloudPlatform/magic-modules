@@ -32,6 +32,7 @@ timeouts:
   update_minutes: 30
   delete_minutes: 30
 autogen_async: true
+generate_list_resource: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
