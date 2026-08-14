@@ -141,6 +141,7 @@ func diskConfigKeys(configName string) []string {
 		"cluster_config.0." + configName + ".0.disk_config.0.boot_disk_provisioned_iops",
 		"cluster_config.0." + configName + ".0.disk_config.0.boot_disk_provisioned_throughput",
 		"cluster_config.0." + configName + ".0.disk_config.0.local_ssd_interface",
+		"cluster_config.0." + configName + ".0.disk_config.0.attached_disk_config",
 	}
 }
 
@@ -972,6 +973,40 @@ func ResourceDataprocCluster() *schema.Resource {
 													AtLeastOneOf: masterDiskConfigKeys,
 													ForceNew:     true,
 												},
+												"attached_disk_config": {
+													Type:         schema.TypeList,
+													Optional:     true,
+													Description:  `Optional. Attached disk configuration.`,
+													AtLeastOneOf: masterDiskConfigKeys,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"disk_size_gb": {
+																Type:        schema.TypeInt,
+																Optional:    true,
+																Description: `Size of the attached disk, specified in GB.`,
+																ForceNew:    true,
+															},
+															"disk_type": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																ForceNew:    true,
+															},
+															"provisioned_iops": {
+																Type:        schema.TypeInt,
+																Optional:    true,
+																Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																ForceNew:    true,
+															},
+															"provisioned_throughput": {
+																Type:        schema.TypeInt,
+																Optional:    true,
+																Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																ForceNew:    true,
+															},
+														},
+													},
+												},
 											},
 										},
 									},
@@ -1080,6 +1115,39 @@ func ResourceDataprocCluster() *schema.Resource {
 																			Optional:    true,
 																			Description: `The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.`,
 																			ForceNew:    true,
+																		},
+																		"attached_disk_config": {
+																			Type:        schema.TypeList,
+																			Optional:    true,
+																			Description: `Optional. Attached disk configuration.`,
+																			Elem: &schema.Resource{
+																				Schema: map[string]*schema.Schema{
+																					"disk_size_gb": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Size of the attached disk, specified in GB.`,
+																						ForceNew:    true,
+																					},
+																					"disk_type": {
+																						Type:        schema.TypeString,
+																						Optional:    true,
+																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:    true,
+																					},
+																					"provisioned_iops": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																						ForceNew:    true,
+																					},
+																					"provisioned_throughput": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																						ForceNew:    true,
+																					},
+																				},
+																			},
 																		},
 																	},
 																},
@@ -1249,6 +1317,40 @@ func ResourceDataprocCluster() *schema.Resource {
 													AtLeastOneOf: workerDiskConfigKeys,
 													ForceNew:     true,
 												},
+												"attached_disk_config": {
+													Type:         schema.TypeList,
+													Optional:     true,
+													Description:  `Optional. Attached disk configuration.`,
+													AtLeastOneOf: workerDiskConfigKeys,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"disk_size_gb": {
+																Type:        schema.TypeInt,
+																Optional:    true,
+																Description: `Size of the attached disk, specified in GB.`,
+																ForceNew:    true,
+															},
+															"disk_type": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																ForceNew:    true,
+															},
+															"provisioned_iops": {
+																Type:        schema.TypeInt,
+																Optional:    true,
+																Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																ForceNew:    true,
+															},
+															"provisioned_throughput": {
+																Type:        schema.TypeInt,
+																Optional:    true,
+																Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																ForceNew:    true,
+															},
+														},
+													},
+												},
 											},
 										},
 									},
@@ -1376,6 +1478,39 @@ func ResourceDataprocCluster() *schema.Resource {
 																			Optional:    true,
 																			Description: `The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.`,
 																			ForceNew:    true,
+																		},
+																		"attached_disk_config": {
+																			Type:        schema.TypeList,
+																			Optional:    true,
+																			Description: `Optional. Attached disk configuration.`,
+																			Elem: &schema.Resource{
+																				Schema: map[string]*schema.Schema{
+																					"disk_size_gb": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Size of the attached disk, specified in GB.`,
+																						ForceNew:    true,
+																					},
+																					"disk_type": {
+																						Type:        schema.TypeString,
+																						Optional:    true,
+																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:    true,
+																					},
+																					"provisioned_iops": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																						ForceNew:    true,
+																					},
+																					"provisioned_throughput": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																						ForceNew:    true,
+																					},
+																				},
+																			},
 																		},
 																	},
 																},
@@ -1515,6 +1650,41 @@ func ResourceDataprocCluster() *schema.Resource {
 													ForceNew:     true,
 													Description:  `Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
 												},
+
+												"attached_disk_config": {
+													Type:         schema.TypeList,
+													Optional:     true,
+													Description:  `Optional. Attached disk configuration.`,
+													AtLeastOneOf: workerDiskConfigKeys,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"disk_size_gb": {
+																Type:        schema.TypeInt,
+																Optional:    true,
+																Description: `Size of the attached disk, specified in GB.`,
+																ForceNew:    true,
+															},
+															"disk_type": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																ForceNew:    true,
+															},
+															"provisioned_iops": {
+																Type:        schema.TypeInt,
+																Optional:    true,
+																Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																ForceNew:    true,
+															},
+															"provisioned_throughput": {
+																Type:        schema.TypeInt,
+																Optional:    true,
+																Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																ForceNew:    true,
+															},
+														},
+													},
+												},
 											},
 										},
 									},
@@ -1610,6 +1780,39 @@ func ResourceDataprocCluster() *schema.Resource {
 																			Optional:    true,
 																			Description: `The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.`,
 																			ForceNew:    true,
+																		},
+																		"attached_disk_config": {
+																			Type:        schema.TypeList,
+																			Optional:    true,
+																			Description: `Optional. Attached disk configuration.`,
+																			Elem: &schema.Resource{
+																				Schema: map[string]*schema.Schema{
+																					"disk_size_gb": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Size of the attached disk, specified in GB.`,
+																						ForceNew:    true,
+																					},
+																					"disk_type": {
+																						Type:        schema.TypeString,
+																						Optional:    true,
+																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:    true,
+																					},
+																					"provisioned_iops": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																						ForceNew:    true,
+																					},
+																					"provisioned_throughput": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																						ForceNew:    true,
+																					},
+																				},
+																			},
 																		},
 																	},
 																},
@@ -2634,30 +2837,7 @@ func expandNodeGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGroupCo
 	}
 
 	if dc, ok := cfg["disk_config"]; ok {
-		d := dc.([]interface{})
-		if len(d) > 0 {
-			dcfg := d[0].(map[string]interface{})
-			icg.DiskConfig = &dataproc.DiskConfig{}
-
-			if v, ok := dcfg["boot_disk_size_gb"]; ok {
-				icg.DiskConfig.BootDiskSizeGb = int64(v.(int))
-			}
-			if v, ok := dcfg["num_local_ssds"]; ok {
-				icg.DiskConfig.NumLocalSsds = int64(v.(int))
-			}
-			if v, ok := dcfg["boot_disk_type"]; ok {
-				icg.DiskConfig.BootDiskType = v.(string)
-			}
-			if v, ok := dcfg["boot_disk_provisioned_iops"]; ok {
-				icg.DiskConfig.BootDiskProvisionedIops = int64(v.(int))
-			}
-			if v, ok := dcfg["boot_disk_provisioned_throughput"]; ok {
-				icg.DiskConfig.BootDiskProvisionedThroughput = int64(v.(int))
-			}
-			if v, ok := dcfg["local_ssd_interface"]; ok {
-				icg.DiskConfig.LocalSsdInterface = v.(string)
-			}
-		}
+		icg.DiskConfig = expandDiskConfig(dc)
 	}
 
 	icg.Accelerators = expandAccelerators(cfg["accelerators"].(*schema.Set).List())
@@ -2957,30 +3137,7 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 		icg.NumInstances = int64(v.(int))
 	}
 	if dc, ok := cfg["disk_config"]; ok {
-		d := dc.([]interface{})
-		if len(d) > 0 {
-			dcfg := d[0].(map[string]interface{})
-			icg.DiskConfig = &dataproc.DiskConfig{}
-
-			if v, ok := dcfg["boot_disk_size_gb"]; ok {
-				icg.DiskConfig.BootDiskSizeGb = int64(v.(int))
-			}
-			if v, ok := dcfg["num_local_ssds"]; ok {
-				icg.DiskConfig.NumLocalSsds = int64(v.(int))
-			}
-			if v, ok := dcfg["boot_disk_type"]; ok {
-				icg.DiskConfig.BootDiskType = v.(string)
-			}
-			if v, ok := dcfg["boot_disk_provisioned_iops"]; ok {
-				icg.DiskConfig.BootDiskProvisionedIops = int64(v.(int))
-			}
-			if v, ok := dcfg["boot_disk_provisioned_throughput"]; ok {
-				icg.DiskConfig.BootDiskProvisionedThroughput = int64(v.(int))
-			}
-			if v, ok := dcfg["local_ssd_interface"]; ok {
-				icg.DiskConfig.LocalSsdInterface = v.(string)
-			}
-		}
+		icg.DiskConfig = expandDiskConfig(dc)
 	}
 
 	if ifpc, ok := cfg["instance_flexibility_policy"]; ok {
@@ -3003,7 +3160,7 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 	return icg
 }
 
-func expandDiskConfigForInstanceSelection(v interface{}) *dataproc.DiskConfig {
+func expandDiskConfig(v interface{}) *dataproc.DiskConfig {
 	d := v.([]interface{})
 	if len(d) == 0 || d[0] == nil {
 		return nil
@@ -3029,6 +3186,9 @@ func expandDiskConfigForInstanceSelection(v interface{}) *dataproc.DiskConfig {
 	if val, ok := dcfg["local_ssd_interface"]; ok {
 		diskConfig.LocalSsdInterface = val.(string)
 	}
+	if val, ok := dcfg["attached_disk_config"]; ok {
+		diskConfig.AttachedDiskConfigs = expandAttachedDiskConfig(val.([]interface{}))
+	}
 	return diskConfig
 }
 
@@ -3049,7 +3209,7 @@ func expandInstanceSelectionList(v interface{}) []*dataproc.InstanceSelection {
 			instanceSelection.Rank = int64(x.(int))
 		}
 		if x, ok := instanceSelectionItem["disk_config"]; ok {
-			instanceSelection.DiskConfig = expandDiskConfigForInstanceSelection(x)
+			instanceSelection.DiskConfig = expandDiskConfig(x)
 		}
 		instanceSelections = append(instanceSelections, instanceSelection)
 	}
@@ -3086,31 +3246,9 @@ func expandMasterInstanceGroupConfig(cfg map[string]interface{}) *dataproc.Insta
 	}
 
 	if dc, ok := cfg["disk_config"]; ok {
-		d := dc.([]interface{})
-		if len(d) > 0 {
-			dcfg := d[0].(map[string]interface{})
-			icg.DiskConfig = &dataproc.DiskConfig{}
-
-			if v, ok := dcfg["boot_disk_size_gb"]; ok {
-				icg.DiskConfig.BootDiskSizeGb = int64(v.(int))
-			}
-			if v, ok := dcfg["num_local_ssds"]; ok {
-				icg.DiskConfig.NumLocalSsds = int64(v.(int))
-			}
-			if v, ok := dcfg["boot_disk_type"]; ok {
-				icg.DiskConfig.BootDiskType = v.(string)
-			}
-			if v, ok := dcfg["boot_disk_provisioned_iops"]; ok {
-				icg.DiskConfig.BootDiskProvisionedIops = int64(v.(int))
-			}
-			if v, ok := dcfg["boot_disk_provisioned_throughput"]; ok {
-				icg.DiskConfig.BootDiskProvisionedThroughput = int64(v.(int))
-			}
-			if v, ok := dcfg["local_ssd_interface"]; ok {
-				icg.DiskConfig.LocalSsdInterface = v.(string)
-			}
-		}
+		icg.DiskConfig = expandDiskConfig(dc)
 	}
+
 	if ifpc, ok := cfg["instance_flexibility_policy"]; ok {
 		ifps := ifpc.([]interface{})
 		if len(ifps) > 0 {
@@ -3145,30 +3283,7 @@ func expandWorkerInstanceGroupConfig(cfg map[string]interface{}) *dataproc.Insta
 	}
 
 	if dc, ok := cfg["disk_config"]; ok {
-		d := dc.([]interface{})
-		if len(d) > 0 {
-			dcfg := d[0].(map[string]interface{})
-			icg.DiskConfig = &dataproc.DiskConfig{}
-
-			if v, ok := dcfg["boot_disk_size_gb"]; ok {
-				icg.DiskConfig.BootDiskSizeGb = int64(v.(int))
-			}
-			if v, ok := dcfg["num_local_ssds"]; ok {
-				icg.DiskConfig.NumLocalSsds = int64(v.(int))
-			}
-			if v, ok := dcfg["boot_disk_type"]; ok {
-				icg.DiskConfig.BootDiskType = v.(string)
-			}
-			if v, ok := dcfg["boot_disk_provisioned_iops"]; ok {
-				icg.DiskConfig.BootDiskProvisionedIops = int64(v.(int))
-			}
-			if v, ok := dcfg["boot_disk_provisioned_throughput"]; ok {
-				icg.DiskConfig.BootDiskProvisionedThroughput = int64(v.(int))
-			}
-			if v, ok := dcfg["local_ssd_interface"]; ok {
-				icg.DiskConfig.LocalSsdInterface = v.(string)
-			}
-		}
+		icg.DiskConfig = expandDiskConfig(dc)
 	}
 	if ifpc, ok := cfg["instance_flexibility_policy"]; ok {
 		ifps := ifpc.([]interface{})
@@ -3781,7 +3896,6 @@ func flatternNodeGroup(ng *dataproc.NodeGroup) []map[string]interface{} {
 }
 
 func flattenNodeGroupConfig(icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
-	disk := map[string]interface{}{}
 	data := map[string]interface{}{}
 
 	if icg != nil {
@@ -3790,22 +3904,11 @@ func flattenNodeGroupConfig(icg *dataproc.InstanceGroupConfig) []map[string]inte
 		data["min_cpu_platform"] = icg.MinCpuPlatform
 		data["instance_names"] = icg.InstanceNames
 		if icg.DiskConfig != nil {
-			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
-			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
-			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
-			if icg.DiskConfig.BootDiskProvisionedIops > 0 {
-				disk["boot_disk_provisioned_iops"] = icg.DiskConfig.BootDiskProvisionedIops
-			}
-			if icg.DiskConfig.BootDiskProvisionedThroughput > 0 {
-				disk["boot_disk_provisioned_throughput"] = icg.DiskConfig.BootDiskProvisionedThroughput
-			}
-			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
+			data["disk_config"] = flattenDiskConfig(icg.DiskConfig)
 		}
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)
-
 	}
 
-	data["disk_config"] = []map[string]interface{}{disk}
 	return []map[string]interface{}{data}
 }
 
@@ -3886,7 +3989,6 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 		}
 	}
 
-	disk := map[string]interface{}{}
 	instanceFlexibilityPolicy := map[string]interface{}{}
 	data := map[string]interface{}{}
 
@@ -3895,16 +3997,7 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 		data["instance_names"] = icg.InstanceNames
 		data["preemptibility"] = icg.Preemptibility
 		if icg.DiskConfig != nil {
-			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
-			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
-			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
-			if icg.DiskConfig.BootDiskProvisionedIops > 0 {
-				disk["boot_disk_provisioned_iops"] = icg.DiskConfig.BootDiskProvisionedIops
-			}
-			if icg.DiskConfig.BootDiskProvisionedThroughput > 0 {
-				disk["boot_disk_provisioned_throughput"] = icg.DiskConfig.BootDiskProvisionedThroughput
-			}
-			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
+			data["disk_config"] = flattenDiskConfig(icg.DiskConfig)
 		}
 		if icg.InstanceFlexibilityPolicy != nil {
 			if icg.InstanceFlexibilityPolicy.InstanceSelectionList != nil {
@@ -3917,12 +4010,11 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 		}
 	}
 
-	data["disk_config"] = []map[string]interface{}{disk}
 	data["instance_flexibility_policy"] = []map[string]interface{}{instanceFlexibilityPolicy}
 	return []map[string]interface{}{data}
 }
 
-func flattenDiskConfigForInstanceSelection(dc *dataproc.DiskConfig) []map[string]interface{} {
+func flattenDiskConfig(dc *dataproc.DiskConfig) []map[string]interface{} {
 	if dc == nil {
 		return nil
 	}
@@ -3937,6 +4029,9 @@ func flattenDiskConfigForInstanceSelection(dc *dataproc.DiskConfig) []map[string
 		disk["boot_disk_provisioned_throughput"] = dc.BootDiskProvisionedThroughput
 	}
 	disk["local_ssd_interface"] = dc.LocalSsdInterface
+	if v := flattenAttachedDiskConfig(dc.AttachedDiskConfigs); v != nil {
+		disk["attached_disk_config"] = v
+	}
 
 	return []map[string]interface{}{disk}
 }
@@ -3951,7 +4046,7 @@ func flattenInstanceSelectionList(is []*dataproc.InstanceSelection) []map[string
 		}
 		instanceSelection["rank"] = v.Rank
 		if v.DiskConfig != nil {
-			instanceSelection["disk_config"] = flattenDiskConfigForInstanceSelection(v.DiskConfig)
+			instanceSelection["disk_config"] = flattenDiskConfig(v.DiskConfig)
 		}
 		instanceSelections = append(instanceSelections, instanceSelection)
 	}
@@ -3981,7 +4076,6 @@ func flattenProvisioningModelMix(pmm *dataproc.ProvisioningModelMix) []map[strin
 }
 
 func flattenMasterInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
-	disk := map[string]interface{}{}
 	instanceFlexibilityPolicy := map[string]interface{}{}
 	data := map[string]interface{}{}
 
@@ -3992,16 +4086,7 @@ func flattenMasterInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.Inst
 		data["image_uri"] = icg.ImageUri
 		data["instance_names"] = icg.InstanceNames
 		if icg.DiskConfig != nil {
-			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
-			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
-			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
-			if icg.DiskConfig.BootDiskProvisionedIops > 0 {
-				disk["boot_disk_provisioned_iops"] = icg.DiskConfig.BootDiskProvisionedIops
-			}
-			if icg.DiskConfig.BootDiskProvisionedThroughput > 0 {
-				disk["boot_disk_provisioned_throughput"] = icg.DiskConfig.BootDiskProvisionedThroughput
-			}
-			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
+			data["disk_config"] = flattenDiskConfig(icg.DiskConfig)
 		}
 		if icg.InstanceFlexibilityPolicy != nil {
 			if icg.InstanceFlexibilityPolicy.InstanceSelectionList != nil {
@@ -4012,13 +4097,11 @@ func flattenMasterInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.Inst
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)
 	}
 
-	data["disk_config"] = []map[string]interface{}{disk}
 	data["instance_flexibility_policy"] = []map[string]interface{}{instanceFlexibilityPolicy}
 	return []map[string]interface{}{data}
 }
 
 func flattenWorkerInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
-	disk := map[string]interface{}{}
 	instanceFlexibilityPolicy := map[string]interface{}{}
 	data := map[string]interface{}{}
 
@@ -4030,16 +4113,7 @@ func flattenWorkerInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.Inst
 		data["image_uri"] = icg.ImageUri
 		data["instance_names"] = icg.InstanceNames
 		if icg.DiskConfig != nil {
-			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
-			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
-			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
-			if icg.DiskConfig.BootDiskProvisionedIops > 0 {
-				disk["boot_disk_provisioned_iops"] = icg.DiskConfig.BootDiskProvisionedIops
-			}
-			if icg.DiskConfig.BootDiskProvisionedThroughput > 0 {
-				disk["boot_disk_provisioned_throughput"] = icg.DiskConfig.BootDiskProvisionedThroughput
-			}
-			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
+			data["disk_config"] = flattenDiskConfig(icg.DiskConfig)
 		}
 		if icg.InstanceFlexibilityPolicy != nil {
 			if icg.InstanceFlexibilityPolicy.InstanceSelectionList != nil {
@@ -4050,7 +4124,6 @@ func flattenWorkerInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.Inst
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)
 	}
 
-	data["disk_config"] = []map[string]interface{}{disk}
 	data["instance_flexibility_policy"] = []map[string]interface{}{instanceFlexibilityPolicy}
 	return []map[string]interface{}{data}
 }
@@ -4175,4 +4248,55 @@ func init() {
 		Type:        registry.SchemaTypeResource,
 		Schema:      ResourceDataprocCluster(),
 	}.Register()
+}
+
+func expandAttachedDiskConfig(l []interface{}) []*dataproc.AttachedDiskConfig {
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	var res []*dataproc.AttachedDiskConfig
+	for _, raw := range l {
+		if raw == nil {
+			continue
+		}
+		rawMap := raw.(map[string]interface{})
+		c := &dataproc.AttachedDiskConfig{}
+		if v, ok := rawMap["disk_size_gb"]; ok {
+			c.DiskSizeGb = int64(v.(int))
+		}
+		if v, ok := rawMap["disk_type"]; ok {
+			c.DiskType = v.(string)
+		}
+		if v, ok := rawMap["provisioned_iops"]; ok && v.(int) > 0 {
+			c.ProvisionedIops = int64(v.(int))
+		}
+		if v, ok := rawMap["provisioned_throughput"]; ok && v.(int) > 0 {
+			c.ProvisionedThroughput = int64(v.(int))
+		}
+		res = append(res, c)
+	}
+	return res
+}
+
+func flattenAttachedDiskConfig(configs []*dataproc.AttachedDiskConfig) []map[string]interface{} {
+	if len(configs) == 0 {
+		return nil
+	}
+	var res []map[string]interface{}
+	for _, c := range configs {
+		if c == nil {
+			continue
+		}
+		m := make(map[string]interface{})
+		m["disk_size_gb"] = c.DiskSizeGb
+		m["disk_type"] = c.DiskType
+		if c.ProvisionedIops > 0 {
+			m["provisioned_iops"] = c.ProvisionedIops
+		}
+		if c.ProvisionedThroughput > 0 {
+			m["provisioned_throughput"] = c.ProvisionedThroughput
+		}
+		res = append(res, m)
+	}
+	return res
 }

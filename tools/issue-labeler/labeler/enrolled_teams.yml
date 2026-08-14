@@ -25,6 +25,9 @@ service/aiplatform-colab-enterprise:
 service/aiplatform-dataset:
   resources:
   - google_vertex_ai_dataset
+service/aiplatform-evaluation:
+  resources:
+  - google_vertex_ai_evaluation_.*
 service/aiplatform-featurestore:
   resources:
   - google_vertex_ai_featurestore.*
@@ -182,6 +185,9 @@ service/cloudscheduler:
 service/cloudsecuritycompliance:
   resources:
   - google_cloud_security_compliance_.*
+service/cloudsupport:
+  resources:
+  - google_cloud_support_.*
 service/cloudtasks:
   resources:
   - google_cloud_tasks_.*
