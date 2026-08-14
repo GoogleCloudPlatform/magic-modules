@@ -58,7 +58,7 @@ list "google_apigee_environment_api_revision_deployment" "list_query" {
     org_id      = %q
     environment = %q
     api         = %q
-    revision    = %q
+    revision    = %s
   }
 }
 `, orgId, environment, api, revision)

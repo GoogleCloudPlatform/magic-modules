@@ -25,7 +25,7 @@ self_link: '{{org_id}}/environments/{{name}}'
 import_format:
   - '{{org_id}}/environments/{{name}}'
   - '{{org_id}}/{{name}}'
-generate_list_resource: true
+# generate_list_resource: true  # Disabled: requires P-08 generator fix for bare-array API response
 collection_url_key: 'environment'
 
 timeouts:

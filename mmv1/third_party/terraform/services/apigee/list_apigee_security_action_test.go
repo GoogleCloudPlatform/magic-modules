@@ -22,10 +22,8 @@ func TestAccApigeeSecurityActionListQuery(t *testing.T) {
 	acctest.SkipIfVcr(t)
 
 	orgId := envvar.GetTestOrgFromEnv(t)
-	// env_id is the full resource path of an existing Apigee environment,
-	// e.g. "organizations/my-org/environments/my-env".
-	// We derive it from the org and a conventional test environment name.
-	envId := fmt.Sprintf("organizations/%s/environments/my-test-environment", orgId)
+	// env_id is just the environment name, not the full path
+	envId := "my-test-environment"
 
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
