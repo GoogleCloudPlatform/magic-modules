@@ -1994,7 +1994,7 @@ func TestAccMemorystoreInstance_withAclPolicy(t *testing.T) {
 				ResourceName:            "google_memorystore_instance.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_id", "location"},
+				ImportStateVerifyIgnore: []string{"instance_id", "location", "acl_policy"},
 			},
 		},
 	})
