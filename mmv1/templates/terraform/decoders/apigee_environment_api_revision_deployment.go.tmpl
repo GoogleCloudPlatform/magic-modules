@@ -1,0 +1,15 @@
+{{- /*
+  Handles the revision field which comes as a string from the API but needs to be an integer in the resource schema.
+*/ -}}
+if v, ok := res["revision"]; ok && v != nil {
+    if s, ok := v.(string); ok {
+        i, err := strconv.Atoi(s)
+        if err != nil {
+            return res, fmt.Errorf("error converting revision to integer: %w", err)
+        }
+        res["revision"] = i
+    } else if f, ok := v.(float64); ok {
+        res["revision"] = int(f)
+    }
+}
+return res, nil

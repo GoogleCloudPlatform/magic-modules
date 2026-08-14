@@ -29,6 +29,8 @@ import_format:
   - organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}
   - '{{id}}'
 generate_list_resource: true
+custom_code:
+  decoder: templates/terraform/decoders/apigee_environment_api_revision_deployment.go.tmpl
 
 autogen_async: false
 samples:

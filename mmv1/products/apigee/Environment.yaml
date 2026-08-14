@@ -26,6 +26,7 @@ import_format:
   - '{{org_id}}/environments/{{name}}'
   - '{{org_id}}/{{name}}'
 generate_list_resource: true
+collection_url_key: 'environment'
 
 timeouts:
   insert_minutes: 30

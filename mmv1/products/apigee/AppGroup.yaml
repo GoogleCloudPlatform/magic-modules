@@ -60,7 +60,6 @@ samples:
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
-generate_list_resource: true
 
 parameters:
   - name: orgId
