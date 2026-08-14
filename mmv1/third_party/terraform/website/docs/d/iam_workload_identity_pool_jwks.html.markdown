@@ -36,7 +36,7 @@ In addition to the arguments listed above, the following attributes are exported
 
 * `keys` - The list of public keys in the JSON Web Key Set. Structure is [documented below](#nested_keys).
 
-<aByName name="nested_keys"></a>The `keys` block contains:
+<a name="nested_keys"></a>The `keys` block contains:
 
 * `kty` - The key type (e.g. `RSA`).
 
