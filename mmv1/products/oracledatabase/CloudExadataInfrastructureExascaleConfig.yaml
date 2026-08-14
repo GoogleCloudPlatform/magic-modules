@@ -77,4 +77,3 @@ properties:
     required: false
     immutable: true
     description: Storage size needed for VM storage on Exascale in GBs.
-
