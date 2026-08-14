@@ -35,7 +35,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_delete: true
-generate_list_resource: true
 custom_code:
 samples:
   - name: apigee_sync_authorization_basic_test

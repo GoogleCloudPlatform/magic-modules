@@ -41,7 +41,6 @@ async:
     resource_inside_response: true
 exclude_delete: true
 autogen_async: true
-generate_list_resource: true
 custom_code:
 samples:
   - name: apigee_control_plane_access_basic_test
