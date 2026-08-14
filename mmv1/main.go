@@ -129,16 +129,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 		providerToGenerate.CompileCommonFiles(outputPath, productsForVersion, "")
 	}
 
-	productWord := "products"
-	if productCount == 1 {
-		productWord = "product"
-	}
-	resourceWord := "resources"
-	if resourceCount == 1 {
-		resourceWord = "resource"
-	}
-
-	log.Printf("Generated %d %s, %d %s for %s version %s.", productCount, productWord, resourceCount, resourceWord, providerName, version)
+	log.Printf("Generated %d products, %d resources for %s version %s.", productCount, resourceCount, providerName, version)
 	log.Println("Done MM generation.")
 }
 
