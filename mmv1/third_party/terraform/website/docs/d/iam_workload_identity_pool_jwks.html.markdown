@@ -1,12 +1,12 @@
 ---
 subcategory: "Cloud IAM"
 description: |-
-  Get JSON Web Key Set (JWKS) public keys for a Workload Identity Pool from Google Cloud.
+  Get JSON Web Key Set (JWKS) public keys for a Workload Identity Pool from GCP.
 ---
 
 # google_iam_workload_identity_pool_jwks
 
-Get the JSON Web Key Set (JWKS) public keys (`/openid/jwks`) for an Agent Workload Identity Pool from Google Cloud.
+Get the JSON Web Key Set (JWKS) public keys (`/openid/jwks`) for an Agent Workload Identity Pool from GCP.
 
 ## Example Usage
 

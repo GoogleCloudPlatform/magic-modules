@@ -73,8 +73,8 @@ func dataSourceIAMBetaWorkloadIdentityPoolOpenIdConfigRead(d *schema.ResourceDat
 	url := d.Get("resource_name").(string)
 	// We cannot use standard provider transport (transport_tpg.SendRequest) here because
 	// the OIDC discovery endpoint (/.well-known/openid-configuration) is a public, unauthenticated API.
-	// If the provider transport is used, additional headers are attached to the request which
-	// causes Google STS to reject the request with HTTP 400 Bad Request during VCR testing.
+	// If the provider transport is used, it attaches an OAuth Bearer token to the request which
+	// causes Google STS to reject the request with HTTP 400 Bad Request during cross-org testing (e.g. VCR).
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return fmt.Errorf("Error creating request: %s", err)
