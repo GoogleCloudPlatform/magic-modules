@@ -1,0 +1,6 @@
+resource "google_observability_bucket" "primary" {
+  provider     = "google-beta"
+  bucket_id    = "_Trace"
+  location     = "us"
+  project      = "%{project_name}"
+}

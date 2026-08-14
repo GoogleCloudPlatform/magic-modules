@@ -1,0 +1,108 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Bucket
+description: Bucket configuration for storing observability data.
+base_url: projects/{{project}}/locations/{{location}}/buckets
+min_version: beta
+self_link: projects/{{project}}/locations/{{location}}/buckets/{{bucket_id}}
+create_url: projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}
+update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/buckets/{{bucket_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/buckets/{{bucket_id}}
+async:
+  operation:
+    timeouts:
+      insert_minutes: 10
+      update_minutes: 10
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+exclude_delete: true
+autogen_async: true
+custom_code:
+  pre_create: templates/terraform/pre_create/observability_bucket.go.tmpl
+samples:
+  # name is used to generate the test name.
+  - name: "observability_bucket_basic"
+    # primary_resource_id will be used for the Terraform resource id in the configuration file.
+    primary_resource_id: "primary"
+    steps:
+      # The first step defines the initial create configuration.
+      # Step name: Matches the template file name by default (for example, pubsub_topic_minimal.tf.tmpl). Use config_path to override this.
+      - name: "observability_bucket_basic"
+        test_env_vars:
+          project_name: PROJECT_NAME
+parameters:
+  - name: location
+    type: String
+    description: The location of the bucket.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: bucketId
+    type: String
+    description: A client-assigned identifier for the bucket.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: cmekSettings
+    type: NestedObject
+    description: Settings for configuring CMEK for a bucket.
+    properties:
+      - name: kmsKey
+        type: String
+        description: |-
+          The resource name for the configured Cloud KMS key. The format is: projects/[PROJECT_ID]/locations/[LOCATION]/keyRings/[KEYRING]/cryptoKeys/[KEY]
+      - name: kmsKeyVersion
+        type: String
+        description: The CryptoKeyVersion resource name for the configured Cloud KMS key.
+        output: true
+      - name: serviceAccountId
+        type: String
+        description: The service account used to access the key.
+        output: true
+  - name: createTime
+    type: String
+    description: Output only. Create timestamp.
+    output: true
+  - name: deleteTime
+    type: String
+    description: Output only. Delete timestamp.
+    output: true
+  - name: description
+    type: String
+    description: Description of the bucket.
+    default_from_api: true
+  - name: displayName
+    type: String
+    description: User friendly display name.
+    default_from_api: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. Name of the bucket. The format is: projects/[PROJECT_ID]/locations/[LOCATION]/buckets/[BUCKET_ID]
+    output: true
+  - name: purgeTime
+    type: String
+    description: Output only. Timestamp when the bucket in soft-deleted state is purged.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. Update timestamp.
+    output: true
