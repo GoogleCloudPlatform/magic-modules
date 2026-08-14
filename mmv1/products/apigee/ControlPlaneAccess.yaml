@@ -23,6 +23,7 @@ docs:
 base_url: ""
 self_link: organizations/{{name}}/controlPlaneAccess
 update_mask: true
+generate_list_resource: true
 create_verb: PATCH
 update_verb: PATCH
 id_format: organizations/{{name}}/controlPlaneAccess
