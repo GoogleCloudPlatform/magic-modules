@@ -103,23 +103,8 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 		}
 	}
 
-	var totalResources int
-	for _, productApi := range loadedProducts {
-		if !slices.Contains(productsToGenerate, productApi.PackagePath) {
-			continue
-		}
-		ver := productApi.VersionObjOrClosest(version)
-		for _, object := range productApi.Objects {
-			object.ExcludeIfNotInVersion(ver)
-			if resource != "" && object.Name != resource {
-				continue
-			}
-			if !object.IsExcluded() {
-				totalResources++
-			}
-		}
-	}
-	google.InitProgress(totalResources)
+	productCount, resourceCount := loader.CountProductsAndResources(productsToGenerate, resource)
+	google.InitProgress(resourceCount)
 
 	for _, productApi := range loadedProducts {
 		wg.Add(1)
@@ -142,22 +127,6 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(outputPath, productsForVersion, "")
-	}
-
-	var productCount, resourceCount int
-	for _, productApi := range loadedProducts {
-		if !slices.Contains(productsToGenerate, productApi.PackagePath) {
-			continue
-		}
-		productCount++
-		for _, object := range productApi.Objects {
-			if resource != "" && object.Name != resource {
-				continue
-			}
-			if !object.IsExcluded() {
-				resourceCount++
-			}
-		}
 	}
 
 	productWord := "products"
