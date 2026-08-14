@@ -60,13 +60,16 @@ parameters:
     type: String
     required: true
     url_param_only: true
+    immutable: true
     description: |
       The location for the backupplan association
   - name: backup_plan_association_id
     type: String
     required: true
     url_param_only: true
-    description: The id of backupplan association
+    immutable: true
+    description: |-
+      The id of backupplan association
 properties:
   - name: resource
     type: String
