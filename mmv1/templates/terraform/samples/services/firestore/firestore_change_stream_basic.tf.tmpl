@@ -8,7 +8,7 @@ resource "google_firestore_database" "database" {
   deletion_policy = "DELETE"
 }
 
-resource "time_sleep" "wait_60_seconds" {
+resource "time_sleep" "wait_30_seconds" {
   depends_on = [google_firestore_database.database]
 
   create_duration = "30s"
@@ -22,5 +22,5 @@ resource "google_firestore_change_stream" "{{$.PrimaryResourceId}}" {
 
   database_scope {}
 
-  depends_on = [time_sleep.wait_60_seconds]
+  depends_on = [time_sleep.wait_30_seconds]
 }

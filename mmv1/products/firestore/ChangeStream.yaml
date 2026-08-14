@@ -50,6 +50,8 @@ samples:
           change_stream_id: my-change-stream
         test_env_vars:
           project_id: PROJECT_NAME
+        ignore_read_extra:
+          - etag
   - name: firestore_change_stream_full
     primary_resource_id: change_stream
     external_providers: ["time"]
@@ -60,6 +62,8 @@ samples:
           change_stream_id: my-change-stream
         test_env_vars:
           project_id: PROJECT_NAME
+        ignore_read_extra:
+          - etag
 parameters:
   - name: database
     type: String
@@ -116,8 +120,15 @@ properties:
     description: |
       The last update timestamp of the change stream.
     output: true
-  - name: state
+  - name: startTime
     type: String
     description: |
-      The current state of the change stream.
+      The time the Change Stream started recording events.
+    output: true
+  - name: etag
+    type: Fingerprint
+    description: |
+      Output only. This checksum is computed by the server based on the value of other fields,
+      and may be sent on delete request to ensure the client has an
+      up-to-date value before proceeding.
     output: true
