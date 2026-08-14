@@ -118,7 +118,7 @@ parameters:
     description: The region of the dataset. eg us-central1
     url_param_only: true
     immutable: true
-    default_from_api: true
+    required: true
 properties:
   - name: name
     type: String
