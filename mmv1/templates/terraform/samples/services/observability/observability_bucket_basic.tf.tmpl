@@ -1,6 +1,65 @@
+resource "google_project_service" "observability_api" {
+  provider           = "google-beta"
+  project            = "%{project_name}"
+  service            = "observability.googleapis.com"
+  disable_on_destroy = false
+}
+
+# Actively force the creation of the Service Agent identity
+resource "google_project_service_identity" "observability_sa" {
+  provider = "google-beta"
+  project  = "%{project_name}"
+  service  = "observability.googleapis.com"
+
+  depends_on = [
+    google_project_service.observability_api
+  ]
+}
+
+# Short buffer for the new identity to propagate to global IAM indexes
+resource "time_sleep" "wait_for_sa_propagation" {
+  create_duration = "30s"
+  depends_on      = [
+    google_project_service_identity.observability_sa
+  ]
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key_1" {
+  provider      = "google-beta"
+  crypto_key_id = "%{kms_key_name_1}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_project_service_identity.observability_sa.email}"
+
+  depends_on = [
+    time_sleep.wait_for_sa_propagation
+  ]
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key_2" {
+  provider      = "google-beta"
+  crypto_key_id = "%{kms_key_name_2}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_project_service_identity.observability_sa.email}"
+
+  depends_on = [
+    time_sleep.wait_for_sa_propagation
+  ]
+}
+
 resource "google_observability_bucket" "primary" {
   provider     = "google-beta"
   bucket_id    = "_Trace"
   location     = "us"
   project      = "%{project_name}"
+  display_name = "%{display_name}"
+  description  = "%{description}"
+
+  cmek_settings {
+    kms_key = "%{kms_key_name}"
+  }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.crypto_key_1,
+    google_kms_crypto_key_iam_member.crypto_key_2
+  ]
 }
