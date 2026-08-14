@@ -59,7 +59,7 @@ samples:
       - name: discoveryengine_chat_engine_basic
         resource_id_vars:
           engine_id: chat-engine-id
-          data_store_id: data-store
+          data_store_id: data-store-3
           data_store_2_id: data-store-2
   - name: discoveryengine_chat_engine_existing_dialogflow_agent
     primary_resource_id: primary
