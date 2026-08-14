@@ -49,8 +49,13 @@ description: |-
 Three different resources help you manage your IAM policy for {{$.ProductMetadata.DisplayName}} {{$.Name}}. Each of these resources serves a different use case:
 
 * `{{ $.IamTerraformName }}_policy`: Authoritative. Sets the IAM policy for the {{ lower $.Name }} and replaces any existing policy already attached.
-* `{{ $.IamTerraformName }}_binding`: Authoritative for a given role. Updates the IAM policy to grant a role to a list of members. Other roles within the IAM policy for the {{ lower $.Name }} are preserved.
-* `{{ $.IamTerraformName }}_member`: Non-authoritative. Updates the IAM policy to grant a role to a new member. Other members for the role for the {{ lower $.Name }} are preserved.
+{{ if $.IamPolicy.IamConditionsRequestType }}
+* `{{ $.IamTerraformName }}_binding`: Authoritative for a given role and condition combination (the condition can be omitted). Updates the IAM policy to grant a role to a list of members. Other role and condition combinations within the IAM policy for the {{ lower $.Name }} are preserved. Members added outside of Terraform for the same role and condition combination will be detected as drift and removed on the next `terraform apply`.
+* `{{ $.IamTerraformName }}_member`: Non-authoritative. Updates the IAM policy to grant a role to a new member. Other members for the same role and condition combination for the {{ lower $.Name }} are preserved. Members added outside of Terraform will **not** be detected as drift.
+{{- else }}
+* `{{ $.IamTerraformName }}_binding`: Authoritative for a given role. Updates the IAM policy to grant a role to a list of members. Other roles within the IAM policy for the {{ lower $.Name }} are preserved. Members added outside of Terraform for the same role will be detected as drift and removed on the next `terraform apply`.
+* `{{ $.IamTerraformName }}_member`: Non-authoritative. Updates the IAM policy to grant a role to a new member. Other members for the role for the {{ lower $.Name }} are preserved. Members added outside of Terraform will **not** be detected as drift.
+{{- end }}
 
 A data source can be used to retrieve policy data in advent you do not need creation
 
@@ -58,9 +63,12 @@ A data source can be used to retrieve policy data in advent you do not need crea
 
 ~> **Note:** `{{ $.IamTerraformName }}_policy` **cannot** be used in conjunction with `{{ $.IamTerraformName }}_binding` and `{{ $.IamTerraformName }}_member` or they will fight over what your policy should be.
 
-~> **Note:** `{{ $.IamTerraformName }}_binding` resources **can be** used in conjunction with `{{ $.IamTerraformName }}_member` resources **only if** they do not grant privilege to the same role.
 {{ if $.IamPolicy.IamConditionsRequestType }}
+~> **Note:** `{{ $.IamTerraformName }}_binding` resources **can be** used in conjunction with `{{ $.IamTerraformName }}_member` resources **only if** they do not grant privilege to the same role and condition combination.
+
 ~> **Note:**  This resource supports IAM Conditions but they have some known limitations which can be found [here](https://cloud.google.com/iam/docs/conditions-overview#limitations). Please review this article if you are having issues with IAM Conditions.
+{{- else }}
+~> **Note:** `{{ $.IamTerraformName }}_binding` resources **can be** used in conjunction with `{{ $.IamTerraformName }}_member` resources **only if** they do not grant privilege to the same role.
 {{- end }}
 {{ if or (eq $.MinVersionObj.Name "beta") (eq $.IamPolicy.MinVersion "beta") }}
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
@@ -268,8 +276,12 @@ The following arguments are supported:
   * **projectViewer:projectid**: Viewers of the given project. For example, "projectViewer:my-example-project"
   * **Federated identities**: One or more federated identities in a workload or workforce identity pool, workload running on GKE, etc. Refer to the [Principal identifiers documentation](https://cloud.google.com/iam/docs/principal-identifiers#allow) for examples of targets and valid configuration. For example, "principal://iam.googleapis.com/locations/global/workforcePools/example-contractors/subject/joe@example.com"
 
-* `role` - (Required) The role that should be applied. Only one
-    `{{ $.IamTerraformName }}_binding` can be used per role. Note that custom roles must be of the format
+* `role` - (Required) The role that should be applied.
+{{- if $.IamPolicy.IamConditionsRequestType }} Only one
+    `{{ $.IamTerraformName }}_binding` can be used per role and condition combination. Multiple bindings for the same role are allowed if each has a different `condition` block (or one has no condition).
+{{- else }} Only one
+    `{{ $.IamTerraformName }}_binding` can be used per role.
+{{- end }} Note that custom roles must be of the format
     `[projects|organizations]/{parent-name}/roles/{role-name}`.
 
 * `policy_data` - (Required only by `{{ $.IamTerraformName }}_policy`) The policy data generated by
