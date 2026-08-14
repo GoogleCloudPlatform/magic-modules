@@ -26,6 +26,7 @@ import_format:
   - '{{org_id}}/apiproducts/{{name}}'
   - '{{org_id}}/{{name}}'
 generate_list_resource: true
+collection_url_key: 'apiProduct'
 custom_code:
   custom_import: templates/terraform/custom_import/apigee_api_product.go.tmpl
 samples:
