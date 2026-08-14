@@ -472,9 +472,9 @@ func TestAccSqlUser_instanceWithActivationPolicy(t *testing.T) {
 			},
 			// Step 3a: ImportState with instance stopped — verifies identity survives a round-trip
 			{
-				ResourceName:      "google_sql_user.user",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_sql_user.user",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password", "deletion_policy"},
 			},
 			// Step 4: Update activation_policy to ALWAYS so that post-test destroy code is able to delete the google_sql_user resource
