@@ -14,7 +14,7 @@ import (
 )
 
 // DataSourceIAMBetaWorkloadIdentityPoolJwks retrieves the JSON Web Key Set (JWKS)
-// public keys for a Workload Identity Pool from Google Cloud Security Token Service (STS) per RFC 7517.
+// public keys for a Workload Identity Pool per RFC 7517 (https://datatracker.ietf.org/doc/html/rfc7517#section-4).
 func DataSourceIAMBetaWorkloadIdentityPoolJwks() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceIAMBetaWorkloadIdentityPoolJwksRead,
@@ -29,7 +29,6 @@ func DataSourceIAMBetaWorkloadIdentityPoolJwks() *schema.Resource {
 				Computed:    true,
 				Description: "The raw JSON string representation of the JWKS response.",
 			},
-			// Schema follows the Google Cloud Security Token Service (STS) JWKS response.
 			"keys": {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -85,7 +84,7 @@ func dataSourceIAMBetaWorkloadIdentityPoolJwksRead(d *schema.ResourceData, meta 
 	// We cannot use standard provider transport (transport_tpg.SendRequest) here because
 	// the JWKS endpoint (/openid/jwks) is a public, unauthenticated API.
 	// If the provider transport is used, it attaches an OAuth Bearer token to the request which
-	// causes Google STS to reject the request with HTTP 400 Bad Request during cross-org testing (e.g. VCR).
+	// causes public STS to reject the request with HTTP 400 Bad Request.
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return fmt.Errorf("Error creating request: %s", err)
