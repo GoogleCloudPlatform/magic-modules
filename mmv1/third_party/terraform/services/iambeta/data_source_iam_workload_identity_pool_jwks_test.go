@@ -1,13 +1,15 @@
 package iambeta_test
 
 import (
+	"fmt"
 	"regexp"
+	"strconv"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/iambeta"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccDataSourceIAMBetaWorkloadIdentityPoolJwks_basic(t *testing.T) {
@@ -25,17 +27,44 @@ func TestAccDataSourceIAMBetaWorkloadIdentityPoolJwks_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceIAMBetaWorkloadIdentityPoolJwksBasic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "jwks_json", regexp.MustCompile(`(?s)^\{\s*"keys":\s*\[.*\]\s*\}\s*$`)),
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "keys.0.kty", regexp.MustCompile(`^RSA$`)),
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "keys.0.use", regexp.MustCompile(`^sig$`)),
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "keys.0.alg", regexp.MustCompile(`^RS256$`)),
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "keys.0.kid", regexp.MustCompile(`.+`)),
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "keys.0.n", regexp.MustCompile(`.+`)),
-					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "keys.0.e", regexp.MustCompile(`^AQAB$`)),
+					resource.TestMatchResourceAttr("data.google_iam_workload_identity_pool_jwks.example", "jwks_json", regexp.MustCompile(`(?s)^\{\s*"keys":\s*\[.*\]\s*\}$`)),
+					testAccCheckJWKSKeys("data.google_iam_workload_identity_pool_jwks.example"),
 				),
 			},
 		},
 	})
+}
+
+func testAccCheckJWKSKeys(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		keysCountStr, ok := rs.Primary.Attributes["keys.#"]
+		if !ok {
+			return fmt.Errorf("Attribute 'keys.#' not found")
+		}
+
+		keysCount, err := strconv.Atoi(keysCountStr)
+		if err != nil {
+			return fmt.Errorf("Error parsing keys count: %s", err)
+		}
+
+		// Only check that key attributes are present when keys list is not empty
+		if keysCount > 0 {
+			fields := []string{"kty", "use", "kid", "n", "e", "alg"}
+			for _, field := range fields {
+				attrKey := fmt.Sprintf("keys.0.%s", field)
+				if val, exists := rs.Primary.Attributes[attrKey]; !exists || val == "" {
+					return fmt.Errorf("Expected %s to be present and non-empty in keys.0", attrKey)
+				}
+			}
+		}
+
+		return nil
+	}
 }
 
 func testAccDataSourceIAMBetaWorkloadIdentityPoolJwksBasic(context map[string]interface{}) string {

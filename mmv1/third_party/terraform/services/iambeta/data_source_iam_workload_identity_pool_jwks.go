@@ -13,6 +13,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+// DataSourceIAMBetaWorkloadIdentityPoolJwks retrieves the JSON Web Key Set (JWKS)
+// public keys for a Workload Identity Pool from Google Cloud Security Token Service (STS) per RFC 7517.
 func DataSourceIAMBetaWorkloadIdentityPoolJwks() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceIAMBetaWorkloadIdentityPoolJwksRead,
@@ -27,6 +29,7 @@ func DataSourceIAMBetaWorkloadIdentityPoolJwks() *schema.Resource {
 				Computed:    true,
 				Description: "The raw JSON string representation of the JWKS response.",
 			},
+			// Schema follows the Google Cloud Security Token Service (STS) JWKS response.
 			"keys": {
 				Type:        schema.TypeList,
 				Computed:    true,
