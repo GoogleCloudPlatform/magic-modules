@@ -44,6 +44,8 @@ async:
     resource_inside_response: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_endpoint_attachment.go.tmpl'
+error_retry_predicates:
+  - 'transport_tpg.IsApigeeRetryableError'
 exclude_sweeper: true
 samples:
   - name: 'apigee_endpoint_attachment_basic'
