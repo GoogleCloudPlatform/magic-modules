@@ -41,6 +41,19 @@ async:
     resource_inside_response: false
 legacy_long_form_project: true
 custom_code:
+  constants: templates/terraform/constants/network_connectivity_spoke.go.tmpl
+  post_create: templates/terraform/post_create/network_connectivity_spoke.go.tmpl
+  post_update: templates/terraform/post_update/network_connectivity_spoke.go.tmpl
+virtual_fields:
+  - name: autoAcceptHub
+    type: Boolean
+    default_value: false
+    description: |
+      If true, after this spoke is created the provider calls `hubs.acceptSpoke` when the spoke
+      is still `INACTIVE`. After an update that needs hub approval, it calls `hubs.acceptSpokeUpdate`.
+      Requires `networkconnectivity.groups.acceptSpoke` on the hub. Same-project spokes are
+      accepted by the API already. Use this for a cross-project spoke when these credentials
+      can accept on the hub. Otherwise leave unset and accept from the hub project.
 samples:
   - name: network_connectivity_spoke_linked_vpc_network_basic
     primary_resource_id: primary
@@ -57,6 +70,23 @@ samples:
           hub_name: '"hub1" + randomSuffix'
           # for backward compatible
           spoke_name: '"spoke1" + randomSuffix'
+  - name: network_connectivity_spoke_accept
+    primary_resource_id: primary
+    steps:
+      - name: network_connectivity_spoke_accept
+        resource_id_vars:
+          network_name: net
+          hub_name: hub1
+          spoke_name: spoke-accept
+        ignore_read_extra:
+          - auto_accept_hub
+      - name: network_connectivity_spoke_accept_update
+        resource_id_vars:
+          network_name: net
+          hub_name: hub1
+          spoke_name: spoke-accept
+        ignore_read_extra:
+          - auto_accept_hub
   - name: network_connectivity_spoke_linked_vpc_network_group
     primary_resource_id: primary
     steps:

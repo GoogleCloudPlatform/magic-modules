@@ -1,0 +1,110 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+var networkConnectivityHubPathRe = regexp.MustCompile(`projects/([^/]+)/locations/global/hubs/([^/]+)$`)
+
+func networkConnectivityParseHub(hub, defaultProject string) (string, string) {
+	if m := networkConnectivityHubPathRe.FindStringSubmatch(hub); len(m) == 3 {
+		return m[1], m[2]
+	}
+	return tpgresource.GetResourceNameFromSelfLink(strings.TrimPrefix(defaultProject, "projects/")), tpgresource.GetResourceNameFromSelfLink(hub)
+}
+
+func networkConnectivitySpokeUpdatePending(spoke map[string]interface{}) bool {
+	if spoke == nil {
+		return false
+	}
+	if paths, ok := spoke["fieldPathsPendingUpdate"].([]interface{}); ok && len(paths) > 0 {
+		return true
+	}
+	reasons, _ := spoke["reasons"].([]interface{})
+	for _, raw := range reasons {
+		reason, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if code, _ := reason["code"].(string); code == "UPDATE_PENDING_REVIEW" {
+			return true
+		}
+	}
+	return false
+}
+
+func networkConnectivitySpokeAcceptIfNeeded(d *schema.ResourceData, config *transport_tpg.Config, userAgent string, timeout time.Duration) error {
+	if !d.Get("auto_accept_hub").(bool) {
+		return nil
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+	billingProject := strings.TrimPrefix(project, "projects/")
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	getURL, err := tpgresource.ReplaceVarsForId(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/spokes/{{"{{"}}name{{"}}"}}")
+	if err != nil {
+		return err
+	}
+
+	spoke, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    getURL,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return fmt.Errorf("Error reading Spoke before accept: %s", err)
+	}
+
+	state, _ := spoke["state"].(string)
+	spokeURI, _ := spoke["name"].(string)
+	if spokeURI == "" {
+		spokeURI = d.Id()
+	}
+
+	hubProject, hubName := networkConnectivityParseHub(d.Get("hub").(string), project)
+	acceptBase := transport_tpg.BaseUrl(Product, config) + "projects/" + hubProject + "/locations/global/hubs/" + hubName
+
+	obj := map[string]interface{}{
+		"spokeUri": spokeURI,
+	}
+	var url string
+	if state == "INACTIVE" {
+		url = acceptBase + ":acceptSpoke"
+	} else if networkConnectivitySpokeUpdatePending(spoke) {
+		url = acceptBase + ":acceptSpokeUpdate"
+		if etag, ok := spoke["etag"].(string); ok && etag != "" {
+			obj["spokeEtag"] = etag
+		}
+	} else {
+		return nil
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   hubProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   timeout,
+	})
+	if err != nil {
+		return fmt.Errorf("Error accepting Spoke %q: %s", d.Id(), err)
+	}
+
+	return NetworkConnectivityOperationWaitTime(config, res, hubProject, "Accepting Spoke", userAgent, timeout)
+}
