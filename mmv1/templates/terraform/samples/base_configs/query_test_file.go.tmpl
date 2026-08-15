@@ -20,6 +20,16 @@
 package {{ lower $.ProductMetadata.Name }}_test
 
 import (
+{{- $needsFmt := false -}}
+{{- range $key, $val := $.FirstTestConfig.Step.TestVarsOverrides -}}
+	{{- $valStr := printf "%v" $val -}}
+	{{- if contains $valStr "fmt." -}}
+		{{- $needsFmt = true -}}
+	{{- end -}}
+{{- end -}}
+{{- if $needsFmt }}
+	"fmt"
+{{- end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
