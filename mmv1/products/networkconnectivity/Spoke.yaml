@@ -470,6 +470,12 @@ properties:
     type: String
     description: Output only. The Google-generated UUID for the spoke. This value is unique across all spoke resources. If a spoke is deleted and another with the same name is created, the new spoke is assigned a different unique_id.
     output: true
+  - name: etag
+    type: String
+    description: |
+      This checksum is computed by the server based on the value of other fields, and may be sent
+      on update and delete requests to ensure the client has an up-to-date value before proceeding.
+    output: true
   - name: state
     type: String
     description: Output only. The current lifecycle state of this spoke.

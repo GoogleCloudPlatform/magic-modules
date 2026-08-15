@@ -618,6 +618,7 @@ service/network-connectivity-center:
   resources:
   - google_network_connectivity_hub
   - google_network_connectivity_spoke
+  - google_network_connectivity_hub_spoke_acceptance
   - google_network_connectivity_gateway_advertised_route
   - google_network_connectivity_transport
   - google_network_security_sac_realm
