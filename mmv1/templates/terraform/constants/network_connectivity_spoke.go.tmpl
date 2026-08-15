@@ -10,6 +10,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 var networkConnectivityHubPathRe = regexp.MustCompile(`projects/([^/]+)/locations/global/hubs/([^/]+)$`)
 
 func networkConnectivityParseHub(hub, defaultProject string) (string, string) {
@@ -108,3 +109,4 @@ func networkConnectivitySpokeAcceptIfNeeded(d *schema.ResourceData, config *tran
 
 	return NetworkConnectivityOperationWaitTime(config, res, hubProject, "Accepting Spoke", userAgent, timeout)
 }
+{{- end }}
