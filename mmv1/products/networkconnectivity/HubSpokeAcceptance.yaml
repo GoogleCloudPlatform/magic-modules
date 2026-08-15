@@ -27,7 +27,9 @@ description: |
 references:
   guides:
     Official Documentation: https://cloud.google.com/network-connectivity/docs/network-connectivity-center/how-to/vpc-review-proposed-spokes
-  api: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.global.hubs/acceptSpokeUpdate
+    Accept a spoke: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.global.hubs/acceptSpoke
+    Accept a spoke update: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.global.hubs/acceptSpokeUpdate
+  api: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.global.hubs/acceptSpoke
 docs:
   note: |
     Destroying this resource rejects the spoke (`rejectSpoke`), which disconnects it from the hub.
@@ -124,6 +126,7 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
+    # listSpokes returns a Spoke object; hub is only used to build the method URL.
     ignore_read: true
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
 properties:
@@ -143,6 +146,7 @@ properties:
       Set this to `google_network_connectivity_spoke.this.etag` so Terraform accepts proposed
       filter changes (for example `include_export_ranges`) after the spoke is already attached.
     url_param_only: true
+    # Input for acceptSpokeUpdate. The spoke etag changes after accept, so it cannot be read back.
     ignore_read: true
   - name: state
     type: String
