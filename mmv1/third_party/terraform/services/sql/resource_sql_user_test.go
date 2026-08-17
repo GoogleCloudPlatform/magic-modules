@@ -429,6 +429,14 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 				),
 			},
 			{
+				// Remove password policy
+				Config: testGoogleSqlUser_mysqlPasswordPolicy_removed(instance, "new_password"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
+				),
+			},
+			{
 				ResourceName:            "google_sql_user.user2",
 				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", envvar.GetTestProjectFromEnv(), instance),
 				ImportState:             true,
@@ -1009,6 +1017,34 @@ resource "google_sql_user" "user2" {
     allowed_failed_attempts  = 6
     enable_failed_attempts_check = true
   }
+}
+`, instance, password)
+}
+
+func testGoogleSqlUser_mysqlPasswordPolicy_removed(instance, password string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+  }
+}
+
+resource "google_sql_user" "user1" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  host     = "google.com"
+  password = "%s"
+}
+
+resource "google_sql_user" "user2" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  host     = "gmail.com"
+  password = "hunter2"
 }
 `, instance, password)
 }

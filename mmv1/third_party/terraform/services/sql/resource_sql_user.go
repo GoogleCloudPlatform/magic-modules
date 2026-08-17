@@ -454,6 +454,14 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	if databaseInstance.Settings.ActivationPolicy != "ALWAYS" {
+		if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+			"project":  project,
+			"instance": instance,
+			"host":     host,
+			"name":     name,
+		}); err != nil {
+			return err
+		}
 		return nil
 	}
 
@@ -616,6 +624,13 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		if hasPasswordChange {
 			user.Password = password
+			if d.HasChange("password_policy") {
+				if v, ok := d.GetOk("password_policy"); ok {
+					user.PasswordPolicy = expandPasswordPolicy(v)
+				} else {
+					user.NullFields = append(user.NullFields, "PasswordPolicy")
+				}
+			}
 		}
 
 		transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
