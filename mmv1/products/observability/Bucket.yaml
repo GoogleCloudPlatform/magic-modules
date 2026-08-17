@@ -42,33 +42,23 @@ samples:
     external_providers: [time]
     steps:
       - name: "observability_bucket_basic"
-        resource_id_vars:
-          kms_key_name_1: example-key-1
-          kms_key_name_2: example-key-2
-        test_vars_overrides:
-          kms_key_name_1: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key1").CryptoKey.Name
-          kms_key_name_2: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key2").CryptoKey.Name
-          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key1").CryptoKey.Name
         test_env_vars:
           project_name: PROJECT_NAME
+        test_vars_overrides:
+          kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key1").CryptoKey.Name
         vars:
           display_name: "Initial Display Name"
           description: "Initial description"
-          kms_key_name: example-key-1
+          kms_key: example-key-1
       - name: "observability_bucket_basic"
-        resource_id_vars:
-          kms_key_name_1: example-key-1
-          kms_key_name_2: example-key-2
-        test_vars_overrides:
-          kms_key_name_1: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key1").CryptoKey.Name
-          kms_key_name_2: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key2").CryptoKey.Name
-          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key2").CryptoKey.Name
         test_env_vars:
           project_name: PROJECT_NAME
+        test_vars_overrides:
+          kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key2").CryptoKey.Name
         vars:
           display_name: "Updated Display Name"
           description: "Updated description"
-          kms_key_name: example-key-2
+          kms_key: example-key-2
 parameters:
   - name: location
     type: String
