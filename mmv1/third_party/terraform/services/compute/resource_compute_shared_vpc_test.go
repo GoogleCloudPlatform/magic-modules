@@ -8,11 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
-
-const computeBaseUrl = "https://compute.googleapis.com/compute/v1/"
 
 func TestAccComputeSharedVpc_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
@@ -81,7 +80,7 @@ func testAccCheckComputeSharedVpcHostProject(t *testing.T, hostProject string, e
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		url := fmt.Sprintf("%sprojects/%s", computeBaseUrl, hostProject)
+		url := fmt.Sprintf("%sprojects/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), hostProject)
 		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
@@ -109,7 +108,7 @@ func testAccCheckComputeSharedVpcHostProject(t *testing.T, hostProject string, e
 func testAccCheckComputeSharedVpcServiceProject(t *testing.T, hostProject, serviceProject string, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		url := fmt.Sprintf("%sprojects/%s/getXpnHost", computeBaseUrl, serviceProject)
+		url := fmt.Sprintf("%sprojects/%s/getXpnHost", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), serviceProject)
 		serviceHostProject, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
