@@ -18,9 +18,9 @@ This document outlines the structured 6-step lifecycle for investigating, planni
 *   Execute the `repo-sync` skill (located in `.agents/skills/operations/repo-sync/`). This skill handles checking the sync status and prompting for action if needed to establish a clean sync baseline.
 
 ### 2. Triage & Context Gathering
-*   **External context:** Read the target GitHub issue description, related bug reports, and external API documentation (e.g., REST API references) to understand GCP service behavior and parameters.
+*   **External context:** Read the target issue description, related bug reports, and external API documentation (e.g., REST API references) to understand service behavior and parameters.
 *   **Internal context:** Consult the Knowledge Index (`.agents/knowledge/index.md`) for any relevant topics, patterns, or repository-specific instructions. Then search the codebase to locate where the affected fields, schemas, expanders, or flatteners are defined.
-*   **Historical context:** Trace Git logs, tags, and PRs in downstream provider repositories to identify the lifecycle of the affected code (e.g., when it was introduced, deprecated, or modified).
+*   **Historical context:** Trace Git logs, tags, and past PRs in the repository and downstream provider repositories to identify the lifecycle of the affected code, related fixes, or similar resource implementations (`Modeled after:` / `Based on:`).
 
 ### 3. Remediation Planning (Proposal)
 *   Analyze the triage findings and identify the root cause.
@@ -36,6 +36,7 @@ This document outlines the structured 6-step lifecycle for investigating, planni
 
 ### 4. Implementation & Code Generation (Only if code changes are required)
 *   Apply the approved schema or logic changes in Magic Modules (`mmv1/`).
+*   **Template Modifications:** If the fix requires modifying engine templates (`mmv1/templates/terraform/`), consult the Knowledge Index entry on [Template Modifications & Blast Radius](../../../knowledge/template/template-modifications.md). Obtain explicit user approval before modifying engine templates.
 *   Execute code generation to compile the downstream provider (using the `generate-provider` skill located in `.agents/skills/operations/generate-provider/`).
 
 
@@ -46,14 +47,22 @@ This document outlines the structured 6-step lifecycle for investigating, planni
 
 ### 6. Resolution & Issue Reporting
 *   **Plan Completeness:** Verify that every file listed in the remediation plan (including any necessary documentation) has been generated and staged.
+*   **Pre-PR Quality & Verification Gate:** Before opening a PR or finalizing the branch, run the following verification pipeline:
+    1. **Build Verification:** Run `make build` in downstream provider repository to ensure full compilation passes without syntax errors.
+    2. **Acceptance Test Verification:** Confirm target acceptance tests pass (`PASS`).
+    3. **Pre-Gen Static Checks:** Execute the `run-pre-gen-checks` skill (`.agents/skills/utils/run-pre-gen-checks/`) to run fast static checks directly against Magic Modules (Go formatting, YAML linting, template validation, and MMv1 unit tests).
+    4. **Breaking Change Validation:** Execute the `validate-provider-changes` skill (`.agents/skills/utils/validate-provider-changes/`) if schemas or properties were modified.
 *   **Workspace Cleanup:** Run `git status --porcelain` and remove any untracked `.log`, `.test`, or temporary test artifacts across both repositories before reporting resolution or creating a PR.
-*   If code changes or verification tests were performed, compile these results into a separate verification/test report artifact.
-*   Draft a final, succinct GitHub response containing verified PR/commit links.
-    *   **Succinct Public Communication:** GitHub issue responses should be concise (2–3 sentences preferred): state what changed, why, and refer readers to the PR or documentation for technical deep-dives.
+*   **Artifact Report:** If code changes or verification tests were performed, compile these results into a separate verification/test report artifact.
+*   **PR Creation:** When opening a PR, execute the `create-pr` skill (`.agents/skills/operations/create-pr/`), which governs branch creation, PR title length, release notes, and reference linking (`Modeled after:` / `Based on:`).
+*   **GitHub Response Draft:** Draft a final, succinct public response containing verified PR/commit links.
+    *   **Succinct Public Communication:** Responses should be concise (2–3 sentences preferred): state what changed, why, and refer readers to the PR or documentation for technical deep-dives.
 *   **HIL steering checkpoint:** Present the final response draft and any new verification reports to the user for sign-off and issue closure.
 
 
 ---
 
 ## The Loop
-If verification fails during Step 5, repeat steps 3-5 as needed. Reset to Step 4 (Implementation & Code Generation) after applying any approved fix changes to compile and re-test.
+If verification fails during Step 5, repeat steps 3-5 as needed.
+*   **Scope Expansion Guardrail:** If debugging reveals that resolving the root cause requires expanding scope beyond the approved plan (such as modifying engine templates in `mmv1/templates/` or altering additional fields/resources), do NOT apply changes silently. Loop back to Step 3, update the investigation report artifact, and obtain explicit user approval.
+*   Reset to Step 4 (Implementation & Code Generation) after applying any approved fix changes to compile and re-test.

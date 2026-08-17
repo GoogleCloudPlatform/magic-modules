@@ -21,6 +21,9 @@ For the target resource, confirm its location in the MMv1 codebase, and whether 
 ### 2. Create IAM Resources
 Create the resources by adding the `iam_policy` block to the resource's metadata YAML file. Consult the documentation for the resource's API to determine the correct IAM policy configuration. The available fields for `iam_policy` are documented in `docs/content/reference/resource.md`.
 
+* If the parent resource URL path contains multiple hierarchical path parameters (e.g., `catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}`), ensure that `additional_parent_resource_attributes` is configured under `iam_policy` (e.g. `additional_parent_resource_attributes: [catalog, namespace]`) alongside `parent_resource_attribute: name` so that all parent key identifiers are properly captured in IAM bindings/policies.
+* Note that `allowed_iam_role` is optional and defaults to `'roles/viewer'` if omitted. If configuring a service-specific role (e.g., `roles/apphub.admin`), consult public Google Cloud IAM documentation using `read_url_content` or `search_web`, or inspect existing product YAMLs. Do not use internal search tools.
+
 **IMPORTANT: You are only to modify the `iam_policy` block. Do not modify anything outside of this block, and do not modify any files other than the resource's metadata YAML file.** If you believe you need to make any modifications outside of this block, ask the user to confirm before proceeding. Offer to provide a detailed plan with the changes you are proposing to make.
 
 ### 3. Run Pre-Gen Checks

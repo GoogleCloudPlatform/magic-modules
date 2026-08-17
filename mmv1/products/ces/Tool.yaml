@@ -844,6 +844,15 @@ properties:
                 - name: prompt
                   type: String
                   description: The prompt definition. If not set, default prompt will be used.
+            - name: snippetsConfig
+              type: NestedObject
+              description: Snippets configuration.
+              diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+              properties:
+                - name: enableSnippets
+                  type: Boolean
+                  description: Whether snippets are enabled.
+                  send_empty_value: true
             - name: summarizationConfig
               type: NestedObject
               description: Summarization configuration.
@@ -1399,6 +1408,16 @@ properties:
       - name: pythonCode
         type: String
         description: The Python code to execute for the tool.
+      - name: serviceDirectoryConfig
+        type: NestedObject
+        description: Service Directory configuration for the tool.
+        properties:
+          - name: service
+            type: String
+            description: |-
+              The name of Service Directory service.
+              Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}
+            required: true
   - name: updateTime
     type: String
     description: Timestamp when the tool was last updated.

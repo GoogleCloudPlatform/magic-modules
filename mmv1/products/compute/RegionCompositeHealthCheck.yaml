@@ -14,6 +14,7 @@
 ---
 # API resource name
 name: 'RegionCompositeHealthCheck'
+api_resource_type_kind: 'CompositeHealthCheck'
 # Resource description for the provider documentation.
 description: |
   A composite health check resource specifies the health source resources and
