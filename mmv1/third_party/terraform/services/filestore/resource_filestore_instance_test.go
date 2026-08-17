@@ -870,6 +870,99 @@ resource "google_filestore_instance" "instance" {
 `, context)
 }
 
+func TestAccFilestoreInstance_pscRequestedIPAddress(t *testing.T) {
+	t.Parallel()
+
+	requestedIP := "10.2.0.2"
+
+	context := map[string]interface{}{
+		"name":     fmt.Sprintf("tf-test-%d", acctest.RandInt(t)),
+		"location": "us-central1",
+		"tier":     "REGIONAL",
+		"ip":       requestedIP,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_pscRequestedIPAddressConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.connect_mode", "PRIVATE_SERVICE_CONNECT"),
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.psc_config.0.requested_ip_address", requestedIP),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_pscRequestedIPAddressConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_client_config" "current" {}
+
+resource "google_compute_network" "psc_network" {
+  name                    = "%{name}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "psc_subnet" {
+  name          = "%{name}"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "%{location}"
+  network       = google_compute_network.psc_network.id
+}
+
+resource "google_network_connectivity_service_connection_policy" "default" {
+  name          = "%{name}"
+  location      = "%{location}"
+  service_class = "google-cloud-filestore"
+  network       = google_compute_network.psc_network.id
+  psc_config {
+    subnetworks = [google_compute_subnetwork.psc_subnet.id]
+  }
+}
+
+resource "google_filestore_instance" "instance" {
+  depends_on = [
+    google_network_connectivity_service_connection_policy.default
+  ]
+  name        = "%{name}"
+  location    = "%{location}"
+  tier        = "%{tier}"
+  description = "An instance created during testing."
+  protocol    = "NFS_V4_1"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+
+    nfs_export_options {
+      ip_ranges = ["70.0.0.1/24"]
+      network   = google_compute_network.psc_network.name
+    }
+  }
+
+  networks {
+    network      = google_compute_network.psc_network.name
+    modes        = ["MODE_IPV4"]
+    connect_mode = "PRIVATE_SERVICE_CONNECT"
+    psc_config {
+      endpoint_project     = data.google_client_config.current.project
+      requested_ip_address = "%{ip}"
+    }
+  }
+}
+`, context)
+}
+
 func TestAccFilestoreInstance_nfsExportOptionsNetwork_update(t *testing.T) {
 	t.Parallel()
 

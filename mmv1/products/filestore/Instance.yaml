@@ -324,6 +324,14 @@ properties:
                 is a shared VPC. If this is not specified, the endpoint would be set up
                 in the VPC host project.
               immutable: true
+            - name: requestedIpAddress
+              type: String
+              description: |
+                The desired IP address for the Filestore instance. This IP must be
+                within the subnetwork range configured in the Service Connection
+                Policy and must not already be in use. If not specified, an IP will
+                be automatically allocated.
+              immutable: true
     min_size: 1
   - name: etag
     type: String
