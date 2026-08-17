@@ -47,12 +47,12 @@ resource "google_observability_bucket" "bucket" {
   description  = "Bucket for Link Test"
 }
 
-resource "google_observability_link" "{{$.PrimaryResourceId}}" {
+resource "google_observability_link" "link" {
   provider     = "google-beta"
   bucket       = google_observability_bucket.bucket.bucket_id
   dataset      = "Spans"
   location     = "us"
-  link_id      = "{{index $.ResourceIdVars "link_id"}}"
+  link_id      = "my_link"
   display_name = "%{display_name}"
   description  = "%{description}"
 

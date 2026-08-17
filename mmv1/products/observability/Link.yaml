@@ -39,18 +39,14 @@ async:
 autogen_async: true
 samples:
   - name: "observability_link_basic"
-    primary_resource_id: "primary"
+    primary_resource_id: "link"
     external_providers: [time]
     steps:
       - name: "observability_link_basic"
-        resource_id_vars:
-          link_id: "my_link"
         vars:
           display_name: "Initial Display Name"
           description: "Initial description"
       - name: "observability_link_basic"
-        resource_id_vars:
-          link_id: "my_link"
         vars:
           display_name: "Updated Display Name"
           description: "Updated description"
