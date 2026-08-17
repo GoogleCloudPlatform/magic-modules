@@ -360,25 +360,6 @@ func ResourceDataLineageOpenLineageJob() *schema.Resource {
 					},
 				},
 			},
-			"owner": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: `The owner of the OpenLineage job.`,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: `Owner name.`,
-						},
-						"type": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: `Owner type.`,
-						},
-					},
-				},
-			},
 			"knowledge_catalog": {
 				Type:        schema.TypeList,
 				Computed:    true,

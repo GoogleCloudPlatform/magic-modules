@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenLineage/openlineage/client/go/pkg/openlineage"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -48,14 +47,14 @@ func getOpenLineageProjectAndLocation(d *schema.ResourceData, config *transport_
 	return project, location, nil
 }
 
-func emitEvent(ctx context.Context, d *schema.ResourceData, runEvent *openlineage.RunEvent, config *transport_tpg.Config, userAgent string, timeout time.Duration) (map[string]interface{}, diag.Diagnostics) {
+func emitEvent(ctx context.Context, d *schema.ResourceData, runEvent map[string]interface{}, config *transport_tpg.Config, userAgent string, timeout time.Duration) (map[string]interface{}, diag.Diagnostics) {
 	_ = ctx
 
 	eventJSON, err := json.Marshal(runEvent)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
-
+	fmt.Printf("[DEBUG] Emitting OpenLineage RunEvent: %#v\n", string(eventJSON[:]))
 	payload := map[string]any{}
 	if err := json.Unmarshal(eventJSON, &payload); err != nil {
 		return nil, diag.FromErr(err)
@@ -87,6 +86,8 @@ func emitEvent(ctx context.Context, d *schema.ResourceData, runEvent *openlineag
 		return nil, diag.FromErr(fmt.Errorf("processOpenLineageRunEvent: %w", err))
 	}
 
+	fmt.Printf("[DEBUG] Emitting OpenLineage RunEvent: %#v\n", resp)
+
 	return resp, nil
 }
 
@@ -112,6 +113,7 @@ func getLatestRunForProcess(ctx context.Context, d *schema.ResourceData, config 
 		UserAgent: userAgent,
 		Headers:   make(http.Header),
 	})
+
 	if pErr != nil {
 		return "", diag.FromErr(transport_tpg.HandleNotFoundError(pErr, d, fmt.Sprintf("DataLineageOpenLineageJob %q", process)))
 	}

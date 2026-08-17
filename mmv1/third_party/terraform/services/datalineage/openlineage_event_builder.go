@@ -1,172 +1,237 @@
 package datalineage
 
 import (
-	"fmt"
+	"time"
 
-	"github.com/OpenLineage/openlineage/client/go/pkg/facets"
-	"github.com/OpenLineage/openlineage/client/go/pkg/openlineage"
+	"github.com/google/uuid"
 )
 
-func buildRunEvent(in map[string]interface{}) *openlineage.RunEvent {
-	runEvent := openlineage.NewNamespacedRunEvent(openlineage.EventTypeComplete, openlineage.NewRunID(), in["name"].(string), in["namespace"].(string), "_PRODUCER_")
-	buildJobType(runEvent)
-	buildOwners(in, runEvent)
-	buildInputs(in, runEvent)
-	buildOutputs(in, runEvent)
-	return runEvent
-}
+const (
+	openLineageRunEventSchemaURL = "https://openlineage.io/spec/2-0-2/OpenLineage.json#/$defs/RunEvent"
+	openLineageJobFacetSchemaURL = "https://openlineage.io/spec/facets/2-0-4/JobTypeJobFacet.json"
+	openLineageCatalogFacetURL   = "https://openlineage.io/spec/facets/1-1-0/CatalogDatasetFacet.json"
+	openLineageSymlinkFacetURL   = "https://openlineage.io/spec/facets/1-0-1/SymlinksDatasetFacet.json"
+	openLineageColumnLineageURL  = "https://openlineage.io/spec/facets/1-2-0/ColumnLineageDatasetFacet.json"
+)
 
-func buildOutputs(in map[string]interface{}, runEvent *openlineage.RunEvent) {
-	if v, ok := in["output"]; ok {
-		outputs := make([]openlineage.OutputElement, 0)
-		v := v.([]interface{})
-		for _, item := range v {
-			m := item.(map[string]interface{})
-			element := openlineage.OutputElement{
-				Name:      m["name"].(string),
-				Namespace: m["namespace"].(string),
-			}
-			facets := getCommonDatasetFacets(m)
-			element = element.WithFacets(facets...)
-			if e, ok := m["column_lineage"].(map[string]interface{}); ok {
-				facets = append(facets, buildColumnLineage(e))
-				element = element.WithFacets(facets...)
-			}
-
-			outputs = append(outputs, element)
-		}
-		runEvent.WithOutputs(outputs...)
+func buildRunEvent(in map[string]interface{}) map[string]interface{} {
+	event := map[string]interface{}{
+		"eventTime": time.Now(),
+		"producer":  "_PRODUCER_",
+		"schemaURL": openLineageRunEventSchemaURL,
+		"eventType": "COMPLETE",
+		"job": map[string]interface{}{
+			"name":      in["name"].(string),
+			"namespace": in["namespace"].(string),
+		},
+		"run": map[string]interface{}{
+			"runId": uuid.NewString(),
+		},
 	}
-}
 
-func buildInputs(in map[string]interface{}, runEvent *openlineage.RunEvent) {
-	if v, ok := in["input"]; ok {
-		v := v.([]interface{})
-		inputs := make([]openlineage.InputElement, 0)
-		for _, item := range v {
-			m := item.(map[string]interface{})
-			element := openlineage.InputElement{
-				Name:      m["name"].(string),
-				Namespace: m["namespace"].(string),
-			}
-			facets := getCommonDatasetFacets(m)
-			element = element.WithFacets(facets...)
-			inputs = append(inputs, element)
-		}
-		runEvent.WithInputs(inputs...)
+	if facets := buildJobFacets(); len(facets) > 0 {
+		event["job"].(map[string]interface{})["facets"] = facets
 	}
-}
 
-func buildOwners(in map[string]interface{}, runEvent *openlineage.RunEvent) {
-	if v, ok := in["owner"]; ok {
-		v := v.([]interface{})
-		owners := make([]facets.OwnershipJobFacetOwner, 0, len(v))
-		for _, item := range v {
-			m := item.(map[string]interface{})
-
-			t := m["type"].(string)
-			owners = append(owners, facets.OwnershipJobFacetOwner{
-				Name: m["name"].(string),
-				Type: &t,
-			})
-		}
-		runEvent.WithJobFacets(facets.NewOwnershipJobFacet("_PRODUCER_").WithOwners(owners))
+	if inputs := buildInputs(in); len(inputs) > 0 {
+		event["inputs"] = inputs
 	}
+
+	if outputs := buildOutputs(in); len(outputs) > 0 {
+		event["outputs"] = outputs
+	}
+
+	return event
 }
 
-func buildJobType(runEvent *openlineage.RunEvent) {
-	runEvent.WithJobFacets(
-		facets.NewJobTypeJobFacet("_PRODUCER_", "TERRAFORM", "BYOL"),
-	)
-}
+func buildOutputs(in map[string]interface{}) []map[string]interface{} {
+	v, ok := in["output"]
+	if !ok {
+		return nil
+	}
 
-func buildColumnLineage(cll map[string]interface{}) *facets.ColumnLineageDatasetFacet {
-	fieldList, _ := cll["field"].([]interface{})
-	fields := make(map[string]facets.ColumnLineageDatasetFacetFieldsValue)
-	for _, item := range fieldList {
+	items, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+
+	outputs := make([]map[string]interface{}, 0, len(items))
+	for _, item := range items {
 		m := item.(map[string]interface{})
-		name := m["name"].(string)
-		i := m["input"].([]interface{})
-		fields[name] = facets.ColumnLineageDatasetFacetFieldsValue{
-			InputFields: buildCllInputs(i),
+		element := map[string]interface{}{
+			"name":      m["name"].(string),
+			"namespace": m["namespace"].(string),
 		}
+
+		if facets := getCommonDatasetFacets(m); len(facets) > 0 {
+			element["facets"] = facets
+		}
+
+		outputs = append(outputs, element)
 	}
 
-	di, _ := cll["dataset_input"].([]interface{})
-	facet := facets.NewColumnLineageDatasetFacet("_PRODUCER_", fields).WithDataset(buildCllInputs(di))
-	return facet
+	return outputs
 }
 
-func buildCllInputs(i []interface{}) []facets.InputField {
-	in := make([]facets.InputField, 0)
-
-	for _, it := range i {
-		m2 := it.(map[string]interface{})
-		iname := m2["name"].(string)
-		inamespace := m2["namespace"].(string)
-		field := m2["field"].(string)
-		transformations := make([]facets.InputFieldTransformation, 0)
-		for _, transformation := range m2["transformation"].([]interface{}) {
-			tr := transformation.(map[string]interface{})
-			subtype := tr["subtype"].(string)
-			transformations = append(transformations, facets.InputFieldTransformation{
-				Type:    tr["type"].(string),
-				Subtype: &subtype,
-			})
-		}
-		in = append(in, facets.InputField{
-			Name:            iname,
-			Namespace:       inamespace,
-			Field:           field,
-			Transformations: transformations,
-		})
-
+func buildInputs(in map[string]interface{}) []map[string]interface{} {
+	v, ok := in["input"]
+	if !ok {
+		return nil
 	}
-	return in
+
+	items, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+
+	inputs := make([]map[string]interface{}, 0, len(items))
+	for _, item := range items {
+		m := item.(map[string]interface{})
+		element := map[string]interface{}{
+			"name":      m["name"].(string),
+			"namespace": m["namespace"].(string),
+		}
+
+		if facets := getCommonDatasetFacets(m); len(facets) > 0 {
+			element["facets"] = facets
+		}
+
+		inputs = append(inputs, element)
+	}
+
+	return inputs
 }
 
-func getCommonDatasetFacets(m map[string]interface{}) []facets.DatasetFacet {
-	facets := make([]facets.DatasetFacet, 0)
-	if v, ok := m["catalog"]; ok {
-		fmt.Println("YES CATALOG")
-		facets = append(facets, buildCatalog(v.(map[string]interface{})))
-	} else {
-		fmt.Println("NO CATALOG")
+func buildJobFacets() map[string]interface{} {
+	facets := make(map[string]interface{})
+
+	facets["jobType"] = map[string]interface{}{
+		"_producer":      "_PRODUCER_",
+		"_schemaURL":     openLineageJobFacetSchemaURL,
+		"integration":    "TERRAFORM",
+		"processingType": "BYOL",
 	}
 
-	if v, ok := m["symlink"]; ok {
-		fmt.Println("YES SYMLINK")
-		facets = append(facets, buildSymlinks(v.([]interface{})))
-	} else {
-		fmt.Println("NO SYMLINK")
-	}
-	fmt.Println("FACETS: ", facets)
 	return facets
 }
 
-func buildSymlinks(v []interface{}) *facets.SymlinksDatasetFacet {
+func getCommonDatasetFacets(m map[string]interface{}) map[string]interface{} {
+	facets := make(map[string]interface{})
+
+	if v, ok := m["catalog"]; ok {
+		if catalog, ok := v.(map[string]interface{}); ok {
+			facets["catalog"] = buildCatalog(catalog)
+		}
+	}
+
+	if v, ok := m["symlink"]; ok {
+		if symlink, ok := v.([]interface{}); ok {
+			if facet := buildSymlinks(symlink); facet != nil {
+				facets["symlinks"] = facet
+			}
+		}
+	}
+
+	if v, ok := m["column_lineage"]; ok {
+		if lineage, ok := v.(map[string]interface{}); ok {
+			if facet := buildColumnLineage(lineage); facet != nil {
+				facets["columnLineage"] = facet
+			}
+		}
+	}
+
+	return facets
+}
+
+func buildSymlinks(v []interface{}) map[string]interface{} {
 	if len(v) == 0 {
 		return nil
 	}
 
-	symlinks := make([]facets.SymlinksDatasetFacetIdentifier, 0, len(v))
+	symlinks := make([]map[string]interface{}, 0, len(v))
 	for _, item := range v {
 		m := item.(map[string]interface{})
-		symlinks = append(symlinks, facets.SymlinksDatasetFacetIdentifier{
-			Name:      m["name"].(string),
-			Namespace: m["namespace"].(string),
-			Type:      m["type"].(string),
+		symlinks = append(symlinks, map[string]interface{}{
+			"name":      m["name"].(string),
+			"namespace": m["namespace"].(string),
+			"type":      m["type"].(string),
 		})
 	}
-	return facets.NewSymlinksDatasetFacet("_PRODUCER_").WithIdentifiers(symlinks)
+
+	return map[string]interface{}{
+		"_producer":   "_PRODUCER_",
+		"_schemaURL":  openLineageSymlinkFacetURL,
+		"identifiers": symlinks,
+	}
 }
 
-func buildCatalog(v map[string]interface{}) *facets.CatalogDatasetFacet {
-	return facets.NewCatalogDatasetFacet("_PRODUCER_", v["framework"].(string), v["name"].(string), v["type"].(string))
+func buildCatalog(v map[string]interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"_producer":  "_PRODUCER_",
+		"_schemaURL": openLineageCatalogFacetURL,
+		"framework":  v["framework"].(string),
+		"name":       v["name"].(string),
+		"type":       v["type"].(string),
+	}
 }
 
-func flattenKnowledgeCatalog(
-	process, run string) []interface{} {
+func buildColumnLineage(cll map[string]interface{}) map[string]interface{} {
+	fieldList, _ := cll["field"].([]interface{})
+	fields := make(map[string]interface{}, len(fieldList))
+	for _, item := range fieldList {
+		m := item.(map[string]interface{})
+		name := m["name"].(string)
+		inputs, _ := m["input"].([]interface{})
+		fields[name] = map[string]interface{}{
+			"inputFields": buildCllInputs(inputs),
+		}
+	}
+
+	di, _ := cll["dataset_input"].([]interface{})
+	return map[string]interface{}{
+		"_producer":  "_PRODUCER_",
+		"_schemaURL": openLineageColumnLineageURL,
+		"dataset":    buildCllInputs(di),
+		"fields":     fields,
+	}
+}
+
+func buildCllInputs(i []interface{}) []map[string]interface{} {
+	if len(i) == 0 {
+		return nil
+	}
+
+	in := make([]map[string]interface{}, 0, len(i))
+	for _, it := range i {
+		m2 := it.(map[string]interface{})
+		field := map[string]interface{}{
+			"name":      m2["name"].(string),
+			"namespace": m2["namespace"].(string),
+			"field":     m2["field"].(string),
+		}
+
+		if transformations, ok := m2["transformation"].([]interface{}); ok && len(transformations) > 0 {
+			transformed := make([]map[string]interface{}, 0, len(transformations))
+			for _, transformation := range transformations {
+				tr := transformation.(map[string]interface{})
+				item := map[string]interface{}{
+					"type": tr["type"].(string),
+				}
+				if subtype, ok := tr["subtype"].(string); ok && subtype != "" {
+					item["subtype"] = subtype
+				}
+				transformed = append(transformed, item)
+			}
+			field["transformations"] = transformed
+		}
+
+		in = append(in, field)
+	}
+
+	return in
+}
+
+func flattenKnowledgeCatalog(process, run string) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
 			"process": process,
