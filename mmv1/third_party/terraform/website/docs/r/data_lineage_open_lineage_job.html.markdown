@@ -10,6 +10,14 @@ Static lineage represented in OpenLineage format.
 
 Defines lineage between datasets in OpenLineage format and publishes it to Knowledge Catalog.
 
+This resource is a stop-gap until static lineage endpoints are available in Knowledge Catalog. It can be used to version control declared lineage alongside the environment managed by Terraform.
+
+This resource emits OpenLineage `RunEvent` payloads directly to the Data Lineage API. It does not rely on OpenLineage client libraries.
+
+This resource is **not importable** because there is no 1:1 mapping between the OpenLineage representation and the Knowledge Catalog process and run resources created by the API.
+
+During refresh, Terraform reads the latest run for the tracked process. If external systems emit additional runs for that process, the provider logs that drift, but does not attempt to reconcile it in state beyond reporting it. The update path emits a new event from the current configuration, so the next `terraform apply` is expected to overwrite the observed drift.
+
 
 To get more information about OpenLineageJob, see:
 
@@ -24,19 +32,21 @@ To get more information about OpenLineageJob, see:
 </div>
 ## Example Usage - Data Lineage Open Lineage Job Simple
 
+This example shows the minimal form of the resource. It can be used when you want to declare a job only through its input and output datasets, or when you want to record dataset lineage with a lightweight mock job definition.
+
 
 ```hcl
-resource "google_dataplex_openlineage_job" "simple" {
+resource "google_data_lineage_open_lineage_job" "simple" {
   namespace   = "example_simple_namespace"
   name        = "example_simple_name"
   description = "Nightly ETL from raw to curated"
 
-  inputs {
+  input {
     namespace = "gs://example-bucket/"
     name      = "warehouse/raw_dataset_simple/source_table_1"
   }
 
-  outputs {
+  output {
     namespace = "gs://example-bucket/"
     name      = "warehouse/target_simple/target_table_1"
   }
@@ -49,67 +59,164 @@ resource "google_dataplex_openlineage_job" "simple" {
 </div>
 ## Example Usage - Data Lineage Open Lineage Job With Facets
 
+This example shows a resource that defines all available facets. 
+The resource represents a job running a SQL query with following logic:
+
+```sql
+-- my-project-name.raw_dataset_with_facets.source_table_1 
+--  schema: (a int, b string)
+--  location: gs://example-bucket/warehouse/raw_dataset/source_table_1  
+-- my-project-name.raw_dataset_with_facets.source_table_2 
+--  schema: (a int, c int)
+--  location: gs://example-bucket/warehouse/raw_dataset/source_table_2
+
+CREATE TABLE target_table_1
+AS SELECT
+    t1.a as ident,
+    CONCAT(b, 'transformation') as trans,
+    SUM(c) as agg
+FROM
+    (SELECT a, c from source_table_2 where a > 1) t2
+JOIN source_table_1 t1 on t1.a = t2.a
+GROUP BY t1.a, b
+```
+
+
 
 ```hcl
-resource "google_dataplex_openlineage_job" "with_facets" {
-  namespace   = "example_with_facets_namespace"
-  name        = "example_with_facets_name"
-  description = "Nightly ETL from raw to curated"
+resource "google_data_lineage_open_lineage_job" "column_lineage_event" {
+  namespace   = "testColumnLevelLineage"
+  name        = "open_lineage_integration_create_table.execute_create_hive_table_as_select_command.default_tbl1"
+  description = "OpenLineage column lineage event from Spark integration"
 
-  ownership {
-    owners {
-      name = "team:data-engineering"
-      type = "MAINTAINER"
-    }
-  }
-
-  inputs {
+  input {
     namespace = "gs://example-bucket/"
-    name      = "warehouse/raw_dataset_with_facets/source_table_1"
+    name      = "warehouse/raw_dataset/source_table_1"
 
-    symlinks {
-      identifier {
-        namespace = "bigquery"
-        name      = "my-project-name.raw_dataset_with_facets".source_table_1"
-        type      = "TABLE"
-      }
+    symlink {
+      namespace = "bigquery"
+      name      = "my-project-name.raw_dataset_with_facets.source_table_1"
+      type      = "TABLE"
     }
 
     catalog {
-      framework = "bigquery"
-      type      = "TABLE"
-      name      = "my-project-name"
+      framework = "iceberg"
+      type      = "bigquery"
+      name      = "example-catalog"
     }
   }
 
-  outputs {
+  input {
     namespace = "gs://example-bucket/"
-    name      = "warehouse/target_with_facets/target_table_1"
+    name      = "warehouse/raw_dataset/source_table_2"
 
-  symlinks {
-      identifier {
-        namespace = "bigquery"
-        name      = "my-project-name.target_dataset_with_facets.target_table_1"
-        type      = "TABLE"
-      }
+    symlink {
+      namespace = "bigquery"
+      name      = "my-project-name.raw_dataset_with_facets.source_table_2"
+      type      = "TABLE"
     }
 
     catalog {
-      framework = "bigquery"
+      framework = "iceberg"
+      type      = "bigquery"
+      name      = "example-catalog"
+    }
+  }
+
+  output {
+    namespace = "gs://example-bucket/"
+    name      = "warehouse/raw_dataset/target_table_1"
+
+    symlink {
+      namespace = "bigquery"
+      name      = "my-project-name.raw_dataset_with_facets.target_table_1"
       type      = "TABLE"
-      name      = "my-project-name"
+    }
+
+    catalog {
+      framework = "iceberg"
+      type      = "bigquery"
+      name      = "example-catalog"
     }
 
     column_lineage {
-      fields {
-        name = "user_id"
-        input_field {
+      dataset_input {
+        namespace  = "gs://example-bucket/"
+        name       = "warehouse/raw_dataset/source_table_1"
+        field     = "a"
+        transformation {
+          type    = "INDIRECT"
+          subtype = "GROUP_BY"
+        }
+        transformation {
+          type    = "INDIRECT"
+          subtype = "JOIN"
+        }
+        transformation {
+          type    = "INDIRECT"
+          subtype = "FILTER"
+        }
+      }
+
+      dataset_input {
+        namespace  = "gs://example-bucket/"
+        name       = "warehouse/raw_dataset/source_table_1"
+        field     = "b"
+        transformation {
+          type    = "INDIRECT"
+          subtype = "GROUP_BY"
+        }
+      }
+
+      dataset_input {
+        namespace  = "gs://example-bucket/"
+        name       = "warehouse/raw_dataset/source_table_2"
+        field     = "a"
+        transformation {
+          type    = "INDIRECT"
+          subtype = "JOIN"
+        }
+        transformation {
+          type    = "INDIRECT"
+          subtype = "FILTER"
+        }
+      }
+
+      field {
+        name = "ident"
+        input {
           namespace = "gs://example-bucket/"
-          name      = "warehouse/raw_dataset_with_facets/source_table_1"
-          field     = "id"
+          name      = "warehouse/raw_dataset/source_table_1"
+          field     = "a"
           transformation {
             type    = "DIRECT"
             subtype = "IDENTITY"
+          }
+        }
+      }
+
+      field {
+        name = "trans"
+        input {
+          namespace = "gs://example-bucket/"
+          name      = "warehouse/raw_dataset/source_table_1"
+          field     = "b"
+          transformation {
+            type    = "DIRECT"
+            subtype = "TRANSFORMATION"
+          }
+        }
+      }
+
+      field {
+        name = "agg"
+        input {
+          namespace = "gs://example-bucket/"
+          name      = "warehouse/raw_dataset/source_table_2"
+          field     = "c"
+          transformation {
+            type    = "DIRECT"
+            subtype = "AGGREGATION"
           }
         }
       }
@@ -117,6 +224,8 @@ resource "google_dataplex_openlineage_job" "with_facets" {
   }
 }
 ```
+
+
 
 ## Argument Reference
 
@@ -136,11 +245,6 @@ The following arguments are supported:
   (Optional)
   Description of the OpenLineage job.
 
-* `owner` -
-  (Optional)
-  The owner of the OpenLineage job.
-  Structure is [documented below](#nested_owner).
-
 * `input` -
   (Optional)
   Input datasets consumed by this job.
@@ -157,17 +261,6 @@ The following arguments are supported:
 	When set to "ABANDON", the command will remove the resource from Terraform
 	management without updating or deleting the resource in the API.
 	When set to "DELETE", deleting the resource is allowed.
-
-
-<a name="nested_owner"></a>The `owner` block supports:
-
-* `name` -
-  (Required)
-  Owner name.
-
-* `type` -
-  (Required)
-  Owner type.
 
 <a name="nested_input"></a>The `input` block supports:
 
