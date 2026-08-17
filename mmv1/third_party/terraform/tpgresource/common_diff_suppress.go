@@ -176,3 +176,13 @@ func SuppressMajorRevisionId(_, old, new string, _ *schema.ResourceData) bool {
 	}
 	return false
 }
+
+// WriteOnlyVersionDiffSuppress suppresses diffs between "" and "0" on
+// _wo_version fields. Resources that existed before these fields were
+// introduced have "0" written into state by the state migrator (converted
+// from the old TypeInt default), but their configs have no value set, which
+// resolves to "" for an Optional TypeString field. Treating those two as
+// equivalent avoids a spurious ForceNew on the first plan after upgrading.
+func WriteOnlyVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	return (old == "0" && new == "") || (old == "" && new == "0")
+}
