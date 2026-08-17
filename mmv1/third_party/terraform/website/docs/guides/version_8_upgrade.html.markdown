@@ -179,14 +179,12 @@ When upgrading to version 8.0.0:
 
 ### `secret_data_wo_version` type changed from `Integer` to `String`
 
-The `secret_data_wo_version` field has changed type from `Integer` to `String`. The `ExactlyOneOf` constraint between `secret_data` and `secret_data_wo` remains unchanged.
-
-Existing state is automatically migrated on the first `terraform apply` after upgrading. The old default integer value of `0` is treated as unset (`""`), so resources that never had `secret_data_wo_version` set in their configuration will see no diff and no forced replacement. Non-zero values (e.g. `1`, `2`) are preserved as their string equivalents.
+The `secret_data_wo_version` field has changed type from `Integer` to `String`. The `ExactlyOneOf` constraint between `secret_data` and `secret_data_wo` remains unchanged. Existing state is automatically migrated on the first `terraform apply` after upgrading: the old default value of `0` is converted to `""` (unset), and non-zero values are converted to their string equivalents.
 
 When upgrading to version 8.0.0:
 - If you were using `secret_data`: no configuration change needed.
-- If you were using `secret_data_wo` + `secret_data_wo_version = <integer>`: update `secret_data_wo_version` to a string value (e.g. `secret_data_wo_version = "1"`). Existing integer values in state are converted automatically.
-- If you were using `secret_data_wo` + `secret_data_wo_version = 0` (the old default): no configuration change is needed. The value `0` is treated as unset after migration and will not trigger a forced replacement.
+- If you were using `secret_data_wo` + `secret_data_wo_version = 0`: change this to a non-zero string value (e.g. `secret_data_wo_version = "1"`) before upgrading. The value `0` is now treated as unset, so leaving `= 0` in your configuration will cause a forced replacement on the next apply.
+- If you were using `secret_data_wo` + `secret_data_wo_version = <non-zero integer>`: update the value to a quoted string (e.g. change `secret_data_wo_version = 1` to `secret_data_wo_version = "1"`).
 
 ## Resource: `google_notebooks_instance` is now removed
 
