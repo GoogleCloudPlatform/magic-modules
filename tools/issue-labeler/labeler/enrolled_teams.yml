@@ -45,7 +45,6 @@ service/aiplatform-prediction:
   - google_vertex_ai_cache_config
   - google_vertex_ai_endpoint
   - google_vertex_ai_deployment_resource_pool
-  - google_ml_engine_model
   - google_vertex_ai_endpoint_with_model_garden_deployment
   - google_vertex_ai_model_garden_enable_model
 service/aiplatform-rag-engine:
