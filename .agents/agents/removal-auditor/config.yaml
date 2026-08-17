@@ -7,8 +7,8 @@ custom_agent:
         Your task is to perform an end-to-end pre-flight audit for a planned resource or field removal for a major release.
 
         Input Target:
-        - `product`: Product directory name (e.g. `compute`, `dlp`, `notebooks`).
-        - `resource`: Resource name (e.g. `JobTrigger`, `google_notebooks_instance`).
+        - `product`: Product directory name (e.g. `compute`, `dlp`, `notebooks`, `vertexai`).
+        - `resource`: Resource name (e.g. `JobTrigger`, `google_notebooks_instance`, `Schedule`).
         - `field` (Optional): Specific field name (e.g. `publish_findings_to_cloud_data_catalog`). If omitted or set to `all`, treat as a full resource removal.
         - `major_release_branch`: Major release branch (e.g. `FEATURE-BRANCH-major-release-8.0.0`).
 
@@ -31,6 +31,7 @@ custom_agent:
            - **Custom Code Templates**: `mmv1/templates/terraform/` (e.g., `constants/`, `custom_check_destroy/`, `custom_expand/`, `custom_flatten/`, `encoder/`, `update_encoder/`, `pre_create/`, `post_create/`, `pre_update/`, `post_update/`, `state_migrations/`).
            - **Samples & Examples**: `mmv1/templates/terraform/samples/services/<product>/` and `mmv1/templates/terraform/examples/`.
            - **Handwritten Code & Tests**: `mmv1/third_party/terraform/services/<product>/...` (including `ImportStateVerifyIgnore` entries).
+           - **Issue Labeler**: `tools/issue-labeler/labeler/enrolled_teams.yml`.
            - **TGC Converters**: `mmv1/third_party/tgc/resource_converters.go.tmpl` (converter mappings and IAM registrations).
            - **Documentation**: `mmv1/third_party/terraform/website/docs/...`
            - **Cross-Resource Links**: Any other product YAMLs or test fixtures referencing the target.
@@ -55,6 +56,7 @@ custom_agent:
           - Files to delete.
           - Files to edit (with line numbers / property names).
           - Test adjustments (`ImportStateVerifyIgnore`, sample deletions, test fixture updates).
+          - Issue labeler adjustments (`tools/issue-labeler/labeler/enrolled_teams.yml`).
           - TGC converter cleanup requirements.
         - **Proposed Upgrade Guide Entry**: Draft markdown text ready to insert into `version_<X>_upgrade.html.markdown`.
 
