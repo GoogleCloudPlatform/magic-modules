@@ -44,6 +44,9 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
+	// Gateway names are run-unique (see the fixture comment below); the
+	// state assertions must use the same suffixed names.
+	suffix := context["random_suffix"].(string)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -84,7 +87,7 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"gateway_config.*",
-						map[string]string{"name": "alpha", "state": "ACTIVE"}),
+						map[string]string{"name": "alpha-" + suffix, "state": "ACTIVE"}),
 				),
 			},
 			// ImportStateVerify — round-trip stability of the Map ->
@@ -103,11 +106,11 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"gateway_config.*",
-						map[string]string{"name": "alpha", "state": "ACTIVE"}),
+						map[string]string{"name": "alpha-" + suffix, "state": "ACTIVE"}),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"gateway_config.*",
-						map[string]string{"name": "beta", "state": "ACTIVE"}),
+						map[string]string{"name": "beta-" + suffix, "state": "ACTIVE"}),
 				),
 			},
 			{
@@ -127,16 +130,16 @@ func TestAccVertexAISemanticGovernancePolicyEngine_lifecycle(t *testing.T) {
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"gateway_config.*",
-						map[string]string{"name": "gamma", "state": "ACTIVE"}),
+						map[string]string{"name": "gamma-" + suffix, "state": "ACTIVE"}),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
 						"gateway_config.*",
-						map[string]string{"name": "beta", "state": "ACTIVE"}),
+						map[string]string{"name": "beta-" + suffix, "state": "ACTIVE"}),
 					// Explicitly assert "alpha" is gone (drop-add rename
 					// semantics: the old key must not resurface).
 					testAccCheckSGPEGatewayConfigNamesExact(t,
 						"google_vertex_ai_semantic_governance_policy_engine.sgpe",
-						[]string{"gamma", "beta"}),
+						[]string{"gamma-" + suffix, "beta-" + suffix}),
 				),
 			},
 			{
@@ -190,16 +193,20 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
 // The gateway_config removal step splits the SGPE Update from the
 // zone/subnet/network destroy to avoid a parallel containerNotEmpty.
 //
-// Gateway names are the fixed set alpha/beta/gamma rather than the more
-// obvious primary/secondary/main. The backend derives deterministic
-// customer-project resource names from the gateway name (sgpe-ip-<name>,
-// sgpe-psce-<name>); a partially-failed earlier run in the shared CI
-// project left sgpe-ip-primary bound to a now-deleted VPC, and the
-// backend silently reuses that stale address on the next run, so any
-// fixture reusing the name "primary" collides. alpha/beta/gamma sidestep
-// the known residue. The underlying backend cleanup/resilience gaps are
-// tracked separately (see EXTERNAL_TODOS T-1); this is not a substitute
-// for that fix.
+// Gateway names are run-unique: alpha/beta/gamma suffixed with the test's
+// random_suffix. The backend derives deterministic customer-project
+// resource names from the gateway name (sgpe-ip-<name>, sgpe-psce-<name>)
+// and, on ALREADY_EXISTS for the reserved address, silently reuses the
+// existing address WITHOUT checking its network
+// (CreateRegionAddressTaskHandler). A partially-failed earlier run in the
+// shared CI project leaves a stale sgpe-ip-<name> bound to a now-deleted
+// VPC; a later run reusing the same fixed name then reuses that stale
+// address, and the PSC forwarding rule — built on the run's fresh network
+// — is rejected as different-network. Run-unique names make each run's
+// derived address unique so it cannot collide with shared-project residue.
+// The underlying backend cleanup/resilience gaps are tracked separately
+// (EXTERNAL_TODOS T-1; the b/539978243 ALREADY_EXISTS-verification family);
+// this is not a substitute for that fix.
 
 const testAccSGPESharedNetworking = `
 resource "google_compute_network" "sgpe_network" {
@@ -242,7 +249,7 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
   region = "us-central1"
 
   gateway_config {
-    name          = "alpha"
+    name          = "alpha-%{random_suffix}"
     network       = google_compute_network.sgpe_network.id
     subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
@@ -262,14 +269,14 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
   region = "us-central1"
 
   gateway_config {
-    name          = "alpha"
+    name          = "alpha-%{random_suffix}"
     network       = google_compute_network.sgpe_network.id
     subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
   }
 
   gateway_config {
-    name          = "beta"
+    name          = "beta-%{random_suffix}"
     network       = google_compute_network.sgpe_network.id
     subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
@@ -289,14 +296,14 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
   region = "us-central1"
 
   gateway_config {
-    name          = "gamma"
+    name          = "gamma-%{random_suffix}"
     network       = google_compute_network.sgpe_network.id
     subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
   }
 
   gateway_config {
-    name          = "beta"
+    name          = "beta-%{random_suffix}"
     network       = google_compute_network.sgpe_network.id
     subnetwork    = google_compute_subnetwork.sgpe_subnet.id
     dns_zone_name = google_dns_managed_zone.sgpe_zone.name
