@@ -39,6 +39,8 @@ custom_code:
   constants: 'templates/terraform/constants/google_cloud_quotas_quota_preference.go.tmpl'
   pre_create: 'templates/terraform/pre_create/google_cloud_quotas_quota_preference.go.tmpl'
   pre_update: 'templates/terraform/pre_update/google_cloud_quotas_quota_preference.go.tmpl'
+custom_diff:
+  - 'quotaPreferenceSafetyChecksConflictDiff'
 samples:
   - name: 'cloudquotas_quota_preference_basic'
     primary_resource_id: 'preference'
@@ -59,13 +61,25 @@ parameters:
     default_from_api: true
   - name: 'ignore_safety_checks'
     type: Enum
-    description: The list of quota safety checks to be ignored.
+    description: The quota safety check to be ignored. Cannot be used with `ignore_safety_checks_set`.
     url_param_only: true
     default_value: "QUOTA_SAFETY_CHECK_UNSPECIFIED"
+    deprecation_message: '`ignore_safety_checks` is deprecated and will be removed in a future major release. Use `ignore_safety_checks_set` instead, which supports ignoring multiple safety checks at once.'
     enum_values:
       - 'QUOTA_SAFETY_CHECK_UNSPECIFIED'
       - 'QUOTA_DECREASE_BELOW_USAGE'
       - 'QUOTA_DECREASE_PERCENTAGE_TOO_HIGH'
+  - name: 'ignore_safety_checks_set'
+    type: Array
+    description: The set of quota safety checks to be ignored. Cannot be used with `ignore_safety_checks`.
+    url_param_only: true
+    is_set: true
+    item_type:
+      type: Enum
+      description: A quota safety check to be ignored.
+      enum_values:
+        - 'QUOTA_DECREASE_BELOW_USAGE'
+        - 'QUOTA_DECREASE_PERCENTAGE_TOO_HIGH'
 properties:
   - name: 'name'
     type: String

@@ -6,3 +6,18 @@ func QuotaPreferredValueDiffSuppress(k, old, new string, d *schema.ResourceData)
 	
 	return (oldEmpty && n == "0") || (o == "0" && newEmpty)
 }
+
+// ignore_safety_checks and ignore_safety_checks_set both map to the same
+// ignoreSafetyChecks query parameter and cannot be combined. ConflictsWith
+// is not generated for url_param_only parameters, so the conflict is
+// enforced here at plan time instead.
+func quotaPreferenceSafetyChecksConflictDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	rawConfig := diff.GetRawConfig()
+	if rawConfig.IsNull() {
+		return nil
+	}
+	if !rawConfig.GetAttr("ignore_safety_checks").IsNull() && !rawConfig.GetAttr("ignore_safety_checks_set").IsNull() {
+		return fmt.Errorf("\"ignore_safety_checks\": conflicts with ignore_safety_checks_set")
+	}
+	return nil
+}
