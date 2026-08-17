@@ -179,11 +179,14 @@ When upgrading to version 8.0.0:
 
 ### `secret_data_wo_version` type changed from `Integer` to `String`
 
-The `secret_data_wo_version` field has changed type from `Integer` to `String`. The `ExactlyOneOf` constraint between `secret_data` and `secret_data_wo` remains unchanged. The integer-to-string conversion is handled automatically for existing state.
+The `secret_data_wo_version` field has changed type from `Integer` to `String`. The `ExactlyOneOf` constraint between `secret_data` and `secret_data_wo` remains unchanged.
+
+Existing state is automatically migrated on the first `terraform apply` after upgrading. The old default integer value of `0` is treated as unset (`""`), so resources that never had `secret_data_wo_version` set in their configuration will see no diff and no forced replacement. Non-zero values (e.g. `1`, `2`) are preserved as their string equivalents.
 
 When upgrading to version 8.0.0:
 - If you were using `secret_data`: no configuration change needed.
 - If you were using `secret_data_wo` + `secret_data_wo_version = <integer>`: update `secret_data_wo_version` to a string value (e.g. `secret_data_wo_version = "1"`). Existing integer values in state are converted automatically.
+- If you were using `secret_data_wo` + `secret_data_wo_version = 0` (the old default): no configuration change is needed. The value `0` is treated as unset after migration and will not trigger a forced replacement.
 
 ## Resource: `google_notebooks_instance` is now removed
 

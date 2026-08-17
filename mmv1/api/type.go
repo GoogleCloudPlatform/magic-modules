@@ -1259,12 +1259,6 @@ func propertyWithAtLeastOneOfPointer(ptr *[]string) func(*Type) {
 	}
 }
 
-func propertyWithDiffSuppressFunc(fn string) func(*Type) {
-	return func(p *Type) {
-		p.DiffSuppressFunc = fn
-	}
-}
-
 func (t *Type) validateLabelsField() {
 	productName := t.ResourceMetadata.ProductMetadata.Name
 	resourceName := t.ResourceMetadata.Name
