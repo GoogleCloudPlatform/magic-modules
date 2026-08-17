@@ -1,0 +1,192 @@
+resource "google_bigquery_dataset" "bq_ds" {
+  dataset_id  = "{{index $.ResourceIdVars "dataset_id"}}"
+  location    = "US"
+}
+
+resource "google_bigquery_table" "bq_tbl" {
+  dataset_id          = google_bigquery_dataset.bq_ds.dataset_id
+  table_id            = "{{index $.ResourceIdVars "table_id"}}"
+  deletion_protection = false
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name    = "example_object.txt"
+  content = "Hello World"
+  bucket  = google_storage_bucket.bucket.name
+}
+
+resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourceId}}" {
+  location                 = "us"
+  analyst_agent_persona_id = "{{index $.ResourceIdVars "persona_id"}}"
+  display_name             = "Full Test Analyst Persona"
+  display_description      = "Sample full analyst agent persona description"
+  customer_context         = ["Sample customer context for testing"]
+  model_description        = "Sample model description"
+  role                     = "ANALYST_ROLE_GENERIC_FINANCE_ANALYST"
+
+  artifact_examples {
+    resource {
+      display_label     = "sample_raw_file"
+      model_description = "Sample artifact resource model description"
+      use_rag           = false
+      raw_file_resource {
+        file_title   = "example_doc.txt"
+        file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
+        mime_type    = "text/plain"
+      }
+    }
+  }
+
+  artifact_examples {
+    resource {
+      display_label     = "sample_bq_ds"
+      model_description = "Sample BQ dataset model description"
+      use_rag           = false
+      bigquery_resource {
+        bigquery_dataset = "projects/${google_bigquery_dataset.bq_ds.project}/datasets/${google_bigquery_dataset.bq_ds.dataset_id}"
+      }
+    }
+  }
+
+  artifact_examples {
+    resource {
+      display_label     = "sample_gcs"
+      model_description = "Sample GCS model description"
+      use_rag           = false
+      google_cloud_storage_resource {
+        google_cloud_storage_object = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
+        file_extension_restrictions = ["txt"]
+      }
+    }
+  }
+
+  artifacts_config {
+    document_generation_options {
+      export_format = "EXPORT_FORMAT_UNSPECIFIED"
+      document_examples {
+        resource {
+          display_label     = "doc_example_raw"
+          model_description = "Sample doc raw description"
+          use_rag           = false
+          raw_file_resource {
+            file_title   = "doc.txt"
+            file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
+            mime_type    = "text/plain"
+          }
+        }
+      }
+      document_examples {
+        resource {
+          display_label     = "doc_example_bq"
+          model_description = "Sample doc BQ description"
+          use_rag           = false
+          bigquery_resource {
+            bigquery_dataset = "projects/${google_bigquery_dataset.bq_ds.project}/datasets/${google_bigquery_dataset.bq_ds.dataset_id}"
+          }
+        }
+      }
+    }
+    slide_generation_options {
+      export_format = "EXPORT_FORMAT_UNSPECIFIED"
+      slide_examples {
+        resource {
+          display_label     = "slide_example_raw"
+          model_description = "Sample slide raw description"
+          use_rag           = false
+          raw_file_resource {
+            file_title   = "slide.txt"
+            file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
+            mime_type    = "text/plain"
+          }
+        }
+      }
+    }
+    visualization_options {
+      visualization_examples {
+        visualization_type = "VISUALIZATION_TYPE_UNSPECIFIED"
+        resource {
+          display_label     = "viz_example_raw"
+          model_description = "Sample viz raw description"
+          use_rag           = false
+          raw_file_resource {
+            file_title   = "viz.txt"
+            file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
+            mime_type    = "text/plain"
+          }
+        }
+      }
+    }
+  }
+
+  external_data_sources {
+    enabled = true
+  }
+
+  mcp_data_sources {
+    server_url      = "https://mcp.example.com"
+    display_name    = "Sample MCP Source"
+    description     = "Sample MCP data source description"
+    enabled         = true
+    prompt          = "Use this server for queries"
+    api_key_name    = "x-api-key"
+    client_id       = "sample-client-id"
+    oauth_token_url = "https://example.com/oauth/token"
+  }
+
+  resources {
+    display_label     = "sample_raw_file_full"
+    model_description = "Resource model description"
+    use_rag           = false
+    raw_file_resource {
+      file_title   = "financial_summary.txt"
+      file_content = "UTEgUmV2ZW51ZTogMTAwTQ=="
+      mime_type    = "text/plain"
+    }
+  }
+
+  resources {
+    display_label     = "sample_bq_table_resource"
+    model_description = "BigQuery table resource description"
+    use_rag           = false
+    bigquery_resource {
+      bigquery_table = "projects/${google_bigquery_dataset.bq_ds.project}/datasets/${google_bigquery_dataset.bq_ds.dataset_id}/tables/${google_bigquery_table.bq_tbl.table_id}"
+    }
+  }
+
+  resources {
+    display_label     = "sample_gcs_resource"
+    model_description = "GCS resource description"
+    use_rag           = false
+    google_cloud_storage_resource {
+      google_cloud_storage_object = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
+      file_extension_restrictions = ["txt"]
+    }
+  }
+
+  skills {
+    skill_id    = "finance_analysis_skill"
+    description = "Skill for finance analysis"
+    content     = "# Finance Analysis\nAnalyze financial data."
+    references {
+      reference_id = "ref_1"
+      content      = "Reference content for skill"
+    }
+  }
+
+  tables {
+    name        = "sample_table"
+    description = "Sample table description"
+    columns {
+      name        = "column_1"
+      description = "First column description"
+      data_type   = "STRING"
+    }
+  }
+}

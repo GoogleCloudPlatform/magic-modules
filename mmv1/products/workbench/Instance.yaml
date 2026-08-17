@@ -178,6 +178,12 @@ properties:
       The definition of how to configure a VM instance outside of Resources and Identity.
     default_from_api: true
     properties:
+      - name: 'computeInstanceId'
+        api_name: 'instanceId'
+        type: String
+        description: |
+          Output only. The unique numeric identifier of the underlying Compute Engine VM instance.
+        output: true
       - name: 'machineType'
         type: String
         description: |
