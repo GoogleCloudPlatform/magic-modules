@@ -24,15 +24,6 @@ import (
 	"{{ $.ImportPath }}/tpgiamresource"
 )
 
-func New{{ $.ResourceName }}IamMemberResource() *schema.Resource {
-    return tpgiamresource.ResourceIamMember(
-        {{ $.ResourceName }}IamSchema,
-        {{ $.ResourceName }}IamUpdaterProducer,
-        {{ $.ResourceName }}IdParseFunc,
-        tpgiamresource.IamWithParentResourceIdentity({{ $.ResourceName }}IamParentParentResourceIdentityParser),
-    )
-}
-
 func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
     return tpgiamresource.NewIamMemberListResource(
         "{{ $.TerraformName }}_iam_member",
