@@ -21,6 +21,8 @@ specific one.
 | `new-resource` | New Resource Creation | `.agents/skills/workflows/new_resource/SKILL.md` |
 | `list-resource` | List Resource Addition | `.agents/skills/workflows/add_list_resource/SKILL.md` |
 | `enhancement` (field additions) | New Field / Property Addition | `.agents/skills/workflows/add_fields/SKILL.md` |
+| `deprecation` | Deprecation Notice Addition | `.agents/skills/workflows/deprecate_resource_or_field/SKILL.md` |
+| `breaking-change` | Major Release Removal / Breaking Change | `.agents/skills/workflows/major_release_removal/SKILL.md` |
 | *No matching label / un-labeled* | General Modification / Bug Fix | Fallback to `.agents/skills/workflows/default/SKILL.md` (or inspect issue body) |
 
 ## Available Workflows:
@@ -34,8 +36,11 @@ specific one.
 *   **Test Monitor Workflow** (`.agents/skills/workflows/test_monitor/SKILL.md`): For fetching, triaging, analyzing, and reporting on nightly acceptance test results across Beta and GA providers.
 *   **Add IAM Support Workflow** (`.agents/skills/workflows/add_iam_resources/SKILL.md`): Adds IAM support to an existing MMv1 resource.
 *   **Bug Fix Workflow** (`.agents/skills/workflows/bug_fix/SKILL.md`): For triaging, planning, fixing, and verifying reported provider bugs.
+*   **Deprecate Resource or Field Workflow** (`.agents/skills/workflows/deprecate_resource_or_field/SKILL.md`): Specifically for deprecating existing resources or fields on `main` prior to a major release.
+*   **Major Release Removal Workflow** (`.agents/skills/workflows/major_release_removal/SKILL.md`): Specifically for executing resource and field removals on a major release feature branch.
 *   *(Future workflows can be added here)*
 
 ## Subagents:
 
 *   **`test-fixer`** (`.agents/agents/test-fixer/`): Automates diagnosis, remediation in Magic Modules, provider generation, and re-testing for failing acceptance tests.
+*   **`removal-auditor`** (`.agents/agents/removal-auditor/`): Audits deprecation status on `main`, sync status on the major release branch, and scans repository dependencies for resource and field removals.
