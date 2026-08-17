@@ -8,8 +8,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-
-	"google.golang.org/api/googleapi"
 )
 
 const (
@@ -64,7 +62,7 @@ func resolveImageImageExists(c *transport_tpg.Config, project, name, userAgent s
 		UserAgent: userAgent,
 	}); err == nil {
 		return true, nil
-	} else if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+	} else if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		return false, nil
 	} else {
 		return false, fmt.Errorf("Error checking if image %s exists: %s", name, err)
@@ -81,7 +79,7 @@ func resolveImageFamilyExists(c *transport_tpg.Config, project, name, userAgent 
 		UserAgent: userAgent,
 	}); err == nil {
 		return true, nil
-	} else if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+	} else if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		return false, nil
 	} else {
 		return false, fmt.Errorf("Error checking if family %s exists: %s", name, err)
