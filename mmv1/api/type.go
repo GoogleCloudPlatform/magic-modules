@@ -1259,12 +1259,6 @@ func propertyWithAtLeastOneOfPointer(ptr *[]string) func(*Type) {
 	}
 }
 
-func propertyWithDefault(defaultValue interface{}) func(*Type) {
-	return func(p *Type) {
-		p.DefaultValue = defaultValue
-	}
-}
-
 func (t *Type) validateLabelsField() {
 	productName := t.ResourceMetadata.ProductMetadata.Name
 	resourceName := t.ResourceMetadata.Name

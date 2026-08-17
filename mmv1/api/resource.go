@@ -1019,7 +1019,6 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 		propertyWithDescription(description),
 		propertyWithRequiredWith([]string{requiredWith}),
 		propertyWithClientSide(true),
-		propertyWithDefault("0"),
 	}
 
 	return NewProperty(name, name, options)
