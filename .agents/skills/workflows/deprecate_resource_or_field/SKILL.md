@@ -1,6 +1,6 @@
 ---
 name: deprecate-resource-or-field-workflow
-description: "Workflow for deprecating existing resources or fields on the main branch prior to a major release."
+description: "Workflow for deprecating existing resources, data sources, or fields on the main branch prior to a major release."
 ---
 
 # `deprecate-resource-or-field-workflow`
@@ -12,7 +12,7 @@ This workflow governs adding deprecation notices and establishing forwards-compa
 ## Prerequisites
 
 - You must be operating on the `main` branch in the `magic-modules` root directory.
-- You must know the target resource (e.g., `google_data_loss_prevention_job_trigger`) and the field (or entire resource) to deprecate.
+- You must know the target resource/data source (e.g., `google_beyondcorp_app_connector`) and the field (or entire resource/data source) to deprecate.
 - You must know the replacement path (if applicable) or the reason for deprecation.
 
 ---
@@ -34,8 +34,8 @@ Before beginning implementation, consult:
 ### 3. Apply Deprecation Notice
 
 Follow the conventions in `docs/content/breaking-changes/make-a-breaking-change.md`:
-- **MMv1**: Set `deprecation_message` on the target property or resource in `mmv1/products/<product>/<Resource>.yaml`.
-- **Handwritten**: Set `Deprecated` (fields) or `DeprecationMessage` (resources) in Go schema (`mmv1/third_party/terraform/services/<product>/...`) and update the handwritten documentation markdown file.
+- **MMv1 Resources/Fields**: Set `deprecation_message` on the target property or resource in `mmv1/products/<product>/<Resource>.yaml`.
+- **Handwritten Resources/Data Sources**: Set `Deprecated` (fields) or `DeprecationMessage` (resources / data sources) in Go schema (`mmv1/third_party/terraform/services/<product>/...`) and add deprecation warnings to markdown documentation in `website/docs/r/` or `website/docs/d/`.
 
 ### 4. Run Pre-Gen Checks
 
@@ -52,12 +52,13 @@ Follow the conventions in `docs/content/breaking-changes/make-a-breaking-change.
 
 ### 7. PR Creation & Release Note
 
-Open a PR targeting `main`:
-- Title: `<product>: deprecate <field_name|resource_name>`
-- Body:
+Execute [create-pr](.agents/skills/operations/create-pr/SKILL.md) targeting `main`:
+- **Title Length Limit**: Must be strictly **under 70 characters** (e.g. `<product>: deprecate <target>`).
+- **Body**:
   ```markdown
   ```release-note:deprecation
   <product>: deprecated `<field_name>` on `google_<resource_name>`. Use `<replacement>` instead.
   ```
-  *(or `<product>: deprecated `google_<resource_name>` resource. Use `google_<replacement>` instead.`)*
+  *(or `<product>: deprecated `google_<resource_name>` resource/data source`)*
   ```
+- **Pre-Filled Hyperlink**: Always generate and provide a pre-filled markdown compare URL in chat for easy user submission.
