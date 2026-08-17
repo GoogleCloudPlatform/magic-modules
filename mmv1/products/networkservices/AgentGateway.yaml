@@ -102,7 +102,8 @@ properties:
     description: |
       A free-text description of the resource. Max length 1024 characters.
   - name: etag
-    type: Fingerprint
+    type: String
+    output: true
     description: |
       Etag of the resource.
       If this is provided, it must match the server's etag. If the provided etag
