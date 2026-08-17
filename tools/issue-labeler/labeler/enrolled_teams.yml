@@ -39,7 +39,6 @@ service/aiplatform-matching-engine:
 service/aiplatform-metadata:
   resources:
   - google_vertex_ai_metadata_store
-  - google_vertex_ai_schedule
 service/aiplatform-prediction:
   resources:
   - google_vertex_ai_cache_config
