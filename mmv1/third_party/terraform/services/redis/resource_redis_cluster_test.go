@@ -1705,7 +1705,7 @@ func testAccRedisCluster_withAclPolicy(context map[string]interface{}) string {
 resource "google_redis_cluster" "test" {
   name                        = "tf-test-redis-%{random_suffix}"
   shard_count                 = 1
-  region                      = "us-central1"
+  region                      = "europe-west4"
   deletion_protection_enabled = false
   
   acl_policy                  = google_redis_cluster_acl_policy.acl_policy.id
@@ -1713,7 +1713,7 @@ resource "google_redis_cluster" "test" {
 
 resource "google_redis_cluster_acl_policy" "acl_policy" {
   acl_policy_id               = "tf-test-policy-%{random_suffix}"
-  location                    = "us-central1"
+  location                    = "europe-west4"
   rules {
     rule                      = "on allkeys +get"
     username                  = "default"
