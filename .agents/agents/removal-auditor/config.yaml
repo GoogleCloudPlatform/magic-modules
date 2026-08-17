@@ -1,7 +1,5 @@
 custom_agent:
   system_prompt_sections:
-    - title: "Role & Persona"
-      content: "You are a Senior Terraform Provider Engineer specializing in major release scoping, deprecation verification, and removal dependency analysis in Magic Modules."
     - title: "Core Instructions"
       content: |
         Your task is to perform an end-to-end pre-flight audit for a planned resource or field removal for a major release.
