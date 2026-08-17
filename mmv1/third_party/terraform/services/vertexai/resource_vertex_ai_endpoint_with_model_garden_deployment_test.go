@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/services/vertexai"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -220,7 +220,7 @@ resource "google_vertex_ai_endpoint_with_model_garden_deployment" "test" {
   endpoint_config {
     private_service_connect_config {
       enable_private_service_connect = true
-      project_allowlist              = [data.google_project.project.id]
+      project_allowlist              = [data.google_project.project.project_id]
     }
   }
 }
@@ -231,7 +231,16 @@ data "google_project" "project" {}
 
 func TestAccVertexAIEndpointWithModelGardenDeployment_pscEndpointAutomated(t *testing.T) {
 	t.Parallel()
-	context := map[string]interface{}{"random_suffix": acctest.RandString(t, 10)}
+	// PSC service automation attaches its own firewall rules to the network and
+	// removes them asynchronously when the deployment is deleted, so a network
+	// managed by this test cannot be destroyed reliably. Use the shared
+	// bootstrapped network, which is never torn down.
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "vertex-mg-psc")
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"network_name":  networkName,
+		"subnetwork":    tpgcompute.BootstrapSubnet(t, "vertex-mg-psc", networkName),
+	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -257,26 +266,18 @@ resource "google_vertex_ai_endpoint_with_model_garden_deployment" "test" {
   endpoint_config {
     private_service_connect_config {
       enable_private_service_connect = true
-      project_allowlist              = [data.google_project.project.id]
+      project_allowlist              = [data.google_project.project.project_id]
 
       psc_automation_configs {
-		    project_id = data.google_project.project.id
-		    network    = google_compute_network.network.id
+		    project_id = data.google_project.project.project_id
+		    network    = data.google_compute_network.network.id
 		  }
     }
   }
 }
 
-resource "google_compute_subnetwork" "subnetwork" {
-  name          = "subnetwork"
-  ip_cidr_range = "192.168.0.0/24"
-  region        = "us-central1"
-  network       = google_compute_network.network.id
-}
-
-resource "google_compute_network" "network" {
-  name                    = "network"
-  auto_create_subnetworks = false
+data "google_compute_network" "network" {
+  name = "%{network_name}"
 }
 
 data "google_project" "project" {}
