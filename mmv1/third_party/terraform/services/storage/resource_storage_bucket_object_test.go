@@ -831,7 +831,6 @@ func testGoogleStorageBucketsObjectBasic(bucketName, sourceFilename string) stri
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-	uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "object" {
