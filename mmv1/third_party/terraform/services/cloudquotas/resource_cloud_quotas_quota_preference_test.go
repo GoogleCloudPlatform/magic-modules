@@ -52,7 +52,7 @@ func TestAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_up
 				ResourceName:            "google_cloud_quotas_quota_preference.my_preference",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "ignore_safety_checks", "contact_email", "justification", "quota_config.0.annotations"},
+				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "ignore_safety_checks", "ignore_safety_checks_set", "contact_email", "justification", "quota_config.0.annotations"},
 			},
 		},
 	})
@@ -175,11 +175,11 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_de
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
-			ignore_safety_checks = "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
+			ignore_safety_checks_set = ["QUOTA_DECREASE_BELOW_USAGE", "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"]
 			quota_config  {
 				preferred_value  = 65
 			}
-			depends_on           = [google_project_service.billing]
+			depends_on            = [google_project_service.billing]
 		}
 	`, context)
 }

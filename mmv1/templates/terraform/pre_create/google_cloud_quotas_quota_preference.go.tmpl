@@ -3,4 +3,9 @@ if v, ok := d.GetOk("ignore_safety_checks"); ok && v.(string) != "QUOTA_SAFETY_C
 	if err != nil {
 		return err
 	}
+} else if v, ok := d.GetOk("ignore_safety_checks_set"); ok {
+	url, err = transport_tpg.AddArrayQueryParams(url, "ignoreSafetyChecks", v.(*schema.Set).List())
+	if err != nil {
+		return err
+	}
 }
