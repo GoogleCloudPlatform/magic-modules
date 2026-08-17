@@ -131,16 +131,22 @@ upgrading.
 
 ### `guest_accelerator` can now be updated to a count of `0`
 
-Previously, changing an existing `guest_accelerator` block's `count` to `0` (or
-removing the block entirely) was silently ignored: no diff was produced and
-the accelerator(s) remained attached. `terraform apply` will now correctly
-plan (and apply, replacing the instance) the removal of guest accelerators
-when `guest_accelerator` is removed from config or `count` is set to `0`.
+Previously, changing an existing `guest_accelerator` block's `count` to `0`
+was silently ignored: no diff was produced and the accelerator(s) remained
+attached. `terraform apply` will now correctly plan (and apply, replacing
+the instance) the removal of guest accelerators when `count` is explicitly
+set to `0`.
+
+Note that removing the `guest_accelerator` block entirely will **not** detach
+accelerators, because `guest_accelerator` is `Computed: true` and Terraform
+preserves the existing state when the field is omitted from config.
+Explicitly setting `count = 0` (or `guest_accelerator = []`) is what triggers
+the diff/replacement.
 
 If your configuration relies on the old behavior — for example a
 variable-driven `count = 0` block that was never intended to detach existing
 accelerators — review your configuration before upgrading, as `terraform
-plan` may now show a forced replacement for affected instances
+plan` may now show a forced replacement for affected instances.
 
 ## Resource: `google_compute_backend_service`
 
