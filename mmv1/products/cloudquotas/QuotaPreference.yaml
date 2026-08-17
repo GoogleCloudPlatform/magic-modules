@@ -23,8 +23,8 @@ docs:
 id_format: '{{parent}}/locations/global/quotaPreferences/{{name}}'
 base_url: '{{parent}}/locations/global/quotaPreferences'
 self_link: '{{parent}}/locations/global/quotaPreferences/{{name}}'
-create_url: '{{parent}}/locations/global/quotaPreferences?quotaPreferenceId={{name}}&ignoreSafetyChecks={{ignore_safety_checks}}'
-update_url: '{{parent}}/locations/global/quotaPreferences/{{name}}?ignoreSafetyChecks={{ignore_safety_checks}}'
+create_url: '{{parent}}/locations/global/quotaPreferences?quotaPreferenceId={{name}}'
+update_url: '{{parent}}/locations/global/quotaPreferences/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
 exclude_delete: true
@@ -37,6 +37,8 @@ timeouts:
 include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/google_cloud_quotas_quota_preference.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/google_cloud_quotas_quota_preference.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/google_cloud_quotas_quota_preference.go.tmpl'
 samples:
   - name: 'cloudquotas_quota_preference_basic'
     primary_resource_id: 'preference'
