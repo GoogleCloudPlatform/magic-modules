@@ -19,6 +19,7 @@ references:
   guides:
   api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.templates
 docs:
+min_version: beta
 base_url: projects/{{project}}/locations/global/templates
 self_link: projects/{{project}}/locations/global/templates/{{template_id}}
 create_url: projects/{{project}}/locations/global/templates?template_id={{template_id}}
@@ -34,6 +35,7 @@ custom_code:
 samples:
   - name: template_config_basic
     primary_resource_id: template-basic
+    min_version: beta
     steps:
       - name: template_config_basic
         resource_id_vars:
@@ -42,6 +44,7 @@ samples:
           template_id: '"template" + randomSuffix'
   - name: template_with_format
     primary_resource_id: template-with-format
+    min_version: beta
     steps:
       - name: template_with_format
         resource_id_vars:
@@ -50,6 +53,7 @@ samples:
           template_id: '"template" + randomSuffix'
   - name: template_with_labels
     primary_resource_id: template-with-labels
+    min_version: beta
     steps:
       - name: template_with_labels
         resource_id_vars:
