@@ -1,0 +1,8 @@
+resource "google_chronicle_case_close_definition" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  close_reason = "MALICIOUS"
+  root_cause   = "Phishing email with malicious attachment"
+}
