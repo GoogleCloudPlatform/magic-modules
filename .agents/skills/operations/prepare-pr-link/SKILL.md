@@ -1,26 +1,26 @@
 ---
-name: create-pr
-description: "Create a Pull Request (PR) against GoogleCloudPlatform/magic-modules following repository standards, including branch management, commit formatting, mandatory release notes, pre-PR verification checks, and gh CLI commands."
+name: prepare-pr-link
+description: "Prepares a feature branch, stages and commits changes, pushes to the user's personal fork, and generates a pre-filled GitHub comparison link for the user to review and submit a Pull Request."
 ---
 
-# `create-pr`
+# `prepare-pr-link`
 
 > **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your current roadblock or required task.
 
-This skill provides step-by-step instructions for preparing, formatting, and opening a Pull Request (PR) for `magic-modules` following official contribution guidelines.
+This skill provides step-by-step instructions for preparing, committing, pushing a feature branch to a personal fork, and generating a pre-filled GitHub Pull Request comparison link for the user to review and submit.
 
 ## Prerequisites
 
 * You are in the `magic-modules` root directory.
 * Your git working directory is clean except for the files intended for the PR.
-* Downstream provider changes are NOT staged or committed to `magic-modules`.
+* Downstream provider changes are NOT staged or committed in `magic-modules`.
 * Remote repositories are configured (e.g., `upstream` pointing to `GoogleCloudPlatform/magic-modules` and a personal fork remote such as `origin`).
 
 ---
 
 ## Pre-PR Verification & Guardrails
 
-Before creating a branch or opening a PR, verify all of the following rules:
+Before creating a branch or generating the link, verify all of the following rules:
 
 1. **Single Self-Contained Change:** Each PR must contain only **one** logical change.
    - Adding multiple resources? Put **one resource per PR**.
@@ -30,7 +30,7 @@ Before creating a branch or opening a PR, verify all of the following rules:
    - Format: `<product>: <action> <target>` (e.g. `beyondcorp: deprecate google_beyondcorp_app_*` or `compute: add foo field to google_compute_instance`).
 3. **No Downstream Artifacts in Magic Modules:**
    - Do NOT commit generated downstream provider code into `magic-modules`.
-4. **Workspace Cleanup:** Run `git status --porcelain` and ensure no untracked temporary test files exist before opening the PR.
+4. **Workspace Cleanup:** Run `git status --porcelain` and ensure no untracked temporary test files exist before pushing.
 
 ---
 
@@ -42,9 +42,11 @@ Before creating a branch or opening a PR, verify all of the following rules:
 UPSTREAM_REMOTE=$(git remote -v | grep -i "GoogleCloudPlatform/magic-modules" | head -n 1 | awk '{print $1}')
 UPSTREAM_REMOTE="${UPSTREAM_REMOTE:-upstream}"
 
-git fetch "$UPSTREAM_REMOTE" main
+BASE_BRANCH="main" # or target major release feature branch, e.g. FEATURE-BRANCH-major-release-8.0.0
+git fetch "$UPSTREAM_REMOTE" "$BASE_BRANCH"
+
 BRANCH="<short-descriptive-branch-name>" # e.g. deprecate-beyondcorp-app
-git checkout -b "$BRANCH" "$UPSTREAM_REMOTE/main"
+git checkout -b "$BRANCH" "$UPSTREAM_REMOTE/$BASE_BRANCH"
 ```
 
 ### 2. Stage and Commit Changes
@@ -69,7 +71,7 @@ git push -u "$FORK_REMOTE" "$BRANCH"
 
 Every PR must contain a clear summary and a release note block in the PR body.
 
-Refer to [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md) for details on categories (`enhancement`, `bug`, `none`, `new-resource`, `deprecation`, `breaking-change`).
+Refer to [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md) for details on categories (`enhancement`, `bug`, `none`, `new-resource`, `new-datasource`, `new-list-resource`, `deprecation`, `breaking-change`).
 
 #### Sample PR Body
 ```markdown
@@ -84,46 +86,30 @@ Fixes https://github.com/hashicorp/terraform-provider-google/issues/12345
 
 ---
 
-### 5. Create PR or Provide Pre-Filled Web Link
+### 5. Generate Pre-Filled Web URL (Always Provide as Hyperlink)
 
-Write the PR body to a temporary file (`/tmp/pr_body.txt`) using a single-quoted HEREDOC:
-
-```bash
-PR_TITLE="<product>: <short description under 70 chars>"
-BASE_BRANCH="main" # or FEATURE-BRANCH-major-release-8.0.0
-
-cat <<'EOF' > /tmp/pr_body.txt
-<summary of what changed and why>
-
-Fixes <issue link if applicable>
-
-```release-note:<type>
-<product>: <release note description>
-```
-EOF
-```
-
-#### Attempt `gh pr create`:
-```bash
-gh pr create \
-  --repo GoogleCloudPlatform/magic-modules \
-  --base "$BASE_BRANCH" \
-  --head "$(gh api user -q .login):$BRANCH" \
-  --title "$PR_TITLE" \
-  --body-file /tmp/pr_body.txt
-```
-
-#### Generate Pre-Filled Web URL (Always Provide as Hyperlink):
-Always generate and present a clickable markdown link with the PR title and description pre-filled in query parameters for easy user review and submission:
+Run Python to generate the pre-filled comparison URL with title and body URL-encoded:
 
 ```python
 import urllib.parse
+import subprocess
+import re
 
-base_branch = "main" # or "FEATURE-BRANCH-major-release-8.0.0"
-head_ref = f"{username}:{branch}" # e.g. "c2thorn:deprecate-beyondcorp-app"
-title = "..."
-body = "..."
+base_branch = "main" # or target feature branch, e.g. "FEATURE-BRANCH-major-release-8.0.0"
+branch = "<BRANCH>"
+title = "<PR_TITLE>"
+body = """<PR_BODY>"""
 
+# Auto-detect fork remote and username
+fork_remote_cmd = "git remote -v | grep -v -i 'GoogleCloudPlatform/magic-modules' | head -n 1 | awk '{print $1}'"
+fork_remote = subprocess.check_output(fork_remote_cmd, shell=True, text=True).strip() or "origin"
+fork_url = subprocess.check_output(["git", "remote", "get-url", fork_remote], text=True).strip()
+
+# Extract username from git URL (ssh or https)
+m = re.search(r"github\.com[:/]([^/]+)/", fork_url)
+username = m.group(1) if m else "<username>"
+
+head_ref = f"{username}:{branch}"
 url = f"https://github.com/GoogleCloudPlatform/magic-modules/compare/{base_branch}...{head_ref}?expand=1&title={urllib.parse.quote(title)}&body={urllib.parse.quote(body)}"
 print(url)
 ```
@@ -131,9 +117,4 @@ print(url)
 Present the result in chat as:
 👉 **[Create Pull Request on GitHub](<URL>)**
 
----
-
-## Verification & Summary
-
-1. If `gh pr create` succeeds, view the published PR: `gh pr view --repo GoogleCloudPlatform/magic-modules`.
-2. Share the confirmed PR URL (or the pre-filled direct compare URL) with the user.
+Inform the user that the branch has been pushed to their fork and they can click the link to review the diff and submit the Pull Request.
