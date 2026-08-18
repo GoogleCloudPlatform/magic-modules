@@ -187,7 +187,7 @@ func buildColumnLineage(cll map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	di, _ := cll["datasetInput"].([]interface{})
+	di, _ := cll["dataset_input"].([]interface{})
 	return map[string]interface{}{
 		"_producer":  "_PRODUCER_",
 		"_schemaURL": openLineageColumnLineageURL,

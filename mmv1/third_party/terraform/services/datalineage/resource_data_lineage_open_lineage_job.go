@@ -228,7 +228,7 @@ func ResourceDataLineageOpenLineageJob() *schema.Resource {
 							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"datasetInput": {
+									"dataset_input": {
 										Type:        schema.TypeList,
 										Optional:    true,
 										Description: `Input fields affecting whole dataset, e.g. filtering columns.`,
@@ -628,8 +628,8 @@ func flattenDataLineageOpenLineageJobOutputColumnLineage(v interface{}, d *schem
 	transformed := make(map[string]interface{})
 	transformed["field"] =
 		flattenDataLineageOpenLineageJobOutputColumnLineageField(original["field"], d, config)
-	transformed["datasetInput"] =
-		flattenDataLineageOpenLineageJobOutputColumnLineageDatasetInput(original["datasetInput"], d, config)
+	transformed["dataset_input"] =
+		flattenDataLineageOpenLineageJobOutputColumnLineageDatasetInput(original["dataset_input"], d, config)
 	return []interface{}{transformed}
 }
 func flattenDataLineageOpenLineageJobOutputColumnLineageField(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
@@ -1182,11 +1182,11 @@ func expandDataLineageOpenLineageJobOutputColumnLineage(v interface{}, d tpgreso
 		transformed["field"] = transformedField
 	}
 
-	transformedDatasetInput, err := expandDataLineageOpenLineageJobOutputColumnLineageDatasetInput(original["datasetInput"], d, config)
+	transformedDatasetInput, err := expandDataLineageOpenLineageJobOutputColumnLineageDatasetInput(original["dataset_input"], d, config)
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedDatasetInput); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["datasetInput"] = transformedDatasetInput
+		transformed["dataset_input"] = transformedDatasetInput
 	}
 
 	return transformed, nil
