@@ -726,3 +726,48 @@ path and make it deterministic (or seed it from the VCR cassette name).
 **Do NOT:**
 Treat P-20 as P-17 (scope mismatch). The recording passed — the resource was found. The problem is
 cassette path resolution in replay, not a filter or scope issue.
+
+---
+
+### P-21 — Template behavioral changes are breaking changes to all existing list resources
+
+**Symptom:**
+A fix to a CI failure edited `mmv1/templates/terraform/samples/base_configs/query_test_file.go.tmpl`
+in a way that changes the **logic or behavior** of the generated test — not just fixing a syntax/compile
+error. Examples of behavioral changes:
+- Removing a conditional guard (`{{- if $scope.Required }}`) so that optional scope params are now
+  captured when they were not before.
+- Changing how `listScope.Capture` is called — adding, removing, or reordering fields.
+- Altering which resources are included or excluded from the generated test structure.
+- Removing a `{{- if ... }}` / `{{- end }}` block that previously gated a code path.
+
+**Root cause:**
+`query_test_file.go.tmpl` generates test code for **every** resource that has
+`generate_list_resource: true` across all products (80+ resources). A behavioral change to this
+template silently changes the generated test for all of them — including resources that are already
+merged and passing CI. This constitutes a breaking change to the test suite for all existing list
+resources, not a fix for the current product.
+
+**Real example (networkservices, 2026-08-18):**
+The agent removed the `{{- if $scope.Required }}` guard from the `listScope.Capture` block to fix a
+CI failure. This changed the generated `listScope.Capture` call for every resource: previously only
+required scope params were captured, but after the change all scope params (required AND optional)
+were captured. The downstream generation check (`downstream-generation-and-test`) and lint-yaml both
+failed, and the PR had to be closed and re-opened without the template change.
+
+**Fix:**
+1. **Never remove conditional guards** from `query_test_file.go.tmpl` to fix a CI failure.
+2. The **only** acceptable changes to `query_test_file.go.tmpl` in a YAML batch PR are:
+   - Fixing a missing import that causes a compile error (`"fmt"` imported and not used, etc.)
+   - Fixing a template syntax error that prevents generation entirely.
+   - Adding an `{{- if ... }}` guard (never removing one).
+3. If fixing the CI failure genuinely requires a behavioral template change, that change must go in a
+   **separate PR** (see P-16) targeting `upstream/main`, be reviewed independently, and be merged
+   before the YAML batch PR is updated to depend on it.
+4. Until the template fix PR is merged, drop the resource(s) that require the behavioral change from
+   the current batch with reason `"requires template change (P-21) in a separate PR"`.
+
+**Do NOT:**
+Edit `query_test_file.go.tmpl` in a way that removes, relaxes, or changes existing conditional logic.
+If you are about to remove an `{{- if ... }}` block or change a `{{- range }}` structure, stop — that
+is a behavioral change and belongs in a separate template PR, not in a YAML batch fix.
