@@ -7,39 +7,37 @@ api_service_name: datalineage.googleapis.com
 api_version: v1
 api_resource_type_kind: OpenLineageJob
 fields:
-    - api_field: input.catalog.framework
-    - api_field: input.catalog.name
-    - api_field: input.catalog.type
-    - api_field: input.name
-    - api_field: input.namespace
-    - api_field: input.symlink.name
-    - api_field: input.symlink.namespace
-    - api_field: input.symlink.type
-    - api_field: knowledge_catalog.process
-    - api_field: knowledge_catalog.run
-    - api_field: name
-    - api_field: namespace
-    - api_field: output.catalog.framework
-    - api_field: output.catalog.name
-    - api_field: output.catalog.type
-    - api_field: output.columnLineage.datasetInput.field
-    - api_field: output.columnLineage.datasetInput.name
-    - api_field: output.columnLineage.datasetInput.namespace
-    - api_field: output.columnLineage.datasetInput.transformation.subtype
-    - api_field: output.columnLineage.datasetInput.transformation.type
-    - api_field: output.columnLineage.field.input.field
-    - api_field: output.columnLineage.field.input.name
-    - api_field: output.columnLineage.field.input.namespace
-    - api_field: output.columnLineage.field.input.transformation.subtype
-    - api_field: output.columnLineage.field.input.transformation.type
-    - api_field: output.columnLineage.field.name
-    - api_field: output.name
-    - api_field: output.namespace
-    - api_field: output.symlink.name
-    - api_field: output.symlink.namespace
-    - api_field: output.symlink.type
-    - api_field: owner.name
-    - api_field: owner.type
+    - field: input.catalog.framework
+    - field: input.catalog.name
+    - field: input.catalog.type
+    - field: input.name
+    - field: input.namespace
+    - field: input.symlink.name
+    - field: input.symlink.namespace
+    - field: input.symlink.type
+    - field: knowledge_catalog.process
+    - field: knowledge_catalog.run
+    - field: name
+    - field: namespace
+    - field: output.catalog.framework
+    - field: output.catalog.name
+    - field: output.catalog.type
+    - field: output.column_lineage.dataset_input.field
+    - field: output.column_lineage.dataset_input.name
+    - field: output.column_lineage.dataset_input.namespace
+    - field: output.column_lineage.dataset_input.transformation.subtype
+    - field: output.column_lineage.dataset_input.transformation.type
+    - field: output.column_lineage.field.input.field
+    - field: output.column_lineage.field.input.name
+    - field: output.column_lineage.field.input.namespace
+    - field: output.column_lineage.field.input.transformation.subtype
+    - field: output.column_lineage.field.input.transformation.type
+    - field: output.column_lineage.field.name
+    - field: output.name
+    - field: output.namespace
+    - field: output.symlink.name
+    - field: output.symlink.namespace
+    - field: output.symlink.type
     - field: description
       provider_only: true
     - field: deletion_policy

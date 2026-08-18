@@ -132,10 +132,10 @@ func getCommonDatasetFacets(m map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	if v, ok := m["columnLineage"]; ok {
+	if v, ok := m["column_lineage"]; ok {
 		if lineage, ok := v.(map[string]interface{}); ok {
 			if facet := buildColumnLineage(lineage); facet != nil {
-				facets["columnLineage"] = facet
+				facets["column_lineage"] = facet
 			}
 		}
 	}
