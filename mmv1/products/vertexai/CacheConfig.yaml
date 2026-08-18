@@ -33,6 +33,7 @@ async:
   result:
     resource_inside_response: true
 exclude_delete: true
+generate_list_resource: true
 samples:
   - name: vertex_ai_cache_config
     primary_resource_id: cache_config
