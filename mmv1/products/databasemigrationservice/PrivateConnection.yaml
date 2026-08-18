@@ -74,6 +74,17 @@ samples:
           private_connection_id: '"my-connection" + randomSuffix'
           network_name: '"my-network" + randomSuffix'
           subnetwork_name: '"my-subnetwork" + randomSuffix'
+  - name: database_migration_service_private_connection_reserved_public_ip
+    primary_resource_id: default
+    steps:
+      - name: database_migration_service_private_connection_reserved_public_ip
+        resource_id_vars:
+          private_connection_id: my-connection
+          create_without_validation: "false"
+        test_vars_overrides:
+          # for backward compatible
+          create_without_validation: '"false" + randomSuffix'
+          private_connection_id: '"my-connection" + randomSuffix'
 parameters:
   - name: privateConnectionId
     type: String
@@ -134,6 +145,7 @@ properties:
       between databasemigrationservice and the consumer's VPC.
     exactly_one_of:
       - pscInterfaceConfig
+      - reservedPublicIpConfig
     properties:
       - name: vpcName
         type: String
@@ -153,6 +165,7 @@ properties:
       between DMS's internal VPC and the consumer's PSC.
     exactly_one_of:
       - vpcPeeringConfig
+      - reservedPublicIpConfig
     properties:
       - name: networkAttachment
         type: String
@@ -160,3 +173,22 @@ properties:
           Fully qualified name of the Network Attachment that DMS will connect to.
           Format: projects/{project}/regions/{region}/networkAttachments/{name}
         required: true
+  - name: reservedPublicIpConfig
+    type: NestedObject
+    description: |
+      The Reserved Public IP configuration.
+    exactly_one_of:
+      - vpcPeeringConfig
+      - pscInterfaceConfig
+    properties:
+      - name: natIpsCount
+        type: Integer
+        description: |
+          Optional. Number of static public IP addresses to reserve.
+      - name: egressPublicIps
+        type: Array
+        item_type:
+          type: String
+        output: true
+        description: |
+          Output only. The reserved public IPs.
