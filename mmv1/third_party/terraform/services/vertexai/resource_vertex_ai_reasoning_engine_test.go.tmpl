@@ -963,6 +963,12 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
             managed_topic_enum = "USER_PREFERENCES"
           }
         }
+        memory_topics {
+          custom_memory_topic {
+            label       = "custom_user_workflow"
+            description = "Workflow and process steps preferred by user."
+          }
+        }
         generate_memories_examples {
           conversation_source {
             events {
@@ -1004,6 +1010,22 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
                     output  = "pizza"
                   }
                 }
+                parts {
+                  file_data {
+                    file_uri  = "gs://cloud-samples-data/generative-ai/video/pixel8.mp4"
+                    mime_type = "video/mp4"
+                  }
+                  video_metadata {
+                    start_offset = "0s"
+                    end_offset   = "10s"
+                  }
+                }
+                parts {
+                  inline_data {
+                    mime_type = "image/png"
+                    data      = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                  }
+                }
               }
             }
           }
@@ -1011,6 +1033,12 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
             fact = "User likes pepperoni pizza."
             topics {
               managed_memory_topic = "USER_PREFERENCES"
+            }
+          }
+          generated_memories {
+            fact = "User workflow preferences captured from sample video and diagram."
+            topics {
+              custom_memory_topic_label = "custom_user_workflow"
             }
           }
         }
@@ -1051,6 +1079,12 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
         memory_topics {
           managed_memory_topic {
             managed_topic_enum = "EXPLICIT_INSTRUCTIONS"
+          }
+        }
+        memory_topics {
+          custom_memory_topic {
+            label       = "custom_updated_workflow"
+            description = "Updated workflow preferences."
           }
         }
         generate_memories_examples {
@@ -1094,6 +1128,22 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
                     output  = "success"
                   }
                 }
+                parts {
+                  file_data {
+                    file_uri  = "gs://cloud-samples-data/generative-ai/video/pixel8.mp4"
+                    mime_type = "video/mp4"
+                  }
+                  video_metadata {
+                    start_offset = "2s"
+                    end_offset   = "12s"
+                  }
+                }
+                parts {
+                  inline_data {
+                    mime_type = "image/png"
+                    data      = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                  }
+                }
               }
             }
           }
@@ -1101,6 +1151,12 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
             fact = "User prefers dark mode theme."
             topics {
               managed_memory_topic = "EXPLICIT_INSTRUCTIONS"
+            }
+          }
+          generated_memories {
+            fact = "User updated workflow preferences."
+            topics {
+              custom_memory_topic_label = "custom_updated_workflow"
             }
           }
         }
