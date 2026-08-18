@@ -1106,6 +1106,206 @@ properties:
                   type: Boolean
                   description: |-
                     Optional. Generate memories in the third person if set to true.
+                - name: 'disableNaturalLanguageMemories'
+                  type: Boolean
+                  description: |-
+                    Optional. Indicates whether natural language memory generation should be disabled.
+                - name: 'generateMemoriesExamples'
+                  type: Array
+                  description: |-
+                    Optional. Provides examples of how to generate memories for a particular scope.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'conversationSource'
+                        type: NestedObject
+                        description: |-
+                          Optional. A conversation source for the example.
+                        properties:
+                          - name: 'events'
+                            type: Array
+                            description: |-
+                              Optional. Represents the input conversation events for the example.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: 'content'
+                                  type: NestedObject
+                                  description: |-
+                                    Required. Represents the content of the event.
+                                  properties:
+                                    - name: 'role'
+                                      type: String
+                                      description: |-
+                                        Optional. The producer of the content. Must be either 'user' or 'model'. If not set, the service will default to 'user'.
+                                    - name: 'parts'
+                                      type: Array
+                                      description: |-
+                                        Required. A list of Part objects that make up a single message.
+                                      item_type:
+                                        type: NestedObject
+                                        properties:
+                                          - name: 'text'
+                                            type: String
+                                            description: |-
+                                              Optional. The text content of the part.
+                                          - name: 'thought'
+                                            type: Boolean
+                                            description: |-
+                                              Optional. Indicates whether the part represents the model's thought process or reasoning.
+                                          - name: 'inlineData'
+                                            type: NestedObject
+                                            description: |-
+                                              Optional. The inline data content of the part.
+                                            properties:
+                                              - name: 'mimeType'
+                                                type: String
+                                                description: |-
+                                                  Required. The IANA standard MIME type of the source data.
+                                                required: true
+                                              - name: 'data'
+                                                type: String
+                                                description: |-
+                                                  Required. Raw bytes, which should be base64-encoded.
+                                                required: true
+                                          - name: 'fileData'
+                                            type: NestedObject
+                                            description: |-
+                                              Optional. URI based data.
+                                            properties:
+                                              - name: 'mimeType'
+                                                type: String
+                                                description: |-
+                                                  Required. The IANA standard MIME type of the source data.
+                                                required: true
+                                              - name: 'fileUri'
+                                                type: String
+                                                description: |-
+                                                  Required. The URI of the file in Google Cloud Storage.
+                                                required: true
+                                          - name: 'functionCall'
+                                            type: NestedObject
+                                            description: |-
+                                              Optional. A predicted function call returned from the model.
+                                            properties:
+                                              - name: 'id'
+                                                type: String
+                                                description: |-
+                                                  Optional. The unique id of the function call.
+                                              - name: 'name'
+                                                type: String
+                                                description: |-
+                                                  Required. The name of the function to call.
+                                                required: true
+                                              - name: 'args'
+                                                type: String
+                                                description: |-
+                                                  Optional. The function parameters and values in JSON object format.
+                                                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                                                validation:
+                                                  function: 'validation.StringIsJSON'
+                                          - name: 'functionResponse'
+                                            type: NestedObject
+                                            description: |-
+                                              Optional. The result of a function call.
+                                            properties:
+                                              - name: 'id'
+                                                type: String
+                                                description: |-
+                                                  Optional. The id of the function call this response is for.
+                                              - name: 'name'
+                                                type: String
+                                                description: |-
+                                                  Required. The name of the function to call.
+                                                required: true
+                                              - name: 'response'
+                                                type: String
+                                                description: |-
+                                                  Required. The function response in JSON object format.
+                                                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                                                validation:
+                                                  function: 'validation.StringIsJSON'
+                                          - name: 'executableCode'
+                                            type: NestedObject
+                                            description: |-
+                                              Optional. Code generated by the model that is intended to be executed.
+                                            properties:
+                                              - name: 'id'
+                                                type: String
+                                                description: |-
+                                                  Optional. Unique identifier of the ExecutableCode part.
+                                              - name: 'language'
+                                                type: String
+                                                description: |-
+                                                  Required. Supported programming languages for the generated code. Possible values: ["LANGUAGE_UNSPECIFIED", "PYTHON", "BASH"]
+                                                required: true
+                                              - name: 'code'
+                                                type: String
+                                                description: |-
+                                                  Required. The code to be executed.
+                                                required: true
+                                          - name: 'codeExecutionResult'
+                                            type: NestedObject
+                                            description: |-
+                                              Optional. Result of executing the ExecutableCode.
+                                            properties:
+                                              - name: 'id'
+                                                type: String
+                                                description: |-
+                                                  Optional. The identifier of the ExecutableCode part this result is for.
+                                              - name: 'outcome'
+                                                type: String
+                                                description: |-
+                                                  Required. Outcome of the code execution. Possible values: ["OUTCOME_UNSPECIFIED", "OUTCOME_OK", "OUTCOME_FAILED", "OUTCOME_DEADLINE_EXCEEDED"]
+                                                required: true
+                                              - name: 'output'
+                                                type: String
+                                                description: |-
+                                                  Optional. Contains stdout when code execution is successful, stderr or other description otherwise.
+                                          - name: 'videoMetadata'
+                                            type: NestedObject
+                                            description: |-
+                                              Optional. Video metadata.
+                                            properties:
+                                              - name: 'startOffset'
+                                                type: String
+                                                description: |-
+                                                  Optional. The start offset of the video.
+                                              - name: 'endOffset'
+                                                type: String
+                                                description: |-
+                                                  Optional. The end offset of the video.
+                      - name: 'generatedMemories'
+                        type: Array
+                        description: |-
+                          Optional. Represents the memories that are expected to be generated from the input conversation.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: 'fact'
+                              type: String
+                              description: |-
+                                Required. Represents the fact to generate a memory from.
+                              required: true
+                            - name: 'topics'
+                              type: Array
+                              description: |-
+                                Optional. Represents the list of topics that the memory should be associated with.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'customMemoryTopicLabel'
+                                    type: String
+                                    description: |-
+                                      Optional. Represents the custom memory topic label.
+                                  - name: 'managedMemoryTopic'
+                                    type: String
+                                    description: |-
+                                      Optional. Represents the managed memory topic. Possible values: ["USER_PERSONAL_INFO", "USER_PREFERENCES", "KEY_CONVERSATION_DETAILS", "EXPLICIT_INSTRUCTIONS"]
           - name: 'structuredMemoryConfigs'
             type: Array
             description: |-
