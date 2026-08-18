@@ -29,8 +29,6 @@ delete_url: '{{env_id}}/keyvaluemaps/{{name}}'
 import_format:
   - '{{env_id}}/keyvaluemaps/{{name}}'
   - '{{env_id}}/{{name}}'
-generate_list_resource: true
-list_response_is_array: true
 
 timeouts:
   insert_minutes: 1
