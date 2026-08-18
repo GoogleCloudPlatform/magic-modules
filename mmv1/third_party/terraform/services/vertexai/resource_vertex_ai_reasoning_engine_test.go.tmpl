@@ -898,6 +898,168 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
 }
 `, context)
 }
+
+func TestAccVertexAIReasoningEngine_memoryCustomizationUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckVertexAIReasoningEngineDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_memoryCustomizationGenerateMemoriesExamples(context),
+			},
+			{
+				ResourceName:      "google_vertex_ai_reasoning_engine.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_memoryCustomizationDisableNaturalLanguageMemories(context),
+			},
+			{
+				ResourceName:      "google_vertex_ai_reasoning_engine.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccVertexAIReasoningEngine_memoryCustomizationGenerateMemoriesExamples(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_vertex_ai_reasoning_engine" "primary" {
+  provider     = google-beta
+  display_name = "tf-test-reasoning-engine-%{random_suffix}"
+  description  = "Reasoning engine testing memory customization"
+  region       = "us-central1"
+
+  context_spec {
+    memory_bank_config {
+      generation_config {
+        model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+      }
+      similarity_search_config {
+        embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
+      }
+      customization_configs {
+        scope_keys = ["user_id"]
+        memory_topics {
+          managed_memory_topic {
+            managed_topic_enum = "USER_PREFERENCES"
+          }
+        }
+        memory_topics {
+          custom_memory_topic {
+            label       = "jargon"
+            description = "Domain-specific terms used by the user."
+          }
+        }
+        generate_memories_examples {
+          conversation_source {
+            events {
+              content {
+                role = "user"
+                parts {
+                  text = "Keep your answers short, I don't have much time."
+                }
+              }
+            }
+            events {
+              content {
+                role = "model"
+                parts {
+                  text = "Understood, I'll keep it brief."
+                }
+              }
+            }
+          }
+          generated_memories {
+            fact = "Prefers short answers."
+            topics {
+              managed_memory_topic = "USER_PREFERENCES"
+            }
+          }
+        }
+        generate_memories_examples {
+          conversation_source {
+            events {
+              content {
+                role = "user"
+                parts {
+                  text = "What's the weather like today?"
+                }
+              }
+            }
+          }
+          # No memories are expected to be generated for this conversation.
+          generated_memories {
+            fact = "Asks about the weather."
+            topics {
+              custom_memory_topic_label = "jargon"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccVertexAIReasoningEngine_memoryCustomizationDisableNaturalLanguageMemories(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_vertex_ai_reasoning_engine" "primary" {
+  provider     = google-beta
+  display_name = "tf-test-reasoning-engine-%{random_suffix}"
+  description  = "Reasoning engine testing memory customization"
+  region       = "us-central1"
+
+  context_spec {
+    memory_bank_config {
+      generation_config {
+        model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+      }
+      similarity_search_config {
+        embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
+      }
+      customization_configs {
+        scope_keys                        = ["user_id"]
+        disable_natural_language_memories = true
+      }
+      structured_memory_configs {
+        scope_keys = ["user_id"]
+        schema_configs {
+          id            = "user-profile"
+          memory_schema = jsonencode({
+            type = "OBJECT"
+            properties = {
+              name = {
+                type        = "STRING"
+                description = "Name of the user."
+              }
+            }
+          })
+        }
+      }
+    }
+  }
+}
+`, context)
+}
 {{- end }}
 
 func TestAccVertexAIReasoningEngine_apiParityExternal(t *testing.T) {
