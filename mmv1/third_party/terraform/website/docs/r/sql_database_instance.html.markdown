@@ -355,6 +355,10 @@ SQL Server version to use. Supported values include `MYSQL_5_6`,
 [Database Version Policies](https://cloud.google.com/sql/docs/db-versions)
 includes an up-to-date reference of supported versions.
 
+* `switch_transaction_logs_to_cloud_storage_enabled` - (Optional) When set to `true`, Cloud SQL instances can switch storing point-in-time recovery transaction logs from a data disk to Cloud Storage, freeing up data disk space and enabling longer retention windows. This is an input-only field that is not persisted in the API.
+
+* `include_replicas_for_major_version_upgrade` - (Optional) When this parameter is set to `true`, Cloud SQL instances can perform in-place major version upgrades of read replicas along with the primary instance when `database_version` is updated. This is an input-only field that is not persisted in the API and only takes effect during a major version upgrade.
+
 * `name` - (Optional, Computed) The name of the instance. If the name is left
     blank, Terraform will randomly generate one when the instance is first
     created. This is done because after a name is used, it cannot be reused for
@@ -399,6 +403,11 @@ includes an up-to-date reference of supported versions.
 
   ~> **NOTE:** This flag only protects instances from deletion within Terraform. To protect your instances from accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform), use the API flag `settings.deletion_protection_enabled`.
 
+* `enforce_new_sql_network_architecture` - (Optional) Whether to enforce the new SQL network architecture. 
+    By default, new Cloud SQL instances created in projects created after August 2021 use the new network architecture. 
+    This follows the gcloud pattern where the flag is an irreversible opt-in.
+    See [official documentation](https://docs.cloud.google.com/sql/docs/mysql/upgrade-cloud-sql-instance-new-network-architecture#new-arch) for more details.
+
 * `final_backup_description` - (Optional) The description of final backup. Only set this field when `final_backup_config.enabled` is true.
 
 * `restore_backup_context` - (optional) The context needed to restore the database to a backup run. This field will
@@ -431,9 +440,16 @@ The `settings` block supports:
 
 * `tier` - (Required) The machine type to use. See [tiers](https://cloud.google.com/sql/docs/admin-api/v1beta4/tiers)
     for more details and supported versions. Postgres supports only shared-core machine types,
-    and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types.
+    and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types. Note that shared-core and custom machine types are valid only under the `ENTERPRISE` edition; PostgreSQL 16+ instances default to `ENTERPRISE_PLUS` when `edition` is unset (see the `edition` argument below).
 
-* `edition` - (Optional) The edition of the instance, can be `ENTERPRISE` or `ENTERPRISE_PLUS`.
+* `edition` - (Optional) The edition of the instance, can be `ENTERPRISE` or `ENTERPRISE_PLUS`. If `edition`
+    is not set, the Cloud SQL API determines the default based on `database_version`: instances with
+    `database_version` `POSTGRES_16` or later default to `ENTERPRISE_PLUS`, while all others default to
+    `ENTERPRISE`. Note that `ENTERPRISE_PLUS` supports only predefined `db-perf-optimized-N-*` machine
+    types (the `N2`/`C4A` series); shared-core and custom tiers such as `db-g1-small`, `db-f1-micro`, and
+    `db-custom-*` require `edition = "ENTERPRISE"`. Omitting `edition` on a PostgreSQL 16+ instance while
+    setting a shared-core or custom `tier` therefore fails at create time with
+    `Invalid Tier (...) for (ENTERPRISE_PLUS) Edition`.
 
 * `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
 
@@ -480,6 +496,8 @@ The `settings` block supports:
 
 * `data_disk_provisioned_throughput` - (Optional) Provisioned throughput measured in MiB per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
 
+* `replication_lag_max_seconds` - (Optional) The acceptable replication lag, in seconds, after which a read replica recreates itself. The lag must persist for at least five minutes before recreation is triggered. This is a replica level field, and must be between `300` (five minutes) and `31536000` (one year).
+
 * `node_count` - For a read pool instance, the number of nodes in the read pool. For read pools with auto scaling enabled, this field is read only.
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
@@ -506,8 +524,15 @@ The optional `settings.database_flags` sublist supports:
 
 The optional `settings.active_directory_config` subblock supports:
 
-* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
-    Can only be used with SQL Server.
+* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com). Can only be used with SQL Server.
+
+* `mode` - (Optional) The mode of the Active Directory configuration. Can be `MANAGED_ACTIVE_DIRECTORY` or `CUSTOMER_MANAGED_ACTIVE_DIRECTORY`.
+
+* `dns_servers` - (Optional) Domain controller IPv4 addresses used to bootstrap Active Directory.
+
+* `admin_credential_secret_name` - (Optional) The secret manager key storing the administrator credential. (e.g., `projects/{project}/secrets/{secret}`).
+
+* `organizational_unit` - (Optional) The organizational unit distinguished name. This is the full hierarchical path to the organizational unit.
 
 The optional `settings.entraid_config` block supports:
 
@@ -606,6 +631,8 @@ The optional `settings.ip_configuration.psc_config` sublist supports:
 
 * `psc_write_endpoint_dns_enabled` - (Optional) Whether PSC write endpoint DNS is enabled for this instance. This is only supported for Enterprise Plus edition instances.
 
+* `settings.ip_configuration.psc_config.psc_auto_connection_policy_enabled` - (Optional) Whether a service connection policy is created for the auto connections configured for the instance.
+
 * `allowed_consumer_projects` - (Optional) List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).
 
 * The optional `psc_config.psc_auto_connections` subblock - (Optional) A comma-separated list of networks or a comma-separated list of network-project pairs. Each project in this list is represented by a project number (numeric) or by a project ID (alphanumeric). This allows Private Service Connect connections to be created automatically for the specified networks.
@@ -685,6 +712,36 @@ The optional `settings.password_validation_policy` subblock for instances declar
 * `password_change_interval` - Specifies the minimum duration after which you can change the password.
 
 * `enable_password_policy` - Enables or disable the password validation policy.
+
+The optional `settings.performance_capture_config` (Beta) subblock for instances declares Performance Capture configuration. It contains:
+
+* `enabled` - (Beta) True if the Performance Capture feature is enabled.
+
+* `probing_interval_seconds` - (Beta) The time interval in seconds between any two probes.
+
+* `probe_threshold` - (Beta) The minimum number of consecutive readings above threshold that triggers instance state capture.
+
+* `running_threads_threshold` - (Beta) The minimum number of server threads running to trigger the capture on primary.
+
+* `seconds_behind_source_threshold` - (Beta) The minimum number of seconds replica must be lagging behind primary to trigger capture on replica.
+
+* `transaction_duration_threshold` - (Beta) The amount of time in seconds that a transaction needs to have been open before the watcher starts recording it.
+
+* `cpu_utilization_threshold_percent` - (Beta) The minimum percentage of CPU utilization that triggers the performance capture. Valid range is 10 to 99. `0` disables the check.
+
+* `memory_usage_threshold_percent` - (Beta) The minimum percentage of memory usage that triggers the performance capture. Valid range is 10 to 99. `0` disables the check.
+
+* `history_list_length_threshold_count` - (Beta) The minimum number of undo log entries in the history list length that triggers the performance capture. Valid range is 10000 to 10000000. `0` disables the check.
+
+* `semaphore_wait_threshold_count` - (Beta) The minimum number of semaphore waits that triggers the performance capture. Valid range is 10 to 10000. `0` disables the check.
+
+* `transaction_lock_wait_threshold_count` - (Beta) The minimum number of transactions in lock wait state that triggers the performance capture. Valid range is 10 to 10000. `0` disables the check.
+
+* `transaction_kill_threshold_seconds` - (Beta) The amount of time in seconds that a transaction needs to have been open before the watcher starts terminating it. Valid range is 60 to 604800. `0` disables termination.
+
+* `transaction_kill_type` - (Beta) Determines which transactions are allowed to be terminated when they exceed `transaction_kill_threshold_seconds`. Possible values are: `TRANSACTION_KILL_TYPE_UNSPECIFIED`, `READ_ONLY_TRANSACTIONS`, `ALL_TRANSACTIONS`.
+
+* `transaction_kill_excluded_user_hosts` - (Beta) A list of users to exclude from transaction termination. Entries can be in the format `user@host` or just `user`.
 
 The optional `replica_configuration` block must have `master_instance_name` set
 to work, cannot be updated and supports:
@@ -866,9 +923,17 @@ performing filtering in a Terraform config.
 
 * `settings.ip_configuration.psc_config.psc_auto_connections.consumer_network_status` - (Output) The connection policy status of the consumer network.
 
+* `settings.ip_configuration.psc_config.psc_auto_connections.instance_auto_dns_status` - (Output) The status of the automated DNS provisioning for the instance.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.write_endpoint_auto_dns_status` - (Output) The status of the automated DNS provisioning for the write endpoint.
+
 * `settings.ip_configuration.psc_config.psc_auto_connections.ip_address` - (Output) The IP address of the consumer endpoint.
 
 * `settings.ip_configuration.psc_config.psc_auto_connections.status` - (Output) The connection status of the consumer endpoint.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.service_connection_policy` - (Output) The service connection policy created for the auto connection.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.service_connection_policy_creation_result` - (Output) The result of the service connection policy creation.
 
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.

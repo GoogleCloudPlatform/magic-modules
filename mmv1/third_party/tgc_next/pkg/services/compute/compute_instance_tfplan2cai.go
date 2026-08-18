@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -121,7 +122,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating params: %s", err)
 	}
 
-	metadata, err := resourceInstanceMetadata(d)
+	metadataMap, err := resourceInstanceMetadata(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
@@ -168,31 +169,48 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
+	tagsMap := resourceInstanceTags(d)
+	var tags *compute.Tags
+	if tagsMap != nil {
+		tags = &compute.Tags{
+			Items:       tagsMap["items"].([]string),
+			Fingerprint: tagsMap["fingerprint"].(string),
+		}
+	}
+
 	// Create the instance information
 	instance := &compute.Instance{
 		CanIpForward:             d.Get("can_ip_forward").(bool),
 		Description:              d.Get("description").(string),
 		Disks:                    disks,
 		MachineType:              machineTypeUrl,
-		Metadata:                 metadata,
 		Name:                     d.Get("name").(string),
 		Zone:                     d.Get("zone").(string),
 		NetworkInterfaces:        networkInterfaces,
 		NetworkPerformanceConfig: networkPerformanceConfig,
-		Tags:                     resourceInstanceTags(d),
+		Tags:                     tags,
 		Params:                   params,
 		Labels:                   tpgresource.ExpandLabels(d),
-		ServiceAccounts:          expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
 		GuestAccelerators:        accels,
 		MinCpuPlatform:           d.Get("min_cpu_platform").(string),
 		Scheduling:               scheduling,
 		DeletionProtection:       d.Get("deletion_protection").(bool),
 		Hostname:                 d.Get("hostname").(string),
-		AdvancedMachineFeatures:  expandAdvancedMachineFeatures(d),
+		AdvancedMachineFeatures:  expandAdvancedMachineFeaturesTypedTgcNext(d),
 		ResourcePolicies:         tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:      reservationAffinity,
 		KeyRevocationActionType:  d.Get("key_revocation_action_type").(string),
 		InstanceEncryptionKey:    instanceEncryptionKey,
+	}
+	if serviceAccount := expandServiceAccounts(d.Get("service_account").([]interface{})); len(serviceAccount) > 0 {
+		if err := convertViaJSONTgcNext(serviceAccount, &instance.ServiceAccounts); err != nil {
+			return nil, fmt.Errorf("Error converting service_accounts: %s", err)
+		}
+	}
+	if metadataMap != nil {
+		if err := convertViaJSONTgcNext(metadataMap, &instance.Metadata); err != nil {
+			return nil, fmt.Errorf("Error converting metadata: %s", err)
+		}
 	}
 	if cic := expandConfidentialInstanceConfig(d); cic != nil {
 		instance.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{
@@ -464,16 +482,29 @@ func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *tra
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
 
+		accessConfigs, err := expandAccessConfigsTyped(data["access_config"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		aliasIpRanges, err := expandAliasIpRangesTyped(data["alias_ip_range"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		ipv6AccessConfigs, err := expandIpv6AccessConfigsTyped(data["ipv6_access_config"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:                data["network_ip"].(string),
 			Network:                  network,
 			Subnetwork:               subnetwork,
-			AccessConfigs:            expandAccessConfigs(data["access_config"].([]interface{})),
-			AliasIpRanges:            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
+			AccessConfigs:            accessConfigs,
+			AliasIpRanges:            aliasIpRanges,
 			NicType:                  data["nic_type"].(string),
 			StackType:                data["stack_type"].(string),
 			QueueCount:               int64(data["queue_count"].(int)),
-			Ipv6AccessConfigs:        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
+			Ipv6AccessConfigs:        ipv6AccessConfigs,
 			Ipv6Address:              data["ipv6_address"].(string),
 			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
 			NetworkAttachment:        data["network_attachment"].(string),
@@ -557,21 +588,33 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		scheduling.AvailabilityDomain = int64(v.(int))
 	}
 	if v, ok := original["max_run_duration"]; ok {
-		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
+		maxRunDurationMap, err := expandComputeMaxRunDuration(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.MaxRunDuration = transformedMaxRunDuration
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
+		if maxRunDurationMap != nil {
+			typed := &compute.Duration{}
+			if err := convertViaJSONTgcNext(maxRunDurationMap, typed); err != nil {
+				return nil, fmt.Errorf("Error converting max_run_duration: %s", err)
+			}
+			scheduling.MaxRunDuration = typed
+			scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
+		}
 	}
 
 	if v, ok := original["on_instance_stop_action"]; ok {
-		transformedOnInstanceStopAction, err := expandComputeOnInstanceStopAction(v)
+		onInstanceStopActionMap, err := expandComputeOnInstanceStopAction(v)
 		if err != nil {
 			return nil, err
 		}
-		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
+		if onInstanceStopActionMap != nil {
+			typed := &compute.SchedulingOnInstanceStopAction{}
+			if err := convertViaJSONTgcNext(onInstanceStopActionMap, typed); err != nil {
+				return nil, fmt.Errorf("Error converting on_instance_stop_action: %s", err)
+			}
+			scheduling.OnInstanceStopAction = typed
+			scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
+		}
 	}
 
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
@@ -633,4 +676,55 @@ func expandComputeLocalSsdRecoveryTimeoutTgc(v interface{}) (*compute.Duration, 
 		duration.ForceSendFields = append(duration.ForceSendFields, "Seconds")
 	}
 	return duration, nil
+}
+
+func expandAccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
+	expanded := expandAccessConfigs(configs)
+	acs := make([]*compute.AccessConfig, 0, len(expanded))
+	if err := convertViaJSONTgcNext(expanded, &acs); err != nil {
+		return nil, fmt.Errorf("Error converting access configs: %s", err)
+	}
+	return acs, nil
+}
+
+func expandAliasIpRangesTyped(ranges []interface{}) ([]*compute.AliasIpRange, error) {
+	expanded := expandAliasIpRanges(ranges)
+	out := make([]*compute.AliasIpRange, 0, len(expanded))
+	if err := convertViaJSONTgcNext(expanded, &out); err != nil {
+		return nil, fmt.Errorf("Error converting alias ip ranges: %s", err)
+	}
+	return out, nil
+}
+
+func expandIpv6AccessConfigsTyped(configs []interface{}) ([]*compute.AccessConfig, error) {
+	expanded := expandIpv6AccessConfigs(configs)
+	acs := make([]*compute.AccessConfig, 0, len(expanded))
+	if err := convertViaJSONTgcNext(expanded, &acs); err != nil {
+		return nil, fmt.Errorf("Error converting ipv6 access configs: %s", err)
+	}
+	return acs, nil
+}
+
+func expandAdvancedMachineFeaturesTypedTgcNext(d tpgresource.TerraformResourceData) *compute.AdvancedMachineFeatures {
+	amfMap := expandAdvancedMachineFeatures(d)
+	if amfMap == nil {
+		return nil
+	}
+	typed := &compute.AdvancedMachineFeatures{}
+	if err := convertViaJSONTgcNext(amfMap, typed); err != nil {
+		return nil
+	}
+	return typed
+}
+
+func convertViaJSON(in, out interface{}) error {
+	b, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, out)
+}
+
+func convertViaJSONTgcNext(in, out interface{}) error {
+	return convertViaJSON(in, out)
 }

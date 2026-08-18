@@ -1,0 +1,5 @@
+resource "google_compute_region_ssl_policy" "region-ssl-policy" {
+  name    = "{{index $.ResourceIdVars "region_ssl_policy_name"}}"
+  region  = "us-central1"
+  profile = "MODERN"
+}

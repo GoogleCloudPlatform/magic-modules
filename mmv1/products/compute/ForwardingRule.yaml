@@ -62,182 +62,215 @@ sweeper:
     - region: "europe-west4"
     - region: "europe-west1"
     - region: "us-west1"
-examples:
+samples:
   - name: 'internal_http_lb_with_mig_backend'
     primary_resource_id: 'google_compute_forwarding_rule'
     min_version: 'beta'
-    vars:
-      ilb_network_name: 'l7-ilb-network'
-      proxy_subnet_name: 'l7-ilb-proxy-subnet'
-      backend_subnet_name: 'l7-ilb-subnet'
-      forwarding_rule_name: 'l7-ilb-forwarding-rule'
-      target_http_proxy_name: 'l7-ilb-target-http-proxy'
-      regional_url_map_name: 'l7-ilb-regional-url-map'
-      backend_service_name: 'l7-ilb-backend-subnet'
-      mig_template_name: 'l7-ilb-mig-template'
-      hc_name: 'l7-ilb-hc'
-      mig_name: 'l7-ilb-mig1'
-      fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
-      fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
-      vm_test_name: 'l7-ilb-test-vm'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
+    steps:
+      - name: 'internal_http_lb_with_mig_backend'
+        min_version: 'beta'
+        resource_id_vars:
+          ilb_network_name: 'l7-ilb-network'
+          proxy_subnet_name: 'l7-ilb-proxy-subnet'
+          backend_subnet_name: 'l7-ilb-subnet'
+          forwarding_rule_name: 'l7-ilb-forwarding-rule'
+          target_http_proxy_name: 'l7-ilb-target-http-proxy'
+          regional_url_map_name: 'l7-ilb-regional-url-map'
+          backend_service_name: 'l7-ilb-backend-subnet'
+          mig_template_name: 'l7-ilb-mig-template'
+          hc_name: 'l7-ilb-hc'
+          mig_name: 'l7-ilb-mig1'
+          fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
+          fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
+          vm_test_name: 'l7-ilb-test-vm'
+        ignore_read_extra:
+          - 'port_range'
+          - 'target'
   - name: 'internal_tcp_udp_lb_with_mig_backend'
     primary_resource_id: 'google_compute_forwarding_rule'
     min_version: 'beta'
-    vars:
-      ilb_network_name: 'l4-ilb-network'
-      backend_subnet_name: 'l4-ilb-subnet'
-      forwarding_rule_name: 'l4-ilb-forwarding-rule'
-      backend_service_name: 'l4-ilb-backend-subnet'
-      mig_template_name: 'l4-ilb-mig-template'
-      hc_name: 'l4-ilb-hc'
-      mig_name: 'l4-ilb-mig1'
-      fw_allow_hc_name: 'l4-ilb-fw-allow-hc'
-      fw_allow_ilb_to_backends_name: 'l4-ilb-fw-allow-ilb-to-backends'
-      fw_allow_ilb_ssh_name: 'l4-ilb-fw-ssh'
-      vm_test_name: 'l4-ilb-test-vm'
+    steps:
+      - name: 'internal_tcp_udp_lb_with_mig_backend'
+        min_version: 'beta'
+        resource_id_vars:
+          ilb_network_name: 'l4-ilb-network'
+          backend_subnet_name: 'l4-ilb-subnet'
+          forwarding_rule_name: 'l4-ilb-forwarding-rule'
+          backend_service_name: 'l4-ilb-backend-subnet'
+          mig_template_name: 'l4-ilb-mig-template'
+          hc_name: 'l4-ilb-hc'
+          mig_name: 'l4-ilb-mig1'
+          fw_allow_hc_name: 'l4-ilb-fw-allow-hc'
+          fw_allow_ilb_to_backends_name: 'l4-ilb-fw-allow-ilb-to-backends'
+          fw_allow_ilb_ssh_name: 'l4-ilb-fw-ssh'
+          vm_test_name: 'l4-ilb-test-vm'
   - name: 'forwarding_rule_externallb'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      forwarding_rule_name: 'website-forwarding-rule'
-      backend_name: 'website-backend'
-      network_name: 'website-net'
-    ignore_read_extra:
-      - 'port_range'
+    steps:
+      - name: 'forwarding_rule_externallb'
+        min_version: 'beta'
+        resource_id_vars:
+          forwarding_rule_name: 'website-forwarding-rule'
+          backend_name: 'website-backend'
+          network_name: 'website-net'
+        ignore_read_extra:
+          - 'port_range'
   - name: 'forwarding_rule_externallb_byoipv6'
     primary_resource_id: 'default'
-    vars:
-      forwarding_rule_name: 'byoipv6-forwarding-rule'
-      backend_name: 'website-backend'
-      network_name: 'website-net'
-      ip_address: '"2600:1901:4457:1::/96"'
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
-    test_vars_overrides:
-      ip_address: 'fmt.Sprintf("2600:1901:4457:1:%d:%d::/96", acctest.RandIntRange(t, 0, 9999), acctest.RandIntRange(t, 0, 9999))'
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
-    ignore_read_extra:
-      - 'port_range'
+    steps:
+      - name: 'forwarding_rule_externallb_byoipv6'
+        resource_id_vars:
+          forwarding_rule_name: 'byoipv6-forwarding-rule'
+          backend_name: 'website-backend'
+          network_name: 'website-net'
+          ip_address: '"2600:1901:4457:1::/96"'
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
+        test_vars_overrides:
+          ip_address: 'fmt.Sprintf("2600:1901:4457:1:%d:%d::/96", acctest.RandIntRange(t, 0, 9999), acctest.RandIntRange(t, 0, 9999))'
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
+        ignore_read_extra:
+          - 'port_range'
   - name: 'forwarding_rule_global_internallb'
     primary_resource_id: 'default'
-    vars:
-      forwarding_rule_name: 'website-forwarding-rule'
-      backend_name: 'website-backend'
-      network_name: 'website-net'
+    steps:
+      - name: 'forwarding_rule_global_internallb'
+        resource_id_vars:
+          forwarding_rule_name: 'website-forwarding-rule'
+          backend_name: 'website-backend'
+          network_name: 'website-net'
   - name: 'forwarding_rule_basic'
     primary_resource_id: 'default'
-    vars:
-      forwarding_rule_name: 'website-forwarding-rule'
-      target_pool_name: 'website-target-pool'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
+    steps:
+      - name: 'forwarding_rule_basic'
+        resource_id_vars:
+          forwarding_rule_name: 'website-forwarding-rule'
+          target_pool_name: 'website-target-pool'
+        ignore_read_extra:
+          - 'port_range'
+          - 'target'
   - name: 'forwarding_rule_l3_default'
     primary_resource_id: 'fwd_rule'
     min_version: 'beta'
-    vars:
-      forwarding_rule_name: 'l3-forwarding-rule'
-      service_name: 'service'
-      health_check_name: 'health-check'
-    test_vars_overrides:
-      # for backward compatible
-      service_name: '"service" + randomSuffix'
+    steps:
+      - name: 'forwarding_rule_l3_default'
+        min_version: 'beta'
+        resource_id_vars:
+          forwarding_rule_name: 'l3-forwarding-rule'
+          service_name: 'service'
+          health_check_name: 'health-check'
+        test_vars_overrides:
+          # for backward compatible
+          service_name: '"service" + randomSuffix'
   - name: 'forwarding_rule_internallb'
     primary_resource_id: 'default'
-    vars:
-      forwarding_rule_name: 'website-forwarding-rule'
-      backend_name: 'website-backend'
-      network_name: 'website-net'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
+    steps:
+      - name: 'forwarding_rule_internallb'
+        resource_id_vars:
+          forwarding_rule_name: 'website-forwarding-rule'
+          backend_name: 'website-backend'
+          network_name: 'website-net'
+        ignore_read_extra:
+          - 'port_range'
+          - 'target'
   - name: 'forwarding_rule_http_lb'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      forwarding_rule_name: 'website-forwarding-rule'
-      region_target_http_proxy_name: 'website-proxy'
-      region_url_map_name: 'website-map'
-      region_backend_service_name: 'website-backend'
-      region_health_check_name: 'website-hc'
-      rigm_name: 'website-rigm'
-      network_name: 'website-net'
-      fw_name: 'website-fw'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
+    steps:
+      - name: 'forwarding_rule_http_lb'
+        min_version: 'beta'
+        resource_id_vars:
+          forwarding_rule_name: 'website-forwarding-rule'
+          region_target_http_proxy_name: 'website-proxy'
+          region_url_map_name: 'website-map'
+          region_backend_service_name: 'website-backend'
+          region_health_check_name: 'website-hc'
+          rigm_name: 'website-rigm'
+          network_name: 'website-net'
+          fw_name: 'website-fw'
+        ignore_read_extra:
+          - 'port_range'
+          - 'target'
   - name: 'forwarding_rule_regional_http_xlb'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      forwarding_rule_name: 'website-forwarding-rule'
-      region_target_http_proxy_name: 'website-proxy'
-      region_url_map_name: 'website-map'
-      region_backend_service_name: 'website-backend'
-      region_health_check_name: 'website-hc'
-      rigm_name: 'website-rigm'
-      network_name: 'website-net'
-      fw_name: 'website-fw'
-      ip_name: 'website-ip'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-      - 'ip_address'
+    steps:
+      - name: 'forwarding_rule_regional_http_xlb'
+        min_version: 'beta'
+        resource_id_vars:
+          forwarding_rule_name: 'website-forwarding-rule'
+          region_target_http_proxy_name: 'website-proxy'
+          region_url_map_name: 'website-map'
+          region_backend_service_name: 'website-backend'
+          region_health_check_name: 'website-hc'
+          rigm_name: 'website-rigm'
+          network_name: 'website-net'
+          fw_name: 'website-fw'
+          ip_name: 'website-ip'
+        ignore_read_extra:
+          - 'port_range'
+          - 'target'
+          - 'ip_address'
   - name: 'forwarding_rule_vpc_psc'
     primary_resource_id: 'default'
-    vars:
-      forwarding_rule_name: 'psc-endpoint'
-      consumer_network_name: 'consumer-net'
-      ip_name: 'website-ip'
-      producer_network_name: 'producer-net'
-      producer_psc_network_name: 'producer-psc-net'
-      service_attachment_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      producer_backend_name: 'producer-service-backend'
-      producer_healthcheck_name: 'producer-service-health-check'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-      - 'ip_address'
+    steps:
+      - name: 'forwarding_rule_vpc_psc'
+        resource_id_vars:
+          forwarding_rule_name: 'psc-endpoint'
+          consumer_network_name: 'consumer-net'
+          ip_name: 'website-ip'
+          producer_network_name: 'producer-net'
+          producer_psc_network_name: 'producer-psc-net'
+          service_attachment_name: 'producer-service'
+          producer_forwarding_rule_name: 'producer-forwarding-rule'
+          producer_backend_name: 'producer-service-backend'
+          producer_healthcheck_name: 'producer-service-health-check'
+        ignore_read_extra:
+          - 'port_range'
+          - 'target'
+          - 'ip_address'
   - name: 'forwarding_rule_vpc_psc_no_automate_dns'
     primary_resource_id: 'default'
-    vars:
-      forwarding_rule_name: 'psc-endpoint'
-      consumer_network_name: 'consumer-net'
-      ip_name: 'website-ip'
-      producer_network_name: 'producer-net'
-      producer_psc_network_name: 'producer-psc-net'
-      service_attachment_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      producer_backend_name: 'producer-service-backend'
-      producer_healthcheck_name: 'producer-service-health-check'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-      - 'ip_address'
+    steps:
+      - name: 'forwarding_rule_vpc_psc_no_automate_dns'
+        resource_id_vars:
+          forwarding_rule_name: 'psc-endpoint'
+          consumer_network_name: 'consumer-net'
+          ip_name: 'website-ip'
+          producer_network_name: 'producer-net'
+          producer_psc_network_name: 'producer-psc-net'
+          service_attachment_name: 'producer-service'
+          producer_forwarding_rule_name: 'producer-forwarding-rule'
+          producer_backend_name: 'producer-service-backend'
+          producer_healthcheck_name: 'producer-service-health-check'
+        ignore_read_extra:
+          - 'port_range'
+          - 'target'
+          - 'ip_address'
   - name: 'forwarding_rule_regional_steering'
     primary_resource_id: 'steering'
-    vars:
-      forwarding_rule_name: 'steering-rule'
-      ip_name: 'website-ip'
-      backend_name: 'service-backend'
-      external_forwarding_rule_name: 'external-forwarding-rule'
+    steps:
+      - name: 'forwarding_rule_regional_steering'
+        resource_id_vars:
+          forwarding_rule_name: 'steering-rule'
+          ip_name: 'website-ip'
+          backend_name: 'service-backend'
+          external_forwarding_rule_name: 'external-forwarding-rule'
   - name: 'forwarding_rule_internallb_ipv6'
     primary_resource_id: 'default'
-    vars:
-      forwarding_rule_name: 'ilb-ipv6-forwarding-rule'
-      backend_name: 'ilb-ipv6-backend'
-      network_name: 'net-ipv6'
-      subnet_name: 'subnet-internal-ipv6'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
+    steps:
+      - name: 'forwarding_rule_internallb_ipv6'
+        resource_id_vars:
+          forwarding_rule_name: 'ilb-ipv6-forwarding-rule'
+          backend_name: 'ilb-ipv6-backend'
+          network_name: 'net-ipv6'
+          subnet_name: 'subnet-internal-ipv6'
+        ignore_read_extra:
+          - 'port_range'
+          - 'target'
 virtual_fields:
   - name: 'recreate_closed_psc'
-    description:
-      This is used in PSC consumer ForwardingRule to make terraform recreate the ForwardingRule when the status is closed
+    description: This is used in PSC consumer ForwardingRule to make terraform recreate the ForwardingRule when the status is closed
     type: Boolean
     default_value: false
 parameters:
@@ -280,9 +313,7 @@ properties:
     output: true
   - name: 'pscConnectionStatus'
     type: String
-    description:
-      'The PSC connection status of the PSC Forwarding Rule. Possible values:
-      `STATUS_UNSPECIFIED`, `PENDING`, `ACCEPTED`, `REJECTED`, `CLOSED`'
+    description: 'The PSC connection status of the PSC Forwarding Rule. Possible values: `STATUS_UNSPECIFIED`, `PENDING`, `ACCEPTED`, `REJECTED`, `CLOSED`'
     output: true
   - name: 'description'
     type: String
@@ -636,30 +667,17 @@ properties:
     output: true
   - name: 'sourceIpRanges'
     type: Array
-    description:
-      If not empty, this Forwarding Rule will only forward the traffic when the
-      source IP address matches one of the IP addresses or CIDR ranges set here.
-      Note that a Forwarding Rule can only have up to 64 source IP ranges, and
-      this field can only be used with a regional Forwarding Rule whose scheme
-      is EXTERNAL. Each sourceIpRange entry should be either an IP address (for
-      example, 1.2.3.4) or a CIDR range (for example, 1.2.3.0/24).
+    description: If not empty, this Forwarding Rule will only forward the traffic when the source IP address matches one of the IP addresses or CIDR ranges set here. Note that a Forwarding Rule can only have up to 64 source IP ranges, and this field can only be used with a regional Forwarding Rule whose scheme is EXTERNAL. Each sourceIpRange entry should be either an IP address (for example, 1.2.3.4) or a CIDR range (for example, 1.2.3.0/24).
     immutable: true
     item_type:
       type: String
   - name: 'baseForwardingRule'
     type: String
-    description:
-      '[Output Only] The URL for the corresponding base Forwarding Rule. By base
-      Forwarding Rule, we mean the Forwarding Rule that has the same IP address,
-      protocol, and port settings with the current Forwarding Rule, but without
-      sourceIPRanges specified. Always empty if the current Forwarding Rule does
-      not have sourceIPRanges specified.'
+    description: '[Output Only] The URL for the corresponding base Forwarding Rule. By base Forwarding Rule, we mean the Forwarding Rule that has the same IP address, protocol, and port settings with the current Forwarding Rule, but without sourceIPRanges specified. Always empty if the current Forwarding Rule does not have sourceIPRanges specified.'
     output: true
   - name: 'allowPscGlobalAccess'
     type: Boolean
-    description:
-      This is used in PSC consumer ForwardingRule to control whether the PSC
-      endpoint can be accessed from another region.
+    description: This is used in PSC consumer ForwardingRule to control whether the PSC endpoint can be accessed from another region.
     send_empty_value: true
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}'
     update_verb: 'PATCH'
@@ -667,9 +685,7 @@ properties:
     fingerprint_name: 'fingerprint'
   - name: 'noAutomateDnsZone'
     type: Boolean
-    description:
-      This is used in PSC consumer ForwardingRule to control whether it should try to auto-generate a DNS zone or not.
-      Non-PSC forwarding rules do not use this field.
+    description: This is used in PSC consumer ForwardingRule to control whether it should try to auto-generate a DNS zone or not. Non-PSC forwarding rules do not use this field.
     immutable: true
     ignore_read: true
     send_empty_value: true

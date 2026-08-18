@@ -40,13 +40,15 @@ iam_policy:
   custom_import_state_id_funcs: 'templates/terraform/iam/iap_web_appengine_state_id_funcs.go.tmpl'
 custom_code:
 exclude_tgc: true
-examples:
+samples:
   - name: 'iap_appengine'
     primary_resource_id: 'app'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
+    steps:
+      - name: 'iap_appengine'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
 parameters:
 properties:
   - name: 'appId'

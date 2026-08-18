@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'ContainerAttached'
-display_name: 'ContainerAttached'
-versions:
-  - name: 'ga'
-    base_url: 'https://{{location}}-gkemulticloud.googleapis.com/v1/'
+name: ContainerAttached
+display_name: ContainerAttached
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://{{location}}-gkemulticloud.googleapis.com/v1/

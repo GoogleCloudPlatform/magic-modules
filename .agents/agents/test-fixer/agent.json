@@ -1,0 +1,6 @@
+{
+  "name": "test-fixer",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

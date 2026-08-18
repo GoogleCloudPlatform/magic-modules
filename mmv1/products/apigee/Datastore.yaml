@@ -12,22 +12,22 @@
 # limitations under the License.
 
 ---
-name: 'Datastore'
+name: Datastore
 description: |
   An analytics datastore for an Apigee organization. Datastores configure
   export destinations for Apigee Analytics data, supporting either Google
   Cloud Storage (GCS) or BigQuery as targets.
 references:
   guides:
-    'Export analytics data': 'https://cloud.google.com/apigee/docs/api-platform/analytics/analytics-export'
-  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.analytics.datastores'
+    Export analytics data: https://cloud.google.com/apigee/docs/api-platform/analytics/analytics-export
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.analytics.datastores
 docs:
 base_url: '{{org_id}}/analytics/datastores'
 self_link: '{{org_id}}/analytics/datastores/{{name}}'
-update_url: '{{org_id}}/analytics/datastores/{{name}}'
-update_verb: 'PUT'
-update_mask: false
 delete_url: '{{org_id}}/analytics/datastores/{{name}}'
+update_url: '{{org_id}}/analytics/datastores/{{name}}'
+update_mask: false
+update_verb: PUT
 import_format:
   - '{{org_id}}/analytics/datastores/{{name}}'
   - '{{org_id}}/{{name}}'
@@ -36,39 +36,47 @@ timeouts:
   update_minutes: 1
   delete_minutes: 1
 custom_code:
-  decoder: 'templates/terraform/decoders/apigee_datastore.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/apigee_datastore.go.tmpl'
-examples:
-  - name: 'apigee_datastore_basic'
-    vars:
-      network_name: 'apigee-network'
-      range_name: 'apigee-range'
-      display_name: 'my_datastore'
-      bucket_name: 'my-analytics-bucket'
+  decoder: templates/terraform/decoders/apigee_datastore.go.tmpl
+  custom_import: templates/terraform/custom_import/apigee_datastore.go.tmpl
+samples:
+  - name: apigee_datastore_basic
     exclude_test: true
-  - name: 'apigee_datastore_basic_test'
-    primary_resource_id: 'apigee_datastore'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: 'apigee_datastore_bigquery'
-    vars:
-      network_name: 'apigee-network'
-      range_name: 'apigee-range'
-      display_name: 'my_bigquery_datastore'
-      dataset_id: 'my_analytics_dataset'
+    steps:
+      - name: apigee_datastore_basic
+        resource_id_vars:
+          network_name: apigee-network
+          range_name: apigee-range
+          display_name: my_datastore
+          bucket_name: my-analytics-bucket
+  - name: apigee_datastore_basic_test
+    primary_resource_id: apigee_datastore
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: apigee_datastore_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  - name: apigee_datastore_bigquery
     exclude_test: true
-  - name: 'apigee_datastore_bigquery_test'
-    primary_resource_id: 'apigee_datastore'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
+    steps:
+      - name: apigee_datastore_bigquery
+        resource_id_vars:
+          network_name: apigee-network
+          range_name: apigee-range
+          display_name: my_bigquery_datastore
+          dataset_id: my_analytics_dataset
+  - name: apigee_datastore_bigquery_test
+    primary_resource_id: apigee_datastore
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: apigee_datastore_bigquery_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
 parameters:
-  - name: 'orgId'
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee datastore,
@@ -77,69 +85,69 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The server-assigned UUID identifier for the datastore. Extracted
       from the `self` field in the API response.
     output: true
-  - name: 'self'
+  - name: self
     type: String
     description: |
       The resource link for the datastore, including the full API path.
     output: true
-    api_name: 'self'
-  - name: 'displayName'
+    api_name: self
+  - name: displayName
     type: String
     description: |
       The display name for the datastore.
     required: true
-  - name: 'org'
+  - name: org
     type: String
     description: |
       The Apigee organization name.
     output: true
-  - name: 'targetType'
+  - name: targetType
     type: String
     description: |
       The type of target for the datastore. Must be `gcs` for Google
       Cloud Storage or `bigquery` for BigQuery.
     required: true
     immutable: true
-  - name: 'createTime'
+  - name: createTime
     type: String
     description: |
       The time at which the datastore was created in milliseconds since the epoch.
     output: true
-  - name: 'lastUpdateTime'
+  - name: lastUpdateTime
     type: String
     description: |
       The time at which the datastore was last updated in milliseconds since the epoch.
     output: true
-  - name: 'datastoreConfig'
+  - name: datastoreConfig
     type: NestedObject
     description: |
       Configuration of the datastore target.
     required: true
     properties:
-      - name: 'projectId'
+      - name: projectId
         type: String
         description: |
           The GCP project ID that the datastore target resides in.
         required: true
-      - name: 'bucketName'
+      - name: bucketName
         type: String
         description: |
           The name of the Cloud Storage bucket. Required for `gcs` target type.
-      - name: 'path'
+      - name: path
         type: String
         description: |
           The path within the Cloud Storage bucket. Used for `gcs` target type.
-      - name: 'datasetName'
+      - name: datasetName
         type: String
         description: |
           The name of the BigQuery dataset. Required for `bigquery` target type.
-      - name: 'tablePrefix'
+      - name: tablePrefix
         type: String
         description: |
           The prefix for BigQuery table names. Used for `bigquery` target type.

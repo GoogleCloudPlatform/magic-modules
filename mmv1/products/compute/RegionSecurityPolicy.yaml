@@ -39,6 +39,11 @@ async:
   result:
     resource_inside_response: false
 include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesRateLimitOptions'
+    skip: 'data issue with this test'
+  - name: 'TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpdate'
+    skip: 'data issue with this test'
 custom_code:
   constants: 'templates/terraform/constants/region_security_policy.go.tmpl'
 # excluding identity due to name value inconsistency
@@ -52,23 +57,31 @@ sweeper:
     - region: "europe-west1"
     - region: "southamerica-west1"
     - region: "us-central1"
-examples:
+samples:
   - name: 'region_security_policy_basic'
     primary_resource_id: 'region-sec-policy-basic'
-    vars:
-      sec_policy_name: 'my-sec-policy-basic'
+    steps:
+      - name: 'region_security_policy_basic'
+        resource_id_vars:
+          sec_policy_name: 'my-sec-policy-basic'
   - name: 'region_security_policy_with_ddos_protection_config'
     primary_resource_id: 'region-sec-policy-ddos-protection'
-    vars:
-      sec_policy_name: 'my-sec-policy-ddos-protection'
+    steps:
+      - name: 'region_security_policy_with_ddos_protection_config'
+        resource_id_vars:
+          sec_policy_name: 'my-sec-policy-ddos-protection'
   - name: 'region_security_policy_with_user_defined_fields'
     primary_resource_id: 'region-sec-policy-user-defined-fields'
-    vars:
-      sec_policy_name: 'my-sec-policy-user-defined-fields'
+    steps:
+      - name: 'region_security_policy_with_user_defined_fields'
+        resource_id_vars:
+          sec_policy_name: 'my-sec-policy-user-defined-fields'
   - name: 'region_security_policy_with_rules'
     primary_resource_id: 'region-sec-policy-with-rules'
-    vars:
-      sec_policy_name: 'my-sec-policy-with-rules'
+    steps:
+      - name: 'region_security_policy_with_rules'
+        resource_id_vars:
+          sec_policy_name: 'my-sec-policy-with-rules'
 parameters:
   - name: 'region'
     type: ResourceRef

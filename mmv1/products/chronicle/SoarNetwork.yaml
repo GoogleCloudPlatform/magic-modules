@@ -14,13 +14,11 @@
 ---
 name: SoarNetwork
 description: >
-  Manage networks in the platform using the Classless Inter-Domain Routing (CIDR) format.
-  The system identifies network subnets to help Google Security Operations recognize internal assets and consider network sensitivity during playbook execution.
-min_version: 'beta'
+  Manage networks in the platform using the Classless Inter-Domain Routing (CIDR) format. The system identifies network subnets to help Google Security Operations recognize internal assets and consider network sensitivity during playbook execution.
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.soarNetworks'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.soarNetworks'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks/{{soar_network_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks
@@ -29,13 +27,10 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarNetworks/{{soar_network_id}}
-
 autogen_status: U29hck5ldHdvcms=
-
 samples:
   - name: chronicle_soarnetwork_update
     primary_resource_id: sample
-    min_version: beta
     steps:
       - name: "chronicle_soarnetwork_basic"
         test_env_vars:
@@ -43,7 +38,6 @@ samples:
       - name: "chronicle_soarnetwork_full"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
-
 parameters:
   - name: location
     type: String
