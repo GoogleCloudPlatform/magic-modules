@@ -258,11 +258,6 @@ type Resource struct {
 	// types that share the same API URL (e.g. engines filtered by solutionType).
 	ListFilter string `yaml:"list_filter,omitempty"`
 
-	// [Optional] If true, the list API response is a bare JSON array instead of
-	// a wrapped object with a named key. Use ListArrayPages instead of ListPages
-	// when generating the list function.
-	ListResponseIsArray bool `yaml:"list_response_is_array,omitempty"`
-
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
