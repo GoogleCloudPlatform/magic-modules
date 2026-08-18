@@ -32,6 +32,7 @@ timeouts:
   update_minutes: 30
   delete_minutes: 30
 autogen_async: true
+generate_list_resource: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -48,6 +49,7 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west1"
+generate_list_resource: true
 samples:
   - name: 'network_services_authz_extension_basic'
     primary_resource_id: 'default'
