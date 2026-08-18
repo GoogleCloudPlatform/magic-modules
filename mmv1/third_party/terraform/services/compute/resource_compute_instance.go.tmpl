@@ -2126,7 +2126,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating scheduling: %s", err)
 	}
 	if schedulingBody != nil {
-		instanceBody["scheduling"] = schedulingBody
+		instanceBody["scheduling"] = stripNilSchedulingDurations(schedulingBody)
 	}
 	if amf := expandAdvancedMachineFeatures(d); amf != nil {
 		instanceBody["advancedMachineFeatures"] = amf
