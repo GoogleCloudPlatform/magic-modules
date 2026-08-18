@@ -140,7 +140,7 @@ resource "google_data_lineage_open_lineage_job" "full_job" {
     }
 
     column_lineage {
-      datasetInput {
+      dataset_input {
         namespace  = "gs://example-bucket/"
         name       = "warehouse/raw_dataset/source_table_1"
         field     = "a"
@@ -158,7 +158,7 @@ resource "google_data_lineage_open_lineage_job" "full_job" {
         }
       }
 
-      datasetInput {
+      dataset_input {
         namespace  = "gs://example-bucket/"
         name       = "warehouse/raw_dataset/source_table_1"
         field     = "b"
@@ -168,7 +168,7 @@ resource "google_data_lineage_open_lineage_job" "full_job" {
         }
       }
 
-      datasetInput {
+      dataset_input {
         namespace  = "gs://example-bucket/"
         name       = "warehouse/raw_dataset/source_table_2"
         field     = "a"
@@ -372,10 +372,10 @@ The following arguments are supported:
   Field-level lineage mappings.
   Structure is [documented below](#nested_output_column_lineage_field).
 
-* `datasetInput` -
+* `dataset_input` -
   (Required)
   Input fields participating in output dataset lineage.
-  Structure is [documented below](#nested_output_column_lineage_datasetInput).
+  Structure is [documented below](#nested_output_column_lineage_dataset_input).
 
 
 <a name="nested_output_column_lineage_field"></a>The `field` block supports:
@@ -420,7 +420,7 @@ The following arguments are supported:
   (Optional)
   Transformation subtype.
 
-<a name="nested_output_column_lineage_datasetInput"></a>The `datasetInput` block supports:
+<a name="nested_output_column_lineage_dataset_input"></a>The `dataset_input` block supports:
 
 * `namespace` -
   (Required)
@@ -437,10 +437,10 @@ The following arguments are supported:
 * `transformation` -
   (Optional)
   Transformations applied to fields from this input.
-  Structure is [documented below](#nested_output_column_lineage_datasetInput_transformation).
+  Structure is [documented below](#nested_output_column_lineage_dataset_input_transformation).
 
 
-<a name="nested_output_column_lineage_datasetInput_transformation"></a>The `transformation` block supports:
+<a name="nested_output_column_lineage_dataset_input_transformation"></a>The `transformation` block supports:
 
 * `type` -
   (Required)
