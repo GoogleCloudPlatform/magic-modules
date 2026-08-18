@@ -191,12 +191,6 @@ properties:
             A FAILED gateway is surfaced here without a provider error
             (the engine as a whole may still be ACTIVE).
           output: true
-        - name: 'ipAddress'
-          type: String
-          description: |
-            The IP address allocated for this gateway's PSC endpoint.
-            Populated by the backend after ACTIVE; empty until then.
-          output: true
         - name: 'pscEndpoint'
           type: String
           description: |
