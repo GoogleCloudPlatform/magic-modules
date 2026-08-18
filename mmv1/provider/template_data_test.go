@@ -16,8 +16,13 @@ package provider
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"testing/fstest"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 )
 
 func TestGenerateFile(t *testing.T) {
@@ -109,5 +114,88 @@ func TestGenerateFile(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestGenerateQueryTestFileImportsFirstSampleDependenciesOnly(t *testing.T) {
+	productVersion := &product.Version{Name: "ga"}
+	importPath := "github.com/hashicorp/terraform-provider-google/google"
+	res := api.Resource{
+		Name:            "Foo",
+		ImportPath:      importPath,
+		ProductMetadata: &api.Product{Name: "Example", Version: productVersion, Versions: []*product.Version{productVersion}},
+		Samples: []*resource.Sample{
+			{
+				Name:              "example_foo",
+				PrimaryResourceId: "example_foo",
+				Steps: []*resource.Step{{
+					Name: "example_foo",
+					TestContextVars: map[string]string{
+						"network_name": `servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "test-network")`,
+					},
+				}},
+			},
+			{
+				Name:              "example_foo_iam",
+				PrimaryResourceId: "example_foo_iam",
+				BootstrapIam: []resource.IamMember{{
+					Member: "serviceAccount:test@example.com",
+					Role:   "roles/viewer",
+				}},
+				Steps: []*resource.Step{{
+					Name: "example_foo_iam",
+				}},
+			},
+		},
+	}
+	filePath := filepath.Join(t.TempDir(), "list_google_example_foo_generated_test.go")
+	NewTemplateData(t.TempDir(), "ga", os.DirFS("..")).GenerateQueryTestFile(filePath, res)
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatalf("query file should be generated: %v", err)
+	}
+	generated := string(content)
+	if !strings.Contains(generated, importPath+"/services/servicenetworking") {
+		t.Fatalf("query test missing first-sample TestContextVars import:\n%s", generated)
+	}
+	if strings.Contains(generated, importPath+"/services/resourcemanager") {
+		t.Fatalf("query test imported later-sample BootstrapIam dependency:\n%s", generated)
+	}
+}
+
+func TestGenerateQueryTestFileUsesResourcemanagerForFirstSampleBootstrapIam(t *testing.T) {
+	productVersion := &product.Version{Name: "ga"}
+	importPath := "github.com/hashicorp/terraform-provider-google/google"
+	res := api.Resource{
+		Name:            "Foo",
+		ImportPath:      importPath,
+		ProductMetadata: &api.Product{Name: "Example", Version: productVersion, Versions: []*product.Version{productVersion}},
+		Samples: []*resource.Sample{{
+			Name:              "example_foo",
+			PrimaryResourceId: "example_foo",
+			BootstrapIam: []resource.IamMember{{
+				Member: "serviceAccount:test@example.com",
+				Role:   "roles/viewer",
+			}},
+			Steps: []*resource.Step{{
+				Name: "example_foo",
+			}},
+		}},
+	}
+	filePath := filepath.Join(t.TempDir(), "list_google_example_foo_generated_test.go")
+	NewTemplateData(t.TempDir(), "ga", os.DirFS("..")).GenerateQueryTestFile(filePath, res)
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatalf("query file should be generated: %v", err)
+	}
+	generated := string(content)
+	if !strings.Contains(generated, importPath+"/services/resourcemanager") {
+		t.Fatalf("query test missing resourcemanager import for first-sample BootstrapIam:\n%s", generated)
+	}
+	if !strings.Contains(generated, "resourcemanager.BootstrapIamMembers") {
+		t.Fatalf("query test should call resourcemanager.BootstrapIamMembers:\n%s", generated)
+	}
+	if strings.Contains(generated, "acctest.BootstrapIamMembers") {
+		t.Fatalf("query test still calls acctest.BootstrapIamMembers:\n%s", generated)
 	}
 }
