@@ -221,7 +221,7 @@ func ResourceDataLineageOpenLineageJob() *schema.Resource {
 								},
 							},
 						},
-						"columnLineage": {
+						"column_lineage": {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Description: `Column-level lineage information for the output dataset.`,
@@ -539,11 +539,11 @@ func flattenDataLineageOpenLineageJobOutput(v interface{}, d *schema.ResourceDat
 			continue
 		}
 		transformed = append(transformed, map[string]interface{}{
-			"namespace":     flattenDataLineageOpenLineageJobOutputNamespace(original["namespace"], d, config),
-			"name":          flattenDataLineageOpenLineageJobOutputName(original["name"], d, config),
-			"symlink":       flattenDataLineageOpenLineageJobOutputSymlink(original["symlink"], d, config),
-			"catalog":       flattenDataLineageOpenLineageJobOutputCatalog(original["catalog"], d, config),
-			"columnLineage": flattenDataLineageOpenLineageJobOutputColumnLineage(original["columnLineage"], d, config),
+			"namespace":      flattenDataLineageOpenLineageJobOutputNamespace(original["namespace"], d, config),
+			"name":           flattenDataLineageOpenLineageJobOutputName(original["name"], d, config),
+			"symlink":        flattenDataLineageOpenLineageJobOutputSymlink(original["symlink"], d, config),
+			"catalog":        flattenDataLineageOpenLineageJobOutputCatalog(original["catalog"], d, config),
+			"column_lineage": flattenDataLineageOpenLineageJobOutputColumnLineage(original["column_lineage"], d, config),
 		})
 	}
 	return transformed
@@ -1044,11 +1044,11 @@ func expandDataLineageOpenLineageJobOutput(v interface{}, d tpgresource.Terrafor
 			transformed["catalog"] = transformedCatalog
 		}
 
-		transformedColumnLineage, err := expandDataLineageOpenLineageJobOutputColumnLineage(original["columnLineage"], d, config)
+		transformedColumnLineage, err := expandDataLineageOpenLineageJobOutputColumnLineage(original["column_lineage"], d, config)
 		if err != nil {
 			return nil, err
 		} else if val := reflect.ValueOf(transformedColumnLineage); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-			transformed["columnLineage"] = transformedColumnLineage
+			transformed["column_lineage"] = transformedColumnLineage
 		}
 
 		req = append(req, transformed)

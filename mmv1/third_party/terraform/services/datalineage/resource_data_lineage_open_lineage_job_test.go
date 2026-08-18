@@ -111,8 +111,8 @@ func TestAccDataLineageOpenLineageJob_dataLineageOpenLineageJobWithFacetsExample
 					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "name", "test_full_job"),
 					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "input.#", "2"),
 					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "output.#", "1"),
-					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "output.0.columnLineage.0.datasetInput.#", "3"),
-					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "output.0.columnLineage.0.field.#", "3"),
+					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "output.0.column_lineage.0.datasetInput.#", "3"),
+					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "output.0.column_lineage.0.field.#", "3"),
 					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "knowledge_catalog.#", "1"),
 					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.full_job", "knowledge_catalog.0.process"),
 					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.full_job", "knowledge_catalog.0.run"),
@@ -183,7 +183,7 @@ resource "google_data_lineage_open_lineage_job" "full_job" {
       name      = "example-catalog"
     }
 
-    columnLineage {
+    column_lineage {
       datasetInput {
        namespace  = "gs://example-bucket/"
        name       = "warehouse/raw_dataset/source_table_1"
