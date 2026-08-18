@@ -947,6 +947,10 @@ properties:
             type: String
             description: |-
               Optional. The resource name of the Cloud Build WorkerPool to use for the build.
+          - name: 'serviceAccount'
+            type: String
+            description: |-
+              Optional. The service account that the Cloud Build builder runs as.
   - name: 'contextSpec'
     min_version: 'beta'
     type: NestedObject
