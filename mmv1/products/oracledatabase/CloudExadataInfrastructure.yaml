@@ -63,7 +63,7 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-basic-%s", acctest.RandString(t, 10))
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-basic-%s", randomSuffix)
   - name: oracledatabase_cloud_exadata_infrastructure_full
     primary_resource_id: my-cloud-exadata
     steps:
@@ -81,7 +81,7 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-full-%s", acctest.RandString(t, 10))
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-full-%s", randomSuffix)
 virtual_fields:
   - name: deletion_protection
     type: Boolean

@@ -58,7 +58,7 @@ samples:
         test_vars_overrides:
           project: '"oci-terraform-testing-prod"'
           deletion_protection: false
-          goldengate_connection_assignment_id: fmt.Sprintf("tf-gcca-%s", acctest.RandString(t, 10))
+          goldengate_connection_assignment_id: fmt.Sprintf("tf-gcca-%s", randomSuffix)
           goldengate_deployment_id: '"tf-test-permanent-deployment"'
           goldengate_connection_id: '"tf-test-permanent-connection"'
 virtual_fields:

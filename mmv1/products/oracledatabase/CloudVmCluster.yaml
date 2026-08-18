@@ -66,8 +66,8 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-basic-%s", acctest.RandString(t, 10))
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-basic-%s", acctest.RandString(t, 10))
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-basic-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-basic-%s", randomSuffix)
   - name: oracledatabase_cloud_vmcluster_odbnetwork
     primary_resource_id: my_vmcluster
     steps:
@@ -89,8 +89,8 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-odbnetwork-%s", acctest.RandString(t, 10))
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-odbnetwork-%s", acctest.RandString(t, 10))
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-odbnetwork-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-odbnetwork-%s", randomSuffix)
           odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
           odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
           backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
@@ -112,8 +112,8 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-full-%s", acctest.RandString(t, 10))
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-full-%s", acctest.RandString(t, 10))
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-full-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-full-%s", randomSuffix)
   - name: oracledatabase_cloud_vmcluster_exascale
     primary_resource_id: my_vmcluster
     steps:
@@ -129,9 +129,9 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           project: '"oci-terraform-testing-prod"'
-          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-exascale-%s", acctest.RandString(t, 10))
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-exascale-%s", acctest.RandString(t, 10))
-          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-vault-for-vmcluster-exascale-%s", acctest.RandString(t, 10))
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-exascale-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-exascale-%s", randomSuffix)
+          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-vault-for-vmcluster-exascale-%s", randomSuffix)
 virtual_fields:
   - name: deletion_protection
     type: Boolean

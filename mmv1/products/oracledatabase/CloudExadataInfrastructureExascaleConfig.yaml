@@ -52,7 +52,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           project: '"oci-terraform-testing-prod"'
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-test-tf-configured-exadata-%s", acctest.RandString(t, 10))
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-test-tf-configured-exadata-%s", randomSuffix)
 parameters:
   - name: location
     type: String

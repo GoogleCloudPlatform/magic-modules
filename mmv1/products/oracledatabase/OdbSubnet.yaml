@@ -66,7 +66,7 @@ samples:
           deletion_protection: "false"
           project: '"oci-terraform-testing-prod"'
           odb_network_id: '"tf-test-permanent-odbnetwork"'
-          odb_subnet_id: fmt.Sprintf("tf-test-odbsubnet-%s", acctest.RandString(t, 10))
+          odb_subnet_id: fmt.Sprintf("tf-test-odbsubnet-%s", randomSuffix)
 virtual_fields:
   - name: deletion_protection
     type: Boolean
