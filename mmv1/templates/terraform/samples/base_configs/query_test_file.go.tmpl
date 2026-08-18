@@ -29,6 +29,9 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
+{{- range $pkg, $alias := $.TestDependencies }}
+	{{ $alias }} "{{ $.ImportPath }}/{{ $pkg }}"
+{{- end }}
 )
 
 var (
