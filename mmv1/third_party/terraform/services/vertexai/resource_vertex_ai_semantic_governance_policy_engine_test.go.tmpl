@@ -193,20 +193,12 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
 // The gateway_config removal step splits the SGPE Update from the
 // zone/subnet/network destroy to avoid a parallel containerNotEmpty.
 //
-// Gateway names are run-unique: alpha/beta/gamma suffixed with the test's
-// random_suffix. The backend derives deterministic customer-project
-// resource names from the gateway name (sgpe-ip-<name>, sgpe-psce-<name>)
-// and, on ALREADY_EXISTS for the reserved address, silently reuses the
-// existing address WITHOUT checking its network
-// (CreateRegionAddressTaskHandler). A partially-failed earlier run in the
-// shared CI project leaves a stale sgpe-ip-<name> bound to a now-deleted
-// VPC; a later run reusing the same fixed name then reuses that stale
-// address, and the PSC forwarding rule — built on the run's fresh network
-// — is rejected as different-network. Run-unique names make each run's
-// derived address unique so it cannot collide with shared-project residue.
-// The underlying backend cleanup/resilience gaps are tracked separately
-// (EXTERNAL_TODOS T-1; the b/539978243 ALREADY_EXISTS-verification family);
-// this is not a substitute for that fix.
+// Gateway names are run-unique (alpha/beta/gamma + random_suffix) rather
+// than fixed. The backend derives customer-project resource names from the
+// gateway name, so reusing a fixed name across runs can collide with
+// resources left behind by an earlier failed run: the backend has trouble
+// both with cleanup on failure paths and with recreating same-named
+// networking resources. Run-unique names keep each run's resources isolated.
 
 const testAccSGPESharedNetworking = `
 resource "google_compute_network" "sgpe_network" {
