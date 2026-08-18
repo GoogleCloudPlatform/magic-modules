@@ -87,6 +87,23 @@ func (r *KeyAndroidSettings) validate() error {
 	return nil
 }
 func (r *KeyIosSettings) validate() error {
+	if !dcl.IsEmptyValueIndirect(r.AppleDeveloperId) {
+		if err := r.AppleDeveloperId.validate(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func (r *KeyIosSettingsAppleDeveloperId) validate() error {
+	if err := dcl.Required(r, "keyId"); err != nil {
+		return err
+	}
+	if err := dcl.Required(r, "teamId"); err != nil {
+		return err
+	}
+	if err := dcl.Required(r, "privateKey"); err != nil {
+		return err
+	}
 	return nil
 }
 func (r *KeyTestingOptions) validate() error {
@@ -1189,7 +1206,7 @@ func canonicalizeNewKeyIosSettingsAppleDeveloperId(c *Client, des, nw *KeyIosSet
 	if dcl.StringCanonicalize(des.KeyId, nw.KeyId) {
 		nw.KeyId = des.KeyId
 	}
-	if dcl.StringCanonicalize(des.PrivateKey, nw.PrivateKey) {
+	if dcl.StringCanonicalize(des.PrivateKey, nw.PrivateKey) || dcl.IsEmptyValueIndirect(nw.PrivateKey) {
 		nw.PrivateKey = des.PrivateKey
 	}
 	if dcl.StringCanonicalize(des.TeamId, nw.TeamId) {
@@ -2504,6 +2521,9 @@ func expandKeyAndroidSettings(c *Client, f *KeyAndroidSettings, res *Key) (map[s
 	if v := f.AllowedPackageNames; v != nil {
 		m["allowedPackageNames"] = v
 	}
+	if v := f.SupportNonGoogleAppStoreDistribution; !dcl.IsEmptyValueIndirect(v) {
+		m["supportNonGoogleAppStoreDistribution"] = v
+	}
 
 	return m, nil
 }
@@ -2523,6 +2543,129 @@ func flattenKeyAndroidSettings(c *Client, i interface{}, res *Key) *KeyAndroidSe
 	}
 	r.AllowAllPackageNames = dcl.FlattenBool(m["allowAllPackageNames"])
 	r.AllowedPackageNames = dcl.FlattenStringSlice(m["allowedPackageNames"])
+	r.SupportNonGoogleAppStoreDistribution = dcl.FlattenBool(m["supportNonGoogleAppStoreDistribution"])
+
+	return r
+}
+
+// expandKeyIosSettingsAppleDeveloperIdMap expands the contents of KeyIosSettingsAppleDeveloperId into a JSON
+// request object.
+func expandKeyIosSettingsAppleDeveloperIdMap(c *Client, f map[string]KeyIosSettingsAppleDeveloperId, res *Key) (map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+
+	items := make(map[string]interface{})
+	for k, item := range f {
+		i, err := expandKeyIosSettingsAppleDeveloperId(c, &item, res)
+		if err != nil {
+			return nil, err
+		}
+		if i != nil {
+			items[k] = i
+		}
+	}
+
+	return items, nil
+}
+
+// expandKeyIosSettingsAppleDeveloperIdSlice expands the contents of KeyIosSettingsAppleDeveloperId into a JSON
+// request object.
+func expandKeyIosSettingsAppleDeveloperIdSlice(c *Client, f []KeyIosSettingsAppleDeveloperId, res *Key) ([]map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+
+	items := []map[string]interface{}{}
+	for _, item := range f {
+		i, err := expandKeyIosSettingsAppleDeveloperId(c, &item, res)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, i)
+	}
+
+	return items, nil
+}
+
+// flattenKeyIosSettingsAppleDeveloperIdMap flattens the contents of KeyIosSettingsAppleDeveloperId from a JSON
+// response object.
+func flattenKeyIosSettingsAppleDeveloperIdMap(c *Client, i interface{}, res *Key) map[string]KeyIosSettingsAppleDeveloperId {
+	a, ok := i.(map[string]interface{})
+	if !ok {
+		return map[string]KeyIosSettingsAppleDeveloperId{}
+	}
+
+	if len(a) == 0 {
+		return map[string]KeyIosSettingsAppleDeveloperId{}
+	}
+
+	items := make(map[string]KeyIosSettingsAppleDeveloperId)
+	for k, item := range a {
+		items[k] = *flattenKeyIosSettingsAppleDeveloperId(c, item.(map[string]interface{}), res)
+	}
+
+	return items
+}
+
+// flattenKeyIosSettingsAppleDeveloperIdSlice flattens the contents of KeyIosSettingsAppleDeveloperId from a JSON
+// response object.
+func flattenKeyIosSettingsAppleDeveloperIdSlice(c *Client, i interface{}, res *Key) []KeyIosSettingsAppleDeveloperId {
+	a, ok := i.([]interface{})
+	if !ok {
+		return []KeyIosSettingsAppleDeveloperId{}
+	}
+
+	if len(a) == 0 {
+		return []KeyIosSettingsAppleDeveloperId{}
+	}
+
+	items := make([]KeyIosSettingsAppleDeveloperId, 0, len(a))
+	for _, item := range a {
+		items = append(items, *flattenKeyIosSettingsAppleDeveloperId(c, item.(map[string]interface{}), res))
+	}
+
+	return items
+}
+
+// expandKeyIosSettingsAppleDeveloperId expands an instance of KeyIosSettingsAppleDeveloperId into a JSON
+// request object.
+func expandKeyIosSettingsAppleDeveloperId(c *Client, f *KeyIosSettingsAppleDeveloperId, res *Key) (map[string]interface{}, error) {
+	if dcl.IsEmptyValueIndirect(f) {
+		return nil, nil
+	}
+
+	m := make(map[string]interface{})
+	if v := f.KeyId; !dcl.IsEmptyValueIndirect(v) {
+		m["keyId"] = v
+	}
+	if v := f.PrivateKey; !dcl.IsEmptyValueIndirect(v) {
+		m["privateKey"] = v
+	}
+	if v := f.TeamId; !dcl.IsEmptyValueIndirect(v) {
+		m["teamId"] = v
+	}
+
+	return m, nil
+}
+
+// flattenKeyIosSettingsAppleDeveloperId flattens an instance of KeyIosSettingsAppleDeveloperId from a JSON
+// response object.
+func flattenKeyIosSettingsAppleDeveloperId(c *Client, i interface{}, res *Key) *KeyIosSettingsAppleDeveloperId {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	r := &KeyIosSettingsAppleDeveloperId{}
+
+	if dcl.IsEmptyValueIndirect(i) {
+		return EmptyKeyIosSettingsAppleDeveloperId
+	}
+	r.KeyId = dcl.FlattenString(m["keyId"])
+	r.PrivateKey = dcl.FlattenString(m["privateKey"])
+	r.TeamId = dcl.FlattenString(m["teamId"])
 
 	return r
 }
@@ -2622,6 +2765,11 @@ func expandKeyIosSettings(c *Client, f *KeyIosSettings, res *Key) (map[string]in
 	if v := f.AllowedBundleIds; v != nil {
 		m["allowedBundleIds"] = v
 	}
+	if v, err := expandKeyIosSettingsAppleDeveloperId(c, f.AppleDeveloperId, res); err != nil {
+		return nil, fmt.Errorf("error expanding AppleDeveloperId into appleDeveloperId: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["appleDeveloperId"] = v
+	}
 
 	return m, nil
 }
@@ -2641,6 +2789,7 @@ func flattenKeyIosSettings(c *Client, i interface{}, res *Key) *KeyIosSettings {
 	}
 	r.AllowAllBundleIds = dcl.FlattenBool(m["allowAllBundleIds"])
 	r.AllowedBundleIds = dcl.FlattenStringSlice(m["allowedBundleIds"])
+	r.AppleDeveloperId = flattenKeyIosSettingsAppleDeveloperId(c, m["appleDeveloperId"], res)
 
 	return r
 }
