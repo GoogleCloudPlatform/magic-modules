@@ -84,10 +84,10 @@ GROUP BY t1.a, b
 
 
 ```hcl
-resource "google_data_lineage_open_lineage_job" "column_lineage_event" {
-  namespace   = "testColumnLevelLineage"
-  name        = "open_lineage_integration_create_table.execute_create_hive_table_as_select_command.default_tbl1"
-  description = "OpenLineage column lineage event from Spark integration"
+resource "google_data_lineage_open_lineage_job" "full_job" {
+  namespace   = "testNamespace"
+  name        = "test_full_job"
+  description = "Test resource with all available facets"
 
   input {
     namespace = "gs://example-bucket/"
@@ -139,8 +139,8 @@ resource "google_data_lineage_open_lineage_job" "column_lineage_event" {
       name      = "example-catalog"
     }
 
-    column_lineage {
-      dataset_input {
+    columnLineage {
+      datasetInput {
         namespace  = "gs://example-bucket/"
         name       = "warehouse/raw_dataset/source_table_1"
         field     = "a"
@@ -158,7 +158,7 @@ resource "google_data_lineage_open_lineage_job" "column_lineage_event" {
         }
       }
 
-      dataset_input {
+      datasetInput {
         namespace  = "gs://example-bucket/"
         name       = "warehouse/raw_dataset/source_table_1"
         field     = "b"
@@ -168,7 +168,7 @@ resource "google_data_lineage_open_lineage_job" "column_lineage_event" {
         }
       }
 
-      dataset_input {
+      datasetInput {
         namespace  = "gs://example-bucket/"
         name       = "warehouse/raw_dataset/source_table_2"
         field     = "a"
@@ -331,10 +331,10 @@ The following arguments are supported:
   Catalog information for the dataset.
   Structure is [documented below](#nested_output_catalog).
 
-* `column_lineage` -
+* `columnLineage` -
   (Optional)
   Column-level lineage information for the output dataset.
-  Structure is [documented below](#nested_output_column_lineage).
+  Structure is [documented below](#nested_output_columnLineage).
 
 
 <a name="nested_output_symlink"></a>The `symlink` block supports:
@@ -365,20 +365,20 @@ The following arguments are supported:
   (Required)
   Catalog entity name.
 
-<a name="nested_output_column_lineage"></a>The `column_lineage` block supports:
+<a name="nested_output_columnLineage"></a>The `columnLineage` block supports:
 
 * `field` -
   (Required)
   Field-level lineage mappings.
-  Structure is [documented below](#nested_output_column_lineage_field).
+  Structure is [documented below](#nested_output_columnLineage_field).
 
-* `dataset_input` -
+* `datasetInput` -
   (Required)
   Input fields participating in output dataset lineage.
-  Structure is [documented below](#nested_output_column_lineage_dataset_input).
+  Structure is [documented below](#nested_output_columnLineage_datasetInput).
 
 
-<a name="nested_output_column_lineage_field"></a>The `field` block supports:
+<a name="nested_output_columnLineage_field"></a>The `field` block supports:
 
 * `name` -
   (Required)
@@ -387,10 +387,10 @@ The following arguments are supported:
 * `input` -
   (Required)
   Input fields contributing to this output field.
-  Structure is [documented below](#nested_output_column_lineage_field_input).
+  Structure is [documented below](#nested_output_columnLineage_field_input).
 
 
-<a name="nested_output_column_lineage_field_input"></a>The `input` block supports:
+<a name="nested_output_columnLineage_field_input"></a>The `input` block supports:
 
 * `namespace` -
   (Required)
@@ -407,10 +407,10 @@ The following arguments are supported:
 * `transformation` -
   (Optional)
   Transformations applied from source to output field.
-  Structure is [documented below](#nested_output_column_lineage_field_input_transformation).
+  Structure is [documented below](#nested_output_columnLineage_field_input_transformation).
 
 
-<a name="nested_output_column_lineage_field_input_transformation"></a>The `transformation` block supports:
+<a name="nested_output_columnLineage_field_input_transformation"></a>The `transformation` block supports:
 
 * `type` -
   (Required)
@@ -420,7 +420,7 @@ The following arguments are supported:
   (Optional)
   Transformation subtype.
 
-<a name="nested_output_column_lineage_dataset_input"></a>The `dataset_input` block supports:
+<a name="nested_output_columnLineage_datasetInput"></a>The `datasetInput` block supports:
 
 * `namespace` -
   (Required)
@@ -437,10 +437,10 @@ The following arguments are supported:
 * `transformation` -
   (Optional)
   Transformations applied to fields from this input.
-  Structure is [documented below](#nested_output_column_lineage_dataset_input_transformation).
+  Structure is [documented below](#nested_output_columnLineage_datasetInput_transformation).
 
 
-<a name="nested_output_column_lineage_dataset_input_transformation"></a>The `transformation` block supports:
+<a name="nested_output_columnLineage_datasetInput_transformation"></a>The `transformation` block supports:
 
 * `type` -
   (Required)
