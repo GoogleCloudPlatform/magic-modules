@@ -15,9 +15,6 @@
 name: Template
 description: |
   A Template is a logical parameter template.
-references:
-  guides:
-  api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.templates
 docs:
 min_version: beta
 base_url: projects/{{project}}/locations/global/templates
