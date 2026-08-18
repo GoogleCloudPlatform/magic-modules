@@ -1,0 +1,4 @@
+resource "google_parameter_manager_template" "{{$.PrimaryResourceId}}" {
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+  format = "TEMPLATE_FORMAT_JSON"
+}
