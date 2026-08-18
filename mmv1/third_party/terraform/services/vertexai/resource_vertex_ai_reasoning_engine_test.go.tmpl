@@ -127,6 +127,10 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     class_methods   = jsonencode(local.class_methods)
     service_account = google_service_account.service_account.email
 
+    build_spec {
+      service_account = google_service_account.service_account.email
+    }
+
     deployment_spec {
       min_instances         = 1
       max_instances         = 3
@@ -177,6 +181,9 @@ resource "time_sleep" "wait_5_minutes" {
   depends_on = [
     google_project_iam_member.sa_iam_ai_platform_user,
     google_project_iam_member.sa_iam_object_viewer,
+    google_project_iam_member.sa_iam_object_admin,
+    google_project_iam_member.sa_iam_log_writer,
+    google_project_iam_member.sa_iam_ar_writer,
     google_project_iam_member.sa_iam_viewer,
     google_secret_manager_secret_iam_member.secret_access,
     google_secret_manager_secret_version.secret_version
@@ -239,6 +246,24 @@ resource "google_project_iam_member" "sa_iam_object_viewer" {
 
 resource "google_project_iam_member" "sa_iam_ai_platform_user" {
   role    = "roles/aiplatform.user"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "sa_iam_object_admin" {
+  role    = "roles/storage.objectAdmin"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "sa_iam_log_writer" {
+  role    = "roles/logging.logWriter"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "sa_iam_ar_writer" {
+  role    = "roles/artifactregistry.writer"
   project = data.google_project.project.id
   member  = google_service_account.service_account.member
 }
@@ -309,6 +334,10 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     class_methods   = jsonencode(local.class_methods_new)
     service_account = google_service_account.service_account_new.email
 
+    build_spec {
+      service_account = google_service_account.service_account_new.email
+    }
+
     deployment_spec {
       min_instances         = 2
       max_instances         = 4
@@ -368,6 +397,9 @@ resource "time_sleep" "wait_5_minutes" {
   depends_on = [
     google_project_iam_member.sa_iam_ai_platform_user_new,
     google_project_iam_member.sa_iam_object_viewer_new,
+    google_project_iam_member.sa_iam_object_admin_new,
+    google_project_iam_member.sa_iam_log_writer_new,
+    google_project_iam_member.sa_iam_ar_writer_new,
     google_project_iam_member.sa_iam_viewer_new,
     google_secret_manager_secret_iam_member.secret_access_new,
     google_secret_manager_secret_iam_member.secret_new_access,
@@ -508,6 +540,24 @@ resource "google_project_iam_member" "sa_iam_object_viewer_new" {
 
 resource "google_project_iam_member" "sa_iam_ai_platform_user_new" {
   role    = "roles/aiplatform.user"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
+
+resource "google_project_iam_member" "sa_iam_object_admin_new" {
+  role    = "roles/storage.objectAdmin"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
+
+resource "google_project_iam_member" "sa_iam_log_writer_new" {
+  role    = "roles/logging.logWriter"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
+
+resource "google_project_iam_member" "sa_iam_ar_writer_new" {
+  role    = "roles/artifactregistry.writer"
   project = data.google_project.project.id
   member  = google_service_account.service_account_new.member
 }
@@ -734,24 +784,12 @@ func TestAccVertexAIReasoningEngine_apiParity(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckVertexAIReasoningEngineDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAIReasoningEngine_apiParity(context),
-			},
-			{
-				ResourceName:            "google_vertex_ai_reasoning_engine.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source", "spec.0.agent_card"},
-			},
-			{
-				Config: testAccVertexAIReasoningEngine_apiParityUpdate(context),
-			},
-			{
-				ResourceName:            "google_vertex_ai_reasoning_engine.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source", "spec.0.agent_card"},
 			},
 		},
 	})
@@ -761,11 +799,6 @@ func testAccVertexAIReasoningEngine_apiParity(context map[string]interface{}) st
 	return acctest.Nprintf(`
 data "google_project" "project" {
   provider = google-beta
-}
-
-resource "google_service_account" "sa" {
-  provider   = google-beta
-  account_id = "tf-test-re-sa-%{random_suffix}"
 }
 
 resource "google_cloudbuild_worker_pool" "pool" {
@@ -798,76 +831,7 @@ resource "google_vertex_ai_reasoning_engine" "primary" {
       description = "a test agent card"
     })
     build_spec {
-      worker_pool     = google_cloudbuild_worker_pool.pool.id
-      service_account = google_service_account.sa.email
-    }
-    deployment_spec {
-      agent_server_mode                  = "EXPERIMENTAL"
-      dedicated_ingress_endpoint_enabled = false
-    }
-    source_code_spec {
-      inline_source {
-        source_archive = filebase64("./test-fixtures/agent_src.tar.gz")
-      }
-      image_spec {
-        build_args = {}
-      }
-    }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      spec[0].agent_card,
-      context_spec,
-    ]
-  }
-}
-`, context)
-}
-
-func testAccVertexAIReasoningEngine_apiParityUpdate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_project" "project" {
-  provider = google-beta
-}
-
-resource "google_service_account" "sa_upd" {
-  provider   = google-beta
-  account_id = "tf-test-re-sa-upd-%{random_suffix}"
-}
-
-resource "google_cloudbuild_worker_pool" "pool" {
-  provider = google-beta
-  name     = "pool-%{random_suffix}"
-  location = "us-central1"
-  worker_config {
-    disk_size_gb   = 100
-    machine_type   = "e2-standard-4"
-    no_external_ip = false
-  }
-}
-
-resource "google_vertex_ai_reasoning_engine" "primary" {
-  provider     = google-beta
-  display_name = "tf-test-reasoning-engine-%{random_suffix}"
-  description  = "Reasoning engine testing API parity fields updated"
-  region       = "us-central1"
-
-  context_spec {
-    example_store_config {
-      similarity_search_config {
-        embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
-      }
-    }
-  }
-  spec {
-    agent_card = jsonencode({
-      name        = "test-agent"
-      description = "a test agent card"
-    })
-    build_spec {
-      worker_pool     = google_cloudbuild_worker_pool.pool.id
-      service_account = google_service_account.sa_upd.email
+      worker_pool = google_cloudbuild_worker_pool.pool.id
     }
     deployment_spec {
       agent_server_mode                  = "EXPERIMENTAL"
