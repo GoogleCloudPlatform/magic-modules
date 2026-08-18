@@ -6017,6 +6017,97 @@ resource "google_container_node_pool" "np" {
 }
 `, networkName, subnetworkName, cluster, np)
 }
+
+func TestAccContainerNodePool_withOpportunisticMaintenance(t *testing.T) {
+	t.Parallel()
+	t.Skip("Opportunistic maintenance strategy is only supported on GPU/TPU node pools; requires GPU capacity/quota and a project allowlisted for GKE host maintenance. Run manually.")
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+	networkName := fmt.Sprintf("tf-test-net-%s", acctest.RandString(t, 10))
+	subnetworkName := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+			PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+			ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+			CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+			Steps: []resource.TestStep{
+					{
+							Config: testAccContainerNodePool_withOpportunisticMaintenance(cluster, networkName, subnetworkName, np),
+					},
+					{
+							ResourceName:      "google_container_node_pool.np",
+							ImportState:       true,
+							ImportStateVerify: true,
+					},
+			},
+	})
+}
+
+func testAccContainerNodePool_withOpportunisticMaintenance(cluster, networkName, subnetworkName, np string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "net" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "sub" {
+  name          = "%s"
+  network       = google_compute_network.net.id
+  ip_cidr_range = "10.0.0.0/20"
+  region        = "us-central1"
+  secondary_ip_range {
+    range_name    = "pods"
+    ip_cidr_range = "10.16.0.0/14"
+  }
+  secondary_ip_range {
+    range_name    = "services"
+    ip_cidr_range = "10.20.0.0/20"
+  }
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  node_config {
+    machine_type = "n2-standard-2"
+  }
+  network    = google_compute_network.net.id
+  subnetwork = google_compute_subnetwork.sub.id
+  ip_allocation_policy {
+    cluster_secondary_range_name  = "pods"
+    services_secondary_range_name = "services"
+  }
+  deletion_protection = false
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    machine_type = "n1-standard-2"
+    guest_accelerator {
+      type  = "nvidia-tesla-t4"
+      count = 1
+      gpu_driver_installation_config {
+        gpu_driver_version = "DEFAULT"
+      }
+    }
+    host_maintenance_policy {
+      maintenance_interval = "PERIODIC"
+      opportunistic_maintenance_strategy {
+        node_idle_time_window           = "600s"
+        maintenance_availability_window = "1209600s"
+        min_nodes_per_pool              = 1
+      }
+    }
+  }
+}
+`, networkName, subnetworkName, cluster, np)
+}
 {{- end }}
 
 func TestAccContainerNodePool_withConfidentialBootDisk(t *testing.T) {
