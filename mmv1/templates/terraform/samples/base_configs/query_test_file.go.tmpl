@@ -34,6 +34,9 @@ import (
 		{{- if contains (toString $varVal) "kms." }}
 	"{{ $.ImportPath }}/services/kms"
 		{{- end }}
+		{{- if contains (toString $varVal) "servicenetworking." }}
+	"{{ $.ImportPath }}/services/servicenetworking"
+		{{- end }}
 	{{- end }}
 {{- end }}
 )
