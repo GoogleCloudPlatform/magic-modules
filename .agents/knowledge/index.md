@@ -37,6 +37,8 @@ Read this index at decision points; open only the source the task needs. Format 
 - Create a PR — `docs/content/code-review/create-pr.md`
 - Write release notes — `docs/content/code-review/release-notes.md`
 - Review a PR — `docs/content/code-review/review-pr.md`
+- Make a breaking change / deprecations / removals — `docs/content/breaking-changes/make-a-breaking-change.md`
+- Types of breaking changes — `docs/content/breaking-changes/breaking-changes.md`
 
 **Documentation:**
 
