@@ -248,7 +248,7 @@ properties:
     is_set: true
     required: true
     send_empty_value: true
-    set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
+    set_hash_func: 'tpgresource.SelfLinkNameHash'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'subnet'
