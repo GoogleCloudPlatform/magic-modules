@@ -29,6 +29,13 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
+{{- if $step.TestContextVars }}
+	{{- range $varKey, $varVal := $step.TestContextVars }}
+		{{- if contains (toString $varVal) "kms." }}
+	"{{ $.ImportPath }}/services/kms"
+		{{- end }}
+	{{- end }}
+{{- end }}
 )
 
 var (
