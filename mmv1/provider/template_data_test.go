@@ -199,3 +199,37 @@ func TestGenerateQueryTestFileUsesResourcemanagerForFirstSampleBootstrapIam(t *t
 		t.Fatalf("query test still calls acctest.BootstrapIamMembers:\n%s", generated)
 	}
 }
+
+func TestGenerateListResourceStripsSelfLinkFromIdentityName(t *testing.T) {
+	productVersion := &product.Version{Name: "ga", BaseUrl: "https://example.googleapis.com/v1/"}
+	res := api.Resource{
+		Name:                 "Foo",
+		GenerateListResource: true,
+		ImportPath:           "github.com/hashicorp/terraform-provider-google/google",
+		ProductMetadata:      &api.Product{Name: "Example", Versions: []*product.Version{productVersion}, Version: productVersion},
+		CollectionUrlKey:     "foos",
+		BaseUrl:              "projects/{{project}}/locations/{{location}}/foos",
+		IdFormat:             "projects/{{project}}/locations/{{location}}/foos/{{name}}",
+		ImportFormat:         []string{"projects/{{project}}/locations/{{location}}/foos/{{name}}"},
+		Parameters: []*api.Type{
+			{Name: "location", Type: "String", UrlParamOnly: true, Required: true, ApiName: "location"},
+			{Name: "name", Type: "String", UrlParamOnly: true, Required: true, ApiName: "name"},
+		},
+		Properties: []*api.Type{
+			{Name: "description", Type: "String", ApiName: "description"},
+		},
+	}
+	filePath := filepath.Join(t.TempDir(), "list_google_example_foo.go")
+	NewTemplateData(t.TempDir(), "ga", os.DirFS("..")).GenerateFile(filePath, "templates/terraform/list_resource.go.tmpl", res, true,
+		"templates/terraform/list_resource.go.tmpl",
+		"templates/terraform/list_resource_method.go.tmpl",
+	)
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatalf("failed to read generated list resource: %v", err)
+	}
+	generated := string(content)
+	if !strings.Contains(generated, "tpgresource.GetResourceNameFromSelfLink(s)") {
+		t.Fatalf("list flattener did not strip self-link from identity name:\n%s", generated)
+	}
+}
