@@ -1078,53 +1078,81 @@ func resourceInstanceTagsOmitEmpty(d tpgresource.TerraformResourceData) map[stri
 	return tags
 }
 
+func isZeroSchedulingValue(v interface{}) bool {
+	switch val := v.(type) {
+	case nil:
+		// hostErrorTimeoutSeconds, set to an explicit null that unmarshalled to int64 0.
+		return true
+	case bool:
+		// preemptible, skipGuestOsShutdown.
+		return !val
+	case string:
+		// onHostMaintenance, provisioningModel, instanceTerminationAction,
+		// terminationTime, maintenanceInterval.
+		return val == ""
+	case int:
+		return val == 0
+	case int64:
+		// minNodeCpus, availabilityDomain.
+		return val == 0
+	case float64:
+		return val == 0
+	case map[string]interface{}:
+		// The *Duration fields. Their expanders return a typed nil map, which does not
+		// compare equal to untyped nil and so must be matched by type.
+		return val == nil
+	case []interface{}:
+		// nodeAffinities.
+		return len(val) == 0
+	}
+	// Unknown types are kept, matching a field with no droppable zero value.
+	return false
+}
+
+// schedulingOmitEmpty reproduces the omitempty serialization callers used to get from
+// compute.Scheduling. Paths that sent a raw map keep their zero values instead and
+// should use stripNilSchedulingDurations.
 func schedulingOmitEmpty(scheduling map[string]interface{}) map[string]interface{} {
 	if scheduling == nil {
 		return nil
 	}
+	// AutomaticRestart is a *bool in compute.Scheduling, so false unmarshalled into a
+	// non-nil pointer and was serialized. Every other scalar is a plain value.
+	forceSendKeys := map[string]bool{
+		"automaticRestart": true,
+	}
 	result := map[string]interface{}{}
 	for k, v := range scheduling {
-		if k == "automaticRestart" {
-			result[k] = v
-			continue
-		}
-		if v == nil {
-			continue
-		}
-		switch val := v.(type) {
-		case bool:
-			if val {
-				result[k] = v
-			}
-		case string:
-			if val != "" {
-				result[k] = v
-			}
-		case int:
-			if val != 0 {
-				result[k] = v
-			}
-		case int64:
-			if val != 0 {
-				result[k] = v
-			}
-		case float64:
-			if val != 0 {
-				result[k] = v
-			}
-		case map[string]interface{}:
-			if val != nil {
-				result[k] = v
-			}
-		case []interface{}:
-			if len(val) > 0 {
-				result[k] = v
-			}
-		default:
+		if forceSendKeys[k] || !isZeroSchedulingValue(v) {
 			result[k] = v
 		}
 	}
 	return result
+}
+
+func isNilSchedulingValue(v interface{}) bool {
+	if v == nil {
+		return true
+	}
+	switch t := v.(type) {
+	case map[string]interface{}:
+		return t == nil
+	case []interface{}:
+		return t == nil
+	}
+	return false
+}
+
+func stripNilSchedulingDurations(scheduling map[string]interface{}) map[string]interface{} {
+	if scheduling == nil {
+		return nil
+	}
+	for _, k := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "gracefulShutdown", "preemptionNoticeDuration"} {
+		if v, ok := scheduling[k]; ok && isNilSchedulingValue(v) {
+			delete(scheduling, k)
+		}
+	}
+	return scheduling
 }
 
 func expandShieldedVmConfigs(d tpgresource.TerraformResourceData) map[string]interface{} {

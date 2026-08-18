@@ -220,7 +220,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 			return fmt.Errorf("Error expanding scheduling: %s", err)
 		}
 		if schedulingBody != nil {
-			instanceBody["scheduling"] = schedulingOmitEmpty(schedulingBody)
+			instanceBody["scheduling"] = stripNilSchedulingDurations(schedulingBody)
 		}
 	} else if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
 		if schedulingRaw, ok := srcProps["scheduling"].(map[string]interface{}); ok {
