@@ -95,6 +95,44 @@ resource "google_container_cluster" "primary" {
 }
 ```
 
+## Example Usage - Rollback-safe (Two-Step) Upgrades
+
+To perform a rollback-safe (two-step) control plane upgrade, you first specify a soak duration in the `rollback_safe_upgrade` block when changing the `min_master_version`. This upgrades the master but keeps the control plane emulating the older version.
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name               = "my-gke-cluster"
+  location           = "us-central1"
+  initial_node_count = 1
+  min_master_version = "1.32.4-gke.200" # Upgrading to the 1.32 minor track
+
+  # Phase 1: Explicitly opt-in to a rollback-safe upgrade
+  rollback_safe_upgrade {
+    control_plane_soak_duration = "604800s" # Soak for 7 days
+  }
+}
+```
+
+After the soak period concludes, you can declaratively complete the upgrade by specifying the target `desired_emulated_version`.
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name               = "my-gke-cluster"
+  location           = "us-central1"
+  initial_node_count = 1
+  min_master_version = "1.32.4-gke.200"
+
+  rollback_safe_upgrade {
+    control_plane_soak_duration = "604800s"
+  }
+
+  # Phase 2: Complete the upgrade (updates emulated_version to 1.32)
+  desired_emulated_version = "1.32"
+}
+```
+
+~> **Note:** If you omit the `control_plane_soak_duration` field completely, GKE bypasses the two-step feature and performs a standard one-step upgrade. You must specify a duration between 6 hours and 7 days.
+
 ## Argument Reference
 
 * `name` - (Required) The name of the cluster, unique within the project and
@@ -253,6 +291,10 @@ Structure is [documented below](#nested_master_auth).
 -> If you are using the `google_container_engine_versions` datasource with a regional cluster, ensure that you have provided a `location`
 to the datasource. A region can have a different set of supported versions than its corresponding zones, and not all zones in a
 region are guaranteed to support the same version.
+
+* `rollback_safe_upgrade` - (Optional) Configuration for rollback-safe (two-step) upgrades. Structure is [documented below](#nested_rollback_safe_upgrade).
+
+* `desired_emulated_version` - (Optional) The desired emulated version for the cluster. Used to complete a rollback-safe upgrade after a soak period. Must be in major.minor format (e.g., "1.31"). To complete the upgrade declaratively, set this field to the target minor version. Removing this field from your configuration will not trigger completion.
 
 * `monitoring_config` - (Optional) Monitoring configuration for the cluster.
     Structure is [documented below](#nested_monitoring_config).
@@ -557,6 +599,8 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    It is enabled by default for Autopilot clusters with version 1.29 or later; set `enabled = true` to enable it explicitly.
    See [Enable the Parallelstore CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/parallelstore-csi-new-volume#enable) for more information.
 
+*  `high_scale_checkpointing_config` - (Optional) The status of the High Scale Checkpointing addon, which enables Multi-Tier Checkpointing for Machine Learning workloads. Structure is [documented below](#nested_high_scale_checkpointing_config).
+
 *  `lustre_csi_driver_config` - (Optional) The status of the Lustre CSI driver addon,
    which allows the usage of a Lustre instances as volumes.
    It is disabled by default for Standard clusters; set `enabled = true` to enable.
@@ -574,6 +618,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
     Defaults to disabled for Standard clusters; set `enabled = true` to enable.
     It can not be enabled for Autopilot clusters.
 
+* `node_readiness_config` - (Optional) The status of the Node Readiness Controller addon. It is disabled by default. Set `enabled = true` to enable.
+  Structure is [documented below](#nested_node_readiness_config).
+
 This example `addons_config` disables two addons:
 
 ```hcl
@@ -587,6 +634,10 @@ addons_config {
   }
 }
 ```
+<a name="nested_node_readiness_config"></a>The `node_readiness_config` block supports:
+
+* `enabled` - (Required) Enable the Node Readiness Controller addon for your cluster.
+
 <a name="nested_binary_authorization"></a>The `binary_authorization` block supports:
 
 * `enabled` - (DEPRECATED) Enable Binary Authorization for this cluster. Deprecated in favor of `evaluation_mode`.
@@ -611,6 +662,10 @@ addons_config {
 <a name="nested_enable_k8s_beta_apis"></a>The `enable_k8s_beta_apis` block supports:
 
 * `enabled_apis` - (Required) Enabled Kubernetes Beta APIs. To list a Beta API resource, use the representation {group}/{version}/{resource}. The version must be a Beta version. Note that you cannot disable beta APIs that are already enabled on a cluster without recreating it. See the [Configure beta APIs](https://cloud.google.com/kubernetes-engine/docs/how-to/use-beta-apis#configure-beta-apis) for more information.
+
+<a name="nested_high_scale_checkpointing_config"></a>The `high_scale_checkpointing_config` block supports:
+
+* `enabled` - (Required) Whether the High Scale Checkpointing addon is enabled.
 
 <a name="nested_cloudrun_config"></a>The `cloudrun_config` block supports:
 
@@ -996,6 +1051,10 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
     * `NETWORK_TIER_STANDARD`: Standard network tier.
 
 
+<a name="nested_rollback_safe_upgrade"></a>The `rollback_safe_upgrade` block supports:
+
+* `control_plane_soak_duration` - (Optional) A user-defined period that the cluster remains in the rollbackable state. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "604800s" for 7 days. Minimum is 6 hours, maximum is 7 days. If omitted, the two-step upgrade is skipped and a standard one-step upgrade is performed.
+
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
 * `client_certificate_config` - (Required) Whether client certificate authorization is enabled for this cluster.  For example:
@@ -1126,6 +1185,8 @@ gvnic {
 * `max_run_duration` - (Optional) The runtime of each node in the node pool in seconds, terminated by 's'. Example: "3600s".
 
 * `flex_start` - (Optional) Enables Flex Start provisioning model for the node pool.
+
+* `host_maintenance_policy` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The maintenance policy for the hosts on which the GKE VMs run on. Structure is [documented below](#nested_host_maintenance_policy).
 
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.
@@ -1319,6 +1380,20 @@ sole_tenant_config {
 <a name="nested_gvnic"></a>The `gvnic` block supports:
 
 * `enabled` (Required) - Whether or not the Google Virtual NIC (gVNIC) is enabled
+
+<a name="nested_host_maintenance_policy"></a>The `host_maintenance_policy` block supports:
+
+* `maintenance_interval` (Required) - Specifies the frequency of planned maintenance events. Possible values are `MAINTENANCE_INTERVAL_UNSPECIFIED`, `AS_NEEDED`, and `PERIODIC`.
+
+* `opportunistic_maintenance_strategy` (Optional) - Strategy that will trigger maintenance on behalf of the customer. Structure is [documented below](#nested_opportunistic_maintenance_strategy).
+
+<a name="nested_opportunistic_maintenance_strategy"></a>The `opportunistic_maintenance_strategy` block supports:
+
+* `node_idle_time_window` (Required) - The amount of time that a node can remain idle (no customer owned workloads running), before triggering maintenance. Format is a duration terminated by `s`, e.g. `"600s"`.
+
+* `maintenance_availability_window` (Required) - The window of time that opportunistic maintenance can run. Example: A setting of 14 days (`"1209600s"`) implies that opportunistic maintenance can only be ran in the 2 weeks leading up to the scheduled maintenance date. Setting 28 days (`"2419200s"`) allows opportunistic maintenance to run at any time in the scheduled maintenance window (all `PERIODIC` maintenance is set 28 days in advance).
+
+* `min_nodes_per_pool` (Required) - The minimum nodes required to be available in a pool. Blocks maintenance if it would cause the number of running nodes to dip below this value.
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
@@ -2057,6 +2132,8 @@ exported:
 * `fleet.0.membership_location` - The location of the fleet membership,  extracted from `fleet.0.membership`. You can use this field to configure `membership_location` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
 
 * `enterprise_config.0.cluster_tier` - The effective tier of the cluster.
+
+* `emulated_version` - The current emulated Kubernetes version running on the GKE cluster control plane.
 
 ## Timeouts
 

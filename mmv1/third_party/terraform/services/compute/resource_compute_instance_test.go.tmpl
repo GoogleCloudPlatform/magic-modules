@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -380,6 +381,39 @@ func TestAccComputeInstance_basic5(t *testing.T) {
 					testAccCheckComputeInstanceMetadata(&instance, "foo", "bar"),
 					testAccCheckComputeInstanceDisk(&instance, instanceName, true, true),
 				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_importBlockWithResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	project := envvar.GetTestProjectFromEnv()
+	zone := "us-central1-a"
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_basic(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "name", instanceName),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "zone", zone),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "project", project),
+				),
+			},
+			{
+				ResourceName:       "google_compute_instance.foobar",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
@@ -2329,7 +2363,6 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 	t.Parallel()
 
@@ -2406,7 +2439,6 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeInstance_subnet_auto(t *testing.T) {
 	t.Parallel()
@@ -11004,7 +11036,6 @@ resource "google_compute_instance" "foobar" {
 `, instanceName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_hostErrorTimeoutSeconds(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
@@ -11033,7 +11064,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, context)
 }
-{{- end }}
 
 func testAccComputeInstance_shieldedVmConfig(instance string, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) string {
 	return fmt.Sprintf(`

@@ -31,6 +31,16 @@ var ServicesListBeta = mapOf(
         "displayName" to "Activedirectory",
         "path" to "./google-beta/services/activedirectory"
     ),
+    "agentidentity" to mapOf(
+        "name" to "agentidentity",
+        "displayName" to "Agent Identity",
+        "path" to "./google-beta/services/agentidentity"
+    ),
+    "agenticapplications" to mapOf(
+        "name" to "agenticapplications",
+        "displayName" to "Agentic Applications",
+        "path" to "./google-beta/services/agenticapplications"
+    ),
     "agentregistry" to mapOf(
         "name" to "agentregistry",
         "displayName" to "Agent Registry",
@@ -245,6 +255,11 @@ var ServicesListBeta = mapOf(
         "name" to "cloudsecuritycompliance",
         "displayName" to "Cloud Security Compliance",
         "path" to "./google-beta/services/cloudsecuritycompliance"
+    ),
+    "cloudsupport" to mapOf(
+        "name" to "cloudsupport",
+        "displayName" to "Cloudsupport",
+        "path" to "./google-beta/services/cloudsupport"
     ),
     "cloudtasks" to mapOf(
         "name" to "cloudtasks",
@@ -915,6 +930,11 @@ var ServicesListBeta = mapOf(
         "name" to "vertexai",
         "displayName" to "Vertexai",
         "path" to "./google-beta/services/vertexai"
+    ),
+    "vertexaiaad" to mapOf(
+        "name" to "vertexaiaad",
+        "displayName" to "Vertexaiaad",
+        "path" to "./google-beta/services/vertexaiaad"
     ),
     "vmwareengine" to mapOf(
         "name" to "vmwareengine",

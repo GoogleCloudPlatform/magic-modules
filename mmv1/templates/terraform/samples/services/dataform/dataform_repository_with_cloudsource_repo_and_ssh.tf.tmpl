@@ -1,10 +1,8 @@
 resource "google_sourcerepo_repository" "git_repository" {
-  provider = google-beta
   name = "{{index $.ResourceIdVars "git_repository_name"}}"
 }
 
 resource "google_secret_manager_secret" "secret" {
-  provider = google-beta
   secret_id = "{{index $.ResourceIdVars "secret_name"}}"
 
   replication {
@@ -13,14 +11,12 @@ resource "google_secret_manager_secret" "secret" {
 }
 
 resource "google_secret_manager_secret_version" "secret_version" {
-  provider = google-beta
   secret = google_secret_manager_secret.secret.id
 
   secret_data = "{{index $.ResourceIdVars "data"}}"
 }
 
 resource "google_dataform_repository" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name = "{{index $.ResourceIdVars "dataform_repository_name"}}"
 
   git_remote_settings {
@@ -42,5 +38,4 @@ resource "google_dataform_repository" "{{$.PrimaryResourceId}}" {
 }
 
 data "google_project" "project" {
-  provider = google-beta
 }

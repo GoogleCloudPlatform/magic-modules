@@ -87,6 +87,15 @@ samples:
           ca_pool_id: my-pool
         test_env_vars:
           project: PROJECT_NAME
+  - name: privateca_certificate_subject_config_org_optional
+    primary_resource_id: default
+    steps:
+      - name: privateca_certificate_subject_config_org_optional
+        resource_id_vars:
+          certificate_name: my-certificate
+          ca_pool_id: my-pool
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -1026,7 +1035,6 @@ properties:
               - name: organization
                 type: String
                 description: The organization of the subject.
-                required: true
                 immutable: true
               - name: organizationalUnit
                 type: String
