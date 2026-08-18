@@ -175,6 +175,7 @@ properties:
         required: true
   - name: reservedPublicIpConfig
     type: NestedObject
+    send_empty_value: true
     description: |
       The Reserved Public IP configuration.
     exactly_one_of:
