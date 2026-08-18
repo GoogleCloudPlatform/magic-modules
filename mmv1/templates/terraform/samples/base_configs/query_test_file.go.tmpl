@@ -17,6 +17,9 @@
 
 {{$.CodeHeader TemplatePath}}
 
+{{- $sample := $.FirstTestConfig.Sample -}}
+{{- $step := $.FirstTestConfig.Step -}}
+{{- if and $sample $step }}
 package {{ lower $.ProductMetadata.Name }}_test
 
 import (
@@ -31,10 +34,10 @@ import (
 	"{{ $.ImportPath }}/envvar"
 {{- if $step.TestContextVars }}
 	{{- range $varKey, $varVal := $step.TestContextVars }}
-		{{- if contains (toString $varVal) "kms." }}
+		{{- if contains (printf "%v" $varVal) "kms." }}
 	"{{ $.ImportPath }}/services/kms"
 		{{- end }}
-		{{- if contains (toString $varVal) "servicenetworking." }}
+		{{- if contains (printf "%v" $varVal) "servicenetworking." }}
 	"{{ $.ImportPath }}/services/servicenetworking"
 		{{- end }}
 	{{- end }}
@@ -45,8 +48,6 @@ var (
 	_ = envvar.TestEnvVar
 )
 
-{{ $sample := $.FirstTestConfig.Sample }}
-{{ $step := $.FirstTestConfig.Step }}
 func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	t.Parallel()
 
@@ -171,3 +172,4 @@ list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
 }
 `, context)
 }
+{{- end }}

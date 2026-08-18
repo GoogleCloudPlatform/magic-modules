@@ -230,7 +230,16 @@ func (t *Terraform) hasEligibleSample(object api.Resource) bool {
 		if sample.ExcludeTest {
 			continue
 		}
-		if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+		if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0 {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if step == nil {
+				continue
+			}
+			if step.MinVersion != "" && object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(step.MinVersion)) < 0 {
+				continue
+			}
 			return true
 		}
 	}

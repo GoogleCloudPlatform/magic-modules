@@ -22,6 +22,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 )
 
 func TestGenerateListResourceSkipsProjectWhenNotInListScope(t *testing.T) {
@@ -59,6 +60,64 @@ func TestGenerateListResourceSkipsProjectWhenNotInListScope(t *testing.T) {
 	}
 	if strings.Contains(generated, "ResourceFooFlatten(d, config, res, config, project, userAgent") {
 		t.Fatalf("generated flatten call still passes project even though list scope excludes it:\n%s", generated)
+	}
+}
+
+func TestTerraformHasEligibleSampleRequiresValidStep(t *testing.T) {
+	terraform := Terraform{TargetVersionName: "ga", Product: &api.Product{
+		Version:  &product.Version{Name: "ga"},
+		Versions: []*product.Version{{Name: "ga"}},
+	}}
+
+	resNoSteps := api.Resource{
+		ProductMetadata: terraform.Product,
+		Samples: []*resource.Sample{{
+			Name:             "missing_steps",
+			PrimaryResourceId: "example",
+			Steps:            nil,
+		}},
+	}
+	if terraform.hasEligibleSample(resNoSteps) {
+		t.Fatal("sample with no steps should not be considered eligible for query test generation")
+	}
+
+	resValid := api.Resource{
+		ProductMetadata: terraform.Product,
+		Samples: []*resource.Sample{{
+			Name:             "with_step",
+			PrimaryResourceId: "example",
+			Steps: []*resource.Step{{
+				Name: "example_step",
+			}},
+		}},
+	}
+	if !terraform.hasEligibleSample(resValid) {
+		t.Fatal("sample with a valid step should be eligible for query test generation")
+	}
+}
+
+func TestGenerateQueryTestFileForValidSample(t *testing.T) {
+	productVersion := &product.Version{Name: "ga"}
+	res := api.Resource{
+		Name:            "Foo",
+		ProductMetadata: &api.Product{Name: "Example", Version: productVersion, Versions: []*product.Version{productVersion}},
+		Samples: []*resource.Sample{{
+			Name:             "example_foo",
+			PrimaryResourceId: "example_foo",
+			Steps: []*resource.Step{{
+				Name: "example_foo",
+			}},
+		}},
+	}
+	filePath := filepath.Join(t.TempDir(), "list_google_example_foo_generated_test.go")
+	NewTemplateData(t.TempDir(), "ga", os.DirFS("..")).GenerateQueryTestFile(filePath, res)
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatalf("query file should be generated for a valid sample: %v", err)
+	}
+	generated := string(content)
+	if !strings.Contains(generated, "ListQuery_generated") {
+		t.Fatalf("generated query test did not render expected function name:\n%s", generated)
 	}
 }
 
