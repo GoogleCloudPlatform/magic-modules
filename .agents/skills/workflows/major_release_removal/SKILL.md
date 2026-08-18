@@ -93,18 +93,3 @@ Add entries to `${UPGRADE_GUIDE}` following existing entries in that file and gu
 ### 7. Verification Testing
 
 Invoke [qa-test-runner](.agents/skills/operations/qa-test-runner/SKILL.md) to run acceptance tests for remaining or adjacent resources to ensure no regressions.
-
----
-
-### 8. PR Creation & Release Note
-
-Execute [create-pr](.agents/skills/operations/create-pr/SKILL.md) targeting `${FEATURE_BRANCH}`:
-- **Title Length Limit**: Must be strictly **under 70 characters** (e.g. `<product>: remove deprecated google_<resource>_* for ${MAJOR_VERSION}`).
-- **Body**:
-  ```markdown
-  ```release-note:breaking-change
-  <product>: removed deprecated `<field_name>` from `google_<resource_name>`
-  ```
-  *(or `<product>: removed deprecated `google_<resource_name>` resource/data source`)*
-  ```
-- **Pre-Filled Hyperlink**: Always generate and provide a pre-filled markdown compare URL in chat for easy user submission.

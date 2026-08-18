@@ -49,16 +49,3 @@ Follow the conventions in `docs/content/breaking-changes/make-a-breaking-change.
 ### 6. Verification Testing
 
 - Invoke [qa-test-runner](.agents/skills/operations/qa-test-runner/SKILL.md) to verify acceptance tests pass (`PASS`).
-
-### 7. PR Creation & Release Note
-
-Execute [create-pr](.agents/skills/operations/create-pr/SKILL.md) targeting `main`:
-- **Title Length Limit**: Must be strictly **under 70 characters** (e.g. `<product>: deprecate <target>`).
-- **Body**:
-  ```markdown
-  ```release-note:deprecation
-  <product>: deprecated `<field_name>` on `google_<resource_name>`. Use `<replacement>` instead.
-  ```
-  *(or `<product>: deprecated `google_<resource_name>` resource/data source`)*
-  ```
-- **Pre-Filled Hyperlink**: Always generate and provide a pre-filled markdown compare URL in chat for easy user submission.

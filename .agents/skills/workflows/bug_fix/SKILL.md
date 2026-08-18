@@ -54,7 +54,6 @@ This document outlines the structured 6-step lifecycle for investigating, planni
     4. **Breaking Change Validation:** Execute the `validate-provider-changes` skill (`.agents/skills/utils/validate-provider-changes/`) if schemas or properties were modified.
 *   **Workspace Cleanup:** Run `git status --porcelain` and remove any untracked `.log`, `.test`, or temporary test artifacts across both repositories before reporting resolution or creating a PR.
 *   **Artifact Report:** If code changes or verification tests were performed, compile these results into a separate verification/test report artifact.
-*   **PR Creation:** When opening a PR, execute the `create-pr` skill (`.agents/skills/operations/create-pr/`), which governs branch creation, PR title length, release notes, and reference linking (`Modeled after:` / `Based on:`).
 *   **GitHub Response Draft:** Draft a final, succinct public response containing verified PR/commit links.
     *   **Succinct Public Communication:** Responses should be concise (2–3 sentences preferred): state what changed, why, and refer readers to the PR or documentation for technical deep-dives.
 *   **HIL steering checkpoint:** Present the final response draft and any new verification reports to the user for sign-off and issue closure.

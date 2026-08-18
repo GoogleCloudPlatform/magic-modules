@@ -31,7 +31,7 @@ specific one.
 *   **New Resource Workflow** (`.agents/skills/workflows/new_resource/SKILL.md`): Specifically for creating a new resource, supporting both autogen and manual generation.
 *   **Add Fields Workflow** (`.agents/skills/workflows/add_fields/SKILL.md`): Specifically for adding new fields to existing MMv1 or handwritten resources.
 *   **Test Fix Workflow** (`.agents/skills/workflows/test_fix/SKILL.md`): Specifically for resolving failing acceptance tests from GitHub issues, direct prompts, or debug logs.
-*   **Add List Resource Workflow** (`.agents/skills/workflows/add_list_resource/SKILL.md`): Opts one product's eligible MMv1 resources into list-resource generation by setting `generate_list_resource: true`, validates locally, and opens a PR.
+*   **Add List Resource Workflow** (`.agents/skills/workflows/add_list_resource/SKILL.md`): Opts one product's eligible MMv1 resources into list-resource generation by setting `generate_list_resource: true`, and validates locally.
 *   **Prepare Release Workflow** (`.agents/skills/workflows/prepare_release/SKILL.md`): Prepares and cuts weekly releases for both `terraform-provider-google` (TPG) and `terraform-provider-google-beta` (TPGB) providers.
 *   **Test Monitor Workflow** (`.agents/skills/workflows/test_monitor/SKILL.md`): For fetching, triaging, analyzing, and reporting on nightly acceptance test results across Beta and GA providers.
 *   **Add IAM Support Workflow** (`.agents/skills/workflows/add_iam_resources/SKILL.md`): Adds IAM support to an existing MMv1 resource.
