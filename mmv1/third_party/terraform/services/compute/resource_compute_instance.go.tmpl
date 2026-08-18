@@ -3444,13 +3444,17 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if updateDuringStop {
 			// Lets be explicit about what we are changing in the patch call
 			niPatchMap := map[string]interface{}{
-				"network":       networkInterface["network"],
-				"subnetwork":    networkInterface["subnetwork"],
-				"aliasIpRanges": networkInterface["aliasIpRanges"],
-{{- if ne $.TargetVersionName "ga" }}
-				"aliasIpv6Ranges": networkInterface["aliasIpv6Ranges"],
-{{- end }}
+				"network":    networkInterface["network"],
+				"subnetwork": networkInterface["subnetwork"],
 			}
+			if air, ok := networkInterface["aliasIpRanges"].([]interface{}); ok && len(air) > 0 {
+				niPatchMap["aliasIpRanges"] = air
+			}
+{{- if ne $.TargetVersionName "ga" }}
+			if air6, ok := networkInterface["aliasIpv6Ranges"].([]interface{}); ok && len(air6) > 0 {
+				niPatchMap["aliasIpv6Ranges"] = air6
+			}
+{{- end }}
 
 			// network_ip can be inferred if not declared. Let's only patch if it's being changed by user
 			// otherwise this could fail if the network ip is not compatible with the new Subnetwork/Network.
@@ -4221,11 +4225,11 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 		"source": sourceLink,
 	}
 
-	if v, ok := diskConfig["mode"]; ok {
+	if v, ok := diskConfig["mode"]; ok && v.(string) != "" {
 		disk["mode"] = v.(string)
 	}
 
-	if v, ok := diskConfig["device_name"]; ok {
+	if v, ok := diskConfig["device_name"]; ok && v.(string) != "" {
 		disk["deviceName"] = v.(string)
 	}
 
@@ -4278,8 +4282,8 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 		disk["diskEncryptionKey"] = diskEncryptionKey
 	}
 
-	if forceAttach, ok := diskConfig["force_attach"]; ok {
-		disk["forceAttach"] = forceAttach.(bool)
+	if forceAttach, ok := diskConfig["force_attach"].(bool); ok && forceAttach {
+		disk["forceAttach"] = true
 	}
 
 	return disk, nil
@@ -4812,11 +4816,13 @@ func expandScratchDisks(d *schema.ResourceData, config *transport_tpg.Config, pr
 		scratchDisk := map[string]interface{}{
 			"autoDelete": true,
 			"type":       "SCRATCH",
-			"deviceName": d.Get(fmt.Sprintf("scratch_disk.%d.device_name", i)).(string),
 			"interface":  d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string),
 			"initializeParams": map[string]interface{}{
 				"diskType": diskType.RelativeLink(),
 			},
+		}
+		if deviceName := d.Get(fmt.Sprintf("scratch_disk.%d.device_name", i)).(string); deviceName != "" {
+			scratchDisk["deviceName"] = deviceName
 		}
 		if size := d.Get(fmt.Sprintf("scratch_disk.%d.size", i)).(int); size > 0 {
 			scratchDisk["diskSizeGb"] = strconv.Itoa(size)
