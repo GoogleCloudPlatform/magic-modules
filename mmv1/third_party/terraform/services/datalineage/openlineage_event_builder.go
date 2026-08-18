@@ -132,7 +132,7 @@ func getCommonDatasetFacets(m map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	if v, ok := m["column_lineage"]; ok {
+	if v, ok := m["columnLineage"]; ok {
 		if lineage, ok := v.(map[string]interface{}); ok {
 			if facet := buildColumnLineage(lineage); facet != nil {
 				facets["columnLineage"] = facet
@@ -187,7 +187,7 @@ func buildColumnLineage(cll map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	di, _ := cll["dataset_input"].([]interface{})
+	di, _ := cll["datasetInput"].([]interface{})
 	return map[string]interface{}{
 		"_producer":  "_PRODUCER_",
 		"_schemaURL": openLineageColumnLineageURL,

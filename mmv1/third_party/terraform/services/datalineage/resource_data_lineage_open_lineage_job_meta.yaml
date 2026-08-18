@@ -22,17 +22,17 @@ fields:
     - api_field: output.catalog.framework
     - api_field: output.catalog.name
     - api_field: output.catalog.type
-    - api_field: output.column_lineage.dataset_input.field
-    - api_field: output.column_lineage.dataset_input.name
-    - api_field: output.column_lineage.dataset_input.namespace
-    - api_field: output.column_lineage.dataset_input.transformation.subtype
-    - api_field: output.column_lineage.dataset_input.transformation.type
-    - api_field: output.column_lineage.field.input.field
-    - api_field: output.column_lineage.field.input.name
-    - api_field: output.column_lineage.field.input.namespace
-    - api_field: output.column_lineage.field.input.transformation.subtype
-    - api_field: output.column_lineage.field.input.transformation.type
-    - api_field: output.column_lineage.field.name
+    - api_field: output.columnLineage.datasetInput.field
+    - api_field: output.columnLineage.datasetInput.name
+    - api_field: output.columnLineage.datasetInput.namespace
+    - api_field: output.columnLineage.datasetInput.transformation.subtype
+    - api_field: output.columnLineage.datasetInput.transformation.type
+    - api_field: output.columnLineage.field.input.field
+    - api_field: output.columnLineage.field.input.name
+    - api_field: output.columnLineage.field.input.namespace
+    - api_field: output.columnLineage.field.input.transformation.subtype
+    - api_field: output.columnLineage.field.input.transformation.type
+    - api_field: output.columnLineage.field.name
     - api_field: output.name
     - api_field: output.namespace
     - api_field: output.symlink.name

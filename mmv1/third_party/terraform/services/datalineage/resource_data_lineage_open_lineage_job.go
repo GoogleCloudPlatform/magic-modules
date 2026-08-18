@@ -221,14 +221,14 @@ func ResourceDataLineageOpenLineageJob() *schema.Resource {
 								},
 							},
 						},
-						"column_lineage": {
+						"columnLineage": {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Description: `Column-level lineage information for the output dataset.`,
 							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"dataset_input": {
+									"datasetInput": {
 										Type:        schema.TypeList,
 										Optional:    true,
 										Description: `Input fields affecting whole dataset, e.g. filtering columns.`,
@@ -539,11 +539,11 @@ func flattenDataLineageOpenLineageJobOutput(v interface{}, d *schema.ResourceDat
 			continue
 		}
 		transformed = append(transformed, map[string]interface{}{
-			"namespace":      flattenDataLineageOpenLineageJobOutputNamespace(original["namespace"], d, config),
-			"name":           flattenDataLineageOpenLineageJobOutputName(original["name"], d, config),
-			"symlink":        flattenDataLineageOpenLineageJobOutputSymlink(original["symlink"], d, config),
-			"catalog":        flattenDataLineageOpenLineageJobOutputCatalog(original["catalog"], d, config),
-			"column_lineage": flattenDataLineageOpenLineageJobOutputColumnLineage(original["column_lineage"], d, config),
+			"namespace":     flattenDataLineageOpenLineageJobOutputNamespace(original["namespace"], d, config),
+			"name":          flattenDataLineageOpenLineageJobOutputName(original["name"], d, config),
+			"symlink":       flattenDataLineageOpenLineageJobOutputSymlink(original["symlink"], d, config),
+			"catalog":       flattenDataLineageOpenLineageJobOutputCatalog(original["catalog"], d, config),
+			"columnLineage": flattenDataLineageOpenLineageJobOutputColumnLineage(original["columnLineage"], d, config),
 		})
 	}
 	return transformed
@@ -628,8 +628,8 @@ func flattenDataLineageOpenLineageJobOutputColumnLineage(v interface{}, d *schem
 	transformed := make(map[string]interface{})
 	transformed["field"] =
 		flattenDataLineageOpenLineageJobOutputColumnLineageField(original["field"], d, config)
-	transformed["dataset_input"] =
-		flattenDataLineageOpenLineageJobOutputColumnLineageDatasetInput(original["dataset_input"], d, config)
+	transformed["datasetInput"] =
+		flattenDataLineageOpenLineageJobOutputColumnLineageDatasetInput(original["datasetInput"], d, config)
 	return []interface{}{transformed}
 }
 func flattenDataLineageOpenLineageJobOutputColumnLineageField(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
@@ -1044,11 +1044,11 @@ func expandDataLineageOpenLineageJobOutput(v interface{}, d tpgresource.Terrafor
 			transformed["catalog"] = transformedCatalog
 		}
 
-		transformedColumnLineage, err := expandDataLineageOpenLineageJobOutputColumnLineage(original["column_lineage"], d, config)
+		transformedColumnLineage, err := expandDataLineageOpenLineageJobOutputColumnLineage(original["columnLineage"], d, config)
 		if err != nil {
 			return nil, err
 		} else if val := reflect.ValueOf(transformedColumnLineage); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-			transformed["column_lineage"] = transformedColumnLineage
+			transformed["columnLineage"] = transformedColumnLineage
 		}
 
 		req = append(req, transformed)
@@ -1182,11 +1182,11 @@ func expandDataLineageOpenLineageJobOutputColumnLineage(v interface{}, d tpgreso
 		transformed["field"] = transformedField
 	}
 
-	transformedDatasetInput, err := expandDataLineageOpenLineageJobOutputColumnLineageDatasetInput(original["dataset_input"], d, config)
+	transformedDatasetInput, err := expandDataLineageOpenLineageJobOutputColumnLineageDatasetInput(original["datasetInput"], d, config)
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedDatasetInput); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["dataset_input"] = transformedDatasetInput
+		transformed["datasetInput"] = transformedDatasetInput
 	}
 
 	return transformed, nil
