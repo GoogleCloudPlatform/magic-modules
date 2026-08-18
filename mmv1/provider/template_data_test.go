@@ -72,9 +72,9 @@ func TestTerraformHasEligibleSampleRequiresValidStep(t *testing.T) {
 	resNoSteps := api.Resource{
 		ProductMetadata: terraform.Product,
 		Samples: []*resource.Sample{{
-			Name:             "missing_steps",
+			Name:              "missing_steps",
 			PrimaryResourceId: "example",
-			Steps:            nil,
+			Steps:             nil,
 		}},
 	}
 	if terraform.hasEligibleSample(resNoSteps) {
@@ -84,7 +84,7 @@ func TestTerraformHasEligibleSampleRequiresValidStep(t *testing.T) {
 	resValid := api.Resource{
 		ProductMetadata: terraform.Product,
 		Samples: []*resource.Sample{{
-			Name:             "with_step",
+			Name:              "with_step",
 			PrimaryResourceId: "example",
 			Steps: []*resource.Step{{
 				Name: "example_step",
@@ -102,7 +102,7 @@ func TestGenerateQueryTestFileForValidSample(t *testing.T) {
 		Name:            "Foo",
 		ProductMetadata: &api.Product{Name: "Example", Version: productVersion, Versions: []*product.Version{productVersion}},
 		Samples: []*resource.Sample{{
-			Name:             "example_foo",
+			Name:              "example_foo",
 			PrimaryResourceId: "example_foo",
 			Steps: []*resource.Step{{
 				Name: "example_foo",
