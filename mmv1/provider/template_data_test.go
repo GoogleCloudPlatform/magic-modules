@@ -16,9 +16,51 @@ package provider
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"testing/fstest"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 )
+
+func TestGenerateListResourceSkipsProjectWhenNotInListScope(t *testing.T) {
+	tempDir := t.TempDir()
+	filePath := filepath.Join(tempDir, "list_google_example_foo.go")
+	version := &product.Version{Name: "ga", BaseUrl: "https://example.googleapis.com/v1/"}
+	res := api.Resource{
+		Name:             "Foo",
+		ProductMetadata:  &api.Product{Name: "Example", Versions: []*product.Version{version}, Version: version},
+		CollectionUrlKey: "foos",
+		BaseUrl:          "regions/{{region}}/foos",
+		CreateUrl:        "projects/{{project}}/regions/{{region}}/foos",
+		Parameters: []*api.Type{
+			{Name: "region", Type: "string"},
+		},
+		Properties: []*api.Type{
+			{Name: "name", Type: "string"},
+		},
+		GenerateListResource: true,
+	}
+
+	td := NewTemplateData(tempDir, "ga", os.DirFS(".."))
+	td.GenerateFile(filePath, "templates/terraform/list_resource.go.tmpl", res, true,
+		"templates/terraform/list_resource.go.tmpl",
+		"templates/terraform/list_resource_method.go.tmpl",
+	)
+
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatalf("failed to read generated file: %v", err)
+	}
+	generated := string(content)
+	if strings.Contains(generated, "billingProject := project") {
+		t.Fatalf("generated list resource used project when it is not in the list scope:\n%s", generated)
+	}
+	if strings.Contains(generated, "ResourceFooFlatten(d, config, res, config, project, userAgent") {
+		t.Fatalf("generated flatten call still passes project even though list scope excludes it:\n%s", generated)
+	}
+}
 
 func TestGenerateFile(t *testing.T) {
 	mockFS := fstest.MapFS{

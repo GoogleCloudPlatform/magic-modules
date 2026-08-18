@@ -13,6 +13,12 @@
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
 {{ define "listResourceMethod" }}
+{{- $projectInListScope := false -}}
+{{- range $scope := $.ListScopeProperties -}}
+	{{- if eq $scope.Name "project" -}}
+		{{- $projectInListScope = true -}}
+	{{- end -}}
+{{- end }}
 func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 {{- range $scope := $.ListScopeProperties }}
 	{{ $scope.CamelizeProperty }} string,
@@ -37,7 +43,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		return err
 	}
 
-{{- if $.HasProject }}
+{{- if $projectInListScope }}
 	billingProject := project
 {{- else }}
 	billingProject := ""
@@ -115,7 +121,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 			}
 {{- end }}
 {{- end }}
-			if err = Resource{{ $.ResourceName }}Flatten(d, config, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
+			if err = Resource{{ $.ResourceName }}Flatten(d, config, res, config, {{ if $projectInListScope }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
 			id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
