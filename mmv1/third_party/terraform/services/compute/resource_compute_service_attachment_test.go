@@ -79,8 +79,8 @@ func TestAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(t *test
 				// send_propagated_connection_limit_if_zero is a virtual field with no API
 				// representation, so it can't be reconstructed on import.
 				ImportStateVerifyIgnore: []string{"target_service", "region", "send_propagated_connection_limit_if_zero"},
-      },
-      {
+			},
+			{
 				Config:   testAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdateReordered(context),
 				PlanOnly: true,
 			},
@@ -919,7 +919,6 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   region      = "us-west2"
   description = "A service attachment configured with Terraforms"
 
-  enable_proxy_protocol    = true
   connection_preference    = "ACCEPT_MANUAL"
   nat_subnets              = [google_compute_subnetwork.psc_ilb_nat.id]
   target_service           = google_compute_forwarding_rule.psc_ilb_target_service.id
