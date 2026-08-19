@@ -26,4 +26,4 @@ versions:
   - name: ga
     base_url: https://networkmanagement.googleapis.com/v1/
   - name: beta
-    base_url: https://networkmanagement.googleapis.com/v1/
+    base_url: https://networkmanagement.googleapis.com/v1beta1/
