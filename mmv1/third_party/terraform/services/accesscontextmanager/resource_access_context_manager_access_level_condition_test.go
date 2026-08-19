@@ -174,6 +174,7 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
     require_corp_owned = true
     os_constraints {
       os_type = "DESKTOP_CHROME_OS"
+      require_verified_chrome_os = true
     }
   }
   regions = [
