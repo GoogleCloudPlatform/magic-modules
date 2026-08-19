@@ -19,6 +19,7 @@ references:
     Official Documentation: https://cloud.google.com/beyondcorp-enterprise/docs/enable-app-connector
   api: https://cloud.google.com/beyondcorp/docs/reference/rest#rest-resource:-v1.projects.locations.appconnectors
 docs:
+deprecation_message: '`google_beyondcorp_app_connector` is deprecated. App Connector is being deprecated and creation of new App Connectors is no longer permitted. Use `google_beyondcorp_security_gateway` and `google_beyondcorp_security_gateway_application` instead.'
 base_url: projects/{{project}}/locations/{{region}}/appConnectors
 self_link: projects/{{project}}/locations/{{region}}/appConnectors/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/appConnectors?app_connector_id={{name}}
