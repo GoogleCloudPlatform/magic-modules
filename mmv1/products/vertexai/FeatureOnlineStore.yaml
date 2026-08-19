@@ -32,7 +32,6 @@ iam_policy:
   import_format:
     - projects/{{project}}/locations/{{region}}/featureOnlineStores/{{name}}
   min_version: beta
-generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -53,8 +52,6 @@ samples:
       - name: vertex_ai_feature_online_store
         resource_id_vars:
           name: example_feature_online_store
-        vars:
-          region: 'us-central1'
         ignore_read_extra:
           - force_destroy
   - name: vertex_ai_featureonlinestore_with_optimized
