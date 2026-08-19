@@ -13,7 +13,8 @@ import (
 func TestAccGeminiGeminiGcpEnablementSetting_geminiGeminiGcpEnablementSettingBasicExample_update(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
-		"setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
+		"setting_id":  fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
+		"bucket_name": fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10)),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -58,12 +59,20 @@ resource "google_gemini_gemini_gcp_enablement_setting" "example" {
 }
 func testAccGeminiGeminiGcpEnablementSetting_geminiGeminiGcpEnablementSettingBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_storage_bucket" "bucket" {
+    name                        = "%{bucket_name}"
+    location                    = "US"
+    uniform_bucket_level_access = true
+    force_destroy               = true
+}
+
 resource "google_gemini_gemini_gcp_enablement_setting" "example" {
     gemini_gcp_enablement_setting_id = "%{setting_id}"
     location = "global"
     labels = {"my_key" = "my_value"}
     enable_customer_data_sharing = false
 	web_grounding_type = "GROUNDING_WITH_GOOGLE_SEARCH"
+	gcs_bucket = google_storage_bucket.bucket.name
 }
 `, context)
 }
