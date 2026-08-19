@@ -55,8 +55,6 @@ samples:
           name: terraform
           project: appeng-flex
           kms_key_name: kms-name
-        vars:
-          region: 'us-central1'
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
