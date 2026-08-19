@@ -176,4 +176,3 @@ func SuppressMajorRevisionId(_, old, new string, _ *schema.ResourceData) bool {
 	}
 	return false
 }
-
