@@ -76,6 +76,14 @@ func (td *TemplateData) GenerateFWResourceFile(filePath string, resource api.Res
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
+func (td *TemplateData) GenerateCustomFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/resource_custom.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
 func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resource) {
 	metadata := metadata.FromResource(resource)
 	bytes, err := yaml.Marshal(metadata)

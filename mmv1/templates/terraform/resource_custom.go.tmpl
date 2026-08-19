@@ -1,0 +1,136 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+{{$.CodeHeader TemplatePath}}
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+    "bytes"
+    "context"
+    "encoding/base64"
+    "encoding/json"
+    "fmt"
+    "log"
+    "net/http"
+    "reflect"
+    "regexp"
+    "slices"
+    "sort"
+    "strconv"
+    "strings"
+    "time"
+
+    "runtime"
+
+    "github.com/gammazero/workerpool"
+    "github.com/hashicorp/errwrap"
+    "github.com/hashicorp/go-cty/cty"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+    "{{ $.ImportPath }}/registry"
+    "{{ $.ImportPath }}/tpgresource"
+    transport_tpg "{{ $.ImportPath }}/transport"
+    "{{ $.ImportPath }}/verify"
+
+    "google.golang.org/api/googleapi"
+)
+
+var (
+    _ = bytes.Clone
+    _ = context.WithCancel
+    _ = base64.NewDecoder
+    _ = json.Marshal
+    _ = fmt.Sprintf
+    _ = log.Print
+    _ = http.Get
+    _ = reflect.ValueOf
+    _ = regexp.Match
+    _ = slices.Min([]int{1})
+    _ = sort.IntSlice{}
+    _ = strconv.Atoi
+    _ = strings.Trim
+    _ = time.Now
+    _ = runtime.GOARCH
+    _ = workerpool.New
+    _ = errwrap.Wrap
+    _ = cty.BoolVal
+    _ = diag.Diagnostic{}
+    _ = customdiff.All
+    _ = id.UniqueId
+    _ = logging.LogLevel
+    _ = retry.Retry
+    _ = schema.Noop
+    _ = validation.All
+    _ = structure.ExpandJsonFromString
+    _ = terraform.State{}
+    _ = registry.Schema{}
+    _ = tpgresource.SetLabels
+    _ = transport_tpg.Config{}
+    _ = verify.ValidateEnum
+    _ = googleapi.Error{}
+)
+
+{{ if $.CustomCode.CustomCreate -}}
+func resource{{ $.ResourceName }}CustomCreate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	{{ customTemplate $ $.CustomCode.CustomCreate false -}}
+}
+{{ end }}
+
+{{ if and ($.CustomCode.CustomUpdate) ($.Updatable) -}}
+func resource{{ $.ResourceName }}CustomUpdate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	{{ customTemplate $ $.CustomCode.CustomUpdate false -}}
+}
+{{ end }}
+
+{{ if and ($.CustomCode.CustomDelete) (not $.ExcludeDelete) -}}
+func resource{{ $.ResourceName }}CustomDelete(d *schema.ResourceData, meta interface{}) error {
+{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing {{ $.Name }} %q from Terraform state without deletion", d.Id())
+        return nil
+    }
+{{- end }}
+{{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
+    var project string
+{{- end }}
+    config := meta.(*transport_tpg.Config)
+    userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+    if err != nil {
+        return err
+    }
+	{{ customTemplate $ $.CustomCode.CustomDelete false -}}
+}
+{{ end }}
+
+{{ if and ($.CustomCode.CustomImport) (not $.ExcludeImport) -}}
+func resource{{ $.ResourceName }}CustomImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	{{ customTemplate $ $.CustomCode.CustomImport false -}}
+}
+{{ end }}

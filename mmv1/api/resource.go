@@ -2112,6 +2112,13 @@ func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
 }
 
+func (r Resource) HasCustomMethods() bool {
+	return r.CustomCode.CustomCreate != "" ||
+		(r.CustomCode.CustomUpdate != "" && r.Updatable()) ||
+		(r.CustomCode.CustomDelete != "" && !r.ExcludeDelete) ||
+		(r.CustomCode.CustomImport != "" && !r.ExcludeImport)
+}
+
 func (r Resource) TestSamples() []*resource.Sample {
 	return google.Reject(google.Reject(r.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest

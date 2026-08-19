@@ -201,11 +201,15 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
 }
 
 func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+{{ if $.CustomCode.CustomCreate -}}
+	r.customCreate(ctx, req, resp)
+}
+
+func (r *{{$.ResourceName}}FWResource) customCreate(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	{{ customTemplate $ $.CustomCode.CustomCreate false -}}
+{{  else  -}}
 	var data {{$.ResourceName}}FWModel
 	var metaData *fwmodels.ProviderMetaModel
-{{ if $.CustomCode.CustomCreate -}}
-    {{ customTemplate $ $.CustomCode.CustomCreate false -}}
-{{  else  -}}
 
     // Read Provider meta into the meta model
 	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
