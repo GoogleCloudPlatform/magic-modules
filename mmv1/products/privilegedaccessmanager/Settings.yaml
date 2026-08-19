@@ -45,7 +45,7 @@ async:
 exclude_delete: true
 autogen_async: true
 custom_code:
-  custom_create: templates/terraform/custom_create/privileged_access_manager_settings.go.tmpl
+  custom_create: true
   pre_update: templates/terraform/pre_update/privileged_access_manager_settings.go.tmpl # get etag
 samples:
   - name: privileged_access_manager_settings_basic

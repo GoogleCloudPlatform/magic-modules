@@ -51,7 +51,7 @@ custom_code:
   constants: 'templates/terraform/constants/firestore_index.go.tmpl'
   encoder: 'templates/terraform/encoders/index.go.tmpl'
   custom_import: 'templates/terraform/custom_import/index_self_link_as_name_set_project.go.tmpl'
-  custom_create: 'templates/terraform/custom_create/firestore_index.go.tmpl'
+  custom_create: true
 error_retry_predicates:
   - 'transport_tpg.FirestoreIndex409Retry'
 samples:

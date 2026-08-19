@@ -86,10 +86,9 @@ type CustomCode struct {
 	// modification.
 	PostCreateFailure string `yaml:"post_create_failure,omitempty"`
 
-	// This code replaces the entire contents of the Create call. It
-	// should be used for resources that don't have normal creation
-	// semantics that cannot be supported well by other MM features.
-	CustomCreate string `yaml:"custom_create,omitempty"`
+	// CustomCreate indicates that the resource's create logic is defined
+	// in a handwritten function named resource<ResourceName>CustomCreate in the service package.
+	CustomCreate bool `yaml:"custom_create,omitempty"`
 
 	// This code is run before the Read call happens.  It's placed
 	// in the Read function.

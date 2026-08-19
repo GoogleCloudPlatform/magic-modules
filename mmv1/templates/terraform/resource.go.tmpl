@@ -272,13 +272,13 @@ func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_
 {{- end}}
 
 func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{}) error {
+{{ if $.CustomCode.CustomCreate -}}
+	return resource{{ $.ResourceName }}CustomCreate(d, meta)
+{{- else -}}
 {{- if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create")) -}}
     var project string
 {{- end}}
     config := meta.(*transport_tpg.Config)
-{{ if $.CustomCode.CustomCreate -}}
-    {{ customTemplate $ $.CustomCode.CustomCreate false -}}
-{{  else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err

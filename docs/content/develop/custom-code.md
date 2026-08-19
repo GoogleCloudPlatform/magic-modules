@@ -232,13 +232,13 @@ The function takes an error and returns:
 
 ```yaml
 custom_code:
-  custom_create: templates/terraform/custom_create/PRODUCT_RESOURCE.go.tmpl
+  custom_create: true # Calls resource<ResourceName>CustomCreate in third_party/terraform/services/<product>/
   custom_update: templates/terraform/custom_update/PRODUCT_RESOURCE.go.tmpl
   custom_delete: templates/terraform/custom_delete/PRODUCT_RESOURCE.go.tmpl
   custom_import: templates/terraform/custom_import/PRODUCT_RESOURCE.go.tmpl
 ```
 
-Custom methods replace the entire contents of the Create, Update, Delete, or Import methods. For example:
+Custom methods replace the entire contents of the Create, Update, Delete, or Import methods. For `custom_create: true`, define a native Go function `resource<ResourceName>CustomCreate(d *schema.ResourceData, meta interface{}) error` in `third_party/terraform/services/<product>/resource_<resource_name>_custom.go`. For other custom methods, templates are injected directly:
 
 ```go
 func resourceProductResourceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
