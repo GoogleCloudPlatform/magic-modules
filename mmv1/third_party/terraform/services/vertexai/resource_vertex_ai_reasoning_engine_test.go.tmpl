@@ -181,9 +181,6 @@ resource "time_sleep" "wait_5_minutes" {
   depends_on = [
     google_project_iam_member.sa_iam_ai_platform_user,
     google_project_iam_member.sa_iam_object_viewer,
-    google_project_iam_member.sa_iam_object_admin,
-    google_project_iam_member.sa_iam_log_writer,
-    google_project_iam_member.sa_iam_ar_writer,
     google_project_iam_member.sa_iam_viewer,
     google_secret_manager_secret_iam_member.secret_access,
     google_secret_manager_secret_version.secret_version
@@ -246,24 +243,6 @@ resource "google_project_iam_member" "sa_iam_object_viewer" {
 
 resource "google_project_iam_member" "sa_iam_ai_platform_user" {
   role    = "roles/aiplatform.user"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account.member
-}
-
-resource "google_project_iam_member" "sa_iam_object_admin" {
-  role    = "roles/storage.objectAdmin"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account.member
-}
-
-resource "google_project_iam_member" "sa_iam_log_writer" {
-  role    = "roles/logging.logWriter"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account.member
-}
-
-resource "google_project_iam_member" "sa_iam_ar_writer" {
-  role    = "roles/artifactregistry.writer"
   project = data.google_project.project.id
   member  = google_service_account.service_account.member
 }
@@ -397,9 +376,6 @@ resource "time_sleep" "wait_5_minutes" {
   depends_on = [
     google_project_iam_member.sa_iam_ai_platform_user_new,
     google_project_iam_member.sa_iam_object_viewer_new,
-    google_project_iam_member.sa_iam_object_admin_new,
-    google_project_iam_member.sa_iam_log_writer_new,
-    google_project_iam_member.sa_iam_ar_writer_new,
     google_project_iam_member.sa_iam_viewer_new,
     google_secret_manager_secret_iam_member.secret_access_new,
     google_secret_manager_secret_iam_member.secret_new_access,
@@ -540,24 +516,6 @@ resource "google_project_iam_member" "sa_iam_object_viewer_new" {
 
 resource "google_project_iam_member" "sa_iam_ai_platform_user_new" {
   role    = "roles/aiplatform.user"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account_new.member
-}
-
-resource "google_project_iam_member" "sa_iam_object_admin_new" {
-  role    = "roles/storage.objectAdmin"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account_new.member
-}
-
-resource "google_project_iam_member" "sa_iam_log_writer_new" {
-  role    = "roles/logging.logWriter"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account_new.member
-}
-
-resource "google_project_iam_member" "sa_iam_ar_writer_new" {
-  role    = "roles/artifactregistry.writer"
   project = data.google_project.project.id
   member  = google_service_account.service_account_new.member
 }
