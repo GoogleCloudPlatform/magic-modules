@@ -786,3 +786,31 @@ follow-up. Keep list generation only for resources whose create finishes in tens
 
 **Do NOT:**
 Add `skip_vcr: true` (P-19) to hide the timeout.
+
+---
+
+### P-23 — ListQuery races Example on a shared permanent parent pair
+
+**Symptom:**
+`TestAccOracleDatabaseGoldengateConnectionAssignmentListQuery_generated` fails VCR
+recording. The matching `*FullExample` test **passes**. Connection and OdbNetwork
+ListQuery tests on the same PR pass.
+
+**Root cause:**
+Generated ListQuery always creates the first sample. Assignment's only sample pins
+`tf-test-permanent-connection` and `tf-test-permanent-deployment`. FullExample uses
+the same pair. Both tests call `t.Parallel()`, so one VCR recording creates two
+assignments of the same connection→deployment pair. The API allows a connection to
+be assigned to multiple deployments, but assigning the **same** pair twice conflicts.
+ListQuery lost that race (c2425f55 / auto-pr-18631). A generator-template change to
+probe display-name matching would mark every list test affected and blow the VCR 6h
+budget (see P-20 / P-22).
+
+**Fix:**
+Do **not** set `generate_list_resource: true` until a dedicated first sample uses
+its own parent fixtures (or ListQuery is otherwise isolated from FullExample).
+Leave a YAML comment and a `deferred-list-resources.md` row.
+
+**Do NOT:**
+Add `skip_vcr: true` (P-19).
+Change list/query templates in the product PR just to debug display-name matching.

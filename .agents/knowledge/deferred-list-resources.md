@@ -35,3 +35,4 @@ Each row: **product**, **resource** (PascalCase YAML stem), **pattern** (oracle 
 | oracledatabase | ExadbVmCluster | P-22 | ListQuery create uses 120m insert timeout; VCR 6h wall clock cannot record it | add-oracledatabase-list-resources-followup |
 | oracledatabase | ExascaleDbStorageVault | P-22 | ListQuery create uses 120m insert timeout; VCR 6h wall clock cannot record it | add-oracledatabase-list-resources-followup |
 | oracledatabase | GoldengateDeployment | P-22 | ListQuery create ~78m plus sibling tests exceeded VCR 6h recording wall clock | add-oracledatabase-list-resources-followup |
+| oracledatabase | GoldengateConnectionAssignment | P-23 | ListQuery reuses FullExample's shared permanent connection+deployment under t.Parallel(); VCR recording failed while FullExample passed | add-oracledatabase-list-resources-followup |

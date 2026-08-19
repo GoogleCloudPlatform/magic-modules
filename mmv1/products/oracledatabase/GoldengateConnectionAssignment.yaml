@@ -16,7 +16,14 @@ name: GoldengateConnectionAssignment
 description: This resource helps to assign a GoldengateConnection to a GoldengateDeployment used for actual data replication and transformations.
 base_url: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments
 immutable: true
-generate_list_resource: true
+# List generation omitted: generated ListQuery reuses the FullExample sample, which
+# pins the shared permanent connection+deployment (tf-test-permanent-connection /
+# tf-test-permanent-deployment). ListQuery and FullExample both t.Parallel(), so
+# they create two assignments of the same pair in one VCR recording.
+# TestAccOracleDatabaseGoldengateConnectionAssignmentListQuery_generated failed
+# recording on auto-pr-18631 (c2425f55) while FullExample passed. Revisit with a
+# dedicated parent fixture in a follow-up PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments/{{goldengate_connection_assignment_id}}
 create_url: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments?goldengateConnectionAssignmentId={{goldengate_connection_assignment_id}}
 id_format: projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments/{{goldengate_connection_assignment_id}}
@@ -58,7 +65,7 @@ samples:
         test_vars_overrides:
           project: '"oci-terraform-testing-prod"'
           deletion_protection: false
-          goldengate_connection_assignment_id: fmt.Sprintf("tf-gcca-%s", randomSuffix)
+          goldengate_connection_assignment_id: fmt.Sprintf("tf-gcca-%s", acctest.RandString(t, 10))
           goldengate_deployment_id: '"tf-test-permanent-deployment"'
           goldengate_connection_id: '"tf-test-permanent-connection"'
 virtual_fields:
