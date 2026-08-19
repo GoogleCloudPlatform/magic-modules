@@ -632,7 +632,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 
 	// Read the network from the API so we can get the correct self link format. We can't construct it from the
 	// base path because it might not line up exactly (compute.googleapis.com vs www.googleapis.com)
-	net, err := tpgcompute.NewClient(config, userAgent).Networks.Get(projectId, networkName).Do()
+	net, err := tpgcompute.DEPRECATED_LegacyApiaryClient(config, userAgent).Networks.Get(projectId, networkName).Do()
 	if err != nil {
 		return err
 	}
@@ -640,7 +640,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 	token := ""
 	for paginate := true; paginate; {
 		filter := fmt.Sprintf("network eq %s", net.SelfLink)
-		resp, err := tpgcompute.NewClient(config, userAgent).Firewalls.List(projectId).Filter(filter).Do()
+		resp, err := tpgcompute.DEPRECATED_LegacyApiaryClient(config, userAgent).Firewalls.List(projectId).Filter(filter).Do()
 		if err != nil {
 			return errwrap.Wrapf("Error listing firewall rules in proj: {{err}}", err)
 		}
@@ -648,7 +648,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 		log.Printf("[DEBUG] Found %d firewall rules in %q network", len(resp.Items), networkName)
 
 		for _, firewall := range resp.Items {
-			op, err := tpgcompute.NewClient(config, userAgent).Firewalls.Delete(projectId, firewall.Name).Do()
+			op, err := tpgcompute.DEPRECATED_LegacyApiaryClient(config, userAgent).Firewalls.Delete(projectId, firewall.Name).Do()
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
@@ -714,7 +714,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 }
 
 func deleteComputeNetwork(project, network, userAgent string, config *transport_tpg.Config) error {
-	op, err := tpgcompute.NewClient(config, userAgent).Networks.Delete(
+	op, err := tpgcompute.DEPRECATED_LegacyApiaryClient(config, userAgent).Networks.Delete(
 		project, network).Do()
 	if err != nil {
 		return errwrap.Wrapf("Error deleting network: {{err}}", err)

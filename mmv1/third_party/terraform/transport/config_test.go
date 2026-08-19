@@ -258,7 +258,7 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected call with loaded config client to work, got error: %s", err)
 	}
@@ -286,7 +286,7 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -324,7 +324,7 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -360,7 +360,7 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
