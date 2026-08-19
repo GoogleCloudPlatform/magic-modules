@@ -79,7 +79,7 @@ func testAccCheckComputeSharedVpcHostProject(t *testing.T, hostProject string, e
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		found, err := compute.NewClient(config, config.UserAgent).Projects.Get(hostProject).Do()
+		found, err := compute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Projects.Get(hostProject).Do()
 		if err != nil {
 			return fmt.Errorf("Error reading project %s: %s", hostProject, err)
 		}
@@ -99,7 +99,7 @@ func testAccCheckComputeSharedVpcHostProject(t *testing.T, hostProject string, e
 func testAccCheckComputeSharedVpcServiceProject(t *testing.T, hostProject, serviceProject string, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		serviceHostProject, err := compute.NewClient(config, config.UserAgent).Projects.GetXpnHost(serviceProject).Do()
+		serviceHostProject, err := compute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Projects.GetXpnHost(serviceProject).Do()
 		if err != nil {
 			if enabled {
 				return fmt.Errorf("Expected service project to be enabled.")
