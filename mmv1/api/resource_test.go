@@ -1115,3 +1115,62 @@ func TestSamplePrimaryResourceId(t *testing.T) {
 		})
 	}
 }
+
+func TestListResultDisplayNameKeyStrings(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    []string
+	}{
+		{
+			description: "camelCase displayName is treated as terraform display_name",
+			resource: api.Resource{
+				IdFormat: "projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}",
+				Properties: []*api.Type{
+					{Name: "displayName", Type: "String"},
+				},
+			},
+			expected: []string{"display_name", "notebook_execution_job_id"},
+		},
+		{
+			description: "snake_case display_name still matches",
+			resource: api.Resource{
+				IdFormat: "projects/{{project}}/foos/{{name}}",
+				Properties: []*api.Type{
+					{Name: "display_name", Type: "String"},
+				},
+			},
+			expected: []string{"display_name", "name"},
+		},
+		{
+			description: "name property without display_name uses name",
+			resource: api.Resource{
+				IdFormat: "projects/{{project}}/foos/{{name}}",
+				Properties: []*api.Type{
+					{Name: "name", Type: "String"},
+				},
+			},
+			expected: []string{"name"},
+		},
+		{
+			description: "falls back to last id_format token",
+			resource: api.Resource{
+				IdFormat: "projects/{{project}}/locations/{{location}}/jobs/{{job_id}}",
+			},
+			expected: []string{"job_id"},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			got := tc.resource.ListResultDisplayNameKeyStrings()
+			if diff := cmp.Diff(tc.expected, got); diff != "" {
+				t.Errorf("ListResultDisplayNameKeyStrings() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

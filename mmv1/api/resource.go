@@ -770,10 +770,15 @@ func (r Resource) ListScopeProperties() []*Type {
 
 func (r Resource) ListResultDisplayNameKeyStrings() []string {
 	var keys []string
-	if slices.ContainsFunc(r.RootProperties(), func(p *Type) bool { return p.Name == "display_name" }) {
+	hasAttr := func(attr string) bool {
+		return slices.ContainsFunc(r.RootProperties(), func(p *Type) bool {
+			return google.Underscore(p.Name) == attr
+		})
+	}
+	if hasAttr("display_name") {
 		keys = append(keys, "display_name")
 	}
-	if slices.ContainsFunc(r.RootProperties(), func(p *Type) bool { return p.Name == "name" }) {
+	if hasAttr("name") {
 		keys = append(keys, "name")
 	}
 	markers := regexp.MustCompile(`\{\{(\w+)\}\}`).FindAllStringSubmatch(r.IdFormat, -1)
