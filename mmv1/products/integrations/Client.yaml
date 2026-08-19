@@ -58,13 +58,6 @@ samples:
           key_ring_name: '"tftest-shared-keyring-1"'
           crypto_key_name: '"tftest-shared-key-1"'
           kms_key: kms.BootstrapKMSKeyInLocation(t, "us-east1")
-  - name: integrations_client_service_account
-    primary_resource_id: example
-    exclude_basic_doc: true
-    steps:
-      - name: integrations_client_service_account
-        resource_id_vars:
-          service_account_id: service-acc
 parameters:
   - name: location
     type: String
@@ -120,10 +113,3 @@ properties:
       Indicates if sample integrations should be created along with provisioning.
     immutable: true
     ignore_read: true
-  - name: runAsServiceAccount
-    type: String
-    description: |
-      User input run-as service account, if empty, will bring up a new default service account.
-    immutable: true
-    ignore_read: true
-    deprecation_message: '`run_as_service_account` is deprecated and will be removed in a future major release.'
