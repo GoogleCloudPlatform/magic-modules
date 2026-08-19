@@ -46,7 +46,6 @@ schema_version: 1
 state_upgraders: true
 autogen_async: true
 custom_code:
-generate_list_resource: true
 samples:
   - name: network_services_tls_route_basic
     primary_resource_id: default
