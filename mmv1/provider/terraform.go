@@ -288,7 +288,7 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 	templateData.GenerateQueryTestFile(targetFilePath, object)
 }
 
-// GenrateIamListResqourceQueryTest emits list_iam_<resource>_generated_test.go.
+// GenerateIamListResqourceQueryTest emits list_iam_<resource>_generated_test.go.
 func (t *Terraform) GenerateIamListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder string) {
 	if object.IamPolicy == nil || !object.IamPolicy.GenerateListResource {
 		return
