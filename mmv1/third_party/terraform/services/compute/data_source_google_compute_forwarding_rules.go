@@ -26,6 +26,12 @@ func DataSourceGoogleComputeForwardingRules() *schema.Resource {
 				Optional: true,
 			},
 
+			"filter": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `A filter expression that filters resources listed in the response, in the form documented at https://cloud.google.com/compute/docs/reference/rest/v1/forwardingRules/list. Example: "labels.env:prod".`,
+			},
+
 			"rules": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -54,10 +60,19 @@ func dataSourceGoogleComputeForwardingRulesRead(d *schema.ResourceData, meta int
 		return err
 	}
 
+	filter, _ := d.Get("filter").(string)
+
 	id := fmt.Sprintf("projects/%s/regions/%s/forwardingRules", project, region)
+	if filter != "" {
+		id = fmt.Sprintf("%s/filter=%s", id, filter)
+	}
 	d.SetId(id)
 
-	forwardingRulesAggregatedList, err := NewClient(config, userAgent).ForwardingRules.List(project, region).Do()
+	listCall := NewClient(config, userAgent).ForwardingRules.List(project, region)
+	if filter != "" {
+		listCall = listCall.Filter(filter)
+	}
+	forwardingRulesAggregatedList, err := listCall.Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Forwarding Rules Not Found : %s", project))
 	}
@@ -98,6 +113,10 @@ func dataSourceGoogleComputeForwardingRulesRead(d *schema.ResourceData, meta int
 
 	if err := d.Set("region", region); err != nil {
 		return fmt.Errorf("Error setting the region: %s", err)
+	}
+
+	if err := d.Set("filter", filter); err != nil {
+		return fmt.Errorf("Error setting the filter: %s", err)
 	}
 
 	return nil
