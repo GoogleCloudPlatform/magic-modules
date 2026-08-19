@@ -36,6 +36,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Agent Identity",
         "path" to "./google-beta/services/agentidentity"
     ),
+    "agenticapplications" to mapOf(
+        "name" to "agenticapplications",
+        "displayName" to "Agentic Applications",
+        "path" to "./google-beta/services/agenticapplications"
+    ),
     "agentregistry" to mapOf(
         "name" to "agentregistry",
         "displayName" to "Agent Registry",
@@ -925,6 +930,11 @@ var ServicesListBeta = mapOf(
         "name" to "vertexai",
         "displayName" to "Vertexai",
         "path" to "./google-beta/services/vertexai"
+    ),
+    "vertexaiaad" to mapOf(
+        "name" to "vertexaiaad",
+        "displayName" to "Vertexaiaad",
+        "path" to "./google-beta/services/vertexaiaad"
     ),
     "vmwareengine" to mapOf(
         "name" to "vmwareengine",

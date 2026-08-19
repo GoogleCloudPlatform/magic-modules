@@ -477,3 +477,31 @@ func (l *Loader) Validate() {
 		}
 	}
 }
+
+// CountProductsAndResources returns the number of products and resources that will be generated
+// based on the productsToGenerate list and optional resourceToGenerate filter.
+func (l *Loader) CountProductsAndResources(productsToGenerate []string, resourceToGenerate string) (int, int) {
+	if l.Products == nil {
+		return 0, 0
+	}
+
+	var productCount, resourceCount int
+	for _, productApi := range l.Products {
+		if len(productsToGenerate) > 0 && !slices.Contains(productsToGenerate, productApi.PackagePath) {
+			continue
+		}
+		productCount++
+		ver := productApi.VersionObjOrClosest(l.version)
+		for _, object := range productApi.Objects {
+			object.ExcludeIfNotInVersion(ver)
+			if resourceToGenerate != "" && object.Name != resourceToGenerate {
+				continue
+			}
+			if !object.IsExcluded() {
+				resourceCount++
+			}
+		}
+	}
+
+	return productCount, resourceCount
+}

@@ -25,6 +25,9 @@ service/aiplatform-colab-enterprise:
 service/aiplatform-dataset:
   resources:
   - google_vertex_ai_dataset
+service/aiplatform-evaluation:
+  resources:
+  - google_vertex_ai_evaluation_.*
 service/aiplatform-featurestore:
   resources:
   - google_vertex_ai_featurestore.*
