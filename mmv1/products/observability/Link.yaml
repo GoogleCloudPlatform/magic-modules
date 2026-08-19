@@ -43,10 +43,16 @@ samples:
     external_providers: [time]
     steps:
       - name: "observability_link_basic"
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         vars:
           display_name: "Initial Display Name"
           description: "Initial description"
       - name: "observability_link_basic"
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         vars:
           display_name: "Updated Display Name"
           description: "Updated description"
