@@ -29,6 +29,7 @@ timeouts:
   delete_minutes: 180
 sweeper:
   identifier_field: displayName
+generate_list_resource: true
 async:
   type: OpAsync
   operation:
@@ -49,6 +50,8 @@ samples:
           display_name: test-index
           bucket_name: vertex-ai-index-test
           kms_key_name: kms-name
+        vars:
+          region: 'us-central1'
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
@@ -64,6 +67,8 @@ samples:
           display_name: test-index
           bucket_name: vertex-ai-index-test
           kms_key_name: kms-name
+        vars:
+          region: 'us-central1'
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
