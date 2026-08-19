@@ -43,18 +43,20 @@ samples:
     steps:
       - name: "observability_bucket_basic"
         test_env_vars:
-          project_name: PROJECT_NAME
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         test_vars_overrides:
-          kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key1").CryptoKey.Name
+          kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-observability-key1").CryptoKey.Name
         vars:
           display_name: "Initial Display Name"
           description: "Initial description"
           kms_key: example-key-1
       - name: "observability_bucket_basic"
         test_env_vars:
-          project_name: PROJECT_NAME
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         test_vars_overrides:
-          kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key2").CryptoKey.Name
+          kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-observability-key2").CryptoKey.Name
         vars:
           display_name: "Updated Display Name"
           description: "Updated description"
