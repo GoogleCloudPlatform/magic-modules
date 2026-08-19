@@ -91,3 +91,9 @@ terraform {
 ## Datasources
 
 ## Resources
+
+## Resource: `google_compute_reservation`
+
+### `reservation_block_count` is now removed
+
+The deprecated top-level `reservation_block_count` attribute has been removed. Use `resource_status[0].reservation_block_count` instead.
