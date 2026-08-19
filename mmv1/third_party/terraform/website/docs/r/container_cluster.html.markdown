@@ -710,6 +710,11 @@ when deciding to remove nodes from a cluster. Can be `BALANCED` or `OPTIMIZE_UTI
 
 * `default_compute_class_enabled` - (Optional) Specifies whether default compute class behaviour is enabled. If enabled, cluster autoscaler will use Compute Class with name default for all the workloads, if not overriden.
 
+* `autopilot_general_profile` - (Optional) The Autopilot general profile for the cluster. Set to `NO_PERFORMANCE` to turn off
+Autopilot's [proactive capacity provisioning](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview),
+which avoids extra IP consumption at the cost of slower scale-up for general-purpose workloads.
+Accepted values are `NONE` and `NO_PERFORMANCE`. Only applicable to Autopilot clusters.
+
 <a name="nested_resource_limits"></a>The `resource_limits` block supports:
 
 * `resource_type` - (Required) The type of the resource. For example, `cpu` and
