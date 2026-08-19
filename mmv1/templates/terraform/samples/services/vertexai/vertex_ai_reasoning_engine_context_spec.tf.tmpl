@@ -36,6 +36,56 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
             managed_topic_enum = "USER_PREFERENCES"
           }
         }
+        generate_memories_examples {
+          conversation_source {
+            events {
+              content {
+                role = "user"
+                parts {
+                  text = "I like pepperoni pizza"
+                }
+                parts {
+                  function_call {
+                    id   = "fn-call-1"
+                    name = "order_pizza"
+                    args = jsonencode({
+                      type = "pepperoni"
+                    })
+                  }
+                }
+                parts {
+                  function_response {
+                    id   = "fn-resp-1"
+                    name = "order_pizza"
+                    response = jsonencode({
+                      status = "ordered"
+                    })
+                  }
+                }
+                parts {
+                  executable_code {
+                    id       = "exec-code-1"
+                    language = "PYTHON"
+                    code     = "print('pizza')"
+                  }
+                }
+                parts {
+                  code_execution_result {
+                    id      = "exec-result-1"
+                    outcome = "OUTCOME_OK"
+                    output  = "pizza"
+                  }
+                }
+              }
+            }
+          }
+          generated_memories {
+            fact = "User likes pepperoni pizza."
+            topics {
+              managed_memory_topic = "USER_PREFERENCES"
+            }
+          }
+        }
       }
 
       # 2. Session-level Customization Config (Transient scratchpad)

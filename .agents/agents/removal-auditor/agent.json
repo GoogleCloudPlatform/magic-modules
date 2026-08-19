@@ -1,0 +1,6 @@
+{
+  "name": "removal-auditor",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

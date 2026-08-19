@@ -137,3 +137,12 @@ properties:
             type: String
             description: |
               The fully qualified Java class name of the output format.
+          - name: serdeInfo
+            type: NestedObject
+            description: |
+              Serializer and deserializer information.
+            properties:
+              - name: serializationLib
+                type: String
+                description: |
+                  The fully qualified Java class name of the serialization library.
