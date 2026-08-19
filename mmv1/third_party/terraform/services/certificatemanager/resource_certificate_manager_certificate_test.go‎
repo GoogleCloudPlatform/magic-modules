@@ -39,7 +39,7 @@ func TestAccCertificateManagerCertificate_tags(t *testing.T) {
 				ResourceName:            "google_certificate_manager_certificate.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"tags"},
+				ImportStateVerifyIgnore: []string{"tags", "self_managed"},
 			},
 		},
 	})
