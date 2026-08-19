@@ -27,25 +27,32 @@ func testAccAccessContextManagerAccessLevelCondition_basicTest(t *testing.T) {
 	serviceAccountName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	vpcName := fmt.Sprintf("test-vpc-%s", acctest.RandString(t, 10))
 
-	expected := map[string]interface{}{
-		"members": []interface{}{fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", serviceAccountName, project)},
-		"devicePolicy": map[string]interface{}{
-			"requireCorpOwned": true,
-			"osConstraints": []interface{}{
+	// requireVerifiedChromeOs is only returned by the API when it is set, so the expected
+	// condition differs between the two steps.
+	expected := func(requireVerifiedChromeOs bool) map[string]interface{} {
+		osConstraint := map[string]interface{}{
+			"osType": "DESKTOP_CHROME_OS",
+		}
+		if requireVerifiedChromeOs {
+			osConstraint["requireVerifiedChromeOs"] = true
+		}
+
+		return map[string]interface{}{
+			"members": []interface{}{fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", serviceAccountName, project)},
+			"devicePolicy": map[string]interface{}{
+				"requireCorpOwned": true,
+				"osConstraints":    []interface{}{osConstraint},
+			},
+			"regions": []interface{}{"IT", "US"},
+			"vpcNetworkSources": []interface{}{
 				map[string]interface{}{
-					"osType": "DESKTOP_CHROME_OS",
+					"vpcSubnetwork": map[string]interface{}{
+						"network":          fmt.Sprintf("//compute.googleapis.com/projects/%s/global/networks/%s", project, vpcName),
+						"vpcIpSubnetworks": []interface{}{"20.0.5.0/24"},
+					},
 				},
 			},
-		},
-		"regions": []interface{}{"IT", "US"},
-		"vpcNetworkSources": []interface{}{
-			map[string]interface{}{
-				"vpcSubnetwork": map[string]interface{}{
-					"network":          fmt.Sprintf("//compute.googleapis.com/projects/%s/global/networks/%s", project, vpcName),
-					"vpcIpSubnetworks": []interface{}{"20.0.5.0/24"},
-				},
-			},
-		},
+		}
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -54,8 +61,13 @@ func testAccAccessContextManagerAccessLevelCondition_basicTest(t *testing.T) {
 		CheckDestroy:             testAccCheckAccessContextManagerAccessLevelConditionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerAccessLevelCondition_basic(org, "my policy", "level", serviceAccountName, vpcName),
-				Check:  testAccCheckAccessContextManagerAccessLevelConditionPresent(t, "google_access_context_manager_access_level_condition.access-level-condition", expected),
+				Config: testAccAccessContextManagerAccessLevelCondition_basic(org, "my policy", "level", serviceAccountName, vpcName, true),
+				Check:  testAccCheckAccessContextManagerAccessLevelConditionPresent(t, "google_access_context_manager_access_level_condition.access-level-condition", expected(true)),
+			},
+			{
+				// The resource is immutable, so flipping require_verified_chrome_os replaces it.
+				Config: testAccAccessContextManagerAccessLevelCondition_basic(org, "my policy", "level", serviceAccountName, vpcName, false),
+				Check:  testAccCheckAccessContextManagerAccessLevelConditionPresent(t, "google_access_context_manager_access_level_condition.access-level-condition", expected(false)),
 			},
 		},
 	})
@@ -121,7 +133,7 @@ func testAccCheckAccessContextManagerAccessLevelConditionDestroyProducer(t *test
 	}
 }
 
-func testAccAccessContextManagerAccessLevelCondition_basic(org, policyTitle, levelTitleName, saName, vpcName string) string {
+func testAccAccessContextManagerAccessLevelCondition_basic(org, policyTitle, levelTitleName, saName, vpcName string, requireVerifiedChromeOs bool) string {
 	return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
@@ -174,7 +186,7 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
     require_corp_owned = true
     os_constraints {
       os_type = "DESKTOP_CHROME_OS"
-      require_verified_chrome_os = true
+      require_verified_chrome_os = %t
     }
   }
   regions = [
@@ -189,5 +201,5 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
 		}
 	}
 }
-`, org, policyTitle, levelTitleName, levelTitleName, saName, vpcName)
+`, org, policyTitle, levelTitleName, levelTitleName, saName, vpcName, requireVerifiedChromeOs)
 }
