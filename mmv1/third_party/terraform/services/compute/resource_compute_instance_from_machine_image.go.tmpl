@@ -2,7 +2,6 @@ package compute
 {{- if ne $.TargetVersionName "ga" }}
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -141,30 +140,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		return err
 	}
 
-	// Force send all top-level fields that have been set in case they're overridden to zero values.
-	// Initialize ForceSendFields to empty so we don't get things that the instance resource
-	// always force-sends.
-	instance.ForceSendFields = []string{}
-	for f, s := range computeInstanceFromMachineImageSchema() {
-		// It seems that GetOkExists always returns true for sets.
-		// TODO: confirm this and file issue against Terraform core.
-		// In the meantime, don't force send sets.
-		if s.Type == schema.TypeSet {
-			continue
-		}
-
-		if _, exists := d.GetOkExists(f); exists {
-			// Assume for now that all fields are exact snake_case versions of the API fields.
-			// This won't necessarily always be true, but it serves as a good approximation and
-			// can be adjusted later as we discover issues.
-			instance.ForceSendFields = append(instance.ForceSendFields,  tpgresource.SnakeToPascalCase(f))
-		}
-	}
-
-	instanceBody, err := tpgresource.ConvertToMap(instance)
-	if err != nil {
-		return fmt.Errorf("Error converting instance: %s", err)
-	}
+	instanceBody := instance
 
 	if paramsBody, err := expandParams(d); err != nil {
 		return fmt.Errorf("Error creating params: %s", err)
@@ -244,17 +220,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 			return fmt.Errorf("Error expanding scheduling: %s", err)
 		}
 		if schedulingBody != nil {
-			// Strip nil Duration fields so the source machine image values are inherited
-			// instead of being overridden with null. Use json.Marshal to detect typed nils
-			// (map[string]interface{}(nil)) that are not equal to untyped nil.
-			for _, k := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "gracefulShutdown", "preemptionNoticeDuration"} {
-				if v, ok := schedulingBody[k]; ok {
-					if b, err := json.Marshal(v); err == nil && string(b) == "null" {
-						delete(schedulingBody, k)
-					}
-				}
-			}
-			instanceBody["scheduling"] = schedulingBody
+			instanceBody["scheduling"] = stripNilSchedulingDurations(schedulingBody)
 		}
 	} else if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
 		if schedulingRaw, ok := srcProps["scheduling"].(map[string]interface{}); ok {
@@ -288,6 +254,35 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		instanceBody["advancedMachineFeatures"] = amf
 	}
 
+	delete(instanceBody, "canIpForward")
+	delete(instanceBody, "deletionProtection")
+	forceableScalars := map[string]string{
+		"can_ip_forward":             "canIpForward",
+		"deletion_protection":        "deletionProtection",
+		"description":                "description",
+		"hostname":                   "hostname",
+		"machine_type":               "machineType",
+		"min_cpu_platform":           "minCpuPlatform",
+		"name":                       "name",
+		"key_revocation_action_type": "keyRevocationActionType",
+{{- if ne $.TargetVersionName "ga" }}
+		"erase_windows_vss_signature": "eraseWindowsVssSignature",
+{{- end }}
+	}
+	for field, key := range forceableScalars {
+		if _, exists := d.GetOkExists(field); !exists {
+			continue
+		}
+		if _, present := instanceBody[key]; !present {
+			instanceBody[key] = d.Get(field)
+		}
+	}
+	if _, exists := d.GetOkExists("zone"); exists {
+		if _, present := instanceBody["zone"]; !present {
+			instanceBody["zone"] = ""
+		}
+	}
+
 	log.Printf("[INFO] Requesting instance creation")
 	insertURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances", transport_tpg.BaseUrl(Product, config), project, z)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -303,7 +298,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 
 	// Store the ID now
-	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, instance.Name))
+	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, d.Get("name").(string)))
 
 	// Wait for the operation to complete
 	err = ComputeOperationWaitTime(config, res, project,
@@ -330,7 +325,7 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 	}
 
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
-		bootDisk, err := expandBootDiskTyped(d, config, project)
+		bootDisk, err := expandBootDisk(d, config, project)
 		if err != nil {
 			return nil, err
 		}
@@ -358,7 +353,7 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 	}
 
 	if _, hasScratchDisk := d.GetOk("scratch_disk"); hasScratchDisk {
-		scratchDisks, err := expandScratchDisksTyped(d, config, project)
+		scratchDisks, err := expandScratchDisks(d, config, project)
 		if err != nil {
 			return nil, err
 		}
@@ -390,7 +385,7 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 	if attachedDisksCount > 0 {
 		for i := 0; i < attachedDisksCount; i++ {
 			diskConfig := d.Get(fmt.Sprintf("attached_disk.%d", i)).(map[string]interface{})
-			disk, err := expandAttachedDiskTyped(diskConfig, d, config)
+			disk, err := expandAttachedDisk(diskConfig, d, config)
 			if err != nil {
 				return nil, err
 			}
