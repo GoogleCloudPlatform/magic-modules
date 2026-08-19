@@ -96,12 +96,12 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 					querycheck.ExpectLength("{{ $.TerraformName }}_iam_member.members", 1),
 					querycheck.ExpectIdentity("{{ $.TerraformName }}_iam_member.members", map[string]knownvalue.Check{
 				{{- range $attribute := $.IamAttributes }}
-						"{{attribute }}": knownvalue.NotNull(),
+						"{{ $attribute }}": knownvalue.NotNull(),
 				{{- end}}
 						"role": knownvalue.StringExact("{{ $.IamPolicy.AllowedIamRole }}"),
 						"member": knownvalue.StringExact("user:admin@hashicorptest.com"),
 				{{- if $.IamPolicy.IamConditionsRequestType }}
-						"condition_title": knownvalue.Null(),]}
+						"condition_title": knownvalue.Null(),
 				{{- end}}
 					}),
 				},
