@@ -45,6 +45,7 @@ async:
   result:
     resource_inside_response: false
 autogen_async: true
+generate_list_resource: true
 custom_code:
 samples:
   - name: netapp_host_group
