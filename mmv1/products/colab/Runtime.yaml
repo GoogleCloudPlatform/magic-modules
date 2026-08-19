@@ -23,6 +23,7 @@ references:
 base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes'
 self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimes/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes:assign?notebook_runtime_id={{name}}'
+generate_list_resource: true
 async:
   type: 'OpAsync'
 include_in_tgc_next: true

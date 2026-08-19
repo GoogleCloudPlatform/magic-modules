@@ -25,6 +25,7 @@ self_link: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{
 delete_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
 id_format: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
 immutable: true
+generate_list_resource: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs?notebook_execution_job_id={{notebook_execution_job_id}}'
 async:
   type: 'OpAsync'
