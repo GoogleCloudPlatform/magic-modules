@@ -44,7 +44,7 @@ async:
 autogen_async: false
 custom_code:
   constants: templates/terraform/constants/storage_anywhere_cache.go.tmpl
-  custom_create: true
+  custom_create: 'resourceStorageAnywhereCacheCustomCreate'
   custom_update: templates/terraform/custom_update/storage_anywhere_cache.go.tmpl
 samples:
   - name: storage_anywhere_cache_basic

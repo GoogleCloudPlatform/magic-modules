@@ -46,7 +46,7 @@ custom_code:
   update_encoder: templates/terraform/update_encoder/source_repo_repository.tmpl
   constants: templates/terraform/constants/source_repo_repository.go.tmpl
   post_create: templates/terraform/post_create/source_repo_repository_update.go.tmpl
-  custom_create: true
+  custom_create: 'resourceSourceRepoRepositoryCustomCreate'
 samples:
   - name: sourcerepo_repository_basic
     primary_resource_id: my-repo

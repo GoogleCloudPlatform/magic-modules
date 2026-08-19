@@ -31,7 +31,7 @@ exclude_delete: true
 autogen_status: UnVsZURlcGxveW1lbnQ=
 custom_code:
   constants: 'templates/terraform/constants/chronicle_rule_deployment.go.tmpl'
-  custom_create: true
+  custom_create: 'resourceChronicleRuleDeploymentCustomCreate'
   pre_update: 'templates/terraform/pre_update/chronicle_rule_deployment.go.tmpl'
 samples:
   - name: 'chronicle_ruledeployment_basic'

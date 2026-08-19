@@ -273,7 +273,7 @@ func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_
 
 func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{}) error {
 {{ if $.CustomCode.CustomCreate -}}
-	return resource{{ $.ResourceName }}CustomCreate(d, meta)
+	return {{ $.CustomCode.CustomCreate }}(d, meta)
 {{- else -}}
 {{- if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create")) -}}
     var project string

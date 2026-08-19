@@ -86,9 +86,9 @@ type CustomCode struct {
 	// modification.
 	PostCreateFailure string `yaml:"post_create_failure,omitempty"`
 
-	// CustomCreate indicates that the resource's create logic is defined
-	// in a handwritten function named resource<ResourceName>CustomCreate in the service package.
-	CustomCreate bool `yaml:"custom_create,omitempty"`
+	// CustomCreate indicates the name of a handwritten function in the service package
+	// that defines the resource's create logic.
+	CustomCreate string `yaml:"custom_create,omitempty"`
 
 	// This code is run before the Read call happens.  It's placed
 	// in the Read function.

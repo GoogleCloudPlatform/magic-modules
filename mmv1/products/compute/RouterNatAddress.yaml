@@ -59,7 +59,7 @@ custom_code:
   constants: 'templates/terraform/constants/router_nat_address.go.tmpl'
   encoder: 'templates/terraform/encoders/router_nat_address_patch_on_create.go.tmpl'
   update_encoder: 'templates/terraform/encoders/router_nat_address_update_skip_encoder.go.tmpl'
-  custom_create: true
+  custom_create: 'resourceComputeRouterNatAddressCustomCreate'
   pre_delete: 'templates/terraform/pre_delete/compute_router_nat_address_delete_nat_ips_only.go.tmpl'
 custom_diff:
   - 'resourceComputeRouterNatAddressDrainNatIpsCustomDiff'
