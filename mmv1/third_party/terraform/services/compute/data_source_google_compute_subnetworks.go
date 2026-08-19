@@ -99,43 +99,54 @@ func dataSourceGoogleComputeSubnetworksRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	params := map[string]string{}
-	if filter != "" {
-		params["filter"] = filter
-	}
-	url, err := transport_tpg.AddQueryParams(baseURL, params)
-	if err != nil {
-		return err
-	}
+	pageToken := ""
+	for {
+		params := map[string]string{}
+		if filter != "" {
+			params["filter"] = filter
+		}
+		if pageToken != "" {
+			params["pageToken"] = pageToken
+		}
+		url, err := transport_tpg.AddQueryParams(baseURL, params)
+		if err != nil {
+			return err
+		}
 
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   project,
-		RawURL:    url,
-		UserAgent: userAgent,
-	})
-	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Subnetworks : %s %s", project, region))
-	}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Subnetworks : %s %s", project, region))
+		}
 
-	if items, ok := res["items"].([]interface{}); ok {
-		for _, item := range items {
-			subnet, ok := item.(map[string]interface{})
-			if !ok {
-				continue
+		if items, ok := res["items"].([]interface{}); ok {
+			for _, item := range items {
+				subnet, ok := item.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				network, _ := subnet["network"].(string)
+				subnetworks = append(subnetworks, map[string]interface{}{
+					"description":              subnet["description"],
+					"ip_cidr_range":            subnet["ipCidrRange"],
+					"name":                     subnet["name"],
+					"network_self_link":        filepath.Base(network),
+					"network":                  subnet["network"],
+					"network_name":             filepath.Base(network),
+					"private_ip_google_access": subnet["privateIpGoogleAccess"],
+					"self_link":                subnet["selfLink"],
+				})
 			}
-			network, _ := subnet["network"].(string)
-			subnetworks = append(subnetworks, map[string]interface{}{
-				"description":              subnet["description"],
-				"ip_cidr_range":            subnet["ipCidrRange"],
-				"name":                     subnet["name"],
-				"network_self_link":        filepath.Base(network),
-				"network":                  subnet["network"],
-				"network_name":             filepath.Base(network),
-				"private_ip_google_access": subnet["privateIpGoogleAccess"],
-				"self_link":                subnet["selfLink"],
-			})
+		}
+
+		pageToken, _ = res["nextPageToken"].(string)
+		if pageToken == "" {
+			break
 		}
 	}
 
