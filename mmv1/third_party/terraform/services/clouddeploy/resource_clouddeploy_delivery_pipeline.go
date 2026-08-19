@@ -1953,7 +1953,7 @@ func expandClouddeployDeliveryPipelineTaskArray(o interface{}) []DeliveryPipelin
 	objs := o.([]interface{})
 	items := make([]DeliveryPipelineTask, 0, len(objs))
 	for _, item := range objs {
-		i := expandClouddeployDeliveryPipelineTask(item)
+		i := expandClouddeployDeliveryPipelineTask([]interface{}{item})
 		if i != nil {
 			items = append(items, *i)
 		}
