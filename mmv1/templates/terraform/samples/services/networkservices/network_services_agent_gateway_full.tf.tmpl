@@ -37,7 +37,6 @@ resource "google_network_services_agent_connectivity_template" "default" {
     tier = "gold"
   }
 
-  access_types = ["PUBLIC"]
   access_path = "AGENT_TO_ANYWHERE"
 
   egress_network_config {
@@ -64,7 +63,7 @@ resource "google_compute_subnetwork" "default" {
 resource "google_compute_network_attachment" "default" {
   name                  = "{{index $.ResourceIdVars "network_attachment_name"}}"
   region                = "us-central1"
-  connection_preference = "ACCEPT_MANUAL"
+  connection_preference = "ACCEPT_AUTOMATIC"
 
   subnetworks = [
     google_compute_subnetwork.default.id,

@@ -19,12 +19,24 @@ resource "google_compute_network_attachment" "default" {
   subnetworks           = [google_compute_subnetwork.default.id]
 }
 
+resource "google_dns_managed_zone" "default" {
+  name        = "{{index $.ResourceIdVars "dns_zone_name"}}"
+  dns_name    = "example.com."
+  description = "Private zone used by AgentGateway DNS peering"
+  visibility  = "private"
+
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.default.id
+    }
+  }
+}
+
 resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResourceId}}" {
   agent_connectivity_template_id = "{{index $.ResourceIdVars "agent_connectivity_template_id"}}"
   location                       = "us-central1"
   description                    = "An updated advanced configuration for Agent Connectivity Template"
 
-  access_types = ["PRIVATE"]
   access_path = "AGENT_TO_ANYWHERE"
 
   labels = {
@@ -35,7 +47,7 @@ resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResou
     vpc_egress = "PRIVATE_RANGES_ONLY"
     network_attachment = google_compute_network_attachment.default.id
     dns_peering_config {
-      domain         = "example.com."
+      domain         = google_dns_managed_zone.default.dns_name
       target_network = google_compute_network.default.id
     }
   }
