@@ -115,15 +115,13 @@ func TestAccClouddeployDeliveryPipeline_withPredeployTasks(t *testing.T) {
 			{
 				Config: testAccClouddeployDeliveryPipeline_withPredeployTasks(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.actions.#", "1"),
-					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.actions.0", "predeploy-action"),
-					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-image"),
-					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.command.0", "echo"),
-					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.args.0", "hello"),
-					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.actions.#", "1"),
-					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.actions.0", "postdeploy-action"),
-					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-cleanup-image"),
-				),
+						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-image"),
+						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.command.0", "echo"),
+						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.args.0", "hello"),
+						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-cleanup-image"),
+						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.tasks.0.container.0.command.0", "cleanup"),
+						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.tasks.0.container.0.args.0", "--all"),
+					),
 			},
 			{
 				ResourceName:            "google_clouddeploy_delivery_pipeline.primary",
@@ -140,15 +138,17 @@ func testAccClouddeployDeliveryPipeline_withPredeployTasks(context map[string]in
 resource "google_clouddeploy_delivery_pipeline" "primary" {
   location = "%{region}"
   name     = "tf-test-pipeline%{random_suffix}"
+
   description = "test predeploy and postdeploy tasks"
+
   project = "%{project_name}"
+
   serial_pipeline {
     stages {
       target_id = "my-target"
       strategy {
         standard {
           predeploy {
-            actions = ["predeploy-action"]
             tasks {
               container {
                 image   = "gcr.io/my-project/my-image"
@@ -158,7 +158,6 @@ resource "google_clouddeploy_delivery_pipeline" "primary" {
             }
           }
           postdeploy {
-            actions = ["postdeploy-action"]
             tasks {
               container {
                 image   = "gcr.io/my-project/my-cleanup-image"
