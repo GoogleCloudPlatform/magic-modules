@@ -15,7 +15,10 @@ name: DbSystem
 description: A DbSystem Resource
 base_url: projects/{{project}}/locations/{{location}}/dbSystems
 immutable: true
-generate_list_resource: true
+# List generation omitted: generated ListQuery tests create a live DbSystem
+# (insert timeout 120 minutes), which exceeds the VCR recording 6h wall clock.
+# Revisit in a dedicated PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/dbSystems/{{db_system_id}}
 create_url: projects/{{project}}/locations/{{location}}/dbSystems?dbSystemId={{db_system_id}}
 id_format: projects/{{project}}/locations/{{location}}/dbSystems/{{db_system_id}}
@@ -66,9 +69,9 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          db_system_id: fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", randomSuffix)
-          database_id: fmt.Sprintf("ofake-tf-test-database-basic-%s", randomSuffix)
-          db_unique_name: fmt.Sprintf("db%s", randomSuffix)
+          db_system_id: fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t, 10))
+          database_id: fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t, 10))
+          db_unique_name: fmt.Sprintf("db%s", acctest.RandString(t, 10))
           odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
           odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
   - name: oracledatabase_db_system_full
@@ -93,10 +96,10 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          db_system_id: fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", randomSuffix)
-          database_id: fmt.Sprintf("ofake-tf-test-database-basic-%s", randomSuffix)
-          pluggable_database_id: fmt.Sprintf("ofake-tf-test-mypdb-%s", randomSuffix)
-          db_unique_name: fmt.Sprintf("db%s", randomSuffix)
+          db_system_id: fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t, 10))
+          database_id: fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t, 10))
+          pluggable_database_id: fmt.Sprintf("ofake-tf-test-mypdb-%s", acctest.RandString(t, 10))
+          db_unique_name: fmt.Sprintf("db%s", acctest.RandString(t, 10))
           odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
           odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
 virtual_fields:

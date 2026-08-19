@@ -28,3 +28,10 @@ Each row: **product**, **resource** (PascalCase YAML stem), **pattern** (oracle 
 | networkservices | ServiceLbPolicies | P-17 | `base_url` defaults to `global` location; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
 | networkservices | TcpRoute | P-17 | `base_url` hardcodes `/locations/global/`; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
 | networkservices | TlsRoute | P-17 | `base_url` defaults to `global` location; list scope mismatches resource creation scope | add-networkservices-list-resources-followup |
+| oracledatabase | AutonomousDatabase | P-22 | ListQuery create uses 240m insert timeout; VCR 6h wall clock cannot record it with sibling tests | add-oracledatabase-list-resources-followup |
+| oracledatabase | CloudExadataInfrastructure | P-22 | ListQuery create uses 240m insert timeout; VCR 6h wall clock cannot record it | add-oracledatabase-list-resources-followup |
+| oracledatabase | CloudVmCluster | P-22 | ListQuery create uses 120m insert timeout; VCR 6h wall clock cannot record it | add-oracledatabase-list-resources-followup |
+| oracledatabase | DbSystem | P-22 | ListQuery create uses 120m insert timeout; VCR 6h wall clock cannot record it | add-oracledatabase-list-resources-followup |
+| oracledatabase | ExadbVmCluster | P-22 | ListQuery create uses 120m insert timeout; VCR 6h wall clock cannot record it | add-oracledatabase-list-resources-followup |
+| oracledatabase | ExascaleDbStorageVault | P-22 | ListQuery create uses 120m insert timeout; VCR 6h wall clock cannot record it | add-oracledatabase-list-resources-followup |
+| oracledatabase | GoldengateDeployment | P-22 | ListQuery create ~78m plus sibling tests exceeded VCR 6h recording wall clock | add-oracledatabase-list-resources-followup |

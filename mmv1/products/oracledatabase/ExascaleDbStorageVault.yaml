@@ -16,7 +16,10 @@ name: ExascaleDbStorageVault
 description: An Exascale Storage Vault Resource
 base_url: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults
 immutable: true
-generate_list_resource: true
+# List generation omitted: generated ListQuery tests create a live Exascale
+# storage vault (insert timeout 120 minutes), which exceeds the VCR recording
+# 6h wall clock. Revisit in a dedicated PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults/{{exascale_db_storage_vault_id}}
 create_url: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults?exascaleDbStorageVaultId={{exascale_db_storage_vault_id}}
 id_format: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults/{{exascale_db_storage_vault_id}}
@@ -63,7 +66,7 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", randomSuffix)
+          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", acctest.RandString(t, 10))
   - name: oracledatabase_exascale_db_storage_vault_full
     primary_resource_id: my_storage_vault
     steps:
@@ -81,7 +84,7 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-full-%s", randomSuffix)
+          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-full-%s", acctest.RandString(t, 10))
   - name: oracledatabase_exascale_db_storage_vault_dedicated_exadata_infrastructure
     primary_resource_id: my_storage_vault
     steps:
@@ -96,8 +99,8 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           project: '"oci-terraform-testing-prod"'
-          cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-configured-exadata-%s", randomSuffix)'
-          exascale_db_storage_vault_id: 'fmt.Sprintf("ofake-tf-test-vault-on-exadata-%s", randomSuffix)'
+          cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-configured-exadata-%s", acctest.RandString(t, 10))'
+          exascale_db_storage_vault_id: 'fmt.Sprintf("ofake-tf-test-vault-on-exadata-%s", acctest.RandString(t, 10))'
 virtual_fields:
   - name: deletion_protection
     type: Boolean

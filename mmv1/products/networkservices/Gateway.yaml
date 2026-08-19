@@ -52,7 +52,6 @@ async:
   result:
     resource_inside_response: false
 autogen_async: true
-generate_list_resource: true
 include_in_tgc_next: true
 custom_code:
   update_encoder: templates/terraform/update_encoder/network_services_gateway.go.tmpl

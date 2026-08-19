@@ -16,7 +16,10 @@ name: GoldengateDeployment
 description: This resource helps to create a GoldengateDeployment which enables running Oracle GoldenGate in Google Cloud.
 base_url: projects/{{project}}/locations/{{location}}/goldengateDeployments
 immutable: true
-generate_list_resource: true
+# List generation omitted: generated ListQuery tests create a live GoldenGate
+# deployment (insert timeout 120 minutes; CI recording took ~78 minutes and
+# still failed VCR 6h wall clock with sibling tests). Revisit in a dedicated PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/goldengateDeployments/{{goldengate_deployment_id}}
 create_url: projects/{{project}}/locations/{{location}}/goldengateDeployments?goldengateDeploymentId={{goldengate_deployment_id}}
 id_format: projects/{{project}}/locations/{{location}}/goldengateDeployments/{{goldengate_deployment_id}}
@@ -57,7 +60,7 @@ samples:
         test_vars_overrides:
           project: '"oci-terraform-testing-prod"'
           deletion_policy: '"DELETE"'
-          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-basic-%s", randomSuffix)
+          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-basic-%s", acctest.RandString(t, 10))
           odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
   - name: oracledatabase_goldengate_deployment_full
     primary_resource_id: deployment
@@ -74,7 +77,7 @@ samples:
         test_vars_overrides:
           project: '"oci-terraform-testing-prod"'
           deletion_policy: '"DELETE"'
-          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-full-%s", randomSuffix)
+          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-full-%s", acctest.RandString(t, 10))
           odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
           odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
 parameters:

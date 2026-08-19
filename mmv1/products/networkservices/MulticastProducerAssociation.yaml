@@ -46,7 +46,6 @@ async:
   include_project: false
 autogen_status: TXVsdGljYXN0UHJvZHVjZXJBc3NvY2lhdGlvbg==
 autogen_async: true
-generate_list_resource: true
 samples:
   - name: network_services_multicast_producer_association_basic
     primary_resource_id: mpa_test

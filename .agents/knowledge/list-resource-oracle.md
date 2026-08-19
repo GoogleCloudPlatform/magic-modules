@@ -726,3 +726,63 @@ path and make it deterministic (or seed it from the VCR cassette name).
 **Do NOT:**
 Treat P-20 as P-17 (scope mismatch). The recording passed — the resource was found. The problem is
 cassette path resolution in replay, not a filter or scope issue.
+
+---
+
+### P-21 — Optional `project` (and other auto-scopes) not captured into the list query
+
+**Symptom:**
+Recording log contains `no query results found after filtering` and
+`Query result of at least length 1 - expected but got 0` for a `*ListQuery_generated` test.
+The create step (and the matching example test) **passes**. The list query runs against the
+wrong project/region.
+
+**Root cause:**
+`query_test_file.go.tmpl` only captured `ListScopeProperties` with `required: true`. Synthesized
+provider-default scopes (`project`, and sometimes `region`/`zone`) are appended **without**
+`Required: true`, so they were omitted from `listScope.Capture` and from the list `config {}`
+block. The list then used the provider default (CI project / env region) instead of the values
+on the resource just created.
+
+**Real example (oracledatabase, 2026-08-18):**
+`TestAccOracleDatabaseGoldengateDeploymentListQuery_generated` created the resource in
+`oci-terraform-testing-prod` (sample `test_vars_overrides.project`) at hardcoded `us-east4`.
+The generated list query captured only required `location` and listed the default CI project →
+empty result set. The corresponding `*BasicExample` test passed.
+
+**Fix (oracle branch — query test template):**
+In `mmv1/templates/terraform/samples/base_configs/query_test_file.go.tmpl`, capture and pass
+every required scope **and** the auto-scopes `project` / `region` / `zone` / `location` even
+when they are optional on the list schema. Values must come from the created resource state
+(`listScope.Capture`), not from `envvar.GetTestProjectFromEnv()`.
+
+**Do NOT:**
+- Add `skip_vcr: true` (P-19).
+- Treat this as P-20. Recording actually ran and the query returned 0 hits — the list URL was wrong.
+- Change the sample to use the CI project. Oracle resources are pinned to `oci-terraform-testing-prod`.
+
+---
+
+### P-22 — ListQuery create exceeds VCR 6h recording wall clock
+
+**Symptom:**
+VCR recording panics with `test timed out after 6h0m0s`, or a `*ListQuery_generated` test runs for
+tens of minutes to hours (create of Exadata / VM cluster / GoldenGate deployment / Autonomous DB).
+
+**Root cause:**
+The generated list-query test **creates** the first sample, then lists. Resources whose `timeouts.insert_minutes`
+is 120–240 cannot finish (plus sibling tests) inside the VCR recording step's 6h limit.
+
+**Real example (oracledatabase, 2026-08-18):**
+`TestAccOracleDatabaseGoldengateDeploymentListQuery_generated` alone took ~78 minutes. Combined with
+Exadata/VM-cluster examples and networkservices list tests, recording hit 6h on
+`TestAccNetworkServicesLbRouteExtensionListQuery_generated`.
+
+**Fix:**
+Do **not** set `generate_list_resource: true` on these resources in a multi-resource PR. Leave a YAML
+comment explaining the insert timeout, and add a `deferred-list-resources.md` row for a dedicated
+follow-up. Keep list generation only for resources whose create finishes in tens of minutes
+(e.g. GoldengateConnection, OdbNetwork).
+
+**Do NOT:**
+Add `skip_vcr: true` (P-19) to hide the timeout.

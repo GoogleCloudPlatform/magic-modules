@@ -20,7 +20,10 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures
 immutable: true
-generate_list_resource: true
+# List generation omitted: generated ListQuery tests create live Exadata
+# infrastructure (insert timeout 240 minutes), which exceeds the VCR recording
+# 6h wall clock. Revisit in a dedicated PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}
 create_url: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures?cloudExadataInfrastructureId={{cloud_exadata_infrastructure_id}}
 id_format: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}
@@ -63,7 +66,7 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-basic-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-basic-%s", acctest.RandString(t, 10))
   - name: oracledatabase_cloud_exadata_infrastructure_full
     primary_resource_id: my-cloud-exadata
     steps:
@@ -81,7 +84,7 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-full-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-full-%s", acctest.RandString(t, 10))
 virtual_fields:
   - name: deletion_protection
     type: Boolean
