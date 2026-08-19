@@ -47,9 +47,6 @@ samples:
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
-# generate_list_resource: true - DROPPED: API 403 — resource is org-scoped, requires GOOGLE_ORG (P-14)
-# The list URL contains /organizations/{org_id} and requires org-level credentials beyond GOOGLE_PROJECT
-
 parameters:
   - name: orgId
     type: String

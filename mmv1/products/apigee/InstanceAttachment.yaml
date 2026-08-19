@@ -28,7 +28,6 @@ delete_url: '{{instance_id}}/attachments/{{name}}'
 import_format:
   - '{{instance_id}}/attachments/{{name}}'
   - '{{instance_id}}/{{name}}'
-
 timeouts:
   insert_minutes: 30
   update_minutes: 20
