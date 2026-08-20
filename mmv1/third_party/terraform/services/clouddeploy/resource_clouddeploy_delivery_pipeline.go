@@ -1997,9 +1997,13 @@ func flattenClouddeployDeliveryPipelineTaskArray(objs []DeliveryPipelineTask) []
 	}
 	items := make([]interface{}, 0, len(objs))
 	for _, item := range objs {
-		i := flattenClouddeployDeliveryPipelineTask(&item)
-		if i != nil {
-			items = append(items, i)
+		// flattenClouddeployDeliveryPipelineTask returns []interface{}{map} (single-block
+		// wrapper); unwrap to the inner map so the array contains maps, not slices.
+		flat := flattenClouddeployDeliveryPipelineTask(&item)
+		if flat != nil {
+			if arr, ok := flat.([]interface{}); ok && len(arr) > 0 {
+				items = append(items, arr[0])
+			}
 		}
 	}
 	return items
