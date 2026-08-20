@@ -2126,7 +2126,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating scheduling: %s", err)
 	}
 	if schedulingBody != nil {
-		instanceBody["scheduling"] = stripNilSchedulingDurations(schedulingBody)
+		instanceBody["scheduling"] = schedulingBody
 	}
 	if amf := expandAdvancedMachineFeatures(d); amf != nil {
 		instanceBody["advancedMachineFeatures"] = amf
@@ -4524,8 +4524,10 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 	}
 
 	disk := map[string]interface{}{
-		"autoDelete": d.Get("boot_disk.0.auto_delete").(bool),
-		"boot":       true,
+		"boot": true,
+	}
+	if autoDelete := d.Get("boot_disk.0.auto_delete").(bool); autoDelete {
+		disk["autoDelete"] = true
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.device_name"); ok {

@@ -1155,6 +1155,25 @@ func stripNilSchedulingDurations(scheduling map[string]interface{}) map[string]i
 	return scheduling
 }
 
+func omitZeroIndex(disk map[string]interface{}) {
+	if idx, ok := disk["index"]; ok {
+		switch v := idx.(type) {
+		case float64:
+			if v == 0 {
+				delete(disk, "index")
+			}
+		case int:
+			if v == 0 {
+				delete(disk, "index")
+			}
+		case int64:
+			if v == 0 {
+				delete(disk, "index")
+			}
+		}
+	}
+}
+
 func expandShieldedVmConfigs(d tpgresource.TerraformResourceData) map[string]interface{} {
 	if _, ok := d.GetOk("shielded_instance_config"); !ok {
 		return nil
