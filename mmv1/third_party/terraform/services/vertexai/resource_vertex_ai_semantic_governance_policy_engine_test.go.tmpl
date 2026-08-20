@@ -202,19 +202,19 @@ resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
 
 const testAccSGPESharedNetworking = `
 resource "google_compute_network" "sgpe_network" {
-  name                    = "tf-sgpe-net-%{random_suffix}"
+  name                    = "tf-test-sgpe-net-%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "sgpe_subnet" {
-  name          = "tf-sgpe-subnet-%{random_suffix}"
+  name          = "tf-test-sgpe-subnet-%{random_suffix}"
   ip_cidr_range = "192.168.0.0/24"
   region        = "us-central1"
   network       = google_compute_network.sgpe_network.id
 }
 
 resource "google_dns_managed_zone" "sgpe_zone" {
-  name        = "tf-sgpe-zone-%{random_suffix}"
+  name        = "tf-test-sgpe-zone-%{random_suffix}"
   dns_name    = "sgpe-lifecycle.example.com."
   description = "Private DNS zone for SGPE lifecycle acceptance test."
   visibility  = "private"
