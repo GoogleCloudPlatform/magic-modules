@@ -1989,10 +1989,24 @@ by Dataproc`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"user_service_account_mapping": {
-													Type:        schema.TypeMap,
-													Required:    true,
+													Type:     schema.TypeMap,
+													Optional: true,
+													AtLeastOneOf: []string{
+														"cluster_config.0.security_config.0.identity_config.0.user_service_account_mapping",
+														"cluster_config.0.security_config.0.identity_config.0.enable_ssh",
+													},
 													Elem:        &schema.Schema{Type: schema.TypeString},
 													Description: `User to service account mappings for multi-tenancy.`,
+												},
+												"enable_ssh": {
+													Type:     schema.TypeBool,
+													Optional: true,
+													Computed: true,
+													AtLeastOneOf: []string{
+														"cluster_config.0.security_config.0.identity_config.0.user_service_account_mapping",
+														"cluster_config.0.security_config.0.identity_config.0.enable_ssh",
+													},
+													Description: `Whether to enable SSH access for the cluster. The default is true for image versions prior to 3.1 and false for image versions 3.1 and later. The default behavior can be changed when creating clusters using image versions 2.3.30 and later.`,
 												},
 											},
 										},
@@ -2726,7 +2740,7 @@ func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (
 	conf.GceClusterConfig = c
 
 	if cfg, ok := configOptions(d, "cluster_config.0.security_config"); ok {
-		conf.SecurityConfig = expandSecurityConfig(cfg)
+		conf.SecurityConfig = expandSecurityConfig(d, cfg)
 	}
 
 	if cfg, ok := configOptions(d, "cluster_config.0.software_config"); ok {
@@ -2943,7 +2957,7 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 	return conf, nil
 }
 
-func expandSecurityConfig(cfg map[string]interface{}) *dataproc.SecurityConfig {
+func expandSecurityConfig(d *schema.ResourceData, cfg map[string]interface{}) *dataproc.SecurityConfig {
 	conf := &dataproc.SecurityConfig{}
 	if kfg, ok := cfg["kerberos_config"]; ok {
 		k := kfg.([]interface{})
@@ -2954,13 +2968,13 @@ func expandSecurityConfig(cfg map[string]interface{}) *dataproc.SecurityConfig {
 	if ifg, ok := cfg["identity_config"]; ok {
 		i := ifg.([]interface{})
 		if len(i) > 0 {
-			conf.IdentityConfig = expandIdentityConfig(i[0].(map[string]interface{}))
+			conf.IdentityConfig = expandIdentityConfig(d, i[0].(map[string]interface{}))
 		}
 	}
 	return conf
 }
 
-func expandIdentityConfig(cfg map[string]interface{}) *dataproc.IdentityConfig {
+func expandIdentityConfig(d *schema.ResourceData, cfg map[string]interface{}) *dataproc.IdentityConfig {
 	conf := &dataproc.IdentityConfig{}
 	if v, ok := cfg["user_service_account_mapping"]; ok {
 		m := make(map[string]string)
@@ -2968,6 +2982,13 @@ func expandIdentityConfig(cfg map[string]interface{}) *dataproc.IdentityConfig {
 			m[k] = val.(string)
 		}
 		conf.UserServiceAccountMapping = m
+	}
+	// enable_ssh is Optional+Computed and the API default varies by image version, so only
+	// transmit it when the practitioner set it explicitly. GetOkExists distinguishes an
+	// unset field from an explicit false, which d.Get and the block map cannot.
+	if v, ok := d.GetOkExists("cluster_config.0.security_config.0.identity_config.0.enable_ssh"); ok {
+		conf.EnableSsh = v.(bool)
+		conf.ForceSendFields = append(conf.ForceSendFields, "EnableSsh")
 	}
 	return conf
 }
@@ -3726,6 +3747,7 @@ func flattenIdentityConfig(d *schema.ResourceData, ifg *dataproc.IdentityConfig)
 	}
 	data := map[string]interface{}{
 		"user_service_account_mapping": d.Get("cluster_config.0.security_config.0.identity_config.0.user_service_account_mapping").(map[string]interface{}),
+		"enable_ssh":                   ifg.EnableSsh,
 	}
 
 	return []map[string]interface{}{data}
