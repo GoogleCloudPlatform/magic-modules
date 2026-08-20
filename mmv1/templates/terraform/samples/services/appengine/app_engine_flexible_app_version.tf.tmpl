@@ -42,8 +42,19 @@ resource "google_project_iam_member" "storage_viewer" {
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [
+    google_project_iam_member.gae_api,
+    google_project_iam_member.logs_writer,
+    google_project_iam_member.storage_viewer,
+  ]
+
+  create_duration = "120s"
+}
+
 resource "google_app_engine_flexible_app_version" "{{$.PrimaryResourceId}}" {
   version_id = "v1"
+  depends_on = [time_sleep.wait_120_seconds]
   project    = google_project_iam_member.gae_api.project
   service    = "default"
   runtime    = "nodejs"
