@@ -256,6 +256,12 @@ When upgrading to version 8.0.0:
 - If your configuration sets both `sensitive_params.0.secret_access_key` and `sensitive_params.0.secret_access_key_wo`, remove one of them.
 - Update any `sensitive_params.0.secret_access_key_wo_version = <integer>` in your configuration to a string value (e.g. `secret_access_key_wo_version = "1"`). Existing integer values in state are converted automatically.
 
+## Resource: `google_monitoring_uptime_check_config`
+
+### `http_check.0.auth_info.0.password` and `http_check.0.auth_info.0.password_wo` now require exactly one to be set
+
+The constraint between `http_check.0.auth_info.0.password` and `http_check.0.auth_info.0.password_wo` is now `ExactlyOneOf`. Configurations that set both fields must be updated to set only one.
+
 ## Resource: `google_secret_manager_secret_version`
 
 ### `secret_data_wo_version` type changed from `Integer` to `String`
