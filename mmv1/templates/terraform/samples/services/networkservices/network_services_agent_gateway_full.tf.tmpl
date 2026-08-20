@@ -14,7 +14,7 @@ resource "google_network_services_agent_gateway" "{{$.PrimaryResourceId}}" {
     governed_access_path = "AGENT_TO_ANYWHERE"
   }
 
-  agent_connectivity_template = google_network_services_agent_connectivity_template.default.id
+  agent_connectivity_template = "projects/${data.google_project.project.number}/locations/us-central1/agentConnectivityTemplates/${google_network_services_agent_connectivity_template.default.agent_connectivity_template_id}"
 
   registries = [
     "//agentregistry.googleapis.com/projects/{{index $.TestEnvVars "project"}}/locations/us-central1"
