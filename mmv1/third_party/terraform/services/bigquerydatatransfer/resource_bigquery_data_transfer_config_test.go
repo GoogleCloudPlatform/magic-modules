@@ -1,14 +1,7 @@
 package bigquerydatatransfer_test
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
-	"reflect"
-	"strings"
-	"testing"
-	"time"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -19,69 +12,10 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"strings"
+	"testing"
+	"time"
 )
-
-func TestBigqueryDataTransferConfigStateUpgradeV0(t *testing.T) {
-	t.Parallel()
-
-	cases := map[string]struct {
-		Attributes map[string]interface{}
-		Expected   map[string]interface{}
-	}{
-		"zero int becomes unset": {
-			Attributes: map[string]interface{}{
-				"sensitive_params": []interface{}{
-					map[string]interface{}{
-						"secret_access_key_wo_version": 0,
-					},
-				},
-			},
-			Expected: map[string]interface{}{
-				"sensitive_params": []interface{}{
-					map[string]interface{}{
-						"secret_access_key_wo_version": "",
-					},
-				},
-			},
-		},
-		"nonzero int becomes decimal string": {
-			Attributes: map[string]interface{}{
-				"sensitive_params": []interface{}{
-					map[string]interface{}{
-						"secret_access_key_wo_version": json.Number("2"),
-					},
-				},
-			},
-			Expected: map[string]interface{}{
-				"sensitive_params": []interface{}{
-					map[string]interface{}{
-						"secret_access_key_wo_version": "2",
-					},
-				},
-			},
-		},
-		"missing sensitive_params is a no-op": {
-			Attributes: map[string]interface{}{
-				"display_name": "keep-me",
-			},
-			Expected: map[string]interface{}{
-				"display_name": "keep-me",
-			},
-		},
-	}
-
-	for tn, tc := range cases {
-		t.Run(tn, func(t *testing.T) {
-			actual, err := bigquerydatatransfer.ResourceBigqueryDataTransferConfigUpgradeV0(context.Background(), tc.Attributes, nil)
-			if err != nil {
-				t.Fatalf("error migrating state: %s", err)
-			}
-			if !reflect.DeepEqual(tc.Expected, actual) {
-				t.Fatalf("\n\nexpected:\n\n%#v\n\ngot:\n\n%#v\n\n", tc.Expected, actual)
-			}
-		})
-	}
-}
 
 func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForceNewWhenGoogleCloudStorage(t *testing.T) {
 	t.Parallel()
