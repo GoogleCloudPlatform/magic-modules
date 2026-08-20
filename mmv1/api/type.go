@@ -1548,8 +1548,15 @@ func (t Type) TGCSendEmptyValue() bool {
 	return false
 }
 
+func (t Type) IsTgcCompiler() bool {
+	if t.ResourceMetadata != nil {
+		return t.ResourceMetadata.IsTgcCompiler()
+	}
+	return false
+}
+
 func (t Type) ShouldIgnoreCustomFlatten() bool {
-	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
+	return t.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }
 
 // It returns true if any of the nested properties are required, necessitating the initialization

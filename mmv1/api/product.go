@@ -164,7 +164,7 @@ func (p *Product) SetCompiler(t string) {
 }
 
 func (p Product) IsTgcCompiler() bool {
-	return p.Compiler == "terraformgoogleconversionnext-codegen"
+	return strings.HasPrefix(p.Compiler, "terraformgoogleconversion") || strings.HasPrefix(p.Compiler, "caitoterraformconversion")
 }
 
 // ====================

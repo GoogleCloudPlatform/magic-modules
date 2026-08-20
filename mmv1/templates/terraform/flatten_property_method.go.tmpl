@@ -14,7 +14,7 @@
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
 {{- if and (or $.WriteOnlyLegacy $.WriteOnly) }}
-{{- else if and (and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten)) $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
+{{- else if and (and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten)) $.IsTgcCompiler }}
     {{- customTemplate $ $.CustomFlatten false -}}
 {{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
 {{- else -}}

@@ -2697,5 +2697,8 @@ func (r Resource) CaiResourceName() string {
 }
 
 func (r Resource) IsTgcCompiler() bool {
-	return r.ProductMetadata.Compiler == "terraformgoogleconversionnext-codegen"
+	if r.ProductMetadata != nil {
+		return r.ProductMetadata.IsTgcCompiler()
+	}
+	return false
 }

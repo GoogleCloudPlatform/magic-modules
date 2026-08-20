@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
 {{- define "expandPropertyMethod" }}
-  {{- if and $.CustomExpand $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
+  {{- if and $.CustomExpand $.IsTgcCompiler }}
 {{ customTemplate $ $.CustomExpand true }}
   {{- else if $.CustomExpand }}
   {{- else }}{{/* if $.CustomExpand */}}
