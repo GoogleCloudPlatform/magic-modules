@@ -272,9 +272,9 @@ func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_
 {{- end}}
 
 func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{}) error {
-{{ if $.CustomCode.CustomCreate -}}
+{{- if $.CustomCode.CustomCreate }}
 	return resource{{ $.ResourceName }}CustomCreate(d, meta)
-{{-  else  -}}
+{{- else }}
 {{- if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create")) -}}
     var project string
 {{- end}}
@@ -892,9 +892,9 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
         return resource{{ $.ResourceName -}}Read(d, meta)
     }
 {{-     end}}
-{{ if $.CustomCode.CustomUpdate -}}
+{{- if $.CustomCode.CustomUpdate }}
 	return resource{{ $.ResourceName }}CustomUpdate(d, meta)
-{{ else -}}
+{{- else }}
 {{     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
     var project string
 {{-     end}}
@@ -1302,7 +1302,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return nil
     }
 {{- end }}
-{{ if $.CustomCode.CustomDelete }} 
+{{- if $.CustomCode.CustomDelete }} 
 	return resource{{ $.ResourceName }}CustomDelete(d, meta)
 {{- else }}
 {{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
