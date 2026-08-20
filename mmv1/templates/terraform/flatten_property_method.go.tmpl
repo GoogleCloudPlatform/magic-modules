@@ -15,7 +15,6 @@
 {{- define "flattenPropertyMethod" }}
 {{- if and (or $.WriteOnlyLegacy $.WriteOnly) }}
 {{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
-    {{- customTemplate $ $.CustomFlatten false -}}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   {{- if or $.IgnoreRead $.ClientSide }}
@@ -157,3 +156,14 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   {{- end }}
 {{- end }}
 {{ end }}
+
+{{- define "customFlattenPropertyMethod" }}
+  {{- if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
+{{ customTemplate $ $.CustomFlatten false }}
+  {{- else if $.NestedProperties }}
+    {{- range $prop := $.NestedProperties }}
+      {{ template "customFlattenPropertyMethod" $prop -}}
+    {{- end }}
+  {{- end }}
+{{- end }}
+

@@ -2113,10 +2113,29 @@ func (r Resource) IsExcluded() bool {
 }
 
 func (r Resource) HasCustomMethods() bool {
-	return r.CustomCode.CustomCreate != "" ||
+	if r.CustomCode.CustomCreate != "" ||
 		(r.CustomCode.CustomUpdate != "" && r.Updatable()) ||
 		(r.CustomCode.CustomDelete != "" && !r.ExcludeDelete) ||
-		(r.CustomCode.CustomImport != "" && !r.ExcludeImport)
+		(r.CustomCode.CustomImport != "" && !r.ExcludeImport) ||
+		r.CustomCode.Encoder != "" ||
+		r.CustomCode.UpdateEncoder != "" ||
+		r.CustomCode.Decoder != "" ||
+		r.CustomCode.PostCreateFailure != "" ||
+		(r.SchemaVersion != 0 && r.StateUpgraders) ||
+		(r.IdentitySchemaVersion != 0 && r.IdentityUpgraders && !r.ExcludeRead) {
+		return true
+	}
+	for _, p := range r.AllNestedProperties(r.GettableProperties()) {
+		if p.CustomFlatten != "" && !p.ShouldIgnoreCustomFlatten() {
+			return true
+		}
+	}
+	for _, p := range r.AllNestedProperties(r.SettableProperties()) {
+		if p.CustomExpand != "" {
+			return true
+		}
+	}
+	return false
 }
 
 func (r Resource) TestSamples() []*resource.Sample {

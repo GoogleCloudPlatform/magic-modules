@@ -27,6 +27,7 @@ import (
     "fmt"
     "log"
     "net/http"
+    "net/url"
     "reflect"
     "regexp"
     "slices"
@@ -47,17 +48,30 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    "github.com/hashicorp/terraform-plugin-go/tftypes"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
     "{{ $.ImportPath }}/registry"
+    rmClient "{{ $.ImportPath }}/services/resourcemanager/client"
+{{- if ne (lower $.ProductMetadata.Name) "resourcemanagerv3" }}
+    "{{ $.ImportPath }}/services/resourcemanagerv3"
+{{- end }}
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
     "{{ $.ImportPath }}/verify"
 
     "google.golang.org/api/googleapi"
+    bigtableadmin "google.golang.org/api/bigtableadmin/v2"
 )
 
 var (
+    _ = &bigtableadmin.Service{}
+    _ = tftypes.Value{}
+    _ = url.QueryUnescape
+    _ = rmClient.NewClient
+{{- if ne (lower $.ProductMetadata.Name) "resourcemanagerv3" }}
+    _ = resourcemanagerv3.NewClient
+{{- end }}
     _ = bytes.Clone
     _ = context.WithCancel
     _ = base64.NewDecoder
@@ -125,3 +139,47 @@ func resource{{ $.ResourceName }}CustomImport(d *schema.ResourceData, meta inter
 	{{ customTemplate $ $.CustomCode.CustomImport false -}}
 }
 {{ end }}
+
+{{- if $.CustomCode.Encoder }}
+func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+{{ customTemplate $ $.CustomCode.Encoder false -}}
+}
+{{ end -}}
+
+{{- if $.CustomCode.UpdateEncoder }}
+func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+    {{ customTemplate $ $.CustomCode.UpdateEncoder false -}}
+}
+{{- end }}
+
+{{- if $.CustomCode.Decoder }}
+func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+    {{ customTemplate $ $.CustomCode.Decoder false -}}
+}
+{{- end }}
+
+{{- if $.CustomCode.PostCreateFailure }}
+func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
+    {{- customTemplate $ $.CustomCode.PostCreateFailure false -}}
+}
+{{- end }}
+
+{{- if and $.SchemaVersion $.StateUpgraders }}
+    {{ customTemplate $ $.StateMigrationFile false -}}
+{{- end }}
+
+{{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
+    {{ customTemplate $ $.IdentityUpgraderFile false -}}
+{{- end }}
+
+{{- range $prop := $.GettableProperties }}
+    {{ template "customFlattenPropertyMethod" $prop -}}
+{{- end }}
+
+{{- range $prop := $.SettableProperties }}
+    {{ template "customExpandPropertyMethod" $prop -}}
+{{- end }}
+
+
+
+

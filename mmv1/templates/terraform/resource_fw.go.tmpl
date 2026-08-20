@@ -202,10 +202,6 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
 
 func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 {{ if $.CustomCode.CustomCreate -}}
-	r.customCreate(ctx, req, resp)
-}
-
-func (r *{{$.ResourceName}}FWResource) customCreate(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	{{ customTemplate $ $.CustomCode.CustomCreate false -}}
 {{  else  -}}
 	var data {{$.ResourceName}}FWModel

@@ -46,9 +46,6 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-    {{- if and $.IdentityUpgraders (not $.IsTgcCompiler) }}
-    "github.com/hashicorp/terraform-plugin-go/tftypes"
-    {{- end }}
     "{{ $.ImportPath }}/registry"
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
@@ -1483,40 +1480,8 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 {{- range $prop := $.SettableProperties }}
     {{- template "expandPropertyMethod" $prop -}}
 {{- end }}
-{{- if $.CustomCode.Encoder }}
-func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ customTemplate $ $.CustomCode.Encoder false -}}
-}
-{{ end -}}
-{{- if $.CustomCode.UpdateEncoder }}
-
-func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{ customTemplate $ $.CustomCode.UpdateEncoder false -}}
-}
-{{- end }}
 {{- if $.NestedQuery }}
     {{ template "NestedQuery" $ }}
-{{- end }}
-{{- if $.CustomCode.Decoder }}
-{{- if and $.CustomCode.UpdateEncoder (not $.NestedQuery ) }}
-{{ "" }}
-{{- end }}
-func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-    {{ customTemplate $ $.CustomCode.Decoder false -}}
-}
-{{- end }}
-{{- if $.CustomCode.PostCreateFailure }}
-func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
-    {{- customTemplate $ $.CustomCode.PostCreateFailure false -}}
-}
-{{- end }}
-{{- if and $.SchemaVersion $.StateUpgraders }}
-
-    {{ customTemplate $ $.StateMigrationFile false -}}
-{{- end }}
-
-{{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
-    {{ customTemplate $ $.IdentityUpgraderFile false -}}
 {{- end }}
 
 {{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
