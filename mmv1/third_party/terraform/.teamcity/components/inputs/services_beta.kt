@@ -862,6 +862,7 @@ var ServicesListBeta = mapOf(
         "path" to "./google-beta/services/serviceusage"
     ),
     "serviceusagev2" to mapOf(
+            "name" to "serviceusagev2",
             "displayName" to "ServiceUsageV2",
             "path" to "./google-beta/services/serviceusagev2"
     ),
