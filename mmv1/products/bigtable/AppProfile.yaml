@@ -38,6 +38,7 @@ exclude_sweeper: true
 custom_code:
   extra_schema_entry: templates/terraform/extra_schema_entry/bigtable_app_profile.go.tmpl
   encoder: templates/terraform/encoders/bigtable_app_profile.go.tmpl
+  constants: templates/terraform/constants/bigtable_app_profile_routing.go.tmpl
   pre_update: templates/terraform/pre_update/bigtable_app_profile.go.tmpl
 samples:
   - name: bigtable_app_profile_anycluster

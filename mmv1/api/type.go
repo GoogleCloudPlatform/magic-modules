@@ -1555,6 +1555,13 @@ func (t Type) IsTgcCompiler() bool {
 	return false
 }
 
+func (t Type) IsTerraformProvider() bool {
+	if t.ResourceMetadata != nil {
+		return t.ResourceMetadata.IsTerraformProvider()
+	}
+	return false
+}
+
 func (t Type) ShouldIgnoreCustomFlatten() bool {
 	return t.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }

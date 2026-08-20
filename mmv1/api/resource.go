@@ -2702,3 +2702,10 @@ func (r Resource) IsTgcCompiler() bool {
 	}
 	return false
 }
+
+func (r Resource) IsTerraformProvider() bool {
+	if r.ProductMetadata != nil {
+		return r.ProductMetadata.IsTerraformProvider()
+	}
+	return false
+}

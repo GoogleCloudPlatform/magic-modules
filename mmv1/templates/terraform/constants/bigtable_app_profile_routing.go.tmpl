@@ -1,1 +1,4 @@
+{{- if not $.IsTerraformProvider }}
 import "google.golang.org/api/bigtableadmin/v2"
+{{- end }}
+
