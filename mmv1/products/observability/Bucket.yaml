@@ -85,7 +85,8 @@ properties:
           The resource name for the configured Cloud KMS key. The format is: projects/[PROJECT_ID]/locations/[LOCATION]/keyRings/[KEYRING]/cryptoKeys/[KEY]
       - name: kmsKeyVersion
         type: String
-        description: The CryptoKeyVersion resource name for the configured Cloud KMS key.
+        description: |-
+          The CryptoKeyVersion resource name for the configured Cloud KMS key. The format is: projects/[PROJECT_ID]/locations/[LOCATION]/keyRings/[KEYRING]/cryptoKeys/[KEY]/cryptoKeyVersions/[VERSION]
         output: true
       - name: serviceAccountId
         type: String
