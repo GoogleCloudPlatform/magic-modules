@@ -2,7 +2,6 @@ package resourcemanager
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	tpgcloudbilling "github.com/hashicorp/terraform-provider-google/google/services/cloudbilling"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -632,7 +632,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 
 	// Read the network from the API so we can get the correct self link format. We can't construct it from the
 	// base path because it might not line up exactly (compute.googleapis.com vs www.googleapis.com)
-	networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), projectId, networkName)
+	networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), projectId, networkName)
 	net, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
@@ -654,7 +654,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 			params["pageToken"] = token
 		}
 		firewallsUrl, err := transport_tpg.AddQueryParams(
-			fmt.Sprintf("%sprojects/%s/global/firewalls", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), projectId),
+			fmt.Sprintf("%sprojects/%s/global/firewalls", transport_tpg.BaseUrl(tpgcompute.Product, config), projectId),
 			params)
 		if err != nil {
 			return err
@@ -678,7 +678,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 			firewall, _ := item.(map[string]interface{})
 			firewallName, _ := firewall["name"].(string)
 
-			deleteUrl := fmt.Sprintf("%sprojects/%s/global/firewalls/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), projectId, firewallName)
+			deleteUrl := fmt.Sprintf("%sprojects/%s/global/firewalls/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), projectId, firewallName)
 			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "DELETE",
@@ -689,7 +689,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
-			err = computeOperationWaitTime(config, op, projectId, "Deleting Firewall", userAgent, d.Timeout(schema.TimeoutCreate))
+			err = tpgcompute.ComputeOperationWaitTime(config, op, projectId, "Deleting Firewall", userAgent, d.Timeout(schema.TimeoutCreate))
 			if err != nil {
 				return err
 			}
@@ -755,7 +755,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 }
 
 func deleteComputeNetwork(project, network, userAgent string, config *transport_tpg.Config) error {
-	url := fmt.Sprintf("%sprojects/%s/global/networks/%s", transport_tpg.BaseUrl(registry.GetProduct("compute"), config), project, network)
+	url := fmt.Sprintf("%sprojects/%s/global/networks/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), project, network)
 	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "DELETE",
@@ -767,114 +767,11 @@ func deleteComputeNetwork(project, network, userAgent string, config *transport_
 		return errwrap.Wrapf("Error deleting network: {{err}}", err)
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Deleting Network", userAgent, 10*time.Minute)
+	err = tpgcompute.ComputeOperationWaitTime(config, op, project, "Deleting Network", userAgent, 10*time.Minute)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-// computeOperationWaiter polls a Compute Engine long-running operation until it completes.
-// It only depends on the operation's response body (via its selfLink) so that this package
-// doesn't need to import the compute service package.
-type computeOperationWaiter struct {
-	Config    *transport_tpg.Config
-	UserAgent string
-	Project   string
-	Op        map[string]interface{}
-}
-
-func (w *computeOperationWaiter) State() string {
-	if w == nil || w.Op == nil {
-		return "<nil>"
-	}
-	status, _ := w.Op["status"].(string)
-	return status
-}
-
-func (w *computeOperationWaiter) Error() error {
-	if w == nil || w.Op == nil {
-		return nil
-	}
-	opErr, ok := w.Op["error"].(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	var msgs []string
-	if errs, ok := opErr["errors"].([]interface{}); ok {
-		for _, e := range errs {
-			if em, ok := e.(map[string]interface{}); ok {
-				if msg, ok := em["message"].(string); ok {
-					msgs = append(msgs, msg)
-				}
-			}
-		}
-	}
-	if len(msgs) == 0 {
-		return fmt.Errorf("operation error: %v", opErr)
-	}
-	return errors.New(strings.Join(msgs, "\n\n"))
-}
-
-func (w *computeOperationWaiter) IsRetryable(error) bool {
-	return false
-}
-
-func (w *computeOperationWaiter) SetOp(op interface{}) error {
-	m, ok := op.(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("unable to set operation, unexpected type %T", op)
-	}
-	w.Op = m
-	return nil
-}
-
-func (w *computeOperationWaiter) QueryOp() (interface{}, error) {
-	if w == nil || w.Op == nil {
-		return nil, fmt.Errorf("cannot query operation, it's unset or nil")
-	}
-	selfLink, _ := w.Op["selfLink"].(string)
-	if selfLink == "" {
-		return nil, fmt.Errorf("cannot query operation, missing selfLink")
-	}
-	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    w.Config,
-		Method:    "GET",
-		Project:   w.Project,
-		RawURL:    selfLink,
-		UserAgent: w.UserAgent,
-	})
-}
-
-func (w *computeOperationWaiter) OpName() string {
-	if w == nil || w.Op == nil {
-		return "<nil>"
-	}
-	name, _ := w.Op["name"].(string)
-	return name
-}
-
-func (w *computeOperationWaiter) PendingStates() []string {
-	return []string{"PENDING", "RUNNING"}
-}
-
-func (w *computeOperationWaiter) TargetStates() []string {
-	return []string{"DONE"}
-}
-
-// computeOperationWaitTime waits for a Compute Engine operation (from a network or firewall
-// deletion) to complete. It's a lightweight, package-local substitute for the compute service's
-// own operation waiter so that this file doesn't need to import the compute service package.
-func computeOperationWaitTime(config *transport_tpg.Config, res map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
-	w := &computeOperationWaiter{
-		Config:    config,
-		UserAgent: userAgent,
-		Project:   project,
-	}
-	if err := w.SetOp(res); err != nil {
-		return err
-	}
-	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
 func readGoogleProject(d *schema.ResourceData, config *transport_tpg.Config, userAgent string) (*cloudresourcemanager.Project, error) {
