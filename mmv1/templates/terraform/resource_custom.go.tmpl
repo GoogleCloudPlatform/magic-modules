@@ -108,15 +108,6 @@ func resource{{ $.ResourceName }}CustomUpdate(d *schema.ResourceData, meta inter
 
 {{ if and ($.CustomCode.CustomDelete) (not $.ExcludeDelete) -}}
 func resource{{ $.ResourceName }}CustomDelete(d *schema.ResourceData, meta interface{}) error {
-{{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
-    if d.Get("deletion_policy").(string) == "PREVENT" {
-        return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy=\"DELETE\" and running `terraform apply`")
-    }
-    if d.Get("deletion_policy").(string) == "ABANDON" {
-        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing {{ $.Name }} %q from Terraform state without deletion", d.Id())
-        return nil
-    }
-{{- end }}
 {{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
     var project string
 {{- end }}

@@ -878,9 +878,6 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
 {{if $.Updatable -}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-{{- if $.CustomCode.CustomUpdate }}
-	return resource{{ $.ResourceName }}CustomUpdate(d, meta)
-{{- else }}
 {{-     if and (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)) (not $.BypassClientsideUpdateCheck)}}
     clientSideFields := map[string]bool{"deletion_policy": true}
     clientSideOnly := true
@@ -895,6 +892,9 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
         return resource{{ $.ResourceName -}}Read(d, meta)
     }
 {{-     end}}
+{{ if $.CustomCode.CustomUpdate -}}
+	return resource{{ $.ResourceName }}CustomUpdate(d, meta)
+{{ else -}}
 {{     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
     var project string
 {{-     end}}
@@ -1292,8 +1292,6 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     d.SetId("")
 
     return nil
-{{- else if $.CustomCode.CustomDelete }}
-    return resource{{ $.ResourceName }}CustomDelete(d, meta)
 {{- else }}
 {{- if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
     if d.Get("deletion_policy").(string) == "PREVENT" {
@@ -1304,6 +1302,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return nil
     }
 {{- end }}
+{{ if $.CustomCode.CustomDelete }} 
+	return resource{{ $.ResourceName }}CustomDelete(d, meta)
+{{- else }}
 {{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
     var project string
 {{- end }}
@@ -1433,6 +1434,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", d.Id(), res)
     return nil
+{{- end }}{{/* custom code */}}
 {{- end }}{{/* pre delete */}}
 }
 
