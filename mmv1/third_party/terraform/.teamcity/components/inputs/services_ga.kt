@@ -36,6 +36,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Agent Identity",
         "path" to "./google/services/agentidentity"
     ),
+    "agenticapplications" to mapOf(
+        "name" to "agenticapplications",
+        "displayName" to "Agentic Applications",
+        "path" to "./google/services/agenticapplications"
+    ),
     "agentregistry" to mapOf(
         "name" to "agentregistry",
         "displayName" to "Agent Registry",
