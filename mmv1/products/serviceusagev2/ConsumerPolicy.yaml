@@ -23,8 +23,8 @@ description: |
   Consumer Policy is a set of rules that define what services or service groups can be used for a cloud resource hierarchy.
 references:
   guides:
-    'QUICKSTART_TITLE': 'QUICKSTART_URL'
-  api: 'https://cloud.google.com/service-usage/docs/reference/rest#rest-resource:-v2alpha.consumerpolicies'
+    'Enabling and Disabling Services': 'https://cloud.google.com/service-usage/docs/enable-disable'
+  api: 'https://docs.cloud.google.com/service-usage/docs/reference/rest/v2beta/consumerPolicies'
 import_format: ['{{%parent}}/consumerPolicies/{{name}}']
 id_format: '{{parent}}/consumerPolicies/{{name}}'
 async:
